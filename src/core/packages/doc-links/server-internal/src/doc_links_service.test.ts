@@ -80,7 +80,7 @@ describe('DocLinksService', () => {
   describe('#start', () => {
     it('throws if called before #setup', () => {
       expect(() => service.start()).toThrowErrorMatchingInlineSnapshot(
-        `"#setup must be called before #start"`
+        `[Error: #setup must be called before #start]`
       );
     });
 

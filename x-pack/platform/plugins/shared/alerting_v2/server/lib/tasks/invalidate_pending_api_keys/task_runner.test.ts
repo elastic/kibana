@@ -26,7 +26,7 @@ vi.mock('@kbn/task-manager-plugin/server', () => {
   return { ...mocked, default: mocked };
 });
 
-const { runInvalidate } = await vi.importMock('@kbn/task-manager-plugin/server');
+const { runInvalidate } = vi.mocked(await import('@kbn/task-manager-plugin/server'));
 
 const config = {
   get: vi.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),

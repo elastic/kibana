@@ -24,10 +24,10 @@ describe('accessibility settings', () => {
       expect(() => validate('some format')).not.toThrow();
 
       expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
+        `[Error: expected value of type [string] but got [number]]`
       );
       expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
+        `[Error: expected value of type [string] but got [boolean]]`
       );
     });
   });
@@ -39,9 +39,9 @@ describe('accessibility settings', () => {
       expect(() => validate('Browser')).not.toThrow();
       expect(() => validate('UTC')).not.toThrow();
 
-      expect(() => validate('EST')).toThrowErrorMatchingInlineSnapshot(`"Invalid timezone: EST"`);
+      expect(() => validate('EST')).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid timezone: EST]`);
       expect(() => validate('random string')).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid timezone: random string"`
+        `[Error: Invalid timezone: random string]`
       );
     });
   });
@@ -53,10 +53,10 @@ describe('accessibility settings', () => {
       expect(() => validate('some format')).not.toThrow();
 
       expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
+        `[Error: expected value of type [string] but got [number]]`
       );
       expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
+        `[Error: expected value of type [string] but got [boolean]]`
       );
     });
   });
@@ -69,10 +69,10 @@ describe('accessibility settings', () => {
       expect(() => validate(validDay)).not.toThrow();
 
       expect(() => validate('invalid value')).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid day of week: invalid value"`
+        `[Error: Invalid day of week: invalid value]`
       );
       expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
+        `[Error: expected value of type [string] but got [boolean]]`
       );
     });
   });
@@ -84,10 +84,10 @@ describe('accessibility settings', () => {
       expect(() => validate('some format')).not.toThrow();
 
       expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
+        `[Error: expected value of type [string] but got [number]]`
       );
       expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
+        `[Error: expected value of type [string] but got [boolean]]`
       );
     });
   });

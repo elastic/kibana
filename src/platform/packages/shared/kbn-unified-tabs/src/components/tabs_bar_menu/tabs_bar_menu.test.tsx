@@ -254,7 +254,7 @@ describe('TabsBarMenu', () => {
 
     await user.hover(closedTabOption);
 
-    const previewTitle = screen.getByTestId(
+    const previewTitle = await screen.findByTestId(
       `unifiedTabs_tabPreview_title_${mockRecentlyClosedSingle[0].id}`
     );
 
@@ -321,7 +321,7 @@ describe('TabsBarMenu', () => {
 
     await user.hover(groupTabItem);
 
-    const previewTitle = screen.getByTestId(
+    const previewTitle = await screen.findByTestId(
       `unifiedTabs_tabPreview_title_${mockRecentlyClosedGroup[0].id}`
     );
 
@@ -410,7 +410,7 @@ describe('TabsBarMenu', () => {
     await user.hover(groupTabItem);
 
     // Wait for the preview to appear
-    const title = screen.getByTestId(
+    const title = await screen.findByTestId(
       `unifiedTabs_tabPreview_title_${mockRecentlyClosedGroup[0].id}`
     );
     expect(title).toBeVisible();
@@ -441,7 +441,7 @@ describe('TabsBarMenu', () => {
 
     await user.hover(groupTabItem);
     const previewTitleTestId = `unifiedTabs_tabPreview_title_${mockRecentlyClosedGroup[0].id}`;
-    expect(screen.getByTestId(previewTitleTestId)).toBeVisible();
+    expect(await screen.findByTestId(previewTitleTestId)).toBeVisible();
 
     await user.click(groupTabItem);
     await user.click(menuButton);

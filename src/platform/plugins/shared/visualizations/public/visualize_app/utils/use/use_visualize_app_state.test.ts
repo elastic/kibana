@@ -8,7 +8,7 @@
  */
 
 import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { EventEmitter } from 'events';
@@ -19,15 +19,19 @@ import type { VisualizeServices, SavedVisInstance } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
 import { createVisualizeServicesMock } from '../mocks';
 import { VisualizeConstants } from '@kbn/visualizations-common';
+import { connectToQueryState as connectToQueryStateFn } from '@kbn/data-plugin/public';
+import { visStateToEditorState as visStateToEditorStateFn } from '../utils';
+import { createVisualizeAppState as createVisualizeAppStateFn } from '../create_visualize_app_state';
 
 vi.mock('../utils');
 vi.mock('../create_visualize_app_state');
 vi.mock('@kbn/data-plugin/public');
 
-describe('useVisualizeAppState', async () => {
-  const { visStateToEditorState } = await vi.importMock('../utils');
-  const { createVisualizeAppState } = await vi.importMock('../create_visualize_app_state');
-  const { connectToQueryState } = await vi.importMock('@kbn/data-plugin/public');
+const visStateToEditorState = visStateToEditorStateFn as unknown as Mock;
+const createVisualizeAppState = createVisualizeAppStateFn as unknown as Mock;
+const connectToQueryState = connectToQueryStateFn as unknown as Mock;
+
+describe('useVisualizeAppState', () => {
   const stopStateSyncMock = vi.fn();
   const stateContainerGetStateMock = vi.fn(() => visualizeAppStateStub);
   const stopSyncingAppFiltersMock = vi.fn();

@@ -329,7 +329,7 @@ test(`doesn't preboot core services if config validation fails`, async () => {
   const server = new Server(rawConfigService, env, logger);
 
   await expect(server.preboot()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unknown configuration keys"`
+    `[Error: Unknown configuration keys]`
   );
 
   expect(mockContextService.preboot).not.toHaveBeenCalled();
@@ -357,7 +357,7 @@ describe('stripUnknownsWorkaround', () => {
     const server = new Server(rawConfigService, env, logger);
     await server.preboot();
     await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unknown configuration keys"`
+      `[Error: Unknown configuration keys]`
     );
     expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(1);
   });
@@ -373,7 +373,7 @@ describe('stripUnknownsWorkaround', () => {
     const server = new Server(rawConfigService, env, logger);
     await server.preboot();
     await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unknown configuration keys"`
+      `[Error: Unknown configuration keys]`
     );
     expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(2);
     expect(mockEnsureValidConfiguration).toHaveBeenNthCalledWith(

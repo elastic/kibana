@@ -35,7 +35,7 @@ vi.mock('@langchain/langgraph/prebuilt', () => {
 const askName = internalTools.askUserQuestion.replace(/\./g, '_');
 
 const mockToolNodeOnce = async (messages: ToolMessage[]) => {
-  const { ToolNode } = await vi.importMock('@langchain/langgraph/prebuilt');
+  const { ToolNode } = vi.mocked(await import('@langchain/langgraph/prebuilt'));
   ToolNode.mockImplementationOnce(() => ({
     invoke: vi.fn().mockResolvedValue(messages),
   }));
@@ -486,7 +486,7 @@ describe('createAgentGraph', () => {
     mockToolNodeOnce([
       new ToolMessage({ tool_call_id: 'c1', content: 'r1', artifact: { results: [] } }),
     ]);
-    const { ToolNode } = await vi.importMock('@langchain/langgraph/prebuilt');
+    const { ToolNode } = vi.mocked(await import('@langchain/langgraph/prebuilt'));
     ToolNode.mockImplementationOnce(() => ({
       invoke: vi.fn().mockRejectedValue(new Error('boom')),
     }));

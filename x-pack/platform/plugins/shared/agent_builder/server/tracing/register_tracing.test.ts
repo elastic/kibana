@@ -205,7 +205,7 @@ describe('registerTracingExporter', () => {
   });
 
   it('teardown shuts down processors', async () => {
-    const { shutdownInferenceTracerProvider } = await vi.importMock('@kbn/inference-tracing');
+    const { shutdownInferenceTracerProvider } = vi.mocked(await import('@kbn/inference-tracing'));
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
       exporters: [],

@@ -11,7 +11,7 @@ import fn from './abs';
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-const seriesList = (await import('./fixtures/series_list'))();
+const seriesList = (await import('./fixtures/series_list')).default();
 import invoke from './test_helpers/invoke_series_fn';
 
 describe('abs.js', function () {

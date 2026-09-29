@@ -27,7 +27,7 @@ const mockServerInfo: ReportingServerInfo = {
 test(`fails if no URL is passed`, async () => {
   const fn = () => getFullUrls(mockServerInfo, mockConfig, getMockJob({}));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
-    `"No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\`"`
+    `[Error: No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\`]`
   );
 });
 
@@ -37,7 +37,7 @@ test(`fails if URLs are file-protocols for PDF`, async () => {
   const fn = () =>
     getFullUrls(mockServerInfo, mockConfig, getMockJob({ objects: [{ relativeUrl }], forceNow }));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
-    `"Found invalid URL(s), all URLs must be relative: file://etc/passwd/#/something"`
+    `[Error: Found invalid URL(s), all URLs must be relative: file://etc/passwd/#/something]`
   );
 });
 
@@ -55,7 +55,7 @@ test(`fails if URLs are absolute for PDF`, async () => {
       })
     );
   expect(fn).toThrowErrorMatchingInlineSnapshot(
-    `"Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something"`
+    `[Error: Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something]`
   );
 });
 
@@ -72,7 +72,7 @@ test(`fails if any URLs are absolute or file's for PDF`, async () => {
 
   const fn = () => getFullUrls(mockServerInfo, mockConfig, getMockJob({ objects, forceNow }));
   expect(fn).toThrowErrorMatchingInlineSnapshot(
-    `"Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something file://etc/passwd/#/something"`
+    `[Error: Found invalid URL(s), all URLs must be relative: http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something file://etc/passwd/#/something]`
   );
 });
 
@@ -84,7 +84,7 @@ test(`fails if URL does not route to a visualization`, async () => {
       getMockJob({ objects: [{ relativeUrl: '/app/phoney' }] })
     );
   expect(fn).toThrowErrorMatchingInlineSnapshot(
-    `"No valid hash in the URL! A hash is expected for the application to route to the intended visualization."`
+    `[Error: No valid hash in the URL! A hash is expected for the application to route to the intended visualization.]`
   );
 });
 

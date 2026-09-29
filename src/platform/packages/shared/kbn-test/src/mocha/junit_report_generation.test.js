@@ -55,18 +55,11 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    const expectedCommandLineMultiple =
-      'node scripts/jest --config src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests';
-    const expectedMoonCommandLine =
-      'node scripts/jest.js --passWithNoTests --config src/platform/packages/shared/kbn-test/jest.config.js --maxWorkers=2 --json --passWithNoTests';
-    const expectedCommandLineSingle = 'node node_modules/jest-worker/build/workers/processChild.js';
+    // the report runs inside a Vitest fork worker, so its command line is the worker's argv
+    const expectedCommandLine = 'node node_modules/vitest/dist/workers/forks.js';
 
     expect(testsuite.$).toMatchObject({
-      'command-line': expect.stringMatching(
-        new RegExp(
-          `(${expectedCommandLineMultiple}|${expectedMoonCommandLine}|${expectedCommandLineSingle})`
-        )
-      ),
+      'command-line': expectedCommandLine,
       failures: '2',
       name: 'test',
       skipped: '1',

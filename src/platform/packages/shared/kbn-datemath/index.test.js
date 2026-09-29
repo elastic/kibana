@@ -23,17 +23,17 @@ const dateMath = await import('.');
 const moment = require('moment');
 
 /**
- * Require a new instance of the moment library, bypassing the require cache
- * by using jest.resetModules().
+ * Require a new instance of the moment library, bypassing the require cache.
  * This is needed, since we are trying to test whether or not this library works
  * when passing in a different configured moment instance. If we would change
  * the locales on the imported moment, it would automatically apply
  * to the source code, even without passing it in to the method, since they share
  * the same global state. This method avoids this, by loading a separate instance
- * of moment, by resetting the jest require modules cache and require the library again.
+ * of moment, by removing it from Node's require cache and requiring the library again
+ * (moment is loaded natively, so `vi.resetModules()` doesn't affect it).
  */
 function momentClone() {
-  vi.resetModules();
+  delete require.cache[require.resolve('moment')];
   return require('moment');
 }
 

@@ -19,7 +19,7 @@ const mockLog = {
   debug: vi.fn(),
 };
 
-vi.mock('getopts', () => vi.fn());
+vi.mock('getopts', () => ({ default: vi.fn() }));
 
 vi.mock('fs', () => {
   const mocked = {
@@ -104,7 +104,7 @@ describe('run_all.ts', () => {
     process.env.JEST_WARMUP_DELAY_MS = '0';
 
     // Set up mocks
-    mockGetopts = vi.mocked(await vi.importMock('getopts'));
+    mockGetopts = (await vi.importMock<{ default: Mock }>('getopts')).default;
     mockSpawn = vi.mocked((await vi.importMock('child_process')).spawn);
     mockExecFile = vi.mocked((await vi.importMock('child_process')).execFile);
     mockGetJestConfigs = vi.mocked(

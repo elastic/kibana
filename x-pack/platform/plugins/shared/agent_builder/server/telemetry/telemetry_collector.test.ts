@@ -201,7 +201,7 @@ describe('telemetry_collector', () => {
 
     beforeEach(async () => {
       // Reset the mock for QueryUtils - using require since jest.mock hoists
-      const { QueryUtils } = await vi.importMock('./query_utils');
+      const { QueryUtils } = vi.mocked(await import('./query_utils'));
       mockQueryUtils = {
         getCustomToolsMetrics: vi.fn().mockResolvedValue({
           total: 10,

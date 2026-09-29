@@ -15,7 +15,7 @@ import {
   cleanupDownloads,
 } from './agent_downloads_service';
 import fs from 'fs';
-import { readFile, unlink, writeFile } from 'fs/promises';
+import { readFile, readdir, stat, unlink, writeFile } from 'fs/promises';
 
 const mockedFetch = vi.spyOn(global, 'fetch');
 const mockDigest = vi.fn();
@@ -366,7 +366,6 @@ describe('AgentDownloadStorage', () => {
 
   describe('cleanupDownloads', () => {
     it('deletes sidecar file alongside expired tarball', async () => {
-      const { readdir, stat } = await vi.importMock('fs/promises');
       const oldDate = new Date(Date.now() - 1.728e8 - 1000); // older than maxFileAge
 
       // Settings with old lastCleanup to trigger cleanup
@@ -375,8 +374,8 @@ describe('AgentDownloadStorage', () => {
         maxFileAge: 1.728e8,
       });
       (readFile as unknown as Mock).mockResolvedValue(oldSettings);
-      readdir.mockResolvedValue([fileName, `${fileName}.sha512`]);
-      stat.mockResolvedValue({ isFile: () => true, birthtime: oldDate });
+      (readdir as unknown as Mock).mockResolvedValue([fileName, `${fileName}.sha512`]);
+      (stat as unknown as Mock).mockResolvedValue({ isFile: () => true, birthtime: oldDate });
       (unlink as unknown as Mock).mockResolvedValue(undefined);
       (writeFile as unknown as Mock).mockResolvedValue(undefined);
 

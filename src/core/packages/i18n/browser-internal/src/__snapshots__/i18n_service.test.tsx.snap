@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#start() returns \`Context\` component 1`] = `
+exports[`#start() > returns \`Context\` component 1`] = `
 "{
   \\"mapping\\": {
     \\"euiAccordionChildrenLoading.message\\": \\"Loading\\",

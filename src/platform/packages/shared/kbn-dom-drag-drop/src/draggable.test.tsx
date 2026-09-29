@@ -27,7 +27,10 @@ vi.useFakeTimers({ legacyFakeTimers: true });
 describe('Draggable', () => {
   const renderDraggable = (propsOverrides = {}) => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    // Timers advanced by user-event run inside act, so the React work they schedule is flushed
+    const user = userEvent.setup({
+      advanceTimers: (ms) => act(() => vi.advanceTimersByTime(ms)),
+    });
 
     const rtlRender = renderWithDragDropContext(
       <>

@@ -14,6 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { mockCase, mockObservables } from '../../containers/mock';
 import { ObservablesTable, type ObservablesTableProps } from './observables_table';
 import { renderWithTestingProviders } from '../../common/mock';
+import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 
 // Partial mock: keep createCaseWorkflowFilter / createCaseWorkflowComparator / useRunCaseWorkflow
 // real; only pin useCanRunCaseWorkflow so we don't need to wire up its four dependencies.
@@ -25,9 +26,7 @@ vi.mock('../workflows/use_run_case_workflow', async () => {
   return { ...mocked, default: mocked };
 });
 
-describe('ObservablesTable', async () => {
-  const { useCanRunCaseWorkflow } = await vi.importMock('../workflows/use_run_case_workflow');
-
+describe('ObservablesTable', () => {
   const props: ObservablesTableProps = {
     caseData: {
       ...mockCase,

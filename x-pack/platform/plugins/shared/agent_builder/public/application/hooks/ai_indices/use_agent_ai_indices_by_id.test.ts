@@ -47,7 +47,7 @@ vi.mock('@kbn/agent-builder-browser', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useQuery } = await vi.importMock('@kbn/react-query');
+const { useQuery } = vi.mocked(await import('@kbn/react-query'));
 
 describe('useAgentAiIndicesById', () => {
   beforeEach(() => {

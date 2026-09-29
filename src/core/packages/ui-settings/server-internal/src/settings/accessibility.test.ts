@@ -24,10 +24,10 @@ describe('accessibility settings', () => {
       expect(() => validate(false)).not.toThrow();
 
       expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [number]"`
+        `[Error: expected value of type [boolean] but got [number]]`
       );
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [string]"`
+        `[Error: expected value of type [boolean] but got [string]]`
       );
     });
   });

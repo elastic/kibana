@@ -18,7 +18,7 @@ describe('condition.js', function () {
   let comparable;
   let seriesList;
   beforeEach(async function () {
-    seriesList = (await import('./fixtures/series_list'))();
+    seriesList = (await import('./fixtures/series_list')).default();
     comparable = getSeriesList('', [
       [moment.utc('1980-01-01T00:00:00.000Z'), 12],
       [moment.utc('1981-01-01T00:00:00.000Z'), 33],

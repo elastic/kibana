@@ -41,9 +41,10 @@ vi.mock('pdf-lib', () => {
 });
 
 // Mock domtoimage
+const mockToBlob = vi.hoisted(() => vi.fn());
 vi.mock('dom-to-image-more', () => {
   const mocked = {
-    toBlob: vi.fn(),
+    toBlob: mockToBlob,
   };
   return { ...mocked, default: mocked };
 });
@@ -59,8 +60,7 @@ describe('ValueReportExporter', () => {
       addError: mockAddError,
     } as unknown as ReturnType<typeof useToasts>);
 
-    const { toBlob } = await vi.importMock('dom-to-image-more');
-    toBlob.mockResolvedValue({
+    mockToBlob.mockResolvedValue({
       arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
     });
   });
@@ -88,8 +88,7 @@ describe('ValueReportExporter', () => {
   });
 
   it('handles export error gracefully', async () => {
-    const { toBlob } = await vi.importMock('dom-to-image-more');
-    toBlob.mockRejectedValue(new Error('Export failed'));
+    mockToBlob.mockRejectedValue(new Error('Export failed'));
 
     let exportFunction: (() => void) | null = null;
 

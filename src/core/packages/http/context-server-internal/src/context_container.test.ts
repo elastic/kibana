@@ -65,7 +65,7 @@ describe('ContextContainer', () => {
           () => 'aString'
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Context provider for ctxFromA has already been registered."`
+        `[Error: Context provider for ctxFromA has already been registered.]`
       );
     });
 
@@ -79,7 +79,7 @@ describe('ContextContainer', () => {
           () => 'aString'
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot register a provider for resolve, it is a reserved keyword."`
+        `[Error: Cannot register a provider for resolve, it is a reserved keyword.]`
       );
     });
 
@@ -92,7 +92,7 @@ describe('ContextContainer', () => {
           vi.fn()
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot register context for unknown plugin: Symbol(unknown)"`
+        `[Error: Cannot register context for unknown plugin: Symbol(unknown)]`
       );
     });
 
@@ -601,7 +601,7 @@ describe('ContextContainer', () => {
       await expect(() =>
         contextContainer.createHandler(Symbol('unknown'), vi.fn())
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot create handler for unknown plugin: Symbol(unknown)"`
+        `[Error: Cannot create handler for unknown plugin: Symbol(unknown)]`
       );
     });
 

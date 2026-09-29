@@ -16,7 +16,7 @@ import invoke from './test_helpers/invoke_series_fn';
 describe('divide.js', () => {
   let seriesList;
   beforeEach(async () => {
-    seriesList = (await import('./fixtures/series_list'))();
+    seriesList = (await import('./fixtures/series_list')).default();
   });
 
   it('divides by a single number', () => {

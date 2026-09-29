@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`interpreter/functions#table logs correct datatable to inspector 1`] = `
+exports[`interpreter/functions#table > logs correct datatable to inspector 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -20,7 +20,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#table returns an object with the correct structure 1`] = `
+exports[`interpreter/functions#table > returns an object with the correct structure 1`] = `
 Object {
   "as": "table_vis",
   "type": "render",

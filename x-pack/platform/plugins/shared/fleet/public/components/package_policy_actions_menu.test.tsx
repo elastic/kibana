@@ -622,7 +622,7 @@ describe('PackagePolicyActionsMenu', () => {
     });
 
     it('should use project_id instead of deployment_id on serverless', async () => {
-      const { useStartServices } = await vi.importMock('../hooks');
+      const { useStartServices } = vi.mocked(await import('../hooks'));
       const serverlessReturnValue = {
         application: { navigateToApp: vi.fn() },
         notifications: { toasts: { addSuccess: vi.fn() } },

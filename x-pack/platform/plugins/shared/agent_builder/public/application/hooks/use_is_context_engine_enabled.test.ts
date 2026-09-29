@@ -18,7 +18,7 @@ vi.mock('@kbn/kibana-react-plugin/public', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useUiSetting } = await vi.importMock('@kbn/kibana-react-plugin/public');
+const { useUiSetting } = vi.mocked(await import('@kbn/kibana-react-plugin/public'));
 
 describe('useIsContextEngineEnabled', () => {
   beforeEach(() => vi.clearAllMocks());

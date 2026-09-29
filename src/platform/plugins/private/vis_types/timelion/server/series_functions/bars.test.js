@@ -16,7 +16,7 @@ import invoke from './test_helpers/invoke_series_fn';
 describe('bars.js', () => {
   let seriesList;
   beforeEach(async () => {
-    seriesList = (await import('./fixtures/series_list'))();
+    seriesList = (await import('./fixtures/series_list')).default();
   });
 
   it('creates the bars property, with defaults, on all series', () => {

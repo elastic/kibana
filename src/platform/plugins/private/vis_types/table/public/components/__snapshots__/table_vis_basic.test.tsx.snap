@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TableVisBasic should init data grid 1`] = `
+exports[`TableVisBasic > should init data grid 1`] = `
 <Fragment>
   <EuiDataGrid
     aria-label="Data table visualization"
@@ -31,7 +31,7 @@ exports[`TableVisBasic should init data grid 1`] = `
 </Fragment>
 `;
 
-exports[`TableVisBasic should init data grid with title provided - for split mode 1`] = `
+exports[`TableVisBasic > should init data grid with title provided - for split mode 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -69,7 +69,7 @@ exports[`TableVisBasic should init data grid with title provided - for split mod
 </Fragment>
 `;
 
-exports[`TableVisBasic should render the toolbar 1`] = `
+exports[`TableVisBasic > should render the toolbar 1`] = `
 <Fragment>
   <EuiDataGrid
     aria-label="My saved vis"

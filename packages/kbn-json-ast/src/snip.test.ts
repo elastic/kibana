@@ -40,7 +40,7 @@ describe('snip()', () => {
 
   it('throws if the snips are misordered', () => {
     expect(() => snip('foo', [[2, 1]])).toThrowErrorMatchingInlineSnapshot(
-      `"snips can not be reversed, received [2,1]"`
+      `[Error: snips can not be reversed, received [2,1]]`
     );
   });
 

@@ -10,7 +10,7 @@
 import { vi } from 'vitest';
 
 let mockGetOsResult: object = {};
-vi.mock('getos', () => (cb: Function) => cb(null, mockGetOsResult));
+vi.mock('getos', () => ({ default: (cb: Function) => cb(null, mockGetOsResult) }));
 
 import { loggerMock } from '@kbn/logging-mocks';
 import os from 'os';

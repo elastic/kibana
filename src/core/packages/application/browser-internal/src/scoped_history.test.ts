@@ -31,7 +31,7 @@ describe('ScopedHistory', () => {
       const gh = createMemoryHistory();
       gh.push('/app/other');
       expect(() => new ScopedHistory(gh, '/app/wow')).toThrowErrorMatchingInlineSnapshot(
-        `"Browser location [/app/other] is not currently in expected basePath [/app/wow]"`
+        `[Error: Browser location [/app/other] is not currently in expected basePath [/app/wow]]`
       );
     });
   });
@@ -209,7 +209,7 @@ describe('ScopedHistory', () => {
       gh.push('/app/other'); // Make it fall out of scope
 
       expect(() => h.push('/new-page')).toThrowErrorMatchingInlineSnapshot(
-        `"ScopedHistory instance has fell out of navigation scope for basePath: /app/wow"`
+        `[Error: ScopedHistory instance has fell out of navigation scope for basePath: /app/wow]`
       );
       expect(() => h.replace('/new-page')).toThrow();
       expect(() => h.go(1)).toThrow();
@@ -467,7 +467,7 @@ describe('ScopedHistory', () => {
       gh.push('/app/other');
 
       expect(() => h.block()).toThrowErrorMatchingInlineSnapshot(
-        `"ScopedHistory instance has fell out of navigation scope for basePath: /app/wow"`
+        `[Error: ScopedHistory instance has fell out of navigation scope for basePath: /app/wow]`
       );
     });
 

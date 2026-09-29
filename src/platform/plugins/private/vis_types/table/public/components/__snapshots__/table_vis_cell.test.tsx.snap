@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`table vis cell should return a cell component with data in scope 1`] = `
+exports[`table vis cell > should return a cell component with data in scope 1`] = `
 <div
   className="tbvChartCellContent eui-textTruncate"
   data-test-subj="tbvChartCellContent"

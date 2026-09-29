@@ -18,11 +18,13 @@ const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
 vi.mock('moment', () => {
   const actual = require('moment');
-  return Object.assign(
-    (...args: unknown[]) => (args.length ? actual(...args) : actual(MOCKED_NOW)),
-    actual,
-    { tz: { guess: () => 'UTC' } }
-  );
+  return {
+    default: Object.assign(
+      (...args: unknown[]) => (args.length ? actual(...args) : actual(MOCKED_NOW)),
+      actual,
+      { tz: { guess: () => 'UTC' } }
+    ),
+  };
 });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

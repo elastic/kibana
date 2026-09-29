@@ -601,7 +601,7 @@ describe('toPackagePolicy', () => {
 });
 
 describe('toNewAgentlessPolicy', async () => {
-  const { detectTargetCsp } = await vi.importMock('./cloud_connectors');
+  const { detectTargetCsp } = vi.mocked(await import('./cloud_connectors'));
 
   type AgentlessPolicyInput = NewPackagePolicy & {
     force?: boolean;

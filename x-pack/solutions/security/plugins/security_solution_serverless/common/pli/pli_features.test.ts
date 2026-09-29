@@ -5,9 +5,14 @@
  * 2.0.
  */
 import { getEnabledProductFeatures, getRequiredProductTypesForFeature } from './pli_features';
-import * as pliConfig from './pli_config';
+import { vi } from 'vitest';
 import { ProductLine, ProductTier } from '../product';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+
+const mockPliConfig = vi.hoisted(() => ({
+  PLI_PRODUCT_FEATURES: {} as Record<string, Record<string, string[]>>,
+}));
+vi.mock('./pli_config', () => mockPliConfig);
 
 describe('getProductProductFeatures', () => {
   it('returns an empty array if no product types are provided', () => {
@@ -15,8 +20,7 @@ describe('getProductProductFeatures', () => {
   });
 
   it('returns features for a single product type', () => {
-    // @ts-ignore- reassigning readonly value for testing
-    pliConfig.PLI_PRODUCT_FEATURES = {
+    mockPliConfig.PLI_PRODUCT_FEATURES = {
       security: {
         search_ai_lake: [],
         essentials: ['foo'],
@@ -38,8 +42,7 @@ describe('getProductProductFeatures', () => {
 
 describe('getRequiredProductTypesForFeature', () => {
   beforeEach(() => {
-    // @ts-ignore - reassigning readonly value for testing
-    pliConfig.PLI_PRODUCT_FEATURES = {
+    mockPliConfig.PLI_PRODUCT_FEATURES = {
       [ProductLine.security]: {
         search_ai_lake: [],
         essentials: ['featureA'],

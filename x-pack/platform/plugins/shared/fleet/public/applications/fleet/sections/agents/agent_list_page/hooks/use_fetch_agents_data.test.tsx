@@ -143,7 +143,7 @@ describe('useFetchAgentsData', () => {
   beforeEach(async () => {
     mockErrorToast.mockReset();
     mockErrorToast.mockResolvedValue({});
-    const { sendGetAgentTagsForRq, sendGetActionStatus } = await vi.importMock('../../../../hooks');
+    const { sendGetAgentTagsForRq, sendGetActionStatus } = vi.mocked(await import('../../../../hooks'));
     sendGetAgentTagsForRq.mockReturnValue({ items: ['tag1', 'tag2'] });
     sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
   });
@@ -225,7 +225,7 @@ describe('useFetchAgentsData', () => {
 
   describe('allTags', () => {
     it('should be updated to empty array when all tags are removed', async () => {
-      const { sendGetAgentTagsForRq } = await vi.importMock('../../../../hooks');
+      const { sendGetAgentTagsForRq } = vi.mocked(await import('../../../../hooks'));
 
       sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1'] });
 
@@ -251,7 +251,7 @@ describe('useFetchAgentsData', () => {
     });
 
     it('should be updated when tags change from multiple to fewer', async () => {
-      const { sendGetAgentTagsForRq } = await vi.importMock('../../../../hooks');
+      const { sendGetAgentTagsForRq } = vi.mocked(await import('../../../../hooks'));
 
       sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1', 'tag2', 'tag3'] });
 
@@ -277,7 +277,7 @@ describe('useFetchAgentsData', () => {
     });
 
     it('should not be updated when they have not changed', async () => {
-      const { sendGetAgentTagsForRq } = await vi.importMock('../../../../hooks');
+      const { sendGetAgentTagsForRq } = vi.mocked(await import('../../../../hooks'));
 
       sendGetAgentTagsForRq.mockResolvedValue({ items: ['tag1', 'tag2'] });
 
@@ -304,7 +304,7 @@ describe('useFetchAgentsData', () => {
 
   describe('error action ids', () => {
     it('calls sendGetActionStatus with latest window and accumulates error action ids', async () => {
-      const { sendGetActionStatus } = await vi.importMock('../../../../hooks');
+      const { sendGetActionStatus } = vi.mocked(await import('../../../../hooks'));
       sendGetActionStatus.mockImplementation((opts: { scheduledOnly?: boolean }) => {
         if (opts.scheduledOnly) return Promise.resolve({ data: { items: [] } });
         return Promise.resolve({
@@ -334,7 +334,7 @@ describe('useFetchAgentsData', () => {
 
   describe('scheduledActionsCount', () => {
     it('returns 0 when there are no scheduled UNENROLL actions', async () => {
-      const { sendGetActionStatus } = await vi.importMock('../../../../hooks');
+      const { sendGetActionStatus } = vi.mocked(await import('../../../../hooks'));
       sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
 
       const renderer = createFleetTestRendererMock();
@@ -349,7 +349,7 @@ describe('useFetchAgentsData', () => {
 
     it('sums nbAgentsActioned for future UNENROLL actions', async () => {
       const futureTime = new Date(Date.now() + 3600_000).toISOString();
-      const { sendGetActionStatus } = await vi.importMock('../../../../hooks');
+      const { sendGetActionStatus } = vi.mocked(await import('../../../../hooks'));
       sendGetActionStatus.mockImplementation(({ scheduledOnly }: { scheduledOnly?: boolean }) => {
         if (!scheduledOnly) return Promise.resolve({ data: { items: [] } });
         return Promise.resolve({
@@ -384,7 +384,7 @@ describe('useFetchAgentsData', () => {
 
     it('excludes non-UNENROLL scheduled actions', async () => {
       const futureTime = new Date(Date.now() + 3600_000).toISOString();
-      const { sendGetActionStatus } = await vi.importMock('../../../../hooks');
+      const { sendGetActionStatus } = vi.mocked(await import('../../../../hooks'));
       sendGetActionStatus.mockImplementation(({ scheduledOnly }: { scheduledOnly?: boolean }) => {
         if (!scheduledOnly) return Promise.resolve({ data: { items: [] } });
         return Promise.resolve({
@@ -418,7 +418,7 @@ describe('useFetchAgentsData', () => {
     });
 
     it('calls sendGetActionStatus with scheduledOnly: true', async () => {
-      const { sendGetActionStatus } = await vi.importMock('../../../../hooks');
+      const { sendGetActionStatus } = vi.mocked(await import('../../../../hooks'));
       sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
 
       const renderer = createFleetTestRendererMock();

@@ -23,6 +23,7 @@ import {
   setAssetCriticalityTool,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
 } from './set_asset_criticality_tool';
+import { recalculateEntityRiskScore } from '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score';
 
 vi.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score', () => {
   const mocked = {
@@ -30,6 +31,8 @@ vi.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
   };
   return { ...mocked, default: mocked };
 });
+
+const mockRecalculate = recalculateEntityRiskScore as Mock;
 
 const ENTITY_ID = 'host:server1';
 const ENTITY_TYPE = 'host' as const;
@@ -370,9 +373,6 @@ describe('setAssetCriticalityTool', () => {
     });
 
     it('includes the updated risk score in the response when recalculation returns a score', async () => {
-      const { recalculateEntityRiskScore: mockRecalculate } = await vi.importMock(
-        '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
-      );
       mockRecalculate.mockResolvedValueOnce({ baseScore: 75.5, resolutionScore: undefined });
 
       const ctx = acceptedCtx();
@@ -396,9 +396,6 @@ describe('setAssetCriticalityTool', () => {
     });
 
     it('omits riskScore from the response when recalculation fails', async () => {
-      const { recalculateEntityRiskScore: mockRecalculate } = await vi.importMock(
-        '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
-      );
       mockRecalculate.mockRejectedValueOnce(new Error('No Risk engine configuration found'));
 
       const ctx = acceptedCtx();

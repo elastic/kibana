@@ -164,7 +164,7 @@ describe('AgentRemoveCollectorModal', () => {
 
   it('shows error toast and does not close on API failure', async () => {
     const mockAddError = vi.fn();
-    const { useStartServices } = await vi.importMock('../../../../hooks');
+    const { useStartServices } = vi.mocked(await import('../../../../hooks'));
     useStartServices.mockReturnValue({
       notifications: { toasts: { addSuccess: vi.fn(), addError: mockAddError } },
     });

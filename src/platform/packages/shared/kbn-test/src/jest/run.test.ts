@@ -77,7 +77,7 @@ vi.mock('@kbn/repo-info', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('getopts', () => vi.fn());
+vi.mock('getopts', () => ({ default: vi.fn() }));
 
 vi.mock('./buildkite_checkpoint', () => {
   const mocked = {
@@ -215,7 +215,7 @@ describe('run.ts', () => {
     let mockGetopts: Mock;
 
     beforeEach(async () => {
-      mockGetopts = vi.mocked(await vi.importMock('getopts'));
+      mockGetopts = (await vi.importMock<{ default: Mock }>('getopts')).default;
     });
 
     it('should parse arguments with verbose flag', () => {
@@ -952,7 +952,7 @@ describe('run.ts', () => {
     let mockProcessExit: MockInstance;
 
     beforeEach(async () => {
-      mockGetopts = vi.mocked(await vi.importMock('getopts'));
+      mockGetopts = (await vi.importMock<{ default: Mock }>('getopts')).default;
       mockIsInBuildkite = vi.mocked((await vi.importMock('./buildkite_checkpoint')).isInBuildkite);
       mockIsConfigCompleted = vi.mocked(
         (await vi.importMock('./buildkite_checkpoint')).isConfigCompleted

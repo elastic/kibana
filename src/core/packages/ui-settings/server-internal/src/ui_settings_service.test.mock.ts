@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MockUiSettingsClientConstructor = jest.fn();
-jest.doMock('./clients/ui_settings_client', () => ({
+import { vi } from 'vitest';
+
+export const MockUiSettingsClientConstructor = vi.fn();
+vi.doMock('./clients/ui_settings_client', () => ({
   UiSettingsClient: MockUiSettingsClientConstructor,
 }));
 
-export const MockUiSettingsGlobalClientConstructor = jest.fn();
-jest.doMock('./clients/ui_settings_global_client', () => ({
+export const MockUiSettingsGlobalClientConstructor = vi.fn();
+vi.doMock('./clients/ui_settings_global_client', () => ({
   UiSettingsGlobalClient: MockUiSettingsGlobalClientConstructor,
 }));
 
-export const MockUiSettingsDefaultsClientConstructor = jest.fn();
-jest.doMock('./clients/ui_settings_defaults_client', () => ({
+export const MockUiSettingsDefaultsClientConstructor = vi.fn();
+vi.doMock('./clients/ui_settings_defaults_client', () => ({
   UiSettingsDefaultsClient: MockUiSettingsDefaultsClientConstructor,
 }));
 
-export const getCoreSettingsMock = jest.fn();
-export const getCoreGlobalSettingsMock = jest.fn();
-jest.doMock('./settings', () => ({
+export const getCoreSettingsMock = vi.fn();
+export const getCoreGlobalSettingsMock = vi.fn();
+vi.doMock('./settings', () => ({
   getCoreSettings: getCoreSettingsMock,
   getGlobalCoreSettings: getCoreGlobalSettingsMock,
 }));

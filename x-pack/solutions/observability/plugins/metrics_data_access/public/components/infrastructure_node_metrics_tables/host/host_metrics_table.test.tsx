@@ -77,8 +77,10 @@ describe('HostMetricsTable', () => {
         }
       );
 
-      expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
-      expect(screen.queryByTestId('hostMetricsTable')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
+        expect(screen.queryByTestId('hostMetricsTable')).toBeInTheDocument();
+      });
     }, 10000);
   });
 

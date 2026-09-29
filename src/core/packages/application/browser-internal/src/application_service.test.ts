@@ -82,7 +82,7 @@ describe('#setup()', () => {
       expect(() =>
         register(Symbol(), createApp({ id: 'app1' }))
       ).toThrowErrorMatchingInlineSnapshot(
-        `"An application is already registered with the id \\"app1\\""`
+        `[Error: An application is already registered with the id "app1"]`
       );
     });
 
@@ -92,7 +92,7 @@ describe('#setup()', () => {
       expect(() =>
         register(Symbol(), createApp({ id: 'invalid&app' }))
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid application id: it can only be composed of alphanum chars, '-' and '_'"`
+        `[Error: Invalid application id: it can only be composed of alphanum chars, '-' and '_']`
       );
     });
 
@@ -103,7 +103,7 @@ describe('#setup()', () => {
       expect(() =>
         register(Symbol(), createApp({ id: 'app1' }))
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Applications cannot be registered after \\"setup\\" (attempted to register \\"app1\\")"`
+        `[Error: Applications cannot be registered after "setup" (attempted to register "app1")]`
       );
     });
 
@@ -192,7 +192,7 @@ describe('#setup()', () => {
       expect(() =>
         register(Symbol(), createApp({ id: 'app2', appRoute: '/app/app1' }))
       ).toThrowErrorMatchingInlineSnapshot(
-        `"An application is already registered with the appRoute \\"/app/app1\\""`
+        `[Error: An application is already registered with the appRoute "/app/app1"]`
       );
 
       register(Symbol(), createApp({ id: 'app-next', appRoute: '/app/app3' }));
@@ -200,7 +200,7 @@ describe('#setup()', () => {
       expect(() =>
         register(Symbol(), createApp({ id: 'app2', appRoute: '/app/app3' }))
       ).toThrowErrorMatchingInlineSnapshot(
-        `"An application is already registered with the appRoute \\"/app/app3\\""`
+        `[Error: An application is already registered with the appRoute "/app/app3"]`
       );
     });
 
@@ -210,7 +210,7 @@ describe('#setup()', () => {
       expect(() =>
         register(Symbol(), createApp({ id: 'app2', appRoute: '/base-path/app2' }))
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot register an application route that includes HTTP base path"`
+        `[Error: Cannot register an application route that includes HTTP base path]`
       );
 
       expect(() =>
@@ -542,7 +542,7 @@ describe('#start()', () => {
 
   it('rejects if called prior to #setup()', async () => {
     await expect(service.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ApplicationService#setup() must be invoked before start."`
+      `[Error: ApplicationService#setup() must be invoked before start.]`
     );
   });
 

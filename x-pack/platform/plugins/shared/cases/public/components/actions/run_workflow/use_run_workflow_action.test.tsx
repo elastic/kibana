@@ -6,12 +6,15 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { renderHook, act } from '@testing-library/react';
 import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../../common/constants';
 import { basicCase } from '../../../containers/mock';
 import type { CaseUI } from '../../../containers/types';
 import { useRunWorkflowAction } from './use_run_workflow_action';
+import { useCasesContext as useCasesContextFn } from '../../cases_context/use_cases_context';
+import { useCasesConfig as useCasesConfigFn } from '../../../common/lib/kibana';
 
 // Hoist mock state so factories can reference them
 const mockCanRunWorkflow = vi.fn<boolean, []>();
@@ -38,8 +41,8 @@ vi.mock('../../workflows/use_run_workflow_on_cases', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useCasesContext } = await vi.importMock('../../cases_context/use_cases_context');
-const { useCasesConfig } = await vi.importMock('../../../common/lib/kibana');
+const useCasesContext = useCasesContextFn as unknown as Mock;
+const useCasesConfig = useCasesConfigFn as unknown as Mock;
 
 const setupMocks = ({
   permissionsUpdate = true,

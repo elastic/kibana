@@ -72,8 +72,10 @@ describe('PodMetricsTable', () => {
         }
       );
 
-      expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
-      expect(screen.queryByTestId('podMetricsTable')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
+        expect(screen.queryByTestId('podMetricsTable')).toBeInTheDocument();
+      });
     }, 10000);
   });
 

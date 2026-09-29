@@ -9,7 +9,7 @@
 
 // Vitest counterpart of the Jest setupFilesAfterEnv list in jest-preset.js.
 
-import { expect, vi } from 'vitest';
+import { afterAll, expect, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import 'web-streams-polyfill/polyfill';
 import { ReadableStream } from 'stream/web';
@@ -18,7 +18,7 @@ import clearImmediate from 'core-js/stable/clear-immediate';
 import { configure } from '@testing-library/react';
 import { matchers } from '@emotion/jest';
 import { createRequire } from 'module';
-import { TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from 'util';
+import { promisify, TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from 'util';
 import { i18n } from '@kbn/i18n';
 
 // Shared Kibana mock factories (coreMock, elasticsearchServiceMock, ...) are also used by the Jest
@@ -89,6 +89,58 @@ if (typeof window !== 'undefined') {
   global.TextDecoder = NodeTextDecoder;
   global.Uint8Array = NodeUint8Array;
   global.ArrayBuffer = new NodeUint8Array(0).buffer.constructor;
+}
+
+// Same as src/jest/setup/setup_test.js: jsdom 20's AbortSignal lacks throwIfAborted.
+if (
+  typeof AbortSignal !== 'undefined' &&
+  typeof AbortSignal.prototype.throwIfAborted !== 'function'
+) {
+  AbortSignal.prototype.throwIfAborted = function throwIfAborted() {
+    if (this.aborted) {
+      throw new DOMException('Aborted', 'AbortError');
+    }
+  };
+}
+
+// Jest's jsdom environment ran timers on the jsdom window, and closing it cancelled whatever was
+// still pending. Vitest keeps Node's timers, so e.g. EUI's LiveAnnouncer timeouts fire after the
+// environment is gone ("window is not defined"). Track timers and clear the leftovers per file.
+if (typeof window !== 'undefined') {
+  const pendingTimers = new Map();
+  const wrapTimer = (schedule, clear, isInterval) => {
+    const wrapped = Object.assign((callback, ...rest) => {
+      const handle = schedule(
+        typeof callback === 'function' && !isInterval
+          ? (...args) => {
+              pendingTimers.delete(handle);
+              return callback(...args);
+            }
+          : callback,
+        ...rest
+      );
+      pendingTimers.set(handle, clear);
+      return handle;
+    }, schedule);
+    // keep util.promisify(setTimeout) working
+    wrapped[promisify.custom] = schedule[promisify.custom];
+    return wrapped;
+  };
+  const wrapClear = (clear) =>
+    Object.assign((handle) => {
+      pendingTimers.delete(handle);
+      return clear(handle);
+    }, clear);
+
+  global.setTimeout = wrapTimer(global.setTimeout, global.clearTimeout, false);
+  global.setInterval = wrapTimer(global.setInterval, global.clearInterval, true);
+  global.clearTimeout = wrapClear(global.clearTimeout);
+  global.clearInterval = wrapClear(global.clearInterval);
+
+  afterAll(() => {
+    pendingTimers.forEach((clear, handle) => clear(handle));
+    pendingTimers.clear();
+  });
 }
 
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });

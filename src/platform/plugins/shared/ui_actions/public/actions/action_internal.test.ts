@@ -9,8 +9,12 @@
 
 import { vi } from 'vitest';
 
+import type { NotificationsStart } from '@kbn/core/public';
 import type { ActionDefinition } from './action';
 import { ActionInternal } from './action_internal';
+import { getNotifications } from '../services';
+
+vi.mock('../services', { spy: true });
 
 const defaultActionDef: ActionDefinition = {
   id: 'test-action',
@@ -25,13 +29,12 @@ describe('ActionInternal', () => {
 
   describe('displays toasts when execute function throws', () => {
     const addWarningMock = vi.fn();
-    beforeAll(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      (await import('../services')).getNotifications = () => ({
+    beforeAll(() => {
+      vi.mocked(getNotifications).mockReturnValue({
         toasts: {
           addWarning: addWarningMock,
         },
-      });
+      } as unknown as NotificationsStart);
     });
 
     beforeEach(() => {

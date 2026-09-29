@@ -43,7 +43,7 @@ describe('UserProfileService', () => {
         registerUserProfileDelegate(contract);
 
         expect(() => registerUserProfileDelegate(contract)).toThrowErrorMatchingInlineSnapshot(
-          `"userProfile API can only be registered once"`
+          `[Error: userProfile API can only be registered once]`
         );
       });
     });

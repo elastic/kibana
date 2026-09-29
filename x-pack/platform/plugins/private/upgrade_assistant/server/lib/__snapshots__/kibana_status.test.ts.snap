@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getKibanaUpgradeStatus returns the correct shape of data 1`] = `
+exports[`getKibanaUpgradeStatus > returns the correct shape of data 1`] = `
 Object {
   "apiDeprecations": Array [],
   "totalCriticalDeprecations": 1,

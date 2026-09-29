@@ -104,7 +104,7 @@ describe('runDefaultAgentMode started from inside another graph node (sub-agent 
       attachmentStateManager: context.attachmentStateManager,
     } as any);
     selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
-    const { ToolNode } = await vi.importMock('@langchain/langgraph/prebuilt');
+    const { ToolNode } = vi.mocked(await import('@langchain/langgraph/prebuilt'));
     ToolNode.mockImplementationOnce(() => ({
       invoke: vi.fn().mockResolvedValue([
         new ToolMessage({

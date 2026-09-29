@@ -116,7 +116,7 @@ describe('removeReferences()', () => {
         `,
         ['foo']
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"unable to find reference \\"foo\\""`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: unable to find reference "foo"]`);
   });
   it('adds removes items from single-line and expanded lists', () => {
     expect(

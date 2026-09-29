@@ -43,6 +43,7 @@ import type {
   ImportExceptionListItemSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { ExceptionItemImportError } from '@kbn/lists-plugin/server/exception_item_import_error';
 import { cloneDeep } from 'lodash';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
@@ -632,7 +633,14 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           lists: [],
         };
         const expectedItems: PromiseFromStreams = {
-          items: [item1Mock(), new Error('houston, we have a problem')],
+          items: [
+            item1Mock(),
+            new ExceptionItemImportError(
+              new Error('houston, we have a problem'),
+              'list id 2',
+              'itemId2'
+            ),
+          ],
           lists: [],
         };
 

@@ -50,7 +50,7 @@ vi.mock('../../hooks/use_fetch_graph_data', async () => {
   return await import('../mock/use_fetch_graph_data.mock');
 });
 
-const actionMocks: Record<string, Mock> = {};
+const actionMocks = vi.hoisted((): Record<string, Mock> => ({}));
 
 vi.mock('@storybook/addon-actions', () => {
   const mocked = {
@@ -108,7 +108,9 @@ vi.mock('../constants', async () => {
 });
 
 // By default we toggle the search bar visibility
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn().mockReturnValue([true, vi.fn()]));
+vi.mock('react-use/lib/useSessionStorage', () => ({
+  default: vi.fn().mockReturnValue([true, vi.fn()]),
+}));
 
 const QUERY_PARAM_IDX = 0;
 const FILTERS_PARAM_IDX = 1;

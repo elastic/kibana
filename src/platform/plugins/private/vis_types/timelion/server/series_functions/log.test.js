@@ -16,7 +16,7 @@ import invoke from './test_helpers/invoke_series_fn';
 describe('log.js', () => {
   let seriesList;
   beforeEach(async () => {
-    seriesList = (await import('./fixtures/series_list'))();
+    seriesList = (await import('./fixtures/series_list')).default();
   });
 
   it('should return the log10 value of every value', () => {

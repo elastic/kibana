@@ -51,7 +51,7 @@ describe('createPersistedSkillProvider', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mockClient = createMockClient();
-    const { createClient } = await vi.importMock('./client');
+    const { createClient } = vi.mocked(await import('./client'));
     createClient.mockReturnValue(mockClient);
   });
 

@@ -40,7 +40,7 @@ vi.mock('../../../../../services/documentation', () => {
   return { ...mocked, default: mocked };
 });
 
-const { __setMockIndexSettings } = await vi.importMock('../../../config_context');
+const { __setMockIndexSettings } = vi.mocked(await import('../../../config_context'));
 
 const createMockField = (source: Record<string, unknown> = {}): NormalizedField => ({
   id: 'test-field',

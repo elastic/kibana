@@ -85,7 +85,9 @@ const mockComposeDiscoverForm = vi.fn((_props: FormProps) => (
 ));
 
 vi.mock('./compose_discover_form', async () => {
-  const { useFormContext } = require('react-hook-form') as typeof import('react-hook-form');
+  const { useFormContext } = (await vi.importActual(
+    'react-hook-form'
+  )) as typeof import('react-hook-form');
   const { getSteps } = (await vi.importActual(
     './compose_discover_form'
   )) as typeof import('./compose_discover_form');

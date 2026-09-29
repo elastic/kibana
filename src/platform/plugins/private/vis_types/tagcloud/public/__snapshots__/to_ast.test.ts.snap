@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`tagcloud vis toExpressionAst function should match snapshot params fulfilled with DatatableColumn vis_dimension.accessor at metric 1`] = `
+exports[`tagcloud vis toExpressionAst function > should match snapshot params fulfilled with DatatableColumn vis_dimension.accessor at metric 1`] = `
 Object {
   "chain": Array [
     Object {
@@ -86,7 +86,7 @@ Object {
 }
 `;
 
-exports[`tagcloud vis toExpressionAst function should match snapshot params fulfilled with number vis_dimension.accessor at metric 1`] = `
+exports[`tagcloud vis toExpressionAst function > should match snapshot params fulfilled with number vis_dimension.accessor at metric 1`] = `
 Object {
   "chain": Array [
     Object {
@@ -172,7 +172,7 @@ Object {
 }
 `;
 
-exports[`tagcloud vis toExpressionAst function should match snapshot without params 1`] = `
+exports[`tagcloud vis toExpressionAst function > should match snapshot without params 1`] = `
 Object {
   "chain": Array [
     Object {

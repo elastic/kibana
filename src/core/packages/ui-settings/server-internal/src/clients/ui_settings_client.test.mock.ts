@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
-export const mockCreateOrUpgradeSavedConfig = jest.fn() as jest.MockedFunction<
+export const mockCreateOrUpgradeSavedConfig = vi.fn() as MockedFunction<
   typeof createOrUpgradeSavedConfig
 >;
-jest.mock('../create_or_upgrade_saved_config', () => ({
+vi.doMock('../create_or_upgrade_saved_config', () => ({
   createOrUpgradeSavedConfig: mockCreateOrUpgradeSavedConfig,
 }));

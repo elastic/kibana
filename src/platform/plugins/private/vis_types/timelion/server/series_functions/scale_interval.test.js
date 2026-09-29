@@ -16,7 +16,7 @@ import invoke from './test_helpers/invoke_series_fn';
 describe('scale_interval.js', () => {
   let seriesList;
   beforeEach(async () => {
-    seriesList = (await import('./fixtures/series_list'))();
+    seriesList = (await import('./fixtures/series_list')).default();
   });
 
   it('Can multiply to transform one interval to another', () => {

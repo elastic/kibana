@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { act, renderHook } from '@testing-library/react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
@@ -21,6 +22,9 @@ import {
   ExtendedFieldsUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
 import { basicCase } from '../../containers/mock';
+import { useCasesContext as useCasesContextFn } from '../cases_context/use_cases_context';
+import { useCasesConfig as useCasesConfigFn } from '../../common/lib/kibana';
+import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
 
 // ---- module mocks ----
 
@@ -46,8 +50,8 @@ vi.mock('@kbn/workflows-ui', () => {
 
 // ---- helpers ----
 
-const { useCasesContext } = await vi.importMock('../cases_context/use_cases_context');
-const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
+const useCasesContext = useCasesContextFn as unknown as Mock;
+const useCasesConfig = useCasesConfigFn as unknown as Mock;
 
 const setupMocks = ({
   permissionsUpdate = true,
@@ -137,8 +141,7 @@ describe('useRunCaseWorkflow', () => {
   });
 
   describe('origin', () => {
-    it('uses the CASE_WORKFLOW_ORIGIN_TYPE for the case-level origin', async () => {
-      const { useCasesWorkflowExecutor } = await vi.importMock('./use_cases_workflow_executor');
+    it('uses the CASE_WORKFLOW_ORIGIN_TYPE for the case-level origin', () => {
       renderHookWithDefaults();
       expect(useCasesWorkflowExecutor).toHaveBeenCalledWith(
         expect.objectContaining({

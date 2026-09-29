@@ -113,7 +113,7 @@ const { useHasConnectorsAllPrivileges } = vi.mocked(await import(
 ));
 const { useConnectorsActions } = vi.mocked(await import('../../../context/connectors_provider'));
 const { useQueryState } = vi.mocked(await import('../../../hooks/use_query_state'));
-const { ConnectorDetailPanel } = await vi.importMock('./connector_detail_panel');
+const { ConnectorDetailPanel } = vi.mocked(await import('./connector_detail_panel'));
 
 const openCreateFlyout = vi.fn();
 

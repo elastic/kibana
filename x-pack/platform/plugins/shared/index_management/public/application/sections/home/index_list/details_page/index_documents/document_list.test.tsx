@@ -31,7 +31,7 @@ vi.mock('@kbn/search-index-documents', () => {
   return { ...mocked, default: mocked };
 });
 
-const { resultMetaData, resultToField } = await vi.importMock('@kbn/search-index-documents');
+const { resultMetaData, resultToField } = vi.mocked(await import('@kbn/search-index-documents'));
 
 const mockDocs: SearchHit[] = [
   { _index: 'test-index', _id: 'doc-1', _source: { title: 'First' } },

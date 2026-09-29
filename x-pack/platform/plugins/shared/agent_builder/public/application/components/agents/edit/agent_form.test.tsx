@@ -121,7 +121,7 @@ vi.mock('@kbn/unsaved-changes-prompt', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useAgentEdit } = await vi.importMock('../../../hooks/agents/use_agent_edit');
+const { useAgentEdit } = vi.mocked(await import('../../../hooks/agents/use_agent_edit'));
 
 const renderWithIntl = (ui: React.ReactElement) => {
   const queryClient = new QueryClient({

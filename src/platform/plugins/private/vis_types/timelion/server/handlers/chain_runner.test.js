@@ -14,7 +14,7 @@ describe('chain_runner', () => {
   let runner;
 
   beforeAll(async () => {
-    tlConfig = (await import('../series_functions/fixtures/tl_config'))();
+    tlConfig = (await import('../series_functions/fixtures/tl_config')).default();
   });
 
   function processExpression(expression) {

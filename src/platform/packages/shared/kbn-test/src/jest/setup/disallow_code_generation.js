@@ -57,8 +57,9 @@ const ALLOWED_CALLERS = [
   /jest-snapshot/,
   // Jest's own environment uses new Function() for code generation. Dev-only, this is OK.
   /jest-environment/,
-  // Vitest evaluates snapshot files with new Function(). Dev-only, this is OK.
-  /node_modules\/vitest\//,
+  // Vitest evaluates snapshot files with new Function(). Match that function only: the Vitest
+  // runner is on every test stack. Dev-only, this is OK.
+  /at evaluateSnapshotFile /,
   // Vitest installs jsdom into the test realm (Jest keeps it outside the sandbox), so jsdom's
   // selector compiler (nwsapi) runs against the patched Function. Dev-only, this is OK.
   /node_modules\/nwsapi\//,

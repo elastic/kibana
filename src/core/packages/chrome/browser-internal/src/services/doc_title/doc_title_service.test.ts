@@ -121,7 +121,7 @@ describe('DocTitleService', () => {
     it('throws if called before #setup', () => {
       const docTitle = new DocTitleService();
       expect(() => docTitle.start()).toThrowErrorMatchingInlineSnapshot(
-        `"DocTitleService#setup must be called before DocTitleService#start"`
+        `[Error: DocTitleService#setup must be called before DocTitleService#start]`
       );
     });
 

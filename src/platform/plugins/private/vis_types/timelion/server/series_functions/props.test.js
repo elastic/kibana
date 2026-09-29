@@ -15,7 +15,7 @@ describe('props.js', () => {
   let seriesList;
 
   beforeEach(async () => {
-    seriesList = (await import('./fixtures/series_list'))();
+    seriesList = (await import('./fixtures/series_list')).default();
   });
 
   it('sets safe nested properties on each series', async () => {

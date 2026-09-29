@@ -19,7 +19,9 @@ import {
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
 } from '../test_ids';
 
-vi.mock('react-use/lib/useLocalStorage', () => vi.fn().mockReturnValue([false, vi.fn()]));
+vi.mock('react-use/lib/useLocalStorage', () => ({
+  default: vi.fn().mockReturnValue([false, vi.fn()]),
+}));
 const SEARCH_BAR_TOUR_TITLE = 'Refine your view with search';
 
 const mockToursIsEnabled = vi.fn(() => true);

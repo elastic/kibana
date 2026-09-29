@@ -22,7 +22,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { ApiService } from './api';
 
 describe('ApiService payload shaping', async () => {
-  const sharedImportsMock = (await vi.importMock('../../shared_imports')) as {
+  const sharedImportsMock = (vi.mocked(await import('../../shared_imports'))) as {
     sendRequest: Mock;
     useRequest: Mock;
   };

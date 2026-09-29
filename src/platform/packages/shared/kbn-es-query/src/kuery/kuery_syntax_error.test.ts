@@ -68,9 +68,9 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('foo:"ba "r"');
     }).toThrowErrorMatchingInlineSnapshot(`
-      "Expected AND, OR, end of input but \\"r\\" found.
-      foo:\\"ba \\"r\\"
-      ---------^"
+      [KQLSyntaxError: Expected AND, OR, end of input but "r" found.
+      foo:"ba "r"
+      ---------^]
     `);
   });
 
@@ -78,9 +78,9 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('foo:ba:r');
     }).toThrowErrorMatchingInlineSnapshot(`
-      "Expected AND, OR, end of input but \\":\\" found.
+      [KQLSyntaxError: Expected AND, OR, end of input but ":" found.
       foo:ba:r
-      ------^"
+      ------^]
     `);
   });
 

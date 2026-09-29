@@ -87,7 +87,7 @@ vi.mock('@kbn/core-di-browser', () => {
   };
 });
 
-const { mockCanRead } = (await vi.importMock('@kbn/core-di-browser')) as {
+const { mockCanRead } = (vi.mocked(await import('@kbn/core-di-browser'))) as {
   mockCanRead: Mock;
 };
 

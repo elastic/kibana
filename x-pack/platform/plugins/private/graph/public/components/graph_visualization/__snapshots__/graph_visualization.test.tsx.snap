@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`graph_visualization should render to svg elements 1`] = `
+exports[`graph_visualization > should render to svg elements 1`] = `
 <svg
   className="gphGraph"
   height="100%"

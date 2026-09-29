@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const parseSheet = await import('./parse_sheet');
+import parseSheet from './parse_sheet';
 
 import expect from '@kbn/expect';
 

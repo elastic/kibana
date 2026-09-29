@@ -92,9 +92,9 @@ describe('createSkillService', () => {
     });
 
     it('throws when registering a skill id not in the allow-list', async () => {
-      const { isAllowedSkillRegistration } = await vi.importMock(
+      const { isAllowedSkillRegistration } = vi.mocked(await import(
         '@kbn/agent-builder-server/allow_lists'
-      );
+      ));
       isAllowedSkillRegistration.mockReturnValueOnce(false);
 
       const service = createSkillService();

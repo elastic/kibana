@@ -29,7 +29,7 @@ vi.mock('../../../../../hooks/use_follow_execution', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useFollowExecution } = await vi.importMock('../../../../../hooks/use_follow_execution');
+const { useFollowExecution } = vi.mocked(await import('../../../../../hooks/use_follow_execution'));
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(

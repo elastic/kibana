@@ -49,7 +49,7 @@ vi.mock('@elastic/eui', async () => {
 
 // ---- helpers ----
 
-const { useChangePointLensProps } = await vi.importMock('../hooks/use_change_point_lens_props');
+const { useChangePointLensProps } = vi.mocked(await import('../hooks/use_change_point_lens_props'));
 
 const stubCard = (overrides: Partial<ChangePointCardModel> = {}): ChangePointCardModel => ({
   id: 'card-1',

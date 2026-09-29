@@ -99,9 +99,9 @@ const packageInfo = {
   type: 'integration',
 } as PackageInfo;
 
-const getInstallStatusMock = (await vi.importMock('../../../../../hooks'))
+const getInstallStatusMock = (vi.mocked(await import('../../../../../hooks')))
   .useGetPackageInstallStatus as Mock;
-const useGetPackageInfoByKeyQueryMock = (await vi.importMock('../../../../../hooks'))
+const useGetPackageInfoByKeyQueryMock = (vi.mocked(await import('../../../../../hooks')))
   .useGetPackageInfoByKeyQuery as Mock;
 
 const renderPage = () => {

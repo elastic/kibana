@@ -23,10 +23,10 @@ describe('state settings', () => {
       expect(() => validate(true)).not.toThrow();
       expect(() => validate(false)).not.toThrow();
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [string]"`
+        `[Error: expected value of type [boolean] but got [string]]`
       );
       expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [number]"`
+        `[Error: expected value of type [boolean] but got [number]]`
       );
     });
   });

@@ -39,41 +39,43 @@ const makePluginClass = (filename: string) => ({
   `,
 });
 
-const makeModuleByPath = (
-  path: string,
-  group: ModuleGroup,
-  visibility: ModuleVisibility,
-  pluginOverrides: any = {}
-): Record<string, ModuleId> => {
-  const pluginId = path.split('/')[4];
-  const packageId = `@kbn/${pluginId}-plugin`;
+const { makeModuleByPath } = vi.hoisted(() => ({
+  makeModuleByPath: (
+    path: string,
+    group: ModuleGroup,
+    visibility: ModuleVisibility,
+    pluginOverrides: any = {}
+  ): Record<string, ModuleId> => {
+    const pluginId = path.split('/')[4];
+    const packageId = `@kbn/${pluginId}-plugin`;
 
-  return {
-    [path]: {
-      type: 'server package',
-      dirs: [],
-      repoRel: 'some/relative/path',
-      pkgInfo: {
-        pkgId: packageId,
-        pkgDir: path.split('/').slice(0, -2).join('/'),
-        rel: 'some/relative/path',
-      },
-      group,
-      visibility,
-      manifest: {
-        type: 'plugin',
-        id: packageId,
-        owner: ['@kbn/kibana-operations'],
-        plugin: {
-          id: pluginId,
-          browser: true,
-          server: true,
-          ...pluginOverrides,
+    return {
+      [path]: {
+        type: 'server package',
+        dirs: [],
+        repoRel: 'some/relative/path',
+        pkgInfo: {
+          pkgId: packageId,
+          pkgDir: path.split('/').slice(0, -2).join('/'),
+          rel: 'some/relative/path',
+        },
+        group,
+        visibility,
+        manifest: {
+          type: 'plugin',
+          id: packageId,
+          owner: ['@kbn/kibana-operations'],
+          plugin: {
+            id: pluginId,
+            browser: true,
+            server: true,
+            ...pluginOverrides,
+          },
         },
       },
-    },
-  };
-};
+    };
+  },
+}));
 
 const makeError = (line: number, ...violations: string[]) => ({
   line,

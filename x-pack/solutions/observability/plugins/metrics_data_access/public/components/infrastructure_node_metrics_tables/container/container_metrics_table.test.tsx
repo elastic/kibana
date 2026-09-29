@@ -78,8 +78,10 @@ describe('ContainerMetricsTable', () => {
         }
       );
 
-      expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
-      expect(screen.queryByTestId('containerMetricsTable')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
+        expect(screen.queryByTestId('containerMetricsTable')).toBeInTheDocument();
+      });
     }, 10000);
   });
 

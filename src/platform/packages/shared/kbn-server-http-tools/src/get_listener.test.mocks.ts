@@ -28,10 +28,11 @@ export const createHttpServerMock = vi.fn(() => {
 
 vi.doMock('http', () => {
   const actual = require('http');
-  return {
+  const mocked = {
     ...actual,
     createServer: createHttpServerMock,
   };
+  return { ...mocked, default: mocked };
 });
 
 export const createHttpsServerMock = vi.fn(() => {
@@ -43,10 +44,11 @@ export const createHttpsServerMock = vi.fn(() => {
 
 vi.doMock('https', () => {
   const actual = require('https');
-  return {
+  const mocked = {
     ...actual,
     createServer: createHttpsServerMock,
   };
+  return { ...mocked, default: mocked };
 });
 
 export const createHttp2SecureServerMock = vi.fn(() => {
@@ -65,9 +67,10 @@ export const createHttp2UnsecureServerMock = vi.fn(() => {
 
 vi.doMock('http2', () => {
   const actual = require('https');
-  return {
+  const mocked = {
     ...actual,
     createServer: createHttp2UnsecureServerMock,
     createSecureServer: createHttp2SecureServerMock,
   };
+  return { ...mocked, default: mocked };
 });

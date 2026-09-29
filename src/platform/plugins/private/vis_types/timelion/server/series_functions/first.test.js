@@ -10,7 +10,7 @@
 import fn from './first';
 
 import expect from '@kbn/expect';
-const seriesList = (await import('./fixtures/series_list'))();
+const seriesList = (await import('./fixtures/series_list')).default();
 import invoke from './test_helpers/invoke_series_fn';
 
 describe('first.js', function () {

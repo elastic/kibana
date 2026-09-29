@@ -8,6 +8,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -155,9 +156,10 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
 });
 
 describe('ChangePointExperienceGrid UI states', () => {
+  // untyped mocks: the tests return partial stubs
   const { buildChangePointCards, getChangePointSeriesColumns } = {
-    buildChangePointCards: () => vi.mocked(buildChangePointCardsMock),
-    getChangePointSeriesColumns: () => vi.mocked(getChangePointSeriesColumnsMock),
+    buildChangePointCards: () => buildChangePointCardsMock as unknown as Mock,
+    getChangePointSeriesColumns: () => getChangePointSeriesColumnsMock as unknown as Mock,
   };
 
   afterEach(() => {

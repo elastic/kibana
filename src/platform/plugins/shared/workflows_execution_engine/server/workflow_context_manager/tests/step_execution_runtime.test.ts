@@ -774,7 +774,7 @@ describe('StepExecutionRuntime', () => {
 
       expect(workflowLogger.logError).toHaveBeenCalledWith(
         `Step 'fakeStepId1' failed: Step execution failed`,
-        error,
+        expect.objectContaining({ message: error.message }),
         {
           event: { action: 'step-fail', category: ['workflow', 'step'] },
           tags: ['workflow', 'step', 'fail'],

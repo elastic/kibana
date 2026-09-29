@@ -104,7 +104,7 @@ describe('uiSettings', () => {
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
         expect(() => setup.register(defaults)).toThrowErrorMatchingInlineSnapshot(
-          `"uiSettings for the key [foo] has been already registered"`
+          `[Error: uiSettings for the key [foo] has been already registered]`
         );
       });
 
@@ -112,7 +112,7 @@ describe('uiSettings', () => {
         const setup = await service.setup(setupDeps);
         setup.registerGlobal(defaults);
         expect(() => setup.registerGlobal(defaults)).toThrowErrorMatchingInlineSnapshot(
-          `"Global uiSettings for the key [foo] has been already registered"`
+          `[Error: Global uiSettings for the key [foo] has been already registered]`
         );
       });
 

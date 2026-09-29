@@ -41,7 +41,7 @@ describe('indexPattern expression function', () => {
     await expect(async () => {
       await indexPatternDefinition().fn(null, { id: '1' }, {} as any);
     }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"A KibanaRequest is required to execute this search on the server. Please provide a request object to the expression execution params."`
+      `[Error: A KibanaRequest is required to execute this search on the server. Please provide a request object to the expression execution params.]`
     );
   });
 });

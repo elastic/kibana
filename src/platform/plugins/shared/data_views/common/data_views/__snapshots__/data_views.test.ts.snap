@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`IndexPatterns correctly composes runtime field 1`] = `
+exports[`IndexPatterns > correctly composes runtime field 1`] = `
 FldList [
   Object {
     "aggregatable": true,
@@ -43,13 +43,13 @@ FldList [
 ]
 `;
 
-exports[`IndexPatterns createAndSave will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
+exports[`IndexPatterns > createAndSave will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
 
-exports[`IndexPatterns createAndSaveDataViewLazy will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
+exports[`IndexPatterns > createAndSaveDataViewLazy will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
 
-exports[`IndexPatterns delete will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: 1]`;
+exports[`IndexPatterns > delete will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: 1]`;
 
-exports[`IndexPatterns savedObjectToSpec 1`] = `
+exports[`IndexPatterns > savedObjectToSpec 1`] = `
 Object {
   "allowHidden": undefined,
   "allowNoIndex": undefined,
@@ -100,4 +100,4 @@ Object {
 }
 `;
 
-exports[`IndexPatterns updateSavedObject will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: id]`;
+exports[`IndexPatterns > updateSavedObject will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: id]`;

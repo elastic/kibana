@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`timelion vis toExpressionAst function should match basic snapshot 1`] = `
+exports[`timelion vis toExpressionAst function > should match basic snapshot 1`] = `
 Object {
   "chain": Array [
     Object {
@@ -20,7 +20,7 @@ Object {
 }
 `;
 
-exports[`timelion vis toExpressionAst function should not escape single quotes 1`] = `
+exports[`timelion vis toExpressionAst function > should not escape single quotes 1`] = `
 Object {
   "chain": Array [
     Object {

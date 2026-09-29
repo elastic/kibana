@@ -8,7 +8,7 @@
  */
 
 import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 
 import type { VisualizeInput, VisSavedObject, Vis } from '../..';
 import {
@@ -20,11 +20,16 @@ import { BehaviorSubject } from 'rxjs';
 import type { VisualizeServices } from '../types';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import type { VisParams } from '@kbn/visualizations-common';
+import {
+  getSavedVisualization as getSavedVisualizationFn,
+  convertToSerializedVis as convertToSerializedVisFn,
+} from '../../utils/saved_visualize_utils';
+import { createVisAsync as createVisAsyncFn } from '../../vis_async';
 
-const commonSerializedVisMock = {
+const commonSerializedVisMock = vi.hoisted(() => ({
   type: 'area',
   aggs: [],
-};
+}));
 
 vi.mock('../../utils/saved_visualize_utils', async () => {
   const actual = await vi.importActual('../../utils/saved_visualize_utils');
@@ -34,9 +39,6 @@ vi.mock('../../utils/saved_visualize_utils', async () => {
     convertToSerializedVis: vi.fn().mockReturnValue(commonSerializedVisMock),
   };
 });
-const { getSavedVisualization, convertToSerializedVis } = await vi.importMock(
-  '../../utils/saved_visualize_utils'
-);
 
 vi.mock('../../vis_async', () => {
   const mocked = {
@@ -44,7 +46,10 @@ vi.mock('../../vis_async', () => {
   };
   return { ...mocked, default: mocked };
 });
-const { createVisAsync } = await vi.importMock('../../vis_async');
+
+const getSavedVisualization = getSavedVisualizationFn as unknown as Mock;
+const convertToSerializedVis = convertToSerializedVisFn as unknown as Mock;
+const createVisAsync = createVisAsyncFn as unknown as Mock;
 
 let savedVisMock: VisSavedObject;
 

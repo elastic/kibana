@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getIndices response object to item array 1`] = `
+exports[`getIndices > response object to item array 1`] = `
 Array [
   Object {
     "item": Object {
