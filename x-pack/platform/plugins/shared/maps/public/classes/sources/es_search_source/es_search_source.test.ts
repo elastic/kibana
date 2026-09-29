@@ -278,7 +278,6 @@ describe('ESSearchSource', () => {
           topHitsSplitField: 'machine.os.raw',
           topHitsSize: 5,
         });
-        // @ts-expect-error
         jest.spyOn(esSearchSource, '_getTopHits').mockResolvedValue({
           hits: makeHits(10),
           meta: {
@@ -321,7 +320,6 @@ describe('ESSearchSource', () => {
           totalEntities: 20000,
           warnings: [],
         };
-        // @ts-expect-error
         jest.spyOn(esSearchSource, '_getTopHits').mockResolvedValue({
           hits: makeHits(5),
           meta: topHitsMeta,

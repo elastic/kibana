@@ -172,8 +172,8 @@ describe('getGeoJsonWithMeta', () => {
     );
 
     expect(data.features).toHaveLength(5);
-    expect(meta.resultsCount).toBe(5);
-    expect(meta.areResultsTrimmed).toBe(false);
+    expect(meta?.resultsCount).toBe(5);
+    expect(meta?.areResultsTrimmed).toBe(false);
   });
 
   test('should set areResultsTrimmed when resultsCount reaches the limit', async () => {
@@ -188,7 +188,7 @@ describe('getGeoJsonWithMeta', () => {
       makeInspectorAdapters() as any
     );
 
-    expect(meta.resultsCount).toBe(3);
-    expect(meta.areResultsTrimmed).toBe(true);
+    expect(meta?.resultsCount).toBe(3);
+    expect(meta?.areResultsTrimmed).toBe(true);
   });
 });
