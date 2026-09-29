@@ -64,7 +64,7 @@ export const ServiceAccountRoleSelector = ({
     checked: selectedRoleNames.includes(role.name) ? 'on' : undefined,
     'data-test-subj': `roleOption-${role.name}`,
     data: { description: role.description },
-    css: css({ borderBottom: euiTheme.border.thin }),
+    css: css({ height: 32, borderBottom: euiTheme.border.thin }),
     append: isRoleDeprecated(role) ? (
       <EuiBadge color="warning">
         <FormattedMessage
@@ -88,6 +88,7 @@ export const ServiceAccountRoleSelector = ({
     justifyContent: 'space-between',
     alignItems: 'center',
     fontSize: 14,
+    minHeight: 32,
     color: euiTheme.colors.textParagraph,
     paddingBlock: 0,
     '&:not(:first-child)': { paddingBlockStart: 0 },
@@ -113,26 +114,6 @@ export const ServiceAccountRoleSelector = ({
         ),
       })
     ),
-    {
-      label: i18n.translate('xpack.security.management.serviceAccounts.create.customRolesLabel', {
-        defaultMessage: 'Custom roles',
-      }),
-      isGroupLabel: true,
-      css: groupStyle,
-      append: createRoleUrl && (
-        <EuiLink
-          href={createRoleUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          css={css({ fontWeight: euiTheme.font.weight.regular })}
-        >
-          <FormattedMessage
-            id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
-            defaultMessage="Create new role"
-          />
-        </EuiLink>
-      ),
-    },
     ...customRoles.map(optionForRole),
     ...(predefinedRoles.length
       ? [
@@ -205,10 +186,41 @@ export const ServiceAccountRoleSelector = ({
         </EuiButtonEmpty>
       }
     >
+      <div
+        css={css({
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: 32,
+          paddingInline: euiTheme.size.s,
+          borderBottom: euiTheme.border.thin,
+        })}
+      >
+        <strong>
+          <FormattedMessage
+            id="xpack.security.management.serviceAccounts.create.customRolesLabel"
+            defaultMessage="Custom roles"
+          />
+        </strong>
+        {createRoleUrl && (
+          <EuiLink
+            href={createRoleUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            color="text"
+            css={css({ textDecoration: 'underline' })}
+          >
+            <FormattedMessage
+              id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
+              defaultMessage="Create new role"
+            />
+          </EuiLink>
+        )}
+      </div>
       <EuiSelectable
         aria-label={selectRolesLabel}
         options={options}
-        height={288}
+        height={256}
         onChange={(nextOptions) =>
           onChange(
             nextOptions.filter((option) => option.checked === 'on').map(({ label }) => label)
@@ -216,7 +228,7 @@ export const ServiceAccountRoleSelector = ({
         }
         listProps={{
           rowHeight: 32,
-          windowProps: { itemSize: () => 32 },
+          isVirtualized: false,
           paddingSize: 'none',
           onFocusBadge: false,
           autoFocus: true,
