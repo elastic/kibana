@@ -61,19 +61,13 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
 
   // The stacks are read from refs but mutated via async setState, so a second
   // undo/redo fired in the same tick (e.g. a key held down) would read the same
-  // pre-update stack and pop the same snapshot twice. This lock blocks re-entry
-  // until the state update commits.
+  // pre-update stack and pop the same snapshot twice. Restoring also updates the
+  // nodes, and that write can look like a new edit. Hold the lock until this
+  // commit's effects have run, then release it so the next real edit is recorded.
   const isApplyingRef = useRef(false);
-  // Restoring a snapshot updates nodes, then the graph sync writes them again.
-  // Those writes look like a new edit and would clear the redo stack. Ignore
-  // records for this render and the follow-up one.
-  const suppressRecordRef = useRef(0);
 
   useEffect(() => {
     isApplyingRef.current = false;
-    if (suppressRecordRef.current > 0) {
-      suppressRecordRef.current -= 1;
-    }
   });
 
   const captureSnapshot = useCallback((): Snapshot<NodeType, EdgeType, Extra> => {
@@ -86,7 +80,7 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
   }, []);
 
   const record = useCallback(() => {
-    if (isApplyingRef.current || suppressRecordRef.current > 0) {
+    if (isApplyingRef.current) {
       return;
     }
     setPast((stack) => [...stack, captureSnapshot()].slice(-HISTORY_LIMIT));
@@ -99,7 +93,6 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
       return;
     }
     isApplyingRef.current = true;
-    suppressRecordRef.current = 2;
     const previous = stack[stack.length - 1];
     setFuture([...futureRef.current, captureSnapshot()]);
     setPast(stack.slice(0, -1));
@@ -114,7 +107,6 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
       return;
     }
     isApplyingRef.current = true;
-    suppressRecordRef.current = 2;
     const next = stack[stack.length - 1];
     setPast([...pastRef.current, captureSnapshot()]);
     setFuture(stack.slice(0, -1));
@@ -136,4 +128,20 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
     canUndo: past.length > 0,
     canRedo: future.length > 0,
   };
+}
+
+/**
+ * Clears history when `value` is replaced. Staged edits keep the same persisted
+ * unit, so they stay undoable. A successful save replaces it and drops snapshots
+ * that would otherwise write a unit without the component that was just saved.
+ */
+export function useResetHistoryOnIdentityChange<T>(value: T, reset: () => void): void {
+  const seenRef = useRef(value);
+  useEffect(() => {
+    if (Object.is(seenRef.current, value)) {
+      return;
+    }
+    seenRef.current = value;
+    reset();
+  }, [reset, value]);
 }

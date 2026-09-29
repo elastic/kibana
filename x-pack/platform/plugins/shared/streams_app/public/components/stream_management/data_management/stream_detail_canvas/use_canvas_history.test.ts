@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import type { Edge, Node } from '@xyflow/react';
-import { useCanvasHistory } from './use_canvas_history';
+import { useCanvasHistory, useResetHistoryOnIdentityChange } from './use_canvas_history';
 
 const initialNodes: Node[] = [{ id: 'a', position: { x: 0, y: 0 }, data: {} }];
 
@@ -71,9 +71,9 @@ describe('useCanvasHistory', () => {
     act(() => result.current.history.undo());
     expect(result.current.history.canRedo).toBe(true);
 
-    // The undo's own follow-up render is ignored. A later edit clears redo.
-    act(() => result.current.setNodes((current) => [...current]));
     act(() => result.current.history.record());
+    act(() => result.current.setNodes(moveFirstNodeTo(200)));
+    expect(result.current.history.canUndo).toBe(true);
     expect(result.current.history.canRedo).toBe(false);
   });
 
@@ -143,6 +143,24 @@ describe('useCanvasHistory', () => {
     act(() => result.current.history.reset());
     expect(result.current.history.canUndo).toBe(false);
     expect(result.current.history.canRedo).toBe(false);
+  });
+
+  it('resets history when the persisted value is replaced', () => {
+    const persisted = { revision: 1 };
+    const replacement = { revision: 2 };
+    const reset = jest.fn();
+    const { rerender } = renderHook(
+      ({ value }: { value: { revision: number } }) => useResetHistoryOnIdentityChange(value, reset),
+      { initialProps: { value: persisted } }
+    );
+
+    expect(reset).not.toHaveBeenCalled();
+
+    rerender({ value: persisted });
+    expect(reset).not.toHaveBeenCalled();
+
+    rerender({ value: replacement });
+    expect(reset).toHaveBeenCalledTimes(1);
   });
 
   it('is a no-op to undo or redo when the stacks are empty', () => {

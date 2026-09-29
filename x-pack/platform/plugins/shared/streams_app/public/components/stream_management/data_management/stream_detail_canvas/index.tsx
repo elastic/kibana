@@ -51,7 +51,7 @@ import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
-import { useCanvasHistory } from './use_canvas_history';
+import { useCanvasHistory, useResetHistoryOnIdentityChange } from './use_canvas_history';
 import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
 import {
   DESTINATION_NODE_TYPE,
@@ -70,6 +70,7 @@ import {
   useCanvasIsSaving,
   useCanvasIsUnitUnavailable,
   useCanvasNodePositions,
+  useCanvasPersistedUnit,
   useCanvasUnitDefinition,
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
@@ -359,6 +360,9 @@ function StreamsCanvasInner() {
   useEffect(() => {
     reset();
   }, [classicNodeIds, reset]);
+  // A saved source or destination must not be removed by undoing an older edit.
+  const persistedUnit = useCanvasPersistedUnit();
+  useResetHistoryOnIdentityChange(persistedUnit, reset);
 
   // Tracks whether a pointer drag is in progress so we snapshot each gesture
   // exactly once.

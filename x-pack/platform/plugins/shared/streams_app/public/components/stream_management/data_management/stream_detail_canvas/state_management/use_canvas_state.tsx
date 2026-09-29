@@ -36,6 +36,10 @@ export const useCanvasUnitDefinition = () => {
   return useCanvasStateSelector((state) => state.context.nextUnit);
 };
 
+export const useCanvasPersistedUnit = () => {
+  return useCanvasStateSelector((state) => state.context.unit);
+};
+
 export const useCanvasHasUnsavedChanges = () => {
   return useCanvasStateSelector((state) => state.context.unit !== state.context.nextUnit);
 };
