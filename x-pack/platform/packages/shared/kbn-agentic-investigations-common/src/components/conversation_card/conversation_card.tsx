@@ -108,7 +108,7 @@ export const ConversationCard = memo<ConversationCardProps>(
                 <ConversationMetaInfo createdAt={investigation.createdAt} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                   {/*
                    * Stop propagation so interacting with the assignee picker
                    * (clicking the + button or selecting a user) does not trigger the card click.

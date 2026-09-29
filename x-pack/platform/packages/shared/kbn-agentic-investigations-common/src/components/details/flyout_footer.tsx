@@ -21,6 +21,7 @@ import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 export type { CloseInvestigationModalRenderProps };
 
 export interface ConversationDetailsFlyoutFooterProps {
+  isOpenedFromChat: boolean;
   investigation: Investigation;
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
@@ -48,6 +49,7 @@ const CLOSED_MODAL: ModalState = { type: null, recordId: null };
  * can be mounted through `core.overlays.openFlyout`, where there is no page-level React tree.
  */
 export const ConversationDetailsFlyoutFooter = ({
+  isOpenedFromChat,
   investigation,
   onOpenChat,
   onOpenEscalation,
@@ -71,16 +73,18 @@ export const ConversationDetailsFlyoutFooter = ({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <AiButtonEmpty
-            size="s"
-            iconType="productAgent"
-            onClick={onOpenChat}
-            data-test-subj="investigationFlyoutOpenChat"
-          >
-            {DETAILS_FLYOUT_LABELS.actions.openChat}
-          </AiButtonEmpty>
-        </EuiFlexItem>
+        {!isOpenedFromChat && (
+          <EuiFlexItem grow={false}>
+            <AiButtonEmpty
+              size="s"
+              iconType="productAgent"
+              onClick={onOpenChat}
+              data-test-subj="investigationFlyoutOpenChat"
+            >
+              {DETAILS_FLYOUT_LABELS.actions.openChat}
+            </AiButtonEmpty>
+          </EuiFlexItem>
+        )}
         {canRenderEscalationButton && (
           <EuiFlexItem grow={false}>
             <EuiButton
