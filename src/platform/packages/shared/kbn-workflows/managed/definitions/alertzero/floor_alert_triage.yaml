@@ -289,6 +289,7 @@ steps:
     with:
       alert_count: "${{ event.alerts | size }}"
       verdict_count: "${{ steps.classify_alerts.output.verdicts | size }}"
+      missing_alert_count: "${{ steps.classify_alerts.output.missing_alert_ids | size }}"
 
   - name: guard_classification_nonempty
     type: if
@@ -318,6 +319,38 @@ steps:
                   Likely causes: the `alertzero_reasoning` Model Management feature has no connector,
                   or the sub-workflow skipped the batch.
                   Alerts have NOT been tagged or closed.
+        else:
+          # Partial miss: at least one verdict came back (the all-empty case is handled
+          # above), but the sub-workflow's missing_alert_ids is nonempty — the model
+          # dropped one or more alerts from its reply, or a batch failed after retries.
+          # Those alerts get no az: tag, note, or FP-candidate consideration, so the
+          # Investigation would otherwise look fully triaged with no record that some
+          # alerts still need a verdict.
+          - name: guard_missing_alert_ids
+            type: if
+            condition: "${{ variables.missing_alert_count > 0 }}"
+            steps:
+              - name: post_comment_missing_alert_ids
+                type: kibana.request
+                on-failure:
+                  continue: true
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
+                    elastic-api-version: "2023-10-31"
+                  body:
+                    conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                    trigger_mode: "never"
+                    input: >-
+                      ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
+                      {{ variables.alert_count }} alert(s) in this batch (see the sub-workflow's
+                      missing_alert_ids). Those alerts were NOT tagged, noted, or considered for
+                      closure by this Worker; only the {{ variables.verdict_count }} matched
+                      alert(s) will be triaged below. Re-run the Worker or follow up manually on
+                      the missing alert(s).
 
   - name: post_comment_classification_results
     type: kibana.request

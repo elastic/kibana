@@ -351,6 +351,7 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
     expect(counts?.with).toEqual({
       alert_count: '${{ event.alerts | size }}',
       verdict_count: '${{ steps.classify_alerts.output.verdicts | size }}',
+      missing_alert_count: '${{ steps.classify_alerts.output.missing_alert_ids | size }}',
     });
     expect(outer?.condition).toBe('${{ variables.alert_count > 0 }}');
     expect(inner?.condition).toBe('${{ variables.verdict_count == 0 }}');
@@ -377,6 +378,30 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
     // The sub-workflow skips its dedupe on the Worker path, so tags cannot empty the batch.
     expect(input).not.toContain('already carry the analysis tag');
     expect(input).not.toContain('Verify the Alert Analysis workflow is enabled');
+  });
+
+  it('warns about missing_alert_ids only on the else branch of the all-empty guard', () => {
+    const inner = stepByName('guard_classification_nonempty_inner');
+    const missingGuard = stepByName('guard_missing_alert_ids');
+
+    // Not a sibling top-level step of the inner guard — nested under its `else`, so it
+    // cannot double-fire alongside post_comment_classification_empty for the all-empty case.
+    expect(inner?.steps?.some((s) => s.name === 'guard_missing_alert_ids')).toBe(false);
+    expect(inner?.else?.some((s) => s.name === 'guard_missing_alert_ids')).toBe(true);
+    expect(missingGuard?.condition).toBe('${{ variables.missing_alert_count > 0 }}');
+    expect(missingGuard?.condition).not.toContain('|');
+  });
+
+  it('reports the shortfall and warns the missing alert(s) were not tagged, noted, or closed', () => {
+    const comment = stepByName('post_comment_missing_alert_ids');
+    const template = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    const rendered = renderString(template, {
+      variables: { missing_alert_count: 2, alert_count: 5, verdict_count: 3 },
+    });
+
+    expect(rendered).toContain('no verdict for 2 of 5 alert(s)');
+    expect(rendered).toContain('NOT tagged, noted, or considered for closure');
+    expect(rendered).toContain('3 matched alert(s) will be triaged');
   });
 });
 
