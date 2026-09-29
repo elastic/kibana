@@ -7,8 +7,19 @@ date: 2022-05-17
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'plugin']
 ---
 
-An ESLint plugin exposing custom rules used and built specifically for development within Kibana. 
-Next you can find information on each on.
+An ESLint and Oxlint plugin exposing custom rules used and built specifically for development within Kibana. Eight optionless, always-on base rules run in Oxlint using its `createOnce` alternative API and are wrapped with `eslintCompatPlugin` so existing ESLint configuration remains compatible. `module_migration` remains ESLint-only until its RegExp-bearing options have an equivalent Oxlint configuration, and `no_unsafe_hash` remains ESLint-only to preserve protected disable-directive enforcement.
+
+Oxlint loads the plugin from `.oxlintrc.json` with the existing rule namespace preserved:
+
+```json
+{
+  "jsPlugins": [
+    { "name": "@kbn/eslint", "specifier": "./packages/kbn-eslint-plugin-eslint/oxlint_plugin.js" }
+  ]
+}
+```
+
+Rule configuration uses the existing `@kbn/eslint/<rule>` names in both linters.
 
 ## disallow-license-headers
 
