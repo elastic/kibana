@@ -29,6 +29,9 @@ import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common
 
 const RATE_LIMITER_POLICY = 'elu';
 
+/** Temporary rollout delay before HTTP ELU rate limiting applies; remove when elastic/kibana#293805 lands. */
+export const RATE_LIMITER_STARTUP_DELAY_MS = 10 * 60 * 1000;
+
 /** @internal */
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -57,10 +60,16 @@ export class HttpRateLimiterService
   private state$ = new BehaviorSubject<State | undefined>(undefined);
   private ready$ = new Subject<boolean>();
   private stopped$ = new Subject<boolean>();
+  private rateLimiterActiveAfterMs?: number;
 
   private handler: OnPreAuthHandler = (request, response, toolkit) => {
     const state = this.state$.getValue();
-    if (request.route.options.excludeFromRateLimiter || !state?.overloaded) {
+    if (
+      request.route.options.excludeFromRateLimiter ||
+      !state?.overloaded ||
+      (this.rateLimiterActiveAfterMs !== undefined &&
+        Date.now() < this.rateLimiterActiveAfterMs)
+    ) {
       return toolkit.next();
     }
 
@@ -151,6 +160,7 @@ export class HttpRateLimiterService
   }
 
   public start(): InternalRateLimiterStart {
+    this.rateLimiterActiveAfterMs = Date.now() + RATE_LIMITER_STARTUP_DELAY_MS;
     this.ready$.next(true);
     this.ready$.complete();
   }
