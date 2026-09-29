@@ -1,8 +1,7 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`I18n engine translate should throw error if used format is not specified 2`] = `
-"[I18n] Error formatting the default message for: \\"d.e.f\\".
-Error: [@formatjs/intl Error FORMAT_ERROR] Error formatting default message for: \\"d.e.f\\", rendering default message verbatim
+exports[`I18n engine > translate > should throw error if used format is not specified 2`] = `[Error: [I18n] Error formatting the default message for: "d.e.f".
+Error: [@formatjs/intl Error FORMAT_ERROR] Error formatting default message for: "d.e.f", rendering default message verbatim
 MessageID: d.e.f
 Default Message: Your total is {total, bar}
 Description: undefined
@@ -38,12 +37,10 @@ SyntaxError: INVALID_ARGUMENT_TYPE
     at jestAdapter (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
     at runTestInternal (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:367:16)
     at runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/testWorker.js:106:12)"
-`;
+    at Object.worker (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/testWorker.js:106:12)]`;
 
-exports[`I18n engine translate should throw error if wrong context is provided to the translation string 2`] = `
-"[I18n] Error formatting the default message for: \\"d.e.f\\".
-Error: [@formatjs/intl Error FORMAT_ERROR] Error formatting default message for: \\"d.e.f\\", rendering default message verbatim
+exports[`I18n engine > translate > should throw error if wrong context is provided to the translation string 2`] = `[Error: [I18n] Error formatting the default message for: "d.e.f".
+Error: [@formatjs/intl Error FORMAT_ERROR] Error formatting default message for: "d.e.f", rendering default message verbatim
 MessageID: d.e.f
 Default Message: You have {numPhotos, plural,
                              =0 {no photos.}
@@ -55,16 +52,16 @@ Description: undefined
 Locale: en
 
 
-The intl string context variable \\"numPhotos\\" was not provided to the string \\"You have {numPhotos, plural,
+The intl string context variable "numPhotos" was not provided to the string "You have {numPhotos, plural,
                              =0 {no photos.}
                              =1 {one photo.}
                              other {# photos.}
-                          }\\"
-Error: The intl string context variable \\"numPhotos\\" was not provided to the string \\"You have {numPhotos, plural,
+                          }"
+Error: The intl string context variable "numPhotos" was not provided to the string "You have {numPhotos, plural,
                              =0 {no photos.}
                              =1 {one photo.}
                              other {# photos.}
-                          }\\"
+                          }"
     at MissingValueError.FormatError (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/error.js:17:28)
     at new MissingValueError (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/error.js:47:23)
     at formatToParts (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/formatters.js:70:19)
@@ -92,5 +89,4 @@ Error: The intl string context variable \\"numPhotos\\" was not provided to the 
     at jestAdapter (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
     at runTestInternal (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:367:16)
     at runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/testWorker.js:106:12)"
-`;
+    at Object.worker (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/testWorker.js:106:12)]`;

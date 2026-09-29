@@ -114,13 +114,13 @@ test('throws if adding plugin with incompatible type', () => {
 
   prebootPluginSystem.addPlugin(prebootPlugin);
   expect(() => prebootPluginSystem.addPlugin(standardPlugin)).toThrowErrorMatchingInlineSnapshot(
-    `"Cannot add plugin with type \\"standard\\" to plugin system with type \\"preboot\\"."`
+    `[Error: Cannot add plugin with type "standard" to plugin system with type "preboot".]`
   );
   expect(prebootPluginSystem.getPlugins()).toEqual([prebootPlugin]);
 
   standardPluginSystem.addPlugin(standardPlugin);
   expect(() => standardPluginSystem.addPlugin(prebootPlugin)).toThrowErrorMatchingInlineSnapshot(
-    `"Cannot add plugin with type \\"preboot\\" to plugin system with type \\"standard\\"."`
+    `[Error: Cannot add plugin with type "preboot" to plugin system with type "standard".]`
   );
   expect(standardPluginSystem.getPlugins()).toEqual([standardPlugin]);
 });
@@ -597,7 +597,7 @@ test('cannot start preboot plugins', async () => {
 
   await expect(
     prebootPluginSystem.startPlugins(startDeps)
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"Preboot plugins cannot be started."`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Preboot plugins cannot be started.]`);
   expect(prebootPlugin.start).not.toHaveBeenCalled();
 });
 
@@ -977,7 +977,8 @@ describe('findCircularDependencies', () => {
 
 describe('stop', () => {
   beforeAll(() => {
-    vi.useFakeTimers({ legacyFakeTimers: true });
+    // Jest legacy fake timers still ran setImmediate callbacks, which `nextTick` relies on
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
   });
 
   afterAll(() => {

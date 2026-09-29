@@ -80,13 +80,13 @@ vi.doMock(MONACO_MODULE, () => {
   };
 });
 
-vi.mock('react-use/lib/useDebounce', () => {
-  return (cb: () => void, ms: number, deps: any[]) => {
+vi.mock('react-use/lib/useDebounce', () => ({
+  default: (cb: () => void, ms: number, deps: any[]) => {
     mockUseEffect(() => {
       cb();
     }, deps);
-  };
-});
+  },
+}));
 
 vi.mock('@kbn/code-editor', async () => {
   const original = await vi.importActual('@kbn/code-editor');

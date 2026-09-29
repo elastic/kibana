@@ -113,21 +113,21 @@ vi.mock('fs', () => {
 const mockExecaFn = vi.fn();
 vi.mock('execa', () => ({ __esModule: true, default: mockExecaFn }));
 
-const mockRun = (await vi.importMock('@kbn/dev-cli-runner')).run as Mock;
-const mockReadValidationRunFlags = (await vi.importMock('@kbn/dev-validation-runner'))
+const mockRun = (await import('@kbn/dev-cli-runner')).run as Mock;
+const mockReadValidationRunFlags = (await import('@kbn/dev-validation-runner'))
   .readValidationRunFlags as Mock;
-const mockResolveValidationBaseContext = (await vi.importMock('@kbn/dev-validation-runner'))
+const mockResolveValidationBaseContext = (await import('@kbn/dev-validation-runner'))
   .resolveValidationBaseContext as Mock;
-const mockResolveValidationAffectedProjects = (await vi.importMock('@kbn/dev-validation-runner'))
+const mockResolveValidationAffectedProjects = (await import('@kbn/dev-validation-runner'))
   .resolveValidationAffectedProjects as Mock;
-const mockExecuteTypeCheckValidation = (await vi.importMock('./type_check_validation_loader'))
+const mockExecuteTypeCheckValidation = (await import('./type_check_validation_loader'))
   .executeTypeCheckValidation as Mock;
-const mockExecuteEslintValidation = (await vi.importMock('./eslint/run_eslint_contract'))
+const mockExecuteEslintValidation = (await import('./eslint/run_eslint_contract'))
   .executeEslintValidation as Mock;
-const mockExecuteOxlintValidation = (await vi.importMock('./oxlint/run_oxlint_contract'))
+const mockExecuteOxlintValidation = (await import('./oxlint/run_oxlint_contract'))
   .executeOxlintValidation as Mock;
-const mockExistsSync = (await vi.importMock('fs')).existsSync as Mock;
-const mockReaddirSync = (await vi.importMock('fs')).readdirSync as Mock;
+const mockExistsSync = (await import('fs')).existsSync as Mock;
+const mockReaddirSync = (await import('fs')).readdirSync as Mock;
 const mockExeca = mockExecaFn;
 
 let handler: (args: {

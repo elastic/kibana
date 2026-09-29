@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`KibanaSolutionAvatar renders 1`] = `
+exports[`KibanaSolutionAvatar > renders 1`] = `
 <EuiAvatar
   color="plain"
   css="unknown styles"
@@ -9,7 +9,7 @@ exports[`KibanaSolutionAvatar renders 1`] = `
 />
 `;
 
-exports[`KibanaSolutionAvatar renders 2`] = `
+exports[`KibanaSolutionAvatar > renders 2`] = `
 <EuiAvatar
   color="plain"
   css="unknown styles"

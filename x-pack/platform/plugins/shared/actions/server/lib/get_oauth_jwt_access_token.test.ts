@@ -231,7 +231,7 @@ describe('getOAuthJwtAccessToken', () => {
 
     await expect(
       getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"createJWTAssertion error!!"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: createJWTAssertion error!!]`);
   });
 
   test('throws error if requestOAuthJWTToken throws error', async () => {
@@ -244,7 +244,7 @@ describe('getOAuthJwtAccessToken', () => {
 
     await expect(
       getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"requestOAuthJWTToken error!!"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: requestOAuthJWTToken error!!]`);
   });
 
   test('logs warning if connectorTokenClient.updateOrReplace throws error', async () => {

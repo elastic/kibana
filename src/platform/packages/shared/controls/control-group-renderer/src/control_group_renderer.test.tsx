@@ -108,6 +108,10 @@ describe('control group renderer', () => {
         },
       }),
     });
+    // the child control's embeddable is loaded asynchronously
+    await waitFor(() => {
+      expect(api.children$.getValue().test).toBeDefined();
+    });
     const applySpy = vi.spyOn(
       api.children$.getValue().test as HasSerializableState,
       'applySerializedState'

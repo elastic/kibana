@@ -12,6 +12,7 @@ import { createEsContext } from './context';
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '../lib/ready_signal';
+import { initializeEs } from './init';
 import type { estypes } from '@elastic/elasticsearch';
 
 // Not importing because it'd run the tests in that file again
@@ -156,7 +157,7 @@ describe('createEsContext', () => {
   });
 
   test('should handled failed initialization', async () => {
-    (await vi.importMock('./init')).initializeEs.mockResolvedValue(false);
+    vi.mocked(initializeEs).mockResolvedValue(false);
     const context = createEsContext({
       logger,
       shouldSetExistingAssetsToHidden: true,

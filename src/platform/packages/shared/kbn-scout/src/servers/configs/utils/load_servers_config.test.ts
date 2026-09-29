@@ -58,10 +58,11 @@ vi.mock('./configure_http2', () => {
 
 vi.mock('fs', () => {
   const actualFs = require('fs');
-  return {
+  const mocked = {
     ...actualFs,
     existsSync: vi.fn(),
   };
+  return { ...mocked, default: mocked };
 });
 
 const mockScoutTestConfig: ScoutTestConfig = {

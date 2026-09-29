@@ -24,7 +24,7 @@ vi.mock('fs', () => {
 });
 
 const { extractConfigFiles } = await import('./extract_config_files');
-const fs = require('fs');
+const { default: fs } = await import('fs');
 
 afterEach(() => {
   vi.clearAllMocks();

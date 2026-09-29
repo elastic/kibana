@@ -20,7 +20,7 @@ const currentAppIdSubject$ = new BehaviorSubject<string>(APP_UI_ID);
 services.application.currentAppId$ = currentAppIdSubject$.asObservable();
 
 const mockCopy = vi.fn((text: string) => true);
-vi.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
+vi.mock('copy-to-clipboard', () => ({ default: (text: string) => mockCopy(text) }));
 
 describe('createCopyToClipboardDiscoverCellActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardDiscoverCellActionFactory({ services });

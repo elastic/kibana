@@ -10,12 +10,12 @@ import { vi } from 'vitest';
 import { builtInStepDefinitions, getElasticsearchConnectors } from '@kbn/workflows';
 import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 
-vi.mock('@kbn/workflows-management-plugin/common/schema', () => {
+vi.mock('@kbn/workflows-management-plugin/common/schema', async () => {
+  const { getElasticsearchConnectors: getEs } = await vi.importActual<{
+    getElasticsearchConnectors: typeof getElasticsearchConnectors;
+  }>('@kbn/workflows');
   const mocked = {
-    getAllConnectors: async () => {
-      const { getElasticsearchConnectors: getEs } = await vi.importActual('@kbn/workflows');
-      return getEs();
-    },
+    getAllConnectors: () => getEs(),
     addDynamicConnectorsToCache: vi.fn(),
     getCachedAllConnectorsMap: () => null,
     getDeprecatedStepMetadata: () => undefined,

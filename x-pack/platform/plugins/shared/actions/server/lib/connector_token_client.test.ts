@@ -420,7 +420,7 @@ describe('update()', () => {
         token: 'testtokenvalue',
         expiresAtMillis: expiresAt,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"There is a conflict."`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: There is a conflict.]`);
     expect(logger.error.mock.calls[0]).toMatchObject([
       'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict.',
     ]);
@@ -449,7 +449,7 @@ describe('update()', () => {
         token: 'testtokenvalue',
         expiresAtMillis: expiresAt,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"There is a conflict."`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: There is a conflict.]`);
     expect(logger.error.mock.calls[0]).toMatchObject([
       'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict.',
     ]);
@@ -479,7 +479,7 @@ describe('update()', () => {
         token: 'testtokenvalue',
         expiresAtMillis: expiresAt,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
   });
 });
 

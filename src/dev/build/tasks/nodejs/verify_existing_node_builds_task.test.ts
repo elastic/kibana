@@ -25,9 +25,9 @@ vi.mock('./node_download_info');
 vi.mock('../../lib/fs');
 vi.mock('../../lib/get_build_number');
 
-const { getNodeShasums } = await vi.importMock('./node_shasums');
-const { getNodeDownloadInfo } = await vi.importMock('./node_download_info');
-const { getFileHash } = await vi.importMock('../../lib/fs');
+const { getNodeShasums } = vi.mocked(await import('./node_shasums'), true);
+const { getNodeDownloadInfo } = vi.mocked(await import('./node_download_info'), true);
+const { getFileHash } = vi.mocked(await import('../../lib/fs'), true);
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
@@ -494,6 +494,6 @@ it('rejects if any download has an incorrect sha256', async () => {
   await expect(
     VerifyExistingNodeBuilds.run(config, log)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Download at linux:default:linux-arm64:downloadPath does not match expected checksum invalid shasum"`
+    `[Error: Download at linux:default:linux-arm64:downloadPath does not match expected checksum invalid shasum]`
   );
 });

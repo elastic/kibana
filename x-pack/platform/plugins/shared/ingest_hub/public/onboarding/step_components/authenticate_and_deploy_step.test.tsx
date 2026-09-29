@@ -64,7 +64,7 @@ vi.mock('./authenticate_and_deploy_step/agent_based_section', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
+vi.mock('react-use/lib/useSessionStorage', () => ({ default: vi.fn() }));
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
   const mocked = {

@@ -10,12 +10,15 @@
 import { vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 
-import crypto from 'crypto';
+import { randomInt } from 'crypto';
 import { getNextAttemptDate } from './get_next_attempt_date';
+
+// ESM named imports of `crypto` can't be spied on via the default export, so auto-spy the module.
+vi.mock('crypto', { spy: true });
 
 describe('getNextAttemptDate', () => {
   // The casting is needed because `randomInt` has multiple call signatures and typescript is taking the callback one.
-  const randomIntSpy = vi.spyOn(crypto, 'randomInt') as unknown as MockInstance<
+  const randomIntSpy = vi.mocked(randomInt) as unknown as MockInstance<
     (...args: [min: number, max: number]) => number
   >;
 

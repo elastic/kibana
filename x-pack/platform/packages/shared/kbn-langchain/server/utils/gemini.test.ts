@@ -33,9 +33,12 @@ describe('parseGeminiStream', () => {
   });
 
   it('should handle abort signal correctly', async () => {
-    const abortSignal = new AbortController().signal;
+    const abortController = new AbortController();
+    const abortSignal = abortController.signal;
     setTimeout(() => {
-      abortSignal.dispatchEvent(new Event('abort'));
+      // `abort()` dispatches the 'abort' event with the signal's own Event class; jsdom's global `Event`
+      // is rejected by Node's AbortSignal.
+      abortController.abort();
     }, 100);
 
     const result = parseGeminiStream(mockStream, mockLogger, abortSignal);

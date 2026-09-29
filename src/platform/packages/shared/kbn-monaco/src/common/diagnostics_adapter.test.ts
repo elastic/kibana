@@ -9,8 +9,6 @@
 
 import { vi } from 'vitest';
 
-import '../__jest__/jest.mocks'; // Make sure this is the first import
-
 import type { Subscription } from 'rxjs';
 
 import type { MockIModel } from '../__jest__/types';
@@ -18,6 +16,65 @@ import type { LangValidation } from '../types';
 import { monaco } from '../monaco_imports';
 
 import { DiagnosticsAdapter } from './diagnostics_adapter';
+
+vi.mock('../monaco_imports', async (importOriginal) => {
+  const original = await importOriginal<{ monaco: typeof monaco }>();
+  const originalMonaco = original.monaco;
+  const originalEditor = original.monaco.editor;
+
+  const createMockModel = (id: string) => {
+    const mockModel: MockIModel = {
+      uri: '',
+      id: 'mockModel',
+      value: '',
+      getLanguageId: () => id,
+      changeContentListeners: [],
+      setValue(newValue) {
+        this.value = newValue;
+        this.changeContentListeners.forEach((listener) => listener());
+      },
+      getValue() {
+        return this.value;
+      },
+      onDidChangeContent(handler) {
+        this.changeContentListeners.push(handler);
+      },
+      onDidChangeLanguage: (handler) => {
+        handler({ newLanguage: id });
+      },
+    };
+
+    return mockModel;
+  };
+
+  return {
+    ...original,
+    monaco: {
+      ...originalMonaco,
+      editor: {
+        ...originalEditor,
+        model: null as MockIModel | null,
+        createModel(id: string) {
+          this.model = createMockModel(id);
+          return this.model;
+        },
+        onDidCreateModel(handler: (model: MockIModel) => void) {
+          if (!this.model) {
+            throw new Error(
+              `Model needs to be created by calling monaco.editor.createModel(ID) first.`
+            );
+          }
+          handler(this.model);
+        },
+        getModel() {
+          return this.model;
+        },
+        getModels: () => [],
+        setModelMarkers: () => undefined,
+      },
+    },
+  };
+});
 
 const getSyntaxErrors = vi.fn(async (): Promise<string[] | undefined> => undefined);
 

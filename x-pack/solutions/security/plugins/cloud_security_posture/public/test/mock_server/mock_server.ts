@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
 import type { SetupServer } from 'msw/node';
 import { setupServer } from 'msw/node';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -23,8 +24,8 @@ import { MOCK_SERVER_LICENSING_INFO_URL } from './handlers/licensing.handlers.mo
  * Mock the lastValueFrom function from rxjs to return the result of the promise instead of the Observable
  * This is for simplifying the testing by avoiding the need to subscribe to the Observable while producing the same result
  */
-jest.mock('rxjs', () => {
-  const actual = jest.requireActual('rxjs');
+vi.mock('rxjs', async (importOriginal) => {
+  const actual = await importOriginal<object>();
   return {
     ...actual,
     lastValueFrom: async (source: Promise<any>) => {
@@ -35,7 +36,7 @@ jest.mock('rxjs', () => {
 });
 
 // Set the default timeout for all mock server tests to 30 seconds
-jest.setTimeout(10 * 3000);
+vi.setConfig({ testTimeout: 10 * 3000 });
 
 /**
  * Setup a mock server with the default handlers

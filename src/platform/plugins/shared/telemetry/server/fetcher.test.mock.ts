@@ -9,7 +9,7 @@
 
 export const fetchMock = jest.fn();
 
-jest.doMock('node-fetch', () => fetchMock);
+jest.doMock('node-fetch', () => ({ default: fetchMock }));
 
 export const getNextAttemptDateMock = jest.fn();
 

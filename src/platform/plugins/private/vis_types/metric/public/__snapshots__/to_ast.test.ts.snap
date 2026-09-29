@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`metric vis toExpressionAst function with percentage mode should have percentage format 1`] = `
+exports[`metric vis toExpressionAst function > with percentage mode should have percentage format 1`] = `
 Object {
   "chain": Array [
     Object {
@@ -67,7 +67,7 @@ Object {
 }
 `;
 
-exports[`metric vis toExpressionAst function without params 1`] = `
+exports[`metric vis toExpressionAst function > without params 1`] = `
 Object {
   "chain": Array [
     Object {

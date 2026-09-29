@@ -10,6 +10,7 @@ import type { Mock } from 'vitest';
 
 import https from 'https';
 import type { Response } from 'node-fetch';
+import fetch from 'node-fetch';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { UsageReportingService, type UsageReportingConfig } from './usage_reporting_service';
 import type { UsageRecord } from './types';
@@ -31,7 +32,7 @@ vi.mock('@kbn/server-http-tools', () => {
   return { ...mocked, default: mocked };
 });
 
-const fetchMock = (await vi.importMock('node-fetch')).default as Mock;
+const fetchMock = fetch as unknown as Mock;
 
 const createRecord = (id = 'rec-1'): UsageRecord => ({
   id,

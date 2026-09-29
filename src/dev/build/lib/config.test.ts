@@ -100,7 +100,7 @@ describe('#getPlatform()', () => {
         'x64'
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Unable to find platform (foo) with architecture (x64)"`
+      `[Error: Unable to find platform (foo) with architecture (x64)]`
     );
   });
 
@@ -113,7 +113,7 @@ describe('#getPlatform()', () => {
         'foo'
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Unable to find platform (linux) with architecture (foo)"`
+      `[Error: Unable to find platform (linux) with architecture (foo)]`
     );
   });
 });

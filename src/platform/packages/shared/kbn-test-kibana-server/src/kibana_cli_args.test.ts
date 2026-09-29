@@ -28,7 +28,7 @@ describe('parseRawFlags()', () => {
 
   it('validates that bare values are not used', () => {
     expect(() => parseRawFlags(['--foo', 'bar'])).toThrowErrorMatchingInlineSnapshot(
-      `"invalid CLI arg [bar], all args must start with \\"--\\" and values must be specified after an \\"=\\" in a single string per arg"`
+      `[Error: invalid CLI arg [bar], all args must start with "--" and values must be specified after an "=" in a single string per arg]`
     );
   });
 

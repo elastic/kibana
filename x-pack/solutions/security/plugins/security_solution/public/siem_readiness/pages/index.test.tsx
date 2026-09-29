@@ -28,7 +28,7 @@ vi.mock('react-router-dom', () => {
   };
   return { ...mocked, default: mocked };
 });
-vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [[], vi.fn()]));
+vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn(() => [[], vi.fn()]) }));
 vi.mock('@kbn/siem-readiness', () => {
   const mocked = { ALL_CATEGORIES: [] };
   return { ...mocked, default: mocked };

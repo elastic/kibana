@@ -1,34 +1,34 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`validateName rejects empty input '   ' 1`] = `
+exports[`validateName > rejects empty input > '   ' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
 />
 `;
 
-exports[`validateName rejects empty input 'null' 1`] = `
+exports[`validateName > rejects empty input > 'null' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
 />
 `;
 
-exports[`validateName rejects empty input 'undefined' 1`] = `
+exports[`validateName > rejects empty input > 'undefined' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
 />
 `;
 
-exports[`validateName rejects invalid characters ' ' 1`] = `
+exports[`validateName > rejects invalid characters > ' ' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
 />
 `;
 
-exports[`validateName rejects invalid characters '!' 1`] = `
+exports[`validateName > rejects invalid characters > '!' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -43,7 +43,7 @@ exports[`validateName rejects invalid characters '!' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '#' 1`] = `
+exports[`validateName > rejects invalid characters > '#' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -58,7 +58,7 @@ exports[`validateName rejects invalid characters '#' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '$' 1`] = `
+exports[`validateName > rejects invalid characters > '$' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -73,7 +73,7 @@ exports[`validateName rejects invalid characters '$' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '%' 1`] = `
+exports[`validateName > rejects invalid characters > '%' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -88,7 +88,7 @@ exports[`validateName rejects invalid characters '%' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '&' 1`] = `
+exports[`validateName > rejects invalid characters > '&' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -103,7 +103,7 @@ exports[`validateName rejects invalid characters '&' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '(' 1`] = `
+exports[`validateName > rejects invalid characters > '(' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -118,7 +118,7 @@ exports[`validateName rejects invalid characters '(' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters ')' 1`] = `
+exports[`validateName > rejects invalid characters > ')' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -133,7 +133,7 @@ exports[`validateName rejects invalid characters ')' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '*' 1`] = `
+exports[`validateName > rejects invalid characters > '*' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -148,7 +148,7 @@ exports[`validateName rejects invalid characters '*' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '+' 1`] = `
+exports[`validateName > rejects invalid characters > '+' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -163,7 +163,7 @@ exports[`validateName rejects invalid characters '+' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters ',' 1`] = `
+exports[`validateName > rejects invalid characters > ',' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -178,7 +178,7 @@ exports[`validateName rejects invalid characters ',' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '.' 1`] = `
+exports[`validateName > rejects invalid characters > '.' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -193,7 +193,7 @@ exports[`validateName rejects invalid characters '.' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '<' 1`] = `
+exports[`validateName > rejects invalid characters > '<' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -208,7 +208,7 @@ exports[`validateName rejects invalid characters '<' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '>' 1`] = `
+exports[`validateName > rejects invalid characters > '>' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -223,7 +223,7 @@ exports[`validateName rejects invalid characters '>' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '?' 1`] = `
+exports[`validateName > rejects invalid characters > '?' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -238,7 +238,7 @@ exports[`validateName rejects invalid characters '?' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '@' 1`] = `
+exports[`validateName > rejects invalid characters > '@' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
@@ -253,7 +253,7 @@ exports[`validateName rejects invalid characters '@' 1`] = `
 />
 `;
 
-exports[`validateName rejects invalid characters '^' 1`] = `
+exports[`validateName > rejects invalid characters > '^' 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"

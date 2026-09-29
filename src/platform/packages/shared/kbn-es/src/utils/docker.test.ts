@@ -8,7 +8,7 @@
  */
 
 import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 
 import mockFs from 'mock-fs';
 
@@ -61,7 +61,7 @@ import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
 
 vi.mock('execa');
-const execa = await vi.importMock('execa');
+const execa = (await import('execa')).default as unknown as Mock;
 execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
 vi.mock('./read_string_secrets', () => {
@@ -256,8 +256,8 @@ describe('resolveDockerImage()', () => {
         defaultImg,
       })
     ).toThrowErrorMatchingInlineSnapshot(`
-      "Only verified images from docker.elastic.co are currently allowed.
-      If you require this functionality in @kbn/es please contact the Kibana Operations Team."
+      [Error: Only verified images from docker.elastic.co are currently allowed.
+      If you require this functionality in @kbn/es please contact the Kibana Operations Team.]
     `);
   });
 });
@@ -345,9 +345,9 @@ describe('verifyDockerInstalled()', () => {
     execa.mockImplementation(() => Promise.reject({ message: 'Hello World' }));
 
     await expect(verifyDockerInstalled(log)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Docker not found locally. Install it from: https://www.docker.com
+      [Error: Docker not found locally. Install it from: https://www.docker.com
 
-      Hello World"
+      Hello World]
     `);
   });
 });
@@ -398,7 +398,7 @@ describe('maybeCreateDockerNetwork()', () => {
     execa.mockImplementation(() => Promise.reject({ message: 'some error' }));
 
     await expect(maybeCreateDockerNetwork(log)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"some error"`
+      `[Error: some error]`
     );
   });
 });
@@ -477,7 +477,7 @@ describe('detectRunningNodes()', () => {
     );
 
     await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ES has already been started, pass --kill to automatically stop the containers on startup."`
+      `[Error: ES has already been started, pass --kill to automatically stop the containers on startup.]`
     );
   });
 });

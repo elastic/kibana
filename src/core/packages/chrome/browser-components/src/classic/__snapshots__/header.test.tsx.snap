@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Header renders 1`] = `
+exports[`Header > renders 1`] = `
 <header
   class="hide-for-sharing headerGlobalNav"
   data-test-subj="headerGlobalNav"

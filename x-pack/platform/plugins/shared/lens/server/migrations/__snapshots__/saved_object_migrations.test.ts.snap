@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Lens migrations 7.10.0 references should produce a valid document 1`] = `
+exports[`Lens migrations > 7.10.0 references > should produce a valid document 1`] = `
 Object {
   "attributes": Object {
     "state": Object {

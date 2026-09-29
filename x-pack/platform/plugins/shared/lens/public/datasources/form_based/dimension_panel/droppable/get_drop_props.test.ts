@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 import type {
@@ -21,6 +22,8 @@ import {
   mockedColumns,
 } from './mocks';
 import { generateId } from '../../../../id_generator';
+
+vi.mock('../../../../id_generator');
 
 const getDefaultProps = () => ({
   indexPatterns: mockDataViews(),

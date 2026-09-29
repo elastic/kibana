@@ -27,7 +27,7 @@ vi.mock('../../mdx/get_all_doc_file_ids', () => {
 // Use jest.requireActual to preserve all fs functions that globby needs
 vi.mock('fs', () => {
   const actualFs = require('fs');
-  return {
+  const mocked = {
     ...actualFs,
     existsSync: vi.fn(() => false),
     readFileSync: vi.fn((path: string) => {
@@ -39,6 +39,7 @@ vi.mock('fs', () => {
     }),
     realpathSync: vi.fn((path: string) => path),
   };
+  return { ...mocked, default: mocked };
 });
 vi.mock('@kbn/repo-info', () => {
   const mocked = {

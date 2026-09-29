@@ -27,14 +27,11 @@ const SANDBOX_KIBANA_CONFIG = join(
   'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/kibana.sandbox.yml'
 );
 
-const loadConfig = (env: Record<string, string>) => {
-  let loaded: typeof import('./classic.stateful.config') | undefined;
-  jest.isolateModules(async () => {
-    Object.assign(process.env, env);
-    loaded = await vi.importActual('./classic.stateful.config');
-  });
-  if (!loaded) throw new Error('config failed to load');
-  return loaded;
+const loadConfig = async (env: Record<string, string>) => {
+  Object.assign(process.env, env);
+  // Re-evaluate the config module so it reads the current env
+  vi.resetModules();
+  return await import('./classic.stateful.config');
 };
 
 describe('evals_nightshift_investigations config set', () => {
@@ -57,7 +54,7 @@ describe('evals_nightshift_investigations config set', () => {
   it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
     'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
     async (selection) => {
-      const { servers } = loadConfig({
+      const { servers } = await loadConfig({
         SANDBOX_API_KEY: 'key',
         ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
       });
@@ -73,8 +70,8 @@ describe('evals_nightshift_investigations config set', () => {
     }
   );
 
-  it('enables the investigation engine and loads the sandbox config with SANDBOX_KIBANA_CONFIG', () => {
-    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG });
+  it('enables the investigation engine and loads the sandbox config with SANDBOX_KIBANA_CONFIG', async () => {
+    const { servers } = await loadConfig({ SANDBOX_KIBANA_CONFIG });
     const args = servers.kbnTestServer.serverArgs;
 
     expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
@@ -88,19 +85,19 @@ describe('evals_nightshift_investigations config set', () => {
     expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
   });
 
-  it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {
-    expect(() =>
+  it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', async () => {
+    await expect(
       loadConfig({ SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
-    ).toThrow(
+    ).rejects.toThrow(
       'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
     );
   });
-  it('reserves capacity for sixteen investigations and five background tasks', () => {
-    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG });
+  it('reserves capacity for sixteen investigations and five background tasks', async () => {
+    const { servers } = await loadConfig({ SANDBOX_KIBANA_CONFIG });
     expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
   });
 
-  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
+  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', async () => {
     const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
     const exporters = JSON.stringify([
       {
@@ -110,7 +107,7 @@ describe('evals_nightshift_investigations config set', () => {
         },
       },
     ]);
-    const { servers } = loadConfig({
+    const { servers } = await loadConfig({
       SANDBOX_KIBANA_CONFIG,
       NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: telemetryConfig,
       TRACING_EXPORTERS: exporters,
@@ -120,11 +117,11 @@ describe('evals_nightshift_investigations config set', () => {
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
   });
 
-  it('keeps exporter headers out of smoke-only process arguments', () => {
+  it('keeps exporter headers out of smoke-only process arguments', async () => {
     const exporters = JSON.stringify([
       { http: { url: 'https://traces.example.com', headers: { Authorization: 'smoke-key' } } },
     ]);
-    const { servers } = loadConfig({ TRACING_EXPORTERS: exporters });
+    const { servers } = await loadConfig({ TRACING_EXPORTERS: exporters });
     expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('smoke-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
     expect(servers.kbnTestServer.serverArgs).toContain(
@@ -132,9 +129,9 @@ describe('evals_nightshift_investigations config set', () => {
     );
   });
 
-  it('fails fast when the telemetry YAML is missing', () => {
-    expect(() =>
+  it('fails fast when the telemetry YAML is missing', async () => {
+    await expect(
       loadConfig({ SANDBOX_KIBANA_CONFIG, NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: '/missing.yml' })
-    ).toThrow('NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file');
+    ).rejects.toThrow('NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file');
   });
 });

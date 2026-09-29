@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -26,7 +28,7 @@ import { mockHistory } from '../react_router/state.mock';
 
 export const mockKibanaValues = {
   application: {
-    getUrlForApp: jest.fn(
+    getUrlForApp: vi.fn(
       (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path}`
     ),
   } as unknown as ApplicationStart,
@@ -47,8 +49,8 @@ export const mockKibanaValues = {
       agentless: true,
     },
   },
-  getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
-  getNavLinks: jest.fn().mockReturnValue([]),
+  getChromeStyle$: vi.fn().mockReturnValue(of('classic')),
+  getNavLinks: vi.fn().mockReturnValue([]),
   history: mockHistory,
   indexMappingComponent: null,
   isAgentlessEnabled: false,
@@ -57,13 +59,13 @@ export const mockKibanaValues = {
   isSidebarEnabled: true,
   kibanaVersion: null,
   lens: {
-    EmbeddableComponent: jest.fn(),
-    stateHelperApi: jest.fn().mockResolvedValue({
-      formula: jest.fn(),
+    EmbeddableComponent: vi.fn(),
+    stateHelperApi: vi.fn().mockResolvedValue({
+      formula: vi.fn(),
     }),
   } as unknown as LensPublicStart,
   ml: mlPluginMock.createStartContract(),
-  navigateToUrl: jest.fn(),
+  navigateToUrl: vi.fn(),
   notifications: notificationServiceMock.createStartContract(),
   productFeatures: {
     hasDocumentLevelSecurityEnabled: true,
@@ -71,20 +73,20 @@ export const mockKibanaValues = {
     hasNativeConnectors: true,
     hasWebCrawler: true,
   },
-  renderHeaderActions: jest.fn(),
+  renderHeaderActions: vi.fn(),
   searchNavigation: searchNavigationMock.createStart(),
   security: securityMock.createStart(),
-  setBreadcrumbs: jest.fn(),
-  setChromeIsVisible: jest.fn(),
-  setDocTitle: jest.fn(),
+  setBreadcrumbs: vi.fn(),
+  setChromeIsVisible: vi.fn(),
+  setDocTitle: vi.fn(),
   share: sharePluginMock.createStartContract(),
   spaces: spacesPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  updateSideNavDefinition: jest.fn(),
+  updateSideNavDefinition: vi.fn(),
   user: null,
 };
 
-jest.mock('../../shared/kibana', () => ({
+vi.mock('../../shared/kibana', () => ({
   KibanaLogic: { values: mockKibanaValues },
 }));

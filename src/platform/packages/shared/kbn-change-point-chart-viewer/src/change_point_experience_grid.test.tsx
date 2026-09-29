@@ -15,8 +15,10 @@ import {
   KibanaErrorBoundaryProvider,
   KibanaSectionErrorBoundary,
 } from '@kbn/shared-ux-error-boundary';
+import { getChangePointSeriesColumns as getChangePointSeriesColumnsMock } from '@kbn/esql-utils';
 import { ChangePointExperienceGrid } from './change_point_experience_grid';
 import type { UnifiedChangePointGridProps } from './types';
+import { buildChangePointCards as buildChangePointCardsMock } from './utils/derive_change_point_cards';
 
 // The APM client is pulled in transitively by the error boundary package.
 vi.mock('@elastic/apm-rum');
@@ -122,11 +124,9 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     vi.restoreAllMocks();
-    (
-      await vi.importMock('./utils/derive_change_point_cards')
-    ).buildChangePointCards.mockReturnValue([]);
+    vi.mocked(buildChangePointCardsMock).mockReturnValue([]);
   });
 
   it('renders the grid without errors under normal conditions', () => {
@@ -138,12 +138,10 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
     expect(container.firstChild).not.toBeNull();
   });
 
-  it('shows the section error boundary UI instead of crashing when buildChangePointCards throws', async () => {
+  it('shows the section error boundary UI instead of crashing when buildChangePointCards throws', () => {
     // Simulate the kind of synchronous render-time crash the error boundary is there to catch
     // (e.g. malformed data, unexpected null reference inside a memoised helper).
-    (
-      await vi.importMock('./utils/derive_change_point_cards')
-    ).buildChangePointCards.mockImplementation(() => {
+    vi.mocked(buildChangePointCardsMock).mockImplementation(() => {
       throw new Error('Simulated crash in buildChangePointCards');
     });
 
@@ -158,10 +156,8 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
 
 describe('ChangePointExperienceGrid UI states', () => {
   const { buildChangePointCards, getChangePointSeriesColumns } = {
-    buildChangePointCards: async () =>
-      (await vi.importMock('./utils/derive_change_point_cards')).buildChangePointCards,
-    getChangePointSeriesColumns: async () =>
-      (await vi.importMock('@kbn/esql-utils')).getChangePointSeriesColumns,
+    buildChangePointCards: () => vi.mocked(buildChangePointCardsMock),
+    getChangePointSeriesColumns: () => vi.mocked(getChangePointSeriesColumnsMock),
   };
 
   afterEach(() => {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`runs expected fs operations default variant 1`] = `
+exports[`runs expected fs operations > default variant 1`] = `
 Object {
   "copy": Array [
     Array [
@@ -93,7 +93,7 @@ Object {
 }
 `;
 
-exports[`runs expected fs operations glibc-217 variant (CI_FORCE_NODE_GLIBC_217) 1`] = `
+exports[`runs expected fs operations > glibc-217 variant (CI_FORCE_NODE_GLIBC_217) 1`] = `
 Object {
   "copy": Array [
     Array [
@@ -158,7 +158,7 @@ Object {
 }
 `;
 
-exports[`runs expected fs operations pointer-compression variant (CI_FORCE_NODE_POINTER_COMPRESSION) 1`] = `
+exports[`runs expected fs operations > pointer-compression variant (CI_FORCE_NODE_POINTER_COMPRESSION) 1`] = `
 Object {
   "copy": Array [
     Array [

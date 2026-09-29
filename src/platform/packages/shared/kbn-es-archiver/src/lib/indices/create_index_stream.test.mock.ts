@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
+
 import type {
   cleanSavedObjectIndices,
   deleteSavedObjectIndices,
   isSavedObjectIndex,
 } from './kibana_index';
 
-export const mockCleanSavedObjectIndices = jest.fn() as jest.MockedFunction<
+export const mockCleanSavedObjectIndices = vi.fn() as MockedFunction<
   typeof cleanSavedObjectIndices
 >;
 
-export const mockDeleteSavedObjectIndices = jest.fn() as jest.MockedFunction<
+export const mockDeleteSavedObjectIndices = vi.fn() as MockedFunction<
   typeof deleteSavedObjectIndices
 >;
 
-export const mockIsSavedObjectIndex = jest.fn() as unknown as jest.MockedFunction<
+export const mockIsSavedObjectIndex = vi.fn() as unknown as MockedFunction<
   typeof isSavedObjectIndex
 >;
 
-jest.mock('./kibana_index', () => ({
+vi.mock('./kibana_index', () => ({
   cleanSavedObjectIndices: mockCleanSavedObjectIndices,
   deleteSavedObjectIndices: mockDeleteSavedObjectIndices,
   isSavedObjectIndex: mockIsSavedObjectIndex,

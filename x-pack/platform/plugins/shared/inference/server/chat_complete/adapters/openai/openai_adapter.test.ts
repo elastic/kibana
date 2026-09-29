@@ -603,7 +603,7 @@ describe('openAIAdapter', () => {
               .pipe(toArray())
           )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Error calling connector: something went wrong"`
+          `[Error: Error calling connector: something went wrong]`
         );
       });
 
@@ -873,7 +873,7 @@ describe('openAIAdapter', () => {
               .pipe(toArray())
           )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Error calling connector: something went wrong"`
+          `[Error: Error calling connector: something went wrong]`
         );
       });
 

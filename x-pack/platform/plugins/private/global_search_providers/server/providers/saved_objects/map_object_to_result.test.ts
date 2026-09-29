@@ -86,7 +86,7 @@ describe('mapToResult', () => {
         })
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Trying to map an object from a type without management metadata"`
+      `[Error: Trying to map an object from a type without management metadata]`
     );
 
     expect(() => {
@@ -100,7 +100,7 @@ describe('mapToResult', () => {
         })
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Trying to map an object from a type without management metadata"`
+      `[Error: Trying to map an object from a type without management metadata]`
     );
 
     expect(() => {
@@ -112,7 +112,7 @@ describe('mapToResult', () => {
         })
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Trying to map an object from a type without management metadata"`
+      `[Error: Trying to map an object from a type without management metadata]`
     );
   });
 });

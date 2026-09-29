@@ -37,23 +37,23 @@ describe('mergeCapabilities', () => {
     expect(() => {
       mergeCapabilities({ foo: { bar: false } }, { foo: { bar: true } });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"conflict trying to merge booleans with different values"`
+      `[Error: conflict trying to merge booleans with different values]`
     );
 
     expect(() => {
       mergeCapabilities({ foo: { bar: true } }, { foo: { bar: false } });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"conflict trying to merge booleans with different values"`
+      `[Error: conflict trying to merge booleans with different values]`
     );
   });
 
   it('throws if value as same path is boolean on left and object on right', () => {
     expect(() => {
       mergeCapabilities({ foo: { bar: false } }, { foo: { bar: {} } });
-    }).toThrowErrorMatchingInlineSnapshot(`"conflict trying to merge boolean with object"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: conflict trying to merge boolean with object]`);
     expect(() => {
       mergeCapabilities({ foo: { bar: false } }, { foo: { bar: { baz: false } } });
-    }).toThrowErrorMatchingInlineSnapshot(`"conflict trying to merge boolean with object"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: conflict trying to merge boolean with object]`);
   });
 
   it('should not alter the input capabilities', () => {

@@ -44,15 +44,13 @@ describe('readConfigFile', () => {
 
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
-    jest.isolateModules(async () => {
-      vi.doMock(resolvedPath, () => mockConfigModule, { virtual: true });
-      mockConfigConstructor.mockImplementation((servers) => ({ servers }));
+    vi.doMock(resolvedPath, () => mockConfigModule);
+    mockConfigConstructor.mockImplementation((servers) => ({ servers }));
 
-      const result = await readConfigFile(configPath);
+    const result = await readConfigFile(configPath);
 
-      expect(path.resolve).toHaveBeenCalledWith(configPath);
-      expect(result).toEqual({ servers: mockConfigModule.servers });
-    });
+    expect(path.resolve).toHaveBeenCalledWith(configPath);
+    expect(result).toEqual({ servers: mockConfigModule.servers });
   });
 
   it(`should throw an error if the config file does not export 'servers'`, async () => {
@@ -60,33 +58,23 @@ describe('readConfigFile', () => {
 
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
-    jest.isolateModules(async () => {
-      vi.doMock(resolvedPath, () => mockConfigModule, { virtual: true });
+    vi.doMock(resolvedPath, () => mockConfigModule);
 
-      await expect(readConfigFile(configPath)).rejects.toThrow(
-        `No 'servers' found in the config file at path: ${resolvedPath}`
-      );
-      expect(path.resolve).toHaveBeenCalledWith(configPath);
-    });
+    await expect(readConfigFile(configPath)).rejects.toThrow(
+      `No 'servers' found in the config file at path: ${resolvedPath}`
+    );
+    expect(path.resolve).toHaveBeenCalledWith(configPath);
   });
 
   it('should throw an error if the config file cannot be loaded', async () => {
+    // Nothing is mocked at `resolvedPath`, so the dynamic import genuinely fails to load it.
+    // (Vitest wraps errors thrown from a mock factory, so a throwing factory can't simulate this.)
+    vi.doUnmock(resolvedPath);
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
-    jest.isolateModules(async () => {
-      const message = 'Module not found';
-      vi.doMock(
-        resolvedPath,
-        () => {
-          throw new Error(message);
-        },
-        { virtual: true }
-      );
-
-      await expect(readConfigFile(configPath)).rejects.toThrow(
-        `Failed to load config from ${configPath}: ${message}`
-      );
-      expect(path.resolve).toHaveBeenCalledWith(configPath);
-    });
+    await expect(readConfigFile(configPath)).rejects.toThrow(
+      `Failed to load config from ${configPath}: Cannot find module '${resolvedPath}'`
+    );
+    expect(path.resolve).toHaveBeenCalledWith(configPath);
   });
 });

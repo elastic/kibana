@@ -15,6 +15,16 @@ import { mockLoadConfiguration } from './init_apm.test.mocks';
 import { initApm } from './init_apm';
 import apm from 'elastic-apm-node';
 
+// `initApm` lazily loads the agent with a native `require()`, which the Vite resolver's
+// `elastic-apm-node` mock mapping doesn't cover, so the mock is registered in the require cache.
+const apmAgentPath = require.resolve('elastic-apm-node');
+require.cache[apmAgentPath] = {
+  id: apmAgentPath,
+  filename: apmAgentPath,
+  loaded: true,
+  exports: apm,
+} as NodeModule;
+
 describe('initApm', () => {
   let apmAddFilterMock: Mock;
   let apmStartMock: Mock;

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
+exports[`renderFlakySuiteIssueBody > renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
 "3 tests in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) suite appear to be flaky:
 
 | Test | Flaky branches | Dashboard |
@@ -87,7 +87,7 @@ Possibly related: #7, #8.
 <!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"a\\",\\"b\\",\\"c\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":264,\\"failedBuilds\\":23}]}} -->"
 `;
 
-exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
+exports[`renderFlakySuiteIssueBody > renders a single-test suite 1`] = `
 "1 test in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) suite appears to be flaky:
 
 | Test | Flaky branches | Dashboard |

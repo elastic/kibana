@@ -24,7 +24,7 @@ describe('parseDate', () => {
     expect(() =>
       parseDate('this shall not pass', 'dateStart', new Date())
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid date for parameter dateStart: \\"this shall not pass\\""`
+      `[Error: Invalid date for parameter dateStart: "this shall not pass"]`
     );
   });
 });

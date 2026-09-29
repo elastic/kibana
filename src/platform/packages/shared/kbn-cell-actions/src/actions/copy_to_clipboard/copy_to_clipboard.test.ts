@@ -18,7 +18,7 @@ const mockSuccessToast = vi.fn();
 const mockWarningToast = vi.fn();
 
 const mockCopy = vi.fn((text: string) => true);
-vi.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
+vi.mock('copy-to-clipboard', () => ({ default: (text: string) => mockCopy(text) }));
 
 describe('Default createCopyToClipboardActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardActionFactory({

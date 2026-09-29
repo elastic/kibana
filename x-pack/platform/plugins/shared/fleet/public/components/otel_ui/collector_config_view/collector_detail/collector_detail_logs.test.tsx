@@ -25,9 +25,9 @@ vi.mock('@kbn/saved-search-component', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('react-use/lib/useAsync', () =>
-  vi.fn(() => ({ value: 'logs-elastic_agent-*', loading: false }))
-);
+vi.mock('react-use/lib/useAsync', () => ({
+  default: vi.fn(() => ({ value: 'logs-elastic_agent-*', loading: false })),
+}));
 
 describe('CollectorDetailLogs', () => {
   let testRenderer: TestRenderer;

@@ -37,7 +37,7 @@ describe('loadManifestFile', () => {
     const archive = createMockArchive({});
 
     await expect(loadManifestFile(archive)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Could not load archive file: \\"manifest.json\\" not found in archive"`
+      `[Error: Could not load archive file: "manifest.json" not found in archive]`
     );
   });
 
@@ -66,7 +66,7 @@ describe('loadMappingFile', () => {
     const archive = createMockArchive({});
 
     await expect(loadMappingFile(archive)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Could not load archive file: \\"mappings.json\\" not found in archive"`
+      `[Error: Could not load archive file: "mappings.json" not found in archive]`
     );
   });
 

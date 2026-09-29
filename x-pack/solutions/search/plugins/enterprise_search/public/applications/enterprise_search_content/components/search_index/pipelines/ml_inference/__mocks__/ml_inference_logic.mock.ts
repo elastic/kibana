@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 export const mockMlInferenceValues: any = {
   addInferencePipelineModal: {
     configuration: {
@@ -16,6 +18,6 @@ export const mockMlInferenceValues: any = {
   },
   mlInferncePipeline: undefined,
 };
-jest.mock('../ml_inference_logic', () => ({
+vi.mock('../ml_inference_logic', () => ({
   MLInferenceLogic: () => mockMlInferenceValues,
 }));

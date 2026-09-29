@@ -11,14 +11,14 @@ import { vi } from 'vitest';
 
 import { parseArchive } from './parse_archive';
 
+const { mockReadFile } = vi.hoisted(() => ({ mockReadFile: vi.fn() }));
+
 vi.mock('fs/promises', () => {
   const mocked = {
-    readFile: vi.fn(),
+    readFile: mockReadFile,
   };
   return { ...mocked, default: mocked };
 });
-
-const mockReadFile = (await vi.importMock('fs/promises')).readFile;
 
 beforeEach(() => {
   vi.clearAllMocks();

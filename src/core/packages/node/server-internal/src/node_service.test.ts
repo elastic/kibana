@@ -191,7 +191,7 @@ describe('NodeService', () => {
 
       service = new NodeService(coreContext);
       expect(() => service.start()).toThrowErrorMatchingInlineSnapshot(
-        `"NodeService#start() can only be called after NodeService#preboot()"`
+        `[Error: NodeService#start() can only be called after NodeService#preboot()]`
       );
     });
   });

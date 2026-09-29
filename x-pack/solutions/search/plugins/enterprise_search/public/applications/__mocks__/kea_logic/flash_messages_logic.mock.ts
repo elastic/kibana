@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 export const mockFlashMessagesValues = {
   messages: [],
   queuedMessages: [],
 };
 
 export const mockFlashMessagesActions = {
-  setFlashMessages: jest.fn(),
-  clearFlashMessages: jest.fn(),
-  setQueuedMessages: jest.fn(),
-  clearQueuedMessages: jest.fn(),
-  dismissToastMessage: jest.fn(),
+  setFlashMessages: vi.fn(),
+  clearFlashMessages: vi.fn(),
+  setQueuedMessages: vi.fn(),
+  clearQueuedMessages: vi.fn(),
+  dismissToastMessage: vi.fn(),
 };
 
 export const mockFlashMessageHelpers = {
-  flashAPIErrors: jest.fn(),
-  setSuccessMessage: jest.fn(),
-  setErrorMessage: jest.fn(),
-  setQueuedSuccessMessage: jest.fn(),
-  setQueuedErrorMessage: jest.fn(),
-  clearFlashMessages: jest.fn(),
-  flashSuccessToast: jest.fn(),
-  flashErrorToast: jest.fn(),
-  toastAPIErrors: jest.fn(),
+  flashAPIErrors: vi.fn(),
+  setSuccessMessage: vi.fn(),
+  setErrorMessage: vi.fn(),
+  setQueuedSuccessMessage: vi.fn(),
+  setQueuedErrorMessage: vi.fn(),
+  clearFlashMessages: vi.fn(),
+  flashSuccessToast: vi.fn(),
+  flashErrorToast: vi.fn(),
+  toastAPIErrors: vi.fn(),
 };
 
-jest.mock('../../shared/flash_messages', () => ({
-  ...(jest.requireActual('../../shared/flash_messages') as object),
+vi.mock('../../shared/flash_messages', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   ...mockFlashMessageHelpers,
   FlashMessagesLogic: {
     values: mockFlashMessagesValues,

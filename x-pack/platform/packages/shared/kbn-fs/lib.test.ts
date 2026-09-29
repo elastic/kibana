@@ -28,7 +28,7 @@ const DATA_PATH = join(REPO_ROOT, 'data');
 
 vi.mock('fs', () => {
   const actual = require('fs');
-  return {
+  const mocked = {
     ...actual,
     promises: {
       ...actual.promises,
@@ -52,6 +52,7 @@ vi.mock('fs', () => {
     createWriteStream: vi.fn(),
     createReadStream: vi.fn(),
   };
+  return { ...mocked, default: mocked };
 });
 
 import fs from 'fs';

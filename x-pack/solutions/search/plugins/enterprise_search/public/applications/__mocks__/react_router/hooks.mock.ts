@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockHistory, mockLocation } from './state.mock';
 
-export const mockUseHistory = jest.fn(() => mockHistory);
-export const mockUseLocation = jest.fn(() => mockLocation);
-export const mockUseParams = jest.fn(() => ({}));
-export const mockUseRouteMatch = jest.fn(() => true);
+export const mockUseHistory = vi.fn(() => mockHistory);
+export const mockUseLocation = vi.fn(() => mockLocation);
+export const mockUseParams = vi.fn(() => ({}));
+export const mockUseRouteMatch = vi.fn(() => true);
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', async (importOriginal) => {
+  const originalModule = await importOriginal<typeof import('react-router-dom')>();
   return {
     ...originalModule,
     useHistory: mockUseHistory,
@@ -24,6 +26,6 @@ jest.mock('react-router-dom', () => {
     // show up/affect the final browser URL). Since we already have a generateEncodedPath helper &
     // RR is removing this behavior in history 5.0+, I'm mocking tests to remove the extra encoding
     // for now to make reading generateEncodedPath URLs a little less of a pain
-    generatePath: jest.fn((path, params) => decodeURI(originalModule.generatePath(path, params))),
+    generatePath: vi.fn((path, params) => decodeURI(originalModule.generatePath(path, params))),
   };
 });

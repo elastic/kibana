@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`different cwd() resolves relative files based on the cwd 1`] = `
+exports[`different cwd() > resolves relative files based on the cwd 1`] = `
 Object {
   "abc": Object {
     "def": "test",
@@ -127,4 +127,4 @@ Object {
 }
 `;
 
-exports[`should throw an exception when referenced environment variable in a config value does not exist 1`] = `"Unknown environment variable referenced in config : KBN_ENV_VAR1"`;
+exports[`should throw an exception when referenced environment variable in a config value does not exist 1`] = `[Error: Unknown environment variable referenced in config : KBN_ENV_VAR1]`;

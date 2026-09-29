@@ -735,7 +735,9 @@ describe('dimension editor', () => {
 
     const mockSetState = vi.fn();
 
-    afterEach(() => mockSetState.mockClear());
+    afterEach(() => {
+      mockSetState.mockClear();
+    });
 
     function renderBreakdownEditor(overrides = {}, user: UserEvent = userEvent.setup()) {
       const rtlRender = render(
@@ -885,7 +887,9 @@ describe('dimension editor', () => {
     const metricAccessorState = { ...fullState, metricAccessor: accessor };
     const mockSetState = vi.fn();
 
-    afterEach(() => mockSetState.mockClear());
+    afterEach(() => {
+      mockSetState.mockClear();
+    });
 
     function renderAdditionalSectionEditor(overrides = {}) {
       const rtlRender = render(

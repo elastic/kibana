@@ -288,7 +288,7 @@ describe('updateConnectorRoute', () => {
       secrets: { key: 'i8oh34yf9783y39' },
     };
     expect(() => updateConnectorBodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
-      `"[name]: value '' is not valid"`
+      `[Error: [name]: value '' is not valid]`
     );
   });
 

@@ -24,15 +24,15 @@ it('parses minutes', () => {
 });
 it('throws for invalid values', () => {
   expect(() => parseTimeoutToMs(true)).toThrowErrorMatchingInlineSnapshot(
-    `"[true] is not a valid timeout value"`
+    `[Error: [true] is not a valid timeout value]`
   );
   expect(() => parseTimeoutToMs([true])).toThrowErrorMatchingInlineSnapshot(
-    `"[[ true ]] is not a valid timeout value"`
+    `[Error: [[ true ]] is not a valid timeout value]`
   );
   expect(() => parseTimeoutToMs(['true'])).toThrowErrorMatchingInlineSnapshot(
-    `"[[ 'true' ]] is not a valid timeout value"`
+    `[Error: [[ 'true' ]] is not a valid timeout value]`
   );
   expect(() => parseTimeoutToMs(NaN)).toThrowErrorMatchingInlineSnapshot(
-    `"[NaN] is not a valid timeout value"`
+    `[Error: [NaN] is not a valid timeout value]`
   );
 });

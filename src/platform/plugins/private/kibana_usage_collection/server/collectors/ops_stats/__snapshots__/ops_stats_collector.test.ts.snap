@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`telemetry_ops_stats should return something when there is a metric 1`] = `
+exports[`telemetry_ops_stats > should return something when there is a metric 1`] = `
 Object {
   "concurrent_connections": 1,
   "elasticsearch_client": Object {

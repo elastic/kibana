@@ -10,7 +10,7 @@ import type { Mock } from 'vitest';
 
 import { renderHook } from '@testing-library/react';
 
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
+vi.mock('react-use/lib/useSessionStorage', () => ({ default: vi.fn() }));
 
 vi.mock('@kbn/fleet-plugin/public', () => {
   const mocked = {

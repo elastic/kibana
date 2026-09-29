@@ -164,7 +164,9 @@ describe('resolveInstanceUuid', () => {
         mockReadFile({ uuid: 'invalid uuid in data file' });
         await expect(
           resolveInstanceUuid({ pathConfig, serverConfig, logger })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"data-folder/uuid contains an invalid UUID"`);
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `[Error: data-folder/uuid contains an invalid UUID]`
+        );
       });
     });
 
@@ -173,7 +175,9 @@ describe('resolveInstanceUuid', () => {
         mockReadFile({ uuid: '' });
         await expect(
           resolveInstanceUuid({ pathConfig, serverConfig, logger })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"data-folder/uuid contains an invalid UUID"`);
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `[Error: data-folder/uuid contains an invalid UUID]`
+        );
       });
     });
 
@@ -266,7 +270,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read UUID file at data-folder/uuid.  Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EACCES"`
+        `[Error: Unable to read UUID file at data-folder/uuid.  Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EACCES]`
       );
     });
     it('throws an explicit error for file write errors', async () => {
@@ -274,7 +278,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to write to UUID file at data-folder/uuid. Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EISDIR"`
+        `[Error: Unable to write to UUID file at data-folder/uuid. Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EISDIR]`
       );
     });
   });

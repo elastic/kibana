@@ -7,23 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const Module = require('module');
+
+// The rule loads `@elastic/eui-test-helpers` with a lazy CommonJS `require()`, which `vi.mock`
+// can't intercept, so the stand-in is registered in the require cache instead.
 // Shape of the real package: one `Eui<Component>Selectors` object per Component
 // Object, `*_SELECTOR` entries are CSS classes, `*_TEST_SUBJ` entries are not.
-vi.mock('@elastic/eui-test-helpers', () => {
-  const mocked = {
-    EuiComboBoxObject: class {},
-    EuiComboBoxSelectors: {
-      ROOT_SELECTOR: '.euiComboBox',
-      PILL_SELECTOR: '.euiComboBoxPill',
-      SEARCH_INPUT_TEST_SUBJ: 'comboBoxSearchInput',
-      optionFor: (testSubj) => `[data-test-subj~="${testSubj}-optionsList"] [role="option"]`,
-    },
-    EuiDataGridSelectors: {
-      ROW_SELECTOR: '.euiDataGridRow',
-      FULL_SCREEN_BUTTON_TEST_SUBJ: 'dataGridFullScreenButton',
-    },
-  };
-  return { ...mocked, default: mocked };
+const euiTestHelpersPath = require.resolve('@elastic/eui-test-helpers');
+const euiTestHelpersModule = new Module(euiTestHelpersPath);
+euiTestHelpersModule.filename = euiTestHelpersPath;
+euiTestHelpersModule.loaded = true;
+euiTestHelpersModule.exports = {
+  EuiComboBoxObject: class {},
+  EuiComboBoxSelectors: {
+    ROOT_SELECTOR: '.euiComboBox',
+    PILL_SELECTOR: '.euiComboBoxPill',
+    SEARCH_INPUT_TEST_SUBJ: 'comboBoxSearchInput',
+    optionFor: (testSubj) => `[data-test-subj~="${testSubj}-optionsList"] [role="option"]`,
+  },
+  EuiDataGridSelectors: {
+    ROW_SELECTOR: '.euiDataGridRow',
+    FULL_SCREEN_BUTTON_TEST_SUBJ: 'dataGridFullScreenButton',
+  },
+};
+const originalEuiTestHelpersCacheEntry = require.cache[euiTestHelpersPath];
+require.cache[euiTestHelpersPath] = euiTestHelpersModule;
+
+afterAll(() => {
+  if (originalEuiTestHelpersCacheEntry) {
+    require.cache[euiTestHelpersPath] = originalEuiTestHelpersCacheEntry;
+  } else {
+    delete require.cache[euiTestHelpersPath];
+  }
 });
 
 const { RuleTester } = require('eslint');

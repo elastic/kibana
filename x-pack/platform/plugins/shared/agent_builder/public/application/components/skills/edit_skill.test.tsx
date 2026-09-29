@@ -34,8 +34,8 @@ vi.mock('./skill_form', async () => {
   };
 });
 
-const { useEditSkill } = await vi.importMock('../../hooks/skills/use_edit_skill');
-const { useUiPrivileges } = await vi.importMock('../../hooks/use_ui_privileges');
+const { useEditSkill } = vi.mocked(await import('../../hooks/skills/use_edit_skill'));
+const { useUiPrivileges } = vi.mocked(await import('../../hooks/use_ui_privileges'));
 
 describe('EditSkill', () => {
   beforeEach(() => {

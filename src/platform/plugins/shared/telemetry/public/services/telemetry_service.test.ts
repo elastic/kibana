@@ -289,7 +289,9 @@ describe('TelemetryService', () => {
       originalFetch = window.fetch;
     });
 
-    beforeEach(() => (window.fetch = mockFetch = vi.fn()));
+    beforeEach(() => {
+      window.fetch = mockFetch = vi.fn();
+    });
     afterAll(() => (window.fetch = originalFetch));
 
     it('reports opt-in status to telemetry url', async () => {

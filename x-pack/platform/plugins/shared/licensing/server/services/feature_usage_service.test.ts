@@ -36,7 +36,7 @@ describe('FeatureUsageService', () => {
         expect(() => {
           setup.register('foo', 'enterprise');
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Feature 'foo' has already been registered with another license type. (current: basic, new: enterprise)"`
+          `[Error: Feature 'foo' has already been registered with another license type. (current: basic, new: enterprise)]`
         );
       });
     });
@@ -97,7 +97,7 @@ describe('FeatureUsageService', () => {
         const start = service.start();
         expect(() => {
           start.notifyUsage('unregistered');
-        }).toThrowErrorMatchingInlineSnapshot(`"Feature 'unregistered' is not registered."`);
+        }).toThrowErrorMatchingInlineSnapshot(`[Error: Feature 'unregistered' is not registered.]`);
       });
     });
 

@@ -118,7 +118,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
         expect(() => {
           registerResultProvider(provider);
-        }).toThrowErrorMatchingInlineSnapshot(`"trying to register duplicate provider: A"`);
+        }).toThrowErrorMatchingInlineSnapshot(`[Error: trying to register duplicate provider: A]`);
       });
     });
   });

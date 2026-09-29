@@ -446,7 +446,7 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: [param1] is required"`
+      `[Error: error validating action type connector: [param1] is required]`
     );
   });
 
@@ -461,7 +461,7 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"unregistered-action-type\\" is not registered."`
+      `[Error: Action type "unregistered-action-type" is not registered.]`
     );
   });
 
@@ -633,7 +633,7 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"action type \\"my-connector-type\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
+      `[Error: action type "my-connector-type" is not enabled in the Kibana config xpack.actions.enabledActionTypes]`
     );
   });
 
@@ -663,7 +663,7 @@ describe('create()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
   });
 
   test('throws error when predefined id match a pre-configure action id', async () => {
@@ -715,7 +715,7 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"This mySuperRadTestPreconfiguredId already exists in a preconfigured action."`
+      `[Error: This mySuperRadTestPreconfiguredId already exists in a preconfigured action.]`
     );
   });
 
@@ -739,7 +739,7 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"System action creation is forbidden. Action type: .cases."`
+      `[Error: System action creation is forbidden. Action type: .cases.]`
     );
   });
 
@@ -779,7 +779,7 @@ describe('create()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Action type \\".cases\\" is not registered."`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Action type ".cases" is not registered.]`);
   });
 });
 
@@ -1140,7 +1140,7 @@ describe('get()', () => {
 
     await expect(
       actionsClient.get({ id: 'system-connector-.cases' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Connector system-connector-.cases not found]`);
   });
 
   it('does not throw when getting a system action if throwIfSystemAction=false', async () => {
@@ -1477,7 +1477,7 @@ describe('getBulk()', () => {
 
     await expect(
       actionsClient.getBulk({ ids: ['1', 'testPreconfigured', 'system-connector-.cases'] })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Connector system-connector-.cases not found]`);
   });
 
   test('should throw an error if a system action is requested', async () => {
@@ -2144,7 +2144,7 @@ describe('delete()', () => {
     await expect(
       actionsClient.delete({ id: 'testPreconfigured' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Preconfigured action testPreconfigured is not allowed to delete."`
+      `[Error: Preconfigured action testPreconfigured is not allowed to delete.]`
     );
   });
 
@@ -2224,7 +2224,7 @@ describe('delete()', () => {
     await expect(
       actionsClient.delete({ id: 'system-connector-.cases' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"System action system-connector-.cases is not allowed to delete."`
+      `[Error: System action system-connector-.cases is not allowed to delete.]`
     );
   });
 
@@ -2709,7 +2709,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: [param1] is required"`
+      `[Error: error validating action type connector: [param1] is required]`
     );
   });
 
@@ -2832,7 +2832,7 @@ describe('update()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
   });
 
   it('throws when trying to update a preconfigured connector', async () => {
@@ -2878,7 +2878,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Preconfigured action testPreconfigured can not be updated."`
+      `[Error: Preconfigured action testPreconfigured can not be updated.]`
     );
   });
 
@@ -2919,7 +2919,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"System action system-connector-.cases can not be updated."`
+      `[Error: System action system-connector-.cases can not be updated.]`
     );
   });
 });

@@ -95,7 +95,7 @@ describe('streamToResponse', () => {
   it('rejects an error if message event is not emitted', async () => {
     await expect(
       streamToResponse(fromEvents(chunkEvent('chunk_1'), tokensEvent()))
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"No message event found"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No message event found]`);
   });
 
   it('includes deanonymization data in the response if present', async () => {

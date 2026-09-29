@@ -526,7 +526,7 @@ describe('request', () => {
         configurationUtilities,
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Do not use \\"baseURL\\" in the creation of your axios instance because you will mostly break proxy"`
+      `[Error: Do not use "baseURL" in the creation of your axios instance because you will mostly break proxy]`
     );
   });
 

@@ -66,8 +66,8 @@ describe('ModalService', () => {
         return () => {};
       });
       expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual('EuiModal');
-      const { container } = render(mockReactDomRender.mock.calls[0][0]);
-      expect(container.querySelector('div.euiModal')?.textContent).toEqual(
+      const { baseElement } = render(mockReactDomRender.mock.calls[0][0]);
+      expect(baseElement.querySelector('div.euiModal')?.textContent).toEqual(
         `${MODAL_CONTENT}${MODAL_SCREEN_READER_TEXT}`
       );
     });
@@ -88,10 +88,10 @@ describe('ModalService', () => {
           mockReactDomRender.mock.calls[1][0].props.children.props.children.props.mount
         ).toEqual(mountPoint);
 
-        const { container } = render(mockReactDomRender.mock.calls[1][0]);
+        const { baseElement } = render(mockReactDomRender.mock.calls[1][0]);
 
         // Verify the modal structure is correct since we can't test the mount point content
-        expect(container.querySelector('.kbnOverlayMountWrapper')).toBeInTheDocument();
+        expect(baseElement.querySelector('.kbnOverlayMountWrapper')).toBeInTheDocument();
 
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrow();

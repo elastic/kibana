@@ -563,7 +563,7 @@
         "inversify",
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
-        "@fast-check/jest",
+        "@fast-check/vitest",
         "mock-fs",
         "node-fetch",
         "react-intl",

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`metric trendline function builds trends with breakdown 1`] = `
+exports[`metric trendline function > builds trends with breakdown 1`] = `
 Object {
   "css": Array [
     Object {
@@ -99,7 +99,7 @@ Object {
 }
 `;
 
-exports[`metric trendline function builds trends without breakdown 1`] = `
+exports[`metric trendline function > builds trends without breakdown 1`] = `
 Object {
   "default": Array [
     Object {
@@ -122,7 +122,7 @@ Object {
 }
 `;
 
-exports[`metric trendline function creates inspector information 1`] = `
+exports[`metric trendline function > creates inspector information 1`] = `
 Object {
   "columns": Array [
     Object {

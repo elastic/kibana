@@ -15,7 +15,7 @@ import { renderHome } from '../helpers/render_home';
 import { httpService } from '../../../public/application/services/http';
 import { createNonDataStreamIndex } from '../helpers/actions/data_stream_actions';
 
-vi.mock('react-use/lib/useObservable', () => () => vi.fn());
+vi.mock('react-use/lib/useObservable', () => ({ default: () => vi.fn() }));
 
 describe('Index table pagination', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];

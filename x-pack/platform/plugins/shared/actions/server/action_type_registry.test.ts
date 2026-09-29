@@ -118,7 +118,7 @@ describe('actionTypeRegistry', () => {
       expect(() =>
         actionTypeRegistry.register(getConnectorType())
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Action type \\"my-connector-type\\" is already registered."`
+        `[Error: Action type "my-connector-type" is already registered.]`
       );
     });
 
@@ -131,7 +131,7 @@ describe('actionTypeRegistry', () => {
           })
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-connector-type\\"."`
+        `[Error: At least one "supportedFeatureId" value must be supplied for connector type "my-connector-type".]`
       );
     });
 
@@ -144,7 +144,7 @@ describe('actionTypeRegistry', () => {
           })
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid feature ids \\"foo\\" for connector type \\"my-connector-type\\"."`
+        `[Error: Invalid feature ids "foo" for connector type "my-connector-type".]`
       );
     });
 
@@ -157,7 +157,7 @@ describe('actionTypeRegistry', () => {
           })
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature IDs for connector type \\"my-connector-type\\" must not exceed 100 characters."`
+        `[Error: Feature IDs for connector type "my-connector-type" must not exceed 100 characters.]`
       );
     });
 
@@ -203,7 +203,7 @@ describe('actionTypeRegistry', () => {
           })
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature"`
+        `[Error: Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature]`
       );
     });
   });
@@ -230,7 +230,7 @@ describe('actionTypeRegistry', () => {
     test(`throws an error when connector type doesn't exist`, () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       expect(() => actionTypeRegistry.get('my-connector-type')).toThrowErrorMatchingInlineSnapshot(
-        `"Action type \\"my-connector-type\\" is not registered."`
+        `[Error: Action type "my-connector-type" is not registered.]`
       );
     });
   });
@@ -656,7 +656,7 @@ describe('actionTypeRegistry', () => {
       });
       expect(() =>
         actionTypeRegistry.ensureActionTypeEnabled('foo')
-      ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
     });
 
     test('should throw when ensureLicenseForActionType throws', async () => {
@@ -665,7 +665,7 @@ describe('actionTypeRegistry', () => {
       });
       expect(() =>
         actionTypeRegistry.ensureActionTypeEnabled('foo')
-      ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
     });
   });
 

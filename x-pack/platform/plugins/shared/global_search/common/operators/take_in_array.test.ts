@@ -57,7 +57,7 @@ describe('takeInArray', () => {
 
       expect(() => {
         source.pipe(takeInArray(-4)).subscribe(() => undefined);
-      }).toThrowErrorMatchingInlineSnapshot(`"Cannot take a negative number of items"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: Cannot take a negative number of items]`);
     });
   });
 });

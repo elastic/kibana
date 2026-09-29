@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ManageData render 1`] = `
+exports[`ManageData > render 1`] = `
 <Fragment>
   <EuiHorizontalRule
     aria-hidden="true"
@@ -90,4 +90,4 @@ exports[`ManageData render 1`] = `
 </Fragment>
 `;
 
-exports[`ManageData render empty without any features 1`] = `<Fragment />`;
+exports[`ManageData > render empty without any features 1`] = `<Fragment />`;

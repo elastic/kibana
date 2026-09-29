@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`View policy flyout shows all phases 1`] = `
+exports[`View policy flyout > shows all phases 1`] = `
 <div>
   <div
     data-eui="EuiFlyout"

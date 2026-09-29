@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 export const mockIndexNameValues = {
   indexName: 'index-name',
 };
 
-jest.mock('../index_name_logic', () => ({
+vi.mock('../index_name_logic', () => ({
   IndexNameLogic: {
     values: mockIndexNameValues,
   },

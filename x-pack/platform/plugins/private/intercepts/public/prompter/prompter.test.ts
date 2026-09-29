@@ -311,7 +311,7 @@ describe('ProductInterceptPrompter', () => {
         localStorageGetItemSpy.mockReturnValue(
           JSON.stringify({
             [intercept.id]: {
-              timerStart: new Date(vi.now() - triggerInfo.triggerIntervalInMs - 1).toISOString(),
+              timerStart: new Date(Date.now() - triggerInfo.triggerIntervalInMs - 1).toISOString(),
             },
           })
         );

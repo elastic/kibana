@@ -15,7 +15,7 @@ const services = createStartServicesMock();
 const mockSuccessToast = services.notifications.toasts.addSuccess;
 
 const mockCopy = vi.fn((text: string) => true);
-vi.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
+vi.mock('copy-to-clipboard', () => ({ default: (text: string) => mockCopy(text) }));
 
 describe('createCopyToClipboardCellActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardCellActionFactory({ services });

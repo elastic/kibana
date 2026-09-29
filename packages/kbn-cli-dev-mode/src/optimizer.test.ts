@@ -21,17 +21,11 @@ import { createReplaceSerializer } from '@kbn/jest-serializers';
 import type { Options } from './optimizer';
 import { Optimizer } from './optimizer';
 
-const importState = { shouldFail: false };
+const { createRspackOptimizerModuleMock } = vi.hoisted(() => ({
+  createRspackOptimizerModuleMock: () => ({ RspackOptimizer: vi.fn() }),
+}));
 
-vi.mock('@kbn/rspack-optimizer', () => {
-  if (importState.shouldFail) {
-    throw new Error('missing native binding');
-  }
-
-  return {
-    RspackOptimizer: vi.fn(),
-  };
-});
+vi.mock('@kbn/rspack-optimizer', createRspackOptimizerModuleMock);
 
 interface RspackMockInstance {
   opts: unknown;
@@ -247,15 +241,22 @@ it('logs and errors run$ when @kbn/rspack-optimizer fails to load', async () => 
   const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
   const error = vi.fn();
 
-  importState.shouldFail = true;
-  // drop the cached mock so the deferred import goes through the (now throwing) module factory
+  // Vitest caches `vi.mock` factory results across `vi.resetModules()` and wraps errors thrown by a
+  // factory, so the load failure is simulated by a module that throws as soon as it's consumed.
   vi.resetModules();
+  vi.doMock('@kbn/rspack-optimizer', () => ({
+    get RspackOptimizer() {
+      throw new Error('missing native binding');
+    },
+  }));
 
   try {
     subscriptions.push(new Optimizer({ ...defaultOptions, writeLogTo }).run$.subscribe({ error }));
-    await flushPromises();
+    // resolving the re-registered mock takes more than one macrotask
+    await vi.waitFor(() => expect(error).toHaveBeenCalled());
   } finally {
-    importState.shouldFail = false;
+    vi.resetModules();
+    vi.doMock('@kbn/rspack-optimizer', createRspackOptimizerModuleMock);
   }
 
   writeLogTo.end();

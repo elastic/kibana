@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CollapsibleNav renders links grouped by category 1`] = `
+exports[`CollapsibleNav > renders links grouped by category 1`] = `
 Array [
   <button
     aria-controls="collapsibe-nav"
@@ -760,7 +760,7 @@ Array [
 ]
 `;
 
-exports[`CollapsibleNav renders the default nav 1`] = `
+exports[`CollapsibleNav > renders the default nav 1`] = `
 <CollapsibleNav
   button={<button />}
   closeNav={[Function]}
@@ -858,7 +858,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
 </CollapsibleNav>
 `;
 
-exports[`CollapsibleNav renders the default nav 2`] = `
+exports[`CollapsibleNav > renders the default nav 2`] = `
 <CollapsibleNav
   button={<button />}
   closeNav={[Function]}

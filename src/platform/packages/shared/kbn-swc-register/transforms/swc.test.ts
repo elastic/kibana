@@ -8,33 +8,21 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
-import { transformSync } from '@swc/core';
-import { getNodeRegisterSwcConfig } from '@kbn/swc-config/node_register';
 
 import type { Cache } from '../cache/types';
 import { swcTransform } from './swc';
 
-vi.mock('@swc/core', () => {
-  const mocked = {
-    transformSync: vi.fn(),
-  };
-  return { ...mocked, default: mocked };
-});
-
-vi.mock('@kbn/swc-config/node_register', () => {
-  const mocked = {
-    getNodeRegisterSwcConfig: vi.fn((path: string, options = {}) => ({
+// swc.js is CommonJS and loads its dependencies with Node's require(), which vi.mock() doesn't
+// intercept, so spy on the required module instances before ./swc is evaluated.
+const { transformSyncMock, getNodeRegisterSwcConfigMock } = vi.hoisted(() => ({
+  transformSyncMock: vi.spyOn(require('@swc/core'), 'transformSync').mockReturnValue(undefined),
+  getNodeRegisterSwcConfigMock: vi
+    .spyOn(require('@kbn/swc-config/node_register'), 'getNodeRegisterSwcConfig')
+    .mockImplementation((path: string, options: { inlineSourceMaps?: boolean } = {}) => ({
       filename: path,
       sourceMaps: options.inlineSourceMaps ? 'inline' : true,
     })),
-  };
-  return { ...mocked, default: mocked };
-});
-
-const transformSyncMock = transformSync as Mock;
-const getNodeRegisterSwcConfigMock = getNodeRegisterSwcConfig as Mock;
+}));
 
 const makeCache = (code: string | undefined = undefined) => {
   const cache: Cache = {

@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 
 import { CriticalError } from '@kbn/core-base-server-internal';
 
-const mockGetFipsFn = vi.fn();
+const mockGetFipsFn = vi.hoisted(() => vi.fn());
 vi.mock('crypto', () => {
   const mocked = {
     randomBytes: vi.fn(),

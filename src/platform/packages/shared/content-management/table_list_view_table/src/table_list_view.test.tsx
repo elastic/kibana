@@ -39,13 +39,13 @@ vi.mock('lodash', () => {
   };
 });
 
-vi.mock('react-use/lib/useDebounce', () => {
-  return (cb: () => void, ms: number, deps: any[]) => {
+vi.mock('react-use/lib/useDebounce', () => ({
+  default: (cb: () => void, ms: number, deps: any[]) => {
     mockUseEffect(() => {
       cb();
     }, deps);
-  };
-});
+  },
+}));
 
 interface Router {
   history: Partial<History>;

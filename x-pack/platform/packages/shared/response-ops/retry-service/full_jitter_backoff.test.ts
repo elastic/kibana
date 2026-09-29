@@ -11,13 +11,13 @@ describe('FullJitterBackoff', () => {
   it('throws if the baseDelay is negative', async () => {
     expect(() =>
       fullJitterBackoffFactory({ baseDelay: -1, maxBackoffTime: 2000 }).create()
-    ).toThrowErrorMatchingInlineSnapshot(`"baseDelay must not be negative"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: baseDelay must not be negative]`);
   });
 
   it('throws if the maxBackoffTime is negative', async () => {
     expect(() =>
       fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: -1 }).create()
-    ).toThrowErrorMatchingInlineSnapshot(`"maxBackoffTime must not be negative"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: maxBackoffTime must not be negative]`);
   });
 
   it('starts with minimum of 1ms', () => {

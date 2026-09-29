@@ -8,6 +8,7 @@
  */
 
 import { vi } from 'vitest';
+import type * as EsClientModule from '@elastic/elasticsearch';
 
 export const parseClientOptionsMock = vi.fn();
 vi.doMock('./client_config', () => {
@@ -26,10 +27,7 @@ vi.doMock('./create_transport', () => {
 });
 
 export const ClientMock = vi.fn();
-vi.doMock('@elastic/elasticsearch', () => {
-  const actual = require('@elastic/elasticsearch');
-  return {
-    ...actual,
-    Client: ClientMock,
-  };
-});
+vi.doMock('@elastic/elasticsearch', async (importOriginal) => ({
+  ...(await importOriginal<typeof EsClientModule>()),
+  Client: ClientMock,
+}));

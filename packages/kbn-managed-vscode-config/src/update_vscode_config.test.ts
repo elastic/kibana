@@ -111,13 +111,13 @@ it('replaces conflicting managed keys which do not have matching value types', (
 
 it(`throws if the JSON file doesn't contain an object`, () => {
   expect(() => run('[]')).toThrowErrorMatchingInlineSnapshot(
-    `expected VSCode config to contain a JSON object`
+    `[Error: expected VSCode config to contain a JSON object]`
   );
   expect(() => run('1')).toThrowErrorMatchingInlineSnapshot(
-    `expected VSCode config to contain a JSON object`
+    `[Error: expected VSCode config to contain a JSON object]`
   );
   expect(() => run('"foo"')).toThrowErrorMatchingInlineSnapshot(
-    `expected VSCode config to contain a JSON object`
+    `[Error: expected VSCode config to contain a JSON object]`
   );
 });
 

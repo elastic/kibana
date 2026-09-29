@@ -36,7 +36,7 @@ const urlServiceMock = {
     }),
   },
 };
-vi.mock('react-use/lib/useObservable', () => () => vi.fn());
+vi.mock('react-use/lib/useObservable', () => ({ default: () => vi.fn() }));
 
 describe('Data Streams - Project level max retention', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];

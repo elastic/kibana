@@ -30,7 +30,10 @@ import {
 } from './types';
 
 // Use the server HTTP client under this package's jsdom test environment.
-vi.mock('axios', () => require('axios/dist/node/axios.cjs'));
+vi.mock('axios', () => {
+  const nodeAxios = require('axios/dist/node/axios.cjs');
+  return { ...nodeAxios, default: nodeAxios };
+});
 
 let nock: typeof import('nock');
 

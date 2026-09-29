@@ -28,7 +28,7 @@ describe('getTelemetrySavedObject', () => {
     });
 
     await expect(callGetTelemetrySavedObject(params)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"savedObjectForbidden"`
+      `[Error: savedObjectForbidden]`
     );
   });
 

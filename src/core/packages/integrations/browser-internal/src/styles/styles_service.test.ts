@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 
 import { BehaviorSubject } from 'rxjs';
 
-vi.mock('./disable_animations.css?raw', () => 'MOCK DISABLE ANIMATIONS CSS');
+vi.mock('./disable_animations.css?raw', () => ({ default: 'MOCK DISABLE ANIMATIONS CSS' }));
 
 import { StylesService } from './styles_service';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';

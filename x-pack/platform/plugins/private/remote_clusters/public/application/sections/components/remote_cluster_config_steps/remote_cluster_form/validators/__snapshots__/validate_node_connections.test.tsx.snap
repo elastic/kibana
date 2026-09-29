@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`validateNodeConnections rejects numbers larger than MaxValue 1`] = `
+exports[`validateNodeConnections > rejects numbers larger than MaxValue 1`] = `
 <Memo(MemoizedFormattedMessage)
   defaultMessage="This number must be equal or less than {maxValue}."
   id="xpack.remoteClusters.form.errors.maxValue"

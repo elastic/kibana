@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`extend index management ilm banner extension should return extension when any index has lifecycle error 1`] = `
+exports[`extend index management > ilm banner extension > should return extension when any index has lifecycle error 1`] = `
 Object {
   "action": Object {
     "buttonLabel": "Retry failed lifecycle step",
@@ -53,7 +53,7 @@ Object {
 }
 `;
 
-exports[`extend index management ilm filter extension should return extension when any index has lifecycle policy 1`] = `
+exports[`extend index management > ilm filter extension > should return extension when any index has lifecycle policy 1`] = `
 Array [
   Object {
     "field": "ilm.managed",
@@ -103,7 +103,7 @@ Array [
 ]
 `;
 
-exports[`extend index management ilm summary extension should render a phase definition panel when lifecycle has phase definition 1`] = `
+exports[`extend index management > ilm summary extension > should render a phase definition panel when lifecycle has phase definition 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
@@ -275,7 +275,7 @@ exports[`extend index management ilm summary extension should render a phase def
 </div>
 `;
 
-exports[`extend index management ilm summary extension should render a step info panel when lifecycle is waiting for a step completion 1`] = `
+exports[`extend index management > ilm summary extension > should render a step info panel when lifecycle is waiting for a step completion 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
@@ -443,7 +443,7 @@ exports[`extend index management ilm summary extension should render a step info
 </div>
 `;
 
-exports[`extend index management ilm summary extension should render an error panel when index has lifecycle error 1`] = `
+exports[`extend index management > ilm summary extension > should render an error panel when index has lifecycle error 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
@@ -612,7 +612,7 @@ exports[`extend index management ilm summary extension should render an error pa
 </div>
 `;
 
-exports[`extend index management ilm summary extension should render the tab when index has lifecycle policy 1`] = `
+exports[`extend index management > ilm summary extension > should render the tab when index has lifecycle policy 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
@@ -746,7 +746,7 @@ exports[`extend index management ilm summary extension should render the tab whe
 </div>
 `;
 
-exports[`extend index management remove lifecycle action extension should return extension when all indices have lifecycle policy 1`] = `
+exports[`extend index management > remove lifecycle action extension > should return extension when all indices have lifecycle policy 1`] = `
 Object {
   "buttonLabel": "Remove lifecycle policy",
   "icon": "stopFill",
@@ -760,7 +760,7 @@ Object {
 }
 `;
 
-exports[`extend index management retry lifecycle action extension should return extension when all indices have failed step lifecycle errors 1`] = `
+exports[`extend index management > retry lifecycle action extension > should return extension when all indices have failed step lifecycle errors 1`] = `
 Object {
   "buttonLabel": "Retry failed lifecycle step",
   "icon": "play",
@@ -775,7 +775,7 @@ Object {
 }
 `;
 
-exports[`extend index management retry lifecycle action extension should return extension with only indices that have failed step lifecycle errors 1`] = `
+exports[`extend index management > retry lifecycle action extension > should return extension with only indices that have failed step lifecycle errors 1`] = `
 Object {
   "buttonLabel": "Retry failed lifecycle step",
   "icon": "play",

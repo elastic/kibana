@@ -11,13 +11,22 @@ import { vi } from 'vitest';
 
 import type { FC } from 'react';
 import React from 'react';
-import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchUnifiedAlertsFields } from './use_fetch_unified_alerts_fields';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
+
+vi.mock('@kbn/react-query', async () => {
+  const actual = await vi.importActual<typeof import('@kbn/react-query')>('@kbn/react-query');
+  return {
+    ...actual,
+    useMutation: vi.fn(actual.useMutation),
+    useQuery: vi.fn(actual.useQuery),
+    useQueryClient: vi.fn(actual.useQueryClient),
+  };
+});
 
 const { QueryClient, QueryClientProvider, useQuery } = ReactQuery;
 

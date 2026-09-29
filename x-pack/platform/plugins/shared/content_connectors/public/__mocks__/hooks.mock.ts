@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
+
 /**
  * Combine all shared mock values/actions into a single obj
  *
@@ -26,10 +29,10 @@ export const mockAllActions = {
  *
  * import '../../../__mocks__/kea_logic'; // Must come before kea's import, adjust relative path as needed
  */
-jest.mock('kea', () => ({
-  ...(jest.requireActual('kea') as object),
-  useActions: jest.fn(() => ({ ...mockAllActions })),
-  useValues: jest.fn(() => ({ ...mockAllValues })),
+vi.mock('kea', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useActions: vi.fn(() => ({ ...mockAllActions })),
+  useValues: vi.fn(() => ({ ...mockAllValues })),
 }));
 
 /**
@@ -50,8 +53,8 @@ jest.mock('kea', () => ({
 import { useValues, useActions } from 'kea';
 
 export const setMockValues = (values: object) => {
-  (useValues as jest.Mock).mockImplementation(() => ({ ...mockAllValues, ...values }));
+  (useValues as Mock).mockImplementation(() => ({ ...mockAllValues, ...values }));
 };
 export const setMockActions = (actions: object) => {
-  (useActions as jest.Mock).mockImplementation(() => ({ ...mockAllActions, ...actions }));
+  (useActions as Mock).mockImplementation(() => ({ ...mockAllActions, ...actions }));
 };

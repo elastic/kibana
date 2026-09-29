@@ -118,7 +118,7 @@ describe('InstallationService', () => {
       http.post.mockResolvedValue(expected);
 
       await expect(service.install({ inferenceId })).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Installation did not complete successfully."`
+        `[Error: Installation did not complete successfully.]`
       );
     });
   });

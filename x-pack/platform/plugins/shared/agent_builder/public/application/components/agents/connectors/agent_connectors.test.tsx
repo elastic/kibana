@@ -103,16 +103,16 @@ vi.mock('../../../hooks/connectors/use_agent_connectors');
 vi.mock('../../../hooks/use_has_connectors_all_privileges');
 vi.mock('../../../context/connectors_provider');
 
-const { useAgentBuilderAgentById } = await vi.importMock('../../../hooks/agents/use_agent_by_id');
-const { useCanUpdateAgent } = await vi.importMock('../../../hooks/agents/use_can_update_agent');
-const { useAgentConnectors } = await vi.importMock(
+const { useAgentBuilderAgentById } = vi.mocked(await import('../../../hooks/agents/use_agent_by_id'));
+const { useCanUpdateAgent } = vi.mocked(await import('../../../hooks/agents/use_can_update_agent'));
+const { useAgentConnectors } = vi.mocked(await import(
   '../../../hooks/connectors/use_agent_connectors'
-);
-const { useHasConnectorsAllPrivileges } = await vi.importMock(
+));
+const { useHasConnectorsAllPrivileges } = vi.mocked(await import(
   '../../../hooks/use_has_connectors_all_privileges'
-);
-const { useConnectorsActions } = await vi.importMock('../../../context/connectors_provider');
-const { useQueryState } = await vi.importMock('../../../hooks/use_query_state');
+));
+const { useConnectorsActions } = vi.mocked(await import('../../../context/connectors_provider'));
+const { useQueryState } = vi.mocked(await import('../../../hooks/use_query_state'));
 const { ConnectorDetailPanel } = await vi.importMock('./connector_detail_panel');
 
 const openCreateFlyout = vi.fn();

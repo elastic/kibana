@@ -266,9 +266,9 @@ describe('get', () => {
     };
 
     await expect(get(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Invalid response. ✖ Invalid input: expected string, received null
-        → at item.attributes.description"
-    `);
+    [Error: Invalid response. ✖ Invalid input: expected string, received null
+      → at item.attributes.description]
+  `);
   });
 
   test('logs response validation error', async () => {
@@ -349,8 +349,8 @@ describe('create', () => {
     };
 
     await expect(create(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Invalid response. ✖ Invalid input: expected string, received null
-        → at item.attributes.description"
+      [Error: Invalid response. ✖ Invalid input: expected string, received null
+        → at item.attributes.description]
     `);
   });
 
@@ -432,9 +432,9 @@ describe('update', () => {
     };
 
     await expect(update(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Invalid response. ✖ Invalid input: expected string, received null
-        → at item.attributes.description"
-    `);
+        [Error: Invalid response. ✖ Invalid input: expected string, received null
+          → at item.attributes.description]
+      `);
   });
 
   test('logs response validation error', async () => {
@@ -515,9 +515,9 @@ describe('search', () => {
     };
 
     await expect(search(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Invalid response. ✖ Invalid input: expected string, received null
-        → at hits[0].attributes.description"
-    `);
+        [Error: Invalid response. ✖ Invalid input: expected string, received null
+          → at hits[0].attributes.description]
+      `);
   });
 
   test('logs response validation error', async () => {
@@ -598,9 +598,9 @@ describe('mSearch', () => {
     };
 
     await expect(mSearch(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Invalid response. ✖ Invalid input: expected string, received null
-        → at attributes.description"
-    `);
+    [Error: Invalid response. ✖ Invalid input: expected string, received null
+      → at attributes.description]
+  `);
   });
 
   test('logs response validation error', async () => {

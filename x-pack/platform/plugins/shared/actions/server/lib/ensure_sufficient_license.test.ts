@@ -17,7 +17,7 @@ const sampleActionType: ActionType = getConnectorType({
 describe('ensureSufficientLicense()', () => {
   it('throws for licenses below gold', () => {
     expect(() => ensureSufficientLicense(sampleActionType)).toThrowErrorMatchingInlineSnapshot(
-      `"Third party action type \\"test\\" can only set minimumLicenseRequired to a gold license or higher"`
+      `[Error: Third party action type "test" can only set minimumLicenseRequired to a gold license or higher]`
     );
   });
 
@@ -59,6 +59,6 @@ describe('ensureSufficientLicense()', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         minimumLicenseRequired: 'foo' as any,
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: "foo" is not a valid license type]`);
   });
 });

@@ -55,11 +55,11 @@ interface NBAResponse {
 
 // Mock useInterval to capture the callback
 let intervalCallback: (() => void) | null = null;
-vi.mock('react-use/lib/useInterval', () => {
-  return vi.fn((callback: () => void) => {
+vi.mock('react-use/lib/useInterval', () => ({
+  default: vi.fn((callback: () => void) => {
     intervalCallback = callback;
-  });
-});
+  }),
+}));
 
 const mockUseKibana = useKibana as Mock;
 const mockUseGetNBA = useGetNBA as Mock;

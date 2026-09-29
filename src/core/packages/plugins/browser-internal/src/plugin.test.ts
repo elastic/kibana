@@ -60,14 +60,14 @@ describe('PluginWrapper', () => {
   test('`setup` fails if plugin.setup is not a function', () => {
     mockInitializer.mockReturnValueOnce({ start: vi.fn() } as any);
     expect(() => plugin.setup({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
-      `"Instance of plugin \\"plugin-a\\" does not define \\"setup\\" function."`
+      `[Error: Instance of plugin "plugin-a" does not define "setup" function.]`
     );
   });
 
   test('`setup` fails if plugin.start is not a function', () => {
     mockInitializer.mockReturnValueOnce({ setup: vi.fn() } as any);
     expect(() => plugin.setup({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
-      `"Instance of plugin \\"plugin-a\\" does not define \\"start\\" function."`
+      `[Error: Instance of plugin "plugin-a" does not define "start" function.]`
     );
   });
 
@@ -102,7 +102,7 @@ describe('PluginWrapper', () => {
 
   test('`start` fails if setup is not called first', () => {
     expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
-      `"Plugin \\"plugin-a\\" can't be started since it isn't set up."`
+      `[Error: Plugin "plugin-a" can't be started since it isn't set up.]`
     );
   });
 
@@ -162,7 +162,7 @@ describe('PluginWrapper', () => {
 
   test('`stop` fails if plugin is not setup up', async () => {
     await expect(plugin.stop()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`
+      `[Error: Plugin "plugin-a" can't be stopped since it isn't set up.]`
     );
   });
 

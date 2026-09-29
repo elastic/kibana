@@ -929,7 +929,7 @@ describe('inferenceEndpointAdapter', () => {
             })
             .pipe(toArray())
         )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Inference endpoint not found"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Inference endpoint not found]`);
     });
 
     describe('EIS cache control and session id', () => {

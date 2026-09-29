@@ -9,8 +9,7 @@
 
 import { vi } from 'vitest';
 
-import { waitFor } from '@testing-library/dom';
-import { toNavigationItems } from './to_navigation_items';
+import { toNavigationItems, type NavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
 import type {
   ChromeProjectNavigationNode,
@@ -42,9 +41,21 @@ beforeEach(() => {
 });
 
 describe('toNavigationItems', () => {
-  const {
-    navItems: { footerItems, primaryItems },
-  } = createNavigationItems();
+  let primaryItems: NavigationItems['navItems']['primaryItems'];
+  let footerItems: NavigationItems['navItems']['footerItems'];
+
+  // Warnings are flushed on a timer; fake timers keep them pending until the warning test flushes them,
+  // so the top-level `consoleWarnSpy.mockClear()` can't race with them.
+  beforeAll(() => {
+    vi.useFakeTimers();
+    ({
+      navItems: { footerItems, primaryItems },
+    } = createNavigationItems());
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
 
   it('keeps the home node as a regular primary item', () => {
     const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
@@ -61,10 +72,9 @@ describe('toNavigationItems', () => {
     expect(footerItems).toMatchSnapshot();
   });
 
-  it('should warn about issues with navigation tree', async () => {
-    await waitFor(() => {
-      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-    });
+  it('should warn about issues with navigation tree', () => {
+    vi.runOnlyPendingTimers();
+    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
 
     expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "

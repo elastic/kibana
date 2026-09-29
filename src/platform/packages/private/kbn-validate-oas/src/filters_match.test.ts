@@ -13,7 +13,7 @@ import type { MockedFunction } from 'vitest';
 import execa from 'execa';
 import { filtersMatch } from './filters_match';
 
-vi.mock('execa', () => vi.fn());
+vi.mock('execa', () => ({ default: vi.fn() }));
 
 const mockedExeca = execa as MockedFunction<typeof execa>;
 

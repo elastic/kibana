@@ -8,11 +8,12 @@
  */
 
 import { vi } from 'vitest';
-import type { MockInstance } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 
 import Path from 'path';
 import * as Rx from 'rxjs';
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
+import { CiStatsReporter as CiStatsReporterClass } from '@kbn/ci-stats-reporter';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -20,25 +21,29 @@ import { TestLog } from './log';
 import type { SomeCliArgs } from './cli_dev_mode';
 import { CliDevMode } from './cli_dev_mode';
 import type { CliDevConfig } from './config';
+import { Watcher as WatcherClass } from './watcher';
+import { Optimizer as OptimizerClass } from './optimizer';
+import { DevServer as DevServerClass } from './dev_server';
+import { getBasePathProxyServer as getBasePathProxyServerFn } from './base_path_proxy';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Rx.Observable, 'Rx.Observable'));
 expect.addSnapshotSerializer(createAnyInstanceSerializer(TestLog));
 
 vi.mock('./watcher');
-const { Watcher } = await vi.importMock('./watcher');
+const Watcher = WatcherClass as unknown as Mock;
 
 vi.mock('./optimizer');
-const { Optimizer } = await vi.importMock('./optimizer');
+const Optimizer = OptimizerClass as unknown as Mock;
 
 vi.mock('./dev_server');
-const { DevServer } = await vi.importMock('./dev_server');
+const DevServer = DevServerClass as unknown as Mock;
 
 vi.mock('./base_path_proxy');
-const { getBasePathProxyServer } = await vi.importMock('./base_path_proxy');
+const getBasePathProxyServer = getBasePathProxyServerFn as unknown as Mock;
 
 vi.mock('@kbn/ci-stats-reporter');
-const { CiStatsReporter } = await vi.importMock('@kbn/ci-stats-reporter');
+const CiStatsReporter = CiStatsReporterClass as unknown as { fromEnv: Mock };
 
 const mockBasePathProxy = {
   targetPort: 9999,
@@ -110,7 +115,8 @@ it('passes correct args to sub-classes', () => {
           "mapLogLine": [Function],
           "proxyUrl": undefined,
           "script": <absolute path>/scripts/kibana,
-          "watcher": Watcher {
+          "watcher": Mock {
+            "constructor": [MockFunction],
             "optimizerShouldRestart$": [MockFunction],
             "serverShouldRestart$": [MockFunction],
           },
@@ -395,7 +401,7 @@ describe('#start()/#stop()', () => {
 
       devMode.start();
       devMode.start();
-    }).toThrowErrorMatchingInlineSnapshot(`"CliDevMode already started"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: CliDevMode already started]`);
   });
 
   it('unsubscribes from all observables and stops basePathProxy when stopped', () => {

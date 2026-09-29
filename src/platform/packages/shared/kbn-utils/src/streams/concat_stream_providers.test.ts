@@ -45,7 +45,7 @@ describe('concatStreamProviders() helper', () => {
     dest.on('error', errorListener);
 
     await expect(createPromiseFromStreams([dest])).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"foo"`
+      `[Error: foo]`
     );
     expect(errorListener.mock.calls).toMatchInlineSnapshot(`
 Array [

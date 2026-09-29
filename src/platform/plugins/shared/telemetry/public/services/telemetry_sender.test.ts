@@ -184,7 +184,9 @@ describe('TelemetrySender', () => {
       originalFetch = window.fetch;
     });
 
-    beforeEach(() => (window.fetch = mockFetch = vi.fn()));
+    beforeEach(() => {
+      window.fetch = mockFetch = vi.fn();
+    });
     afterAll(() => (window.fetch = originalFetch));
 
     it('does not send if shouldSendReport returns false', async () => {
@@ -243,6 +245,7 @@ describe('TelemetrySender', () => {
     let originalFetch: (typeof window)['fetch'];
     let mockFetch: Mock<(...args: unknown[]) => (typeof window)['fetch']>;
     let consoleWarnMock: MockInstance;
+    let setTimeoutSpy: MockInstance;
 
     beforeAll(() => {
       originalFetch = window.fetch;
@@ -251,11 +254,14 @@ describe('TelemetrySender', () => {
     beforeEach(() => {
       window.fetch = mockFetch = vi.fn();
       vi.useFakeTimers({ legacyFakeTimers: true });
+      // Jest's legacy fake timers exposed setTimeout as a mock; Vitest's fake timers don't
+      setTimeoutSpy = vi.spyOn(global, 'setTimeout');
       consoleWarnMock = vi.spyOn(global.console, 'warn').mockImplementation(() => {});
     });
 
     afterEach(() => {
       vi.resetAllMocks();
+      setTimeoutSpy.mockRestore();
     });
 
     afterAll(() => {

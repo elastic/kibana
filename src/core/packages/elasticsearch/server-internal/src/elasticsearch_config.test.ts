@@ -153,13 +153,13 @@ describe('#maxSockets', () => {
     expect(() => {
       config.schema.validate({ maxSockets: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[maxSockets]: expected value of type [number] but got [string]"`
+      `[Error: [maxSockets]: expected value of type [number] but got [string]]`
     );
 
     expect(() => {
       config.schema.validate({ maxSockets: true });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[maxSockets]: expected value of type [number] but got [boolean]"`
+      `[Error: [maxSockets]: expected value of type [number] but got [boolean]]`
     );
   });
 
@@ -167,18 +167,18 @@ describe('#maxSockets', () => {
     expect(() => {
       config.schema.validate({ maxSockets: -1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"[maxSockets]: Value must be equal to or greater than [1]."'
+      `[Error: [maxSockets]: Value must be equal to or greater than [1].]`
     );
 
     expect(() => {
       config.schema.validate({ maxSockets: 0 });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"[maxSockets]: Value must be equal to or greater than [1]."'
+      `[Error: [maxSockets]: Value must be equal to or greater than [1].]`
     );
 
     expect(() => {
       config.schema.validate({ maxSockets: Infinity });
-    }).toThrowErrorMatchingInlineSnapshot('"[maxSockets]: \\"maxSockets\\" cannot be infinity"');
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: [maxSockets]: "maxSockets" cannot be infinity]`);
   });
 });
 
@@ -222,7 +222,7 @@ describe('reserved headers', () => {
         customHeaders: { foo: 'bar', 'x-elastic-product-origin': 'beats' },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[customHeaders]: cannot use reserved headers: [x-elastic-product-origin]"`
+      `[Error: [customHeaders]: cannot use reserved headers: [x-elastic-product-origin]]`
     );
   });
 
@@ -230,16 +230,16 @@ describe('reserved headers', () => {
     expect(() => {
       config.schema.validate({ requestHeadersWhitelist: ['foo', 'x-elastic-product-origin'] });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[requestHeadersWhitelist]: types that failed validation:
+      [Error: [requestHeadersWhitelist]: types that failed validation:
       - [requestHeadersWhitelist.0]: expected value of type [string] but got [Array]
-      - [requestHeadersWhitelist.1]: cannot use reserved headers: [x-elastic-product-origin]"
+      - [requestHeadersWhitelist.1]: cannot use reserved headers: [x-elastic-product-origin]]
     `);
     expect(() => {
       config.schema.validate({ requestHeadersWhitelist: 'x-elastic-product-origin' });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[requestHeadersWhitelist]: types that failed validation:
+      [Error: [requestHeadersWhitelist]: types that failed validation:
       - [requestHeadersWhitelist.0]: cannot use reserved headers: [x-elastic-product-origin]
-      - [requestHeadersWhitelist.1]: could not parse array value from json input"
+      - [requestHeadersWhitelist.1]: could not parse array value from json input]
     `);
   });
 });
@@ -365,7 +365,7 @@ describe('throws when config is invalid', () => {
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/key'"`
+      `[Error: ENOENT: no such file or directory, open '/invalid/key']`
     );
   });
 
@@ -374,7 +374,7 @@ describe('throws when config is invalid', () => {
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/cert'"`
+      `[Error: ENOENT: no such file or directory, open '/invalid/cert']`
     );
   });
 
@@ -382,7 +382,9 @@ describe('throws when config is invalid', () => {
     const value = { ssl: { certificateAuthorities: '/invalid/ca' } };
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(`"ENOENT: no such file or directory, open '/invalid/ca'"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: ENOENT: no such file or directory, open '/invalid/ca']`
+    );
   });
 
   it('throws if keystore path is invalid', () => {
@@ -390,7 +392,7 @@ describe('throws when config is invalid', () => {
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/keystore'"`
+      `[Error: ENOENT: no such file or directory, open '/invalid/keystore']`
     );
   });
 
@@ -399,7 +401,7 @@ describe('throws when config is invalid', () => {
     const value = { ssl: { keystore: { path: 'some-path' } } };
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(`"Did not find key in Elasticsearch keystore."`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Did not find key in Elasticsearch keystore.]`);
   });
 
   it('throws if keystore does not contain a certificate', () => {
@@ -407,7 +409,9 @@ describe('throws when config is invalid', () => {
     const value = { ssl: { keystore: { path: 'some-path' } } };
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(`"Did not find certificate in Elasticsearch keystore."`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Did not find certificate in Elasticsearch keystore.]`
+    );
   });
 
   it('throws if truststore path is invalid', () => {
@@ -415,21 +419,21 @@ describe('throws when config is invalid', () => {
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/truststore'"`
+      `[Error: ENOENT: no such file or directory, open '/invalid/truststore']`
     );
   });
 
   it('throws if key and keystore.path are both specified', () => {
     const value = { ssl: { key: 'foo', keystore: { path: 'bar' } } };
     expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: cannot use [key] when [keystore.path] is specified"`
+      `[Error: [ssl]: cannot use [key] when [keystore.path] is specified]`
     );
   });
 
   it('throws if certificate and keystore.path are both specified', () => {
     const value = { ssl: { certificate: 'foo', keystore: { path: 'bar' } } };
     expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: cannot use [certificate] when [keystore.path] is specified"`
+      `[Error: [ssl]: cannot use [certificate] when [keystore.path] is specified]`
     );
   });
 });
@@ -493,7 +497,7 @@ test('serviceAccountToken throws if username is also set', () => {
   };
 
   expect(() => config.schema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[serviceAccountToken]: serviceAccountToken cannot be specified when \\"username\\" is also set."`
+    `[Error: [serviceAccountToken]: serviceAccountToken cannot be specified when "username" is also set.]`
   );
 });
 
@@ -530,7 +534,7 @@ describe('skipStartupConnectionCheck', () => {
     };
     expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
     expect(() => config.schema.validate(obj, { dist: true })).toThrowErrorMatchingInlineSnapshot(
-      `"[skipStartupConnectionCheck]: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server"`
+      `[Error: [skipStartupConnectionCheck]: "skipStartupConnectionCheck" can only be set to true when running from source to allow integration tests to run without an ES server]`
     );
   });
 });

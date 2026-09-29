@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ServerStatus renders correctly for green state 2`] = `
+exports[`ServerStatus > renders correctly for green state 2`] = `
 <span
   aria-label="Green"
   class="euiBadge emotion-euiBadge-success"
@@ -19,7 +19,7 @@ exports[`ServerStatus renders correctly for green state 2`] = `
 </span>
 `;
 
-exports[`ServerStatus renders correctly for red state 2`] = `
+exports[`ServerStatus > renders correctly for red state 2`] = `
 <span
   aria-label="Red"
   class="euiBadge emotion-euiBadge-success"
@@ -38,7 +38,7 @@ exports[`ServerStatus renders correctly for red state 2`] = `
 </span>
 `;
 
-exports[`ServerStatus renders correctly for yellow state 2`] = `
+exports[`ServerStatus > renders correctly for yellow state 2`] = `
 <span
   aria-label="Yellow"
   class="euiBadge emotion-euiBadge-success"

@@ -20,10 +20,11 @@ import moment from 'moment';
 import { ScoutTestTarget } from '@kbn/scout-info';
 vi.mock('moment', () => {
   const actualMoment = require('moment');
-  return {
+  const mocked = {
     ...actualMoment,
     utc: vi.fn((date, fmt) => actualMoment(date, fmt)),
   };
+  return { ...mocked, default: mocked };
 });
 
 describe('isValidUTCDate', () => {

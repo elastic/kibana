@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`i18n json serializer should serialize default messages to JSON 1`] = `
+exports[`i18n json serializer > should serialize default messages to JSON 1`] = `
 "{
   \\"formats\\": {
     \\"number\\": {

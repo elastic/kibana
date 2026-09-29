@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
+vi.mock('react-use/lib/useSessionStorage', () => ({ default: vi.fn() }));
 
 vi.mock('../ecf_cloudformation', () => {
   const mocked = {

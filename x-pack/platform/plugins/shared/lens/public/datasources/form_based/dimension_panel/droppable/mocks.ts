@@ -16,7 +16,6 @@ import type {
 } from '@kbn/lens-common';
 import { documentField } from '../../document_field';
 import { getFieldByNameFactory } from '../../pure_helpers';
-jest.mock('../../../../id_generator');
 
 export const mockDataViews = (): IndexPatternMap => {
   const fields = [

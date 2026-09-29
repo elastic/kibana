@@ -18,7 +18,7 @@ import { fetchRulesSearch } from '@kbn/alerting-v2-episodes-ui/apis/fetch_rules_
 import { TestProviders } from '../../../test_utils/test_providers';
 import { EpisodesFilterBar } from './episodes_filter_bar';
 
-vi.mock('react-use/lib/useDebounce', () => vi.fn());
+vi.mock('react-use/lib/useDebounce', () => ({ default: vi.fn() }));
 
 const mockUseEuiContainerQuery = vi.fn();
 

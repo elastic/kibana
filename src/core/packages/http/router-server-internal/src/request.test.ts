@@ -338,7 +338,7 @@ describe('CoreKibanaRequest', () => {
         });
 
         expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
-          `"unexpected authentication options: {\\"strategies\\":[\\"session\\"]} for route: /"`
+          `[Error: unexpected authentication options: {"strategies":["session"]} for route: /]`
         );
       });
 
@@ -352,7 +352,7 @@ describe('CoreKibanaRequest', () => {
         });
 
         expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
-          `"unexpected authentication options: {} for route: /"`
+          `[Error: unexpected authentication options: {} for route: /]`
         );
       });
     });

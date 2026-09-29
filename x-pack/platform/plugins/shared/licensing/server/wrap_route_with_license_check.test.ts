@@ -54,7 +54,7 @@ describe('wrapRouteWithLicenseCheck', () => {
     const response = httpServerMock.createResponseFactory();
 
     await expect(wrapper(context, request, response)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"reason"`
+      `[Error: reason]`
     );
   });
 
@@ -67,7 +67,7 @@ describe('wrapRouteWithLicenseCheck', () => {
     const response = httpServerMock.createResponseFactory();
 
     await expect(wrapper(context, request, response)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"reason"`
+      `[Error: reason]`
     );
 
     expect(routeHandler).toHaveBeenCalledTimes(0);

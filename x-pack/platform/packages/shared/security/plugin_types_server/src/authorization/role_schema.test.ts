@@ -39,7 +39,7 @@ describe('getKibanaRoleSchema', () => {
       expect(() =>
         getKibanaRoleSchema(() => basePrivilegeNamesMap).validate(kibana)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"array size is [1001], but cannot be greater than [1000]"`
+        `[Error: array size is [1001], but cannot be greater than [1000]]`
       );
     });
 
@@ -61,7 +61,7 @@ describe('getKibanaRoleSchema', () => {
           { feature: { bar: ['bar-privilege-1'] }, spaces: ['sales', 'marketing'] },
         ])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"more than one privilege is applied to the following spaces: [marketing]"`
+        `[Error: more than one privilege is applied to the following spaces: [marketing]]`
       );
     });
 
@@ -72,7 +72,7 @@ describe('getKibanaRoleSchema', () => {
           { base: ['read'], spaces: ['alpha', 'beta'] },
         ])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"more than one privilege is applied to the following spaces: [alpha]"`
+        `[Error: more than one privilege is applied to the following spaces: [alpha]]`
       );
     });
 
@@ -82,7 +82,7 @@ describe('getKibanaRoleSchema', () => {
           { base: ['all'], spaces: ['marketing', 'marketing'] },
         ])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"more than one privilege is applied to the following spaces: [marketing]"`
+        `[Error: more than one privilege is applied to the following spaces: [marketing]]`
       );
     });
 

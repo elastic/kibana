@@ -12,6 +12,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import { getExecutionState as getExecutionStateImpl } from '@kbn/agent-builder-tools-base/workflows';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
@@ -22,7 +23,7 @@ vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { getExecutionState } = await vi.importMock('@kbn/agent-builder-tools-base/workflows');
+const getExecutionState = vi.mocked(getExecutionStateImpl);
 
 describe('resumeWorkflowExecutionTool', () => {
   const createWorkflowsManagement = () => ({

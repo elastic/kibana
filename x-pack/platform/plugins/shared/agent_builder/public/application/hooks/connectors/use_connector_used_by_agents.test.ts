@@ -12,7 +12,7 @@ import { useConnectorUsedByAgents } from './use_connector_used_by_agents';
 
 vi.mock('../agents/use_agents');
 
-const { useAgentBuilderAgents } = await vi.importMock('../agents/use_agents');
+const { useAgentBuilderAgents } = vi.mocked(await import('../agents/use_agents'));
 
 const agent = (id: string, connectorIds: string[] | undefined | null) => ({
   id,

@@ -49,13 +49,13 @@ test('parses days', () => {
 
 test('throws error when the format is invalid', () => {
   expect(() => parseDuration('10x')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"10x\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "10x". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
 });
 
 test('throws error when suffix is missing', () => {
   expect(() => parseDuration('1000')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"1000\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "1000". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
 });
 
@@ -141,28 +141,28 @@ test('formats days with full unit', () => {
 
 test('format throws error when the format is invalid', () => {
   expect(() => formatDuration('10x')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"10x\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "10x". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
 });
 
 test('format throws error when suffix is missing', () => {
   expect(() => formatDuration('1000')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"1000\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "1000". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
 });
 
 test('throws error when 0 based', () => {
   expect(() => parseDuration('0s')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"0s\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "0s". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
   expect(() => parseDuration('0m')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"0m\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "0m". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
   expect(() => parseDuration('0h')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"0h\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "0h". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
   expect(() => parseDuration('0d')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"0d\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "0d". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
 });
 
@@ -209,12 +209,12 @@ test('convertDurationToFrequency converts duration', () => {
 
 test('convertDurationToFrequency throws when duration is invalid', () => {
   expect(() => convertDurationToFrequency('0d')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid duration \\"0d\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    `[Error: Invalid duration "0d". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"]`
   );
 });
 
 test('convertDurationToFrequency throws when denomination is 0', () => {
   expect(() => convertDurationToFrequency('1s', 0)).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid denomination value: value cannot be 0"`
+    `[Error: Invalid denomination value: value cannot be 0]`
   );
 });

@@ -159,7 +159,7 @@ describe('requestOAuthToken', () => {
         }
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"{\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}"'
+      `[Error: {\"error\":\"invalid_scope\",\"error_description\":\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\"}]`
     );
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`

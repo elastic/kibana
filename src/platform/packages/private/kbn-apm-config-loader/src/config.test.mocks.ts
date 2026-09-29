@@ -10,15 +10,33 @@
 import { vi } from 'vitest';
 
 import { join } from 'path';
+import { tmpdir } from 'os';
 const childProcessModule = require('child_process');
 const fsModule = require('fs');
 
-export const mockedRootDir = '/root';
+// `ApmConfiguration` loads `<rootDir>/package.json` with a native `require()` that `vi.mock` can't
+// intercept, so the mocked package.json is written to a real temporary root directory.
+// Real path, because `require.cache` is keyed by resolved file names.
+export const mockedRootDir: string = fsModule.realpathSync(
+  fsModule.mkdtempSync(join(tmpdir(), 'kbn-apm-config-loader-'))
+);
+const packageJsonPath = join(mockedRootDir, 'package.json');
 
+let rawPackage: Record<string, unknown> = {};
 export const packageMock = {
-  raw: {} as any,
+  get raw(): Record<string, unknown> {
+    return rawPackage;
+  },
+  set raw(value: Record<string, unknown>) {
+    rawPackage = value;
+    fsModule.writeFileSync(packageJsonPath, JSON.stringify(value));
+    delete require.cache[packageJsonPath];
+  },
 };
-vi.doMock(join(mockedRootDir, 'package.json'), () => packageMock.raw, { virtual: true });
+
+afterAll(() => {
+  fsModule.rmSync(mockedRootDir, { recursive: true, force: true });
+});
 
 export const gitRevExecMock = vi.fn();
 vi.doMock('child_process', () => {

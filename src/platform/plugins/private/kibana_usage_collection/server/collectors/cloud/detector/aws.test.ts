@@ -11,15 +11,15 @@
 
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
+import fetch from 'node-fetch';
+import { readFile as readFileOriginal } from 'fs/promises';
 vi.mock('node-fetch');
 vi.mock('fs/promises');
 import type { AWSResponse } from './aws';
 import { AWSCloudService } from './aws';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as Mock;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { readFile } = require('fs/promises') as { readFile: Mock };
+const fetchMock = fetch as unknown as Mock;
+const readFile = readFileOriginal as unknown as Mock;
 
 describe('AWS', () => {
   const mockIsWindows = vi.fn();

@@ -35,7 +35,7 @@ describe('getProvider', () => {
       type: InferenceConnectorType.OpenAI,
     });
     expect(() => getProvider(connector)).toThrowErrorMatchingInlineSnapshot(
-      `"trying to get provider for a non-inference connector (.gen-ai)"`
+      `[Error: trying to get provider for a non-inference connector (.gen-ai)]`
     );
   });
 });
@@ -64,7 +64,7 @@ describe('getModelId', () => {
       type: InferenceConnectorType.OpenAI,
     });
     expect(() => getModelId(connector)).toThrowErrorMatchingInlineSnapshot(
-      `"trying to get modelId for a non-inference connector (.gen-ai)"`
+      `[Error: trying to get modelId for a non-inference connector (.gen-ai)]`
     );
   });
 });
@@ -101,7 +101,7 @@ describe('getElasticModelProvider', () => {
       type: InferenceConnectorType.OpenAI,
     });
     expect(() => getElasticModelProvider(connector)).toThrowErrorMatchingInlineSnapshot(
-      `"trying to get provider for a non-inference connector (.gen-ai)"`
+      `[Error: trying to get provider for a non-inference connector (.gen-ai)]`
     );
   });
   it('throws when called for a wrong provider', () => {
@@ -112,7 +112,7 @@ describe('getElasticModelProvider', () => {
       },
     });
     expect(() => getElasticModelProvider(connector)).toThrowErrorMatchingInlineSnapshot(
-      `"trying to retrieve model provider for a non-elastic inference endpoint (openai)"`
+      `[Error: trying to retrieve model provider for a non-elastic inference endpoint (openai)]`
     );
   });
 });

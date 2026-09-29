@@ -12,12 +12,12 @@ import { vi } from 'vitest';
 const mockDiff = vi.fn();
 const mockRaw = vi.fn();
 
-vi.mock('simple-git', () =>
-  vi.fn().mockImplementation(() => ({
+vi.mock('simple-git', () => ({
+  default: vi.fn().mockImplementation(() => ({
     diff: mockDiff,
     raw: mockRaw,
-  }))
-);
+  })),
+}));
 
 import SimpleGit from 'simple-git';
 import { getFilesForCommit } from './get_files_for_commit';

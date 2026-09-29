@@ -8,7 +8,6 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock } from 'vitest';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -16,7 +15,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 import { lintFiles } from './lint_files';
 
-vi.mock('execa', () => vi.fn());
+vi.mock('execa', () => ({ default: vi.fn() }));
 vi.mock('./constants', () => {
   const mocked = {
     LINT_LOG_PREFIX: '[oxlint]',
@@ -26,7 +25,7 @@ vi.mock('./constants', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockExeca = (await vi.importMock('execa')) as Mock;
+const mockExeca = vi.mocked((await import('execa')).default);
 
 interface FakeRun {
   exitCode: number;

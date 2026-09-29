@@ -99,7 +99,7 @@ describe('writePidFile', () => {
         },
         logger,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"pid file already exists at /pid-file"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: pid file already exists at /pid-file]`);
 
     expect(writeFile).not.toHaveBeenCalled();
     expect(process.once).not.toHaveBeenCalled();

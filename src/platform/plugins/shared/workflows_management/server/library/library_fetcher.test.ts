@@ -132,9 +132,7 @@ beforeEach(() => {
   now = Date.UTC(2026, 5, 1, 12, 0, 0);
   // Fake only `Date` so we can drive TTL expiry; leave the timer primitives
   // real so p-retry's exponential backoff can complete in retry tests.
-  vi.useFakeTimers({
-    doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate'],
-  });
+  vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date(now));
 });
 

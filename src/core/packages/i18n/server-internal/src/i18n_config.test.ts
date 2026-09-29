@@ -62,7 +62,7 @@ describe('i18n config', () => {
           defaultLocale: 'ja-JP',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[i18n.defaultLocale]: \\"ja-JP\\" must be one of [i18n.locales] (en, fr-FR)"`
+        `[Error: [i18n.defaultLocale]: "ja-JP" must be one of [i18n.locales] (en, fr-FR)]`
       );
     });
 
@@ -93,7 +93,7 @@ describe('i18n config', () => {
       expect(() =>
         config.schema.validate({ locales: tooManyLocales, defaultLocale: 'en' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[locales]: array size is [11], but cannot be greater than [10]"`
+        `[Error: [locales]: array size is [11], but cannot be greater than [10]]`
       );
     });
 

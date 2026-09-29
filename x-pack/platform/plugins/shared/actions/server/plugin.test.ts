@@ -274,7 +274,7 @@ describe('Actions Plugin', () => {
           httpServerMock.createResponseFactory()
         )) as unknown as ActionsApiRequestHandlerContext;
         expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+          `[Error: Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.]`
         );
       });
 
@@ -386,7 +386,7 @@ describe('Actions Plugin', () => {
 
             minimumLicenseRequired: 'foo' as any,
           })
-        ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
+        ).toThrowErrorMatchingInlineSnapshot(`[Error: "foo" is not a valid license type]`);
       });
 
       it('should throw error when license type is less than gold', async () => {
@@ -396,7 +396,7 @@ describe('Actions Plugin', () => {
             minimumLicenseRequired: 'basic',
           })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Third party action type \\"test\\" can only set minimumLicenseRequired to a gold license or higher"`
+          `[Error: Third party action type "test" can only set minimumLicenseRequired to a gold license or higher]`
         );
       });
 
@@ -634,7 +634,7 @@ describe('Actions Plugin', () => {
           serverless: serverlessPluginMock.createStartContract(),
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Action type \\"non-existing\\" is not registered."`
+        `[Error: Action type "non-existing" is not registered.]`
       );
     });
 
@@ -660,7 +660,7 @@ describe('Actions Plugin', () => {
         await expect(
           pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+          `[Error: Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.]`
         );
       });
     });
@@ -820,7 +820,7 @@ describe('Actions Plugin', () => {
           await expect(async () =>
             plugin.start(coreStart, pluginsStart)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Setting system action types in preconfigured connectors are not allowed"`
+            `[Error: Setting system action types in preconfigured connectors are not allowed]`
           );
         });
       });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 export const mockHttpValues = {
@@ -13,6 +15,6 @@ export const mockHttpValues = {
   readOnlyMode: false,
 };
 
-jest.mock('../../shared/http', () => ({
+vi.mock('../../shared/http', () => ({
   HttpLogic: { values: mockHttpValues },
 }));

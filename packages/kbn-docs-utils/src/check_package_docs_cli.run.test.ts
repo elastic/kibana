@@ -20,12 +20,13 @@ vi.mock('elastic-apm-node', () => {
     end: vi.fn(),
     setOutcome: vi.fn(),
   };
-  return {
+  const mocked = {
     startTransaction: vi.fn(() => tx),
     isStarted: vi.fn(() => false),
     flush: vi.fn(),
     __tx: tx,
   };
+  return { ...mocked, default: mocked };
 });
 
 vi.mock('@kbn/apm-config-loader', () => {

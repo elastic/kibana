@@ -10,7 +10,7 @@
 import { vi } from 'vitest';
 
 import { EcsVersion } from '@elastic/ecs';
-import { test as fcTest, fc } from '@fast-check/jest';
+import { test as fcTest, fc } from '@fast-check/vitest';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { JsonLayout } from './json_layout';

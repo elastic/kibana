@@ -20,7 +20,7 @@ describe('config schema', () => {
         { overrides: { featureA: { name: 'new name' } } },
         { serverless: false }
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"[overrides]: a value wasn't expected to be present"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: [overrides]: a value wasn't expected to be present]`);
     expect(
       ConfigSchema.validate({ overrides: { featureA: { name: 'new name' } } }, { serverless: true })
     ).toMatchInlineSnapshot(`
@@ -150,7 +150,7 @@ describe('config schema', () => {
         { serverless: true }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[overrides.featureA.category]: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, workplaceAI, management"`
+      `[Error: [overrides.featureA.category]: Unknown category "unknown". Should be one of kibana, enterpriseSearch, observability, security, workplaceAI, management]`
     );
   });
   it('properly validates sub-feature privilege inclusion override', () => {

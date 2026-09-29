@@ -31,7 +31,14 @@ vi.mock('@kbn/apm-config-loader', async () => {
 import { REPO_ROOT, PKG_JSON } from '@kbn/repo-info';
 import { ApmConfiguration } from '@kbn/apm-config-loader/src/config';
 import { resources } from '@elastic/opentelemetry-node/sdk';
+import {
+  getConfiguration as getConfigurationMock,
+  loadConfiguration as loadConfigurationMock,
+} from '@kbn/apm-config-loader';
 import { initTelemetry } from '..';
+
+const loadConfiguration = vi.mocked(loadConfigurationMock);
+const getConfiguration = vi.mocked(getConfigurationMock);
 
 describe('initTelemetry', () => {
   beforeEach(() => {
@@ -46,7 +53,6 @@ describe('initTelemetry', () => {
         false
       );
 
-      const { loadConfiguration } = await vi.importMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
 
       expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).toThrow(
@@ -64,7 +70,6 @@ describe('initTelemetry', () => {
         false
       );
 
-      const { loadConfiguration } = await vi.importMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
 
       expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).toThrow(
@@ -88,7 +93,6 @@ describe('initTelemetry', () => {
         contextPropagationOnly: false,
       });
 
-      const { loadConfiguration } = await vi.importMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
 
       expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).not.toThrow();
@@ -97,7 +101,6 @@ describe('initTelemetry', () => {
     test('does not throw when APM is active and OTel tracing is disabled (default)', async () => {
       const apmConfig = new ApmConfiguration(REPO_ROOT, {}, false);
 
-      const { loadConfiguration } = await vi.importMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
 
       expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).not.toThrow();
@@ -115,7 +118,6 @@ describe('initTelemetry', () => {
         false
       );
 
-      const { loadConfiguration, getConfiguration } = await vi.importMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
       getConfiguration.mockImplementationOnce(() => apmConfig.getConfig('test-service'));
 
@@ -138,7 +140,6 @@ describe('initTelemetry', () => {
     });
 
     test('uses the provided serviceName (not a hardcoded "kibana") to look up APM config', async () => {
-      const { loadConfiguration, getConfiguration } = await vi.importMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => new ApmConfiguration(REPO_ROOT, {}, false));
       getConfiguration.mockImplementationOnce(() => ({
         serviceName: 'my-worker',
@@ -161,7 +162,6 @@ describe('initTelemetry', () => {
     });
 
     test('does not emit literal "null" or "undefined" strings for nullish globalLabels entries', async () => {
-      const { loadConfiguration, getConfiguration } = await vi.importMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => new ApmConfiguration(REPO_ROOT, {}, false));
       getConfiguration.mockImplementationOnce(() => ({
         serviceName: 'test-service',

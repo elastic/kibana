@@ -14,7 +14,7 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderHome } from '../helpers/render_home';
 
-vi.mock('react-use/lib/useObservable', () => () => vi.fn());
+vi.mock('react-use/lib/useObservable', () => ({ default: () => vi.fn() }));
 
 describe('<IndexManagementHome />', () => {
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];

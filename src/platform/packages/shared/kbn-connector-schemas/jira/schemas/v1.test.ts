@@ -58,16 +58,16 @@ describe('Jira schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-          "[
+          [ZodError: [
             {
-              \\"code\\": \\"custom\\",
-              \\"message\\": \\"A maximum of 20 fields in otherFields can be defined at a time.\\",
-              \\"path\\": [
-                \\"incident\\",
-                \\"otherFields\\"
+              "code": "custom",
+              "message": "A maximum of 20 fields in otherFields can be defined at a time.",
+              "path": [
+                "incident",
+                "otherFields"
               ]
             }
-          ]"
+          ]]
         `);
       });
 

@@ -8,6 +8,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
@@ -20,7 +21,7 @@ vi.mock('timers/promises', () => {
 });
 
 vi.mock('execa');
-const execa = await vi.importMock('execa');
+const execa = (await import('execa')).default as unknown as Mock;
 
 // Mock undici
 vi.mock('undici', () => {

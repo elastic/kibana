@@ -117,7 +117,9 @@ describe('getSchemaForAuthType()', () => {
   test('throws for invalid auth type ID', () => {
     expect(() => {
       getSchemaForAuthType('invalid_auth_type');
-    }).toThrowErrorMatchingInlineSnapshot(`"Auth type with id invalid_auth_type not found."`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Auth type with id invalid_auth_type not found.]`
+    );
 
     expect(() => {
       getSchemaForAuthType({
@@ -127,7 +129,7 @@ describe('getSchemaForAuthType()', () => {
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Auth type with id another_invalid_auth_type not found."`
+      `[Error: Auth type with id another_invalid_auth_type not found.]`
     );
   });
 
@@ -139,6 +141,6 @@ describe('getSchemaForAuthType()', () => {
           noField: 'custom-api-key-field2',
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Auth type ID must be provided."`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Auth type ID must be provided.]`);
   });
 });

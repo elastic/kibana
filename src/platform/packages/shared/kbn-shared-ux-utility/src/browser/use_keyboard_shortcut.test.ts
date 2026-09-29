@@ -12,16 +12,13 @@ import { vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useKeyboardShortcut } from './use_keyboard_shortcut';
 
-let mockIsMac = true;
-vi.mock('./platform', () => {
-  const mocked = {
-    get isMac() {
-      return mockIsMac;
-    },
-    getPlatform: () => (mockIsMac ? 'mac' : 'windows'),
-  };
-  return { ...mocked, default: mocked };
-});
+const mockPlatform = vi.hoisted(() => ({ isMac: true }));
+vi.mock('./platform', () => ({
+  get isMac() {
+    return mockPlatform.isMac;
+  },
+  getPlatform: () => (mockPlatform.isMac ? 'mac' : 'windows'),
+}));
 
 const dispatch = (opts: KeyboardEventInit) => {
   const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...opts });
@@ -31,7 +28,7 @@ const dispatch = (opts: KeyboardEventInit) => {
 
 describe('useKeyboardShortcut', () => {
   afterEach(() => {
-    mockIsMac = true;
+    mockPlatform.isMac = true;
   });
 
   it('fires callback on matching meta+key (Mac)', () => {
@@ -43,7 +40,7 @@ describe('useKeyboardShortcut', () => {
   });
 
   it('fires callback on matching ctrl+key (Windows)', () => {
-    mockIsMac = false;
+    mockPlatform.isMac = false;
     const callback = vi.fn();
     renderHook(() => useKeyboardShortcut({ key: '/', meta: true }, callback));
 

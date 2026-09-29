@@ -15,9 +15,9 @@ import { defaultAgentListState, useSessionAgentListState } from './use_session_a
 const mockSetSessionState = vi.fn();
 const mockSessionState = vi.fn();
 
-vi.mock('react-use/lib/useSessionStorage', () => {
-  return vi.fn(() => [mockSessionState(), mockSetSessionState]);
-});
+vi.mock('react-use/lib/useSessionStorage', () => ({
+  default: vi.fn(() => [mockSessionState(), mockSetSessionState]),
+}));
 
 describe('useSessionAgentListState', () => {
   beforeEach(() => {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
+exports[`#start() > renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
     <I18nProvider>
@@ -39,7 +39,7 @@ Array [
 ]
 `;
 
-exports[`#stop() unmounts the GlobalToastList from the targetDomElement 1`] = `
+exports[`#stop() > unmounts the GlobalToastList from the targetDomElement 1`] = `
 Array [
   Array [
     <div

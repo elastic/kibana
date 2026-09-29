@@ -1,4 +1,26 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`different cwd() > resolves relative files based on the cwd 1`] = `
+Object {
+  "abc": Object {
+    "def": "test",
+    "qwe": 1,
+    "zyx": Object {
+      "val": 1,
+    },
+  },
+  "bar": true,
+  "empty_arr": Array [],
+  "foo": 1,
+  "pom": Object {
+    "bom": 3,
+  },
+  "xyz": Array [
+    "1",
+    "2",
+  ],
+}
+`;
 
 exports[`different cwd() resolves relative files based on the cwd 1`] = `
 Object {

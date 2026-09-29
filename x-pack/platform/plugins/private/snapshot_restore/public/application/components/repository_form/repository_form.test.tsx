@@ -19,7 +19,15 @@ import type { RepositoryType } from '../../../../common/types';
 import { textService } from '../../services/text';
 import { RepositoryForm } from './repository_form';
 
-const repositoryTypes: RepositoryType[] = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
+const repositoryTypes = vi.hoisted((): RepositoryType[] => [
+  'fs',
+  'url',
+  'source',
+  'azure',
+  'gcs',
+  's3',
+  'hdfs',
+]);
 
 vi.mock('../../services/http', async () => {
   const actual = await vi.importActual<typeof import('../../services/http')>('../../services/http');

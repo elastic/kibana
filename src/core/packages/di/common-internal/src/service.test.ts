@@ -9,7 +9,7 @@
 
 import { vi } from 'vitest';
 
-const pluginModuleMock = {};
+const pluginModuleMock = vi.hoisted(() => ({}));
 
 vi.mock('./modules/plugin', async () => {
   const mocked = {

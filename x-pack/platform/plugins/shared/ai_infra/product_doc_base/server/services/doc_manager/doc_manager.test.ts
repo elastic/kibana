@@ -211,7 +211,7 @@ describe('DocumentationManager', () => {
       await expect(
         docManager.install({ force: false, wait: false, inferenceId: DEFAULT_INFERENCE_ID })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Elastic documentation requires an enterprise license"`
+        `[Error: Elastic documentation requires an enterprise license]`
       );
     });
   });

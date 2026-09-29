@@ -270,7 +270,7 @@ describe('chunksIntoMessage', () => {
     }
 
     await expect(async () => getMessage()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Tool call arguments for myFunction (001) were invalid"`
+      `[Error: Tool call arguments for myFunction (001) were invalid]`
     );
   });
 

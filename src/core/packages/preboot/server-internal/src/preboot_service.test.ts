@@ -128,7 +128,7 @@ describe('PrebootService', () => {
           'some-other-reason',
           Promise.resolve(undefined)
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"Cannot hold boot at this stage."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Cannot hold boot at this stage.]`);
 
       expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [

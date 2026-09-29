@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`settingDefinitions should have correct default values 1`] = `
+exports[`settingDefinitions > should have correct default values 1`] = `
 Array [
   Object {
     "key": "api_request_size",

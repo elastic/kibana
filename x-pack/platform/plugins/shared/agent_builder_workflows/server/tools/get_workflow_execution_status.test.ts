@@ -10,6 +10,7 @@ import { vi } from 'vitest';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import { getExecutionState as getExecutionStateImpl } from '@kbn/agent-builder-tools-base/workflows';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
@@ -20,7 +21,7 @@ vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { getExecutionState } = await vi.importMock('@kbn/agent-builder-tools-base/workflows');
+const getExecutionState = vi.mocked(getExecutionStateImpl);
 
 const createWorkflowsManagement = () => ({
   management: {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getJsonSchemaFromStreamlangSchema generates a valid JSON Schema from the streamlang DSL schema 1`] = `
+exports[`getJsonSchemaFromStreamlangSchema > generates a valid JSON Schema from the streamlang DSL schema 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,

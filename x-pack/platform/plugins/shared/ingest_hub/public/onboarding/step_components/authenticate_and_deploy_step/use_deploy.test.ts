@@ -165,7 +165,7 @@ vi.mock('../../onboarding_flow_context', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
+vi.mock('react-use/lib/useSessionStorage', () => ({ default: vi.fn() }));
 
 import {
   sendCreateAgentlessPolicy,

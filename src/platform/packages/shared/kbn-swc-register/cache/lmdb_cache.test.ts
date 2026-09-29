@@ -12,11 +12,14 @@ import Path from 'path';
 import { Writable } from 'stream';
 
 import del from 'del';
-import LmdbStore = require('lmdb');
+import type * as Lmdb from 'lmdb';
 import type { RootDatabaseOptions } from 'lmdb';
 
 import { LmdbCache } from './lmdb_cache';
 import { utf8StringKeyEncoder } from './lmdb_key_encoder';
+
+// Share the CommonJS lmdb instance that lmdb_cache.js loads with require().
+const LmdbStore: typeof Lmdb = require('lmdb');
 
 const DIR = Path.resolve(__dirname, '../__tmp__/cache');
 const DB_DIR = Path.resolve(DIR, 'v2');

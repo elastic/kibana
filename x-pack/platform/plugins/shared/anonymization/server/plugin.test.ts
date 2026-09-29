@@ -19,16 +19,13 @@ import type { AnonymizationProfileInitializer } from './types';
 
 // Allow tests to control ANONYMIZATION_FEATURE_ACTIVE per test via createPlugin(active)
 // without exposing any production config option.
-let mockFeatureActive = true;
-vi.mock('@kbn/anonymization-common', async () => {
-  const mocked = {
-    ...(await vi.importActual('@kbn/anonymization-common')),
-    get ANONYMIZATION_FEATURE_ACTIVE() {
-      return mockFeatureActive;
-    },
-  };
-  return { ...mocked, default: mocked };
-});
+const featureState = vi.hoisted(() => ({ active: true }));
+vi.mock('@kbn/anonymization-common', async () => ({
+  ...(await vi.importActual('@kbn/anonymization-common')),
+  get ANONYMIZATION_FEATURE_ACTIVE() {
+    return featureState.active;
+  },
+}));
 
 vi.mock('./system_index', () => {
   const mocked = {
@@ -53,7 +50,7 @@ const initializationMock = (await vi.importMock('./initialization')) as {
 };
 
 const createPlugin = (active = true) => {
-  mockFeatureActive = active;
+  featureState.active = active;
   const initializerContext = coreMock.createPluginInitializerContext();
   return new AnonymizationPlugin(initializerContext);
 };
@@ -91,7 +88,7 @@ const createProfile = ({
 
 describe('AnonymizationPlugin policy resolution', () => {
   afterEach(() => {
-    mockFeatureActive = true;
+    featureState.active = true;
     vi.clearAllMocks();
     vi.restoreAllMocks();
   });

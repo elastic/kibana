@@ -10,7 +10,7 @@ import type { Mock } from 'vitest';
 
 import { renderHook } from '@testing-library/react';
 
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
+vi.mock('react-use/lib/useSessionStorage', () => ({ default: vi.fn() }));
 
 // Mock use_agent_policy_summary to prevent useQuery from being called without a QueryClientProvider.
 // useDeploymentSummary calls useAgentPolicySummary unconditionally (it's a no-op when agentPolicyId

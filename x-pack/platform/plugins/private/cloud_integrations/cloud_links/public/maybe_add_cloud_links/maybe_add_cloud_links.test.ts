@@ -63,7 +63,9 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+    // Vitest cannot merge asymmetric matchers inside array property matchers of `toMatchSnapshot`,
+    // and the stored snapshot was exactly these values, so assert them directly.
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toStrictEqual([
       {
         href: 'profile-url',
         iconType: 'user',
@@ -150,7 +152,7 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toStrictEqual([
       {
         href: 'profile-url',
         iconType: 'user',

@@ -254,7 +254,7 @@ describe('fields', () => {
       const defaultSourceFields = getDefaultSourceFields(fieldDescriptors);
 
       expect(defaultSourceFields).toEqual({
-        'search-search-labs': [undefined],
+        'search-search-labs': [],
       });
     });
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 export const mockLicensingValues = {
@@ -16,7 +18,7 @@ export const mockLicensingValues = {
   canManageLicense: true,
 };
 
-jest.mock('../../shared/licensing', () => ({
-  ...(jest.requireActual('../../shared/licensing') as object),
+vi.mock('../../shared/licensing', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   LicensingLogic: { values: mockLicensingValues },
 }));

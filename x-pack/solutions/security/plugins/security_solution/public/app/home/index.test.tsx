@@ -41,7 +41,9 @@ vi.mock('../../common/utils/route/use_route_spy', () => {
   return { ...mocked, default: mocked };
 });
 
-const DummyComponent = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const { DummyComponent } = vi.hoisted(() => ({
+  DummyComponent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 const mockedUseInitializeUrlParam = vi.fn();
 

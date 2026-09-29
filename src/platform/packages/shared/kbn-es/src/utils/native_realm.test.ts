@@ -98,7 +98,7 @@ describe('isSecurityEnabled', () => {
 
     await expect(
       nativeRealm.isSecurityEnabled({ maxAttempts: 1 })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"ResponseError"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: ResponseError]`);
   });
 });
 
@@ -215,6 +215,6 @@ describe('setPassword', () => {
 
     await expect(
       nativeRealm.setPassword('kibana_system', 'foo', { maxAttempts: 1 })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"SomeError"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: SomeError]`);
   });
 });

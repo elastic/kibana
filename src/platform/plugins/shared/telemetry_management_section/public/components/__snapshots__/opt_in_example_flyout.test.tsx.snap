@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`OptInDetailsComponent renders as expected 1`] = `
+exports[`OptInDetailsComponent > renders as expected 1`] = `
 <EuiPortal>
   <EuiFlyout
     aria-labelledby="generated-id_flyoutTitle"

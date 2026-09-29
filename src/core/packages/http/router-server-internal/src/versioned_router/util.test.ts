@@ -126,7 +126,7 @@ describe('prepareVersionedRouteValidation', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+        `[Error: [authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]]`
       );
     });
 
@@ -143,7 +143,7 @@ describe('prepareVersionedRouteValidation', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.reason]: expected value of type [string] but got [undefined]"`
+        `[Error: [authz.reason]: expected value of type [string] but got [undefined]]`
       );
     });
 

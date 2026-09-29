@@ -621,7 +621,7 @@ describe('SavedObjectsService', () => {
         await expect(() =>
           soService.start(createStartDeps())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"esNodesCompatibility$ was closed before emitting"`
+          `[Error: esNodesCompatibility$ was closed before emitting]`
         );
 
         expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();

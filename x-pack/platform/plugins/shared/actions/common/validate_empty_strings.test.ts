@@ -25,13 +25,13 @@ describe('validateEmptyStrings', () => {
 
   it('should throw an error if the trimmed strings in an array are empty', () => {
     expect(() => validateEmptyStrings(action.secrets)).toThrowErrorMatchingInlineSnapshot(
-      `"value '' is not valid"`
+      `[Error: value '' is not valid]`
     );
   });
 
   it('should throw an error if the trimmed strings in an object are empty', () => {
     expect(() => validateEmptyStrings(action)).toThrowErrorMatchingInlineSnapshot(
-      `"value '' is not valid"`
+      `[Error: value '' is not valid]`
     );
   });
 });

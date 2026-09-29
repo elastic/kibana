@@ -40,7 +40,7 @@ describe('RuntimePluginContractResolver', () => {
       resolver = new RuntimePluginContractResolver();
 
       expect(() => resolver.onSetup(SOURCE_PLUGIN, ['pluginA'])).toThrowErrorMatchingInlineSnapshot(
-        `"onSetup cannot be called before setDependencyMap"`
+        `[Error: onSetup cannot be called before setDependencyMap]`
       );
     });
 
@@ -57,7 +57,7 @@ describe('RuntimePluginContractResolver', () => {
             pluginA: pluginAContract,
           })
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"resolveSetupRequests can only be called once"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: resolveSetupRequests can only be called once]`);
     });
 
     it('resolves a single request', async () => {
@@ -171,7 +171,7 @@ describe('RuntimePluginContractResolver', () => {
       expect(() =>
         resolver.onSetup(SOURCE_PLUGIN, ['undeclaredPlugin'])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin"`
+        `[Error: Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin]`
       );
     });
 
@@ -184,7 +184,7 @@ describe('RuntimePluginContractResolver', () => {
           'undeclaredPlugin2',
         ])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin1, undeclaredPlugin2"`
+        `[Error: Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin1, undeclaredPlugin2]`
       );
     });
   });
@@ -194,7 +194,7 @@ describe('RuntimePluginContractResolver', () => {
       resolver = new RuntimePluginContractResolver();
 
       expect(() => resolver.onStart(SOURCE_PLUGIN, ['pluginA'])).toThrowErrorMatchingInlineSnapshot(
-        `"onStart cannot be called before setDependencyMap"`
+        `[Error: onStart cannot be called before setDependencyMap]`
       );
     });
 
@@ -211,7 +211,7 @@ describe('RuntimePluginContractResolver', () => {
             pluginA: pluginAContract,
           })
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"resolveStartRequests can only be called once"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: resolveStartRequests can only be called once]`);
     });
 
     it('resolves a single request', async () => {
@@ -325,7 +325,7 @@ describe('RuntimePluginContractResolver', () => {
       expect(() =>
         resolver.onStart(SOURCE_PLUGIN, ['undeclaredPlugin'])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin"`
+        `[Error: Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin]`
       );
     });
 
@@ -338,7 +338,7 @@ describe('RuntimePluginContractResolver', () => {
           'undeclaredPlugin2',
         ])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin1, undeclaredPlugin2"`
+        `[Error: Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin1, undeclaredPlugin2]`
       );
     });
   });

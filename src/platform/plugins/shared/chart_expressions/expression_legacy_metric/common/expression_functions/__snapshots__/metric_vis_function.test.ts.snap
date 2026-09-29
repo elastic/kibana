@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`interpreter/functions#metric logs correct datatable to inspector 1`] = `
+exports[`interpreter/functions#metric > logs correct datatable to inspector 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -21,7 +21,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#metric returns an object with the correct structure 1`] = `
+exports[`interpreter/functions#metric > returns an object with the correct structure 1`] = `
 Object {
   "as": "legacyMetricVis",
   "type": "render",
@@ -103,4 +103,4 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#metric returns error if bucket and colorFullBackground specified 1`] = `"Full background coloring cannot be applied to visualizations that have a bucket specified."`;
+exports[`interpreter/functions#metric > returns error if bucket and colorFullBackground specified 1`] = `[Error: Full background coloring cannot be applied to visualizations that have a bucket specified.]`;

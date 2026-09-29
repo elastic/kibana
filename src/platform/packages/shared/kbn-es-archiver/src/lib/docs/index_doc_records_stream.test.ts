@@ -370,15 +370,15 @@ describe('bulk helper onDrop param', () => {
     ]);
 
     await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Bulk doc failure [operation=index]:
-        doc: {\\"hello\\":\\"world\\"}
-        error: {\\"reason\\":\\"1 conflicts with something\\"}
-      Bulk doc failure [operation=index]:
-        doc: {\\"hello\\":\\"world\\"}
-        error: {\\"reason\\":\\"2 conflicts with something\\"}
-      Bulk doc failure [operation=index]:
-        doc: {\\"hello\\":\\"world\\"}
-        error: {\\"reason\\":\\"3 conflicts with something\\"}"
-    `);
+  [AggregateError: Bulk doc failure [operation=index]:
+    doc: {"hello":"world"}
+    error: {"reason":"1 conflicts with something"}
+  Bulk doc failure [operation=index]:
+    doc: {"hello":"world"}
+    error: {"reason":"2 conflicts with something"}
+  Bulk doc failure [operation=index]:
+    doc: {"hello":"world"}
+    error: {"reason":"3 conflicts with something"}]
+`);
   });
 });

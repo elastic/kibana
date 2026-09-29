@@ -26,7 +26,7 @@ describe('SavedObjectProviderRegistry', () => {
       const registry = new SavedObjectProviderRegistry();
       registry.registerProvider('alert', vi.fn());
       expect(() => registry.registerProvider('alert', vi.fn())).toThrowErrorMatchingInlineSnapshot(
-        `"The Event Log has already registered a Provider for the Save Object type \\"alert\\"."`
+        `[Error: The Event Log has already registered a Provider for the Save Object type "alert".]`
       );
     });
   });

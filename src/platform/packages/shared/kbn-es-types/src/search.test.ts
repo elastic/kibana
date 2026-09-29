@@ -9,7 +9,7 @@
 
 import type { AggregateOfMap } from './search';
 
-xdescribe('AggregateOfMap', () => {
+describe.skip('AggregateOfMap', () => {
   test('aggregations should assume buckets are there if type is explicit', () => {
     type MyAggregation = {} & {
       group_by: {

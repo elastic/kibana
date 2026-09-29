@@ -31,10 +31,11 @@ import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 
+const getPluginPackagesFilterMock: Mock = vi.hoisted(() => vi.fn().mockReturnValue(() => true));
 vi.mock('@kbn/repo-packages', async () => {
   const mocked = {
     ...(await vi.importActual('@kbn/repo-packages')),
-    getPluginPackagesFilter: vi.fn().mockReturnValue(() => true),
+    getPluginPackagesFilter: getPluginPackagesFilterMock,
   };
   return { ...mocked, default: mocked };
 });
@@ -52,8 +53,6 @@ vi.mock('./plugin_manifest_from_plugin_package', () => {
 const getPluginPackagesFilter = (await vi.importActual('@kbn/repo-packages'))
   .getPluginPackagesFilter;
 
-const getPluginPackagesFilterMock: Mock = (await vi.importMock('@kbn/repo-packages'))
-  .getPluginPackagesFilter;
 const pluginManifestFromPluginPackageMock: Mock = (
   await vi.importMock('./plugin_manifest_from_plugin_package')
 ).pluginManifestFromPluginPackage;

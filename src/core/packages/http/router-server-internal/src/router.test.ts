@@ -342,7 +342,7 @@ describe('Router', () => {
         // we use 'any' because validate is a required field
         () => router.get({ path: '/' } as any, (context, req, res) => res.ok({}))
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The [get] at [/] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation."`
+        `[Error: The [get] at [/] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.]`
       );
     });
     it('throws if validation for a route is declared wrong', () => {
@@ -368,7 +368,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params]."`
+        `[Error: Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params].]`
       );
     });
 
@@ -390,7 +390,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"\`options.security\` is not allowed in route config. Use \`security\` instead."`
+        `[Error: \`options.security\` is not allowed in route config. Use \`security\` instead.]`
       );
     });
 
@@ -412,7 +412,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[options.body.output: 'file'] in route POST / is not valid. Only 'data' or 'stream' are valid."`
+        `[Error: [options.body.output: 'file'] in route POST / is not valid. Only 'data' or 'stream' are valid.]`
       );
     });
 
@@ -432,7 +432,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+        `[Error: [authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]]`
       );
     });
 
@@ -453,7 +453,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.reason]: expected value of type [string] but got [undefined]"`
+        `[Error: [authz.reason]: expected value of type [string] but got [undefined]]`
       );
     });
 

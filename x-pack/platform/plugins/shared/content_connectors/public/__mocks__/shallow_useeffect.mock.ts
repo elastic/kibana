@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Helper for calling the returned useEffect unmount handler
 let mockUnmountHandler: () => void;
 export const unmountHandler = () => mockUnmountHandler();
 
-jest.mock('react', () => ({
-  ...(jest.requireActual('react') as object),
-  useEffect: jest.fn((fn) => {
+vi.mock('react', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useEffect: vi.fn((fn) => {
     mockUnmountHandler = fn();
     return mockUnmountHandler;
   }), // Calls on mount/every update - use mount for more complex behavior

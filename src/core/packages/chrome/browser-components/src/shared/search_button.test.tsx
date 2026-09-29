@@ -14,6 +14,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { useKeyboardShortcut } from '@kbn/shared-ux-utility';
 import { TestChromeProviders } from '../test_helpers';
 import { SearchButton } from './search_button';
 import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
@@ -26,10 +27,6 @@ vi.mock('@kbn/shared-ux-utility', async () => {
   };
   return { ...mocked, default: mocked };
 });
-
-const { useKeyboardShortcut } = vi.mocked(
-  (await vi.importMock('@kbn/shared-ux-utility')) as typeof import('@kbn/shared-ux-utility')
-);
 
 const renderButton = (config?: { onClick: () => void }) => {
   const chrome = chromeServiceMock.createStartContract();

@@ -9,19 +9,18 @@
 
 import { vi } from 'vitest';
 
-import Peggy from '@kbn/peggy';
-
 import type { Cache } from '../cache/types';
 import { dotTextTransform } from './dot_text';
 import { peggyTransform } from './peggy';
 import { yamlTransform } from './yaml';
 
-vi.mock('@kbn/peggy', () => {
-  const mocked = {
-    findConfigFile: vi.fn(() => '/repo/peggy.config.js'),
-    getJsSourceSync: vi.fn(() => ({ source: 'compiled peggy' })),
-  };
-  return { ...mocked, default: mocked };
+// peggy.js is CommonJS and loads @kbn/peggy with Node's require(), which vi.mock() doesn't
+// intercept, so spy on the required module instance instead.
+const Peggy = vi.hoisted(() => {
+  const peggy = require('@kbn/peggy');
+  vi.spyOn(peggy, 'findConfigFile').mockReturnValue('/repo/peggy.config.js');
+  vi.spyOn(peggy, 'getJsSourceSync').mockReturnValue({ source: 'compiled peggy' });
+  return peggy;
 });
 
 const makeCache = (code: string | undefined = undefined) => {

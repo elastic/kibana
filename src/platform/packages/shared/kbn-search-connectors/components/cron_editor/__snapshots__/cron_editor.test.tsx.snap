@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CronEditor is rendered with a DAY frequency 1`] = `
+exports[`CronEditor > is rendered with a DAY frequency 1`] = `
 <div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
@@ -645,7 +645,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
 </div>
 `;
 
-exports[`CronEditor is rendered with a HOUR frequency 1`] = `
+exports[`CronEditor > is rendered with a HOUR frequency 1`] = `
 <div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
@@ -1113,7 +1113,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
 </div>
 `;
 
-exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
+exports[`CronEditor > is rendered with a MINUTE frequency 1`] = `
 <div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
@@ -1319,7 +1319,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
 </div>
 `;
 
-exports[`CronEditor is rendered with a MONTH frequency 1`] = `
+exports[`CronEditor > is rendered with a MONTH frequency 1`] = `
 <div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
@@ -2186,7 +2186,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
 </div>
 `;
 
-exports[`CronEditor is rendered with a WEEK frequency 1`] = `
+exports[`CronEditor > is rendered with a WEEK frequency 1`] = `
 <div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
@@ -2933,7 +2933,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
 </div>
 `;
 
-exports[`CronEditor is rendered with a YEAR frequency 1`] = `
+exports[`CronEditor > is rendered with a YEAR frequency 1`] = `
 <div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"

@@ -55,7 +55,7 @@ describe('PluginStatusService', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Custom statuses cannot be registered after setup, plugin [a] attempted"`
+        `[Error: Custom statuses cannot be registered after setup, plugin [a] attempted]`
       );
     });
   });

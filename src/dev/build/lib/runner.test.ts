@@ -115,7 +115,7 @@ describe('task rejection', () => {
       },
     });
 
-    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`"FOO"`);
+    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: FOO]`);
     expect(testWriter.messages).toMatchInlineSnapshot(`
       Array [
         " info [  kibana  ] foo",
@@ -139,7 +139,7 @@ describe('task rejection', () => {
       },
     });
 
-    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`"FOO"`);
+    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: FOO]`);
     expect(testWriter.messages).toMatchInlineSnapshot(`
       Array [
         " info [  kibana  ] foo",

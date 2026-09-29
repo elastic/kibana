@@ -24,7 +24,7 @@ vi.mock('globby', () => {
   const mocked = { globbySync: vi.fn() };
   return { ...mocked, default: mocked };
 });
-vi.mock('del', () => vi.fn().mockResolvedValue(undefined));
+vi.mock('del', () => ({ default: vi.fn().mockResolvedValue(undefined) }));
 
 vi.mock('@kbn/core-i18n-server-internal', () => {
   const mocked = {
@@ -48,7 +48,7 @@ vi.mock('@kbn/i18n', () => {
   return { ...mocked, default: mocked };
 });
 
-const { globbySync } = (await vi.importMock('globby')) as { globbySync: Mock };
+const { globbySync } = (await import('globby')) as { globbySync: Mock };
 globbySync.mockReturnValue([]);
 
 const mockedCopyAll = copyAll as MockedFunction<typeof copyAll>;

@@ -152,7 +152,7 @@ describe('getAxiosInstance', () => {
     });
     await expect(
       getAxios({ connectorId: '1', secrets: { authType: 'foo' } })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Auth type \\"foo\\" is not registered."`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Auth type "foo" is not registered.]`);
     expect(logger.error).toHaveBeenCalledWith(
       `Error getting configured axios instance configured for auth type "foo": Auth type "foo" is not registered. `
     );

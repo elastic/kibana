@@ -53,7 +53,7 @@ Object {
       references: [],
     } as any;
     expect(() => extractReferences(doc)).toThrowErrorMatchingInlineSnapshot(
-      `"indexPattern attribute is missing in \\"wsState\\""`
+      `[Error: indexPattern attribute is missing in "wsState"]`
     );
   });
 });
@@ -121,7 +121,7 @@ Object {
       }),
     };
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find reference \\"indexPattern_0\\""`
+      `[Error: Could not find reference "indexPattern_0"]`
     );
   });
 });

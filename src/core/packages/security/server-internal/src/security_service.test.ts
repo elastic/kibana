@@ -61,7 +61,7 @@ describe('SecurityService', function () {
         registerSecurityDelegate(contract);
 
         expect(() => registerSecurityDelegate(contract)).toThrowErrorMatchingInlineSnapshot(
-          `"security API can only be registered once"`
+          `[Error: security API can only be registered once]`
         );
       });
     });

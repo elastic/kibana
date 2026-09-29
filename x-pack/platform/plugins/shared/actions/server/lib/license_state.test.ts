@@ -165,7 +165,7 @@ describe('ensureLicenseForActionType()', () => {
     expect(() =>
       licenseState.ensureLicenseForActionType(fooActionType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Action type foo is disabled because license information is not available at this time."`
+      `[Error: Action type foo is disabled because license information is not available at this time.]`
     );
   });
 
@@ -174,7 +174,7 @@ describe('ensureLicenseForActionType()', () => {
     expect(() =>
       licenseState.ensureLicenseForActionType(fooActionType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Action type foo is disabled because license information is not available at this time."`
+      `[Error: Action type foo is disabled because license information is not available at this time.]`
     );
   });
 
@@ -184,7 +184,7 @@ describe('ensureLicenseForActionType()', () => {
     expect(() =>
       licenseState.ensureLicenseForActionType(fooActionType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Action type foo is disabled because your basic license has expired."`
+      `[Error: Action type foo is disabled because your basic license has expired.]`
     );
   });
 
@@ -196,7 +196,7 @@ describe('ensureLicenseForActionType()', () => {
     expect(() =>
       licenseState.ensureLicenseForActionType(fooActionType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Action type foo is disabled because your basic license does not support it. Please upgrade your license."`
+      `[Error: Action type foo is disabled because your basic license does not support it. Please upgrade your license.]`
     );
   });
 

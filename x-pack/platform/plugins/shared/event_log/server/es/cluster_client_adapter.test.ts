@@ -202,7 +202,7 @@ describe('doesIndexTemplateExist', () => {
     await expect(
       clusterClientAdapter.doesIndexTemplateExist('foo')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error checking existence of index template: Fail"`
+      `[Error: error checking existence of index template: Fail]`
     );
   });
 });
@@ -223,7 +223,7 @@ describe('createIndexTemplate', () => {
     clusterClient.indices.existsIndexTemplate.mockResponseOnce(false);
     await expect(
       clusterClientAdapter.createIndexTemplate('foo', { args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating index template: Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: error creating index template: Fail]`);
   });
 
   test('should not throw error if index template exists after error is thrown', async () => {
@@ -289,7 +289,7 @@ describe('updateIndexTemplate', () => {
     await expect(() =>
       clusterClientAdapter.updateIndexTemplate('foo', { name: 'template', args: true })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"No mappings would be generated for template, possibly due to failed/misconfigured bootstrapping"`
+      `[Error: No mappings would be generated for template, possibly due to failed/misconfigured bootstrapping]`
     );
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -304,7 +304,7 @@ describe('updateIndexTemplate', () => {
 
     await expect(() =>
       clusterClientAdapter.updateIndexTemplate('foo', { name: 'template', args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to simulate"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: failed to simulate]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `Error updating index template foo: failed to simulate`
@@ -336,7 +336,7 @@ describe('updateIndexTemplate', () => {
 
     await expect(() =>
       clusterClientAdapter.updateIndexTemplate('foo', { name: 'template', args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to update index template"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: failed to update index template]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `Error updating index template foo: failed to update index template`
@@ -376,7 +376,7 @@ describe('getExistingLegacyIndexTemplates', () => {
     await expect(
       clusterClientAdapter.getExistingLegacyIndexTemplates('foo*')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error getting existing legacy index templates: Fail"`
+      `[Error: error getting existing legacy index templates: Fail]`
     );
   });
 });
@@ -412,7 +412,7 @@ describe('setLegacyIndexTemplateToHidden', () => {
         settings: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error setting existing legacy index template foo-bar-template to hidden: Fail"`
+      `[Error: error setting existing legacy index template foo-bar-template to hidden: Fail]`
     );
   });
 });
@@ -448,7 +448,7 @@ describe('getExistingIndices', () => {
     await expect(
       clusterClientAdapter.getExistingIndices('foo*')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error getting existing indices matching pattern foo*: Fail"`
+      `[Error: error getting existing indices matching pattern foo*: Fail]`
     );
   });
 });
@@ -471,7 +471,7 @@ describe('setIndexToHidden', () => {
     await expect(
       clusterClientAdapter.setIndexToHidden('foo-bar-000001')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error setting existing index foo-bar-000001 to hidden: Fail"`
+      `[Error: error setting existing index foo-bar-000001 to hidden: Fail]`
     );
   });
 });
@@ -506,7 +506,7 @@ describe('getExistingIndexAliases', () => {
     await expect(
       clusterClientAdapter.getExistingIndexAliases('foo*')
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error getting existing index aliases matching pattern foo*: Fail"`
+      `[Error: error getting existing index aliases matching pattern foo*: Fail]`
     );
   });
 });
@@ -565,7 +565,7 @@ describe('setIndexAliasToHidden', () => {
         { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error setting existing index aliases for alias foo-bar to is_hidden: Fail"`
+      `[Error: error setting existing index aliases for alias foo-bar to is_hidden: Fail]`
     );
   });
 });
@@ -617,7 +617,7 @@ describe('doesDataStreamExist', () => {
     clusterClient.indices.getDataStream.mockRejectedValue(new Error('Fail'));
     await expect(
       clusterClientAdapter.doesDataStreamExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error checking existance of data stream: Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: error checking existance of data stream: Fail]`);
   });
 });
 
@@ -633,7 +633,7 @@ describe('createDataStream', () => {
     clusterClient.indices.createDataStream.mockRejectedValue(new Error('Fail'));
     await expect(
       clusterClientAdapter.createDataStream('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating data stream: Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: error creating data stream: Fail]`);
   });
 
   test(`shouldn't throw when an error of type resource_already_exists_exception is thrown`, async () => {
@@ -703,7 +703,7 @@ describe('updateConcreteIndices', () => {
 
     await expect(() =>
       clusterClientAdapter.updateConcreteIndices('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to simulate"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: failed to simulate]`);
 
     expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
@@ -729,7 +729,7 @@ describe('updateConcreteIndices', () => {
 
     await expect(() =>
       clusterClientAdapter.updateConcreteIndices('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to put mappings"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: failed to put mappings]`);
 
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
@@ -2368,7 +2368,7 @@ describe('updateDocuments', () => {
 
     await expect(
       clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
-    ).rejects.toThrowErrorMatchingInlineSnapshot('"Internal fields are required"');
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Internal fields are required]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `error updating events in bulk: "Internal fields are required"; docs: ${JSON.stringify([
@@ -2394,7 +2394,7 @@ describe('updateDocuments', () => {
 
     await expect(
       clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Update failed"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Update failed]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `error updating events in bulk: "Update failed"; docs: ${JSON.stringify([doc])}`
@@ -2595,7 +2595,7 @@ describe('queryEventsByDocumentIds', () => {
     await expect(
       clusterClientAdapter.queryEventsByDocumentIds(docs)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error querying events by document ids: Failed to get documents"`
+      `[Error: error querying events by document ids: Failed to get documents]`
     );
   });
 });
@@ -2813,7 +2813,7 @@ describe('refreshIndex', () => {
     clusterClient.indices.refresh.mockRejectedValue(new Error('Failed to refresh index'));
 
     await expect(clusterClientAdapter.refreshIndex()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to refresh index"`
+      `[Error: Failed to refresh index]`
     );
   });
 });

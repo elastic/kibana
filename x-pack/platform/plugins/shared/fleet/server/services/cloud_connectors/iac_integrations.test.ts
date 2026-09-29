@@ -104,7 +104,9 @@ describe('getCloudConnectorIntegrationSelections', () => {
     return finder;
   };
 
-  beforeEach(() => soClient.createPointInTimeFinder.mockReset());
+  beforeEach(() => {
+    soClient.createPointInTimeFinder.mockReset();
+  });
 
   it('derives the enabled input types per policy template from the policies on the connector', async () => {
     const finder = mockFinder([

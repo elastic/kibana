@@ -66,7 +66,7 @@ describe('validateConfig', () => {
 
     await expect(() =>
       validateConfig({ config, esClient })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"No sources found for pattern 'some-pattern'"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No sources found for pattern 'some-pattern']`);
   });
 
   it('returns without errors if at least one source is found', async () => {

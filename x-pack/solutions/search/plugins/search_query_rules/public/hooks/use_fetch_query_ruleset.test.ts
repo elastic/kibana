@@ -50,8 +50,8 @@ describe('useFetchQueryRuleset hook', () => {
     const { useFetchQueryRuleset } = await vi.importActual('./use_fetch_query_ruleset');
 
     const { result } = renderHook(() => useFetchQueryRuleset('my-ruleset'));
-    await waitFor(() => {
-      expect(result.current).resolves.toStrictEqual(MOCK_QUERY_RULESET_RESPONSE_FIXTURE);
+    await waitFor(async () => {
+      await expect(result.current).resolves.toStrictEqual(MOCK_QUERY_RULESET_RESPONSE_FIXTURE);
       expect(mockHttpGet).toHaveBeenCalledWith('/internal/search_query_rules/ruleset/my-ruleset');
     });
   });

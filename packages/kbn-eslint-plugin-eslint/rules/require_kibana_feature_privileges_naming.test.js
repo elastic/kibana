@@ -8,7 +8,7 @@
  */
 const path = require('path');
 const { RuleTester } = require('eslint');
-const rule = (await import('..')).rules.require_kibana_feature_privileges_naming;
+const rule = require('..').rules.require_kibana_feature_privileges_naming;
 
 const fixtureFilename = path.join(__dirname, '__fixtures__/privilege_resolver/consumer.ts');
 

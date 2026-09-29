@@ -204,7 +204,7 @@ describe('PluginsService', () => {
       mockPluginInitializers.set('pluginA', (() => ({})) as any);
       const pluginsService = new PluginsService(mockCoreContext, plugins);
       await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Instance of plugin \\"pluginA\\" does not define \\"setup\\" function."`
+        `[Error: Instance of plugin "pluginA" does not define "setup" function.]`
       );
     });
 

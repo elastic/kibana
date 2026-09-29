@@ -11,7 +11,7 @@ const path = require('path');
 const { RuleTester } = require('eslint');
 const { allowedAlgorithms } = await import('./no_unsafe_hash');
 const rule = (await import('..')).rules.no_unsafe_hash;
-const findKibanaRoot = await import('../helpers/find_kibana_root');
+const findKibanaRoot = require('../helpers/find_kibana_root');
 
 const dedent = require('dedent');
 

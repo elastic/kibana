@@ -28,7 +28,10 @@ const histogram = meter.createHistogram('test');
 vi.mocked(provider.getMeter).mockClear();
 vi.mocked(meter.createHistogram).mockClear();
 
-beforeEach(() => vi.mocked(histogram.record).mockReset());
+// Block body: Vitest would call a returned function (mockReset returns the mock) as teardown.
+beforeEach(() => {
+  vi.mocked(histogram.record).mockReset();
+});
 
 test('creates one shared integer histogram with the proposed name', () => {
   reportStringLengthViolation({

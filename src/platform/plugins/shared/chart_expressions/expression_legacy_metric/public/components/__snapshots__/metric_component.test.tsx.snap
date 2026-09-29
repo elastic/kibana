@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MetricVisComponent should render correct structure for multi-value metrics 1`] = `
+exports[`MetricVisComponent > should render correct structure for multi-value metrics 1`] = `
 Array [
   <MetricVisValue
     colorFullBackground={false}
@@ -77,7 +77,7 @@ Array [
 ]
 `;
 
-exports[`MetricVisComponent should render correct structure for single metric 1`] = `
+exports[`MetricVisComponent > should render correct structure for single metric 1`] = `
 <MetricVisValue
   colorFullBackground={false}
   key="0"

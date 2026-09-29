@@ -96,6 +96,8 @@ const createKbnVitestConfig = ({
       mockReset: restoreMocks,
       ...(testTimeout ? { testTimeout } : {}),
       retry: process.env.CI ? 3 : 0,
+      // jest-worker enabled colors in test processes; chalk-based snapshots depend on it.
+      env: { FORCE_COLOR: process.env.FORCE_COLOR ?? '1' },
       setupFiles: [
         ...(isJsdom
           ? [

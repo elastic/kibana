@@ -17,18 +17,11 @@ import type { MetricVisComponentProps } from './metric_component';
 import MetricVisComponent from './metric_component';
 import { LabelPosition } from '../../common/constants';
 
-vi.mock('../services', () => {
+vi.mock('../services', async () => {
+  const { getFormatService, getPaletteService } = await import('../__mocks__/services');
   const mocked = {
-    getFormatService: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getFormatService } = await import('../__mocks__/services');
-      return getFormatService();
-    },
-    getPaletteService: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getPaletteService } = await import('../__mocks__/services');
-      return getPaletteService();
-    },
+    getFormatService: () => getFormatService(),
+    getPaletteService: () => getPaletteService(),
   };
   return { ...mocked, default: mocked };
 });

@@ -142,8 +142,6 @@ describe('useAlertsHistory', () => {
   });
 
   it('calls http post including instanceId query', async () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
     mockServices.http.post.mockResolvedValueOnce({
       hits: { total: { value: 32, relation: 'eq' }, max_score: null, hits: [] },
       aggregations: {
@@ -181,13 +179,11 @@ describe('useAlertsHistory', () => {
         '"extended_bounds":{"min":"2023-04-10T00:00:00.000Z","max":"2023-05-10T00:00:00.000Z"}}},' +
         '"avgTimeToRecoverUS":{"filter":{"term":{"kibana.alert.status":"recovered"}},' +
         '"aggs":{"recoveryTime":{"avg":{"field":"kibana.alert.duration.us"}}}}}}',
-      signal,
+      signal: expect.any(AbortSignal),
     });
   });
 
   it('calls http post without * instanceId query', async () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
     mockServices.http.post.mockResolvedValueOnce({
       hits: { total: { value: 32, relation: 'eq' }, max_score: null, hits: [] },
       aggregations: {
@@ -224,7 +220,7 @@ describe('useAlertsHistory', () => {
         '"extended_bounds":{"min":"2023-04-10T00:00:00.000Z","max":"2023-05-10T00:00:00.000Z"}}},' +
         '"avgTimeToRecoverUS":{"filter":{"term":{"kibana.alert.status":"recovered"}},' +
         '"aggs":{"recoveryTime":{"avg":{"field":"kibana.alert.duration.us"}}}}}}',
-      signal,
+      signal: expect.any(AbortSignal),
     });
   });
 });

@@ -18,7 +18,7 @@ describe('getBaseUrl', () => {
     expect(() =>
       // @ts-expect-error
       getBaseUrl('ANY')
-    ).toThrowErrorMatchingInlineSnapshot(`"Unknown telemetry endpoint env ANY."`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown telemetry endpoint env ANY.]`);
   });
 
   it('returns correct prod base url', () => {
@@ -38,7 +38,7 @@ describe('getChannel', () => {
       expect(() =>
         // @ts-expect-error
         getChannel('ANY', false)
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown telemetry channel ANY."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown telemetry channel ANY.]`);
     });
 
     it('returns correct snapshot channel name', () => {
@@ -57,7 +57,7 @@ describe('getChannel', () => {
       expect(() =>
         // @ts-expect-error
         getChannel('ANY', true)
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown telemetry channel ANY."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown telemetry channel ANY.]`);
     });
 
     it('returns correct snapshot channel name', () => {
@@ -82,7 +82,7 @@ describe('getTelemetryChannelEndpoint', () => {
           channelName: 'snapshot',
           appendServerlessChannelsSuffix: false,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown telemetry endpoint env ANY."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown telemetry endpoint env ANY.]`);
     });
 
     it('throws on unknown channelName', () => {
@@ -93,7 +93,7 @@ describe('getTelemetryChannelEndpoint', () => {
           channelName: 'ANY',
           appendServerlessChannelsSuffix: false,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown telemetry channel ANY."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown telemetry channel ANY.]`);
     });
 
     describe('snapshot channel', () => {
@@ -152,7 +152,7 @@ describe('getTelemetryChannelEndpoint', () => {
           channelName: 'snapshot',
           appendServerlessChannelsSuffix: true,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown telemetry endpoint env ANY."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown telemetry endpoint env ANY.]`);
     });
 
     it('throws on unknown channelName', () => {
@@ -163,7 +163,7 @@ describe('getTelemetryChannelEndpoint', () => {
           channelName: 'ANY',
           appendServerlessChannelsSuffix: true,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown telemetry channel ANY."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown telemetry channel ANY.]`);
     });
 
     describe('snapshot channel', () => {

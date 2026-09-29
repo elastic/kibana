@@ -174,7 +174,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"[category.id]: expected value of type [string] but got [undefined]"`
+          `[Error: [category.id]: expected value of type [string] but got [undefined]]`
         );
       });
 
@@ -191,7 +191,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"[category.id]: expected value of type [string] but got [undefined]"`
+          `[Error: [category.id]: expected value of type [string] but got [undefined]]`
         );
       });
 
@@ -208,7 +208,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"[category.label]: expected value of type [string] but got [undefined]"`
+          `[Error: [category.label]: expected value of type [string] but got [undefined]]`
         );
       });
     });
@@ -225,7 +225,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[privileges]: expected at least one defined value but got [undefined]"`
+        `[Error: [privileges]: expected at least one defined value but got [undefined]]`
       );
     });
 
@@ -264,7 +264,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[subFeatures]: array size is [1], but cannot be greater than [0]"`
+        `[Error: [subFeatures]: array size is [1], but cannot be greater than [0]]`
       );
     });
 
@@ -483,7 +483,7 @@ describe('FeatureRegistry', () => {
 
       expect(() =>
         featureRegistry.registerKibanaFeature(duplicateFeature)
-      ).toThrowErrorMatchingInlineSnapshot(`"Feature with id test-feature is already registered."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
     });
 
     ['contains space', 'contains_invalid()_chars', ''].forEach((prohibitedChars) => {
@@ -593,7 +593,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.all has unknown app entries: foo, baz"`
+        `[Error: Feature privilege test-feature.all has unknown app entries: foo, baz]`
       );
     });
 
@@ -651,7 +651,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies app entries which are not granted to any privileges: baz"`
+        `[Error: Feature test-feature specifies app entries which are not granted to any privileges: baz]`
       );
     });
 
@@ -685,7 +685,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.reserved has unknown app entries: foo, baz"`
+        `[Error: Feature privilege test-feature.reserved has unknown app entries: foo, baz]`
       );
     });
 
@@ -719,7 +719,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies app entries which are not granted to any privileges: baz"`
+        `[Error: Feature test-feature specifies app entries which are not granted to any privileges: baz]`
       );
     });
 
@@ -757,7 +757,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.all has unknown catalogue entries: foo, baz"`
+        `[Error: Feature privilege test-feature.all has unknown catalogue entries: foo, baz]`
       );
     });
 
@@ -818,7 +818,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies catalogue entries which are not granted to any privileges: baz"`
+        `[Error: Feature test-feature specifies catalogue entries which are not granted to any privileges: baz]`
       );
     });
 
@@ -854,7 +854,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.reserved has unknown catalogue entries: foo, baz"`
+        `[Error: Feature privilege test-feature.reserved has unknown catalogue entries: foo, baz]`
       );
     });
 
@@ -890,7 +890,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies catalogue entries which are not granted to any privileges: baz"`
+        `[Error: Feature test-feature specifies catalogue entries which are not granted to any privileges: baz]`
       );
     });
 
@@ -1039,7 +1039,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature privilege test-feature.all has unknown ruleTypeId: foo"`
+          `[Error: Feature privilege test-feature.all has unknown ruleTypeId: foo]`
         );
       });
 
@@ -1089,7 +1089,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature privilege test-feature.all has unknown ruleTypeId: foo"`
+          `[Error: Feature privilege test-feature.all has unknown ruleTypeId: foo]`
         );
       });
 
@@ -1166,7 +1166,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+          `[Error: Feature test-feature specifies alerting rule types which are not granted to any privileges: baz]`
         );
       });
 
@@ -1243,7 +1243,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+          `[Error: Feature test-feature specifies alerting rule types which are not granted to any privileges: baz]`
         );
       });
 
@@ -1287,7 +1287,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature privilege test-feature.reserved has unknown ruleTypeId: foo"`
+          `[Error: Feature privilege test-feature.reserved has unknown ruleTypeId: foo]`
         );
       });
 
@@ -1331,7 +1331,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature privilege test-feature.reserved has unknown ruleTypeId: foo"`
+          `[Error: Feature privilege test-feature.reserved has unknown ruleTypeId: foo]`
         );
       });
 
@@ -1378,7 +1378,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+          `[Error: Feature test-feature specifies alerting rule types which are not granted to any privileges: baz]`
         );
       });
 
@@ -1425,7 +1425,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+          `[Error: Feature test-feature specifies alerting rule types which are not granted to any privileges: baz]`
         );
       });
 
@@ -1471,7 +1471,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"[alerting.0.consumers]: array size is [0], but cannot be smaller than [1]"`
+          `[Error: [alerting.0.consumers]: array size is [0], but cannot be smaller than [1]]`
         );
       });
 
@@ -1518,7 +1518,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature privilege test-feature.all.bar has unknown consumer: not-exist"`
+          `[Error: Feature privilege test-feature.all.bar has unknown consumer: not-exist]`
         );
       });
 
@@ -1591,7 +1591,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature test-feature specifies alerting consumers which are not granted to any privileges: should-exist"`
+          `[Error: Feature test-feature specifies alerting consumers which are not granted to any privileges: should-exist]`
         );
       });
 
@@ -1631,7 +1631,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature privilege test-feature.reserved.bar has unknown consumer: not-exist"`
+          `[Error: Feature privilege test-feature.reserved.bar has unknown consumer: not-exist]`
         );
       });
 
@@ -1671,7 +1671,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature test-feature specifies alerting consumers which are not granted to any privileges: should-exist"`
+          `[Error: Feature test-feature specifies alerting consumers which are not granted to any privileges: should-exist]`
         );
       });
     });
@@ -1713,7 +1713,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.all has unknown cases entries: foo, baz"`
+        `[Error: Feature privilege test-feature.all has unknown cases entries: foo, baz]`
       );
     });
 
@@ -1774,7 +1774,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies cases entries which are not granted to any privileges: baz"`
+        `[Error: Feature test-feature specifies cases entries which are not granted to any privileges: baz]`
       );
     });
 
@@ -1810,7 +1810,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.reserved has unknown cases entries: foo, baz"`
+        `[Error: Feature privilege test-feature.reserved has unknown cases entries: foo, baz]`
       );
     });
 
@@ -1846,7 +1846,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies cases entries which are not granted to any privileges: baz"`
+        `[Error: Feature test-feature specifies cases entries which are not granted to any privileges: baz]`
       );
     });
 
@@ -1893,7 +1893,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.all has unknown management section: elasticsearch"`
+        `[Error: Feature privilege test-feature.all has unknown management section: elasticsearch]`
       );
     });
 
@@ -1967,7 +1967,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies management entries which are not granted to any privileges: elasticsearch.there"`
+        `[Error: Feature test-feature specifies management entries which are not granted to any privileges: elasticsearch.there]`
       );
     });
 
@@ -2009,7 +2009,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.reserved has unknown management entries for section kibana: hey-there"`
+        `[Error: Feature privilege test-feature.reserved has unknown management entries for section kibana: hey-there]`
       );
     });
 
@@ -2051,7 +2051,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies management entries which are not granted to any privileges: kibana.hey"`
+        `[Error: Feature test-feature specifies management entries which are not granted to any privileges: kibana.hey]`
       );
     });
 
@@ -2128,7 +2128,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/"`
+        `[Error: [reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/]`
       );
     });
 
@@ -2206,7 +2206,7 @@ describe('FeatureRegistry', () => {
       const featureRegistry = new FeatureRegistry();
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(`"Feature test-feature cannot be hidden."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature test-feature cannot be hidden.]`);
     });
 
     it('does not allow features with regular privileges to be hidden', () => {
@@ -2237,7 +2237,7 @@ describe('FeatureRegistry', () => {
       const featureRegistry = new FeatureRegistry();
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(`"Feature test-feature cannot be hidden."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature test-feature cannot be hidden.]`);
     });
 
     it('allows independent sub-feature privileges to register a minimumLicense', () => {
@@ -2495,7 +2495,7 @@ describe('FeatureRegistry', () => {
       expect(() => {
         featureRegistry.registerKibanaFeature(feature2);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Features are locked, can't register new features. Attempt to register test-feature-2 failed."`
+        `[Error: Features are locked, can't register new features. Attempt to register test-feature-2 failed.]`
       );
     });
 
@@ -2715,7 +2715,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           registry.applyOverrides({ unknownFeature: {} })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot override feature \\"unknownFeature\\" since feature with such ID is not registered."`
+          `[Error: Cannot override feature "unknownFeature" since feature with such ID is not registered.]`
         );
       });
 
@@ -2748,7 +2748,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           registry.applyOverrides({ featureB: { privileges: { all: { disabled: true } } } })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot override privilege \\"all\\" of feature \\"featureB\\" since \\"all\\" privilege is not registered."`
+          `[Error: Cannot override privilege "all" of feature "featureB" since "all" privilege is not registered.]`
         );
       });
 
@@ -2762,7 +2762,7 @@ describe('FeatureRegistry', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot compose privilege \\"all\\" of feature \\"featureA\\" with privileges of feature \\"featureF\\" since such feature is not registered."`
+          `[Error: Cannot compose privilege "all" of feature "featureA" with privileges of feature "featureF" since such feature is not registered.]`
         );
       });
 
@@ -2776,7 +2776,7 @@ describe('FeatureRegistry', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot compose privilege \\"all\\" of feature \\"featureA\\" with privilege \\"none\\" of feature \\"featureB\\" since such privilege is not registered."`
+          `[Error: Cannot compose privilege "all" of feature "featureA" with privilege "none" of feature "featureB" since such privilege is not registered.]`
         );
       });
 
@@ -2856,7 +2856,7 @@ describe('FeatureRegistry', () => {
             featureC: { subFeatures: { privileges: { all: { disabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot override sub-feature privilege \\"all\\" of feature \\"featureC\\" since \\"all\\" sub-feature privilege is not registered. Known sub-feature privileges are: subFeatureCOne."`
+          `[Error: Cannot override sub-feature privilege "all" of feature "featureC" since "all" sub-feature privilege is not registered. Known sub-feature privileges are: subFeatureCOne.]`
         );
 
         expect(() =>
@@ -2864,7 +2864,7 @@ describe('FeatureRegistry', () => {
             featureA: { subFeatures: { privileges: { subFeatureCOne: { disabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot override sub-feature privileges of feature \\"featureA\\" since it didn't register any."`
+          `[Error: Cannot override sub-feature privileges of feature "featureA" since it didn't register any.]`
         );
       });
 
@@ -3109,7 +3109,7 @@ describe('FeatureRegistry', () => {
           },
         });
         expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
-          `"Feature \\"feature-alpha\\" is not deprecated and must not define a \\"replacedBy\\" property for privilege \\"all\\"."`
+          `[Error: Feature "feature-alpha" is not deprecated and must not define a "replacedBy" property for privilege "all".]`
         );
 
         // Case 2: some sub-feature privileges define replacement.
@@ -3137,7 +3137,7 @@ describe('FeatureRegistry', () => {
           ],
         });
         expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
-          `"Feature \\"feature-alpha\\" is not deprecated and must not define a \\"replacedBy\\" property for privilege \\"sub-alpha\\"."`
+          `[Error: Feature "feature-alpha" is not deprecated and must not define a "replacedBy" property for privilege "sub-alpha".]`
         );
 
         // Case 3: none of the privileges define replacement.
@@ -3182,7 +3182,7 @@ describe('FeatureRegistry', () => {
         // Case 1: all top-level privileges don't define replacement.
         let registry = createRegistry(featureAlphaDeprecated);
         expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
-          `"Feature \\"feature-alpha\\" is deprecated and must define a \\"replacedBy\\" property for privilege \\"all\\"."`
+          `[Error: Feature "feature-alpha" is deprecated and must define a "replacedBy" property for privilege "all".]`
         );
 
         // Case 2: some top-level privileges don't define replacement.
@@ -3198,7 +3198,7 @@ describe('FeatureRegistry', () => {
           },
         });
         expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
-          `"Feature \\"feature-alpha\\" is deprecated and must define a \\"replacedBy\\" property for privilege \\"read\\"."`
+          `[Error: Feature "feature-alpha" is deprecated and must define a "replacedBy" property for privilege "read".]`
         );
 
         // Case 3: all top-level privileges define replacement.
@@ -3290,7 +3290,7 @@ describe('FeatureRegistry', () => {
         // Case 1: all sub-feature privileges don't define replacement.
         let registry = createRegistry(featureAlphaDeprecated);
         expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
-          `"Feature \\"feature-alpha\\" is deprecated and must define a \\"replacedBy\\" property for privilege \\"sub-alpha-1-1\\"."`
+          `[Error: Feature "feature-alpha" is deprecated and must define a "replacedBy" property for privilege "sub-alpha-1-1".]`
         );
 
         // Case 2: some sub-feature privileges of some sub-features don't define replacement.
@@ -3326,7 +3326,7 @@ describe('FeatureRegistry', () => {
           ],
         });
         expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
-          `"Feature \\"feature-alpha\\" is deprecated and must define a \\"replacedBy\\" property for privilege \\"sub-alpha-1-2\\"."`
+          `[Error: Feature "feature-alpha" is deprecated and must define a "replacedBy" property for privilege "sub-alpha-1-2".]`
         );
 
         // Case 3: all sub-feature privileges of some sub-features don't define replacement.
@@ -3363,7 +3363,7 @@ describe('FeatureRegistry', () => {
           ],
         });
         expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
-          `"Feature \\"feature-alpha\\" is deprecated and must define a \\"replacedBy\\" property for privilege \\"sub-alpha-2-1\\"."`
+          `[Error: Feature "feature-alpha" is deprecated and must define a "replacedBy" property for privilege "sub-alpha-2-1".]`
         );
 
         // Case 4: all top-level and sub-feature privileges define replacement.
@@ -3426,7 +3426,7 @@ describe('FeatureRegistry', () => {
             createDeprecatedFeature({ all: [{ feature: 'feature-unknown', privileges: ['all'] }] })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"all\\" of deprecated feature \\"feature-alpha\\" with privileges of feature \\"feature-unknown\\" since such feature is not registered."`
+          `[Error: Cannot replace privilege "all" of deprecated feature "feature-alpha" with privileges of feature "feature-unknown" since such feature is not registered.]`
         );
 
         // Case 2: top-level privilege references to a non-existent feature (extended format).
@@ -3440,7 +3440,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"read\\" of deprecated feature \\"feature-alpha\\" with privileges of feature \\"feature-unknown\\" since such feature is not registered."`
+          `[Error: Cannot replace privilege "read" of deprecated feature "feature-alpha" with privileges of feature "feature-unknown" since such feature is not registered.]`
         );
 
         // Case 3: sub-feature privilege references to a non-existent feature.
@@ -3451,7 +3451,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"sub-alpha-1-1\\" of deprecated feature \\"feature-alpha\\" with privileges of feature \\"feature-unknown\\" since such feature is not registered."`
+          `[Error: Cannot replace privilege "sub-alpha-1-1" of deprecated feature "feature-alpha" with privileges of feature "feature-unknown" since such feature is not registered.]`
         );
 
         // Case 4: all top-level and sub-feature privileges define proper replacement.
@@ -3465,7 +3465,7 @@ describe('FeatureRegistry', () => {
             createDeprecatedFeature({ all: [{ feature: 'feature-gamma', privileges: ['all'] }] })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"all\\" of deprecated feature \\"feature-alpha\\" with privileges of feature \\"feature-gamma\\" since the referenced feature is deprecated."`
+          `[Error: Cannot replace privilege "all" of deprecated feature "feature-alpha" with privileges of feature "feature-gamma" since the referenced feature is deprecated.]`
         );
 
         // Case 2: top-level privilege references to a deprecated feature (extended format).
@@ -3479,7 +3479,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"read\\" of deprecated feature \\"feature-alpha\\" with privileges of feature \\"feature-gamma\\" since the referenced feature is deprecated."`
+          `[Error: Cannot replace privilege "read" of deprecated feature "feature-alpha" with privileges of feature "feature-gamma" since the referenced feature is deprecated.]`
         );
 
         // Case 3: sub-feature privilege references to a deprecated feature.
@@ -3490,7 +3490,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"sub-alpha-1-1\\" of deprecated feature \\"feature-alpha\\" with privileges of feature \\"feature-gamma\\" since the referenced feature is deprecated."`
+          `[Error: Cannot replace privilege "sub-alpha-1-1" of deprecated feature "feature-alpha" with privileges of feature "feature-gamma" since the referenced feature is deprecated.]`
         );
       });
 
@@ -3501,7 +3501,7 @@ describe('FeatureRegistry', () => {
             createDeprecatedFeature({ all: [{ feature: 'feature-beta', privileges: ['all_v2'] }] })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"all\\" of deprecated feature \\"feature-alpha\\" with privilege \\"all_v2\\" of feature \\"feature-beta\\" since such privilege is not registered."`
+          `[Error: Cannot replace privilege "all" of deprecated feature "feature-alpha" with privilege "all_v2" of feature "feature-beta" since such privilege is not registered.]`
         );
 
         // Case 2: top-level privilege references to a non-existent privilege (extended format).
@@ -3515,7 +3515,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"read\\" of deprecated feature \\"feature-alpha\\" with privilege \\"read_v2\\" of feature \\"feature-beta\\" since such privilege is not registered."`
+          `[Error: Cannot replace privilege "read" of deprecated feature "feature-alpha" with privilege "read_v2" of feature "feature-beta" since such privilege is not registered.]`
         );
 
         // Case 3: sub-feature privilege references to a non-existent privilege.
@@ -3526,7 +3526,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"sub-alpha-1-1\\" of deprecated feature \\"feature-alpha\\" with privilege \\"sub-gamma-1-1_v2\\" of feature \\"feature-beta\\" since such privilege is not registered."`
+          `[Error: Cannot replace privilege "sub-alpha-1-1" of deprecated feature "feature-alpha" with privilege "sub-gamma-1-1_v2" of feature "feature-beta" since such privilege is not registered.]`
         );
       });
 
@@ -3537,7 +3537,7 @@ describe('FeatureRegistry', () => {
             createDeprecatedFeature({ all: [{ feature: 'feature-delta', privileges: ['read'] }] })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"all\\" of deprecated feature \\"feature-alpha\\" with disabled privilege \\"read\\" of feature \\"feature-delta\\"."`
+          `[Error: Cannot replace privilege "all" of deprecated feature "feature-alpha" with disabled privilege "read" of feature "feature-delta".]`
         );
 
         // Case 2: top-level privilege references to a disabled privilege (extended format).
@@ -3551,7 +3551,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"read\\" of deprecated feature \\"feature-alpha\\" with disabled privilege \\"read\\" of feature \\"feature-delta\\"."`
+          `[Error: Cannot replace privilege "read" of deprecated feature "feature-alpha" with disabled privilege "read" of feature "feature-delta".]`
         );
 
         // Case 3: sub-feature privilege references to a disabled privilege.
@@ -3562,7 +3562,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace privilege \\"sub-alpha-1-1\\" of deprecated feature \\"feature-alpha\\" with disabled privilege \\"read\\" of feature \\"feature-delta\\"."`
+          `[Error: Cannot replace privilege "sub-alpha-1-1" of deprecated feature "feature-alpha" with disabled privilege "read" of feature "feature-delta".]`
         );
       });
 
@@ -3573,7 +3573,7 @@ describe('FeatureRegistry', () => {
             createDeprecatedFeature({ deprecated: { notice: 'some notice', replacedBy: [] } })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Feature “feature-alpha” is deprecated and must have at least one feature ID added to the “replacedBy” property, or the property must be left out completely."`
+          `[Error: Feature “feature-alpha” is deprecated and must have at least one feature ID added to the “replacedBy” property, or the property must be left out completely.]`
         );
 
         // Case 2: invalid feature IDs.
@@ -3587,7 +3587,7 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot replace deprecated feature “feature-alpha” with the following features, as they aren’t used to replace feature privileges: feature-gamma, feature-delta."`
+          `[Error: Cannot replace deprecated feature “feature-alpha” with the following features, as they aren’t used to replace feature privileges: feature-gamma, feature-delta.]`
         );
 
         // Case 3: valid feature ID.
@@ -3680,7 +3680,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[privileges]: expected value of type [array] but got [undefined]"`
+        `[Error: [privileges]: expected value of type [array] but got [undefined]]`
       );
     });
 
@@ -3697,7 +3697,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature has a privilege definition at index 0 without any privileges defined."`
+        `[Error: Feature test-feature has a privilege definition at index 0 without any privileges defined.]`
       );
     });
 
@@ -3715,7 +3715,7 @@ describe('FeatureRegistry', () => {
       featureRegistry.registerElasticsearchFeature(feature);
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(`"Feature with id test-feature is already registered."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
     });
 
     it('cannot register elasticsearch feature after lockRegistration has been called', () => {
@@ -3735,7 +3735,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Features are locked, can't register new features. Attempt to register test-feature failed."`
+        `[Error: Features are locked, can't register new features. Attempt to register test-feature failed.]`
       );
     });
   });
@@ -3763,7 +3763,7 @@ describe('FeatureRegistry', () => {
     featureRegistry.registerElasticsearchFeature(elasticsearchFeature);
     expect(() =>
       featureRegistry.registerKibanaFeature(kibanaFeature)
-    ).toThrowErrorMatchingInlineSnapshot(`"Feature with id test-feature is already registered."`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
   });
 
   it('does not allow an Elasticsearch feature to share an id with a Kibana feature', () => {
@@ -3789,6 +3789,6 @@ describe('FeatureRegistry', () => {
     featureRegistry.registerKibanaFeature(kibanaFeature);
     expect(() =>
       featureRegistry.registerElasticsearchFeature(elasticsearchFeature)
-    ).toThrowErrorMatchingInlineSnapshot(`"Feature with id test-feature is already registered."`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
   });
 });

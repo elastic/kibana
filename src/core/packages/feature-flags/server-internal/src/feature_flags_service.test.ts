@@ -78,7 +78,7 @@ describe('FeatureFlagsService Server', () => {
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
       expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
-        `"A provider has already been set. This API cannot be called twice."`
+        `[Error: A provider has already been set. This API cannot be called twice.]`
       );
     });
 

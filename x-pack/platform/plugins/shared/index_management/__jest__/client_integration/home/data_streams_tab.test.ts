@@ -39,7 +39,7 @@ import {
 } from '../helpers/actions/data_stream_actions';
 import { closeViewFilterPopoverIfOpen } from '../helpers/actions/popover_cleanup';
 
-vi.mock('react-use/lib/useObservable', () => () => vi.fn());
+vi.mock('react-use/lib/useObservable', () => ({ default: () => vi.fn() }));
 
 const nonBreakingSpace = ' ';
 

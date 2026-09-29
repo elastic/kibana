@@ -25,7 +25,7 @@ import {
   renderIndexApp,
 } from './index_table.helpers';
 
-vi.mock('react-use/lib/useObservable', () => () => vi.fn());
+vi.mock('react-use/lib/useObservable', () => ({ default: () => vi.fn() }));
 
 describe('index table', () => {
   beforeEach(() => {

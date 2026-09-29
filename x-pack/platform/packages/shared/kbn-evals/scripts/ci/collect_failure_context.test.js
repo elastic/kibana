@@ -7,12 +7,9 @@
 
 import { vi } from 'vitest';
 
-vi.mock('child_process', () => {
-  const mocked = { execFileSync: vi.fn() };
-  return { ...mocked, default: mocked };
-});
-
-const { execFileSync } = require('child_process');
+// The collector is CommonJS and loads `child_process` through Node's require, which `vi.mock` does
+// not intercept, so spy on the shared builtin module before the collector destructures it.
+const execFileSync = vi.spyOn(require('child_process'), 'execFileSync');
 const { collectFailureContext } = await import('./collect_failure_context');
 const { MAX_LOG_EXCERPT_CHARS, failureLogMetadataKey } = await import('./failure_context_helpers');
 

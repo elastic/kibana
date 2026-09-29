@@ -47,7 +47,8 @@ const CURRENCY_DEFAULT_FORMAT = '$0.0';
 const mockFormatSettingLookup = vi.fn(() => CURRENCY_DEFAULT_FORMAT);
 const mockIsOverridden = vi.fn();
 
-vi.mock('../services', () => {
+vi.mock('../services', async () => {
+  const { chartPluginMock } = await vi.importActual('@kbn/charts-plugin/public/mocks');
   const mocked = {
     getFormatService: () => {
       return {
@@ -57,8 +58,7 @@ vi.mock('../services', () => {
     getPaletteService: () => ({
       get: vi.fn(() => ({ getColorForValue: mockGetColorForValue })),
     }),
-    getThemeService: async () => {
-      const { chartPluginMock } = await vi.importActual('@kbn/charts-plugin/public/mocks');
+    getThemeService: () => {
       const { theme: themeServiceMock } = chartPluginMock.createSetupContract();
       return themeServiceMock;
     },

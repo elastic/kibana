@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-01-31T18:33:22.011-05:00][INFO ][some-context] You know, just for your info."`;
 

@@ -30,7 +30,7 @@ describe('validateToolCalls', () => {
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"tool_choice was \\"none\\" but my_function was/were called"`
+      `[Error: tool_choice was "none" but my_function was/were called]`
     );
   });
 
@@ -54,7 +54,7 @@ describe('validateToolCalls', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Tool \\"my_unknown_function\\" called but was not available"`
+      `[Error: Tool "my_unknown_function" called but was not available]`
     );
   });
 
@@ -77,7 +77,7 @@ describe('validateToolCalls', () => {
           },
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"Failed parsing arguments for my_function"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Failed parsing arguments for my_function]`);
   });
 
   it('throws an error if the function call has invalid arguments', () => {
@@ -110,7 +110,7 @@ describe('validateToolCalls', () => {
       });
     }
     expect(() => validate()).toThrowErrorMatchingInlineSnapshot(
-      `"Tool call arguments for my_function (1) were invalid"`
+      `[Error: Tool call arguments for my_function (1) were invalid]`
     );
 
     try {

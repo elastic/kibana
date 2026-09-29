@@ -18,8 +18,13 @@ import {
   summarizeAffectedMoonProjects,
 } from '@kbn/moon';
 import { countCommitsBetweenRefs, hasStagedChanges } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { readFile, writeFile, rm, unlink } from 'fs/promises';
+import execa from 'execa';
 import { cleanupRootRefsConfig, updateRootRefsConfig } from './root_refs_config';
 import { isCiEnvironment } from './src/archive/utils';
+import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
+import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 
 const tsProjectsState: { projects: any[] } = {
   projects: [],
@@ -128,14 +133,10 @@ vi.mock('./src/archive/utils', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('execa', () => {
-  const mockExecaFn = vi.fn();
-  return {
-    __esModule: true,
-    default: mockExecaFn,
-    __mock: { mockExecaFn },
-  };
-});
+vi.mock('execa', () => ({
+  __esModule: true,
+  default: vi.fn(),
+}));
 
 vi.mock('fs/promises', () => {
   const mocked = {
@@ -147,8 +148,8 @@ vi.mock('fs/promises', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockRun = (await vi.importMock('@kbn/dev-cli-runner')).run as Mock;
-const fsPromises = (await vi.importMock('fs/promises')) as {
+const mockRun = run as unknown as Mock;
+const fsPromises = { readFile, writeFile, rm, unlink } as unknown as {
   readFile: Mock;
   writeFile: Mock;
   rm: Mock;
@@ -164,14 +165,9 @@ const mockHasStagedChanges = hasStagedChanges as unknown as Mock;
 const mockUpdateRootRefsConfig = updateRootRefsConfig as unknown as Mock;
 const mockCleanupRootRefsConfig = cleanupRootRefsConfig as unknown as Mock;
 const mockIsCiEnvironment = isCiEnvironment as unknown as Mock;
-const mockArchiveTSBuildArtifacts = (
-  await vi.importMock('./src/archive/archive_ts_build_artifacts')
-).archiveTSBuildArtifacts as Mock;
-const mockRestoreTSBuildArtifacts = (
-  await vi.importMock('./src/archive/restore_ts_build_artifacts')
-).restoreTSBuildArtifacts as Mock;
-const mockExeca = ((await vi.importMock('execa')) as { __mock: { mockExecaFn: Mock } }).__mock
-  .mockExecaFn;
+const mockArchiveTSBuildArtifacts = archiveTSBuildArtifacts as unknown as Mock;
+const mockRestoreTSBuildArtifacts = restoreTSBuildArtifacts as unknown as Mock;
+const mockExeca = execa as unknown as Mock;
 
 let contractHandler: (args: {
   log: { info: Mock; warning: Mock; verbose: Mock };

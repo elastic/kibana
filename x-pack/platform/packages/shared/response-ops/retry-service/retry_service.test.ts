@@ -45,7 +45,7 @@ describe('RetryService', () => {
     cb.mockRejectedValue(new Error('My transient error'));
 
     await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"My transient error"`
+      `[Error: My transient error]`
     );
 
     expect(cb).toHaveBeenCalledTimes(maxAttempts + 1);
@@ -90,7 +90,7 @@ describe('RetryService', () => {
       cb.mockRejectedValue(new Error('My transient error'));
 
       await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"My transient error"`
+        `[Error: My transient error]`
       );
 
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);

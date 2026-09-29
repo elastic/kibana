@@ -11,11 +11,11 @@
 
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
+import fetch from 'node-fetch';
 vi.mock('node-fetch');
 import { AzureCloudService } from './azure';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as Mock;
+const fetchMock = fetch as unknown as Mock;
 
 describe('AzureCloudService', () => {
   const azureCloudService = new AzureCloudService();
@@ -74,14 +74,14 @@ describe('AzureCloudService', () => {
 
       await expect(() =>
         azureCloudService['_checkIfService']()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Azure request failed]`);
     });
 
     it('handles not running on Azure with unexpected response by throwing error', async () => {
       fetchMock.mockResolvedValue({ ok: false });
       await expect(() =>
         azureCloudService['_checkIfService']()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Azure request failed]`);
     });
   });
 

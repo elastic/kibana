@@ -1,11 +1,11 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`transpile - Streamlang DSL to ES|QL) should handle not conditions 1`] = `
+exports[`transpile - Streamlang DSL to ES|QL) > should handle not conditions 1`] = `
 "  | EVAL \`attributes.not_flag\` = CASE(NOT COALESCE(\`attributes.status\` == \\"active\\", FALSE), \\"not-active\\", \`attributes.not_flag\`)
   | EVAL \`attributes.not_nested\` = CASE(NOT (COALESCE(\`attributes.a\` == 1, FALSE) OR COALESCE(\`attributes.b\` == 2, FALSE)), \\"not-a-or-b\\", \`attributes.not_nested\`)"
 `;
 
-exports[`transpile - Streamlang DSL to ES|QL) should handle type coercions 1`] = `
+exports[`transpile - Streamlang DSL to ES|QL) > should handle type coercions 1`] = `
 Object {
   "commands": Array [
     "EVAL \`attributes.boolean_true_test\` = CASE(COALESCE(\`attributes.is_active\` == TRUE, FALSE) AND COALESCE(\`attributes.is_active_str\` == \\"true\\", FALSE) AND COALESCE(\`attributes.is_inactive\` != TRUE, TRUE) AND COALESCE(\`attributes.is_inactive_str\` != \\"true\\", TRUE), \\"matched_true_test\\", \`attributes.boolean_true_test\`)
@@ -20,7 +20,7 @@ Object {
 }
 `;
 
-exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
+exports[`transpile - Streamlang DSL to ES|QL) > should transpile a variety of processor steps and where blocks 1`] = `
 "  | REGISTERED_DOMAIN __streamlang_registered_domain = expression
   | EVAL \`prefix.domain\` = COALESCE(\`__streamlang_registered_domain.domain\`, \`prefix.domain\`), \`prefix.registered_domain\` = COALESCE(\`__streamlang_registered_domain.registered_domain\`, \`prefix.registered_domain\`), \`prefix.subdomain\` = COALESCE(\`__streamlang_registered_domain.subdomain\`, \`prefix.subdomain\`), \`prefix.top_level_domain\` = COALESCE(\`__streamlang_registered_domain.top_level_domain\`, \`prefix.top_level_domain\`)
   | DROP \`__streamlang_registered_domain.domain\`, \`__streamlang_registered_domain.registered_domain\`, \`__streamlang_registered_domain.subdomain\`, \`__streamlang_registered_domain.top_level_domain\`
@@ -72,4 +72,4 @@ exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of proc
   | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""
 `;
 
-exports[`transpile - Streamlang DSL to ES|QL) should warn when manual_ingest_pipeline is used 1`] = `"  | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""`;
+exports[`transpile - Streamlang DSL to ES|QL) > should warn when manual_ingest_pipeline is used 1`] = `"  | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""`;

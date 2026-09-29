@@ -177,11 +177,9 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
 
     beforeEach(() => {
       originalNow = Date.now();
-      vi.useFakeTimers({
-        // Keep timer primitives real so node-fetch / p-retry behave normally;
-        // we only fake `Date` so TTL expiry can be driven from the test.
-        doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate'],
-      });
+      // Keep timer primitives real so node-fetch / p-retry behave normally;
+      // we only fake `Date` so TTL expiry can be driven from the test.
+      vi.useFakeTimers({ toFake: ['Date'] });
       vi.setSystemTime(new Date(originalNow));
     });
 

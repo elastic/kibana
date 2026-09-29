@@ -84,7 +84,7 @@ describe('registerUsageMetricsRoute', () => {
 
     expect(mockResponse.customError).toHaveBeenCalledTimes(1);
     expect(mockResponse.customError).toHaveBeenCalledWith({
-      body: new CustomHttpRequestError('[request body.dataStreams]: no data streams selected'),
+      body: new CustomHttpRequestError('[request body.dataStreams]: no data streams selected', 400),
       statusCode: 400,
     });
   });

@@ -9,6 +9,7 @@ import { vi } from 'vitest';
 import type { Mock, MockInstance, MockedClass, MockedFunction } from 'vitest';
 
 import Fs from 'fs';
+import execa from 'execa';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
 import {
@@ -71,7 +72,9 @@ vi.mock('./detect_stale_artifacts', () => {
 
 // Mock execa to simulate a fresh checkout (no existing build artifacts)
 // and prevent actual git/gcloud commands from running during tests.
-vi.mock('execa', () => vi.fn().mockResolvedValue({ stdout: '' }));
+vi.mock('execa', () => ({ default: vi.fn().mockResolvedValue({ stdout: '' }) }));
+
+const mockedExeca = execa as unknown as Mock;
 
 const mockedBuildCandidateShaList = buildCandidateShaList as MockedFunction<
   typeof buildCandidateShaList
@@ -408,9 +411,7 @@ describe('resolveRestoreStrategy', () => {
     );
   });
 
-  describe('Phase 1.5 — cache-invalidation file detection', async () => {
-    const mockedExeca = (await vi.importMock('execa')) as Mock;
-
+  describe('Phase 1.5 — cache-invalidation file detection', () => {
     it('cleans artifacts and resets state when invalidation files changed', async () => {
       accessSpy.mockResolvedValue(undefined);
       readFileSpy.mockImplementation(makeReadFileMock('known-sha', ['some/tsconfig.json']));
@@ -577,9 +578,7 @@ describe('resolveRestoreStrategy', () => {
     });
   });
 
-  describe('GCS archive node_modules safety check', async () => {
-    const mockedExeca = (await vi.importMock('execa')) as Mock;
-
+  describe('GCS archive node_modules safety check', () => {
     it('skips restore when no local artifacts exist but archive has a node_modules change', async () => {
       // Default beforeEach: no local artifacts, GCS has 'ancestor-sha'.
       // Simulate pnpm-lock.yaml changing between ancestor-sha and HEAD.

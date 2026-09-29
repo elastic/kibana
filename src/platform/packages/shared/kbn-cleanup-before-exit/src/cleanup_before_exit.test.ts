@@ -185,6 +185,8 @@ describe('createCleanupBeforeExit', () => {
       proc.exit(0);
 
       await vi.advanceTimersToNextTimerAsync();
+      // Vitest fires same-time timers synchronously (Jest used tickAsync), so settle the cleanup chain
+      await flushPromises();
 
       expect(warnSpy).toHaveBeenCalled();
 

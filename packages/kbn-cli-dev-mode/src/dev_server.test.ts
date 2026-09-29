@@ -8,11 +8,13 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
+import execaModule from 'execa';
 
 import { extendedEnvSerializer } from './test_helpers';
 import type { Options } from './dev_server';
@@ -44,7 +46,7 @@ class MockProc extends EventEmitter {
 }
 
 vi.mock('execa');
-const execa = await vi.importMock('execa');
+const execa = execaModule as unknown as { node: Mock };
 
 let currentProc: MockProc | undefined;
 execa.node.mockImplementation(() => {

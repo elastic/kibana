@@ -20,7 +20,7 @@ vi.mock('./use_aws_service_matrix', () => {
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
 
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
+vi.mock('react-use/lib/useSessionStorage', () => ({ default: vi.fn() }));
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 

@@ -1,4 +1,34 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`overviewPageActions > all buttons 1`] = `
+Array [
+  <EuiButtonEmpty
+    className="kbnOverviewPageHeader__actionButton"
+    data-test-subj="homeAddData"
+    flush="both"
+    href=""
+    iconType="plusCircle"
+  >
+    Add integrations
+  </EuiButtonEmpty>,
+]
+`;
+
+exports[`overviewPageActions > no buttons 1`] = `Array []`;
+
+exports[`overviewPageActions > only add data button 1`] = `
+Array [
+  <EuiButtonEmpty
+    className="kbnOverviewPageHeader__actionButton"
+    data-test-subj="homeAddData"
+    flush="both"
+    href=""
+    iconType="plusCircle"
+  >
+    Add integrations
+  </EuiButtonEmpty>,
+]
+`;
 
 exports[`overviewPageActions all buttons 1`] = `
 Array [

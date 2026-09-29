@@ -11,8 +11,8 @@ import { createConversationCoherenceEvaluator } from '.';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-vi.mock('p-retry', () => {
-  return vi.fn(async (fn: () => Promise<any>, opts?: any) => {
+vi.mock('p-retry', () => ({
+  default: vi.fn(async (fn: () => Promise<any>, opts?: any) => {
     const retries = opts?.retries ?? 0;
     let lastError: any;
     for (let attempt = 1; attempt <= retries + 1; attempt++) {
@@ -26,8 +26,8 @@ vi.mock('p-retry', () => {
       }
     }
     throw lastError;
-  });
-});
+  }),
+}));
 
 function createMockLog(): ToolingLog {
   return {

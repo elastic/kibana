@@ -100,12 +100,12 @@ vi.mock('../../../hooks/agents/use_can_update_agent');
 vi.mock('../../../hooks/tools/use_tools');
 vi.mock('./use_tools_mutation');
 
-const { useAgentBuilderAgentById } = await vi.importMock('../../../hooks/agents/use_agent_by_id');
-const { useCanUpdateAgent } = await vi.importMock('../../../hooks/agents/use_can_update_agent');
-const { useToolsService } = await vi.importMock('../../../hooks/tools/use_tools');
-const { useToolsMutation } = await vi.importMock('./use_tools_mutation');
-const { useQueryState } = await vi.importMock('../../../hooks/use_query_state');
-const { useFlyoutState } = await vi.importMock('../../../hooks/use_flyout_state');
+const { useAgentBuilderAgentById } = vi.mocked(await import('../../../hooks/agents/use_agent_by_id'));
+const { useCanUpdateAgent } = vi.mocked(await import('../../../hooks/agents/use_can_update_agent'));
+const { useToolsService } = vi.mocked(await import('../../../hooks/tools/use_tools'));
+const { useToolsMutation } = vi.mocked(await import('./use_tools_mutation'));
+const { useQueryState } = vi.mocked(await import('../../../hooks/use_query_state'));
+const { useFlyoutState } = vi.mocked(await import('../../../hooks/use_flyout_state'));
 
 const renderComponent = () =>
   render(

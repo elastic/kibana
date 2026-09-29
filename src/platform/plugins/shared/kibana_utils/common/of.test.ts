@@ -34,6 +34,9 @@ describe('of()', () => {
       // eslint-disable-next-line no-throw-literal
       throw 123;
     });
+    // The promise rejects during test collection, before any test awaits it;
+    // attach a no-op handler so the rejection isn't reported as unhandled.
+    promise.catch(() => {});
 
     test('first member of 3-tuple is undefined', async () => {
       const [result] = await of(promise);

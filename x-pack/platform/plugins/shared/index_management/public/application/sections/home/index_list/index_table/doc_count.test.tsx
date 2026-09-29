@@ -9,13 +9,14 @@ import { vi } from 'vitest';
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import useObservable from 'react-use/lib/useObservable';
 
 import { DocCountCell } from './doc_count';
 import { RequestResultType } from './get_doc_count';
 
-vi.mock('react-use/lib/useObservable', () => vi.fn());
+vi.mock('react-use/lib/useObservable', () => ({ default: vi.fn() }));
 
-const mockedUseObservable = await vi.importMock('react-use/lib/useObservable');
+const mockedUseObservable = vi.mocked(useObservable);
 
 describe('DocCountCell', () => {
   const docCountApi = {

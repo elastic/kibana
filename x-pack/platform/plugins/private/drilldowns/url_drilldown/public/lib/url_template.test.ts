@@ -43,17 +43,17 @@ describe('encoding', () => {
 
 test('should fail on unknown syntax', async () => {
   const url = 'https://elastic.co/{{}';
-  await expect(() => compile(url, {})).rejects;
+  await expect(() => compile(url, {})).rejects.toThrow();
 });
 
 test('should fail on not existing variable', async () => {
   const url = 'https://elastic.co/{{fake}}';
-  await expect(() => compile(url, {})).rejects;
+  await expect(() => compile(url, {})).rejects.toThrow();
 });
 
 test('should fail on not existing nested variable', async () => {
   const url = 'https://elastic.co/{{fake.fake}}';
-  await expect(() => compile(url, { fake: {} })).rejects;
+  await expect(() => compile(url, { fake: {} })).rejects.toThrow();
 });
 
 test('should replace existing variable', async () => {
@@ -63,7 +63,7 @@ test('should replace existing variable', async () => {
 
 test('should fail on unknown helper', async () => {
   const url = 'https://elastic.co/{{fake foo}}';
-  await expect(() => compile(url, { foo: 'bar' })).rejects;
+  await expect(() => compile(url, { foo: 'bar' })).rejects.toThrow();
 });
 
 describe('json helper', () => {
@@ -81,7 +81,9 @@ describe('json helper', () => {
   });
   test('should throw on unknown key', async () => {
     const url = 'https://elastic.co/{{{json fake}}}';
-    await expect(() => compile(url, { foo: { foo: 'bar' }, bar: { bar: 'foo' } })).rejects;
+    await expect(() =>
+      compile(url, { foo: { foo: 'bar' }, bar: { bar: 'foo' } })
+    ).rejects.toThrow();
   });
 });
 
@@ -100,7 +102,9 @@ describe('rison helper', () => {
   });
   test('should throw on unknown key', async () => {
     const url = 'https://elastic.co/{{{rison fake}}}';
-    await expect(() => compile(url, { foo: { foo: 'bar' }, bar: { bar: 'foo' } })).rejects;
+    await expect(() =>
+      compile(url, { foo: { foo: 'bar' }, bar: { bar: 'foo' } })
+    ).rejects.toThrow();
   });
 });
 
@@ -139,7 +143,7 @@ describe('date helper', () => {
 
   test('throws if missing variable', async () => {
     const url = 'https://elastic.co/{{date time}}';
-    await expect(() => compile(url, {})).rejects;
+    await expect(() => compile(url, {})).rejects.toThrow();
   });
 
   test("doesn't throw if non valid date", async () => {
@@ -208,14 +212,14 @@ describe('formatNumber helper', () => {
 
   test('fails on missing format string', async () => {
     const url = 'https://elastic.co/{{formatNumber value}}';
-    await expect(() => compile(url, { value: 12 })).rejects;
+    await expect(() => compile(url, { value: 12 })).rejects.toThrow();
   });
 
   // this doesn't work and doesn't seem
   // possible to validate with our version of numeral
   test.skip('fails on malformed format string', async () => {
     const url = 'https://elastic.co/{{formatNumber value "not a real format string"}}';
-    await expect(() => compile(url, { value: 12 })).rejects;
+    await expect(() => compile(url, { value: 12 })).rejects.toThrow();
   });
 });
 
@@ -248,22 +252,22 @@ describe('replace helper', () => {
     await expect(() =>
       compile('https://elastic.co/{{replace value "Label:"}}', { value: 'No matches' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+      `[Error: [replace]: "searchString" and "valueString" parameters expected to be strings, but not a string or missing]`
     );
     await expect(() =>
       compile('https://elastic.co/{{replace value "Label:" 4}}', { value: 'No matches' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+      `[Error: [replace]: "searchString" and "valueString" parameters expected to be strings, but not a string or missing]`
     );
     await expect(() =>
       compile('https://elastic.co/{{replace value 4 ""}}', { value: 'No matches' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+      `[Error: [replace]: "searchString" and "valueString" parameters expected to be strings, but not a string or missing]`
     );
     await expect(() =>
       compile('https://elastic.co/{{replace value}}', { value: 'No matches' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+      `[Error: [replace]: "searchString" and "valueString" parameters expected to be strings, but not a string or missing]`
     );
   });
 });
@@ -344,7 +348,7 @@ describe('basic string formatting helpers', () => {
     await expect(() =>
       compile(`https://elastic.co/{{split value}}`, { value: '47.766201,-122.257057' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[split] \\"splitter\\" expected to be a string"`
+      `[Error: [split] "splitter" expected to be a string]`
     );
   });
 });

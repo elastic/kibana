@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
 import React, { type ReactElement, type ReactNode } from 'react';
-import ReactDOM from 'react-dom';
+import { render as reactDomRender } from 'react-dom';
 import { render } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
@@ -20,6 +20,12 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 
 import { FatalErrorsService } from './fatal_errors_service';
+
+vi.mock('react-dom', () => {
+  const actual = require('react-dom');
+  const mocked = { ...actual, render: vi.fn(actual.render) };
+  return { ...mocked, default: mocked };
+});
 
 describe('FatalErrorsService', () => {
   let fatalErrorsSetup: FatalErrorsSetup;
@@ -65,7 +71,7 @@ describe('FatalErrorsService', () => {
         handler = vi.fn(() => <div data-test-subj="customError" />);
         fatalErrorsSetup.catch(condition, handler);
 
-        const renderSpy = vi.spyOn(ReactDOM, 'render').mockImplementation(() => {});
+        const renderSpy = vi.mocked(reactDomRender).mockImplementation(() => {});
         expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrow();
         [element] = renderSpy.mock.lastCall as unknown as [ReactElement];
       });

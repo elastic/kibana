@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`can't submit {"__proto__":null} 1`] = `"'__proto__' is an invalid key"`;
 

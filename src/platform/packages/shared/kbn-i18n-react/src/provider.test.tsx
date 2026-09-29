@@ -16,14 +16,17 @@ import { I18nProvider } from './provider';
 import { i18n } from '@kbn/i18n';
 
 describe('I18nProvider', () => {
-  test('throws if i18n is not initialized', () => {
+  test('throws if i18n is not initialized', async () => {
+    // The Vitest setup initializes the shared @kbn/i18n instance, so load a fresh, uninitialized one.
+    vi.resetModules();
+    const { I18nProvider: UninitializedI18nProvider } = await import('./provider');
     const ChildrenMock = () => null;
 
     expect(() =>
       shallow(
-        <I18nProvider>
+        <UninitializedI18nProvider>
           <ChildrenMock />
-        </I18nProvider>
+        </UninitializedI18nProvider>
       )
     ).toThrowErrorMatchingInlineSnapshot(
       `"kbn-i18n must be initialized before using <I18nProvider />"`

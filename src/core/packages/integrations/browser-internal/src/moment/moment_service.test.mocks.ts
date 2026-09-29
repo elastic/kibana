@@ -21,4 +21,4 @@ export const momentMock = {
   weekdays: vi.fn(() => ['dow1', 'dow2', 'dow3']),
   updateLocale: vi.fn(),
 };
-vi.doMock('moment-timezone', () => momentMock);
+vi.doMock('moment-timezone', () => ({ default: momentMock }));

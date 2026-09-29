@@ -9,7 +9,7 @@
 
 import { vi } from 'vitest';
 
-import { fc } from '@fast-check/jest';
+import { fc } from '@fast-check/vitest';
 import { onceCacheOnSuccess } from './once_cache_on_success';
 
 describe('onceCacheOnSuccess', () => {

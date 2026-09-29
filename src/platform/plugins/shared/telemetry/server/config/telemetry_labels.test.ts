@@ -14,7 +14,7 @@ describe('labelsSchema', () => {
     expect(() => {
       labelsSchema.validate({ environment: 1234 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[environment]: expected value of type [string] but got [number]"`
+      `[Error: [environment]: expected value of type [string] but got [number]]`
     );
   });
   test('with environment set', () => {
@@ -31,7 +31,7 @@ describe('labelsSchema', () => {
     expect(() => {
       labelsSchema.validate({ foo: 'bar' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[foo]: Additional properties are not allowed ('foo' was unexpected)"`
+      `[Error: [foo]: Additional properties are not allowed ('foo' was unexpected)]`
     );
   });
 });

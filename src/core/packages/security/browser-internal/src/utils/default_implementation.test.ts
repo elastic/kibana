@@ -21,7 +21,7 @@ describe('getDefaultSecurityImplementation', () => {
     it('rejects with an error', async () => {
       await expect(() =>
         implementation.authc.getCurrentUser()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"No authenticated user"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No authenticated user]`);
     });
   });
 
@@ -37,7 +37,7 @@ describe('getDefaultSecurityImplementation', () => {
     it('create rejects', async () => {
       await expect(
         implementation.serviceAccounts.create({ name: 'my-service-account', roles: ['viewer'] })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Service accounts are disabled]`);
     });
   });
 });

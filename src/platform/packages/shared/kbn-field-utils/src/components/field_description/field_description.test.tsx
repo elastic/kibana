@@ -20,14 +20,14 @@ const mockSetLocalStorage = vi.fn();
 const mockLocalStorageKey = SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY;
 let mockTestInitialLocalStorageValue: boolean | undefined;
 
-vi.mock('react-use/lib/useLocalStorage', () => {
-  return vi.fn((key: string, initialValue: number) => {
+vi.mock('react-use/lib/useLocalStorage', () => ({
+  default: vi.fn((key: string, initialValue: number) => {
     if (key !== mockLocalStorageKey) {
       throw new Error(`Unexpected key: ${key}`);
     }
     return [mockTestInitialLocalStorageValue ?? initialValue, mockSetLocalStorage];
-  });
-});
+  }),
+}));
 
 describe('FieldDescription', () => {
   afterEach(() => {

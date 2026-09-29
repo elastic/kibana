@@ -8,6 +8,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import {
   extractImageInfo,
@@ -17,7 +18,7 @@ import {
 } from './extract_image_info';
 
 vi.mock('execa');
-const execa = await vi.importMock('execa');
+const execa = (await import('execa')).default as unknown as Mock;
 
 describe('extractImageInfo', () => {
   beforeEach(() => {
@@ -38,7 +39,7 @@ describe('extractImageInfo', () => {
     expect(execa).toHaveBeenCalledTimes(2);
   });
 
-  it('should return image labels as an object', () => {
+  it('should return image labels as an object', async () => {
     const image = 'nevermind123';
     const obj = { 'org.opencontainers.image.revision': 'revision', extra: 123 };
     const labelsJson = JSON.stringify(obj);
@@ -46,24 +47,24 @@ describe('extractImageInfo', () => {
 
     const imageInfo = extractImageInfo(image);
 
-    expect(imageInfo).resolves.toEqual(obj);
+    await expect(imageInfo).resolves.toEqual(obj);
   });
 });
 
 describe('getImageVersion', () => {
-  it("should return the image's revision", () => {
+  it("should return the image's revision", async () => {
     const image = 'test-image';
     const labels = { 'org.opencontainers.image.revision': 'deadbeef1234' };
     execa.mockResolvedValue({ stdout: JSON.stringify(labels) });
 
     const imageVersion = getImageVersion(image);
 
-    expect(imageVersion).resolves.toBe('deadbeef1234');
+    await expect(imageVersion).resolves.toBe('deadbeef1234');
   });
 });
 
 describe('getCommitUrl', () => {
-  it('should return the commit url', () => {
+  it('should return the commit url', async () => {
     const image = 'docker.elastic.co/elasticsearch/elasticsearch:7.15.0';
     const labels = {
       'org.opencontainers.image.source': 'https://github.com/elastic/elasticsearch',
@@ -71,20 +72,20 @@ describe('getCommitUrl', () => {
     };
     execa.mockResolvedValue({ stdout: JSON.stringify(labels) });
 
-    expect(getCommitUrl(image)).resolves.toBe(
+    await expect(getCommitUrl(image)).resolves.toBe(
       'https://github.com/elastic/elasticsearch/commit/deadbeef1234'
     );
   });
 });
 
 describe('getServerlessImageTag', () => {
-  it('should return the image tag', () => {
+  it('should return the image tag', async () => {
     const image = 'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest';
     const labels = { 'org.opencontainers.image.revision': 'deadbeef12345678' };
     execa.mockResolvedValue({ stdout: JSON.stringify(labels) });
 
     const imageTag = getServerlessImageTag(image);
 
-    expect(imageTag).resolves.toBe('git-deadbeef1234');
+    await expect(imageTag).resolves.toBe('git-deadbeef1234');
   });
 });

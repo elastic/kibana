@@ -324,7 +324,7 @@ describe('createConnectorRoute', () => {
     };
     expect(() =>
       createConnectorRequestBodySchemaV1.validate(body)
-    ).toThrowErrorMatchingInlineSnapshot(`"[config.foo]: value '' is not valid"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: [config.foo]: value '' is not valid]`);
   });
 
   test('rejects names and config keys past the max length', () => {

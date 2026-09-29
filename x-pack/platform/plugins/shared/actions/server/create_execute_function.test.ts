@@ -875,7 +875,7 @@ describe('bulkExecute()', () => {
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+      `[Error: Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.]`
     );
   });
 

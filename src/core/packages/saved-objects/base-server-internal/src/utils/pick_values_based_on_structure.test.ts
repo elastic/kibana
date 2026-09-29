@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import deepMerge from 'deepmerge';
-import { fc } from '@fast-check/jest';
+import { fc } from '@fast-check/vitest';
 import { pickValuesBasedOnStructure, getFlattenedKeys } from './pick_values_based_on_structure';
 import { isPlainObject } from 'lodash';
 

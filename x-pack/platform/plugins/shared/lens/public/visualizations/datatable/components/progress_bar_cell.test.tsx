@@ -167,7 +167,9 @@ describe('progress bar cell helpers', () => {
       alignment: 'right',
     };
 
-    beforeEach(() => meterMock.mockClear());
+    beforeEach(() => {
+      meterMock.mockClear();
+    });
 
     it('forwards a density-specific meter style override', () => {
       render(<ProgressBarCell {...baseProps} meterStyle={{ height: '12px' }} />);

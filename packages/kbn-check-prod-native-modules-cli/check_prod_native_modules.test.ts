@@ -55,31 +55,21 @@ vi.mock('@kbn/yarn-lock-validator', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock(
-  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-  '/test/node_modules/@elastic/test-package/package.json',
-  () => {
-    const mocked = {
-      name: '@elastic/test-package',
-      version: '1.0.0',
-    };
-    return { ...mocked, default: mocked };
+const mockPackageJsons = vi.hoisted<Record<string, { name: string; version: string }>>(() => ({
+  '/test/node_modules/@elastic/test-package/package.json': {
+    name: '@elastic/test-package',
+    version: '1.0.0',
   },
-  { virtual: true }
-);
+  '/test/node_modules/@elastic/package/package.json': {
+    name: '@elastic/package',
+    version: '1.0.0',
+  },
+}));
 
-vi.mock(
-  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-  '/test/node_modules/@elastic/package/package.json',
-  () => {
-    const mocked = {
-      name: '@elastic/package',
-      version: '1.0.0',
-    };
-    return { ...mocked, default: mocked };
-  },
-  { virtual: true }
-);
+// loadPackageJson uses Node's require, which vi.mock can't intercept, so mock the helper itself
+vi.mock('./helpers', () => ({
+  loadPackageJson: vi.fn((packageJsonPath: string) => mockPackageJsons[packageJsonPath]),
+}));
 
 describe('Check Prod Native Modules', () => {
   let mockLog: Mocked<ToolingLog>;

@@ -10,9 +10,11 @@ import { vi } from 'vitest';
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
+import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import type { MockRouter } from './__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
+import { registerESDeprecationRoutes } from './es_deprecations';
 
 vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
   const mocked = {
@@ -21,12 +23,12 @@ vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
   return { ...mocked, default: mocked };
 });
 
-// Need to require to get mock on named export to work.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ESUpgradeStatusApis = await import('../lib/es_deprecations_status');
-ESUpgradeStatusApis.getESUpgradeStatus = vi.fn();
+vi.mock('../lib/es_deprecations_status', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getESUpgradeStatus: vi.fn(),
+}));
 
-import { registerESDeprecationRoutes } from './es_deprecations';
+const ESUpgradeStatusApis = { getESUpgradeStatus: vi.mocked(getESUpgradeStatus) };
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests

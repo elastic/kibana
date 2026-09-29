@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
 
 import { convertEsError } from './errors';
-import * as convertEsErrorNS from './errors';
 
 import { callIndexAliasApi, callFieldCapsApi } from './es_api';
+
+vi.mock('./errors', { spy: true });
+
+beforeEach(() => {
+  vi.mocked(convertEsError).mockClear();
+});
 
 describe('server/index_patterns/service/lib/es_api', () => {
   describe('#callIndexAliasApi()', () => {
@@ -83,7 +87,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const esError = new Error('esError');
       const convertedError = new Error('convertedError');
 
-      sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
+      vi.mocked(convertEsError).mockImplementationOnce(() => {
+        throw convertedError;
+      });
       const getAlias = sinon.stub(async () => {
         throw esError;
       });
@@ -98,9 +104,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
         throw new Error('expected callIndexAliasApi() to throw');
       } catch (error) {
         expect(error).toBe(convertedError);
-        sinon.assert.calledOnce(convertEsError);
-        expect(convertEsError.args[0][0]).toBe(indices);
-        expect(convertEsError.args[0][1]).toBe(esError);
+        expect(convertEsError).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(convertEsError).mock.calls[0][0]).toBe(indices);
+        expect(vi.mocked(convertEsError).mock.calls[0][1]).toBe(esError);
       }
     });
   });
@@ -172,7 +178,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const esError = new Error('esError');
       const convertedError = new Error('convertedError');
 
-      sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
+      vi.mocked(convertEsError).mockImplementationOnce(() => {
+        throw convertedError;
+      });
       const fieldCaps = sinon.spy(async () => {
         throw esError;
       });
@@ -187,9 +195,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
         throw new Error('expected callFieldCapsApi() to throw');
       } catch (error) {
         expect(error).toBe(convertedError);
-        sinon.assert.calledOnce(convertEsError);
-        expect(convertEsError.args[0][0]).toBe(indices);
-        expect(convertEsError.args[0][1]).toBe(esError);
+        expect(convertEsError).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(convertEsError).mock.calls[0][0]).toBe(indices);
+        expect(vi.mocked(convertEsError).mock.calls[0][1]).toBe(esError);
       }
     });
 

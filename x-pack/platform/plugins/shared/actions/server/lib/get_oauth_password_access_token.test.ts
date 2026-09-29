@@ -153,7 +153,7 @@ describe('getOAuthPasswordAccessToken', () => {
     );
 
     await expect(getOAuthPasswordAccessToken(opts)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"requestOAuthPasswordToken error!!"`
+      `[Error: requestOAuthPasswordToken error!!]`
     );
   });
 

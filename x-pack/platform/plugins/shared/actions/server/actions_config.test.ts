@@ -67,7 +67,7 @@ describe('ensureUriAllowed', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureUriAllowed('')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"target url \\"\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+      `[Error: target url "" is not added to the Kibana config xpack.actions.allowedHosts]`
     );
   });
 
@@ -87,7 +87,7 @@ describe('ensureUriAllowed', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureUriAllowed('https://github.com/elastic/kibana')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"target url \\"https://github.com/elastic/kibana\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+      `[Error: target url "https://github.com/elastic/kibana" is not added to the Kibana config xpack.actions.allowedHosts]`
     );
   });
 
@@ -96,7 +96,7 @@ describe('ensureUriAllowed', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureUriAllowed('github.com/elastic')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"target url \\"github.com/elastic\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+      `[Error: target url "github.com/elastic" is not added to the Kibana config xpack.actions.allowedHosts]`
     );
   });
 
@@ -129,7 +129,7 @@ describe('ensureHostnameAllowed', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureHostnameAllowed('github.com')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"target hostname \\"github.com\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+      `[Error: target hostname "github.com" is not added to the Kibana config xpack.actions.allowedHosts]`
     );
   });
 
@@ -272,7 +272,7 @@ describe('ensureActionTypeEnabled', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
+      `[Error: action type "foo" is not enabled in the Kibana config xpack.actions.enabledActionTypes]`
     );
   });
 
@@ -285,7 +285,7 @@ describe('ensureActionTypeEnabled', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
+      `[Error: action type "foo" is not enabled in the Kibana config xpack.actions.enabledActionTypes]`
     );
   });
 

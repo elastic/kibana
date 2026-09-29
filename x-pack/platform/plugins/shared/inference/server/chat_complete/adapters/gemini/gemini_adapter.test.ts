@@ -756,7 +756,7 @@ describe('geminiAdapter', () => {
               .pipe(toArray())
           )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Error calling connector: something went wrong"`
+          `[Error: Error calling connector: something went wrong]`
         );
       });
     });
@@ -819,7 +819,7 @@ describe('geminiAdapter', () => {
               .pipe(toArray())
           )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Error calling connector: something went wrong"`
+          `[Error: Error calling connector: something went wrong]`
         );
       });
     });

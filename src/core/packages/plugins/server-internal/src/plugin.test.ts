@@ -216,7 +216,7 @@ test('`setup` fails if the plugin has not been initialized', () => {
   expect(() =>
     plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {})
   ).toThrowErrorMatchingInlineSnapshot(
-    `"The plugin is not initialized. Call the init method first."`
+    `[Error: The plugin is not initialized. Call the init method first.]`
   );
 });
 
@@ -237,7 +237,7 @@ test('`init` fails if no `plugin` initializer nor `module` is exported', async (
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"some-plugin-id\\" does not export the \\"plugin\\" definition or \\"module\\" (plugin-without-initializer-path)."`
+    `[Error: Plugin "some-plugin-id" does not export the "plugin" definition or "module" (plugin-without-initializer-path).]`
   );
 });
 
@@ -258,7 +258,7 @@ test('`init` fails if plugin initializer is not a function', async () => {
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Definition of plugin \\"some-plugin-id\\" should be a function (plugin-with-wrong-initializer-path)."`
+    `[Error: Definition of plugin "some-plugin-id" should be a function (plugin-with-wrong-initializer-path).]`
   );
 });
 
@@ -281,7 +281,7 @@ test('`init` fails if initializer does not return object', async () => {
   mockPluginInitializer.mockResolvedValue(null);
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Initializer for plugin \\"some-plugin-id\\" is expected to return plugin instance, but returned \\"null\\"."`
+    `[Error: Initializer for plugin "some-plugin-id" is expected to return plugin instance, but returned "null".]`
   );
 });
 
@@ -305,7 +305,7 @@ test('`init` fails if object returned from initializer does not define `setup` f
   mockPluginInitializer.mockResolvedValue(mockPluginInstance);
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Instance of plugin \\"some-plugin-id\\" does not define \\"setup\\" function."`
+    `[Error: Instance of plugin "some-plugin-id" does not define "setup" function.]`
   );
 });
 
@@ -396,7 +396,7 @@ test('`start` fails if setup is not called first', () => {
   });
 
   expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
+    `[Error: Plugin "some-plugin-id" can't be started since it isn't set up.]`
   );
 });
 
@@ -423,7 +423,7 @@ test('`start` fails invoked for the `preboot` plugin', async () => {
   await plugin.setup({} as any, {} as any);
 
   expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"some-plugin-id\\" is a preboot plugin and cannot be started."`
+    `[Error: Plugin "some-plugin-id" is a preboot plugin and cannot be started.]`
   );
 });
 
@@ -768,7 +768,7 @@ describe('#getConfigSchema()', () => {
       }),
     });
     await expect(() => plugin.getConfigDescriptor()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Configuration schema expected to be an instance of Type"`
+      `[Error: Configuration schema expected to be an instance of Type]`
     );
   });
 });

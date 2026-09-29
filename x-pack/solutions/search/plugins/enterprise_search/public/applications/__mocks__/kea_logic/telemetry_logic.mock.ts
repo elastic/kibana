@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 export const mockTelemetryActions = {
-  sendTelemetry: jest.fn(),
-  sendEnterpriseSearchTelemetry: jest.fn(),
+  sendTelemetry: vi.fn(),
+  sendEnterpriseSearchTelemetry: vi.fn(),
 };
 
-jest.mock('../../shared/telemetry', () => ({
-  ...(jest.requireActual('../../shared/telemetry') as object),
+vi.mock('../../shared/telemetry', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   TelemetryLogic: { actions: mockTelemetryActions },
 }));

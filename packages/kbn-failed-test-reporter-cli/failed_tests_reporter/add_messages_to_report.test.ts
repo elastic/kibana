@@ -23,12 +23,13 @@ expect.addSnapshotSerializer({
 
 vi.mock('fs', () => {
   const realFs = require('fs');
-  return {
+  const mocked = {
     ...realFs,
     writeFile: (...args: any[]) => {
       setTimeout(args[args.length - 1], 0);
     },
   };
+  return { ...mocked, default: mocked };
 });
 
 import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, CYPRESS_REPORT } from './__fixtures__';

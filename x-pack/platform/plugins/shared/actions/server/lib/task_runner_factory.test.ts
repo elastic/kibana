@@ -135,7 +135,7 @@ describe('Task Runner Factory', () => {
     );
     expect(() =>
       factory.create(taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance }))
-    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: TaskRunnerFactory not initialized]`);
   });
 
   test(`throws an error if factory is already initialized`, () => {
@@ -151,7 +151,7 @@ describe('Task Runner Factory', () => {
     factory.initialize(taskRunnerFactoryInitializerParams);
     expect(() =>
       factory.initialize(taskRunnerFactoryInitializerParams)
-    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory already initialized"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: TaskRunnerFactory already initialized]`);
   });
 
   test('executes the task by calling the executor with proper parameters, using given actionId when no actionRef in references', async () => {

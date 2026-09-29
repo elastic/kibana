@@ -114,7 +114,7 @@ describe('getTranslationPaths', () => {
     await expect(
       getTranslationPaths({ cwd: '/cwd', nested: true })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to parse .i18nrc.json file at /cwd/.i18nrc.json"`
+      `[Error: Failed to parse .i18nrc.json file at /cwd/.i18nrc.json]`
     );
   });
 });

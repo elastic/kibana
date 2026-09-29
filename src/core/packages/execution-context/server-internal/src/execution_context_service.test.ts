@@ -324,7 +324,7 @@ describe('ExecutionContextService', () => {
         });
       });
 
-      it('do not swallow errors', () => {
+      it('do not swallow errors', async () => {
         const error = new Error('oops');
         const promise = service.withContext(
           {
@@ -339,7 +339,7 @@ describe('ExecutionContextService', () => {
           }
         );
 
-        expect(promise).rejects.toBe(error);
+        await expect(promise).rejects.toBe(error);
       });
 
       it('emits context to the logs when "withContext" is called', async () => {

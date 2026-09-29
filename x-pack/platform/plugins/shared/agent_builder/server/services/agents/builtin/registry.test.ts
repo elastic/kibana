@@ -39,7 +39,7 @@ describe('BuiltinAgentRegistry', () => {
     it('should throw if the agent id is already registered', () => {
       registry.register(mockAgent);
       expect(() => registry.register(mockAgent)).toThrowErrorMatchingInlineSnapshot(
-        `"Agent with id test-agent already registered"`
+        `[Error: Agent with id test-agent already registered]`
       );
     });
 
@@ -50,7 +50,7 @@ describe('BuiltinAgentRegistry', () => {
           id: '.invalid_id' as any,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid agent id: \\".invalid_id\\": Agent ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores"`
+        `[Error: Invalid agent id: ".invalid_id": Agent ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores]`
       );
     });
   });

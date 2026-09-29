@@ -8,9 +8,10 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock, Mocked } from 'vitest';
+import type { Mocked } from 'vitest';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { delayMs } from '@kbn/occ';
 
 import { logWorkflowChanges } from './log_workflow_changes';
 import {
@@ -27,8 +28,6 @@ vi.mock('@kbn/occ', async () => {
     delayMs: vi.fn().mockResolvedValue(undefined),
   };
 });
-
-const { delayMs } = (await vi.importMock('@kbn/occ')) as { delayMs: Mock };
 
 const REFERENCE_TIMESTAMP_MS = Date.UTC(2026, 0, 15, 12, 30, 45, 678);
 const REFERENCE_TIMESTAMP_ISO = new Date(REFERENCE_TIMESTAMP_MS).toISOString();

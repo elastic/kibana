@@ -37,7 +37,7 @@ import {
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
 
-vi.mock('react-use/lib/useObservable', () => () => vi.fn());
+vi.mock('react-use/lib/useObservable', () => ({ default: () => vi.fn() }));
 
 describe('<IndexManagementHome />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`toNavigationItems should return footer items from navigation tree 1`] = `
+exports[`toNavigationItems > should return footer items from navigation tree 1`] = `
 Array [
   Object {
     "badgeType": undefined,
@@ -522,7 +522,7 @@ Array [
 ]
 `;
 
-exports[`toNavigationItems should return primary items from navigation tree 1`] = `
+exports[`toNavigationItems > should return primary items from navigation tree 1`] = `
 Array [
   Object {
     "badgeType": undefined,

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults and meta overrides are provided 1`] = `
+exports[`getSchemaForAuthType() > correctly returns schema for auth type definition when defaults and meta overrides are provided 1`] = `
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
@@ -27,7 +27,7 @@ Object {
 }
 `;
 
-exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults are provided 1`] = `
+exports[`getSchemaForAuthType() > correctly returns schema for auth type definition when defaults are provided 1`] = `
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
@@ -53,7 +53,7 @@ Object {
 }
 `;
 
-exports[`getSchemaForAuthType() correctly returns schema for auth type definition when only type ID is provided 1`] = `
+exports[`getSchemaForAuthType() > correctly returns schema for auth type definition when only type ID is provided 1`] = `
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
@@ -85,7 +85,7 @@ Object {
 }
 `;
 
-exports[`getSchemaForAuthType() ignores defaults for key that is not in auth type schema 1`] = `
+exports[`getSchemaForAuthType() > ignores defaults for key that is not in auth type schema 1`] = `
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,

@@ -46,7 +46,7 @@ const getLinks = (): Link[] => [
   },
 ];
 
-const getResolvedLinks: () => ResolvedLink[] = () => [
+const getResolvedLinks = vi.hoisted((): (() => ResolvedLink[]) => () => [
   {
     id: '001',
     type: 'dashboardLink',
@@ -80,7 +80,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     title: 'https://elastic.co',
     options: { open_in_new_tab: true, encode_url: false },
   },
-];
+]);
 
 vi.mock('../lib/resolve_links', async () => {
   return {

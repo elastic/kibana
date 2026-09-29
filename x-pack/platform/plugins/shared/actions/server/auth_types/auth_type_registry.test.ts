@@ -47,7 +47,7 @@ describe('AuthTypeRegistry', () => {
       const authTypeRegistry = new AuthTypeRegistry();
       authTypeRegistry.register(getAuthType());
       expect(() => authTypeRegistry.register(getAuthType())).toThrowErrorMatchingInlineSnapshot(
-        `"Auth type \\"my-auth-type\\" is already registered."`
+        `[Error: Auth type "my-auth-type" is already registered.]`
       );
     });
 
@@ -55,7 +55,7 @@ describe('AuthTypeRegistry', () => {
       const authTypeRegistry = new AuthTypeRegistry();
       expect(() =>
         authTypeRegistry.register(getAuthType({ schema: z.string() }))
-      ).toThrowErrorMatchingInlineSnapshot(`"Auth type \\"my-auth-type\\" has an invalid schema."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Auth type "my-auth-type" has an invalid schema.]`);
     });
   });
 
@@ -75,7 +75,7 @@ describe('AuthTypeRegistry', () => {
     test(`throws an error when auth type doesn't exist`, () => {
       const authTypeRegistry = new AuthTypeRegistry();
       expect(() => authTypeRegistry.get('no-auth-type')).toThrowErrorMatchingInlineSnapshot(
-        `"Auth type \\"no-auth-type\\" is not registered."`
+        `[Error: Auth type "no-auth-type" is not registered.]`
       );
     });
   });

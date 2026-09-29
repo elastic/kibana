@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
+exports[`TelemetryManagementSectionComponent > renders as expected 1`] = `
 <Fragment>
   <_EuiSplitPanelOuter
     hasBorder={true}

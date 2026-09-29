@@ -268,7 +268,7 @@ describe('get', () => {
     };
 
     await expect(get(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid response. [item.attributes.description]: expected value of type [string] but got [null]"`
+      `[Error: Invalid response. [item.attributes.description]: expected value of type [string] but got [null]]`
     );
   });
 
@@ -348,7 +348,7 @@ describe('create', () => {
     };
 
     await expect(create(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid response. [item.attributes.description]: expected value of type [string] but got [null]"`
+      `[Error: Invalid response. [item.attributes.description]: expected value of type [string] but got [null]]`
     );
   });
 
@@ -428,7 +428,7 @@ describe('update', () => {
     };
 
     await expect(update(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid response. [item.attributes.description]: expected value of type [string] but got [null]"`
+      `[Error: Invalid response. [item.attributes.description]: expected value of type [string] but got [null]]`
     );
   });
 
@@ -508,7 +508,7 @@ describe('search', () => {
     };
 
     await expect(search(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid response. [hits.0.attributes.description]: expected value of type [string] but got [null]"`
+      `[Error: Invalid response. [hits.0.attributes.description]: expected value of type [string] but got [null]]`
     );
   });
 
@@ -588,7 +588,7 @@ describe('mSearch', () => {
     };
 
     await expect(mSearch(testSavedObject)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid response. [attributes.description]: expected value of type [string] but got [null]"`
+      `[Error: Invalid response. [attributes.description]: expected value of type [string] but got [null]]`
     );
   });
 

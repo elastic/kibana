@@ -161,27 +161,24 @@ describe('ActionsClientChatOpenAI', () => {
       });
 
       it('rejects with the expected error when the action result status is error', async () => {
-        const hasErrorStatus = vi.fn().mockImplementation(() => ({
+        actionsClient.execute.mockImplementation(async () => ({
+          actionId: connectorId,
           message: 'action-result-message',
           serviceMessage: 'action-result-service-message',
           status: 'error', // <-- error status
         }));
-        actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
 
         const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
           ...defaultArgs,
           actionsClient,
+          maxRetries: 0,
         });
 
-        expect(actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs))
-          .rejects.toThrow(
-            'ActionsClientChatOpenAI: action result status is error: action-result-message - action-result-service-message'
-          )
-          .catch(() => {
-            /* ...handle/report the error (or just suppress it, if that's appropriate
-              [which it sometimes, though rarely, is])...
-           */
-          });
+        await expect(
+          actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs)
+        ).rejects.toThrow(
+          'ActionsClientChatOpenAI: action-result-message - action-result-service-message'
+        );
       });
     });
   });

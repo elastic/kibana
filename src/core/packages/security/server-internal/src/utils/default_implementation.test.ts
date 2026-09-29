@@ -67,7 +67,7 @@ describe('getDefaultSecurityImplementation', () => {
           name: 'my-service-account',
           roles: ['viewer'],
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Service accounts are disabled]`);
     });
 
     // Handles are handed out at setup regardless of whether a delegate ever registers, so every
@@ -80,7 +80,7 @@ describe('getDefaultSecurityImplementation', () => {
     ] as const)('%s rejects', async (method) => {
       await expect(
         (implementation.serviceAccounts[method] as () => Promise<unknown>)()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Service accounts are disabled]`);
     });
   });
 

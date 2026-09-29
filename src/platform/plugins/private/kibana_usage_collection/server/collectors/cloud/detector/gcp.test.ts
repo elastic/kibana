@@ -11,10 +11,10 @@
 
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
+import fetch from 'node-fetch';
 vi.mock('node-fetch');
 import { GCPCloudService } from './gcp';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as Mock;
+const fetchMock = fetch as unknown as Mock;
 
 describe('GCP', () => {
   const gcpService = new GCPCloudService();
@@ -86,7 +86,7 @@ describe('GCP', () => {
 
       await expect(() =>
         gcpService['_checkIfService']()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"unrecognized responses"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: unrecognized responses]`);
     });
 
     it('handles unexpected responses without response header', async () => {
@@ -99,7 +99,7 @@ describe('GCP', () => {
 
       await expect(() =>
         gcpService['_checkIfService']()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: GCP request failed]`);
     });
 
     it('handles not running on GCP', async () => {
@@ -108,7 +108,7 @@ describe('GCP', () => {
 
       await expect(() =>
         gcpService['_checkIfService']()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: GCP request failed]`);
     });
 
     it('handles not running on GCP with 404 response by throwing error', async () => {
@@ -121,7 +121,7 @@ describe('GCP', () => {
 
       await expect(() =>
         gcpService['_checkIfService']()
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: GCP request failed]`);
     });
 
     it('handles GCP response even if some requests fail', async () => {

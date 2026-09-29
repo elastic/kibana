@@ -186,7 +186,7 @@ describe('createChatCompleteApi', () => {
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Adapter for type .gen-ai not implemented"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Adapter for type .gen-ai not implemented]`);
   });
 
   describe('response mode', () => {

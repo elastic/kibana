@@ -22,7 +22,7 @@ import { ExtractNodeBuilds } from './extract_node_builds_task';
 vi.mock('../../lib/fs');
 vi.mock('../../lib/get_build_number');
 
-const BuildFs = await vi.importMock('../../lib/fs');
+const BuildFs = vi.mocked(await import('../../lib/fs'), true);
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FieldUtils <FieldIcon /> accepts additional props 1`] = `
+exports[`FieldUtils <FieldIcon /> > accepts additional props 1`] = `
 <span
   class="euiToken kbnFieldIcon emotion-euiToken-square-none-s-euiColorVis8"
 >
@@ -13,7 +13,7 @@ exports[`FieldUtils <FieldIcon /> accepts additional props 1`] = `
 </span>
 `;
 
-exports[`FieldUtils <FieldIcon /> renders properly 1`] = `
+exports[`FieldUtils <FieldIcon /> > renders properly 1`] = `
 <span
   class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis8"
 >
@@ -26,7 +26,7 @@ exports[`FieldUtils <FieldIcon /> renders properly 1`] = `
 </span>
 `;
 
-exports[`FieldUtils <FieldIcon /> renders properly scripted fields 1`] = `
+exports[`FieldUtils <FieldIcon /> > renders properly scripted fields 1`] = `
 <span
   class="euiToken kbnFieldIcon emotion-euiToken-square-dark-s-euiColorVis8"
 >

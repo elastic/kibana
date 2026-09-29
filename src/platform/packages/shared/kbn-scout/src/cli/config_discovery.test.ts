@@ -23,15 +23,15 @@ import { getServerRunFlagsFromTags } from '../tests_discovery/tag_utils';
 import type { ModuleDiscoveryInfo } from './config_discovery';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
 
-// Module-level object to store mock modules that the jest.mock can access
-export const mockTestableModules: { modules: ScoutTestableModuleWithConfigs[] } = {
-  modules: [],
-};
+// Module-level object to store mock modules that the vi.mock factory can access
+const mockTestableModules = vi.hoisted(() => ({
+  modules: [] as ScoutTestableModuleWithConfigs[],
+}));
 
 // Mock fs before any imports that might use it
 vi.mock('fs', () => {
   const actualFs = require('fs');
-  return {
+  const mocked = {
     ...actualFs,
     readFileSync: vi.fn((path: string, encoding?: string) => {
       // Return valid JSON for package.json files (used by @kbn/repo-info during initialization)
@@ -45,6 +45,7 @@ vi.mock('fs', () => {
     mkdirSync: vi.fn(),
     writeFileSync: vi.fn(),
   };
+  return { ...mocked, default: mocked };
 });
 
 vi.mock('@kbn/repo-packages', () => {
@@ -78,14 +79,11 @@ vi.mock('../tests_discovery/search_configs', () => {
 });
 
 vi.mock('@kbn/scout-reporting/src/registry', async () => {
-  // Access the module-level store
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const testModule = await import('./config_discovery.test');
   return {
     ...(await vi.importActual('@kbn/scout-reporting/src/registry')),
     testableModules: {
       get allIncludingConfigs() {
-        return testModule.mockTestableModules.modules;
+        return mockTestableModules.modules;
       },
     },
   };

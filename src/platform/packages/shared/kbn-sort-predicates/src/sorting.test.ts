@@ -42,6 +42,8 @@ function testSorting({
       sorted.push(firstEl);
     }
   }
+  // Array#sort moves holes (sparse entries) to the end regardless of direction
+  sorted.length = input.length;
   const criteria = getSortingCriteria(type, 'a', getMockFormatter());
   expect(datatable.sort((a, b) => criteria(a, b, direction)).map((row) => row.a)).toEqual(sorted);
 }

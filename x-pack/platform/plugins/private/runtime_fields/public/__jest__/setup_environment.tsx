@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import { vi } from 'vitest';
+import type * as EuiModule from '@elastic/eui';
 import '@kbn/code-editor-mock/jest_helper';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async (importOriginal) => {
+  const original = await importOriginal<typeof EuiModule>();
 
   return {
     ...original,

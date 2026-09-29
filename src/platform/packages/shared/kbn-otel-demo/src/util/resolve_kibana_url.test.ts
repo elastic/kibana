@@ -13,7 +13,7 @@ import type { Mock } from 'vitest';
 import fetch from 'node-fetch';
 import { resolveKibanaUrl } from './resolve_kibana_url';
 
-vi.mock('node-fetch', () => vi.fn());
+vi.mock('node-fetch', () => ({ default: vi.fn() }));
 
 describe('resolveKibanaUrl', () => {
   const mockFetch = fetch as unknown as Mock;

@@ -12,12 +12,12 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { useListKeys } from './use_list_keys';
 
-vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  const mocked = {
-    htmlIdGenerator: () => () => `id-${Math.random()}`,
-  };
-  return { ...mocked, default: mocked };
-});
+// `@elastic/eui` loads natively from node_modules, so its internal html_id_generator module cannot be
+// mocked; override the export the hook imports instead.
+vi.mock('@elastic/eui', async () => ({
+  ...(await vi.importActual('@elastic/eui')),
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
 
 describe('use_list_keys', () => {
   function ListingComponent({ items }: { items: object[] }) {

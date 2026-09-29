@@ -334,7 +334,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
 
     await expect(
       getOAuthClientCredentialsAccessToken(getOAuthClientCredentialsAccessTokenOpts)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"requestOAuthClientCredentialsToken error!!"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: requestOAuthClientCredentialsToken error!!]`);
   });
 
   test('logs warning if connectorTokenClient.updateOrReplace throws error', async () => {

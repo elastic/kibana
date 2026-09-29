@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Module from 'module';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
@@ -53,25 +54,25 @@ vi.mock('@opentelemetry/sdk-logs', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('@opentelemetry/exporter-logs-otlp-http', () => {
-  const mocked = {
-    OTLPLogExporter: mockOTLPLogExporter,
-  };
-  return { ...mocked, default: mocked };
-});
+// otel_appender.ts loads the exporters with lazy CommonJS `require()` calls, which `vi.mock` can't
+// intercept, so the stand-ins are registered in the require cache instead.
+const mockRequiredModule = (specifier: string, exports: object) => {
+  const path = require.resolve(specifier);
+  const mockedModule = new Module(path);
+  mockedModule.filename = path;
+  mockedModule.loaded = true;
+  mockedModule.exports = exports;
+  require.cache[path] = mockedModule;
+};
 
-vi.mock('@opentelemetry/exporter-logs-otlp-grpc', () => {
-  const mocked = {
-    OTLPLogExporter: mockOTLPLogExporter,
-  };
-  return { ...mocked, default: mocked };
+mockRequiredModule('@opentelemetry/exporter-logs-otlp-http', {
+  OTLPLogExporter: mockOTLPLogExporter,
 });
-
-vi.mock('@opentelemetry/exporter-logs-otlp-proto', () => {
-  const mocked = {
-    OTLPLogExporter: mockOTLPLogExporter,
-  };
-  return { ...mocked, default: mocked };
+mockRequiredModule('@opentelemetry/exporter-logs-otlp-grpc', {
+  OTLPLogExporter: mockOTLPLogExporter,
+});
+mockRequiredModule('@opentelemetry/exporter-logs-otlp-proto', {
+  OTLPLogExporter: mockOTLPLogExporter,
 });
 
 vi.mock('@elastic/opentelemetry-node/sdk', () => {

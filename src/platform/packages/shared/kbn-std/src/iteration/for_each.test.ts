@@ -8,15 +8,15 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock } from 'vitest';
 
 import * as Rx from 'rxjs';
 
 import { asyncForEach, asyncForEachWithLimit } from './for_each';
+import { mapWithLimit$ } from './observable';
 import { list, sleep } from './test_helpers';
 
 vi.mock('./observable');
-const mockMapWithLimit$: Mock = (await vi.importMock('./observable')).mapWithLimit$;
+const mockMapWithLimit$ = vi.mocked(mapWithLimit$);
 
 beforeEach(() => {
   vi.clearAllMocks();

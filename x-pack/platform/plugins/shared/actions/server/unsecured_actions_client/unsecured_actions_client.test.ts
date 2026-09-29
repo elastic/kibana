@@ -113,7 +113,7 @@ describe('getAll()', () => {
     });
     await expect(
       unsecuredActionsClient.getAll('customSpace')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: failfail]`);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
       inMemoryConnectors,
@@ -138,7 +138,7 @@ describe('execute()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"\\"badId\\" feature is not allow-listed for UnsecuredActionsClient access."`
+      `[Error: "badId" feature is not allow-listed for UnsecuredActionsClient access.]`
     );
   });
 
@@ -279,7 +279,7 @@ describe('bulkEnqueueExecution()', () => {
     await expect(
       unsecuredActionsClient.bulkEnqueueExecution('badId', opts)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"\\"badId\\" feature is not allow-listed for UnsecuredActionsClient access."`
+      `[Error: "badId" feature is not allow-listed for UnsecuredActionsClient access.]`
     );
   });
 

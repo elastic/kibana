@@ -23,9 +23,9 @@ vi.mock('../../lib/get_build_number');
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
-const { getNodeDownloadInfo } = await vi.importMock('./node_download_info');
-const { getNodeShasums } = await vi.importMock('./node_shasums');
-const { downloadToDisk } = await vi.importMock('../../lib/download');
+const { getNodeDownloadInfo } = vi.mocked(await import('./node_download_info'), true);
+const { getNodeShasums } = vi.mocked(await import('./node_shasums'), true);
+const { downloadToDisk } = vi.mocked(await import('../../lib/download'), true);
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();

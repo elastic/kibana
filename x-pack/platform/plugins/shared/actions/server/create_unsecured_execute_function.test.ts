@@ -448,7 +448,7 @@ describe('bulkExecute()', () => {
           },
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"not-preconfigured are not in-memory connectors and can't be scheduled for unsecured actions execution"`
+        `[Error: not-preconfigured are not in-memory connectors and can't be scheduled for unsecured actions execution]`
       );
     }
   );
@@ -491,7 +491,7 @@ describe('bulkExecute()', () => {
             source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
           },
         ])
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
     }
   );
 
@@ -535,7 +535,7 @@ describe('bulkExecute()', () => {
           },
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `".index actions cannot be scheduled for unsecured actions execution"`
+        `[Error: .index actions cannot be scheduled for unsecured actions execution]`
       );
     }
   );

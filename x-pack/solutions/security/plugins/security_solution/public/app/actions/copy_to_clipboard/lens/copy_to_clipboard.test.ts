@@ -24,7 +24,7 @@ const mockSuccessToast = vi.fn();
 KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
 
 const mockCopy = vi.fn((text: string) => true);
-vi.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
+vi.mock('copy-to-clipboard', () => ({ default: (text: string) => mockCopy(text) }));
 
 const getMockLensApi = (
   { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }

@@ -47,7 +47,7 @@ describe('CloudService', () => {
     it('throws an exception unless overridden', async () => {
       await expect(() =>
         service._checkIfService(undefined)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"not implemented"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: not implemented]`);
     });
   });
 
@@ -105,22 +105,22 @@ describe('CloudService', () => {
 
     it('throws error upon failure to parse body as object', () => {
       expect(() => service._parseResponse()).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to handle body"`
+        `[Error: Unable to handle body]`
       );
       expect(() => service._parseResponse(null)).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to handle body"`
+        `[Error: Unable to handle body]`
       );
       expect(() => service._parseResponse({})).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to handle body"`
+        `[Error: Unable to handle body]`
       );
       expect(() => service._parseResponse(123)).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to handle body"`
+        `[Error: Unable to handle body]`
       );
       expect(() => service._parseResponse('raw string')).toThrowErrorMatchingInlineSnapshot(
-        `"'raw string' is not a JSON object"`
+        `[Error: 'raw string' is not a JSON object]`
       );
       expect(() => service._parseResponse('{{}')).toThrowErrorMatchingInlineSnapshot(
-        `"'{{}' is not a JSON object"`
+        `[Error: '{{}' is not a JSON object]`
       );
     });
 
@@ -129,13 +129,13 @@ describe('CloudService', () => {
 
       expect(() =>
         service._parseResponse(JSON.stringify(body), parseBody)
-      ).toThrowErrorMatchingInlineSnapshot(`"Unable to handle body"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Unable to handle body]`);
       expect(parseBody).toHaveBeenCalledTimes(1);
       expect(parseBody).toHaveBeenCalledWith(body);
       parseBody.mockClear();
 
       expect(() => service._parseResponse(body, parseBody)).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to handle body"`
+        `[Error: Unable to handle body]`
       );
       expect(parseBody).toHaveBeenCalledTimes(1);
       expect(parseBody).toHaveBeenCalledWith(body);

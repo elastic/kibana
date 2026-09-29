@@ -52,7 +52,7 @@ describe('BuiltinToolRegistry', () => {
           id: '.invalid_id' as any,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid tool id: \\".invalid_id\\": Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores"`
+        `[Error: Invalid tool id: ".invalid_id": Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores]`
       );
     });
   });

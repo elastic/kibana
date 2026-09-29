@@ -17,6 +17,8 @@ import { QueryRuleFlyout } from './query_rule_flyout';
 import * as formContext from 'react-hook-form';
 import { QueryRulesetDetailsForm } from '../../../providers/query_ruleset_details_form';
 
+vi.mock('react-hook-form', { spy: true });
+
 describe('Query rule edit flyout', () => {
   const TEST_IDS = {
     FlyoutHeader: 'queryRulesFlyoutHeader',
@@ -92,7 +94,7 @@ describe('Query rule edit flyout', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(formContext, 'useFieldArray').mockReturnValue({
+    vi.mocked(formContext.useFieldArray).mockReturnValue({
       fields: [...rulesMock[0].criteria],
       append: appendMock,
       remove: removeMock,

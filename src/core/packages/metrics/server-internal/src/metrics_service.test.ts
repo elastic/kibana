@@ -40,7 +40,9 @@ describe('MetricsService', () => {
   let metricsService: MetricsService;
 
   beforeEach(() => {
-    vi.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers();
+    // Jest's legacy fake timers were mock functions; Vitest's fakes need an explicit spy.
+    vi.spyOn(global, 'setInterval');
     mockOpsCollector.collect.mockResolvedValue(getBaseTestMetrics());
 
     const configService = configServiceMock.create({
@@ -53,6 +55,7 @@ describe('MetricsService', () => {
   afterEach(() => {
     vi.clearAllMocks();
     vi.clearAllTimers();
+    vi.restoreAllMocks();
   });
 
   describe('#start', () => {

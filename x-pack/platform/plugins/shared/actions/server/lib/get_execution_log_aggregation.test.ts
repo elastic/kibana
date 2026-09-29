@@ -24,7 +24,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,schedule_delay]"`
+      `[Error: Invalid sort field "notsortable" - must be one of [timestamp,execution_duration,schedule_delay]]`
     );
   });
 
@@ -36,7 +36,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,schedule_delay]"`
+      `[Error: Invalid sort field "notsortable" - must be one of [timestamp,execution_duration,schedule_delay]]`
     );
   });
 
@@ -47,7 +47,7 @@ describe('getExecutionLogAggregation', () => {
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }],
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid page field \\"0\\" - must be greater than 0"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid page field "0" - must be greater than 0]`);
   });
 
   test('should throw error when given bad perPage field', () => {
@@ -58,7 +58,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid perPage field \\"0\\" - must be greater than 0"`
+      `[Error: Invalid perPage field "0" - must be greater than 0]`
     );
   });
 

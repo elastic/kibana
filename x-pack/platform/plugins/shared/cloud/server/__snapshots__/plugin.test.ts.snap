@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Cloud Plugin #setup interface snapshot 1`] = `
+exports[`Cloud Plugin > #setup > interface > snapshot 1`] = `
 Object {
   "apm": Object {
     "secretToken": undefined,
@@ -43,7 +43,7 @@ Object {
 }
 `;
 
-exports[`Cloud Plugin #start interface snapshot 1`] = `
+exports[`Cloud Plugin > #start > interface > snapshot 1`] = `
 Object {
   "baseUrl": "https://cloud.elastic.co",
   "isCloudEnabled": true,

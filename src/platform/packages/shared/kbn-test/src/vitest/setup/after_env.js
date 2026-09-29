@@ -31,7 +31,21 @@ const nodeRequire = createRequire(import.meta.url);
 // Kibana sources still `require()` TypeScript modules lazily (e.g. @kbn/workflows specs, plugin
 // config loaders). Vitest leaves require() to Node, so compile TS through @kbn/swc-register like
 // `node scripts/*` do. Those modules are separate instances that vi.mock() does not intercept.
+// swc-register also installs source-map-support, which replaces Error.prepareStackTrace; keep
+// Vitest's own mapping, which inline snapshots and error locations rely on.
+const vitestPrepareStackTrace = Error.prepareStackTrace;
 nodeRequire('@kbn/swc-register').install();
+Error.prepareStackTrace = vitestPrepareStackTrace;
+
+// Jest's jsdom sandbox had no fetch, so polyfills.jsdom.js installed whatwg-fetch (XHR based,
+// relative URLs, jsdom Blob bodies). Vitest's jsdom global inherits Node's undici fetch, which made
+// that polyfill a no-op; install it explicitly.
+if (typeof window !== 'undefined') {
+  const whatwgFetch = nodeRequire('whatwg-fetch');
+  for (const name of ['fetch', 'Request', 'Response', 'Headers']) {
+    global[name] = whatwgFetch[name];
+  }
+}
 
 const getCallerFile = () => {
   const [, , callerFrame = ''] = new Error().stack.split('\n').slice(1);
@@ -66,11 +80,15 @@ if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
   });
 }
 
-// Vitest's jsdom environment exposes jsdom's TextEncoder, whose output is not an instance of the
-// (Node realm) global Uint8Array; libraries like openpgp reject it. Jest's sandbox had one realm.
+// Vitest's jsdom environment installs jsdom's realm globals (TextEncoder, Uint8Array, ...) next to
+// Node's Buffer/TextEncoder output, so `instanceof Uint8Array` checks in native libraries such as
+// openpgp fail. Jest ran everything in one realm; use Node's classes consistently.
 if (typeof window !== 'undefined') {
+  const NodeUint8Array = Object.getPrototypeOf(Buffer.prototype).constructor;
   global.TextEncoder = NodeTextEncoder;
   global.TextDecoder = NodeTextDecoder;
+  global.Uint8Array = NodeUint8Array;
+  global.ArrayBuffer = new NodeUint8Array(0).buffer.constructor;
 }
 
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });

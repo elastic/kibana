@@ -5054,9 +5054,9 @@ importers:
       '@eslint-community/eslint-plugin-eslint-comments':
         specifier: 4.4.1
         version: 4.4.1(eslint@8.57.0(supports-color@10.2.2))
-      '@fast-check/jest':
-        specifier: 2.1.1
-        version: 2.1.1(@jest/expect@29.7.0(supports-color@10.2.2))(@jest/globals@29.7.0(supports-color@10.2.2))
+      '@fast-check/vitest':
+        specifier: 0.5.0
+        version: 0.5.0(vitest@5.0.2(patch_hash=90476fdddc3ac8782327e8f398f60bb5c6ccbdfec73293b1962bdee548be940b)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.13.6(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.1(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.8.3)))
       '@hey-api/openapi-ts':
         specifier: 0.90.3
         version: 0.90.3(typescript@6.0.3)
@@ -11393,17 +11393,10 @@ packages:
     resolution: {integrity: sha512-bsxD8WLS5lIj7aaoCx1YJkktqYj5vlBUE6HWzu2Q51ksrGJ0H737ECCKlFU7Yf8Br45z9t99frBp/J7kzbMPAg==}
     engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
-  '@fast-check/jest@2.1.1':
-    resolution: {integrity: sha512-t9m3u3tikj/+Ph+gRLGb7fFS/aqnIafsAc6qhXIFJytkqOFRSF70Y5yUUyTtR0idcb6Ald7AnC0AChLCLxv2Tg==}
+  '@fast-check/vitest@0.5.0':
+    resolution: {integrity: sha512-Kgbj2smuq1P4OhGKuPATs5i2fAxNmGbJ/zSmTrzWhQSLUrHREbKWgv9WGbNUOXcx77q6joLVMmTygyXuwP2Bog==}
     peerDependencies:
-      '@fast-check/worker': '>=0.0.7 <0.6.0'
-      '@jest/expect': '>=28.0.0'
-      '@jest/globals': '>=25.5.2'
-    peerDependenciesMeta:
-      '@fast-check/worker':
-        optional: true
-      '@jest/expect':
-        optional: true
+      vitest: ^4.1.0 || ^5.0.0
 
   '@floating-ui/core@1.8.0':
     resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
@@ -28658,12 +28651,10 @@ snapshots:
 
   '@faker-js/faker@10.5.0': {}
 
-  '@fast-check/jest@2.1.1(@jest/expect@29.7.0(supports-color@10.2.2))(@jest/globals@29.7.0(supports-color@10.2.2))':
+  '@fast-check/vitest@0.5.0(vitest@5.0.2(patch_hash=90476fdddc3ac8782327e8f398f60bb5c6ccbdfec73293b1962bdee548be940b)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.13.6(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.1(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.8.3)))':
     dependencies:
-      '@jest/globals': 29.7.0(supports-color@10.2.2)
       fast-check: 4.10.0
-    optionalDependencies:
-      '@jest/expect': 29.7.0(supports-color@10.2.2)
+      vitest: 5.0.2(patch_hash=90476fdddc3ac8782327e8f398f60bb5c6ccbdfec73293b1962bdee548be940b)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.13.6(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.1(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.8.3))
 
   '@floating-ui/core@1.8.0':
     dependencies:

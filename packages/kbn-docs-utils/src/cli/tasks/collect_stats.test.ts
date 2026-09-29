@@ -13,15 +13,14 @@ import type { Mock } from 'vitest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { collectStats } from './collect_stats';
 import type { CliOptions, SetupProjectResult, BuildApiMapResult } from '../types';
+import { collectApiStatsForPlugin } from '../../stats';
+import { countEslintDisableLines } from '../../count_eslint_disable';
+import { countEnzymeImports } from '../../count_enzyme_imports';
 
 // Mock dependencies
 vi.mock('../../stats');
 vi.mock('../../count_eslint_disable');
 vi.mock('../../count_enzyme_imports');
-
-const { collectApiStatsForPlugin } = await vi.importMock('../../stats');
-const { countEslintDisableLines } = await vi.importMock('../../count_eslint_disable');
-const { countEnzymeImports } = await vi.importMock('../../count_enzyme_imports');
 
 describe('collectStats', () => {
   let log: ToolingLog;

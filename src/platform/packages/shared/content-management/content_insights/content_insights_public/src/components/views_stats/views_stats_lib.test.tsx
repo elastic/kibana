@@ -10,6 +10,8 @@
 import { vi } from 'vitest';
 
 import moment from 'moment';
+// Loads the global moment-timezone mock (America/New_York default); in Jest it was applied via @elastic/charts.
+import 'moment-timezone';
 import { getChartData, getTotalDays } from './views_stats';
 
 beforeEach(() => {

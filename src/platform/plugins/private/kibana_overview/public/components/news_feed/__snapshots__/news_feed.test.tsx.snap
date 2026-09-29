@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FeedItem render 1`] = `
+exports[`FeedItem > render 1`] = `
 <section
   aria-labelledby="kbnOverviewNews__title"
 >

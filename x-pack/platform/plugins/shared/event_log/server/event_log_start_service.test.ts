@@ -10,6 +10,7 @@ import { vi } from 'vitest';
 import type { KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { EventLogClient } from './event_log_client';
 import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
@@ -32,7 +33,7 @@ describe('EventLogClientService', () => {
       eventLogStartService.getClient(request);
 
       const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request);
-      expect((await vi.importMock('./event_log_client')).EventLogClient).toHaveBeenCalledWith({
+      expect(EventLogClient).toHaveBeenCalledWith({
         esContext,
         request,
         savedObjectGetter,
