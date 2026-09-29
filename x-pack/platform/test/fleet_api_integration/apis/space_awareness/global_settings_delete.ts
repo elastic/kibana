@@ -27,9 +27,6 @@ export default function (providerContext: FtrProviderContext) {
     // The superuser API client (uses default fleet_all_int_all user)
     const apiClient = new SpaceTestApiClient(supertest);
 
-    // A user with Fleet + Integrations "all" only in the default space
-    let defaultSpaceOnlyApiClient: SpaceTestApiClient;
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
@@ -38,11 +35,6 @@ export default function (providerContext: FtrProviderContext) {
       await apiClient.postEnableSpaceAwareness();
       await apiClient.setup();
       await createTestSpace(providerContext, TEST_SPACE_1);
-
-      defaultSpaceOnlyApiClient = new SpaceTestApiClient(supertestWithoutAuth, {
-        username: testUsers.fleet_all_int_all_default_space_only.username,
-        password: testUsers.fleet_all_int_all_default_space_only.password,
-      });
     });
 
     after(async () => {
