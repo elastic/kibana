@@ -17,10 +17,13 @@ import {
 } from '../helpers/onboarding';
 
 // ELB with identity federation enabled (no hide_in_var_group_options).
-// bucket_arn is a required text var used to simulate service-var drift.
+// bucket_arn is a required data-stream var used to simulate service-var drift.
+// role_arn is a package-level credential var included so buildPackageVars writes it to the
+// Fleet PUT body when the assume_role form is filled — without it the PUT carries no credential.
 const MOCK_AWS_PACKAGE = {
   item: {
     version: '7.1.1',
+    vars: [{ name: 'role_arn', type: 'text' }],
     policy_templates: [
       {
         name: 'elb',
@@ -275,9 +278,11 @@ test.describe(
 
       await page.testSubj.locator('authenticateAndDeployStep-nextButton').click();
 
-      // Dirty redeploy must PUT the Fleet package policy carrying the changed bucket_arn.
+      // Dirty redeploy must PUT the Fleet package policy carrying the changed bucket_arn AND
+      // the assume_role credential (role_arn) — both prove the PUT is a usable redeployment.
       const pkgPutRequest = await pkgPutPromise;
       expect(pkgPutRequest.postData()).toContain('agent-drift-bucket');
+      expect(pkgPutRequest.postData()).toContain('role_arn');
       // SO must be updated with the new serviceVars so resume reflects the current settings.
       const soRequest = await soPutPromise;
       expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain(
@@ -505,10 +510,12 @@ test.describe(
 
       await page.testSubj.locator('authenticateAndDeployStep-nextButton').click();
 
-      // Fleet PUT must attach the policy to the NEW agent policy, not the old one.
+      // Fleet PUT must attach the policy to the NEW agent policy, not the old one, and must
+      // carry the assume_role credential so the redeployment is a usable configuration.
       const pkgPutRequest = await pkgPutPromise;
       expect(pkgPutRequest.postData()).toContain(NEW_AGENT_POLICY_ID);
       expect(pkgPutRequest.postData()).not.toContain(OLD_AGENT_POLICY_ID);
+      expect(pkgPutRequest.postData()).toContain('role_arn');
       // SO PUT must persist the new agentPolicyIds so resume hydrates the correct selection.
       const soRequest = await soPutPromise;
       const soPutBody = JSON.parse(soRequest.postData() ?? '{}');

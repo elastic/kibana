@@ -208,9 +208,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // against an MI SO would always report drift when a selection is held in session (4124128788).
         const agentPoliciesDirty = (() => {
           if (deploymentMethod !== 'agent_based') return false;
-          const selected = new Set(agentBasedDeploymentFromFlow.selectedAgentPolicyIds);
-          if (selected.size === 0 && agentBasedDeploymentFromFlow.agentHostsMode !== 'existing')
-            return false;
+          const { agentHostsMode, selectedAgentPolicyIds } = agentBasedDeploymentFromFlow;
+          // A mode change from 'existing' to 'new' means the user wants a freshly created policy
+          // instead of the deployed one — always dirty (4131926221).
+          if (agentHostsMode === 'new' && (item.agentPolicyIds ?? []).length > 0) return true;
+          const selected = new Set(selectedAgentPolicyIds);
+          if (selected.size === 0 && agentHostsMode !== 'existing') return false;
           const deployed = new Set(item.agentPolicyIds ?? []);
           return selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id));
         })();
@@ -234,8 +237,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       });
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
-    // edits. Only auth mutations (connector swap, authMethod change, agentCredentialMethod change)
-    // happen in this component's lifetime and need to re-trigger the check.
+    // edits. Auth mutations (connector swap, authMethod, agentCredentialMethod) and agent-based
+    // mode changes (agentHostsMode, policy selection) happen in this component's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onboardingDeploymentId,
@@ -245,6 +248,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     selectedAgentPoliciesKey,
     driftRetryKey,
     agentBasedDeploymentFromFlow?.agentCredentialMethod,
+    agentBasedDeploymentFromFlow?.agentHostsMode,
   ]);
 
   // Called by ManagedIntegrationsSection when the static-key replace form becomes ready or is
