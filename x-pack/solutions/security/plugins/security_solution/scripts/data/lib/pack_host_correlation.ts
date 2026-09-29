@@ -78,7 +78,7 @@ export interface PackHostCorrelationProcessNode {
   name: string;
   executable: string;
   commandLine: string;
-  parent?: { pid: number; entityId: string };
+  parent?: { pid: number; entityId: string; name: string };
   offsetMs: number;
 }
 
@@ -158,7 +158,7 @@ export const PACK_HOST_CORRELATION_CONFIGS: Record<string, PackHostCorrelationCo
         executable: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
         commandLine:
           'powershell.exe -NoProfile -Command "aws sts assume-role --role-arn arn:aws:iam::123456789012:role/escalated-role --role-session-name priv-esc-session"',
-        parent: { pid: 4100, entityId: 'YXdzLWlhbS13aW4tYW5hbHlzdDAxLTQxMDA=' },
+        parent: { pid: 4100, entityId: 'YXdzLWlhbS13aW4tYW5hbHlzdDAxLTQxMDA=', name: 'cmd.exe' },
         offsetMs: 15_000,
       },
       {
@@ -168,7 +168,11 @@ export const PACK_HOST_CORRELATION_CONFIGS: Record<string, PackHostCorrelationCo
         executable: 'C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe',
         commandLine:
           'aws.exe sts assume-role --role-arn arn:aws:iam::123456789012:role/escalated-role --role-session-name priv-esc-session',
-        parent: { pid: 4212, entityId: 'YXdzLWlhbS13aW4tYW5hbHlzdDAxLTQyMTI=' },
+        parent: {
+          pid: 4212,
+          entityId: 'YXdzLWlhbS13aW4tYW5hbHlzdDAxLTQyMTI=',
+          name: 'powershell.exe',
+        },
         offsetMs: 22_000,
       },
     ],
@@ -325,7 +329,15 @@ export const buildProcessDoc = (
     name: node.name,
     executable: node.executable,
     command_line: node.commandLine,
-    ...(node.parent ? { parent: { pid: node.parent.pid, entity_id: node.parent.entityId } } : {}),
+    ...(node.parent
+      ? {
+          parent: {
+            pid: node.parent.pid,
+            entity_id: node.parent.entityId,
+            name: node.parent.name,
+          },
+        }
+      : {}),
   },
 });
 
