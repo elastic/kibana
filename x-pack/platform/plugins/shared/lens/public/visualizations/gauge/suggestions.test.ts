@@ -21,24 +21,26 @@ import type { GaugeVisualizationState } from './constants';
 import { DEFAULT_PALETTE } from './palette_config';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
-const stops = [
-  {
-    color: 'blue',
-    stop: 0,
-  },
-  {
-    color: 'red',
-    stop: 25,
-  },
-  {
-    color: 'yellow',
-    stop: 50,
-  },
-  {
-    color: 'green',
-    stop: 75,
-  },
-];
+const { stops } = vi.hoisted(() => ({
+  stops: [
+    {
+      color: 'blue',
+      stop: 0,
+    },
+    {
+      color: 'red',
+      stop: 25,
+    },
+    {
+      color: 'yellow',
+      stop: 50,
+    },
+    {
+      color: 'green',
+      stop: 75,
+    },
+  ],
+}));
 const MOCKED_DEFAULT_COLOR_PALETTE = {
   ...DEFAULT_PALETTE,
   params: {

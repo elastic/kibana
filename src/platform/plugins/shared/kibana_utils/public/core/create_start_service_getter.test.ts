@@ -20,7 +20,7 @@ describe('createStartServicesGetter', () => {
     await new Promise((r) => setTimeout(r, 1));
 
     expect(() => start()).toThrowErrorMatchingInlineSnapshot(
-      `"Trying to access start services before start."`
+      `[Error: Trying to access start services before start.]`
     );
   });
 

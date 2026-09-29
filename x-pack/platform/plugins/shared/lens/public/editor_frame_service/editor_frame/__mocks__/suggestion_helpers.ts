@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-const actual = jest.requireActual('../suggestion_helpers');
+import { vi } from 'vitest';
+import type * as SuggestionHelpers from '../suggestion_helpers';
 
-jest.spyOn(actual, 'getSuggestions');
+const actual = await vi.importActual<typeof SuggestionHelpers>('../suggestion_helpers');
+
+vi.spyOn(actual, 'getSuggestions');
 
 export const { getSuggestions, switchToSuggestion } = actual;

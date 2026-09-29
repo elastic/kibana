@@ -72,23 +72,23 @@ describe('ExecutionContract', () => {
     });
   });
 
-  test('can get error result of the expression execution', () => {
+  test('can get error result of the expression execution', async () => {
     const execution = createExecution('foo bar=123');
     const contract = new ExecutionContract(execution);
     execution.start();
 
-    expect(contract.getData().toPromise()).resolves.toHaveProperty(
+    await expect(contract.getData().toPromise()).resolves.toHaveProperty(
       'result',
       expect.objectContaining({ type: 'error' })
     );
   });
 
-  test('can get result of the expression execution', () => {
+  test('can get result of the expression execution', async () => {
     const execution = createExecution('var_set name="foo" value="bar" | var name="foo"');
     const contract = new ExecutionContract(execution);
     execution.start();
 
-    expect(contract.getData().toPromise()).resolves.toHaveProperty('result', 'bar');
+    await expect(contract.getData().toPromise()).resolves.toHaveProperty('result', 'bar');
   });
 
   describe('isPending', () => {

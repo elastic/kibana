@@ -10,7 +10,7 @@ import { vi } from 'vitest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { AgentBuilderEvaluationChatClient } from './chat_client';
 
-vi.mock('p-retry', () => (fn: () => Promise<unknown>) => fn());
+vi.mock('p-retry', () => ({ default: (fn: () => Promise<unknown>) => fn() }));
 
 const makeResponse = (prompts: Array<{ id: string; type: string }> = [], message = 'ok') => ({
   conversation_id: 'conv-1',

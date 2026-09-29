@@ -223,7 +223,7 @@ describe('Form', () => {
     expect(() => {
       render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Widget \\"fakeWidget\\" specified in ZodString metadata is not registered in the widget registry."`
+      `[Error: Widget "fakeWidget" specified in ZodString metadata is not registered in the widget registry.]`
     );
 
     consoleError.mockRestore();

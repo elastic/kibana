@@ -20,6 +20,7 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import type { PartitionVisComponentProps } from './partition_vis_component';
 import PartitionVisComponent from './partition_vis_component';
 import {
@@ -167,7 +168,8 @@ describe('PartitionVisComponent', function () {
       await component.update();
     });
 
-    await act(async () => {
+    await waitFor(() => {
+      component.update();
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
   });
@@ -186,6 +188,10 @@ describe('PartitionVisComponent', function () {
     const component = mountWithIntl(<PartitionVisComponent {...wrapperProps} />);
     await actWithTimeout(async () => {
       await component.update();
+    });
+    await waitFor(() => {
+      component.update();
+      expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
     findTestSubject(component, 'vislibToggleLegend').simulate('click');
     await act(async () => {

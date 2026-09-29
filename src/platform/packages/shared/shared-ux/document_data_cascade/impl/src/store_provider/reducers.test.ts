@@ -80,7 +80,7 @@ describe('createStoreReducers', () => {
 
       expect(() => {
         reducers.setActiveCascadeGroups(currentState, columnGroups);
-      }).toThrowErrorMatchingInlineSnapshot(`"Invalid column: invalid-group"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid column: invalid-group]`);
     });
 
     it('should set the active cascade groups correctly', () => {

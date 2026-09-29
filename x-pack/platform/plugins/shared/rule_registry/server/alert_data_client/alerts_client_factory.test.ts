@@ -72,6 +72,6 @@ describe('AlertsClientFactory', () => {
 
     expect(() =>
       factory.initialize({ ...alertsClientFactoryParams })
-    ).toThrowErrorMatchingInlineSnapshot(`"AlertsClientFactory (RAC) already initialized"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: AlertsClientFactory (RAC) already initialized]`);
   });
 });

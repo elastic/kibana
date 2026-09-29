@@ -8,6 +8,7 @@
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
+import fetch from 'node-fetch';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -35,8 +36,8 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 }));
 
 const { Response, FetchError } = require('node-fetch');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as Mock;
+// vi.mock('node-fetch') automocks the default export that requests.ts calls
+const fetchMock = fetch as unknown as Mock;
 
 vi.setConfig({ testTimeout: 120 * 1000 });
 

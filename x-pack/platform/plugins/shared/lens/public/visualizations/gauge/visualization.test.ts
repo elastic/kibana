@@ -17,24 +17,26 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { GaugeVisualizationState } from './constants';
 
-const stops = [
-  {
-    color: 'blue',
-    stop: 0,
-  },
-  {
-    color: 'red',
-    stop: 25,
-  },
-  {
-    color: 'yellow',
-    stop: 50,
-  },
-  {
-    color: 'green',
-    stop: 75,
-  },
-];
+const { stops } = vi.hoisted(() => ({
+  stops: [
+    {
+      color: 'blue',
+      stop: 0,
+    },
+    {
+      color: 'red',
+      stop: 25,
+    },
+    {
+      color: 'yellow',
+      stop: 50,
+    },
+    {
+      color: 'green',
+      stop: 75,
+    },
+  ],
+}));
 
 vi.mock('@kbn/coloring', async () => {
   const mocked = {

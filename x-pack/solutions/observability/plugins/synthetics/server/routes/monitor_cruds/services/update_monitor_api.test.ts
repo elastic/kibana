@@ -47,13 +47,15 @@ vi.mock('../monitor_locations_utils', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('../monitor_validation', () => {
-  const mocked = {
-    validateMonitor: vi.fn(),
-    normalizeAPIConfig: vi.fn(),
-  };
-  return { ...mocked, default: mocked };
-});
+const mockMonitorValidation = vi.hoisted(() => ({
+  validateMonitor: vi.fn(),
+  normalizeAPIConfig: vi.fn(),
+}));
+
+vi.mock('../monitor_validation', () => ({
+  ...mockMonitorValidation,
+  default: mockMonitorValidation,
+}));
 
 vi.mock('../../../synthetics_service/utils/secrets', () => {
   const mocked = {
@@ -168,7 +170,7 @@ describe('UpdateMonitorAPI', () => {
      */
     vi.clearAllMocks();
 
-    const { validateMonitor, normalizeAPIConfig } = await vi.importMock('../monitor_validation');
+    const { validateMonitor, normalizeAPIConfig } = mockMonitorValidation;
     validateMonitor.mockImplementation((m: Record<string, unknown>) => mockValidationResultFor(m));
     // Default: no unsupported keys. Tests that care override this.
     normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => ({ formattedConfig: m }));
@@ -305,7 +307,7 @@ describe('UpdateMonitorAPI', () => {
     );
 
     it('uses the normalized API config before validation and persistence', async () => {
-      const { normalizeAPIConfig, validateMonitor } = await vi.importMock('../monitor_validation');
+      const { normalizeAPIConfig, validateMonitor } = mockMonitorValidation;
       normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => {
         const { url, ...rest } = m;
         return { formattedConfig: { ...rest, [ConfigKey.URLS]: url } };
@@ -409,7 +411,7 @@ describe('UpdateMonitorAPI', () => {
     );
 
     it('does not call validateMonitor for rejected origins (short-circuit)', async () => {
-      const { validateMonitor } = await vi.importMock('../monitor_validation');
+      const { validateMonitor } = mockMonitorValidation;
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
         mockDecryptedMonitor({ attributes: { [ConfigKey.MONITOR_SOURCE_TYPE]: 'project' } }),
@@ -424,7 +426,7 @@ describe('UpdateMonitorAPI', () => {
 
   describe('validation_failed', () => {
     it('records the io-ts failure reason and details', async () => {
-      const { validateMonitor } = await vi.importMock('../monitor_validation');
+      const { validateMonitor } = mockMonitorValidation;
       validateMonitor.mockReturnValue({
         valid: false,
         reason: 'Monitor schedule is invalid',
@@ -530,7 +532,7 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('rejects a rename onto a name whose swap counterpart fails for an unrelated reason', async () => {
-      const { validateMonitor } = await vi.importMock('../monitor_validation');
+      const { validateMonitor } = mockMonitorValidation;
       validateMonitor.mockImplementation((m: Record<string, unknown>) =>
         m.id === 'mon-2'
           ? { valid: false, reason: 'Monitor schedule is invalid', details: '', payload: m }
@@ -709,7 +711,7 @@ describe('UpdateMonitorAPI', () => {
 
   describe('mixed batch', () => {
     it('routes each id to the correct slot and lets survivors through', async () => {
-      const { validateMonitor } = await vi.importMock('../monitor_validation');
+      const { validateMonitor } = mockMonitorValidation;
       validateMonitor.mockImplementation((m: Record<string, unknown>) => {
         if ((m.id as string) === 'mon-bad') {
           return { valid: false, reason: 'bad', details: 'bad', payload: m };
@@ -923,7 +925,7 @@ describe('UpdateMonitorAPI', () => {
    */
   describe('real validation gate (end-to-end)', () => {
     beforeEach(async () => {
-      const { validateMonitor, normalizeAPIConfig } = await vi.importMock('../monitor_validation');
+      const { validateMonitor, normalizeAPIConfig } = mockMonitorValidation;
       const { validateMonitor: realValidateMonitor, normalizeAPIConfig: realNormalizeAPIConfig } =
         await vi.importActual('../monitor_validation');
       validateMonitor.mockImplementation(realValidateMonitor);

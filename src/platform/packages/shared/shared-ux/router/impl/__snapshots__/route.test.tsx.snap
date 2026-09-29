@@ -1,12 +1,12 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Route component prop renders 1`] = `
+exports[`Route > component prop renders 1`] = `
 <Route
   component={[Function]}
 />
 `;
 
-exports[`Route location renders as expected 1`] = `
+exports[`Route > location renders as expected 1`] = `
 <Route
   location={
     Object {
@@ -22,16 +22,16 @@ exports[`Route location renders as expected 1`] = `
 </Route>
 `;
 
-exports[`Route render prop renders 1`] = `
+exports[`Route > render prop renders 1`] = `
 <Route
   render={[Function]}
 />
 `;
 
-exports[`Route renders 1`] = `
+exports[`Route > renders 1`] = `
 <Route>
   <MatchPropagator />
 </Route>
 `;
 
-exports[`Route renders with enableExecutionContextTracking as false 1`] = `<Route />`;
+exports[`Route > renders with enableExecutionContextTracking as false 1`] = `<Route />`;

@@ -36,9 +36,10 @@ const agentPolicySvcMock = agentPolicyService as Mocked<typeof agentPolicyServic
 
 vi.mock('p-retry', () => {
   const originalPRetry = require('p-retry');
-  return vi.fn().mockImplementation((fn, options) => {
+  const mocked = vi.fn().mockImplementation((fn, options) => {
     return originalPRetry(fn, options);
   });
+  return { default: mocked };
 });
 
 const pRetryMock = vi.mocked(pRetry);

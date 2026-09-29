@@ -708,7 +708,7 @@ describe('Execution', () => {
       expect(result).toBe(66);
     });
 
-    test('supports observables in arguments', () => {
+    test('supports observables in arguments', async () => {
       const observable = {
         name: 'observable',
         args: {},
@@ -718,7 +718,7 @@ describe('Execution', () => {
       const executor = createUnitTestExecutor();
       executor.registerFunction(observable);
 
-      expect(executor.run('add val={observable}', 1, {}).toPromise()).resolves.toEqual(
+      await expect(executor.run('add val={observable}', 1, {}).toPromise()).resolves.toEqual(
         expect.objectContaining({
           result: {
             type: 'num',

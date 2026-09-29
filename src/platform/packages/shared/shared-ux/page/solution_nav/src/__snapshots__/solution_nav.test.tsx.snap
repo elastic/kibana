@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SolutionNav accepts EuiSideNavProps 1`] = `
+exports[`SolutionNav > accepts EuiSideNavProps 1`] = `
 <Fragment>
   <SolutionNavCollapseButton
     isCollapsed={true}
@@ -103,7 +103,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
 </Fragment>
 `;
 
-exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
+exports[`SolutionNav > accepts canBeCollapsed prop 1`] = `
 <Fragment>
   <SolutionNavCollapseButton
     isCollapsed={true}
@@ -205,7 +205,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
 </Fragment>
 `;
 
-exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
+exports[`SolutionNav > accepts canBeCollapsed prop 2`] = `
 <Fragment>
   <EuiFlyout
     aria-labelledby="SolutionNav_generated-id_heading"
@@ -404,7 +404,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
 </Fragment>
 `;
 
-exports[`SolutionNav heading accepts more headingProps 1`] = `
+exports[`SolutionNav > heading > accepts more headingProps 1`] = `
 <Fragment>
   <SolutionNavCollapseButton
     isCollapsed={true}
@@ -443,7 +443,7 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
 </Fragment>
 `;
 
-exports[`SolutionNav renders 1`] = `
+exports[`SolutionNav > renders 1`] = `
 <Fragment>
   <SolutionNavCollapseButton
     isCollapsed={true}
@@ -545,7 +545,7 @@ exports[`SolutionNav renders 1`] = `
 </Fragment>
 `;
 
-exports[`SolutionNav renders with icon 1`] = `
+exports[`SolutionNav > renders with icon 1`] = `
 <Fragment>
   <SolutionNavCollapseButton
     isCollapsed={true}

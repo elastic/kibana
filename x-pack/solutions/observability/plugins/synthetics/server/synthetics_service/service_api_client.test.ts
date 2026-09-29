@@ -38,7 +38,7 @@ const licenseMock: LicenseGetResponse = {
   },
 };
 
-vi.mock('axios', () => vi.fn());
+vi.mock('axios', () => ({ default: vi.fn() }));
 vi.mock('./utils/sanitize_error', () => {
   const mocked = {
     getSanitizedError: vi.fn().mockImplementation(() => 'sanitized error'),

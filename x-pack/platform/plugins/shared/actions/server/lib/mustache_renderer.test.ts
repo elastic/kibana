@@ -396,22 +396,26 @@ describe('mustache_renderer', () => {
       b: { c: 2, d: [3, 4] },
       e: [5, { f: 6, g: 7 }],
     };
-    expect(renderMustacheObject(logger, { x: '{{a}} - {{b}} -- {{e}} ' }, deepVariables))
-      .toMatchInlineSnapshot(`
-      Object {
-        "x": "1 - {\\"c\\":2,\\"d\\":[3,4]} -- 5,{\\"f\\":6,\\"g\\":7} ",
-      }
-    `);
+    it('renders objects and arrays as JSON', () => {
+      expect(renderMustacheObject(logger, { x: '{{a}} - {{b}} -- {{e}} ' }, deepVariables))
+        .toMatchInlineSnapshot(`
+        Object {
+          "x": "1 - {\\"c\\":2,\\"d\\":[3,4]} -- 5,{\\"f\\":6,\\"g\\":7} ",
+        }
+      `);
 
-    const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
-    expect(renderMustacheString(logger, '{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(
-      expected
-    );
+      const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
+      expect(
+        renderMustacheString(logger, '{{a}} - {{b}} -- {{e}}', deepVariables, 'none')
+      ).toEqual(expected);
 
-    expect(renderMustacheString(logger, '{{e}}', deepVariables, 'none')).toEqual('5,{"f":6,"g":7}');
-    expect(renderMustacheString(logger, '{{e.asJSON}}', deepVariables, 'none')).toEqual(
-      '[5,{"f":6,"g":7}]'
-    );
+      expect(renderMustacheString(logger, '{{e}}', deepVariables, 'none')).toEqual(
+        '5,{"f":6,"g":7}'
+      );
+      expect(renderMustacheString(logger, '{{e.asJSON}}', deepVariables, 'none')).toEqual(
+        '[5,{"f":6,"g":7}]'
+      );
+    });
   });
 
   describe('converting dot variables', () => {

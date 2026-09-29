@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('..', () => {
-  const actual = jest.requireActual('..');
+import { vi } from 'vitest';
+import type * as ReactQuery from '..';
+
+vi.mock('..', async () => {
+  const actual = await vi.importActual<typeof ReactQuery>('..');
   return {
     ...actual,
-    useMutation: jest.fn(actual.useMutation),
-    useQuery: jest.fn(actual.useQuery),
-    useQueryClient: jest.fn(actual.useQueryClient),
+    useMutation: vi.fn(actual.useMutation),
+    useQuery: vi.fn(actual.useQuery),
+    useQueryClient: vi.fn(actual.useQueryClient),
   };
 });

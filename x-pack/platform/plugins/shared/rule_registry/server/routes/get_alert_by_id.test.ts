@@ -95,7 +95,7 @@ describe('getAlertByIdRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"4\\" supplied to \\"id\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "4" supplied to "id"']`
       );
     });
 
@@ -110,7 +110,7 @@ describe('getAlertByIdRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"id\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "undefined" supplied to "id"']`
       );
     });
   });

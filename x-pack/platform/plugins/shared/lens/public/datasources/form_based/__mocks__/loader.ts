@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
 import { createMockedIndexPattern, createMockedRestrictedIndexPattern } from '../mocks';
 import type { FormBasedPrivateState } from '@kbn/lens-common';
+import type * as Loader from '../loader';
 
 export function loadInitialState() {
   const indexPattern = createMockedIndexPattern();
@@ -17,7 +19,7 @@ export function loadInitialState() {
   return result;
 }
 
-const originalLoader = jest.requireActual('../loader');
+const originalLoader = await vi.importActual<typeof Loader>('../loader');
 
 export const extractReferences = originalLoader.extractReferences;
 

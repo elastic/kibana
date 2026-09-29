@@ -14,7 +14,7 @@ import { overlayServiceMock } from '@kbn/core/public/mocks';
 test('throws if no overlays service provided', () => {
   const overlays = createReactOverlays({});
   expect(() => overlays.openFlyout(null)).toThrowErrorMatchingInlineSnapshot(
-    `"Could not show overlay as overlays service is not available."`
+    `[TypeError: Could not show overlay as overlays service is not available.]`
   );
 });
 

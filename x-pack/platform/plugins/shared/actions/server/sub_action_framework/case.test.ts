@@ -152,17 +152,17 @@ describe('CaseConnector', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[
+        [ZodError: [
           {
-            \\"expected\\": \\"string\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"incident\\",
-              \\"name\\"
+            "expected": "string",
+            "code": "invalid_type",
+            "path": [
+              "incident",
+              "name"
             ],
-            \\"message\\": \\"Invalid input: expected string, received undefined\\"
+            "message": "Invalid input: expected string, received undefined"
           }
-        ]"
+        ]]
       `);
     });
 
@@ -178,17 +178,17 @@ describe('CaseConnector', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[
+        [ZodError: [
           {
-            \\"expected\\": \\"string\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"incident\\",
-              \\"name\\"
+            "expected": "string",
+            "code": "invalid_type",
+            "path": [
+              "incident",
+              "name"
             ],
-            \\"message\\": \\"Invalid input: expected string, received boolean\\"
+            "message": "Invalid input: expected string, received boolean"
           }
-        ]"
+        ]]
       `);
     });
 
@@ -205,17 +205,17 @@ describe('CaseConnector', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[
+        [ZodError: [
           {
-            \\"expected\\": \\"array\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"incident\\",
-              \\"foo\\"
+            "expected": "array",
+            "code": "invalid_type",
+            "path": [
+              "incident",
+              "foo"
             ],
-            \\"message\\": \\"Invalid input: expected array, received null\\"
+            "message": "Invalid input: expected array, received null"
           }
-        ]"
+        ]]
       `);
     });
 
@@ -233,18 +233,18 @@ describe('CaseConnector', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[
+        [ZodError: [
           {
-            \\"expected\\": \\"number\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"incident\\",
-              \\"bar\\",
-              \\"check\\"
+            "expected": "number",
+            "code": "invalid_type",
+            "path": [
+              "incident",
+              "bar",
+              "check"
             ],
-            \\"message\\": \\"Invalid input: expected number, received string\\"
+            "message": "Invalid input: expected number, received string"
           }
-        ]"
+        ]]
       `);
     });
   });
@@ -390,17 +390,17 @@ describe('CaseConnector', () => {
           comments: [],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[
+        [ZodError: [
           {
-            \\"expected\\": \\"string\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"incident\\",
-              \\"externalId\\"
+            "expected": "string",
+            "code": "invalid_type",
+            "path": [
+              "incident",
+              "externalId"
             ],
-            \\"message\\": \\"Invalid input: expected string, received number\\"
+            "message": "Invalid input: expected string, received number"
           }
-        ]"
+        ]]
       `);
     });
   });

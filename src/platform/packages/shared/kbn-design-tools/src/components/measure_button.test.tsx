@@ -47,16 +47,17 @@ describe('MeasureButton', () => {
     const button = screen.getByTestId('measureSpacingButton');
     await userEvent.click(button);
 
-    expect(screen.getByTestId('measureOverlayContainer')).toBeInTheDocument();
+    // the overlay is loaded with React.lazy
+    expect(await screen.findByTestId('measureOverlayContainer')).toBeInTheDocument();
   });
 
-  it('should toggle measure mode on keyboard shortcut', () => {
+  it('should toggle measure mode on keyboard shortcut', async () => {
     renderWithI18n(<MeasureButton />);
 
     mockedIsMeasureShortcut.mockReturnValue(true);
     fireEvent.keyDown(window, { code: 'Period', metaKey: true });
 
-    expect(screen.getByTestId('measureOverlayContainer')).toBeInTheDocument();
+    expect(await screen.findByTestId('measureOverlayContainer')).toBeInTheDocument();
 
     mockedIsMeasureShortcut.mockReturnValue(true);
     fireEvent.keyDown(window, { code: 'Period', metaKey: true });

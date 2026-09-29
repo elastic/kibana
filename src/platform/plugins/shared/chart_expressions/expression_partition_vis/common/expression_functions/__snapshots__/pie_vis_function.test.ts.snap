@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`interpreter/functions#pieVis logs correct datatable to inspector 1`] = `
+exports[`interpreter/functions#pieVis > logs correct datatable to inspector 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -21,7 +21,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#pieVis returns an object with the correct structure for donut 1`] = `
+exports[`interpreter/functions#pieVis > returns an object with the correct structure for donut 1`] = `
 Object {
   "as": "partitionVis",
   "type": "render",
@@ -164,7 +164,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#pieVis returns an object with the correct structure for pie 1`] = `
+exports[`interpreter/functions#pieVis > returns an object with the correct structure for pie 1`] = `
 Object {
   "as": "partitionVis",
   "type": "render",
@@ -307,4 +307,4 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#pieVis throws error if provided split row and split column at once 1`] = `"A split row and column are specified. Expression is supporting only one of them at once."`;
+exports[`interpreter/functions#pieVis > throws error if provided split row and split column at once 1`] = `[Error: A split row and column are specified. Expression is supporting only one of them at once.]`;

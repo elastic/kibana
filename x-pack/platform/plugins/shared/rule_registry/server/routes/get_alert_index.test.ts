@@ -65,7 +65,7 @@ describe('getAlertsIndexRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"4\\" supplied to \\"ruleTypeIds\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "4" supplied to "ruleTypeIds"']`
       );
     });
 
@@ -80,7 +80,7 @@ describe('getAlertsIndexRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'invalid keys \\"boop\\"'"`
+        `[Error: Request was rejected with message: 'invalid keys "boop"']`
       );
     });
   });

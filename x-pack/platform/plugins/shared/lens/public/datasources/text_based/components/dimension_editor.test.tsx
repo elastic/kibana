@@ -22,9 +22,13 @@ vi.mock('lodash', () => {
   };
 });
 
+const { fetchFieldsFromESQLExpression } = vi.hoisted(() => ({
+  fetchFieldsFromESQLExpression: vi.fn(),
+}));
+
 vi.mock('./fetch_fields_from_esql_expression', () => {
   const mocked = {
-    fetchFieldsFromESQLExpression: vi.fn(),
+    fetchFieldsFromESQLExpression,
   };
   return { ...mocked, default: mocked };
 });
@@ -47,10 +51,6 @@ vi.mock('../../form_based/dimension_panel/format_selector', () => {
   };
   return { ...mocked, default: mocked };
 });
-
-const { fetchFieldsFromESQLExpression } = await vi.importMock(
-  './fetch_fields_from_esql_expression'
-);
 
 const waitToLoad = async () =>
   await waitFor(() => {

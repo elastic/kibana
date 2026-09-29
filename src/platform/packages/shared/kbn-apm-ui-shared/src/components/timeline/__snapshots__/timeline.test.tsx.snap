@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
+exports[`Timeline Components > renders TimelineAxisContainer with data 1`] = `
 <div
   data-test-subj="timeline-axis-container"
   style="width: 100%; height: 100%;"
@@ -132,7 +132,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
 </div>
 `;
 
-exports[`Timeline Components renders VerticalLinesContainer with data 1`] = `
+exports[`Timeline Components > renders VerticalLinesContainer with data 1`] = `
 <svg
   data-test-subj="vertical-lines"
   height="100%"

@@ -106,7 +106,7 @@ describe('getBrowserFieldsByFeatureId', () => {
         context
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+      `[Error: Request was rejected with message: 'Invalid value "undefined" supplied to "ruleTypeIds"']`
     );
   });
 

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`shareContextMenuExtensions should render a custom panel title when provided 1`] = `
+exports[`shareContextMenuExtensions > should render a custom panel title when provided 1`] = `
 <I18nProvider>
   <EuiContextMenuClass
     data-test-subj="shareContextMenu"
@@ -67,7 +67,7 @@ exports[`shareContextMenuExtensions should render a custom panel title when prov
 </I18nProvider>
 `;
 
-exports[`shareContextMenuExtensions should sort ascending on sort order first and then ascending on name 1`] = `
+exports[`shareContextMenuExtensions > should sort ascending on sort order first and then ascending on name 1`] = `
 <I18nProvider>
   <EuiContextMenuClass
     data-test-subj="shareContextMenu"

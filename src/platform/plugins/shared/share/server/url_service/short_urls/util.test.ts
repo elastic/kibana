@@ -47,15 +47,15 @@ describe('validateSlug', () => {
 
   it('throws on slugs which contain invalid characters', () => {
     expect(() => validateSlug('hello-tom&herry')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid [slug = hello-tom&herry]."`
+      `[Error: Invalid [slug = hello-tom&herry].]`
     );
     expect(() => validateSlug('foo(bar)')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid [slug = foo(bar)]."`
+      `[Error: Invalid [slug = foo(bar)].]`
     );
   });
 
   it('throws if slug is shorter than 3 chars', () => {
-    expect(() => validateSlug('ab')).toThrowErrorMatchingInlineSnapshot(`"Invalid [slug = ab]."`);
+    expect(() => validateSlug('ab')).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid [slug = ab].]`);
   });
 
   it('throws if slug is longer than 255 chars', () => {
@@ -64,7 +64,7 @@ describe('validateSlug', () => {
         'aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa'
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid [slug = aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa]."`
+      `[Error: Invalid [slug = aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa].]`
     );
   });
 });

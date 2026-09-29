@@ -25,11 +25,11 @@ import { DataViewType } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 
-vi.mock('react-use/lib/useDebounce', () => {
-  return vi.fn((...args) => {
+vi.mock('react-use/lib/useDebounce', () => ({
+  default: vi.fn((...args) => {
     mockUseEffect(args[0], args[2]);
-  });
-});
+  }),
+}));
 
 describe('useTotalHits', () => {
   let fetch$: UnifiedHistogramFetch$ = getFetch$Mock();

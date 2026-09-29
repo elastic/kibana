@@ -248,7 +248,7 @@ describe('hash unhash url', () => {
 
       const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValueHashed1}`;
       expect(() => unhashUrl(url)).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to completely restore the URL, be sure to use the share functionality."`
+        `[Error: Unable to completely restore the URL, be sure to use the share functionality.]`
       );
     });
   });

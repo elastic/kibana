@@ -417,9 +417,9 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected string, received undefined
-        → at param1"
-    `);
+        [Error: error validating connector type config: ✖ Invalid input: expected string, received undefined
+          → at param1]
+      `);
   });
 
   test('validates connector: config and secrets', async () => {
@@ -2679,9 +2679,9 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected string, received undefined
-        → at param1"
-    `);
+        [Error: error validating connector type config: ✖ Invalid input: expected string, received undefined
+          → at param1]
+      `);
   });
 
   test('validates connector: config and secrets', async () => {

@@ -63,8 +63,8 @@ describe('validateAndDecodeParams', () => {
     };
 
     expect(shouldThrow).toThrowErrorMatchingInlineSnapshot(`
-      "Failed to validate: 
-        in /path/my_path_param: undefined does not match expected type string"
+      [Error: Failed to validate: 
+        in /path/my_path_param: undefined does not match expected type string]
     `);
   });
 });

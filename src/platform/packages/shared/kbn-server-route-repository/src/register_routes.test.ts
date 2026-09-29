@@ -164,65 +164,65 @@ describe('registerRoutes', () => {
     };
 
     expect(pathDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unexpectedKey\\"
+          "code": "unrecognized_keys",
+          "keys": [
+            "unexpectedKey"
           ],
-          \\"path\\": [],
-          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
+          "path": [],
+          "message": "Unrecognized key: \\"unexpectedKey\\""
         }
-      ]"
+      ]]
     `);
     expect(queryDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unexpectedKey\\"
+          "code": "unrecognized_keys",
+          "keys": [
+            "unexpectedKey"
           ],
-          \\"path\\": [],
-          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
+          "path": [],
+          "message": "Unrecognized key: \\"unexpectedKey\\""
         }
-      ]"
+      ]]
     `);
     expect(bodyDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"code\\": \\"invalid_union\\",
-          \\"errors\\": [
+          "code": "invalid_union",
+          "errors": [
             [
               {
-                \\"code\\": \\"unrecognized_keys\\",
-                \\"keys\\": [
-                  \\"unexpectedKey\\"
+                "code": "unrecognized_keys",
+                "keys": [
+                  "unexpectedKey"
                 ],
-                \\"path\\": [],
-                \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
+                "path": [],
+                "message": "Unrecognized key: \\"unexpectedKey\\""
               }
             ],
             [
               {
-                \\"expected\\": \\"null\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected null, received object\\"
+                "expected": "null",
+                "code": "invalid_type",
+                "path": [],
+                "message": "Invalid input: expected null, received object"
               }
             ],
             [
               {
-                \\"expected\\": \\"undefined\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected undefined, received object\\"
+                "expected": "undefined",
+                "code": "invalid_type",
+                "path": [],
+                "message": "Invalid input: expected undefined, received object"
               }
             ]
           ],
-          \\"path\\": [],
-          \\"message\\": \\"Invalid input\\"
+          "path": [],
+          "message": "Invalid input"
         }
-      ]"
+      ]]
     `);
   });
 

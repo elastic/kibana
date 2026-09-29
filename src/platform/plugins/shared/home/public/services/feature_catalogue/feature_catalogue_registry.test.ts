@@ -37,7 +37,7 @@ describe('FeatureCatalogueRegistry', () => {
       const setup = new FeatureCatalogueRegistry().setup();
       setup.register(DASHBOARD_FEATURE);
       expect(() => setup.register(DASHBOARD_FEATURE)).toThrowErrorMatchingInlineSnapshot(
-        `"Feature with id [dashboard] has already been registered. Use a unique id."`
+        `[Error: Feature with id [dashboard] has already been registered. Use a unique id.]`
       );
     });
 
@@ -45,7 +45,7 @@ describe('FeatureCatalogueRegistry', () => {
       const setup = new FeatureCatalogueRegistry().setup();
       setup.registerSolution(KIBANA_SOLUTION);
       expect(() => setup.registerSolution(KIBANA_SOLUTION)).toThrowErrorMatchingInlineSnapshot(
-        `"Solution with id [kibana] has already been registered. Use a unique id."`
+        `[Error: Solution with id [kibana] has already been registered. Use a unique id.]`
       );
     });
 

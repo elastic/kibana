@@ -202,10 +202,10 @@ test('should work with @kbn/zod v4', () => {
 
   expect(() => validateParams(actionType, { bar: 2 }, { configurationUtilities }))
     .toThrowErrorMatchingInlineSnapshot(`
-    "error validating action params: ✖ Unrecognized key: \\"bar\\"
-    ✖ Invalid input: expected string, received undefined
-      → at foo"
-  `);
+      [Error: error validating action params: ✖ Unrecognized key: "bar"
+      ✖ Invalid input: expected string, received undefined
+        → at foo]
+    `);
 });
 
 describe('Zod v4 config and secrets', () => {

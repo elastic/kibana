@@ -25,13 +25,13 @@ test('throws on missing locator ID', () => {
   expect(() =>
     parseSearchParams(`?v=0.0.0&p=${encodeURIComponent('{"foo":"bar"}')}`)
   ).toThrowErrorMatchingInlineSnapshot(
-    `"Locator ID not specified. Specify \\"l\\" search parameter in the URL, which should be an existing locator ID."`
+    `[Error: Locator ID not specified. Specify "l" search parameter in the URL, which should be an existing locator ID.]`
   );
 
   expect(() =>
     parseSearchParams(`?l=&v=0.0.0&p=${encodeURIComponent('{"foo":"bar"}')}`)
   ).toThrowErrorMatchingInlineSnapshot(
-    `"Locator ID not specified. Specify \\"l\\" search parameter in the URL, which should be an existing locator ID."`
+    `[Error: Locator ID not specified. Specify "l" search parameter in the URL, which should be an existing locator ID.]`
   );
 });
 
@@ -39,28 +39,28 @@ test('throws on missing version', () => {
   expect(() =>
     parseSearchParams(`?l=LOCATOR&v=&p=${encodeURIComponent('{"foo":"bar"}')}`)
   ).toThrowErrorMatchingInlineSnapshot(
-    `"Locator params version not specified. Specify \\"v\\" search parameter in the URL, which should be the release version of Kibana when locator params were generated."`
+    `[Error: Locator params version not specified. Specify "v" search parameter in the URL, which should be the release version of Kibana when locator params were generated.]`
   );
 
   expect(() =>
     parseSearchParams(`?l=LOCATOR&p=${encodeURIComponent('{"foo":"bar"}')}`)
   ).toThrowErrorMatchingInlineSnapshot(
-    `"Locator params version not specified. Specify \\"v\\" search parameter in the URL, which should be the release version of Kibana when locator params were generated."`
+    `[Error: Locator params version not specified. Specify "v" search parameter in the URL, which should be the release version of Kibana when locator params were generated.]`
   );
 });
 
 test('throws on missing params', () => {
   expect(() => parseSearchParams(`?l=LOCATOR&v=1.1.1`)).toThrowErrorMatchingInlineSnapshot(
-    `"Locator params not specified. Specify \\"p\\" search parameter in the URL, which should be JSON serialized object of locator params."`
+    `[Error: Locator params not specified. Specify "p" search parameter in the URL, which should be JSON serialized object of locator params.]`
   );
 
   expect(() => parseSearchParams(`?l=LOCATOR&v=1.1.1&p=`)).toThrowErrorMatchingInlineSnapshot(
-    `"Locator params not specified. Specify \\"p\\" search parameter in the URL, which should be JSON serialized object of locator params."`
+    `[Error: Locator params not specified. Specify "p" search parameter in the URL, which should be JSON serialized object of locator params.]`
   );
 });
 
 test('throws if params are not JSON', () => {
   expect(() => parseSearchParams(`?l=LOCATOR&v=1.1.1&p=asdf`)).toThrowErrorMatchingInlineSnapshot(
-    `"Could not parse locator params. Locator params must be serialized as JSON and set at \\"p\\" URL search parameter."`
+    `[Error: Could not parse locator params. Locator params must be serialized as JSON and set at "p" URL search parameter.]`
   );
 });

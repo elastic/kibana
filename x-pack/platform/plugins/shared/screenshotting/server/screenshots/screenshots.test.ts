@@ -21,7 +21,11 @@ import type { PngScreenshotOptions } from '..';
 import { HeadlessChromiumDriverFactory } from '../browsers';
 import { Screenshots } from './screenshots';
 
-vi.mock('puppeteer');
+// Jest applied server/__mocks__/puppeteer.ts implicitly; Vitest needs it passed explicitly.
+vi.mock('puppeteer', async () => {
+  const { default: puppeteerMock } = await import('../__mocks__/puppeteer');
+  return { ...puppeteerMock, default: puppeteerMock };
+});
 
 describe('class Screenshots', () => {
   let mockConfig: ConfigType;
@@ -106,10 +110,6 @@ describe('class Screenshots', () => {
   });
 
   describe('getScreenshots', () => {
-    beforeAll(() => {
-      vi.doMock('puppeteer'); // see __mocks__/puppeteer.ts
-    });
-
     beforeEach(() => {
       vi.spyOn(browserDriverFactory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
       vi.spyOn(browserDriverFactory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);

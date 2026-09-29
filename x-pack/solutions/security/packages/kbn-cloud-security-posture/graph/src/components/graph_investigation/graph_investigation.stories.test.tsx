@@ -217,10 +217,10 @@ describe('GraphInvestigation Component', () => {
 
   it('shows error on bad kql syntax', async () => {
     const mockDangerToast = action(NOTIFICATIONS_ADD_ERROR_ACTION);
-    const { getByTestId } = renderStory();
+    const { getByTestId, findByTestId } = renderStory();
 
     // Act
-    const queryInput = getByTestId('queryInput');
+    const queryInput = await findByTestId('queryInput');
     fireEvent.change(queryInput, { target: { value: '< > sdg $@#T' } });
     const querySubmitBtn = getByTestId('querySubmitButton');
     querySubmitBtn.click();

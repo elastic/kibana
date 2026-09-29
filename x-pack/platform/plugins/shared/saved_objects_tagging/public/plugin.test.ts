@@ -72,6 +72,7 @@ describe('SavedObjectTaggingPlugin', () => {
     beforeEach(() => {
       managementPluginSetup = managementPluginMock.createSetupContract();
       savedObjectsTaggingOssPluginSetup = savedObjectTaggingOssPluginMock.createSetup();
+      MockedTagsCache.mockClear();
       MockedTagsCache.mockImplementation(() => tagsCacheMock.create());
 
       plugin.setup(coreMock.createSetup(), {
@@ -101,7 +102,7 @@ describe('SavedObjectTaggingPlugin', () => {
 
       plugin.start(coreStart);
 
-      expect(MockedTagsCache.mock.instances[0].initialize).not.toHaveBeenCalled();
+      expect(MockedTagsCache.mock.results[0].value.initialize).toHaveBeenCalledTimes(1);
     });
 
     it('does not initialize its cache if on an anonymous page', async () => {
@@ -110,7 +111,7 @@ describe('SavedObjectTaggingPlugin', () => {
 
       plugin.start(coreStart);
 
-      expect(MockedTagsCache.mock.instances[0].initialize).not.toHaveBeenCalled();
+      expect(MockedTagsCache.mock.results[0].value.initialize).not.toHaveBeenCalled();
     });
   });
 });

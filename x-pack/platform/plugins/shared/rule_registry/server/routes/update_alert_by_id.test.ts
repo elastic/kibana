@@ -64,7 +64,7 @@ describe('updateAlertByIdRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"alert-1\\" supplied to \\"ids\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "alert-1" supplied to "ids"']`
       );
     });
 
@@ -83,7 +83,7 @@ describe('updateAlertByIdRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"status\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "undefined" supplied to "status"']`
       );
     });
   });

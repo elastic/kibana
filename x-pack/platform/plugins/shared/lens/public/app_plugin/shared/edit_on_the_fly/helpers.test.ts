@@ -57,29 +57,31 @@ vi.mock('../../../chart_type_session_storage', () => {
   return { ...mocked, default: mocked };
 });
 
-const queryResponseColumns = [
-  {
-    name: '@timestamp',
-    id: '@timestamp',
-    meta: {
-      type: 'date',
+const { queryResponseColumns } = vi.hoisted(() => ({
+  queryResponseColumns: [
+    {
+      name: '@timestamp',
+      id: '@timestamp',
+      meta: {
+        type: 'date',
+      },
     },
-  },
-  {
-    name: 'bytes',
-    id: 'bytes',
-    meta: {
-      type: 'number',
+    {
+      name: 'bytes',
+      id: 'bytes',
+      meta: {
+        type: 'number',
+      },
     },
-  },
-  {
-    name: 'memory',
-    id: 'memory',
-    meta: {
-      type: 'number',
+    {
+      name: 'memory',
+      id: 'memory',
+      meta: {
+        type: 'number',
+      },
     },
-  },
-];
+  ],
+}));
 
 vi.mock('@kbn/esql-utils', () => {
   return {

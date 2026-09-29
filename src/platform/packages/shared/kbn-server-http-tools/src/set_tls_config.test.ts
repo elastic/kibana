@@ -24,7 +24,7 @@ describe('setTlsConfig', () => {
     const server = new Server({});
     const config: ISslConfig = { enabled: true };
     expect(() => setTlsConfig(server, config)).toThrowErrorMatchingInlineSnapshot(
-      `"tried to set TLS config on a non-TLS http server"`
+      `[Error: tried to set TLS config on a non-TLS http server]`
     );
   });
 
@@ -49,7 +49,7 @@ describe('setTlsConfig', () => {
     getServerTLSOptionsMock.mockReturnValue(undefined);
 
     expect(() => setTlsConfig(server, config)).toThrowErrorMatchingInlineSnapshot(
-      `"tried to apply a disabled SSL config"`
+      `[Error: tried to apply a disabled SSL config]`
     );
   });
 

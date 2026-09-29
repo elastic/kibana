@@ -88,7 +88,7 @@ describe('File', () => {
     const blobStoreSpy = sandbox.spy(blobStore, 'delete');
     expect(blobStoreSpy.calledOnce).toBe(false);
     await expect(file.uploadContent(Readable.from(['test']))).rejects.toThrow(
-      new FilesPluginError('ContentStream.indexChunk(): test')
+      new FilesPluginError('ContentStream.indexChunk(): test', new Error('test'))
     );
     await setImmediate();
     expect(blobStoreSpy.calledOnce).toBe(true);

@@ -45,6 +45,7 @@ describe('ExpressionRenderer', () => {
         data$,
         loading$,
         update: vi.fn(),
+        destroy: vi.fn(),
       };
     });
 
@@ -223,6 +224,7 @@ describe('ExpressionRenderer', () => {
         data$,
         loading$,
         update: vi.fn(),
+        destroy: vi.fn(),
       };
     });
 
@@ -270,6 +272,7 @@ describe('ExpressionRenderer', () => {
         loading$: new Subject(),
         events$: new Subject(),
         update: vi.fn(),
+        destroy: vi.fn(),
         inspect: vi.fn(() => inspectData),
       };
     });
@@ -312,6 +315,7 @@ describe('ExpressionRenderer', () => {
         loading$,
         events$,
         update: vi.fn(),
+        destroy: vi.fn(),
       };
     });
 

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`WithSolutionNav renders wrapped component 1`] = `
+exports[`WithSolutionNav > renders wrapped component 1`] = `
 <TestComponent
   pageSideBar={
     <SolutionNav
@@ -62,7 +62,7 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
 />
 `;
 
-exports[`WithSolutionNav with children 1`] = `
+exports[`WithSolutionNav > with children 1`] = `
 <TestComponent
   pageSideBar={
     <SolutionNav

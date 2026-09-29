@@ -49,7 +49,7 @@ describe('#SslConfig', () => {
     test('throws if `key` is invalid', () => {
       const obj = { key: '/invalid/key', certificate: '/valid/certificate' };
       expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/key'"`
+        `[Error: ENOENT: no such file or directory, open '/invalid/key']`
       );
     });
 
@@ -57,21 +57,21 @@ describe('#SslConfig', () => {
       mockReadFileSync.mockImplementationOnce((path: string) => `content-of-${path}`);
       const obj = { key: '/valid/key', certificate: '/invalid/certificate' };
       expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/certificate'"`
+        `[Error: ENOENT: no such file or directory, open '/invalid/certificate']`
       );
     });
 
     test('throws if `certificateAuthorities` is invalid', () => {
       const obj = { certificateAuthorities: '/invalid/ca' };
       expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/ca'"`
+        `[Error: ENOENT: no such file or directory, open '/invalid/ca']`
       );
     });
 
     test('throws if `keystore.path` is invalid', () => {
       const obj = { keystore: { path: '/invalid/keystore' } };
       expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/keystore'"`
+        `[Error: ENOENT: no such file or directory, open '/invalid/keystore']`
       );
     });
 
@@ -82,7 +82,7 @@ describe('#SslConfig', () => {
       }));
       const obj = { keystore: { path: 'some-path' } };
       expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"Did not find private key in keystore at [keystore.path]."`
+        `[Error: Did not find private key in keystore at [keystore.path].]`
       );
     });
 
@@ -93,14 +93,14 @@ describe('#SslConfig', () => {
       }));
       const obj = { keystore: { path: 'some-path' } };
       expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"Did not find certificate in keystore at [keystore.path]."`
+        `[Error: Did not find certificate in keystore at [keystore.path].]`
       );
     });
 
     test('throws if `truststore.path` is invalid', () => {
       const obj = { truststore: { path: '/invalid/truststore' } };
       expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/truststore'"`
+        `[Error: ENOENT: no such file or directory, open '/invalid/truststore']`
       );
     });
   });
@@ -252,7 +252,7 @@ describe('#sslSchema', () => {
         },
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [key] when [keystore.path] is specified"`
+        `[Error: cannot use [key] when [keystore.path] is specified]`
       );
     });
 
@@ -264,7 +264,7 @@ describe('#sslSchema', () => {
         },
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [certificate] when [keystore.path] is specified"`
+        `[Error: cannot use [certificate] when [keystore.path] is specified]`
       );
     });
 
@@ -274,7 +274,7 @@ describe('#sslSchema', () => {
         enabled: true,
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
+        `[Error: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled]`
       );
     });
 
@@ -284,7 +284,7 @@ describe('#sslSchema', () => {
         key: '/path/to/key',
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
+        `[Error: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled]`
       );
     });
 
@@ -293,7 +293,7 @@ describe('#sslSchema', () => {
         enabled: true,
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
+        `[Error: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled]`
       );
     });
 
@@ -303,7 +303,7 @@ describe('#sslSchema', () => {
         clientAuthentication: 'optional',
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must enable ssl to use [clientAuthentication]"`
+        `[Error: must enable ssl to use [clientAuthentication]]`
       );
     });
 
@@ -313,7 +313,7 @@ describe('#sslSchema', () => {
         clientAuthentication: 'required',
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must enable ssl to use [clientAuthentication]"`
+        `[Error: must enable ssl to use [clientAuthentication]]`
       );
     });
   });
@@ -362,20 +362,20 @@ describe('#sslSchema', () => {
       };
 
       expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.0]: types that failed validation:
-- [supportedProtocols.0.0]: expected value to equal [TLSv1]
-- [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.0.3]: expected value to equal [TLSv1.3]"
-`);
+        [Error: [supportedProtocols.0]: types that failed validation:
+        - [supportedProtocols.0.0]: expected value to equal [TLSv1]
+        - [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
+        - [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
+        - [supportedProtocols.0.3]: expected value to equal [TLSv1.3]]
+      `);
       expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
         .toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.4]: types that failed validation:
-- [supportedProtocols.4.0]: expected value to equal [TLSv1]
-- [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.4.3]: expected value to equal [TLSv1.3]"
-`);
+          [Error: [supportedProtocols.4]: types that failed validation:
+          - [supportedProtocols.4.0]: expected value to equal [TLSv1]
+          - [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
+          - [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
+          - [supportedProtocols.4.3]: expected value to equal [TLSv1.3]]
+        `);
     });
   });
 

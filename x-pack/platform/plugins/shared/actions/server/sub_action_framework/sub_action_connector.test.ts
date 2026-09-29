@@ -219,17 +219,17 @@ describe('SubActionConnector', () => {
       await expect(async () =>
         service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`
-        "Response validation failed ([
-          {
-            \\"expected\\": \\"string\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"status\\"
-            ],
-            \\"message\\": \\"Invalid input: expected string, received undefined\\"
-          }
-        ])"
-      `);
+          [Error: Response validation failed ([
+            {
+              "expected": "string",
+              "code": "invalid_type",
+              "path": [
+                "status"
+              ],
+              "message": "Invalid input: expected string, received undefined"
+            }
+          ])]
+        `);
     });
 
     describe('zod v3 schema validation', () => {

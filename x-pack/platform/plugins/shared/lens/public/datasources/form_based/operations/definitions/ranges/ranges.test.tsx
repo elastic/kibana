@@ -43,7 +43,7 @@ vi.mock('@elastic/eui', async () => {
   };
 });
 
-vi.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+vi.mock('react-use/lib/useDebounce', () => ({ default: (fn: () => void) => fn() }));
 
 vi.mock('lodash', () => {
   const original = require('lodash');
@@ -176,7 +176,19 @@ describe('ranges', () => {
   }
 
   beforeAll(() => {
-    vi.useFakeTimers({ legacyFakeTimers: true });
+    // Jest's legacy fake timers: timer and animation-frame APIs only, Date stays real.
+    vi.useFakeTimers({
+      toFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'requestAnimationFrame',
+        'cancelAnimationFrame',
+      ],
+    });
   });
 
   beforeEach(() => {

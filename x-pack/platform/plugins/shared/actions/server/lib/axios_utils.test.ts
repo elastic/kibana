@@ -8,7 +8,8 @@
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
 
-import type { AxiosInstance, AxiosResponse, AxiosStatic } from 'axios';
+import type * as AxiosModule from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import { AxiosError } from 'axios';
 import axios from 'axios';
 import { Agent as HttpsAgent } from 'https';
@@ -34,12 +35,14 @@ const TestUrl = 'https://elastic.co/foo/bar/baz';
 
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 let configurationUtilities = actionsConfigMock.create();
-vi.mock('axios', () => {
-  const originalAxios = require('axios');
-  const mock = jest.createMockFromModule('axios') as Mocked<AxiosStatic>;
-  mock.isAxiosError = originalAxios.isAxiosError;
-  mock.AxiosError = originalAxios.AxiosError;
-  return mock;
+vi.mock('axios', async (importOriginal) => {
+  const originalAxios = await importOriginal<typeof AxiosModule>();
+  const mock = vi.mockObject(originalAxios);
+  const realErrorHelpers = {
+    isAxiosError: originalAxios.isAxiosError,
+    AxiosError: originalAxios.AxiosError,
+  };
+  return { ...mock, ...realErrorHelpers, default: Object.assign(mock.default, realErrorHelpers) };
 });
 const axiosMock = vi.mocked(axios);
 

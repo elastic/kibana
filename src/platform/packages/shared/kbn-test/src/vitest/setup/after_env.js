@@ -111,6 +111,42 @@ if (
   };
 }
 
+// Vitest exposes jsdom's globals on Node's global object, so `window === globalThis` isn't jsdom's
+// Window and `new MouseEvent(type, { view: window })` is rejected. Pass the real jsdom window.
+if (typeof window !== 'undefined' && global.jsdom?.window) {
+  const jsdomWindow = global.jsdom.window;
+  for (const name of [
+    'UIEvent',
+    'MouseEvent',
+    'PointerEvent',
+    'WheelEvent',
+    'KeyboardEvent',
+    'FocusEvent',
+    'InputEvent',
+    'TouchEvent',
+    'CompositionEvent',
+  ]) {
+    const Base = global[name];
+    if (typeof Base !== 'function') {
+      continue;
+    }
+    const EventWithJsdomView = class extends Base {
+      constructor(type, init) {
+        super(type, init?.view === global ? { ...init, view: jsdomWindow } : init);
+      }
+    };
+    Object.defineProperty(EventWithJsdomView, 'name', { value: name });
+    global[name] = EventWithJsdomView;
+  }
+}
+
+// jest-environment-jsdom exposed jsdom's (whatwg-url) URL; Vitest leaves Node's, whose error
+// messages and behavior differ ("Invalid URL" vs "Invalid URL: <input>").
+if (typeof window !== 'undefined' && global.jsdom?.window) {
+  global.URL = global.jsdom.window.URL;
+  global.URLSearchParams = global.jsdom.window.URLSearchParams;
+}
+
 // Jest's jsdom environment ran timers on the jsdom window, and closing it cancelled whatever was
 // still pending. Vitest keeps Node's timers, so e.g. EUI's LiveAnnouncer timeouts fire after the
 // environment is gone ("window is not defined"). Track timers and clear the leftovers per file.

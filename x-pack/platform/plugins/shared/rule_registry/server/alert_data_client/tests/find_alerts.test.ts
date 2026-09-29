@@ -664,8 +664,8 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"{\\"match\\":{\\"kibana.alert.workflow_status\\":\\"open\\"}}\\" and operation find 
-      Error: Error: Unauthorized for fake.rule and apm"
+      [Error: Unable to retrieve alert details for alert with id of "undefined" or with query "{"match":{"kibana.alert.workflow_status":"open"}}" and operation find 
+      Error: Error: Unauthorized for fake.rule and apm]
     `);
 
     expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -694,8 +694,8 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"{\\"match\\":{\\"kibana.alert.workflow_status\\":\\"open\\"}}\\" and operation find 
-      Error: Error: something went wrong"
+      [Error: Unable to retrieve alert details for alert with id of "undefined" or with query "{"match":{"kibana.alert.workflow_status":"open"}}" and operation find 
+      Error: Error: something went wrong]
     `);
   });
 

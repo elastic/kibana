@@ -190,7 +190,7 @@ describe('getGroupAggregations()', () => {
         pageSize: 50,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The provided pageIndex value is too high. The maximum allowed pageIndex value is 100."`
+      `[Error: The provided pageIndex value is too high. The maximum allowed pageIndex value is 100.]`
     );
     await expect(() =>
       alertsClient.getGroupAggregations({

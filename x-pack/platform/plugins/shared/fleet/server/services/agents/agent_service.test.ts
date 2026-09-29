@@ -154,9 +154,9 @@ describe('AgentService', () => {
       const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
       const mockSoClient = savedObjectsClientMock.create();
 
-      beforeEach(() =>
-        mockGetAuthzFromRequest.mockReturnValue(Promise.resolve(createFleetAuthzMock()))
-      );
+      beforeEach(() => {
+        mockGetAuthzFromRequest.mockReturnValue(Promise.resolve(createFleetAuthzMock()));
+      });
       expectApisToCallServicesSuccessfully(
         mockEsClient,
         () => mockedScopedSoClient,

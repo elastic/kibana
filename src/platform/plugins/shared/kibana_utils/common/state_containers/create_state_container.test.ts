@@ -186,22 +186,22 @@ test('throws when state is modified inline', () => {
   expect(() => {
     (container.get().a as any) = 'c';
   }).toThrowErrorMatchingInlineSnapshot(
-    `"Cannot assign to read only property 'a' of object '#<Object>'"`
+    `[TypeError: Cannot assign to read only property 'a' of object '#<Object>']`
   );
 
   expect(() => {
     (container.getState().a as any) = 'c';
   }).toThrowErrorMatchingInlineSnapshot(
-    `"Cannot assign to read only property 'a' of object '#<Object>'"`
+    `[TypeError: Cannot assign to read only property 'a' of object '#<Object>']`
   );
 
   expect(() => {
     (container.getState().array as any).push('c');
-  }).toThrowErrorMatchingInlineSnapshot(`"Cannot add property 1, object is not extensible"`);
+  }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Cannot add property 1, object is not extensible]`);
 
   expect(() => {
     (container.getState().array[0] as any).c = 'b';
-  }).toThrowErrorMatchingInlineSnapshot(`"Cannot add property c, object is not extensible"`);
+  }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Cannot add property c, object is not extensible]`);
 
   expect(() => {
     container.set(null as any);
@@ -216,7 +216,7 @@ test('throws when state is modified inline in subscription', () => {
     expect(() => {
       (value.a as any) = 'd';
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot assign to read only property 'a' of object '#<Object>'"`
+      `[TypeError: Cannot assign to read only property 'a' of object '#<Object>']`
     );
   });
 

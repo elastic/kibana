@@ -113,7 +113,7 @@ describe('TutorialsRegistry', () => {
       const [deferredInit] =
         mockCustomIntegrationsPluginSetup.registerDeferredIntegrations.mock.calls[0];
       expect(() => deferredInit()).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to register tutorial spec because its invalid. Error: [name]: is not allowed to be empty"`
+        `[Error: Unable to register tutorial spec because its invalid. Error: [name]: is not allowed to be empty]`
       );
     });
 
@@ -163,7 +163,7 @@ describe('TutorialsRegistry', () => {
       expect(() =>
         setup.addScopedTutorialContextFactory(testItem)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to add scoped(request) context factory because you did not provide a function"`
+        `[Error: Unable to add scoped(request) context factory because you did not provide a function]`
       );
     });
 

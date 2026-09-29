@@ -40,7 +40,7 @@ describe('getAlertSummaryRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"4\\" supplied to \\"gte\\",Invalid value \\"3\\" supplied to \\"lte\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "4" supplied to "gte",Invalid value "3" supplied to "lte"']`
       );
     });
 
@@ -109,7 +109,7 @@ describe('getAlertSummaryRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'invalid keys \\"boop\\"'"`
+        `[Error: Request was rejected with message: 'invalid keys "boop"']`
       );
     });
 
@@ -127,7 +127,7 @@ describe('getAlertSummaryRoute', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "undefined" supplied to "ruleTypeIds"']`
       );
     });
 

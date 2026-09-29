@@ -37,11 +37,13 @@ const ALLOWED_IN_TESTS_ONLY = [
   '@kbn/test-jest-helpers',
   '@testing-library/react',
   '@testing-library/user-event',
+  'vitest',
 ];
 
 // import x from 'y' / export { x } from 'y' / import 'y' / require('y') /
-// import('y') / jest.mock('y'). Anything that pulls in another module.
-const SPECIFIER_PATTERN = /(?:from\s*|import\s*\(\s*|require\s*\(\s*|jest\.mock\(\s*)'([^']+)'/g;
+// import('y') / jest.mock('y') / vi.mock('y'). Anything that pulls in another module.
+const SPECIFIER_PATTERN =
+  /(?:from\s*|import\s*\(\s*|require\s*\(\s*|(?:jest|vi)\.mock\(\s*)'([^']+)'/g;
 
 const collectFiles = (directory: string): string[] =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

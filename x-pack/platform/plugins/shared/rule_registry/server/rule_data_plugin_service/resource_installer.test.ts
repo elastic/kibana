@@ -442,7 +442,7 @@ describe('resourceInstaller', () => {
           await expect(
             installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default')
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"There was an error in the framework installing namespace-level resources and creating concrete indices for .alerts-observability.logs.alerts-default - failed"`
+            `[Error: There was an error in the framework installing namespace-level resources and creating concrete indices for .alerts-observability.logs.alerts-default - failed]`
           );
           expect(mockClusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
           expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();

@@ -36,10 +36,10 @@ describe('uiSetting', () => {
       uiSetting = uiSettingWrapper();
     });
 
-    it('should return a value', () => {
+    it('should return a value', async () => {
       uiSettings.get.mockReturnValueOnce('value');
 
-      expect(uiSetting(null, { parameter: 'something' })).resolves.toEqual({
+      await expect(uiSetting(null, { parameter: 'something' })).resolves.toEqual({
         type: 'ui_setting',
         key: 'something',
         value: 'value',
@@ -52,12 +52,12 @@ describe('uiSetting', () => {
       expect(uiSettings.get).toHaveBeenCalledWith('something', 'default');
     });
 
-    it('should throw an error when parameter does not exist', () => {
+    it('should throw an error when parameter does not exist', async () => {
       uiSettings.get.mockImplementationOnce(() => {
         throw new Error();
       });
 
-      expect(uiSetting(null, { parameter: 'something' })).rejects.toEqual(
+      await expect(uiSetting(null, { parameter: 'something' })).rejects.toEqual(
         new Error('Invalid parameter "something".')
       );
     });

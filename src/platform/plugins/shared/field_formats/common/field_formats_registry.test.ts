@@ -101,7 +101,7 @@ describe('FieldFormatsRegistry', () => {
       fieldFormatsRegistry.register([BoolFormat]);
 
       expect(() => fieldFormatsRegistry.register([BoolFormat])).toThrowErrorMatchingInlineSnapshot(
-        `"Failed to register field format with id \\"boolean\\" as it already has been registered"`
+        `[Error: Failed to register field format with id "boolean" as it already has been registered]`
       );
     });
   });

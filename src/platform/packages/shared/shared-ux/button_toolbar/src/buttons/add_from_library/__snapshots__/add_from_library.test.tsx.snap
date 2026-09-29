@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<AddFromLibraryButton /> is rendered 1`] = `
+exports[`<AddFromLibraryButton /> > is rendered 1`] = `
 <button
   class="euiButton emotion-euiButtonDisplay-m-base-text"
   id="addFromLibraryButton"

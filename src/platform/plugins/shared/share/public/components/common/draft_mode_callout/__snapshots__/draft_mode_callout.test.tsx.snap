@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DraftModeCallout Custom content case renders a callout with custom content when custom props are present 1`] = `
+exports[`DraftModeCallout > Custom content case > renders a callout with custom content when custom props are present 1`] = `
 <div
   class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
   data-size="m"
@@ -45,7 +45,7 @@ exports[`DraftModeCallout Custom content case renders a callout with custom cont
 </div>
 `;
 
-exports[`DraftModeCallout Default case renders a default callout when custom props are not present 1`] = `
+exports[`DraftModeCallout > Default case > renders a default callout when custom props are not present 1`] = `
 <div
   class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
   data-size="m"

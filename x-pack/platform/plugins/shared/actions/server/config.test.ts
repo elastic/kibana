@@ -597,14 +597,14 @@ describe('config validation', () => {
     test('validates email config with unexistend service', () => {
       config.email = { services: { enabled: ['fake-service'] } };
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
-        "[email.services.enabled.0]: types that failed validation:
+        [Error: [email.services.enabled.0]: types that failed validation:
         - [email.services.enabled.0.0]: expected value to equal [google-mail]
         - [email.services.enabled.0.1]: expected value to equal [microsoft-exchange]
         - [email.services.enabled.0.2]: expected value to equal [microsoft-outlook]
         - [email.services.enabled.0.3]: expected value to equal [amazon-ses]
         - [email.services.enabled.0.4]: expected value to equal [elastic-cloud]
         - [email.services.enabled.0.5]: expected value to equal [other]
-        - [email.services.enabled.0.6]: expected value to equal [*]"
+        - [email.services.enabled.0.6]: expected value to equal [*]]
       `);
     });
 

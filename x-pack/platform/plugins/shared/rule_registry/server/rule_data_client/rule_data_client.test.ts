@@ -152,7 +152,7 @@ describe('RuleDataClient', () => {
           const reader = ruleDataClient.getReader();
 
           await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"something went wrong!"`
+            `[Error: something went wrong!]`
           );
 
           expect(logger.error).toHaveBeenCalledWith(
@@ -186,7 +186,7 @@ describe('RuleDataClient', () => {
           const reader = ruleDataClient.getReader();
 
           await expect(reader.getDynamicIndexPattern()).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"something went wrong!"`
+            `[Error: something went wrong!]`
           );
 
           expect(logger.error).toHaveBeenCalledWith(
@@ -223,7 +223,7 @@ describe('RuleDataClient', () => {
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader();
           await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"could not get cluster client"`
+            `[Error: could not get cluster client]`
           );
 
           await expect(reader.getDynamicIndexPattern()).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -243,7 +243,7 @@ describe('RuleDataClient', () => {
           );
 
           await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false and \\"observability.apm\\" is not disabled in \\"xpack.ruleRegistry.write.disabledRegistrationContexts\\" within \\"kibana.yml\\"."`
+            `[RuleDataWriteDisabledError: Rule registry writing is disabled. Make sure that "xpack.ruleRegistry.write.enabled" configuration is not set to false and "observability.apm" is not disabled in "xpack.ruleRegistry.write.disabledRegistrationContexts" within "kibana.yml".]`
           );
           expect(logger.debug).toHaveBeenCalledWith(
             `Writing is disabled, bulk() will not write any data.`
@@ -261,7 +261,7 @@ describe('RuleDataClient', () => {
           );
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
           await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"There has been a catastrophic error trying to install index level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: could not get cluster client"`
+            `[RuleDataWriterInitializationError: There has been a catastrophic error trying to install index level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: could not get cluster client]`
           );
           expect(logger.error).toHaveBeenNthCalledWith(
             1,
@@ -292,7 +292,7 @@ describe('RuleDataClient', () => {
           );
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
           await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"There has been a catastrophic error trying to install namespace level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: bad resource installation"`
+            `[RuleDataWriterInitializationError: There has been a catastrophic error trying to install namespace level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: bad resource installation]`
           );
           expect(logger.error).toHaveBeenNthCalledWith(
             1,
@@ -369,7 +369,7 @@ describe('RuleDataClient', () => {
           await delay();
 
           await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"something went wrong!"`
+            `[Error: something went wrong!]`
           );
           expect(logger.error).toHaveBeenNthCalledWith(
             1,

@@ -27,7 +27,7 @@ describe('createGetterSetter', () => {
   test('getter should throw an exception', () => {
     const [getString] = createGetterSetter<{}>('string');
 
-    expect(() => getString()).toThrowErrorMatchingInlineSnapshot(`"string was not set."`);
+    expect(() => getString()).toThrowErrorMatchingInlineSnapshot(`[Error: string was not set.]`);
   });
 
   test('getter should not throw an exception (isValueRequired is false)', () => {

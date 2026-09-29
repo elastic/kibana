@@ -471,7 +471,8 @@ describe('getProxySettings', () => {
 
 vi.mock('fs', () => {
   const actual = require('fs') as typeof import('fs');
-  return { ...actual, readFileSync: vi.fn().mockImplementation(actual.readFileSync) };
+  const mocked = { ...actual, readFileSync: vi.fn().mockImplementation(actual.readFileSync) };
+  return { ...mocked, default: mocked };
 });
 
 import { readFileSync } from 'fs';

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Fleet - getTemplateInputs should filter inputs when provided a filtering condition 1`] = `
 Object {

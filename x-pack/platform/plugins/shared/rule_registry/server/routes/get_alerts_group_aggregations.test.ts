@@ -200,7 +200,7 @@ describe('getAlertsGroupAggregations', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+        `[Error: Request was rejected with message: 'Invalid value "undefined" supplied to "ruleTypeIds"']`
       );
     });
 
@@ -229,7 +229,7 @@ describe('getAlertsGroupAggregations', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'invalid keys \\"script\\"'"`
+        `[Error: Request was rejected with message: 'invalid keys "script"']`
       );
       await expect(
         server.inject(
@@ -283,7 +283,7 @@ describe('getAlertsGroupAggregations', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'invalid keys \\"runtimeMappings,{}\\"'"`
+        `[Error: Request was rejected with message: 'invalid keys "runtimeMappings,{}"']`
       );
     });
   });
@@ -312,7 +312,7 @@ describe('getAlertsGroupAggregations', () => {
         context
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+      `[Error: Request was rejected with message: 'Invalid value "undefined" supplied to "ruleTypeIds"']`
     );
   });
 

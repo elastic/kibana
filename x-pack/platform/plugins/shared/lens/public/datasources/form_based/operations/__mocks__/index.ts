@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-const actualOperations = jest.requireActual('../operations');
-const actualHelpers = jest.requireActual('../layer_helpers');
-const actualTimeScaleUtils = jest.requireActual('@kbn/lens-common');
-const actualMocks = jest.requireActual('../mocks');
+import { vi } from 'vitest';
+import type * as LensCommon from '@kbn/lens-common';
+import type * as Operations from '../operations';
+import type * as LayerHelpers from '../layer_helpers';
+import type * as OperationMocks from '../mocks';
 
-jest.spyOn(actualOperations.operationDefinitionMap.date_histogram, 'paramEditor');
-jest.spyOn(actualOperations.operationDefinitionMap.terms, 'onOtherColumnChanged');
-jest.spyOn(actualHelpers, 'copyColumn');
-jest.spyOn(actualHelpers, 'insertOrReplaceColumn');
-jest.spyOn(actualHelpers, 'insertNewColumn');
-jest.spyOn(actualHelpers, 'replaceColumn');
-jest.spyOn(actualHelpers, 'adjustColumnReferencesForChangedColumn');
-jest.spyOn(actualHelpers, 'getErrorMessages');
-jest.spyOn(actualHelpers, 'getColumnOrder');
+const actualOperations = await vi.importActual<typeof Operations>('../operations');
+const actualHelpers = await vi.importActual<typeof LayerHelpers>('../layer_helpers');
+const actualTimeScaleUtils = await vi.importActual<typeof LensCommon>('@kbn/lens-common');
+const actualMocks = await vi.importActual<typeof OperationMocks>('../mocks');
+
+vi.spyOn(actualOperations.operationDefinitionMap.date_histogram, 'paramEditor');
+vi.spyOn(actualOperations.operationDefinitionMap.terms, 'onOtherColumnChanged');
+vi.spyOn(actualHelpers, 'copyColumn');
+vi.spyOn(actualHelpers, 'insertOrReplaceColumn');
+vi.spyOn(actualHelpers, 'insertNewColumn');
+vi.spyOn(actualHelpers, 'replaceColumn');
+vi.spyOn(actualHelpers, 'adjustColumnReferencesForChangedColumn');
+vi.spyOn(actualHelpers, 'getErrorMessages');
+vi.spyOn(actualHelpers, 'getColumnOrder');
 
 export const {
   getAvailableOperationsByMetadata,

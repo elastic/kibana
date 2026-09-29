@@ -13,7 +13,7 @@ import type { RenderOptions } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-vi.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+vi.mock('react-use/lib/useDebounce', () => ({ default: (fn: () => void) => fn() }));
 
 const renderValuesInput = (
   {

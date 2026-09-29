@@ -23,7 +23,7 @@ import * as apiKeys from './get_api_key';
 import type { SyntheticsServerSetup } from '../types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
-vi.mock('axios', () => vi.fn());
+vi.mock('axios', () => ({ default: vi.fn() }));
 
 const taskManagerSetup = taskManagerMock.createSetup();
 

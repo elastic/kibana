@@ -99,7 +99,7 @@ describe('ExpressionType', () => {
       const type = new ExpressionType(boolean);
       expect(() => type.from(emptyDatatableValue, {})).toThrow();
       expect(() => type.from(emptyDatatableValue, {})).toThrowErrorMatchingInlineSnapshot(
-        `"Can not cast 'boolean' from datatable"`
+        `[Error: Can not cast 'boolean' from datatable]`
       );
     });
   });
@@ -128,7 +128,7 @@ describe('ExpressionType', () => {
       const type = new ExpressionType(boolean);
       expect(() => type.to(emptyDatatableValue, 'number', {})).toThrow();
       expect(() => type.to(emptyDatatableValue, 'number', {})).toThrowErrorMatchingInlineSnapshot(
-        `"Can not cast object of type 'datatable' using 'boolean'"`
+        `[Error: Can not cast object of type 'datatable' using 'boolean']`
       );
     });
   });

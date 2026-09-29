@@ -52,7 +52,7 @@ describe('AssignmentService', () => {
           authorization,
           client: savedObjectClient,
         });
-      }).toThrowErrorMatchingInlineSnapshot(`"request required for non-internal usages"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: request required for non-internal usages]`);
     });
 
     describe('#updateTagAssignments', () => {
@@ -74,7 +74,7 @@ describe('AssignmentService', () => {
             ],
             unassign: [],
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unsupported type [not-supported]"`);
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Unsupported type [not-supported]]`);
       });
 
       it('throws an error if trying to assign non-assignable types', async () => {
@@ -89,7 +89,7 @@ describe('AssignmentService', () => {
             ],
             unassign: [],
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden type [map]"`);
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Forbidden type [map]]`);
       });
 
       it('calls `soClient.bulkGet` with the correct parameters', async () => {
@@ -128,7 +128,7 @@ describe('AssignmentService', () => {
             assign: [{ type: 'dashboard', id: 'dash-1' }],
             unassign: [{ type: 'map', id: 'map-1' }],
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"not found"`);
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: not found]`);
       });
 
       it('calls `soClient.bulkUpdate` to update the references', async () => {

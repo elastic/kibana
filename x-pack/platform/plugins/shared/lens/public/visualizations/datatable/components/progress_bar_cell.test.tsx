@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock } from 'vitest';
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -23,23 +22,20 @@ import {
   toMeterColorStops,
 } from './progress_bar_cell';
 
+const { meterMock } = vi.hoisted(() => ({
+  meterMock: vi.fn((_props: MeterProps) => null),
+}));
+
 vi.mock('@elastic/charts', () => {
   const actual = require('@elastic/charts');
-  const mockMeter = vi.fn((_props: MeterProps) => null);
   return {
     ...actual,
     Meter: (props: MeterProps) => {
-      mockMeter(props);
+      meterMock(props);
       return <div data-test-subj="mockMeter" />;
     },
-    __mockMeter: mockMeter,
   };
 });
-
-const chartsMock: {
-  __mockMeter: Mock<(...args: [MeterProps]) => null>;
-} = await vi.importMock('@elastic/charts');
-const meterMock = chartsMock.__mockMeter;
 
 describe('progress bar cell helpers', () => {
   describe('toMeterColorStops', () => {

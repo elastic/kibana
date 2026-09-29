@@ -210,7 +210,7 @@ describe('CSV Export Search Cursor', () => {
         logger
       );
       await expect(cursor.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error opening PIT for index pattern [test-index-pattern-string]: Wops!"`
+        `[Error: Error opening PIT for index pattern [test-index-pattern-string]: Wops!]`
       );
     });
 
@@ -226,7 +226,7 @@ describe('CSV Export Search Cursor', () => {
         logger
       );
       await expect(cursor.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to get PIT for index pattern: [test-index-pattern-string], no errors were thrown"`
+        `[Error: Unable to get PIT for index pattern: [test-index-pattern-string], no errors were thrown]`
       );
     });
   });

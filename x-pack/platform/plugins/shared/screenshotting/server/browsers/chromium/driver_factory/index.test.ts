@@ -90,7 +90,7 @@ describe('HeadlessChromiumDriverFactory', () => {
           .pipe(take(1))
           .toPromise()
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error spawning Chromium browser! Puppeteer Launch mock fail."`
+        `[Error: Error spawning Chromium browser! Puppeteer Launch mock fail.]`
       );
     });
 

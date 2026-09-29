@@ -259,9 +259,9 @@ describe('Executor', () => {
         connectorUsageCollector,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Request validation failed (✖ Invalid input: expected string, received undefined
-        → at id)"
-    `);
+        [Error: Request validation failed (✖ Invalid input: expected string, received undefined
+          → at id)]
+      `);
   });
 
   describe('includes Zod v4 error format in validation failure message', () => {

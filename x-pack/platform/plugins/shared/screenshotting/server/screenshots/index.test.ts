@@ -28,11 +28,15 @@ import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 
+vi.mock('../layouts/create_layout', async (importOriginal) => ({
+  ...(await importOriginal<typeof Layouts>()),
+  createLayout: vi.fn(),
+}));
+
 /*
  * Tests
  */
 describe('Screenshot Observable Pipeline', () => {
-  const originalCreateLayout = Layouts.createLayout;
   let driver: ReturnType<typeof createMockBrowserDriver>;
   let driverFactory: Mocked<HeadlessChromiumDriverFactory>;
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -90,17 +94,11 @@ describe('Screenshot Observable Pipeline', () => {
 
     screenshots = new Screenshots(driverFactory, logger, packageInfo, http, config, cloud);
 
-    // Using this patch instead of using `jest.spyOn`. This way we avoid calling
-    // `jest.restoraAllMocks()` which removes implementations from other mocks not
-    // explicit in this test (like apm mock object)
-    // @ts-expect-error
-    Layouts.createLayout = () => layout;
+    vi.mocked(Layouts.createLayout).mockImplementation(() => layout);
     driver.isPageOpen.mockReturnValue(true);
   });
 
   afterEach(() => {
-    // @ts-expect-error
-    Layouts.createLayout = originalCreateLayout;
     vi.clearAllMocks();
   });
 

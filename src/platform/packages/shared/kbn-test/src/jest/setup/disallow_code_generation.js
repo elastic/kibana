@@ -66,6 +66,9 @@ const ALLOWED_CALLERS = [
   // lmdb's ordered-binary compiles its encoder at load time; under Jest jest-runtime was on that
   // stack. Dev-only (swc-register cache), this is OK.
   /node_modules\/(ordered-binary|msgpackr|lmdb)\//,
+  // ajv compiles schemas with new Function(); under Jest, jest-runtime frames were on those stacks
+  // (e.g. yaml-language-server in @kbn/workflows tests). Dev-only, this is OK.
+  /node_modules\/ajv\//,
   // kbn-handlebars tests intentionally exercise the eval-based Handlebars compiler
   // to verify parity with the safe AST-based replacement. The CSP probe
   // (kbnUnsafeEvalTest) is blocked separately above, so this exception only

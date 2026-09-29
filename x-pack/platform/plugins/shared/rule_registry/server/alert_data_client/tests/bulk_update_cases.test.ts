@@ -233,7 +233,7 @@ describe('bulkUpdateCases', () => {
     await expect(
       alertsClient.bulkUpdateCases({ caseIds, alerts })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"You cannot attach more than 10 cases to an alert"`
+      `[Error: You cannot attach more than 10 cases to an alert]`
     );
   });
 
@@ -259,7 +259,7 @@ describe('bulkUpdateCases', () => {
     await expect(
       alertsClient.bulkUpdateCases({ caseIds: multipleCases, alerts })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"You cannot attach more than 10 cases to an alert"`
+      `[Error: You cannot attach more than 10 cases to an alert]`
     );
   });
 
@@ -285,7 +285,7 @@ describe('bulkUpdateCases', () => {
     await expect(
       alertsClient.bulkUpdateCases({ caseIds: multipleCases, alerts })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"You cannot attach more than 10 cases to an alert"`
+      `[Error: You cannot attach more than 10 cases to an alert]`
     );
   });
 
@@ -295,7 +295,7 @@ describe('bulkUpdateCases', () => {
     await expect(
       alertsClient.bulkUpdateCases({ caseIds, alerts: [] })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"You need to define at least one alert to update case ids"`
+      `[Error: You need to define at least one alert to update case ids]`
     );
   });
 
@@ -306,7 +306,7 @@ describe('bulkUpdateCases', () => {
     await expect(
       alertsClient.bulkUpdateCases({ caseIds: multipleCases, alerts })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"You cannot attach more than 10 cases to an alert"`
+      `[Error: You cannot attach more than 10 cases to an alert]`
     );
   });
 });

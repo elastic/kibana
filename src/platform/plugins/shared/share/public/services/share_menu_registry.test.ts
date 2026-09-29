@@ -47,7 +47,7 @@ describe('ShareActionsRegistry', () => {
           getShareIntegrationConfig: (..._args) => Promise.resolve({}),
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Share action with type [integration] for app [*] has already been registered."`
+        `[Error: Share action with type [integration] for app [*] has already been registered.]`
       );
     });
   });

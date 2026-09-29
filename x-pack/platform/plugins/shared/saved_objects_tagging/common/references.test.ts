@@ -184,7 +184,7 @@ describe('updateTagReferences', () => {
         toRemove: ['tag-2', 'tag-3'],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Some ids from 'toAdd' also present in 'toRemove': [tag-2]"`
+      `[Error: Some ids from 'toAdd' also present in 'toRemove': [tag-2]]`
     );
   });
 

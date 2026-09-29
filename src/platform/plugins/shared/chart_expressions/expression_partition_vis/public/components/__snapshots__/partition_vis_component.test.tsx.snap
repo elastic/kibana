@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PartitionVisComponent should render correct structure for donut 1`] = `
+exports[`PartitionVisComponent > should render correct structure for donut 1`] = `
 <div
   css="unknown styles"
   data-test-subj="partitionVisChart"
@@ -961,7 +961,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
 </div>
 `;
 
-exports[`PartitionVisComponent should render correct structure for mosaic 1`] = `
+exports[`PartitionVisComponent > should render correct structure for mosaic 1`] = `
 <div
   css="unknown styles"
   data-test-subj="partitionVisChart"
@@ -1923,7 +1923,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
 </div>
 `;
 
-exports[`PartitionVisComponent should render correct structure for multi-metric pie 1`] = `
+exports[`PartitionVisComponent > should render correct structure for multi-metric pie 1`] = `
 <div
   css="unknown styles"
   data-test-subj="partitionVisChart"
@@ -3005,7 +3005,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
 </div>
 `;
 
-exports[`PartitionVisComponent should render correct structure for pie 1`] = `
+exports[`PartitionVisComponent > should render correct structure for pie 1`] = `
 <div
   css="unknown styles"
   data-test-subj="partitionVisChart"
@@ -3966,7 +3966,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
 </div>
 `;
 
-exports[`PartitionVisComponent should render correct structure for treemap 1`] = `
+exports[`PartitionVisComponent > should render correct structure for treemap 1`] = `
 <div
   css="unknown styles"
   data-test-subj="partitionVisChart"
@@ -4925,7 +4925,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
 </div>
 `;
 
-exports[`PartitionVisComponent should render correct structure for waffle 1`] = `
+exports[`PartitionVisComponent > should render correct structure for waffle 1`] = `
 <div
   css="unknown styles"
   data-test-subj="partitionVisChart"

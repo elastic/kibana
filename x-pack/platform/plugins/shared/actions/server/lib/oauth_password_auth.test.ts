@@ -14,7 +14,10 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { getAxiosInstanceWithAuth } from './get_axios_instance';
 
-vi.mock('axios', () => require('axios/dist/node/axios.cjs'));
+vi.mock('axios', () => {
+  const nodeAxios = require('axios/dist/node/axios.cjs');
+  return { ...nodeAxios, default: nodeAxios };
+});
 
 let nock: typeof import('nock');
 const origin = 'https://threatq.example.com';

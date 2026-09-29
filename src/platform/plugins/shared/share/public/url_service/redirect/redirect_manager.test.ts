@@ -115,7 +115,7 @@ describe('on page mount', () => {
         state: null,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Locator [ID = TEST_LOCATOR_WHICH_DOES_NOT_EXIST] does not exist."`
+      `[Error: Locator [ID = TEST_LOCATOR_WHICH_DOES_NOT_EXIST] does not exist.]`
     );
   });
 });

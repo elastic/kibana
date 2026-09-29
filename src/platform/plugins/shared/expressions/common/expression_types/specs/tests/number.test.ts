@@ -12,7 +12,7 @@ import { number } from '../number';
 describe('number', () => {
   it('should fail when typecasting not numeric string to number', () => {
     expect(() => number.from!.string('123test', {})).toThrowErrorMatchingInlineSnapshot(
-      `"Can't typecast \\"123test\\" string to number"`
+      `[Error: Can't typecast "123test" string to number]`
     );
   });
 });
