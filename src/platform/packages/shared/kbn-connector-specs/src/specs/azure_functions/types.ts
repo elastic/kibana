@@ -171,7 +171,12 @@ export const InvokeInputSchema = FunctionAppRefSchema.extend({
           // caller-defined JSON, so there is no schema to constrain, but an
           // unbounded payload would be allocated and serialized on the Kibana
           // server before ever reaching Azure.
-          return JSON.stringify(value).length <= MAX_INVOKE_BODY_BYTES;
+          //
+          // Measured in encoded bytes, not `String.length`: that counts UTF-16
+          // code units, so a body of non-ASCII text would pass a 1 MiB check
+          // and still send several times that to Azure. A CJK character is one
+          // code unit and three UTF-8 bytes.
+          return Buffer.byteLength(JSON.stringify(value), 'utf8') <= MAX_INVOKE_BODY_BYTES;
         } catch {
           // A value that cannot be serialized (a cycle, a BigInt) could never
           // be sent to the function, so reject it here with a clear message
