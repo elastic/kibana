@@ -30,6 +30,7 @@ interface RegisteredWorkerInstallOptions {
   workflowId?: string;
   workflowIdSuffix?: string;
   values?: ManagedWorkflowTemplateValues;
+  expectedDocumentVersion?: number | null;
 }
 
 /** The runtime registry guarantees that template values came from the definition with this id. */
