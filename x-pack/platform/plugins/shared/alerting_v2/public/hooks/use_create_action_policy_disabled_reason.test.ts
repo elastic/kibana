@@ -6,79 +6,59 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useIsActionPoliciesLicenseValid } from './use_is_action_policies_license_valid';
+import { useService } from '@kbn/core-di-browser';
+import type { AlertingV2Feature } from '../../common/feature_privileges';
 import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
 
-let mockActionPoliciesCapabilities = { read: true, all: true };
+let mockIsLicenseValid = true;
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../services/user_capabilities'
-  );
-  return {
-    useService: (token: unknown) =>
-      token === ActualUserCapabilities
-        ? new ActualUserCapabilities({
-            capabilities: { alerting_v2_action_policies: mockActionPoliciesCapabilities },
-          })
-        : {},
-    CoreStart: (key: string) => key,
-  };
-});
-
+jest.mock('@kbn/core-di-browser');
 jest.mock('./use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: jest.fn(),
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
 }));
 
-const mockUseIsActionPoliciesLicenseValid = jest.mocked(useIsActionPoliciesLicenseValid);
+const mockUseService = useService as jest.MockedFunction<typeof useService>;
 
 const MISSING_PRIVILEGES_REASON = 'You do not have permission to create action policies';
 const LICENSE_REQUIRED_REASON =
   'An active Enterprise license is required to create action policies.';
 
-const renderDisabledReason = ({
-  canWriteActionPolicies,
-  isLicenseValid,
-}: {
-  canWriteActionPolicies: boolean;
-  isLicenseValid: boolean;
-}) => {
-  mockActionPoliciesCapabilities = { read: true, all: canWriteActionPolicies };
-  mockUseIsActionPoliciesLicenseValid.mockReturnValue(isLicenseValid);
-  return renderHook(() => useCreateActionPolicyDisabledReason());
-};
-
 describe('useCreateActionPolicyDisabledReason', () => {
-  it('returns undefined when the user can write action policies and the license is valid', () => {
-    const { result } = renderDisabledReason({ canWriteActionPolicies: true, isLicenseValid: true });
-
-    expect(result.current).toBeUndefined();
-  });
-
-  it('explains missing privileges when the user cannot write action policies', () => {
-    const { result } = renderDisabledReason({
+  it.each([
+    {
+      scenario:
+        'returns undefined when the user can write action policies and the license is valid',
+      canWriteActionPolicies: true,
+      isLicenseValid: true,
+      expected: undefined,
+    },
+    {
+      scenario: 'explains missing privileges when the user cannot write action policies',
       canWriteActionPolicies: false,
       isLicenseValid: true,
-    });
-
-    expect(result.current).toBe(MISSING_PRIVILEGES_REASON);
-  });
-
-  it('explains the license requirement when the license does not allow action policies', () => {
-    const { result } = renderDisabledReason({
+      expected: MISSING_PRIVILEGES_REASON,
+    },
+    {
+      scenario: 'explains the license requirement when the license does not allow action policies',
       canWriteActionPolicies: true,
       isLicenseValid: false,
-    });
-
-    expect(result.current).toBe(LICENSE_REQUIRED_REASON);
-  });
-
-  it('prioritizes missing privileges over the license requirement', () => {
-    const { result } = renderDisabledReason({
+      expected: LICENSE_REQUIRED_REASON,
+    },
+    {
+      scenario: 'prioritizes missing privileges over the license requirement',
       canWriteActionPolicies: false,
       isLicenseValid: false,
+      expected: MISSING_PRIVILEGES_REASON,
+    },
+  ])('$scenario', ({ canWriteActionPolicies, isLicenseValid, expected }) => {
+    mockUseService.mockReturnValue({
+      canWrite: (feature: AlertingV2Feature) =>
+        feature === 'actionPolicies' && canWriteActionPolicies,
     });
+    mockIsLicenseValid = isLicenseValid;
 
-    expect(result.current).toBe(MISSING_PRIVILEGES_REASON);
+    const { result } = renderHook(() => useCreateActionPolicyDisabledReason());
+
+    expect(result.current).toBe(expected);
   });
 });

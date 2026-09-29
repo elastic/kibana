@@ -149,6 +149,8 @@ describe('CreateRuleOptionsFlyout', () => {
   describe('selector → esql transition', () => {
     it('renders ComposeDiscoverFlyout when the ES|QL option is clicked', async () => {
       const onClose = jest.fn();
+      const disabledReason = 'Action policy creation is disabled';
+      mockCreateActionPolicyDisabledReason = disabledReason;
       renderFlyout({ onClose, initialQuery: 'FROM logs-*' });
       resolveServices(mockServices);
 
@@ -170,7 +172,7 @@ describe('CreateRuleOptionsFlyout', () => {
       ).toBe(mockCreateActionPolicyFormFlyout);
       expect(
         (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
-      ).toBeUndefined();
+      ).toBe(disabledReason);
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {
@@ -227,25 +229,6 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.builderType).toBe('threshold');
       expect(capturedComposeProps.onClose).toBe(onClose);
-    });
-
-    it('passes why action policy creation is disabled to ComposeDiscoverFlyout', async () => {
-      mockCreateActionPolicyDisabledReason = 'You do not have permission to create action policies';
-      renderFlyout();
-      resolveServices(mockServices);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('thresholdBtn'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
-      });
-      expect(
-        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
-      ).toBe('You do not have permission to create action policies');
     });
   });
 

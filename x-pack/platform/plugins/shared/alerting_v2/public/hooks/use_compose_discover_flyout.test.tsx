@@ -8,7 +8,6 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
-import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
@@ -123,6 +122,10 @@ const callOnUpdateRule = () => {
   });
 };
 
+beforeEach(() => {
+  mockCreateActionPolicyDisabledReason = undefined;
+});
+
 describe('useComposeDiscoverFlyout — create submission wiring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -157,17 +160,18 @@ describe('useComposeDiscoverFlyout — action policy creation', () => {
     jest.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
-    mockCreateActionPolicyDisabledReason = undefined;
   });
 
   it('passes why action policy creation is disabled to the rule form services', async () => {
-    mockCreateActionPolicyDisabledReason = 'You do not have permission to create action policies';
+    const disabledReason = 'Action policy creation is disabled';
+    mockCreateActionPolicyDisabledReason = disabledReason;
 
     await renderAndOpenCreate();
 
-    expect(
-      (capturedFlyoutProps.services as RuleFormServices).createActionPolicyDisabledReason
-    ).toBe('You do not have permission to create action policies');
+    expect(capturedFlyoutProps.services).toHaveProperty(
+      'createActionPolicyDisabledReason',
+      disabledReason
+    );
   });
 });
 
