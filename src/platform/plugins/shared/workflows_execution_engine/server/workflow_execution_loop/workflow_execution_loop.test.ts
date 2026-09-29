@@ -135,6 +135,7 @@ describe('workflowExecutionLoop', () => {
     expect(params.stepIoService.flush).toHaveBeenCalled();
     expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
+      untilDrained: true,
     });
   });
 });

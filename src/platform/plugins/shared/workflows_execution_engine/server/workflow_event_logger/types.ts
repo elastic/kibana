@@ -71,6 +71,8 @@ export interface WorkflowEventLoggerOptions {
 
 export interface WorkflowEventFlushOptions {
   signal?: AbortSignal;
+  /** Retry a retryable write failure until the queue is empty or the task aborts. */
+  untilDrained?: boolean;
 }
 
 export interface IWorkflowEventLogger {

@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import type { WorkflowEventLoggerContext, WorkflowEventLoggerOptions } from './types';
 import { WorkflowEventLogger } from './workflow_event_logger';
-import { WorkflowEventQueue } from './workflow_event_queue';
+import { RETRYABLE_FLUSH_DELAY_MS, WorkflowEventQueue } from './workflow_event_queue';
 import { createCircuitBreakerError } from '../__fixtures__/circuit_breaker_error';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
@@ -79,7 +79,7 @@ describe('WorkflowEventLogger', () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
     (logsRepository.createLogs as jest.Mock)
-      .mockRejectedValueOnce(new Error('index-fail'))
+      .mockRejectedValueOnce(createCircuitBreakerError())
       .mockResolvedValueOnce(undefined);
     const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
 
@@ -89,7 +89,7 @@ describe('WorkflowEventLogger', () => {
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to index workflow events: index-fail'),
+      expect.stringContaining('Failed to index workflow events'),
       expect.objectContaining({
         eventsCount: 1,
       })
@@ -130,11 +130,11 @@ describe('WorkflowEventLogger', () => {
     const controller = new AbortController();
     controller.abort(new Error('user cancellation'));
 
-    workflowLogger.logInfo('retryable');
+    workflowLogger.logInfo('not retryable');
     await eventQueue.flush({ signal: controller.signal });
     await eventQueue.flush();
 
-    expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to index workflow events: cancelled',
       expect.objectContaining({ eventsCount: 1 })
@@ -257,7 +257,7 @@ describe('WorkflowEventLogger', () => {
 
     const flushPromise = eventQueue.flush();
     workflowLogger.logInfo('during failure');
-    rejectFlush(new Error('index-fail'));
+    rejectFlush(createCircuitBreakerError());
     await flushPromise;
 
     logsRepository.createLogs.mockResolvedValue(undefined);
@@ -329,6 +329,54 @@ describe('WorkflowEventLogger', () => {
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     const nextBatch = logsRepository.createLogs.mock.calls[1][0] as WorkflowLogEvent[];
     expect(nextBatch.map((event) => event.message)).toEqual(['during flush']);
+  });
+
+  it('drops a batch Elasticsearch will not retry and indexes the later events', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    logsRepository.createLogs
+      .mockRejectedValueOnce(new Error('mapper_parsing_exception'))
+      .mockResolvedValue(undefined);
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
+
+    for (let i = 0; i < 501; i++) {
+      workflowLogger.logInfo(`event-${i}`);
+    }
+
+    await eventQueue.flush();
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+    const droppedBatch = logsRepository.createLogs.mock.calls[0][0] as WorkflowLogEvent[];
+    const indexedBatch = logsRepository.createLogs.mock.calls[1][0] as WorkflowLogEvent[];
+    expect(droppedBatch).toHaveLength(500);
+    expect(droppedBatch[0].message).toBe('event-0');
+    expect(indexedBatch.map((event) => event.message)).toEqual(['event-500']);
+
+    await eventQueue.flush();
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries a retryable failure before a drain flush returns', async () => {
+    jest.useFakeTimers();
+    try {
+      const logsRepository = createLogsRepositoryMock();
+      const logger = loggerMock.create();
+      logsRepository.createLogs
+        .mockRejectedValueOnce(createCircuitBreakerError())
+        .mockResolvedValueOnce(undefined);
+      const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
+
+      workflowLogger.logInfo('kept');
+      const flushPromise = eventQueue.flush({ untilDrained: true });
+      await jest.advanceTimersByTimeAsync(RETRYABLE_FLUSH_DELAY_MS);
+      await flushPromise;
+
+      expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+      const retriedBatch = logsRepository.createLogs.mock.calls[1][0] as WorkflowLogEvent[];
+      expect(retriedBatch.map((event) => event.message)).toEqual(['kept']);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('indexes a large backlog in bounded batches', async () => {
