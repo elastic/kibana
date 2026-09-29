@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { EsResourceType, isVisibleSearchSource } from '@kbn/agent-builder-common';
 import { isNotFoundError } from '@kbn/es-errors';
 import { listDatasets } from '../utils/datasets';
+import { listViews } from '../utils/views';
 
 export interface DataStreamSearchSource {
   type: EsResourceType.dataStream;
@@ -36,17 +37,26 @@ export interface DatasetSearchSource {
   resource: string;
 }
 
+export interface ViewSearchSource {
+  type: EsResourceType.view;
+  name: string;
+  query: string;
+  description?: string;
+}
+
 export type EsSearchSource =
   | DataStreamSearchSource
   | AliasSearchSource
   | IndexSearchSource
-  | DatasetSearchSource;
+  | DatasetSearchSource
+  | ViewSearchSource;
 
 export interface ListSourcesResponse {
   indices: IndexSearchSource[];
   aliases: AliasSearchSource[];
   data_streams: DataStreamSearchSource[];
   datasets: DatasetSearchSource[];
+  views: ViewSearchSource[];
   warnings?: string[];
 }
 
@@ -56,7 +66,7 @@ export interface ListSourcesResponse {
  * (e.g. `*`, `emp*`, `a,b-*`, `logs-*,-logs-old`), mirroring how `_resolve/index`
  * honors exclusions for indices, aliases and data streams.
  */
-const matchesPattern = (name: string, pattern: string): boolean => {
+const matchesSearchSourcePattern = (name: string, pattern: string): boolean => {
   const toRegExp = (glob: string) =>
     new RegExp(`^${glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
 
@@ -78,9 +88,10 @@ const matchesPattern = (name: string, pattern: string): boolean => {
  * using the `_resolve_index` API.
  *
  * When `includeDatasets` is true, external ES|QL datasets (registered via `_query/dataset`) are
- * additionally fetched and returned. This is opt-in because datasets are only queryable via ES|QL,
- * so callers backing a `_search` flow (or that only need index/alias/datastream classification)
- * should leave it off to avoid an extra request.
+ * additionally fetched and returned. When `includeViews` is true, ES|QL views (registered via
+ * `_query/view`) are fetched the same way. Both are opt-in because they are only queryable via
+ * ES|QL, so callers backing a `_search` flow (or that only need index/alias/datastream
+ * classification) should leave them off to avoid an extra request.
  */
 export const listSearchSources = async ({
   pattern,
@@ -89,6 +100,7 @@ export const listSearchSources = async ({
   excludeIndicesRepresentedAsAlias = true,
   excludeIndicesRepresentedAsDatastream = true,
   includeDatasets = false,
+  includeViews = false,
   esClient,
 }: {
   pattern: string;
@@ -97,21 +109,36 @@ export const listSearchSources = async ({
   excludeIndicesRepresentedAsAlias?: boolean;
   excludeIndicesRepresentedAsDatastream?: boolean;
   includeDatasets?: boolean;
+  includeViews?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<ListSourcesResponse> => {
-  // external ES|QL datasets — not returned by `_resolve/index`, so fetch and filter by name
-  // separately. Resolved outside the try below so a `NotFound` from `resolveIndex` (e.g. when
-  // `pattern` is an exact dataset name) doesn't discard matching datasets.
+  // External ES|QL datasets and views are not returned by `_resolve/index`, so fetch and
+  // filter them by name separately. Resolved outside the try below so a `NotFound` from
+  // `resolveIndex` (e.g. when `pattern` is an exact view or dataset name) doesn't discard them.
   const datasetSources = includeDatasets
     ? (await listDatasets({ esClient }))
         .filter((dataset) => isVisibleSearchSource(dataset.name))
-        .filter((dataset) => matchesPattern(dataset.name, pattern))
+        .filter((dataset) => matchesSearchSourcePattern(dataset.name, pattern))
         .map<DatasetSearchSource>((dataset) => {
           return {
             type: EsResourceType.dataset,
             name: dataset.name,
             data_source: dataset.data_source,
             resource: dataset.resource,
+          };
+        })
+    : [];
+
+  const viewSources = includeViews
+    ? (await listViews({ esClient }))
+        .filter((view) => isVisibleSearchSource(view.name))
+        .filter((view) => matchesSearchSourcePattern(view.name, pattern))
+        .map<ViewSearchSource>((view) => {
+          return {
+            type: EsResourceType.view,
+            name: view.name,
+            query: view.query,
+            ...(view.description ? { description: view.description } : {}),
           };
         })
     : [];
@@ -203,6 +230,11 @@ export const listSearchSources = async ({
         `Datasets results truncated to ${perTypeLimit} elements - Total result count was ${datasetSources.length}`
       );
     }
+    if (viewSources.length > perTypeLimit) {
+      warnings.push(
+        `Views results truncated to ${perTypeLimit} elements - Total result count was ${viewSources.length}`
+      );
+    }
 
     return {
       warnings,
@@ -210,15 +242,18 @@ export const listSearchSources = async ({
       aliases: take(aliasSources, perTypeLimit),
       indices: take(indexSources, perTypeLimit),
       datasets: take(datasetSources, perTypeLimit),
+      views: take(viewSources, perTypeLimit),
     };
   } catch (e) {
     if (isNotFoundError(e)) {
+      const esqlSourceCount = datasetSources.length + viewSources.length;
       return {
         data_streams: [],
         aliases: [],
         indices: [],
         datasets: take(datasetSources, perTypeLimit),
-        warnings: datasetSources.length > 0 ? [] : ['No sources found.'],
+        views: take(viewSources, perTypeLimit),
+        warnings: esqlSourceCount > 0 ? [] : ['No sources found.'],
       };
     }
     throw e;
