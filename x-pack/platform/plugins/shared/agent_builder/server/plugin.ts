@@ -204,6 +204,13 @@ export class AgentBuilderPlugin
         }
         return services.agents.getRegistry({ request });
       },
+      getExecutionService: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Execution service not available — plugin has not started');
+        }
+        return services.execution;
+      },
       isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
