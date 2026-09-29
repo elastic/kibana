@@ -28,6 +28,7 @@ import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
+import { REQUEST_SCOPED_CONNECTOR_ID } from '../../tools/sandbox_bash/request_scoped_connector';
 
 export { NIGHTSHIFT_INVESTIGATION_AGENT_ID };
 export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
@@ -83,7 +84,8 @@ interface InvestigationAgentTypeOptions {
   investigationToolsEnabled: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
-  telemetryConnectorId?: string;
+  /** Allow-lists the request-scoped Elasticsearch connector. Requires the sandbox. */
+  elasticsearchConnectorEnabled?: boolean;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   logger?: Logger;
@@ -112,8 +114,8 @@ const appendCustomContext = async ({
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * standalone prompt and no Elastic tools. Telemetry is reached through the request-scoped
+ * Elasticsearch connector as described in `/workspace/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   sandboxEnabled,
@@ -122,7 +124,7 @@ export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
-  telemetryConnectorId,
+  elasticsearchConnectorEnabled = true,
   getCustomContextInstructions,
   logger,
 }: InvestigationAgentTypeOptions): AgentTypeDefinition => {
@@ -142,7 +144,8 @@ export const getInvestigationAgentType = ({
       },
     ],
     enable_elastic_capabilities: false,
-    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+    connector_ids:
+      sandboxEnabled && elasticsearchConnectorEnabled ? [REQUEST_SCOPED_CONNECTOR_ID] : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
       // parallel branch of the combined materialize workflow, which already carries the
@@ -191,7 +194,7 @@ export const registerInvestigationAgentType = (
     decisionTreesEnabled = false,
     investigationToolsEnabled,
     proposalsEnabled,
-    telemetryConnectorId,
+    elasticsearchConnectorEnabled,
     getCustomContextInstructions,
     logger,
   }: InvestigationAgentTypeOptions
@@ -204,7 +207,7 @@ export const registerInvestigationAgentType = (
       decisionTreesEnabled,
       investigationToolsEnabled,
       proposalsEnabled,
-      telemetryConnectorId,
+      elasticsearchConnectorEnabled,
       getCustomContextInstructions,
       logger,
     })

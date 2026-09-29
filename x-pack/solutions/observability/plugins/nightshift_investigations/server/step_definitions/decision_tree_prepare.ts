@@ -17,11 +17,12 @@ import { toolCallsSchema } from './tool_calls_schema';
 const MAX_INPUT_CHARS = 100_000;
 
 export const decisionTreePrepareStepDefinition = ({
-  getTelemetryConnectorId,
+  connectorNames,
   logger,
   isEnabled,
 }: {
-  getTelemetryConnectorId: () => string | undefined;
+  /** Connector ids the investigator could query, named in the reinforcement turn script. */
+  connectorNames: readonly string[];
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -78,11 +79,10 @@ export const decisionTreePrepareStepDefinition = ({
         return skippedOutput;
       }
 
-      const telemetryConnectorId = getTelemetryConnectorId();
       const { spaceId } = context.contextManager.getContext().workflow;
       const { message, treeCount, turnKind } = await prepareReinforcementTurn({
         response,
-        connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+        connectorNames: [...connectorNames],
         esClient: context.contextManager.getScopedEsClient(),
         logger,
         spaceId,

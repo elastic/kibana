@@ -10,6 +10,11 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { SandboxCallContext } from './tool_utils';
 import { createOutputRedactor, MIN_REDACTABLE_SECRET_LENGTH } from './output_redactor';
 import { authorizeConnector } from './connector_authorization';
+import {
+  REQUEST_SCOPED_CONNECTOR,
+  REQUEST_SCOPED_CONNECTOR_ID,
+  checkRequestScopedConnector,
+} from './request_scoped_connector';
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
@@ -25,6 +30,8 @@ export type ConnectorCredentialResolution = ConnectorCredentialEnv | { errorMess
 
 export interface ConnectorCredentialDeps {
   actions?: ActionsPluginStart;
+  /** Elasticsearch URL the sandbox reaches this cluster at; enables the request-scoped connector. */
+  elasticsearchUrl?: string;
 }
 
 export type ResolveConnectorCredentials = (
@@ -135,9 +142,10 @@ export const redactSecrets = (text: string, secretValues: readonly string[]): st
 
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
- * Deny by default: the connector must be on the agent allow-list and the current user must be
- * allowed to read and execute it in the current space. Only preconfigured (kibana.yml)
- * connectors are supported: their secrets are held in memory by the actions plugin.
+ * Deny by default: the connector must be on the agent allow-list. The request-scoped
+ * Elasticsearch connector exposes the API key of the current run; any other connector must be
+ * preconfigured (kibana.yml), with its secrets held in memory by the actions plugin, and the
+ * current user must be allowed to read and execute it in the current space.
  */
 export const createConnectorCredentialResolver =
   ({
@@ -148,7 +156,22 @@ export const createConnectorCredentialResolver =
     logger: Logger;
   }): ResolveConnectorCredentials =>
   async (connectorId, callContext) => {
-    const { actions } = getDeps();
+    const { actions, elasticsearchUrl } = getDeps();
+
+    if (connectorId === REQUEST_SCOPED_CONNECTOR_ID) {
+      const checked = checkRequestScopedConnector(callContext, elasticsearchUrl);
+      if ('errorMessage' in checked) return checked;
+
+      logger.debug(`Injecting the run's API key into a single sandbox command`);
+
+      const { env, secretValues } = buildConnectorEnv({
+        connectorId,
+        actionTypeId: REQUEST_SCOPED_CONNECTOR.actionTypeId,
+        config: { url: checked.url },
+        secrets: { password: checked.encoded },
+      });
+      return { env, secretValues: [...secretValues, checked.secret] };
+    }
 
     const authorized = await authorizeConnector(connectorId, callContext, actions);
     if ('errorMessage' in authorized) return authorized;
