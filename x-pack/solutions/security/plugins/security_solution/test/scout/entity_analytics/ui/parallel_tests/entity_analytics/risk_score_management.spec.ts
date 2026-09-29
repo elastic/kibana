@@ -23,7 +23,6 @@ spaceTest.describe(
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await apiServices.detectionRule.deleteAll();
 
       await apiServices.detectionRule.createCustomQueryRule({
@@ -36,7 +35,6 @@ spaceTest.describe(
 
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await apiServices.detectionRule.deleteAll();
     });
 
