@@ -21,6 +21,12 @@ import type { WorkerSettingsDeclaration } from './types';
 
 export const ContinuousThreatHuntWorkerExtras = z
   .object({
+    /**
+     * Defaults to 'always' for the MVP (Steph, 2026-09-29): Tier 2 runs regardless of
+     * Tier 1's result unless explicitly set to `on_hits`. `on_hits` stays a valid value
+     * (kept so this dial means something and isn't a one-value enum in disguise), but
+     * there is no plan to expose a UI control for changing it away from the default.
+     */
     tier2When: z.enum(['on_hits', 'always']),
     candidateLimit: z.number().int().min(1).max(10),
     fanOutMax: z.number().int().min(1).max(10),
@@ -31,7 +37,7 @@ export const ContinuousThreatHuntWorkerExtras = z
 export type ContinuousThreatHuntWorkerExtras = z.infer<typeof ContinuousThreatHuntWorkerExtras>;
 
 export const CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS: ContinuousThreatHuntWorkerExtras = {
-  tier2When: 'on_hits',
+  tier2When: 'always',
   candidateLimit: 10,
   fanOutMax: 10,
 };

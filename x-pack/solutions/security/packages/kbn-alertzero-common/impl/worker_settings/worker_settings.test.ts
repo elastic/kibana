@@ -81,7 +81,7 @@ describe('Worker settings declarations', () => {
       workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
       autonomy: 'manual',
       scheduleInterval: '4h',
-      extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
+      extras: { tier2When: 'always', candidateLimit: 10, fanOutMax: 10 },
     });
   });
 
@@ -92,13 +92,30 @@ describe('Worker settings declarations', () => {
         autonomy: 'manual',
         scheduleInterval: '4h',
         extras: {
-          tier2When: 'on_hits',
+          tier2When: 'always',
           candidateLimit: 10,
           fanOutMax: 10,
           huntCooldownMinutes: 240,
         },
       })
     ).toMatch(/extras.*huntCooldownMinutes/);
+  });
+
+  it('still accepts tier2When: "on_hits" even though the default flipped to "always"', () => {
+    expect(
+      getCompleteWorkerSettingsSchema(
+        SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
+      ).safeParse({
+        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+        extras: {
+          tier2When: 'on_hits',
+          candidateLimit: 10,
+          fanOutMax: 10,
+        },
+      }).success
+    ).toBe(true);
   });
 
   it.each([0, 11, 5.5])('rejects Continuous Threat Hunt candidateLimit %s', (candidateLimit) => {
@@ -108,7 +125,7 @@ describe('Worker settings declarations', () => {
         autonomy: 'manual',
         scheduleInterval: '4h',
         extras: {
-          tier2When: 'on_hits',
+          tier2When: 'always',
           candidateLimit,
           fanOutMax: 10,
         },

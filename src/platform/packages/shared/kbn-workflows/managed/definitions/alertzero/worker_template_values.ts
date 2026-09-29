@@ -70,6 +70,7 @@ export const renderRuleTuningWorkerYaml = (
  */
 export interface HuntWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {
+    /** Defaults to 'always' for the MVP; `on_hits` stays valid, just not UI-exposed. */
     tier2When: 'on_hits' | 'always';
     candidateLimit: number;
     fanOutMax: number;

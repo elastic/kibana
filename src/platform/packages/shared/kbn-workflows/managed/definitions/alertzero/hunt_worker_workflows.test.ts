@@ -63,7 +63,7 @@ const worker = parse(
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '4h',
-    extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
+    extras: { tier2When: 'always', candidateLimit: 10, fanOutMax: 10 },
   })
 ) as YamlWorkflow;
 const findOrCreateInvestigation = parse(
