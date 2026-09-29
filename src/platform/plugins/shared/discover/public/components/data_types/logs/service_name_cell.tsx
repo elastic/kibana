@@ -21,6 +21,7 @@ import {
 } from '@kbn/discover-utils';
 import { extractTextFromReactNode } from '@kbn/discover-contextual-components/src/data_types/logs/components/utils';
 import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
+import { isTracesDataViewPattern } from '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/get_badge_context';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { ContextAwarenessToolkit } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
@@ -33,7 +34,11 @@ const agentIconStyle = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 export const getServiceNameCell =
-  (serviceNameField: string, toolkit: ContextAwarenessToolkit) =>
+  (
+    serviceNameField: string,
+    toolkit: ContextAwarenessToolkit,
+    { isTracesSummary = false }: { isTracesSummary?: boolean } = {}
+  ) =>
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField);
@@ -70,6 +75,9 @@ export const getServiceNameCell =
 
     const textValue = useMemo(() => extractTextFromReactNode(formattedValue), [formattedValue]);
 
+    const useTracesNav =
+      isTracesSummary || isTracesDataViewPattern(props.dataView.getIndexPattern());
+
     return (
       <FieldBadgeWithActions
         onFilter={toolkit.actions.addFilter}
@@ -81,6 +89,17 @@ export const getServiceNameCell =
         property={field}
         core={core}
         share={share}
+        isTracesSummary={useTracesNav}
+        onOpenOverview={
+          toolkit.actions.setExpandedDoc
+            ? () =>
+                toolkit.actions.setExpandedDoc?.(props.row, {
+                  initialTabId: useTracesNav
+                    ? 'doc_view_obs_traces_overview'
+                    : 'doc_view_logs_overview',
+                })
+            : undefined
+        }
       />
     );
   };
