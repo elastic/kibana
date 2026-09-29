@@ -5,56 +5,38 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import type { MappingsDefinition } from '@kbn/es-mappings';
+import { getAlertEventsResourceDefinition } from '../../../../resources/datastreams/alert_events';
+import { getIngestTimestampPipeline } from '../../../../resources/datastreams/ingest_timestamp_pipeline';
 import type { ResourceDefinition } from '../../../../resources/datastreams/types';
 import { DatastreamInitializer } from '../datastream_initializer';
 
 // Distinct name to avoid colliding with any running prod/dev data stream.
-const TEST_DATA_STREAM = '.rule-events-migration-integration-test';
+const TEST_DATA_STREAM = '.rule-events-reset-integration-test';
 
-// Simplified v6 mappings: episode.* are real keyword/long fields, no alias.
-// These match the shape that existed before the episode→alert rename.
-// Typed as MappingsDefinition so putIndexTemplate overload resolves correctly.
-const v6MappingsRaw: MappingsDefinition = {
-  dynamic: false,
-  properties: {
-    '@timestamp': { type: 'date' },
-    episode: {
-      type: 'object',
-      properties: {
-        id: { type: 'keyword' },
-        status: { type: 'keyword' },
-        status_count: { type: 'long' },
-      },
-    },
-    space_id: { type: 'keyword' },
-  },
+const currentDefinition: ResourceDefinition = {
+  ...getAlertEventsResourceDefinition(),
+  key: `data_stream:${TEST_DATA_STREAM}`,
+  dataStreamName: TEST_DATA_STREAM,
+  finalPipeline: getIngestTimestampPipeline(TEST_DATA_STREAM),
 };
 
-// v7 mappings: alert.* are the real fields; episode.* forward to alert.* via aliases.
+// The v7 mapping stored episode.* as concrete fields.
 const v7Mappings: MappingsDefinition = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },
-    alert: {
+    episode: {
       type: 'object',
       properties: {
         id: { type: 'keyword' },
         status: { type: 'keyword' },
         status_count: { type: 'long' },
-      },
-    },
-    episode: {
-      type: 'object',
-      properties: {
-        id: { type: 'alias', path: 'alert.id' },
-        status: { type: 'alias', path: 'alert.status' },
-        status_count: { type: 'alias', path: 'alert.status_count' },
       },
     },
     space_id: { type: 'keyword' },
@@ -62,26 +44,78 @@ const v7Mappings: MappingsDefinition = {
 };
 
 const v7Definition: ResourceDefinition = {
-  key: `data_stream:${TEST_DATA_STREAM}`,
-  dataStreamName: TEST_DATA_STREAM,
+  ...currentDefinition,
   version: 7,
   mappings: v7Mappings,
-  lifecycle: {},
-  episodeToAlertMigration: true,
+  forceReset: undefined,
 };
 
-describe('DatastreamInitializer — episode→alert migration (integration)', () => {
+describe('DatastreamInitializer forceReset (integration)', () => {
   let esServer: EsTestCluster;
-  let logger: Logger;
+  let logger: MockedLogger;
 
-  const cleanup = async () => {
-    const esClient = esServer.getClient();
-    await esClient.indices.deleteDataStream({ name: TEST_DATA_STREAM }).catch(() => {});
-    await esClient.indices.deleteIndexTemplate({ name: TEST_DATA_STREAM }).catch(() => {});
+  const initialize = (definition: ResourceDefinition) =>
+    new DatastreamInitializer(logger, esServer.getClient(), definition).initialize();
+
+  const writeDocument = (id: string, document: Record<string, unknown>) =>
+    esServer.getClient().create({ index: TEST_DATA_STREAM, id, document, refresh: true });
+
+  const countDocuments = async () => {
+    const { count } = await esServer.getClient().count({ index: TEST_DATA_STREAM });
+    return count;
+  };
+
+  const getDataStreamVersion = async () => {
+    const {
+      data_streams: [dataStream],
+    } = await esServer.getClient().indices.getDataStream({ name: TEST_DATA_STREAM });
+    return dataStream._meta?.version;
+  };
+
+  const getIndexTemplateVersion = async () => {
+    const {
+      index_templates: [indexTemplate],
+    } = await esServer.getClient().indices.getIndexTemplate({ name: TEST_DATA_STREAM });
+    return indexTemplate.index_template._meta?.version;
+  };
+
+  const getBackingIndicesProperties = async () => {
+    const response = await esServer.getClient().indices.getMapping({ index: TEST_DATA_STREAM });
+    return Object.values(response).map(({ mappings }) => mappings.properties);
+  };
+
+  // Creates the data stream the way v7 did and writes a document with the v7 field names.
+  const seedV7DataStream = async () => {
+    await initialize(v7Definition);
+    await writeDocument('v7-doc', {
+      '@timestamp': new Date().toISOString(),
+      episode: { id: 'episode-1', status: 'active', status_count: 3 },
+      space_id: 'default',
+    });
+  };
+
+  const expectCurrentMapping = async () => {
+    const properties = await getBackingIndicesProperties();
+    expect(properties).toHaveLength(1);
+    expect(properties[0]).toMatchObject({
+      alert: {
+        properties: {
+          id: { type: 'keyword' },
+          status: { type: 'keyword' },
+          status_count: { type: 'long' },
+        },
+      },
+      episode: {
+        properties: {
+          id: { type: 'alias', path: 'alert.id' },
+          status: { type: 'alias', path: 'alert.status' },
+          status_count: { type: 'alias', path: 'alert.status_count' },
+        },
+      },
+    });
   };
 
   beforeAll(async () => {
-    jest.setTimeout(90_000);
     esServer = createTestEsCluster({
       log: new ToolingLog({ writeTo: process.stdout, level: 'info' }),
     });
@@ -93,151 +127,101 @@ describe('DatastreamInitializer — episode→alert migration (integration)', ()
   });
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
+    logger = loggerMock.create();
   });
 
   afterEach(async () => {
-    await cleanup();
-  });
-
-  // Installs a v6-shaped template and data stream with real episode.* fields,
-  // then writes one document using the old field names.
-  const seedLegacyDataStream = async () => {
     const esClient = esServer.getClient();
-
-    await esClient.indices.putIndexTemplate({
-      name: TEST_DATA_STREAM,
-      index_patterns: [`${TEST_DATA_STREAM}*`],
-      data_stream: {},
-      priority: 100,
-      _meta: { version: 6, managed: true, previousVersions: [] },
-      template: {
-        mappings: v6MappingsRaw,
-        settings: { 'index.auto_expand_replicas': '0-1' },
-      },
-    });
-
-    await esClient.indices.createDataStream({ name: TEST_DATA_STREAM });
-
-    await esClient.create({
-      index: TEST_DATA_STREAM,
-      id: 'legacy-doc-1',
-      document: {
-        '@timestamp': new Date().toISOString(),
-        episode: { id: 'ep-abc', status: 'active', status_count: 3 },
-        space_id: 'default',
-      },
-      refresh: true,
-    });
-  };
-
-  it('detects a v6 data stream and wipes it, then recreates with v7 alias mappings', async () => {
-    const esClient = esServer.getClient();
-    await seedLegacyDataStream();
-
-    // Sanity: v6 doc is there
-    const before = await esClient.count({ index: TEST_DATA_STREAM });
-    expect(before.count).toBe(1);
-
-    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
-    await initializer.initialize();
-
-    // All legacy docs wiped
-    const after = await esClient.count({ index: TEST_DATA_STREAM });
-    expect(after.count).toBe(0);
-
-    // episode.id should be an alias in the live mapping
-    const mappingResponse = await esClient.indices.getMapping({ index: TEST_DATA_STREAM });
-    const backingIndex = Object.keys(mappingResponse)[0];
-    // JSON.parse/stringify converts to plain any so we can navigate without a cast
-    const mappingJson = JSON.parse(
-      JSON.stringify(mappingResponse[backingIndex].mappings.properties)
+    await esClient.indices.deleteDataStream({ name: TEST_DATA_STREAM }, { ignore: [404] });
+    await esClient.indices.deleteIndexTemplate({ name: TEST_DATA_STREAM }, { ignore: [404] });
+    await esClient.ingest.deletePipeline(
+      { id: currentDefinition.finalPipeline.id },
+      { ignore: [404] }
     );
-    expect(mappingJson?.episode?.properties?.id?.type).toBe('alias');
-    expect(mappingJson?.episode?.properties?.id?.path).toBe('alert.id');
   });
 
-  it('queries via episode.* aliases resolve to alert.* source fields after migration', async () => {
-    const esClient = esServer.getClient();
-    await seedLegacyDataStream();
+  it('recreates a data stream created from v7 with alert.* fields and episode.* aliases', async () => {
+    await seedV7DataStream();
+    expect(await getDataStreamVersion()).toBe(7);
 
-    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
-    await initializer.initialize();
+    await initialize(currentDefinition);
 
-    // Write a v7 doc using alert.* field names
-    await esClient.create({
-      index: TEST_DATA_STREAM,
-      id: 'new-doc-1',
-      document: {
-        '@timestamp': new Date().toISOString(),
-        alert: { id: 'alert-xyz', status: 'active', status_count: 2 },
-        space_id: 'default',
-      },
-      refresh: true,
+    expect(await countDocuments()).toBe(0);
+    expect(await getDataStreamVersion()).toBe(currentDefinition.version);
+    await expectCurrentMapping();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`Deleting data stream ${TEST_DATA_STREAM}`)
+    );
+  });
+
+  it('resolves episode.* queries to alert.* fields and rejects episode.* writes after the reset', async () => {
+    await seedV7DataStream();
+    await initialize(currentDefinition);
+
+    // No @timestamp: the final pipeline of the recreated data stream sets it.
+    await writeDocument('alert-doc', {
+      alert: { id: 'alert-1', status: 'active', status_count: 2 },
+      space_id: 'default',
     });
 
-    // Query through the episode.id alias — must find the doc
+    const esClient = esServer.getClient();
     const byEpisodeId = await esClient.search({
       index: TEST_DATA_STREAM,
-      query: { term: { 'episode.id': 'alert-xyz' } },
+      query: { term: { 'episode.id': 'alert-1' } },
     });
-    expect(byEpisodeId.hits.hits).toHaveLength(1);
+    expect(byEpisodeId.hits.hits.map(({ _id }) => _id)).toEqual(['alert-doc']);
 
-    // Query by the canonical alert.id — must also find it
     const byAlertId = await esClient.search({
       index: TEST_DATA_STREAM,
-      query: { term: { 'alert.id': 'alert-xyz' } },
+      query: { term: { 'alert.id': 'alert-1' } },
     });
-    expect(byAlertId.hits.hits).toHaveLength(1);
-  });
+    expect(byAlertId.hits.hits.map(({ _id }) => _id)).toEqual(['alert-doc']);
 
-  it('skips the wipe when episode.id is already an alias (idempotent)', async () => {
-    const esClient = esServer.getClient();
-
-    // Fresh v7 install — no legacy data
-    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
-    await initializer.initialize();
-
-    await esClient.create({
-      index: TEST_DATA_STREAM,
-      id: 'doc-1',
-      document: {
-        '@timestamp': new Date().toISOString(),
-        alert: { id: 'alert-1', status: 'active', status_count: 1 },
+    await expect(
+      writeDocument('episode-doc', {
+        episode: { id: 'episode-2', status: 'active' },
         space_id: 'default',
-      },
-      refresh: true,
-    });
-
-    const countBefore = await esClient.count({ index: TEST_DATA_STREAM });
-    expect(countBefore.count).toBe(1);
-
-    // Re-initialize — must not wipe
-    const initializer2 = new DatastreamInitializer(logger, esClient, v7Definition);
-    await initializer2.initialize();
-
-    const countAfter = await esClient.count({ index: TEST_DATA_STREAM });
-    expect(countAfter.count).toBe(1);
+      })
+    ).rejects.toThrow(/field alias/);
   });
 
-  it('skips the wipe when no template exists (fresh install path)', async () => {
-    const esClient = esServer.getClient();
+  it('does not reset a data stream created from the current version on restart', async () => {
+    await initialize(currentDefinition);
+    await writeDocument('alert-doc', {
+      alert: { id: 'alert-1', status: 'active' },
+      space_id: 'default',
+    });
 
-    // No template, no data stream — fresh cluster state
-    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
-    await initializer.initialize();
+    await initialize(currentDefinition);
 
-    // Data stream should have been created from scratch with v7 mappings
-    const {
-      data_streams: [ds],
-    } = await esClient.indices.getDataStream({ name: TEST_DATA_STREAM });
-    expect(ds).toBeDefined();
+    expect(await countDocuments()).toBe(1);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
 
-    const mappingResponse = await esClient.indices.getMapping({ index: TEST_DATA_STREAM });
-    const backingIndex = Object.keys(mappingResponse)[0];
-    const mappingJson = JSON.parse(
-      JSON.stringify(mappingResponse[backingIndex].mappings.properties)
+  it('creates the data stream from the current version on a fresh install', async () => {
+    await initialize(currentDefinition);
+
+    expect(await getDataStreamVersion()).toBe(currentDefinition.version);
+    await expectCurrentMapping();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('resets a data stream created from v7 after the current index template was installed', async () => {
+    await seedV7DataStream();
+
+    // Without the reset, the current template is installed but Elasticsearch rejects turning
+    // episode.* into aliases on the existing write index.
+    await expect(initialize({ ...currentDefinition, forceReset: undefined })).rejects.toMatchObject(
+      { statusCode: 400 }
     );
-    expect(mappingJson?.episode?.properties?.id?.type).toBe('alias');
+    expect(await getIndexTemplateVersion()).toBe(currentDefinition.version);
+    // The data stream keeps the _meta copied from the template it was created from.
+    expect(await getDataStreamVersion()).toBe(7);
+
+    await initialize(currentDefinition);
+
+    expect(await countDocuments()).toBe(0);
+    expect(await getDataStreamVersion()).toBe(currentDefinition.version);
+    await expectCurrentMapping();
   });
 });

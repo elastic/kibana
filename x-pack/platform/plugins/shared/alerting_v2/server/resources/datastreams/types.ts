@@ -25,13 +25,8 @@ export interface ResourceDefinition {
   lifecycle: IndicesDataStreamLifecycleWithRollover;
   finalPipeline: IngestPipelineDefinition;
   /**
-   * When true: on startup, checks whether `episode.id` is still a real object field in the
-   * live mapping. If so, the data stream is wiped and reinitialized — the episode→alert field
-   * rename cannot be applied in place because ES rejects object→alias mapping changes.
-   *
-   * The check is idempotent: once `episode.id` is an alias the gate never fires again,
-   * regardless of deployed template version. This also prevents false-positives if another
-   * PR increments the version number before this migration ships.
+   * Deletes the existing data stream on startup when it was created from an index template at or
+   * below `version`, for mapping changes that cannot be applied in place. Its documents are lost.
    */
-  episodeToAlertMigration?: true;
+  forceReset?: { version: number };
 }
