@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
@@ -24,6 +25,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ExtractionStatus, Repository } from './api';
 import { getExtraction, startExtraction } from './api';
+import { describeStartError, type StartErrorDescription } from './describe_start_error';
 
 interface Props {
   http: HttpSetup;
@@ -52,7 +54,8 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
   const [revisions, setRevisions] = useState<Record<string, string>>({});
   const [statuses, setStatuses] = useState<Record<string, ExtractionStatus>>({});
   const [starting, setStarting] = useState<string>();
-  const [actionError, setActionError] = useState<string>();
+  const [actionError, setActionError] = useState<StartErrorDescription>();
+  const [following, setFollowing] = useState(false);
 
   const runningIds = Object.values(statuses)
     .filter(({ status }) => status === 'running')
@@ -94,17 +97,33 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
         const { id } = await startExtraction(http, repository.slice(0, 256), revision);
         const status = await getExtraction(http, id);
         setStatuses((current) => ({ ...current, [repository]: status }));
-      } catch {
-        setActionError(
-          i18n.translate('xpack.codeIntelligence.repositories.runError', {
-            defaultMessage: 'The extraction could not be started.',
-          })
-        );
+      } catch (startError) {
+        setActionError(describeStartError(startError, repository));
       } finally {
         setStarting(undefined);
       }
     },
     [http, revisions]
+  );
+
+  const followRun = useCallback(
+    async ({ repository, extractionId }: StartErrorDescription) => {
+      if (extractionId === undefined) return;
+      setFollowing(true);
+      try {
+        const status = await getExtraction(http, extractionId);
+        setStatuses((current) => ({ ...current, [repository]: status }));
+        setActionError(undefined);
+      } catch {
+        // The suggestions still apply when the run can no longer be fetched.
+        setActionError((current) =>
+          current?.extractionId === extractionId ? { ...current, extractionId: undefined } : current
+        );
+      } finally {
+        setFollowing(false);
+      }
+    },
+    [http]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<Repository>>>(
@@ -276,9 +295,42 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
           announceOnMount
           color="danger"
           iconType="error"
-          title={actionError}
+          data-test-subj="codeIntelligenceStartErrorCallout"
+          title={actionError.title}
           onDismiss={() => setActionError(undefined)}
-        />
+        >
+          <EuiText size="s">
+            <p>{actionError.explanation}</p>
+            <p>
+              <strong>
+                {i18n.translate('xpack.codeIntelligence.repositories.startError.suggestionsTitle', {
+                  defaultMessage: 'What you can do',
+                })}
+              </strong>
+            </p>
+            <ul>
+              {actionError.suggestions.map((suggestion) => (
+                <li key={suggestion}>{suggestion}</li>
+              ))}
+            </ul>
+          </EuiText>
+          {actionError.extractionId !== undefined && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiButton
+                data-test-subj="codeIntelligenceFollowRunButton"
+                color="danger"
+                size="s"
+                isLoading={following}
+                onClick={() => void followRun(actionError)}
+              >
+                {i18n.translate('xpack.codeIntelligence.repositories.startError.followRun', {
+                  defaultMessage: 'Follow that run',
+                })}
+              </EuiButton>
+            </>
+          )}
+        </EuiCallOut>
       )}
       <EuiBasicTable
         tableCaption={i18n.translate('xpack.codeIntelligence.repositories.tableCaption', {
