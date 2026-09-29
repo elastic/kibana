@@ -91,6 +91,7 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
+import { getWorkflowDeleteOperation } from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
@@ -381,7 +382,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     operation: WorkflowAccessOperation,
     request: KibanaRequest,
-    options?: { allowAdminOverride?: boolean }
+    options?: { allowAdminOverride?: boolean; auditOverride?: boolean }
   ): Promise<void> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
@@ -456,8 +457,8 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) return null;
     const access = await this.workflowsService.getAccessControl();
-    const result = await access.toDto(workflow, request);
-    return result.permissions.read ? result : null;
+    if (!(await access.checkAccess(workflow, 'read', request))) return null;
+    return access.toDto(workflow, request);
   }
 
   public async getHistoryForWorkflow(
@@ -550,7 +551,8 @@ export class WorkflowsManagementApi {
         workflows.flatMap(({ id }) => (id ? [id] : [])),
         spaceId
       );
-      for (const { id } of existing) await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+      for (const { id } of existing)
+        await this.assertWorkflowAccess(id, spaceId, 'edit', request, { auditOverride: false });
     }
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
@@ -603,7 +605,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { allowManagedWorkflowMutation?: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
-    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request, { auditOverride: false });
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
@@ -627,7 +629,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<RestoreWorkflowVersionResponseDto> {
-    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request, { auditOverride: false });
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
@@ -661,8 +663,9 @@ export class WorkflowsManagementApi {
         const access = await this.workflowsService.getAccessControl();
         await access.assertAccess(
           workflow,
-          options?.force && workflow.access_control.access_mode === 'private' ? 'manage' : 'edit',
-          request
+          getWorkflowDeleteOperation(workflow, options?.force),
+          request,
+          { auditOverride: false }
         );
       }
     }
@@ -1156,10 +1159,10 @@ export class WorkflowsManagementApi {
     );
     const access = await this.workflowsService.getAccessControl();
     const permissions = await Promise.all(
-      workflows.map((workflow) => access.checkAccess(workflow, 'read', request))
+      workflows.map((workflow) => access.permissions(workflow, request))
     );
     const hiddenIds = new Set(
-      workflows.filter((_, index) => !permissions[index]).map(({ id }) => id)
+      workflows.filter((_, index) => !permissions[index].read).map(({ id }) => id)
     );
     return children.filter(({ workflowId }) => !hiddenIds.has(workflowId));
   }

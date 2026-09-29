@@ -506,7 +506,7 @@ export const deleteWorkflows = async (params: {
   spaceId: string;
   force: boolean;
   acknowledgeAclLoss?: boolean;
-  assertCanDelete?: (workflow: WorkflowProperties, id: string | undefined) => void;
+  assertCanDelete?: (workflow: WorkflowProperties, id: string) => void;
   guardedDelete?: GuardedWorkflowDeletion;
   guardedBatch?: OccWorkflowHit[];
   deferCleanup?: boolean;
@@ -568,7 +568,10 @@ export const deleteWorkflows = async (params: {
 
   const hits = searchResponse.hits.hits;
   for (const hit of hits) {
-    if (hit._source) params.assertCanDelete?.(hit._source, hit._id);
+    if (hit._source) {
+      if (!hit._id) throw new Error('Missing workflow ID in deletion result.');
+      params.assertCanDelete?.(hit._source, hit._id);
+    }
   }
 
   if (force) {

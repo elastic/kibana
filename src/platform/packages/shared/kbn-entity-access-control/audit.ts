@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import type { AccessControl } from '.';
+import type { AccessControl } from './types';
 
 interface AccessControlState {
   owner_id?: string;
@@ -17,12 +17,18 @@ interface AccessControlState {
 
 type AccessControlAuditParams = {
   entityType: string;
-  entityId?: string;
+  entityId: string;
   spaceId?: string;
 } & (
   | { action: 'denied' | 'admin_override'; operation: string }
   | { action: 'update'; previous: AccessControlState; current: AccessControlState }
 );
+
+const messages: Record<AccessControlAuditParams['action'], string> = {
+  update: 'Changed entity access control',
+  denied: 'Entity access denied by ACL',
+  admin_override: 'Entity access allowed by administrator override',
+};
 
 /** Records ACL changes and authorization decisions without entity contents. */
 export const logEntityAccessControl = (
@@ -44,17 +50,11 @@ export const logEntityAccessControl = (
           },
         }
       : { operation: params.operation };
-  const message =
-    action === 'update'
-      ? 'Changed entity access control'
-      : action === 'denied'
-      ? 'Entity access denied by ACL'
-      : 'Entity access allowed by administrator override';
   const logger = request
     ? core.security.audit.asScoped(request)
     : core.security.audit.withoutRequest;
   logger.log({
-    message: `${message} ${JSON.stringify({ entityType, entityId, ...details })}`,
+    message: `${messages[action]} ${JSON.stringify({ entityType, entityId, ...details })}`,
     event: {
       action: `${entityType}_access_control_${action}`,
       category: ['iam'],

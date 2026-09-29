@@ -13,7 +13,7 @@ Shared ACL types, input validation, and permission checks. Stored ACLs have this
 
 The entity stores its owner's profile ID separately. Entry IDs are user profile IDs,
 not usernames. Each consumer defines the allowed roles and their operations.
-The package does not access storage, resolve users, or grant feature privileges.
+The package does not access storage, look up user profiles, or grant feature privileges.
 
 `buildEntityReadAccessQuery` requires `entries` to use an Elasticsearch `nested`
 mapping so principal fields are matched within the same entry.
@@ -53,12 +53,17 @@ const canManage = hasEntityAccess({
 ## Audit logging
 
 Call `logEntityAccessControl(core, request, params)` at the server authorization or
-storage boundary. Use `denied` for a failed ACL check, `admin_override` only when
-access needs the override, and `update` after an ACL write succeeds. Pass the
+storage boundary. `resolveEntityAccess` distinguishes normal access, an admin
+override, and denial without repeating the permission check. Use `denied` for a
+failed ACL check, `admin_override` only when access needs the override, and
+`update` after an ACL write succeeds. Pass the
 entity type, ID, and operation. For updates, pass the previous and current owner
 and ACL. The helper records these fields, not the entity contents. Core Security
 adds the caller and request context when a request is provided.
 
 Actions use `<entityType>_access_control_<action>` and respect the existing Kibana
 audit configuration and ignore filters. An override event records an authorization
-decision, not successful completion of the requested operation.
+decision, not successful completion of the requested operation. Searches, lists,
+batch lookups, and filters do not emit ACL events.
+For layered authorization, audit denials at each rejecting boundary and record
+an override at the final permission check before the operation.

@@ -177,9 +177,7 @@ export const WorkflowAccessControlModal = ({
           onChange={setValue}
           ownerId={ownerId}
           currentUserId={currentProfile?.uid}
-          isAdmin={Boolean(
-            workflow.permissions?.manage && currentProfile && ownerId !== currentProfile.uid
-          )}
+          isAdmin={workflow.permissions?.manage}
           profiles={currentProfile ? [...profiles, currentProfile] : profiles}
           suggestedProfiles={suggestedProfiles}
           onSearch={setSearch}

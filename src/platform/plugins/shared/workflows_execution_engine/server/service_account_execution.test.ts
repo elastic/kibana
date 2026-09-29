@@ -128,7 +128,8 @@ describe('workflow service account execution', () => {
           hasWorkflowAccess(
             { owner_id: 'owner', access_control: { access_mode: 'private', entries: [] } },
             actual,
-            core
+            core,
+            { id: 'workflow-id', spaceId: 'space-a' }
           )
       );
 
@@ -140,6 +141,8 @@ describe('workflow service account execution', () => {
         expect(audit).toHaveBeenCalledWith(
           expect.objectContaining({
             event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
+            kibana: { space_id: 'space-a' },
+            message: expect.stringContaining('"entityId":"workflow-id"'),
           })
         );
       }

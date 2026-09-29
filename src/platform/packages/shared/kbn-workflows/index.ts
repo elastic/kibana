@@ -143,6 +143,8 @@ export {
   workflowAccessControlSchema,
   storedWorkflowAccessControlSchema,
   getWorkflowPermissions,
+  getWorkflowAccessDecisions,
+  toWorkflowPermissions,
 } from './common/access_control';
 export type {
   WorkflowAccessControl,

@@ -11,6 +11,7 @@ import {
   createAccessControlSchema,
   prepareAccessControl,
   hasEntityAccess,
+  resolveEntityAccess,
   buildEntityReadAccessQuery,
 } from '.';
 
@@ -100,6 +101,36 @@ describe('entity access control', () => {
       ).toBe(true);
     }
   );
+  it.each([
+    ['owner', true, 'allowed'],
+    [member.id, true, 'allowed'],
+    ['outsider', true, 'admin_override'],
+    ['outsider', false, 'denied'],
+  ] as const)('resolves access for %s with admin=%s as %s', (profileId, isAdmin, expected) => {
+    expect(
+      resolveEntityAccess({
+        accessControl: privateAcl,
+        ownerId: 'owner',
+        profileId,
+        roles: ['member'],
+        isAdmin,
+      })
+    ).toBe(expected);
+  });
+
+  it('does not attribute permitted public access to the admin override', () => {
+    expect(
+      resolveEntityAccess({
+        accessControl: { access_mode: 'public', entries: [] },
+        ownerId: 'owner',
+        profileId: 'outsider',
+        roles: [],
+        allowPublic: true,
+        isAdmin: true,
+      })
+    ).toBe('allowed');
+  });
+
   it('does not treat a consumer role named admin as an administrator override', () => {
     expect(
       hasEntityAccess({

@@ -447,8 +447,11 @@ user's ACL. Background execution keeps its normal ACL checks.
 With Kibana audit logging enabled, `workflow_access_control_update` records the
 previous and stored owner, visibility, and grants. `workflow_access_control_denied`
 records failed ACL checks, including execution checks. `workflow_access_control_admin_override`
-records use of the superuser override. Search overrides are recorded at query
-level. Filtered search results do not produce one denial event per hidden workflow.
+records use of the superuser override for an explicit workflow operation.
+Searches, lists, batch lookups, filters, and result mapping do not emit ACL events.
+Write prechecks audit denials. The check on the stored document audits overrides.
+A rejected scheduled run emits a denial on each tick until access is restored or
+the schedule is disabled.
 Override events confirm authorization only. Existing operation events report the
 operation outcome. ACL events do not contain workflow YAML or execution data.
 

@@ -16,12 +16,14 @@ import {
   logEntityAccessControl,
   prepareAccessControl,
 } from '@kbn/entity-access-control';
-import type { AccessControlInput } from '@kbn/entity-access-control';
+import type { AccessControlInput, EntityAccessDecision } from '@kbn/entity-access-control';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import {
+  getWorkflowAccessDecisions,
   getWorkflowPermissions,
   pickWorkflowDocumentVersion,
   storedWorkflowAccessControlSchema,
+  toWorkflowPermissions,
   WORKFLOW_ACCESS_CONTROL_ROLES,
   WorkflowsManagementApiActions,
 } from '@kbn/workflows';
@@ -40,6 +42,12 @@ import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { workflowIndexName } from '../storage/workflow_storage';
 
+export const WORKFLOW_READ_ACCESS_QUERY = {
+  ownerField: 'owner_id',
+  accessControlField: 'access_control',
+  includeMissing: true,
+} as const;
+
 const rolePrivileges = {
   viewer: [WorkflowsManagementApiActions.read],
   executor: [WorkflowsManagementApiActions.read, WorkflowsManagementApiActions.execute],
@@ -50,31 +58,35 @@ const rolePrivileges = {
   ],
 } as const;
 
-interface WorkflowAccessAuditContext {
+export interface WorkflowAccessAuditContext {
   core: Pick<CoreStart, 'security'>;
   request?: KibanaRequest;
-  id?: string;
+  id: string;
   spaceId?: string;
+  auditOverride?: boolean;
 }
 
 const logWorkflowAccess = (
-  workflow: WorkflowAccessSubject,
+  decision: EntityAccessDecision,
   operation: WorkflowAccessOperation,
-  profileId: string | undefined,
-  allowed: boolean,
-  isAdmin: boolean,
   audit?: WorkflowAccessAuditContext
 ): void => {
-  if (audit && (!allowed || (isAdmin && !getWorkflowPermissions(workflow, profileId)[operation]))) {
-    logEntityAccessControl(audit.core, audit.request, {
-      entityType: 'workflow',
-      entityId: audit.id,
-      spaceId: audit.spaceId,
-      action: allowed ? 'admin_override' : 'denied',
-      operation,
-    });
-  }
+  if (!audit || decision === 'allowed') return;
+  if (decision === 'admin_override' && audit.auditOverride === false) return;
+  logEntityAccessControl(audit.core, audit.request, {
+    entityType: 'workflow',
+    entityId: audit.id,
+    spaceId: audit.spaceId,
+    action: decision,
+    operation,
+  });
 };
+
+export const getWorkflowDeleteOperation = (
+  workflow: WorkflowAccessSubject,
+  force = false
+): WorkflowAccessOperation =>
+  force && workflow.access_control?.access_mode === 'private' ? 'manage' : 'edit';
 
 export const assertWorkflowOperation = (
   workflow: WorkflowAccessSubject,
@@ -83,9 +95,9 @@ export const assertWorkflowOperation = (
   isAdmin = false,
   audit?: WorkflowAccessAuditContext
 ): void => {
-  const allowed = getWorkflowPermissions(workflow, profileId, isAdmin)[operation];
-  logWorkflowAccess(workflow, operation, profileId, allowed, isAdmin, audit);
-  if (!allowed) throw new WorkflowAccessDeniedError();
+  const decision = getWorkflowAccessDecisions(workflow, profileId, isAdmin)[operation];
+  logWorkflowAccess(decision, operation, audit);
+  if (decision === 'denied') throw new WorkflowAccessDeniedError();
 };
 
 export class WorkflowAccessControlService {
@@ -115,42 +127,44 @@ export class WorkflowAccessControlService {
     return profileId;
   }
 
-  async permissions(
+  private async decisions(
     workflow: WorkflowAccessSubject & { createdBy?: string },
     request?: KibanaRequest,
-    allowAdminOverride = true
-  ): Promise<WorkflowPermissions> {
+    { allowAdminOverride = true }: { allowAdminOverride?: boolean } = {}
+  ): Promise<Record<WorkflowAccessOperation, EntityAccessDecision>> {
     const profileId = request ? await this.getProfileId(request) : undefined;
-    const permissions = getWorkflowPermissions(
+    const decisions = getWorkflowAccessDecisions(
       workflow,
       profileId,
       allowAdminOverride && isEntityAccessControlAdmin(this.core, request)
     );
     if (
-      !permissions.manage &&
+      decisions.manage !== 'allowed' &&
       !workflow.owner_id &&
       !workflow.access_control &&
       request &&
-      profileId
+      profileId &&
+      this.core.security.authc.getCurrentUser(request)?.username === workflow.createdBy
     ) {
-      permissions.manage =
-        this.core.security.authc.getCurrentUser(request)?.username === workflow.createdBy;
+      decisions.manage = 'allowed';
     }
-    return permissions;
+    return decisions;
   }
 
-  async toDto<
-    T extends WorkflowAccessSubject & { createdBy?: string; id?: string; spaceId?: string }
-  >(workflow: T, request?: KibanaRequest): Promise<T & { permissions: WorkflowPermissions }> {
+  async permissions(
+    workflow: WorkflowAccessSubject & { createdBy?: string },
+    request?: KibanaRequest,
+    { allowAdminOverride = true }: { allowAdminOverride?: boolean } = {}
+  ): Promise<WorkflowPermissions> {
+    const decisions = await this.decisions(workflow, request, { allowAdminOverride });
+    return toWorkflowPermissions(decisions);
+  }
+
+  async toDto<T extends WorkflowAccessSubject & { createdBy?: string }>(
+    workflow: T,
+    request?: KibanaRequest
+  ): Promise<T & { permissions: WorkflowPermissions }> {
     const permissions = await this.permissions(workflow, request);
-    logWorkflowAccess(
-      workflow,
-      'read',
-      request ? await this.getProfileId(request) : undefined,
-      permissions.read,
-      isEntityAccessControlAdmin(this.core, request),
-      { core: this.core, request, id: workflow.id, spaceId: workflow.spaceId }
-    );
     const result = { ...workflow, permissions };
     if (!permissions.manage) {
       delete result.owner_id;
@@ -160,31 +174,30 @@ export class WorkflowAccessControlService {
   }
 
   async checkAccess(
-    workflow: WorkflowAccessSubject & { id?: string; spaceId?: string },
+    workflow: WorkflowAccessSubject & { id: string; spaceId?: string; createdBy?: string },
     operation: WorkflowAccessOperation,
     request?: KibanaRequest,
-    { allowAdminOverride = true }: { allowAdminOverride?: boolean } = {}
+    {
+      allowAdminOverride = true,
+      auditOverride = true,
+    }: { allowAdminOverride?: boolean; auditOverride?: boolean } = {}
   ): Promise<boolean> {
-    const allowed = (await this.permissions(workflow, request, allowAdminOverride))[operation];
-    const profileId = request ? await this.getProfileId(request) : undefined;
-    logWorkflowAccess(
-      workflow,
-      operation,
-      profileId,
-      allowed,
-      allowAdminOverride &&
-        isEntityAccessControlAdmin(this.core, request) &&
-        !(await this.permissions(workflow, request, false))[operation],
-      { core: this.core, request, id: workflow.id, spaceId: workflow.spaceId }
-    );
-    return allowed;
+    const decision = (await this.decisions(workflow, request, { allowAdminOverride }))[operation];
+    logWorkflowAccess(decision, operation, {
+      core: this.core,
+      request,
+      id: workflow.id,
+      spaceId: workflow.spaceId,
+      auditOverride,
+    });
+    return decision !== 'denied';
   }
 
   async assertAccess(
-    workflow: WorkflowAccessSubject & { id?: string; spaceId?: string },
+    workflow: WorkflowAccessSubject & { id: string; spaceId?: string; createdBy?: string },
     operation: WorkflowAccessOperation,
     request?: KibanaRequest,
-    options?: { allowAdminOverride?: boolean }
+    options?: { allowAdminOverride?: boolean; auditOverride?: boolean }
   ): Promise<void> {
     if (!(await this.checkAccess(workflow, operation, request, options))) {
       throw new WorkflowAccessDeniedError();
@@ -193,19 +206,10 @@ export class WorkflowAccessControlService {
 
   async readFilter(request?: KibanaRequest) {
     const isAdmin = isEntityAccessControlAdmin(this.core, request);
-    if (isAdmin) {
-      logEntityAccessControl(this.core, request, {
-        entityType: 'workflow',
-        action: 'admin_override',
-        operation: 'search',
-      });
-    }
     return buildEntityReadAccessQuery({
       isAdmin,
       profileId: request ? await this.getProfileId(request) : undefined,
-      ownerField: 'owner_id',
-      accessControlField: 'access_control',
-      includeMissing: true,
+      ...WORKFLOW_READ_ACCESS_QUERY,
     });
   }
 
@@ -232,7 +236,7 @@ export class WorkflowAccessControlService {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
-    if (isEntityAccessControlAdmin(this.core, request)) return this.readFilter(request);
+    if (isEntityAccessControlAdmin(this.core, request)) return { match_all: {} };
     const profileId = request ? await this.getProfileId(request) : undefined;
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
@@ -305,6 +309,7 @@ export class WorkflowAccessControlService {
     const { source: existing, seqNo, primaryTerm } = stored;
     const ownerId = existing.owner_id ?? profileId;
     if (!ownerId || existing.managed) {
+      logWorkflowAccess('denied', 'manage', { core: this.core, request, id, spaceId });
       throw new WorkflowAccessDeniedError();
     }
     if (!(await this.checkAccess({ ...existing, id, spaceId }, 'manage', request))) {

@@ -185,7 +185,7 @@ export const AccessControlForm = <Role extends string>({
             })}
             text={i18n.translate('entityAccessControl.adminOverrideDescription', {
               defaultMessage:
-                'You can make these changes as a superuser. The owner will stay the same.',
+                'You have permission to manage access for this owner. The owner will stay the same.',
             })}
           />
           <EuiSpacer size="m" />

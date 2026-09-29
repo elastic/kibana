@@ -13,27 +13,60 @@ import { getWorkflowPermissions } from '@kbn/workflows';
 import type { WorkflowAccessSubject } from '@kbn/workflows';
 import { getWorkflowOriginalRequest } from '../service_account_execution';
 
-export const hasWorkflowAccess = async (
-  workflow: WorkflowAccessSubject & { id?: string; spaceId?: string },
-  request: KibanaRequest,
-  core: Pick<CoreStart, 'userProfile' | 'security'>,
+interface WorkflowAccessContext {
+  core: Pick<CoreStart, 'security'>;
+  request: KibanaRequest;
+  id: string;
+  spaceId: string;
+}
+
+export const checkWorkflowAccess = (
+  workflow: WorkflowAccessSubject,
+  profileId: string | undefined,
+  { core, request, id, spaceId }: WorkflowAccessContext,
   operation: 'execute' | 'edit' = 'execute'
-): Promise<boolean> => {
-  const profileId =
-    workflow.access_control?.access_mode === 'private'
-      ? (await core.userProfile.getCurrentProfileId({
-          request: getWorkflowOriginalRequest(request),
-        })) ?? undefined
-      : undefined;
+): boolean => {
   const allowed = getWorkflowPermissions(workflow, profileId)[operation];
   if (!allowed) {
-    logEntityAccessControl(core, getWorkflowOriginalRequest(request), {
+    logEntityAccessControl(core, request, {
       entityType: 'workflow',
-      entityId: workflow.id,
-      spaceId: workflow.spaceId,
+      entityId: id,
+      spaceId,
       action: 'denied',
       operation,
     });
   }
   return allowed;
+};
+
+export const hasWorkflowAccess = async (
+  workflow: WorkflowAccessSubject,
+  request: KibanaRequest,
+  core: Pick<CoreStart, 'userProfile' | 'security'>,
+  {
+    id,
+    spaceId,
+    operation = 'execute',
+  }: {
+    id: string;
+    spaceId: string;
+    operation?: 'execute' | 'edit';
+  }
+): Promise<boolean> => {
+  const originalRequest = getWorkflowOriginalRequest(request);
+  const profileId =
+    workflow.access_control?.access_mode === 'private'
+      ? (await core.userProfile.getCurrentProfileId({ request: originalRequest })) ?? undefined
+      : undefined;
+  return checkWorkflowAccess(
+    workflow,
+    profileId,
+    {
+      core,
+      request: originalRequest,
+      id,
+      spaceId,
+    },
+    operation
+  );
 };

@@ -34,7 +34,7 @@ const makeDocument = (): WorkflowProperties => ({
 });
 
 describe('WorkflowAccessControlService', () => {
-  const request = httpServerMock.createKibanaRequest();
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let core: ReturnType<typeof coreMock.createStart>;
   let document: WorkflowProperties;
   let service: WorkflowAccessControlService;
@@ -43,6 +43,7 @@ describe('WorkflowAccessControlService', () => {
   const atSpace = jest.fn();
 
   beforeEach(() => {
+    request = httpServerMock.createKibanaRequest();
     core = coreMock.createStart();
     core.userProfile.getCurrentProfileId.mockResolvedValue('owner');
     document = makeDocument();
@@ -85,13 +86,80 @@ describe('WorkflowAccessControlService', () => {
       }
     );
 
-    it('audits a hidden document without exposing its contents', async () => {
+    it('does not audit DTO mapping for hidden documents', async () => {
       core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
-      const result = await service.toDto({ ...document, id: 'id' }, request);
+      const result = await service.toDto(document, request);
       expect(result.permissions.read).toBe(false);
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('does not audit search filters or mapped rows for a superuser', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+      expect(await service.readFilter(request)).toEqual({ match_all: {} });
+      expect(await service.executionFilter('default', request)).toEqual({ match_all: {} });
+      for (let index = 0; index < 100; index++) {
+        const result = await service.toDto({ ...document, id: String(index) }, request);
+        expect(result.permissions.read).toBe(true);
+      }
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('does not report an override for a superuser who created an ownerless workflow', async () => {
+      jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
+        securityServiceMock.createMockAuthenticatedUser({
+          username: 'alice',
+          roles: ['superuser'],
+        })
+      );
+      await service.assertAccess(
+        { ...document, id: 'legacy', owner_id: undefined, access_control: undefined },
+        'manage',
+        request
+      );
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it('audits rejected sharing changes for a managed workflow', async () => {
+      document.managed = true;
+      await expect(
+        service.update('id', 'default', { access_mode: 'private' }, request)
+      ).rejects.toThrow(WorkflowAccessDeniedError);
       expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining('"entityId":"id","operation":"read"'),
+          message: expect.stringContaining('"operation":"manage"'),
+          event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
+        })
+      );
+    });
+
+    it('records an override at the storage check, not the write precheck', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+      await service.assertAccess({ ...document, id: 'id' }, 'edit', request, {
+        auditOverride: false,
+      });
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+      assertWorkflowOperation(document, 'edit', 'admin', true, {
+        core,
+        request,
+        id: 'id',
+        spaceId: 'default',
+      });
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledTimes(1);
+    });
+
+    it('still records a denial when the precheck prevents the storage check', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, 'edit', request, { auditOverride: false })
+      ).rejects.toThrow(WorkflowAccessDeniedError);
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
           event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
         })
       );
@@ -180,12 +248,16 @@ describe('WorkflowAccessControlService', () => {
     });
 
     it('does not use the override for execution or draft tests', async () => {
-      await expect(service.assertAccess(document, 'edit', request)).resolves.toBeUndefined();
-      await expect(service.assertAccess(document, 'execute', request)).rejects.toBeInstanceOf(
-        WorkflowAccessDeniedError
-      );
       await expect(
-        service.assertAccess(document, 'edit', request, { allowAdminOverride: false })
+        service.assertAccess({ ...document, id: 'id' }, 'edit', request)
+      ).resolves.toBeUndefined();
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, 'execute', request)
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, 'edit', request, {
+          allowAdminOverride: false,
+        })
       ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
     });
 
@@ -577,7 +649,9 @@ describe('WorkflowAccessControlService', () => {
     async (operation) => {
       document.access_control = { access_mode: 'public', entries: [] };
       core.userProfile.getCurrentProfileId.mockResolvedValue(null);
-      await expect(service.assertAccess(document, operation, request)).resolves.toBeUndefined();
+      await expect(
+        service.assertAccess({ ...document, id: 'id' }, operation, request)
+      ).resolves.toBeUndefined();
       expect(() => assertWorkflowOperation(document, operation, undefined)).not.toThrow();
     }
   );

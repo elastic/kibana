@@ -422,7 +422,7 @@ export const WorkflowDetailHeader = React.memo(
           tooltipContent: !canManageAccess
             ? workflow?.permissions?.manage === false
               ? i18n.translate('workflows.access.ownerOnlyTooltip', {
-                  defaultMessage: 'Only the workflow owner and administrators can manage access.',
+                  defaultMessage: 'Only the workflow owner and superusers can manage access.',
                 })
               : i18n.translate('workflows.access.updatePrivilegeTooltip', {
                   defaultMessage: 'You need the Workflows Update privilege to manage access.',

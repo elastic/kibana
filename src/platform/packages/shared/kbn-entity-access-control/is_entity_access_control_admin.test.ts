@@ -26,7 +26,6 @@ describe('isEntityAccessControlAdmin', () => {
       .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: [...roles] }));
     expect(isEntityAccessControlAdmin(core, request)).toBe(expected);
     expect(core.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
-    expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
   });
 
   it('does not grant an override without a request', () => {

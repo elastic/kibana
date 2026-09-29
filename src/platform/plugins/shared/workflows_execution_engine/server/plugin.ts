@@ -19,10 +19,8 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { logEntityAccessControl } from '@kbn/entity-access-control';
 import {
   ExecutionStatus,
-  getWorkflowPermissions,
   isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
@@ -58,7 +56,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
-import { hasWorkflowAccess } from './lib/has_workflow_access';
+import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   failExecutionMissingIdentity,
@@ -880,7 +878,12 @@ export class WorkflowsExecutionEnginePlugin
                     state: taskInstance.state,
                   };
                 }
-                if (!(await hasWorkflowAccess(workflow, fakeRequest, coreStart))) {
+                if (
+                  !(await hasWorkflowAccess(workflow, fakeRequest, coreStart, {
+                    id: workflowId,
+                    spaceId,
+                  }))
+                ) {
                   logger.warn(
                     `Skipping scheduled workflow ${workflow.id}: execution access was removed.`
                   );
@@ -1275,7 +1278,10 @@ export class WorkflowsExecutionEnginePlugin
         includeGlobal: true,
         includeDeleted: true,
       });
-      if (current && !(await hasWorkflowAccess(current, request, coreStart))) {
+      if (
+        current &&
+        !(await hasWorkflowAccess(current, request, coreStart, { id: workflow.id, spaceId }))
+      ) {
         throw new Error('You do not have permission to execute this workflow.');
       }
     };
@@ -1582,14 +1588,15 @@ export class WorkflowsExecutionEnginePlugin
           if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
-            if (state && !getWorkflowPermissions(state, profileId).execute) {
-              logEntityAccessControl(coreStart, request, {
-                entityType: 'workflow',
-                entityId: item.workflow.id,
+            if (
+              state &&
+              !checkWorkflowAccess(state, profileId, {
+                core: coreStart,
+                request,
+                id: item.workflow.id,
                 spaceId,
-                action: 'denied',
-                operation: 'execute',
-              });
+              })
+            ) {
               throw new Error('You do not have permission to execute this workflow.');
             }
             if (!state?.enabled) {

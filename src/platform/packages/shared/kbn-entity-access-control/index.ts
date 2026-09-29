@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
+import type { AccessControl, AccessControlEntry, AccessControlInput } from './types';
 
 export { isEntityAccessControlAdmin } from './is_entity_access_control_admin';
 export { logEntityAccessControl } from './audit';
@@ -18,28 +19,13 @@ export class InvalidAccessControlError extends Error {}
 export const ACCESS_CONTROL_MAX_ENTRIES = 100;
 export const ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH = 1024;
 
-export type AccessControlMode = 'private' | 'public';
-
-export interface AccessControlEntryInput<Role extends string = string> {
-  type: 'user';
-  id: string;
-  role: Role;
-}
-
-export interface AccessControlEntry<Role extends string = string>
-  extends AccessControlEntryInput<Role> {
-  added_at: string;
-}
-
-export interface AccessControl<Role extends string = string> {
-  access_mode: AccessControlMode;
-  entries: Array<AccessControlEntry<Role>>;
-}
-
-export interface AccessControlInput<Role extends string = string> {
-  access_mode: AccessControlMode;
-  entries?: Array<AccessControlEntryInput<Role>>;
-}
+export type {
+  AccessControlMode,
+  AccessControlEntryInput,
+  AccessControlEntry,
+  AccessControl,
+  AccessControlInput,
+} from './types';
 
 /** Creates a bounded ACL input schema with the consumer's supported roles. */
 export const createAccessControlSchema = <Role extends string>(roles: readonly [Role, ...Role[]]) =>
@@ -90,8 +76,10 @@ export const prepareAccessControl = <Role extends string>({
   return { access_mode, entries: result };
 };
 
-/** Checks entity access after the consumer has checked its space and feature privileges. */
-export const hasEntityAccess = <Role extends string>({
+export type EntityAccessDecision = 'allowed' | 'admin_override' | 'denied';
+
+/** Resolves entity access after the consumer has checked its space and feature privileges. */
+export const resolveEntityAccess = <Role extends string>({
   accessControl,
   ownerId,
   profileId,
@@ -105,20 +93,28 @@ export const hasEntityAccess = <Role extends string>({
   roles: readonly Role[];
   allowPublic?: boolean;
   isAdmin?: boolean;
-}): boolean => {
-  if (isAdmin || (profileId && ownerId === profileId)) {
-    return true;
+}): EntityAccessDecision => {
+  if (profileId && ownerId === profileId) {
+    return 'allowed';
   }
   if (allowPublic && accessControl.access_mode === 'public') {
-    return true;
+    return 'allowed';
   }
-  return Boolean(
+  if (
     profileId &&
-      accessControl.entries.some(
-        ({ type, id, role }) => type === 'user' && id === profileId && roles.includes(role)
-      )
-  );
+    accessControl.entries.some(
+      ({ type, id, role }) => type === 'user' && id === profileId && roles.includes(role)
+    )
+  ) {
+    return 'allowed';
+  }
+  return isAdmin ? 'admin_override' : 'denied';
 };
+
+/** Checks entity access after the consumer has checked its space and feature privileges. */
+export const hasEntityAccess = <Role extends string>(
+  params: Parameters<typeof resolveEntityAccess<Role>>[0]
+): boolean => resolveEntityAccess(params) !== 'denied';
 
 /** Builds a read filter for nested ACL entries where every supported role permits reading. */
 export const buildEntityReadAccessQuery = ({
