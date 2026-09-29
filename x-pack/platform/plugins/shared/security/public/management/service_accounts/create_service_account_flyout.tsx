@@ -173,8 +173,8 @@ export const CreateServiceAccountFlyout = ({
         })}
       >
         <div css={css({ paddingInline: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` })}>
-          <EuiTitle size="xs">
-            <h2 id={titleId} css={css({ fontSize: 18, lineHeight: '22px' })}>
+          <EuiTitle size="xs" css={css({ fontSize: 18, lineHeight: '22px' })}>
+            <h2 id={titleId}>
               <FormattedMessage
                 id="xpack.security.management.serviceAccounts.create.flyoutTitle"
                 defaultMessage="Create account"
