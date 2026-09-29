@@ -13,7 +13,6 @@ import type {
   RuleOwnership,
   RuleResponse,
   RuleSource,
-  UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import { treeifyError } from '@kbn/zod/v4';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';

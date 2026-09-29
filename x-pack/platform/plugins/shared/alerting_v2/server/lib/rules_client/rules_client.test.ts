@@ -5581,8 +5581,7 @@ describe('RulesClient', () => {
             ownership: { managed: false },
           },
           schedule: { every: '1m', lookback: '1m' },
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
-          recovery_strategy: undefined,
+          query: { base: 'FROM logs-* | LIMIT 1' },
           grouping: undefined,
         });
         const existingDoc = {
@@ -5777,7 +5776,7 @@ describe('RulesClient', () => {
             ownership: { managed: false },
           },
           schedule: { every: '5m' },
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+          query: { base: 'FROM logs-* | LIMIT 1' },
         });
 
         expect(result.success).toBe(false);
@@ -6029,7 +6028,7 @@ describe('RulesClient', () => {
       },
       time_field: '@timestamp',
       schedule: { every: '1m', lookback: '1m' },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      query: { base: 'FROM logs-* | LIMIT 1' },
     });
     const managedDoc = (id: string) => ({
       id,
@@ -6168,7 +6167,7 @@ describe('RulesClient', () => {
           },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '1m' },
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+          query: { base: 'FROM logs-* | LIMIT 1' },
         });
         const client = createClient(undefined, undefined);
         rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -6467,7 +6466,7 @@ describe('RulesClient', () => {
       },
       time_field: '@timestamp',
       schedule: { every: '1m', lookback: '1m' },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      query: { base: 'FROM logs-* | LIMIT 1' },
     });
 
     // Stored attrs for an ordinary (unmanaged) rule.
@@ -6476,7 +6475,7 @@ describe('RulesClient', () => {
       enabled: false,
       time_field: '@timestamp',
       schedule: { every: '1m', lookback: '1m' },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      query: { base: 'FROM logs-* | LIMIT 1' },
     });
 
     const managedDoc = (id: string) => ({

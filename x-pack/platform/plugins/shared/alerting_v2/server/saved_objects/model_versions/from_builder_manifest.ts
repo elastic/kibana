@@ -66,10 +66,9 @@ export function assertBuilderFieldsIsOpenRecord(): void {
     metadata: { name: '__open_record_check__', builder_fields: { __future_field__: true } },
     time_field: '@timestamp',
     schedule: { every: '1m' },
-    query: {
-      format: 'standalone' as const,
-      breach: { query: 'FROM logs-* | LIMIT 1' },
-    },
+    query: { base: 'FROM logs-* | LIMIT 1' },
+    recovery: { strategy: 'manual' as const },
+    no_data: { strategy: 'ignore' as const },
     enabled: false,
     createdBy: null,
     updatedBy: null,

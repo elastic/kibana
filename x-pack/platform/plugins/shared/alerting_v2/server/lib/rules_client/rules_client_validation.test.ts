@@ -98,10 +98,7 @@ function makeExecutionTypeDefinition(): Partial<RegisteredBuilderType> {
       }
       return [];
     },
-    generateQuery: jest.fn().mockReturnValue({
-      format: 'standalone',
-      breach: { query: 'FROM logs-* | LIMIT 1' },
-    }),
+    generateQuery: jest.fn().mockReturnValue({ base: 'FROM logs-* | LIMIT 1' }),
   };
 }
 
@@ -143,10 +140,10 @@ function makeStoredRuleAttrs(
   } as Partial<RuleSavedObjectAttributes>);
   // Execution-time rules persist no query.
   (attrs as unknown as { query: undefined }).query = undefined;
-  // Signal rules cannot have recovery_strategy or no_data_strategy set to
-  // non-none values; clear the defaults that createRuleSoAttributes sets.
-  (attrs as unknown as { recovery_strategy: undefined }).recovery_strategy = undefined;
-  (attrs as unknown as { no_data_strategy: undefined }).no_data_strategy = undefined;
+  // Signal rules have no episodes, so they carry neither lifecycle object;
+  // clear the defaults that createRuleSoAttributes sets.
+  (attrs as unknown as { recovery: undefined }).recovery = undefined;
+  (attrs as unknown as { no_data: undefined }).no_data = undefined;
   return attrs;
 }
 
@@ -229,7 +226,6 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
           maxGroupsPerExecution: 10000,
         },
       },
-      esql: { responseFormat: 'json' },
     };
     const pluginConfigAccessor =
       coreMock.createPluginInitializerContext<PluginConfig>(config).config;
@@ -761,6 +757,8 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
           data: {
             ...baseCreateData,
             kind: 'alert',
+            recovery: { strategy: 'manual' },
+            no_data: { strategy: 'ignore' },
           },
         })
       ).rejects.toMatchObject({
