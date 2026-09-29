@@ -45,17 +45,29 @@ describe('response action error helpers', () => {
     );
   });
 
-  it('endpointNotFoundData returns a consistent not-found shape', () => {
-    expect(endpointNotFoundData('lost-host')).toEqual(
-      expect.objectContaining({
-        kind: 'response_action_result',
-        hostName: 'lost-host',
-        found: false,
-        reason: 'endpoint_not_found',
-        isolated: false,
-        lastSeen: null,
-      })
-    );
+  it('endpointNotFoundData reports a hostname miss without fabricating host state', () => {
+    const data = endpointNotFoundData({ hostName: 'lost-host' });
+    expect(data).toEqual({
+      kind: 'response_action_result',
+      hostName: 'lost-host',
+      found: false,
+      reason: 'endpoint_not_found',
+      message: "No endpoint found with hostname 'lost-host'.",
+    });
+    // No host was observed, so no status/isolation/last-seen may be reported.
+    expect(data).not.toHaveProperty('isolated');
+    expect(data).not.toHaveProperty('status');
+    expect(data).not.toHaveProperty('lastSeen');
+  });
+
+  it('endpointNotFoundData labels an ID-only miss as an agent ID, not a hostname', () => {
+    expect(endpointNotFoundData({ agentId: 'agent-404' })).toEqual({
+      kind: 'response_action_result',
+      agentId: 'agent-404',
+      found: false,
+      reason: 'endpoint_not_found',
+      message: "No endpoint found with agent ID 'agent-404'.",
+    });
   });
 });
 

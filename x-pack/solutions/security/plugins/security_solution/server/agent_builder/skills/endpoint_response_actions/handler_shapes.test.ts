@@ -63,9 +63,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       expect(data.found).toBe(false);
       expect(data.reason).toBe('endpoint_not_found');
       expect(data.hostName).toBe('nonexistent-host');
-      expect(data.isolated).toBe(false);
-      expect(data.lastSeen).toBeNull();
-      expect(data.status).toBe('offline');
+      // No host was observed, so no host state may be reported.
+      expect(data).not.toHaveProperty('isolated');
+      expect(data).not.toHaveProperty('lastSeen');
+      expect(data).not.toHaveProperty('status');
       expect(assertStandardReturn(result)[0].type).toBe('other');
     });
   });

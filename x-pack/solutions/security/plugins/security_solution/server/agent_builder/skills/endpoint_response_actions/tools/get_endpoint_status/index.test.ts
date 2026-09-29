@@ -110,6 +110,31 @@ describe('getEndpointStatusTool', () => {
       }
     });
 
+    it('reports an unknown agent ID as agentId, not as a hostname', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      };
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ agentId: 'agent-404' }, mockContext);
+
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('endpoint_not_found');
+        expect(data.agentId).toBe('agent-404');
+        expect(data).not.toHaveProperty('hostName');
+        expect(data).not.toHaveProperty('isolated');
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
     it('reports the Fleet agent id when looked up by Endpoint ID and the two ids differ', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({
@@ -176,9 +201,10 @@ describe('getEndpointStatusTool', () => {
         expect(data.found).toBe(false);
         expect(data.reason).toBe('endpoint_not_found');
         expect(data.hostName).toBe('nonexistent-host');
-        expect(data.isolated).toBe(false);
-        expect(data.lastSeen).toBeNull();
-        expect(data.status).toBe('offline');
+        // No host was observed, so no host state may be reported.
+        expect(data).not.toHaveProperty('isolated');
+        expect(data).not.toHaveProperty('lastSeen');
+        expect(data).not.toHaveProperty('status');
         expect(mockLogger.error).not.toHaveBeenCalled();
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;

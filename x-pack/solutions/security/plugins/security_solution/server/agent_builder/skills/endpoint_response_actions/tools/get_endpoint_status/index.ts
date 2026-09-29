@@ -129,7 +129,7 @@ export const getEndpointStatusTool = (
                 {
                   tool_result_id: getToolResultId(),
                   type: ToolResultType.other,
-                  data: endpointNotFoundData(hostName),
+                  data: endpointNotFoundData({ hostName }),
                 },
               ],
             };
@@ -219,9 +219,9 @@ export const getEndpointStatusTool = (
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
-                // For an ID-only lookup the agent id is the identifier that
-                // failed to resolve, so that is what the payload echoes.
-                data: endpointNotFoundData(hostName ?? agentId),
+                // An ID-only lookup reports the agent ID that failed to
+                // resolve, not a hostname it never had.
+                data: endpointNotFoundData(hostName ? { hostName } : { agentId }),
               },
             ],
           };

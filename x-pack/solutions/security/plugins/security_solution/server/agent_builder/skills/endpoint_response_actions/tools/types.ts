@@ -9,7 +9,6 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
-import { HostStatus } from '../../../../../common/endpoint/types';
 import type { HostInfo } from '../../../../../common/endpoint/types';
 
 export type { HostInfo };
@@ -174,30 +173,41 @@ export interface EndpointNotFoundResult {
    * `ToolResultType.other`.
    */
   kind: 'response_action_result';
-  hostName: string;
+  /** Set when the lookup was by hostname. */
+  hostName?: string;
+  /** Set when the lookup was by agent ID only. */
+  agentId?: string;
   found: false;
   reason: 'endpoint_not_found';
-  status: string;
-  isolated: false;
-  lastSeen: null;
   /** Human-readable explanation for the agent's response text. */
   message: string;
 }
 
 /**
  * Builds a consistent "endpoint not found" data object for tools that return
- * `ToolResultType.other`.
+ * `ToolResultType.other`. Carries no status, isolation, or last-seen fields:
+ * no host was observed, so reporting e.g. `isolated: false` would let a chat
+ * answer claim a host is not isolated when nothing was found at all.
  */
-export function endpointNotFoundData(hostName: string): EndpointNotFoundResult {
-  return {
+export function endpointNotFoundData(
+  lookup: { hostName: string } | { agentId: string }
+): EndpointNotFoundResult {
+  const base = {
     kind: 'response_action_result' as const,
-    hostName,
-    found: false,
+    found: false as const,
     reason: 'endpoint_not_found' as const,
-    status: HostStatus.OFFLINE,
-    isolated: false,
-    lastSeen: null,
-    message: `No endpoint found with hostname '${hostName}'.`,
+  };
+  if ('hostName' in lookup) {
+    return {
+      ...base,
+      hostName: lookup.hostName,
+      message: `No endpoint found with hostname '${lookup.hostName}'.`,
+    };
+  }
+  return {
+    ...base,
+    agentId: lookup.agentId,
+    message: `No endpoint found with agent ID '${lookup.agentId}'.`,
   };
 }
 
