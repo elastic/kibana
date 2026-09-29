@@ -1,5 +1,5 @@
 {
-  "sha1": "800df1b3ddeac38b0d4fa8c4328a66df7fc7a18c",
+  "sha1": "bf73d004f0e82503727653f7cef76e3742a0e18c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -210,6 +210,54 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
         "line": 40,
         "column": 15
+      }
+    },
+    {
+      "id": "cae0fa4f91bcd16-9e427e0b61a751f",
+      "title": "Pod Metric Detail - schema selector flag off ignores a leftover OpenTelemetry URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv_flag_off.spec.ts",
+        "line": 29,
+        "column": 30
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-9ff361d381da54d",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats opens kubeletstats charts from an OpenTelemetry tile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 49,
+        "column": 57
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-a5d3326a44a1949",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats keeps an Elastic Common Schema tile off the kubeletstats request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 76,
+        "column": 13
       }
     },
     {

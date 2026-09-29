@@ -20,6 +20,7 @@
   "maps-telemetry",
   "ml-telemetry",
   "osquery-usage-metric",
+  "search_playground",
   "server",
   "siem-detection-engine-rule-execution-info",
   "siem-detection-engine-rule-status",
