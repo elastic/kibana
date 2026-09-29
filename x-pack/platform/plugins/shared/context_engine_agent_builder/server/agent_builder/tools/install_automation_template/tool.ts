@@ -288,7 +288,6 @@ export const createInstallAutomationTemplateTool = ({
     interchangeable to a retriever unless their descriptions carry numbers that separate them.
     If this template is already an automation on the AI index, the call replaces that workflow's
     definition and keeps the same workflow id. It does not add a second automation.
-    To run it afterwards, call platform.context_engine.run_automation with the returned workflowId.
   `,
   schema: installAutomationTemplateSchema,
   handler: async (params, { request, spaceId, attachments, logger }) => {

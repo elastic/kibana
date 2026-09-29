@@ -489,7 +489,6 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.workflow_execute_step`,
       'platform.context_engine.install_automation_template',
       'platform.context_engine.save_automation',
-      'platform.context_engine.run_automation',
     ]);
   });
 
@@ -988,17 +987,7 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
-      expect(content).toMatch(
-        /do not\s+execute a saved\s+workflow unless the context in this conversation calls for it/
-      );
-    });
-
-    it('has run_automation report a failed start as the final answer, not a retryable task', () => {
-      expect(content).toMatch(
-        /run_automation` reports that the run did not start, that is the answer/
-      );
-      expect(content).toMatch(/that is the answer, not a task/);
-      expect(content).toMatch(/a second attempt doubles it/);
+      expect(content).toContain('Running — running an installed automation is handled by a separate tool');
     });
 
     it('gives save and run each their own confirmation dialog', () => {

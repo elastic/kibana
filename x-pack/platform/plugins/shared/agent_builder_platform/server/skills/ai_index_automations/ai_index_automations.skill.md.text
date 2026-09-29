@@ -674,7 +674,7 @@ handful of documents that get deleted afterwards. Running the saved automation i
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
 Saving an automation and running it are two separate operations, each with its own confirmation
-dialog. That is `save_automation` and `run_automation`. The install tool is neither: it does not
+dialog. That is `save_automation`. The install tool is neither: it does not
 confirm and it does not start a run.
 
 **Index metadata, bottom-up document and unit profile** — call
@@ -685,33 +685,12 @@ write the YAML and do not call
 the AI index, the tool replaces that workflow's definition and keeps the same workflow id. The
 result says `replaced: true` when it did. It does not add a second automation and it does not start
 a run. Do not look for `run.started`. The document summary workflow is
-`system-context-engine-document-summary`. It is not attached to the AI index. Run the workflow id
-the tool returns by calling `platform.context_engine.run_automation`.
+`system-context-engine-document-summary`. It is not attached to the AI index.
 
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save
 with the user before writing anything. It returns `workflowId`. Save the YAML the subagent returned.
 
-**Running** — call `platform.context_engine.run_automation` with that `workflowId`. For a bottom-up
-document automation, pass the orchestration id the install tool returned. Do not run
-`system-context-engine-document-summary`: it expects one document's inputs and has no corpus of its
-own. The tool asks the user before starting: it is
-never called silently. It fires the execution asynchronously and
-returns immediately with `executionId` and `workflowUrl` — the run continues after the call returns.
-Tell the user it has started and that they can ask for a progress update at any time.
-
-**Checking progress** — call `platform.core.get_workflow_execution_status` with the `executionId`
-from `run_automation`. The `workflowUrl` in the result is a direct link to that execution in the
-Workflows app.
-
-When `run_automation` reports that the run did not start, that is the answer, not a task. It ran
-with exactly the privileges you have, so starting the same workflow yourself fails the same way; and
-where the failure came after the run began, a second attempt doubles it. Report what it said and stop.
-
-What remains unauthorized is starting a run of your own accord on a workflow already saved: do not
-execute a saved workflow unless the context in this conversation calls for it.
-`platform.core.execute_workflow` starts one directly and `platform.core.get_workflow_execution_status`
-reports on it, but prefer `platform.context_engine.run_automation` for automations attached to AI
-indices — it handles enabling a disabled workflow and returns the status check hint.
+**Running** — running an installed automation is handled by a separate tool (`platform.context_engine.run_automation`) that is not part of this skill. To run an automation, use `platform.core.execute_workflow` with the `workflowId` returned by the install or save tool, or open the workflow directly in the Workflows app via its URL.
 
 ## Corpora larger than 10,000 documents
 

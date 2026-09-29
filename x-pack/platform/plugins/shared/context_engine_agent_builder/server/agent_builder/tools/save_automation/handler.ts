@@ -7,11 +7,11 @@
 
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
+  executeWorkflow,
   hasWorkflowCreatePrivilege,
   hasWorkflowExecutePrivilege,
   hasWorkflowReadPrivilege,
   hasWorkflowUpdatePrivilege,
-  startWorkflow,
 } from '@kbn/agent-builder-tools-base/workflows';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { CoreStart, Logger } from '@kbn/core/server';
@@ -31,9 +31,10 @@ export interface SaveAutomationParams {
   workflowYaml?: string;
   workflowId?: string;
   aiIndexId?: string;
+  run?: boolean;
 }
 
-export interface RunAutomationResult {
+export interface SaveAutomationRunResult {
   started: boolean;
   /** Execution id to poll for status, present when the run started. */
   executionId?: string;
@@ -47,6 +48,8 @@ export interface SaveAutomationResult {
   aiIndexId: string;
   workflowId: string;
   status: 'saved_and_attached' | 'attached' | 'already_attached';
+  /** Present when the caller asked to run the automation after saving it. */
+  run?: SaveAutomationRunResult;
 }
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -187,13 +190,15 @@ export const tryResolveSavedWorkflowById = async ({
   workflowsManagement,
   workflowId,
   spaceId,
+  request,
 }: {
   workflowsManagement: WorkflowsManagementApi;
   workflowId: string;
   spaceId: string;
+  request: KibanaRequest;
 }): Promise<SavedWorkflowSummary | undefined> => {
   try {
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
     return workflow ? { name: workflow.name, enabled: workflow.enabled } : undefined;
   } catch {
     return undefined;
@@ -289,7 +294,7 @@ const assertWorkflowReadAccess = async ({
     );
   }
 
-  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
   if (!workflow) {
     throw new Error(`Workflow '${workflowId}' was not found in this space.`);
   }
@@ -492,7 +497,7 @@ const persistWorkflow = async ({
     // exists. If it does not, `updateWorkflow` would fail with a message about the id rather than
     // about the choice, and the caller has a create available that it may not think to fall back
     // to. A workflow can also have been deleted since the attachment recorded it.
-    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId);
+    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId, request);
     if (!target) {
       throw new Error(
         `Workflow '${existingWorkflowId}' was not found in this space, so there is nothing to ` +
@@ -514,7 +519,7 @@ const persistWorkflow = async ({
  * Starts a saved automation, enabling its definition first when it is disabled. Never throws: the
  * workflow is already saved and attached by this point, and a failed run must not undo that.
  */
-export const runSavedAutomation = async ({
+const runSavedAutomation = async ({
   workflowId,
   spaceId,
   request,
@@ -528,7 +533,7 @@ export const runSavedAutomation = async ({
   workflowsManagement: WorkflowsManagementApi;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   logger: Logger;
-}): Promise<RunAutomationResult> => {
+}): Promise<SaveAutomationRunResult> => {
   try {
     const security = await getSecurityStart();
     const canExecute = await hasWorkflowExecutePrivilege({ security, request, spaceId });
@@ -541,7 +546,7 @@ export const runSavedAutomation = async ({
 
     // A disabled definition cannot be run by id. Asking to save and run is consent to enable it,
     // and `enabled` on its own is the one update a managed workflow accepts.
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
     const enabledForRun = workflow?.enabled !== true;
     if (enabledForRun) {
       // Enabling is a write to the saved workflow, and holding execute says nothing about holding
@@ -576,28 +581,15 @@ export const runSavedAutomation = async ({
       }
     }
 
-    // Re-read after enabling so the model carries the stored `enabled`, rather than the `false`
-    // the copy above was fetched with.
-    const runnable = enabledForRun
-      ? await workflowsManagement.getWorkflow(workflowId, spaceId)
-      : workflow;
-    if (!runnable) {
-      return {
-        started: false,
-        reason: `Workflow '${workflowId}' was not found in this space, so it was not run.`,
-        ...(enabledForRun && { enabledForRun }),
-      };
-    }
-
-    // A full-corpus run costs a model call per document, so the turn returns the execution id to
-    // poll. `startWorkflow` rather than `executeWorkflow` because the latter waits for the
-    // execution document even when told not to wait for completion, and nothing here reads it.
-    const result = await startWorkflow({
-      workflow: runnable,
+    const result = await executeWorkflow({
+      workflowId,
       workflowParams: {},
       request,
       spaceId,
       workflowApi: workflowsManagement,
+      // A full-corpus run costs a model call per document, so return the execution id to poll
+      // rather than holding the turn open until it finishes.
+      waitForCompletion: false,
     });
 
     if (!result.success) {
@@ -606,7 +598,7 @@ export const runSavedAutomation = async ({
 
     return {
       started: true,
-      executionId: result.executionId,
+      executionId: result.execution.execution_id,
       ...(enabledForRun && { enabledForRun }),
     };
   } catch (error) {
@@ -671,11 +663,24 @@ export const saveAutomationHandler = async ({
       value: params.workflowId,
     });
 
-    return {
+    const attachResult: SaveAutomationResult = {
       aiIndexId,
       workflowId: params.workflowId,
       status: attachStatus,
     };
+
+    if (params.run) {
+      attachResult.run = await runSavedAutomation({
+        workflowId: params.workflowId,
+        spaceId,
+        request,
+        workflowsManagement,
+        getSecurityStart,
+        logger,
+      });
+    }
+
+    return attachResult;
   }
 
   const source = resolveWorkflowSource(params, attachments);
@@ -724,6 +729,19 @@ export const saveAutomationHandler = async ({
     }
 
     throw error;
+  }
+
+  // Outside the rollback scope above: the workflow is saved and attached, and a run that fails
+  // must leave it that way.
+  if (params.run) {
+    result.run = await runSavedAutomation({
+      workflowId,
+      spaceId,
+      request,
+      workflowsManagement,
+      getSecurityStart,
+      logger,
+    });
   }
 
   return result;
