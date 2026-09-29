@@ -289,9 +289,7 @@ describe('ESSearchSource', () => {
             warnings: [],
           },
         });
-        jest
-          .spyOn(esSearchSource, 'getIndexPattern')
-          .mockResolvedValue(mockIndexPattern as any);
+        jest.spyOn(esSearchSource, 'getIndexPattern').mockResolvedValue(mockIndexPattern as any);
         // @ts-expect-error
         jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
           name: GEO_FIELD_NAME,
@@ -328,9 +326,7 @@ describe('ESSearchSource', () => {
           hits: makeHits(5),
           meta: topHitsMeta,
         });
-        jest
-          .spyOn(esSearchSource, 'getIndexPattern')
-          .mockResolvedValue(mockIndexPattern as any);
+        jest.spyOn(esSearchSource, 'getIndexPattern').mockResolvedValue(mockIndexPattern as any);
         // @ts-expect-error
         jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
           name: GEO_FIELD_NAME,
