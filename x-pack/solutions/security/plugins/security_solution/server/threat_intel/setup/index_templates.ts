@@ -865,7 +865,6 @@ const migrateExistingIndicatorSourcesMapping = async (
         },
       });
       log.info(`Migrated sources[] mapping on ${THREAT_INTEL_INDICATORS_INDEX} (v19 backfill)`);
-      return;
     }
   } catch (err) {
     log.error(
