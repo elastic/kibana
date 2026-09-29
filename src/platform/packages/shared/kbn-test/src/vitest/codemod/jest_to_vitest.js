@@ -221,7 +221,8 @@ const addDefaultToMockFactories = (sourceFile) => {
       .getProperties()
       .some(
         (property) =>
-          (Node.isPropertyAssignment(property) || Node.isShorthandPropertyAssignment(property) ||
+          (Node.isPropertyAssignment(property) ||
+            Node.isShorthandPropertyAssignment(property) ||
             Node.isMethodDeclaration(property)) &&
           ['default', '__esModule'].includes(property.getName().replace(/['"]/g, ''))
       );

@@ -90,7 +90,10 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
       configFiles.map(async (configPath) => {
         // Vitest configs carry exact include/exclude globs, so they need no heuristic or recheck.
         if (isVitestConfig(configPath)) {
-          return { config: configPath, testFiles: getVitestConfigTestFiles(configPath, allTestFiles) };
+          return {
+            config: configPath,
+            testFiles: getVitestConfigTestFiles(configPath, allTestFiles),
+          };
         }
 
         const rules = parseJestConfig(configPath);

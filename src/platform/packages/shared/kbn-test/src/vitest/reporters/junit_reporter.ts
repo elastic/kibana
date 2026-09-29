@@ -47,7 +47,12 @@ export class KbnJunitReporter implements Reporter {
     }));
     const allCases = suites.flatMap(({ cases }) => cases);
 
-    const root = xmlBuilder.create('testsuites', { encoding: 'utf-8' }, {}, { keepNullAttributes: false });
+    const root = xmlBuilder.create(
+      'testsuites',
+      { encoding: 'utf-8' },
+      {},
+      { keepNullAttributes: false }
+    );
     root.att({
       name: 'vitest',
       timestamp: msToIso(this.startTime),

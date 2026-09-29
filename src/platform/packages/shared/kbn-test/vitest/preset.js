@@ -63,7 +63,10 @@ const createKbnVitestConfig = ({
     // Sources are compiled by the kbn SWC plugin; skip Vite's own TS/JSX transform.
     oxc: false,
     resolve: {
-      alias: aliases.map(({ find, replacement }) => ({ find, replacement: toAbsolute(replacement) })),
+      alias: aliases.map(({ find, replacement }) => ({
+        find,
+        replacement: toAbsolute(replacement),
+      })),
     },
     test: {
       include: (include ?? relativeRoots.map((root) => `${root}/**/*.test.${TEST_EXTENSIONS}`)).map(

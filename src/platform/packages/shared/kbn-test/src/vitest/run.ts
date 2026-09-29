@@ -40,7 +40,9 @@ const discoverConfig = (paths: string[], cwd: string, log: ToolingLog): string =
     (paths.length ? paths : [cwd]).map((path) => {
       const config = findNearestConfig(path);
       if (!config) {
-        throw createFailError(`Unable to find a ${VITEST_CONFIG_NAME} for ${relative(REPO_ROOT, path)}`);
+        throw createFailError(
+          `Unable to find a ${VITEST_CONFIG_NAME} for ${relative(REPO_ROOT, path)}`
+        );
       }
       return config;
     })
