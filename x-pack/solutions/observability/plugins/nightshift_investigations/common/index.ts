@@ -265,6 +265,20 @@ export {
 } from './decision_trees';
 
 export {
+  MEMORY_INDEX,
+  MEMORY_ARCHIVE_REASONS,
+  MEMORY_FILTERS,
+  type MemoryArchiveReason,
+  type MemoryFilter,
+  type MemoryPage,
+  type MemoryPageSummary,
+  type MemoryStats,
+  type ListMemoryPagesResponse,
+  type GetMemoryPageResponse,
+  type StoredMemoryPage,
+} from './memory';
+
+export {
   INVESTIGATION_STARTED_TRIGGER_ID,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,

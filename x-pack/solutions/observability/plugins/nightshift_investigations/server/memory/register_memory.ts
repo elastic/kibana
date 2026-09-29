@@ -223,6 +223,8 @@ export const runMemoryOptimize = async ({
     assistantMessage,
     toolCalls,
     investigation,
+    agentId,
+    conversationId,
     logger,
     signal,
   });

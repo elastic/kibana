@@ -111,15 +111,26 @@ describe('createMemoryPageStore', () => {
     );
   });
 
-  it('returns archived pages from get but can filter them from list', async () => {
+  it('reads archived pages but filters them out of an active listing', async () => {
     const archived = {
       ...source,
-      attributes: { ...source.attributes, status: 'archived' as const },
+      attributes: { ...source.attributes, archive_reason: 'harmful' as const },
     };
+    // The store delegates filtering to Elasticsearch, so the mock answers per
+    // query. `active` nests the archive_reason check under a `must_not`; that is
+    // the difference between excluding archived pages and selecting them.
+    const search = jest.fn(({ query }: { query: { bool: Record<string, unknown> } }) => {
+      const bool = query.bool ?? {};
+      // `active` is the only filter that *excludes* archived pages, and it does
+      // so by negating an `exists` check. `all` omits the check entirely and
+      // `archived` asserts it, so both still return the page.
+      const clause = JSON.stringify(bool);
+      const excludesArchived = /must_not[^\]]*archive_reason/.test(clause);
+      const hit = { _id: 'space-a:memory_kafka-lag', _source: archived };
+      return Promise.resolve({ hits: { hits: excludesArchived ? [] : [hit] } });
+    });
     const esClient = {
-      search: jest.fn().mockResolvedValue({
-        hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: archived }] },
-      }),
+      search,
       get: jest.fn().mockResolvedValue({
         found: true,
         _id: 'space-a:memory_kafka-lag',
@@ -134,12 +145,132 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    const listed = await store.list({ status: 'established' });
-    expect(listed.pages).toHaveLength(0);
+    await expect(store.list({ filter: 'active' })).resolves.toMatchObject({ pages: [] });
+
+    // `all` has no archive_reason clause, so the archived page comes back.
+    const all = await store.list({ filter: 'all' });
+    expect(all.pages).toHaveLength(1);
+    expect(all.pages[0]).toMatchObject({ archived: true, archive_reason: 'harmful' });
+
+    // `archived` filters on the reason being present.
+    const archivedOnly = await store.list({ filter: 'archived' });
+    expect(archivedOnly.pages).toHaveLength(1);
 
     const got = await store.get('memory_kafka-lag');
-    expect(got?.status).toBe('archived');
+    expect(got?.archived).toBe(true);
     expect(got?.telemetry.impressions).toBe(10);
+  });
+
+  it('sends an exists check rather than a term match for the archived filter', async () => {
+    const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.list({ filter: 'active' });
+    const activeClause = JSON.stringify(search.mock.calls[0][0]);
+    expect(activeClause).toContain('exists');
+    expect(activeClause).toContain('attributes.archive_reason');
+    // The removed `status` field must never be queried again.
+    expect(activeClause).not.toContain('attributes.status');
+  });
+
+  it('paginates on a total order so no row is skipped or repeated', async () => {
+    // Every row shares an `updated_at`, so the slug tiebreaker is what keeps the
+    // order total. Sorting on `_id` instead is not an option: Elasticsearch
+    // rejects it (`indices.id_field_data.enabled`).
+    const sort = { '@timestamp': '2026-01-01T00:00:00.000Z' };
+    const page = (ids: string[]) => ({
+      hits: {
+        total: { value: 3, relation: 'eq' },
+        hits: ids.map((id) => {
+          // The sort values mirror what Elasticsearch returns for the sort
+          // clause: `updated_at`, then the slug tiebreaker (not `_id`).
+          const slug = id.replace('memory_', '');
+          return {
+            _id: `space-a:${id}`,
+            _source: {
+              ...source,
+              '@timestamp': sort['@timestamp'],
+              attributes: { ...source.attributes, slug },
+            },
+            sort: [sort['@timestamp'], slug],
+          };
+        }),
+      },
+    });
+    // `listPaginated` issues a page query and a separate stats aggregation, so
+    // the mock answers by shape rather than by call order: a query carrying
+    // `size: 0` is the aggregation and returns no hits.
+    interface PageRequest {
+      size?: number;
+      search_after?: unknown[];
+    }
+    const search = jest.fn((request: PageRequest) => {
+      if (request.size === 0) {
+        return Promise.resolve({
+          hits: { total: { value: 3, relation: 'eq' }, hits: [] },
+          aggregations: {
+            archived: { doc_count: 1 },
+            impressions: { value: 30 },
+            conversions: { value: 12 },
+          },
+        });
+      }
+      if (!request.search_after) {
+        return Promise.resolve(page(['memory_a', 'memory_b']));
+      }
+      return Promise.resolve(page(['memory_c']));
+    });
+
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    const first = await store.listPaginated({ size: 2 });
+    expect(first.pages.map((row) => row.id)).toEqual(['memory_a', 'memory_b']);
+    expect(first.total).toBe(3);
+    // A full page may have more behind it, so a cursor is offered.
+    expect(first.cursor).toBeDefined();
+
+    const second = await store.listPaginated({ size: 2, cursor: first.cursor });
+    expect(second.pages.map((row) => row.id)).toEqual(['memory_c']);
+    // A short page means the result set is exhausted.
+    expect(second.cursor).toBeUndefined();
+
+    // The second request must resume from the *first page's last row*, which is
+    // what `search_after` means — not an offset, and not the second page's own
+    // values. The tiebreaker is the slug, never `_id`.
+    const secondQuery = (search.mock.calls as [PageRequest][]).find((call) => call[0].search_after);
+    expect(secondQuery?.[0].search_after).toEqual([sort['@timestamp'], 'b']);
+    // Together the two pages cover every id exactly once.
+    expect([...first.pages, ...second.pages].map((row) => row.id)).toEqual([
+      'memory_a',
+      'memory_b',
+      'memory_c',
+    ]);
+  });
+
+  it('ignores a malformed cursor rather than failing the listing', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    const result = await store.listPaginated({ cursor: 'not-a-cursor' });
+    expect(result.pages).toEqual([]);
+    expect(search.mock.calls[0][0].search_after).toBeUndefined();
   });
 
   it('decays display telemetry without rewriting stored last_impression_time', () => {
@@ -149,7 +280,7 @@ describe('createMemoryPageStore', () => {
       title: 'Kafka lag',
       content: 'Scale the consumer.',
       tags: ['memory'],
-      status: 'established' as const,
+      archived: false as const,
       categories: [],
       references: [],
       created_at: T0_ISO,
@@ -191,7 +322,7 @@ describe('createMemoryPageStore', () => {
       tags: ['memory', 'kafka'],
       categories: [],
       references: [],
-      status: 'tentative',
+
       user: 'sre',
     });
 
@@ -228,7 +359,7 @@ describe('createMemoryPageStore', () => {
       title: 'Kafka lag',
       content: 'Old content.',
       tags: ['memory'],
-      status: 'established' as const,
+      archived: false,
       categories: [],
       references: [],
       created_at: T0_ISO,
@@ -251,7 +382,6 @@ describe('createMemoryPageStore', () => {
         tags: ['kafka'],
         categories: [],
         references: [],
-        status: 'established',
         user: 'nightshift-optimizer',
       },
       { page: existing, seqNo: 12, primaryTerm: 3 }
@@ -290,7 +420,7 @@ describe('createMemoryPageStore', () => {
       tags: ['kafka'],
       categories: [],
       references: [],
-      status: 'tentative',
+
       user: 'nightshift-optimizer',
     });
 
@@ -491,7 +621,7 @@ describe('createMemoryPageStore', () => {
   it('noops archived and missing pages', async () => {
     const archived = {
       ...source,
-      attributes: { ...source.attributes, status: 'archived' as const },
+      attributes: { ...source.attributes, archive_reason: 'harmful' as const },
     };
     const esClient = {
       get: jest
@@ -625,7 +755,7 @@ describe('createMemoryPageStore', () => {
         sort: [{ '@timestamp': { order: 'desc' } }],
         query: expect.objectContaining({
           bool: expect.objectContaining({
-            must_not: [{ term: { 'attributes.status': 'archived' } }],
+            must_not: [{ exists: { field: 'attributes.archive_reason' } }],
           }),
         }),
       }),
@@ -761,7 +891,7 @@ describe('createMemoryPageStore', () => {
       tags: ['kafka'],
       categories: [],
       references: [],
-      status: 'tentative',
+
       user: 'sre',
     });
 
@@ -813,7 +943,6 @@ describe('createMemoryPageStore', () => {
         document: expect.objectContaining({
           context: 'why is checkout slow?',
           attributes: expect.objectContaining({
-            status: 'archived',
             archive_reason: 'merged',
             source: 'Merged from memories: memory_a',
             merged_from: ['memory_a'],
@@ -857,7 +986,6 @@ describe('createMemoryPageStore', () => {
         if_primary_term: 2,
         document: expect.objectContaining({
           attributes: expect.objectContaining({
-            status: 'archived',
             archive_reason: 'merged',
           }),
         }),
@@ -941,7 +1069,6 @@ describe('createMemoryPageStore', () => {
           attributes: expect.objectContaining({
             impressions: 12,
             conversions: 5,
-            status: 'archived',
           }),
         }),
       })

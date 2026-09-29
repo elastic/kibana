@@ -595,6 +595,8 @@ export const applyMemoryEdits = async ({
   extractions,
   context,
   transcript,
+  agentId,
+  conversationId,
   synthesizeMemoryGroup,
   now = () => Date.now() / 1000,
   logger,
@@ -607,6 +609,9 @@ export const applyMemoryEdits = async ({
   /** Current user task — stored on new pages as the recall key. */
   context?: string;
   transcript?: string;
+  /** Provenance stamped on new pages. Metadata only. */
+  agentId?: string;
+  conversationId?: string;
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   now?: () => number;
   logger: Logger;
@@ -687,7 +692,7 @@ export const applyMemoryEdits = async ({
 
     const named = recalledMemories.filter(
       (page) =>
-        extra.replaces.includes(page.id) && page.status !== 'archived' && !harmful.has(page.id)
+        extra.replaces.includes(page.id) && !page.archived && !harmful.has(page.id)
     );
     const harmfulReplaces = extra.replaces.filter((id) => harmful.has(id));
     if (harmfulReplaces.length > 0) {
@@ -709,7 +714,7 @@ export const applyMemoryEdits = async ({
     // joins the entry even when it is not named.
     const exactId = toMemoryKiId(extra.slug);
     const exactStored = await store.get(exactId);
-    const exactPage = exactStored && exactStored.status !== 'archived' ? exactStored : undefined;
+    const exactPage = exactStored && !exactStored.archived ? exactStored : undefined;
     const sources = exactPage ? [...named.filter((page) => page.id !== exactId), exactPage] : named;
     if (sources.some((page) => consumedIds.has(page.id))) {
       logger.debug(`Skipped extraction "${extra.slug}" — a source already belongs to an entry`);
@@ -746,6 +751,8 @@ export const applyMemoryEdits = async ({
       task,
       transcript,
       otherTopics: otherTopicsOf(group.extract),
+      agentId,
+      conversationId,
       synthesizeMemoryGroup,
       now,
       logger,
@@ -787,6 +794,8 @@ const mergeMemoryGroup = async ({
   task,
   transcript,
   otherTopics,
+  agentId,
+  conversationId,
   synthesizeMemoryGroup,
   now,
   logger,
@@ -798,6 +807,9 @@ const mergeMemoryGroup = async ({
   task: string;
   transcript?: string;
   otherTopics: string[];
+  /** Provenance stamped on the written page. Metadata only. */
+  agentId?: string;
+  conversationId?: string;
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
   now: () => number;
   logger: Logger;
@@ -816,9 +828,7 @@ const mergeMemoryGroup = async ({
     const sourceSnapshots = await Promise.all(
       requiredSourceIds.map(async (id) => store.getVersioned(id))
     );
-    const unavailableIndex = sourceSnapshots.findIndex(
-      (source) => !source || source.page.status === 'archived'
-    );
+    const unavailableIndex = sourceSnapshots.findIndex((source) => !source || source.page.archived);
     if (unavailableIndex !== -1) {
       logger.debug(
         `Memory merge aborted — required source ${requiredSourceIds[unavailableIndex]} is missing or archived`
@@ -875,11 +885,11 @@ const mergeMemoryGroup = async ({
           continue;
         }
         const occupant = await store.get(candidateId);
-        if (occupant && occupant.status !== 'archived') {
+        if (occupant && !occupant.archived) {
           continue;
         }
         archivedTarget = occupant ? await store.getVersioned(candidateId) : undefined;
-        if (occupant && archivedTarget?.page.status !== 'archived') {
+        if (occupant && !archivedTarget?.page.archived) {
           continue;
         }
         slug = candidate;
@@ -918,9 +928,8 @@ const mergeMemoryGroup = async ({
       ).filter((tag) => tag !== 'memory'),
       categories: unionStrings(currentSources.flatMap((page) => page.categories)),
       references: unionStrings(currentSources.flatMap((page) => page.references)),
-      status: currentSources.some((page) => page.status === 'established')
-        ? 'established'
-        : 'tentative',
+      agent_id: agentId,
+      conversation_id: conversationId,
       user: 'nightshift-optimizer',
       ...(currentSources.length > 0
         ? {
@@ -943,7 +952,7 @@ const mergeMemoryGroup = async ({
       requiredSourceIds.map(async (id) => store.getVersioned(id))
     );
     const unavailableAfterSynthesisIndex = validatedSources.findIndex(
-      (source) => !source || source.page.status === 'archived'
+      (source) => !source || source.page.archived
     );
     if (unavailableAfterSynthesisIndex !== -1) {
       logger.debug(
@@ -1034,6 +1043,8 @@ export const optimizeMemory = async ({
   assistantMessage,
   toolCalls,
   investigation,
+  agentId,
+  conversationId,
   logger,
   signal,
 }: {
@@ -1048,6 +1059,9 @@ export const optimizeMemory = async ({
   toolCalls: InvestigationToolCall[];
   /** The round's steps in order with tool results, when the persisted round could be read. */
   investigation?: TranscriptStep[];
+  /** Provenance stamped on pages this run writes. Metadata only. */
+  agentId?: string;
+  conversationId?: string;
   logger: Logger;
   /** Aborted on step timeout or workflow cancellation; no later LLM call or write starts. */
   signal?: AbortSignal;
@@ -1164,6 +1178,8 @@ export const optimizeMemory = async ({
     extractions,
     context: task,
     transcript: evidenceTranscript,
+    agentId,
+    conversationId,
     synthesizeMemoryGroup,
     logger,
   });

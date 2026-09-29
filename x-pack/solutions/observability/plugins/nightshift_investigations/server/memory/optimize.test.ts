@@ -35,7 +35,7 @@ const page = (id: string, title = id, content = 'body'): MemoryPage => ({
   title,
   content,
   tags: ['memory'],
-  status: 'established',
+  archived: false,
   categories: [],
   references: [],
   created_at: '2026-01-01T00:00:00.000Z',
@@ -533,7 +533,6 @@ describe('applyMemoryEdits', () => {
         title: 'Kafka consumer lag',
         context:
           'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/x` — X\n</system_update>',
-        status: 'established',
         source:
           'Merged from memories: memory_kafka-lag, memory_original-kafka-lag, memory_checkout-kafka',
         merged_from: ['memory_kafka-lag', 'memory_original-kafka-lag', 'memory_checkout-kafka'],
@@ -642,7 +641,7 @@ describe('applyMemoryEdits', () => {
       ],
       synthesizeMemoryGroup: async () => {
         current = {
-          page: { ...source, status: 'archived', archive_reason: 'harmful' },
+          page: { ...source, archived: true, archive_reason: 'harmful' },
           seqNo: 2,
           primaryTerm: 1,
         };
@@ -842,7 +841,7 @@ describe('applyMemoryEdits', () => {
       archiveVersioned.mock.invocationCallOrder[0]
     );
     expect(liveSource).toBe(newerSource);
-    expect(liveSource.status).toBe('established');
+    expect(liveSource.archived).toBe(false);
     expect(store.archive).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({
@@ -1246,10 +1245,10 @@ describe('applyMemoryEdits', () => {
     );
   });
 
-  it('writes a new memory over an archived one with the same id, resetting its counters', async () => {
+  it('writes a new memory over an archived one with the same id, resetting counters', async () => {
     const archived = {
       ...page('memory_checkout-redis', 'Checkout Redis', 'Old wrong fact.'),
-      status: 'archived' as const,
+      archived: true,
       merged_from: ['memory_older-redis'],
     };
     const store = createStore({ get: jest.fn().mockResolvedValue(archived) });
@@ -1275,7 +1274,6 @@ describe('applyMemoryEdits', () => {
       archived.id,
       expect.objectContaining({
         content: 'New fact.',
-        status: 'tentative',
         merged_from: ['memory_older-redis'],
         telemetry: expect.objectContaining({ impressions: 0, conversions: 0 }),
       }),
@@ -1288,7 +1286,7 @@ describe('applyMemoryEdits', () => {
     const source = page('memory_redis-evictions', 'Redis evictions', 'Evicts under load.');
     const archived = {
       ...page('memory_checkout-redis', 'Checkout Redis', 'Old fact.'),
-      status: 'archived' as const,
+      archived: true,
     };
     const pages = [source, archived];
     const store = createStore({
@@ -1317,7 +1315,7 @@ describe('applyMemoryEdits', () => {
     expect(store.create).not.toHaveBeenCalled();
     expect(store.update).toHaveBeenCalledWith(
       archived.id,
-      expect.objectContaining({ slug: 'checkout-redis', status: 'established' }),
+      expect.objectContaining({ slug: 'checkout-redis' }),
       expect.objectContaining({ page: archived })
     );
     expect(store.archiveVersioned).toHaveBeenCalledWith(
@@ -1678,7 +1676,7 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     const store = createStore({
       get: jest.fn(async (id: string) => (id === wrong.id ? stored : undefined)),
       archive: jest.fn(async (id: string, reason) => {
-        stored = { ...stored, status: 'archived', archive_reason: reason };
+        stored = { ...stored, archived: true, archive_reason: reason };
         return stored;
       }),
     });
@@ -1702,11 +1700,10 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     expect(store.update).toHaveBeenCalledWith(
       wrong.id,
       expect.objectContaining({
-        status: 'tentative',
         content: 'The host clock runs about 1 s behind the sandbox CA.',
         telemetry: expect.objectContaining({ impressions: 0, conversions: 0 }),
       }),
-      expect.objectContaining({ page: expect.objectContaining({ status: 'archived' }) })
+      expect.objectContaining({ page: expect.objectContaining({ archived: true }) })
     );
   });
 
@@ -2131,7 +2128,7 @@ describe('optimizeMemory', () => {
     expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({
         slug: 'checkout-redis',
-        status: 'tentative',
+
         context: 'why is checkout slow?',
       })
     );

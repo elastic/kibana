@@ -92,6 +92,11 @@ jest.mock('./components/cortex/use_cortex', () => ({
 jest.mock('./components/decision_trees/use_decision_trees', () => ({
   useDecisionTreesEnabled: () => false,
 }));
+jest.mock('./components/memory/use_memory', () => ({
+  useMemoryEnabled: () => false,
+  useMemoryPages: () => ({ rows: [], isLoading: false, isError: false }),
+  useMemoryPage: () => ({ data: undefined, isLoading: false, isError: false }),
+}));
 jest.mock('./components/knowledge_indicators_table', () => ({
   KnowledgeIndicatorsTable: () => null,
   KiGenerationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,

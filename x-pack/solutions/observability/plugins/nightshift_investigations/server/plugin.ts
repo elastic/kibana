@@ -49,6 +49,7 @@ import { decisionTreePrepareStepDefinition } from './step_definitions/decision_t
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { registerCortexTelemetryEvents } from './telemetry';
+import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createMemoryService, type MemoryService } from './memory/internal_client';
@@ -418,6 +419,24 @@ export class NightshiftInvestigationsPlugin
             return createDecisionTreeStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('decision_trees'),
+              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+            });
+          },
+          isMemoryEnabled: () => this.memoryEnabled,
+          getMemoryPageStore: (request: KibanaRequest) => {
+            if (!this.elasticsearch) {
+              throw new Error(
+                'elasticsearch is not available — plugin start() has not been called'
+              );
+            }
+            // Deliberately NOT `asScoped(request).asCurrentUser`, unlike the
+            // Cortex and decision-tree stores above. The Semantic Memory index is
+            // hidden and has no end-user index privileges by design, so a
+            // request-scoped client would 403 for every user. Tenancy still comes
+            // from the request's Space, so the store filters on it as usual.
+            return createMemoryPageStore({
+              esClient: this.elasticsearch.client.asInternalUser,
+              logger: this.logger.get('memory'),
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },

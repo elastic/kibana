@@ -25,7 +25,6 @@ const createPage = (slug: string, overrides: Partial<MemoryPageWrite> = {}): Mem
   tags: ['runbook'],
   categories: ['operations'],
   references: [],
-  status: 'established',
   user: 'nightshift-test',
   ...overrides,
 });
@@ -176,17 +175,29 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     expect(archived).toEqual(
       expect.objectContaining({
         id: pageA.id,
-        status: 'archived',
+        archived: true,
         archive_reason: 'harmful',
       })
     );
     expect((await storeA.retrieve()).map(({ id }) => id)).toEqual(['memory_cache-warmup']);
-    expect((await storeA.list({ status: 'archived' })).pages.map(({ id }) => id)).toEqual([
+    expect((await storeA.list({ filter: 'archived' })).pages.map(({ id }) => id)).toEqual([
       pageA.id,
     ]);
+    expect((await storeA.list({ filter: 'active' })).pages.map(({ id }) => id)).toEqual([
+      'memory_cache-warmup',
+    ]);
 
+    // Restoring clears the reason, which is the only archived marker.
+    const restored = await storeA.unarchive(pageA.id);
+    expect(restored).toEqual(expect.objectContaining({ id: pageA.id, archived: false }));
+    expect((await storeA.get(pageA.id))?.archive_reason).toBeUndefined();
+
+    // Counters apply again once restored: the page stood at 2 impressions before
+    // archiving, and the update adds one more.
     await storeA.applyCounterUpdates([{ id: pageA.id, addImp: 1, addConv: 1 }]);
-    expect((await storeA.get(pageA.id))?.telemetry.impressions).toBe(2);
+    expect((await storeA.get(pageA.id))?.telemetry.impressions).toBe(3);
+    // The archive/unarchive round trip preserved the rest of the document.
+    expect((await storeA.get(pageA.id))?.content).toContain('partition lag');
     expect((await storeB.get(pageB.id))?.title).toBe('Payments database recovery');
   });
 

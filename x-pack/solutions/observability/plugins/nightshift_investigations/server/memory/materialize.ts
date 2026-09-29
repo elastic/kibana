@@ -292,7 +292,7 @@ export const materializeMemory = async ({
       continue;
     }
     const existing = await store.get(id);
-    if (!existing || existing.status === 'archived') {
+    if (!existing || existing.archived) {
       continue;
     }
     carriedPaths.add(entry.path);

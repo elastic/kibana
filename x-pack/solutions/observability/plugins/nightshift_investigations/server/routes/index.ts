@@ -32,6 +32,12 @@ import {
   deleteAutomationRoute,
   listAutomationRunsRoute,
 } from './automations';
+import { getMemoryAvailabilityRoute } from './get_memory_availability';
+import { listMemoryPagesRoute } from './list_memory_pages';
+import { getMemoryPageRoute } from './get_memory_page';
+import { archiveMemoryPageRoute } from './archive_memory_page';
+import { deleteMemoryPageRoute } from './delete_memory_page';
+import { getMemoryLineageRoute } from './get_memory_lineage';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -59,7 +65,13 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getAutomationRoute,
   ...updateAutomationRoute,
   ...deleteAutomationRoute,
-  ...listAutomationRunsRoute,
+...listAutomationRunsRoute,
+  ...getMemoryAvailabilityRoute,
+  ...listMemoryPagesRoute,
+  ...getMemoryPageRoute,
+  ...archiveMemoryPageRoute,
+  ...deleteMemoryPageRoute,
+  ...getMemoryLineageRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =
