@@ -2923,7 +2923,8 @@ describe('add_controls / remove_controls operations', () => {
       {
         type: 'add_controls',
         identifier: 'controls[1]',
-        error: 'Field "method" is not an aggregatable field on this index.',
+        error:
+          'Field "method" is not an aggregatable field in the mappings of index "kibana_sample_data_logs". Controls query the index directly, so fields created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot be used. Pick a mapped field or skip this control.',
       },
     ]);
   });

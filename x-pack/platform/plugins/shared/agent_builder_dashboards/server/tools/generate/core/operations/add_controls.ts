@@ -222,7 +222,9 @@ const resolveControlFields = async ({
       aggregatableFieldTypes.has(candidate)
     );
     if (resolvedFieldName === undefined) {
-      recordFailure(`Field "${fieldName}" is not an aggregatable field on this index.`);
+      recordFailure(
+        `Field "${fieldName}" is not an aggregatable field in the mappings of index "${index}". Controls query the index directly, so fields created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot be used. Pick a mapped field or skip this control.`
+      );
       continue;
     }
 
