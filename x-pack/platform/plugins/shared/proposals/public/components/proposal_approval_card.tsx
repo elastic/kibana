@@ -181,7 +181,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           label: i18n.translate('xpack.proposals.proposalCard.approve', {
             defaultMessage: 'Approve',
           }),
-          color: 'success',
+          color: 'primary',
           onClick: handleApprove,
           isDisabled: isExpired,
           'data-test-subj': `proposalApprove-${proposalId}`,

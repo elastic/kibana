@@ -244,6 +244,14 @@ describe('ProposalApprovalCard', () => {
       ).toBeInTheDocument();
     });
 
+    it('uses the primary color for the Approve CTA, not success', () => {
+      // Regression check: the chat card's Approve button was briefly styled `success`,
+      // inconsistent with the AlertZero flyout's approval modal, which uses `primary`.
+      setupMocks();
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(latestPrimaryAction?.color).toBe('primary');
+    });
+
     it('passes onDismiss to ApprovalContent so its built-in decline flow is enabled', () => {
       setupMocks();
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
