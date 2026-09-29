@@ -86,14 +86,21 @@ export interface EvidenceChartProps {
   chart: EvidenceChartSpec;
 }
 
+/** Used when no Kibana `dateFormat` setting is available, e.g. outside a Kibana context. */
+const FALLBACK_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
+
 /**
- * The Kibana `dateFormat:tz` time zone, so evidence charts render times like every other chart in
- * Kibana. Falls back to the browser time zone outside a Kibana context that provides `uiSettings`.
+ * The Kibana `dateFormat:tz` time zone and `dateFormat` pattern, so evidence charts render times
+ * like every other chart in Kibana. Fall back to the browser time zone and a fixed pattern outside
+ * a Kibana context that provides `uiSettings`.
  */
-const useChartTimeZone = (): string => {
+const useChartTimeSettings = (): { timeZone: string; dateFormat: string } => {
   const { uiSettings } = useKibana<{ uiSettings?: IUiSettingsClient }>().services;
   return useMemo(
-    () => (uiSettings ? getTimeZone(uiSettings) : moment.tz.guess(true)),
+    () => ({
+      timeZone: uiSettings ? getTimeZone(uiSettings) : moment.tz.guess(true),
+      dateFormat: uiSettings?.get<string>('dateFormat') || FALLBACK_DATE_FORMAT,
+    }),
     [uiSettings]
   );
 };
@@ -105,7 +112,7 @@ const useChartTimeZone = (): string => {
 export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
   const { euiTheme } = useEuiTheme();
   const baseTheme = useElasticChartsTheme();
-  const timeZone = useChartTimeZone();
+  const { timeZone, dateFormat } = useChartTimeSettings();
   const isTime = chart.x_axis.type === 'time';
   const yFormatter = Y_AXIS_FORMATTERS[chart.y_axis.unit ?? 'number'];
 
@@ -136,7 +143,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
   }, [isTime, series]);
 
   const { pointAnnotations, rangeAnnotations } = useMemo(() => {
-    const points: Array<{ dataValue: number | string; details: string }> = [];
+    const points: Array<{ dataValue: number | string; details: string; header: string }> = [];
     const ranges: Array<{
       coordinates: { x0: number | string; x1: number | string };
       details: string;
@@ -150,11 +157,15 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
       if (end !== undefined) {
         ranges.push({ coordinates: { x0: start, x1: end }, details: annotation.label });
       } else {
-        points.push({ dataValue: start, details: annotation.label });
+        // elastic-charts titles a point annotation's tooltip with `header`, falling back to the
+        // raw data value — epoch milliseconds on a time axis.
+        const header =
+          typeof start === 'number' ? moment.tz(start, timeZone).format(dateFormat) : start;
+        points.push({ dataValue: start, details: annotation.label, header });
       }
     }
     return { pointAnnotations: points, rangeAnnotations: ranges };
-  }, [chart.annotations, isTime]);
+  }, [chart.annotations, isTime, timeZone, dateFormat]);
 
   const hasAnnotations = pointAnnotations.length > 0 || rangeAnnotations.length > 0;
   // Point annotation markers are drawn above the plot, so reserve room for them there.

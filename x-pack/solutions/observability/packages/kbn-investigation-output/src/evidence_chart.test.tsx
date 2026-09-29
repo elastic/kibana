@@ -14,6 +14,7 @@ import type { EvidenceChart as EvidenceChartSpec } from '@kbn/significant-events
 import { EvidenceChart } from './evidence_chart';
 
 const mockSeriesProps = jest.fn();
+const mockLineAnnotationProps = jest.fn();
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
@@ -28,7 +29,10 @@ jest.mock('@elastic/charts', () => {
     Axis: () => null,
     LineSeries: MockSeries,
     BarSeries: MockSeries,
-    LineAnnotation: () => null,
+    LineAnnotation: (props: Record<string, unknown>) => {
+      mockLineAnnotationProps(props);
+      return null;
+    },
     RectAnnotation: () => null,
   };
 });
@@ -49,14 +53,20 @@ const chart: EvidenceChartSpec = {
   ],
 };
 
-const uiSettingsWithTimeZone = (timeZone: string): IUiSettingsClient =>
+const uiSettingsWithTimeZone = (timeZone: string, dateFormat?: string): IUiSettingsClient =>
   ({
-    get: jest.fn((key: string) => (key === 'dateFormat:tz' ? timeZone : undefined)),
+    get: jest.fn((key: string) => {
+      if (key === 'dateFormat:tz') {
+        return timeZone;
+      }
+      return key === 'dateFormat' ? dateFormat : undefined;
+    }),
   } as unknown as IUiSettingsClient);
 
 describe('EvidenceChart', () => {
   beforeEach(() => {
     mockSeriesProps.mockClear();
+    mockLineAnnotationProps.mockClear();
   });
 
   it('renders series in the time zone configured by dateFormat:tz', () => {
@@ -115,5 +125,48 @@ describe('EvidenceChart', () => {
     render(<EvidenceChart chart={chart} />);
 
     expect(screen.queryByTestId('investigationEvidenceChartAnnotation')).not.toBeInTheDocument();
+  });
+
+  it('titles point annotation tooltips with the timestamp formatted in the Kibana settings', () => {
+    render(
+      <KibanaContextProvider
+        services={{ uiSettings: uiSettingsWithTimeZone('Asia/Tokyo', 'YYYY-MM-DD HH:mm') }}
+      >
+        <EvidenceChart
+          chart={{ ...chart, annotations: [{ x: '2026-07-28T14:01:00Z', label: 'Deploy v2.3.1' }] }}
+        />
+      </KibanaContextProvider>
+    );
+
+    expect(mockLineAnnotationProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataValues: [
+          {
+            dataValue: Date.parse('2026-07-28T14:01:00Z'),
+            details: 'Deploy v2.3.1',
+            header: '2026-07-28 23:01',
+          },
+        ],
+      })
+    );
+  });
+
+  it('titles point annotation tooltips on a category axis with the category', () => {
+    render(
+      <EvidenceChart
+        chart={{
+          ...chart,
+          x_axis: { type: 'category' },
+          series: [{ name: 'errors', points: [{ x: 'checkout', y: 3 }] }],
+          annotations: [{ x: 'checkout', label: 'Worst service' }],
+        }}
+      />
+    );
+
+    expect(mockLineAnnotationProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataValues: [{ dataValue: 'checkout', details: 'Worst service', header: 'checkout' }],
+      })
+    );
   });
 });
