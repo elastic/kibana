@@ -298,7 +298,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
 
       expect(ops).toHaveLength(1);
-      const { scriptParams } = ops[0];
+      const { scriptParams } = upsertOps(ops)[0];
       expect(scriptParams.provider).toBe('maltrail');
       expect(scriptParams.trail).toBe('cobaltstrike');
       // Per-IOC reference wins over source.url
@@ -387,7 +387,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
 
       expect(ops).toHaveLength(1);
-      const { scriptParams, upsert } = ops[0];
+      const { scriptParams, upsert } = upsertOps(ops)[0];
       expect(scriptParams.trail).toBeNull();
       expect(scriptParams.provider).toBe('rss-feed');
 
@@ -539,7 +539,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       // never merges sources[] across space boundaries.
       expect(ops.map((op) => op._id)).toEqual(['team-a:ip:9.9.9.9', 'team-b:ip:9.9.9.9']);
       expect((upsertOps(ops)[0].upsert as Record<string, unknown>).space_id).toBe('team-a');
-      expect((ops[1].upsert as Record<string, unknown>).space_id).toBe('team-b');
+      expect((upsertOps(ops)[1].upsert as Record<string, unknown>).space_id).toBe('team-b');
     });
 
     it('falls back to the global space when a report carries no space_id', () => {
