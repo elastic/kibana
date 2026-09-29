@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { EsResourceType } from '@kbn/agent-builder-common';
@@ -16,11 +17,13 @@ import type {
   DataStreamSearchSource,
   DatasetSearchSource,
   IndexSearchSource,
+  ViewSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
 import { flattenMapping, getDataStreamMappings } from './utils/mappings';
 import { getIndexFields, partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
 import { getDatasetFields } from './utils/datasets';
+import { getViewFields } from './utils/views';
 
 export interface RelevantResource {
   type: EsResourceType;
@@ -58,13 +61,17 @@ const truncateList = (fields: string[], max: number): string[] => {
 const createIndexSummaries = async ({
   indices,
   esClient,
+  includeFrozen,
 }: {
   indices: IndexSearchSource[];
   esClient: ElasticsearchClient;
+  includeFrozen: boolean;
 }): Promise<ResourceDescriptor[]> => {
   const indexFields = await getIndexFields({
     indices: indices.map((i) => i.name),
     esClient,
+    includeFrozen,
+    skipUnauthorized: true,
   });
 
   return indices.map(({ name }) => {
@@ -96,9 +103,11 @@ const createAliasSummaries = async ({
 const createDatastreamSummaries = async ({
   datastreams,
   esClient,
+  includeFrozen,
 }: {
   datastreams: DataStreamSearchSource[];
   esClient: ElasticsearchClient;
+  includeFrozen: boolean;
 }): Promise<ResourceDescriptor[]> => {
   const { local, remote } = partitionByCcs(datastreams);
   const descriptors: ResourceDescriptor[] = [];
@@ -113,11 +122,18 @@ const createDatastreamSummaries = async ({
 
     for (const { name } of local) {
       const mappings = allMappings[name];
+      if (!mappings) {
+        // ES omits data streams the user lacks view_index_metadata on
+        // instead of returning 403. Include with no fields — the stream
+        // may still be queryable.
+        descriptors.push({ type: EsResourceType.dataStream, name, fields: [] });
+        continue;
+      }
       const flattened = flattenMapping(mappings.mappings);
       descriptors.push({
         type: EsResourceType.dataStream,
         name,
-        description: mappings?.mappings._meta?.description,
+        description: mappings.mappings._meta?.description,
         fields: flattened.map((field) => ({ path: field.path, type: field.type })),
       });
     }
@@ -128,6 +144,7 @@ const createDatastreamSummaries = async ({
     const fieldsByDs = await getBatchedFieldsFromFieldCaps({
       resources: remote.map((r) => r.name),
       esClient,
+      includeFrozen,
     });
 
     for (const { name } of remote) {
@@ -146,6 +163,51 @@ const createDatastreamSummaries = async ({
  * Builds resource descriptors for a list of external ES|QL datasets by introspecting their
  * columns via `FROM <name> | LIMIT 0` (datasets have no mappings or field caps).
  */
+const VIEW_QUERY_SUMMARY_LIMIT = 500;
+/** Matches the field-fetch cap in getIndexFields. Stored view queries can be expensive. */
+const VIEW_INTROSPECTION_CONCURRENCY = 5;
+
+const summarizeViewQuery = (query: string): string => {
+  const singleLine = query.replace(/\s+/g, ' ').trim();
+  if (singleLine.length <= VIEW_QUERY_SUMMARY_LIMIT) {
+    return singleLine;
+  }
+  return `${singleLine.slice(0, VIEW_QUERY_SUMMARY_LIMIT)}…`;
+};
+
+/**
+ * Builds resource descriptors for ES|QL views by introspecting their output columns via
+ * `FROM <name> | LIMIT 0`. The stored query is included so the model treats the name as a
+ * view rather than a missing index.
+ */
+const createViewSummaries = async ({
+  views,
+  esClient,
+}: {
+  views: ViewSearchSource[];
+  esClient: ElasticsearchClient;
+}): Promise<ResourceDescriptor[]> => {
+  const limit = pLimit(VIEW_INTROSPECTION_CONCURRENCY);
+  return Promise.all(
+    views.map(({ name, query, description }) =>
+      limit(async () => {
+        const definition = `ES|QL view. Query with "FROM ${name}". Defined as: ${summarizeViewQuery(
+          query
+        )}`;
+        // A view whose stored query no longer runs (for example its backing index was removed)
+        // must not fail selection of the other sources.
+        const fields = await getViewFields({ name, esClient }).catch(() => []);
+        return {
+          type: EsResourceType.view,
+          name,
+          description: description ? `${description} ${definition}` : definition,
+          fields: fields.map((f) => ({ path: f.path, type: f.type })),
+        };
+      })
+    )
+  );
+};
+
 const createDatasetSummaries = async ({
   datasets,
   esClient,
@@ -175,21 +237,31 @@ const buildResourceDescriptors = async ({
   includeAliases,
   includeDatastream,
   includeDatasets,
+  includeViews,
+  includeFrozen,
   esClient,
 }: {
   sources: Awaited<ReturnType<typeof listSearchSources>>;
   includeAliases: boolean;
   includeDatastream: boolean;
   includeDatasets: boolean;
+  includeViews: boolean;
+  includeFrozen: boolean;
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
   const resources: ResourceDescriptor[] = [];
   if (sources.indices.length > 0) {
-    resources.push(...(await createIndexSummaries({ indices: sources.indices, esClient })));
+    resources.push(
+      ...(await createIndexSummaries({ indices: sources.indices, esClient, includeFrozen }))
+    );
   }
   if (sources.data_streams.length > 0 && includeDatastream) {
     resources.push(
-      ...(await createDatastreamSummaries({ datastreams: sources.data_streams, esClient }))
+      ...(await createDatastreamSummaries({
+        datastreams: sources.data_streams,
+        esClient,
+        includeFrozen,
+      }))
     );
   }
   if (sources.aliases.length > 0 && includeAliases) {
@@ -197,6 +269,9 @@ const buildResourceDescriptors = async ({
   }
   if (sources.datasets.length > 0 && includeDatasets) {
     resources.push(...(await createDatasetSummaries({ datasets: sources.datasets, esClient })));
+  }
+  if ((sources.views?.length ?? 0) > 0 && includeViews) {
+    resources.push(...(await createViewSummaries({ views: sources.views, esClient })));
   }
   return resources;
 };
@@ -210,12 +285,16 @@ export const gatherResourceDescriptors = async ({
   includeAliases = true,
   includeDatastream = true,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   esClient,
 }: {
   indexPattern?: string;
   includeAliases?: boolean;
   includeDatastream?: boolean;
   includeDatasets?: boolean;
+  includeViews?: boolean;
+  includeFrozen?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
   const sources = await listSearchSources({
@@ -223,6 +302,7 @@ export const gatherResourceDescriptors = async ({
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     includeDatasets,
+    includeViews,
     esClient,
   });
 
@@ -231,6 +311,8 @@ export const gatherResourceDescriptors = async ({
     includeAliases,
     includeDatastream,
     includeDatasets,
+    includeViews,
+    includeFrozen,
     esClient,
   });
 };
@@ -241,6 +323,8 @@ export const indexExplorer = async ({
   includeAliases = true,
   includeDatastream = true,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   limit = 1,
   esClient,
   model,
@@ -251,6 +335,8 @@ export const indexExplorer = async ({
   includeAliases?: boolean;
   includeDatastream?: boolean;
   includeDatasets?: boolean;
+  includeViews?: boolean;
+  includeFrozen?: boolean;
   limit?: number;
   esClient: ElasticsearchClient;
   model: ScopedModel;
@@ -263,6 +349,7 @@ export const indexExplorer = async ({
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     includeDatasets,
+    includeViews,
     esClient,
   });
 
@@ -270,11 +357,12 @@ export const indexExplorer = async ({
   const aliasCount = sources.aliases.length;
   const dataStreamCount = sources.data_streams.length;
   const datasetCount = includeDatasets ? sources.datasets.length : 0;
-  const totalCount = indexCount + aliasCount + dataStreamCount + datasetCount;
+  const viewCount = includeViews ? sources.views?.length ?? 0 : 0;
+  const totalCount = indexCount + aliasCount + dataStreamCount + datasetCount + viewCount;
 
   logger?.trace(
     () =>
-      `index_explorer - found ${indexCount} indices, ${aliasCount} aliases, ${dataStreamCount} datastreams, ${datasetCount} datasets for query="${nlQuery}"`
+      `index_explorer - found ${indexCount} indices, ${aliasCount} aliases, ${dataStreamCount} datastreams, ${datasetCount} datasets, ${viewCount} views for query="${nlQuery}"`
   );
 
   if (totalCount <= limit) {
@@ -284,6 +372,7 @@ export const indexExplorer = async ({
         ...sources.aliases,
         ...sources.data_streams,
         ...(includeDatasets ? sources.datasets : []),
+        ...(includeViews ? sources.views ?? [] : []),
       ].map((resource) => {
         return {
           type: resource.type,
@@ -299,6 +388,8 @@ export const indexExplorer = async ({
     includeAliases,
     includeDatastream,
     includeDatasets,
+    includeViews,
+    includeFrozen,
     esClient,
   });
 
@@ -355,7 +446,7 @@ The 'select_resources' tool expects this exact structure:
   "targets": [
     {
       "name": "resource_name",
-      "type": "index" | "alias" | "data_stream" | "dataset",
+      "type": "index" | "alias" | "data_stream" | "dataset" | "view",
       "reason": "why this resource is relevant"
     }
   ]
@@ -414,6 +505,7 @@ const selectResources = async ({
                   EsResourceType.alias,
                   EsResourceType.dataStream,
                   EsResourceType.dataset,
+                  EsResourceType.view,
                 ])
                 .describe('the type of the resource'),
               name: z.string().describe('name of the resource'),
@@ -421,7 +513,7 @@ const selectResources = async ({
           )
           .default([])
           .describe(
-            'The list of selected resources (indices, aliases, datastreams and/or datasets). Must be an array. Use an empty array if no resources match.'
+            'The list of selected resources (indices, aliases, datastreams, datasets and/or views). Must be an array. Use an empty array if no resources match.'
           ),
       })
       .describe('Tool to select the relevant Elasticsearch resources to search against'),

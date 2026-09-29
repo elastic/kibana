@@ -42,6 +42,7 @@ describe('mapClassicAlertToEpisode', () => {
     'kibana.alert.status': 'active',
     'kibana.alert.rule.uuid': 'rule-uuid-1',
     'kibana.alert.rule.name': 'My Rule',
+    'kibana.alert.rule.category': 'Test',
     'kibana.alert.workflow_tags': ['tag-a', 'tag-b'],
     'kibana.alert.workflow_status': 'open',
     'kibana.alert.duration.us': 7_200_000_000,
@@ -64,6 +65,7 @@ describe('mapClassicAlertToEpisode', () => {
       triggered_at: '2024-01-01T00:00:00.000Z',
       last_tags: ['tag-a', 'tag-b'],
       severity: 'critical',
+      rule_category: 'Test',
       supports_actions: false,
       supports_timeline: false,
     });
@@ -106,6 +108,7 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode.last_tags).toEqual([]);
     expect(episode.last_assignee_uid).toBeNull();
     expect(episode.episode_data).toBeNull();
+    expect(episode.source_grouping).toBeUndefined();
   });
 
   it('computes duration from start/end when kibana.alert.duration.us is absent', () => {
@@ -141,6 +144,44 @@ describe('mapClassicAlertToEpisode', () => {
     const episode = mapClassicAlertToEpisode(baseSource, TEST_INDEX);
     expect(episode.last_ack_action).toBeNull();
     expect(episode).not.toHaveProperty('last_snooze_action');
-    expect(episode).not.toHaveProperty('snooze_expiry');
+    expect(episode).not.toHaveProperty('snoozed_until');
+  });
+
+  it('preserves classic warning severity without mapping it to medium', () => {
+    const episode = mapClassicAlertToEpisode(
+      { ...baseSource, 'kibana.alert.severity': 'Warning' },
+      TEST_INDEX
+    );
+
+    expect(episode.severity).toBe('warning');
+  });
+
+  it('maps kibana.alert.grouping onto source_grouping', () => {
+    const episode = mapClassicAlertToEpisode(
+      {
+        ...baseSource,
+        'kibana.alert.grouping': { host: { name: 'web-01' }, 'service.name': 'api' },
+      },
+      TEST_INDEX
+    );
+
+    expect(episode.source_grouping).toEqual({
+      'host.name': 'web-01',
+      'service.name': 'api',
+    });
+  });
+
+  it('omits empty nested grouping objects from source_grouping', () => {
+    const episode = mapClassicAlertToEpisode(
+      {
+        ...baseSource,
+        'kibana.alert.grouping': { host: {}, 'service.name': 'api' },
+      },
+      TEST_INDEX
+    );
+
+    expect(episode.source_grouping).toEqual({
+      'service.name': 'api',
+    });
   });
 });

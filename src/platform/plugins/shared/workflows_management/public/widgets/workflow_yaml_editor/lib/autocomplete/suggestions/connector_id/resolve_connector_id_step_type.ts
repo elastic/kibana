@@ -8,10 +8,7 @@
  */
 
 import type { Document } from 'yaml';
-import {
-  WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES,
-  type WaitForApprovalChannelKey,
-} from '@kbn/workflows';
+import { getHitlChannelConnectorTypeFromPath, isHitlWaitStepType } from '@kbn/workflows';
 import { getConnectorTypeIdForTriggerEventId } from '../../../../../../../common/triggers/connector_event_triggers';
 import type { StepInfo, StepPropInfo } from '../../../../../../entities/workflows/store';
 import {
@@ -19,26 +16,11 @@ import {
   getTriggerTypeAtIndex,
 } from '../../context/triggers_utils';
 
-function resolveWaitForApprovalChannelConnectorType(
-  propPath: ReadonlyArray<string | number>
-): string | null {
-  const connectorIdIndex = propPath.lastIndexOf('connector-id');
-  if (connectorIdIndex < 2 || propPath[connectorIdIndex - 2] !== 'channels') {
-    return null;
-  }
-
-  const channelKey = propPath[connectorIdIndex - 1];
-  if (typeof channelKey !== 'string') {
-    return null;
-  }
-
-  return WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES[channelKey as WaitForApprovalChannelKey] ?? null;
-}
-
 /**
  * Resolves which connector type to use when suggesting connector-id values.
  * Step-level connector-id uses the step type (e.g. `slack`); nested ids under
- * `waitForApproval.with.channels` map to the notification channel connector type.
+ * `waitForInput` / `waitForApproval` `with.channels` map to the notification
+ * channel connector type. HITL wait step types are never action types.
  */
 export function resolveConnectorIdStepType(
   focusedStepInfo: StepInfo | null,
@@ -49,10 +31,11 @@ export function resolveConnectorIdStepType(
     return null;
   }
 
-  const propPath = focusedYamlPair?.path ?? path;
-  const channelConnectorType = resolveWaitForApprovalChannelConnectorType(propPath);
-  if (channelConnectorType) {
-    return channelConnectorType;
+  if (isHitlWaitStepType(focusedStepInfo.stepType)) {
+    return (
+      getHitlChannelConnectorTypeFromPath(focusedYamlPair?.path) ??
+      getHitlChannelConnectorTypeFromPath(path)
+    );
   }
 
   return focusedStepInfo.stepType;

@@ -1,5 +1,5 @@
 {
-  "sha1": "954e4116086682b6bc8e845279c35a67b006e4c4",
+  "sha1": "5c758cbfcae2fa44db7146e340de3acca1ce4678",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -337,6 +337,70 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
         "line": 360,
+        "column": 13
+      }
+    },
+    {
+      "id": "8cf5758b6dd5b7d-3aed35557d6d9de",
+      "title": "Entity Store history snapshot enable/disable returns 403 for callers without the securitySolution privilege on enable and disable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 92,
+        "column": 21
+      }
+    },
+    {
+      "id": "8cf5758b6dd5b7d-4250d104b41698e",
+      "title": "Entity Store history snapshot enable/disable disables and enables the history snapshot task via Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 106,
+        "column": 75
+      }
+    },
+    {
+      "id": "8cf5758b6dd5b7d-e21e304e7199cb0",
+      "title": "Entity Store history snapshot enable/disable returns 404 on enable and disable when the entity store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 138,
+        "column": 55
+      }
+    },
+    {
+      "id": "8cf5758b6dd5b7d-b1ef008b100347f",
+      "title": "Entity Store history snapshot enable/disable disables with index cleanup then re-enables and runs an immediate snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 161,
         "column": 13
       }
     },

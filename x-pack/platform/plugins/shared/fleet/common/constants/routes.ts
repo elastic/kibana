@@ -121,6 +121,8 @@ export const CLOUD_CONNECTOR_API_ROUTES = {
   UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   USAGE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}/usage`,
+  // Internal: UI-driven check, not part of the public cloud connector API (see render_template).
+  VERIFY_IAC_KEY_PATTERN: `${INTERNAL_ROOT}/cloud_connectors/{cloudConnectorId}/verify_iac_key`,
 };
 
 export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT = `${API_ROOT}/cloud_onboarding_deployments`;
