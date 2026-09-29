@@ -104,7 +104,6 @@ const formatBoolean = (key: SettingKey, value: boolean): string => {
 
 const formatEscapeCharacterForReview = (value: string): string => {
   if (value === '\t') return '\\t';
-  if (value === '\\') return '\\\\';
   return value;
 };
 

@@ -294,7 +294,7 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'csv', quote: "'", escape: '"' });
     });
 
-    it('does not decode escape sequences in the payload (API receives the literal sequence)', () => {
+    it('does not decode the \\t escape sequence in the payload (API receives the literal sequence)', () => {
       expect(
         buildDatasetSettingsFromFormValues({
           ...empty(),
@@ -302,15 +302,26 @@ describe('create_dataset_form_state', () => {
           escape: '\\t',
         })
       ).toEqual({ format: 'tsv', escape: '\\t' });
+    });
 
-      // Backslash itself: user can enter `\\` in the form, and the API should receive `\\`.
+    it('decodes a double backslash into a single backslash in the payload', () => {
       expect(
         buildDatasetSettingsFromFormValues({
           ...empty(),
           format: 'tsv',
           escape: '\\\\',
         })
-      ).toEqual({ format: 'tsv', escape: '\\\\' });
+      ).toEqual({ format: 'tsv', escape: '\\' });
+    });
+
+    it('omits a double backslash for CSV because it decodes to the default escape character', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          escape: '\\\\',
+        })
+      ).toEqual({ format: 'csv' });
     });
 
     it('includes trim_spaces when explicitly set and omits it when unset', () => {

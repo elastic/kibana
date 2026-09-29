@@ -106,6 +106,17 @@ describe('getSettingsReviewItems', () => {
     expect(items.find((item) => item.key === 'escape')?.value).toBe('\\t');
   });
 
+  it.each(['\\', '\\\\'])(
+    'renders a backslash escape entered as %s as a single backslash',
+    (escape) => {
+      const { settings, unmanagedSettings } = allSettingsForFormat('tsv');
+      const items = getSettingsReviewItems(
+        mergedSettingsFromForm({ ...settings, escape }, unmanagedSettings)
+      );
+      expect(items.find((item) => item.key === 'escape')?.value).toBe('\\');
+    }
+  );
+
   it('falls back to the documented default when a setting is untouched', () => {
     const items = reviewItemsFor({
       settings: {

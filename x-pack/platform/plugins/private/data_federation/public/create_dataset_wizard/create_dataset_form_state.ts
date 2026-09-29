@@ -45,6 +45,12 @@ const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<
   '\r': '\\r',
 };
 
+const ESCAPED_BACKSLASH_SEQUENCE = '\\\\';
+
+/** Decodes the escaped backslash form value into the single backslash the API expects. */
+const decodeEscapeCharacterFormValue = (value: string): string =>
+  value === ESCAPED_BACKSLASH_SEQUENCE ? '\\' : value;
+
 /** Encodes non-printable characters into a two-character escape sequence for the form. */
 export const encodeEscapeCharacterToFormValue = (value: string): string => {
   if (!value) return '';
@@ -256,16 +262,17 @@ export const buildDatasetSettingsFromFormValues = (
     if (settings.encoding && settings.encoding !== DEFAULT_ENCODING) {
       applied.encoding = settings.encoding;
     }
+    const escape = decodeEscapeCharacterFormValue(settings.escape);
     if (format === 'csv') {
       if (settings.quote && settings.quote !== DEFAULT_CSV_QUOTE) {
         applied.quote = settings.quote;
       }
-      if (settings.escape && settings.escape !== DEFAULT_CSV_ESCAPE) {
-        applied.escape = settings.escape;
+      if (escape && escape !== DEFAULT_CSV_ESCAPE) {
+        applied.escape = escape;
       }
     } else {
       if (settings.quote) applied.quote = settings.quote;
-      if (settings.escape) applied.escape = settings.escape;
+      if (escape) applied.escape = escape;
     }
     if (settings.column_prefix && settings.column_prefix !== DEFAULT_COLUMN_PREFIX) {
       applied.column_prefix = settings.column_prefix;
