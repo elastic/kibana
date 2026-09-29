@@ -8,12 +8,21 @@
  */
 
 import { setTimeout as timer } from 'timers/promises';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
+import type { OtelAppenderPluginConfig, PluginAppenderConfigType } from '@kbn/core-logging-server';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { TrackUserActionParams, UserActivityActionId } from '@kbn/core-user-activity-server';
 import { UserActivityService } from './user_activity_service';
+import {
+  applyUserActivityOtelFieldMap,
+  USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+  USER_ACTIVITY_OTEL_RESOURCE_ATTRIBUTES,
+} from './user_activity_otel_transform';
 import type { InternalUserActivityServiceSetup } from './types';
 
 const TEST_ACTION = 'create_alerting_rule' as UserActivityActionId;
@@ -57,6 +66,69 @@ describe('UserActivityService', () => {
     });
   });
 
+  describe('serverless OTel appender shaping', () => {
+    const otelAppender: PluginAppenderConfigType = {
+      type: 'otel',
+      protocol: 'http',
+      url: 'http://collector:4318/v1/logs',
+    };
+    const configWithOtel = {
+      ...defaultConfig,
+      appenders: new Map<string, PluginAppenderConfigType>([
+        ['console_appender', { type: 'console', layout: { type: 'json' } }],
+        [
+          'file_appender',
+          { type: 'file', fileName: 'easy_to_find.jsonl', layout: { type: 'json' } },
+        ],
+        ['otel_appender', otelAppender],
+      ]),
+    };
+
+    const setupWithFlavor = (serverless: boolean) => {
+      const coreContext = mockCoreContext.create({
+        env: createTestEnv({ envOptions: getEnvOptions({ cliArgs: { serverless } }) }),
+      });
+      coreContext.configService.atPath.mockReturnValue(new BehaviorSubject(configWithOtel));
+      new UserActivityService(coreContext).setup({ logging: loggingService });
+      const [, config$] = loggingService.configure.mock.calls[0];
+      return firstValueFrom(config$);
+    };
+
+    it('extends the otel appender with the user activity transforms when serverless', async () => {
+      const { appenders } = await setupWithFlavor(true);
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+      const shaped = appendersMap.get('otel_appender') as OtelAppenderPluginConfig;
+
+      expect(shaped.transformAttributes).toBe(applyUserActivityOtelFieldMap);
+      expect(shaped.includeResources).toEqual(['service.name', 'service.type']);
+      expect(shaped.promoteResourceAttributes).toEqual(
+        USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES
+      );
+      expect(shaped.attributes).toEqual(USER_ACTIVITY_OTEL_RESOURCE_ATTRIBUTES);
+    });
+
+    it('leaves non-otel appenders untouched when serverless', async () => {
+      const { appenders } = await setupWithFlavor(true);
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+
+      expect(appendersMap.get('console_appender')).toBe(
+        configWithOtel.appenders.get('console_appender')
+      );
+      expect(appendersMap.get('file_appender')).toBe(configWithOtel.appenders.get('file_appender'));
+    });
+
+    it('passes the otel appender through unchanged when not serverless', async () => {
+      const { appenders } = await setupWithFlavor(false);
+
+      // The transform is Serverless-only: on other build flavors the appenders pass through
+      // unchanged (full resource, raw field names).
+      expect(appenders).toBe(configWithOtel.appenders);
+      expect(otelAppender).not.toHaveProperty('transformAttributes');
+      expect(otelAppender).not.toHaveProperty('includeResources');
+      expect(otelAppender).not.toHaveProperty('promoteResourceAttributes');
+    });
+  });
+
   describe('trackUserAction', () => {
     beforeEach(() => {
       service = new UserActivityService(core).setup({ logging: loggingService });
@@ -65,7 +137,7 @@ describe('UserActivityService', () => {
     it('logs a user action with provided message', () => {
       service.trackUserAction({
         message: 'Custom message for action',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
       });
 
@@ -74,11 +146,37 @@ describe('UserActivityService', () => {
           'Custom message for action',
           {
             message: 'Custom message for action',
-            event: { action: TEST_ACTION, type: 'change' },
-            object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
+            event: { action: TEST_ACTION, type: ['change'], outcome: 'unknown' },
+            kibana: { object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] } },
           },
         ],
       ]);
+    });
+
+    it('does not log the object at the top level', () => {
+      service.trackUserAction({
+        message: 'Custom message for action',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).not.toHaveProperty('object');
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] } },
+      });
+    });
+
+    it('defaults event.outcome to unknown when not provided', () => {
+      service.trackUserAction({
+        message: 'Action without outcome',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'obj-o', name: 'Object', type: 'rule', tags: [] },
+      });
+
+      expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
+        event: { action: TEST_ACTION, type: ['change'], outcome: 'unknown' },
+      });
     });
 
     it('logs optional event timing fields and metadata', () => {
@@ -86,7 +184,7 @@ describe('UserActivityService', () => {
         message: 'Action with metadata',
         event: {
           action: TEST_ACTION,
-          type: 'change',
+          type: ['change'],
           start: '2026-01-01T00:00:00.000Z',
           end: '2026-01-01T00:00:00.250Z',
           duration: 250000000,
@@ -101,30 +199,32 @@ describe('UserActivityService', () => {
 
       service.trackUserAction(params);
 
+      const { object, ...paramsWithoutObject } = params;
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls).toHaveLength(1);
       expect(logCalls[0][0]).toBe('Action with metadata');
       expect(logCalls[0][1]).toMatchObject({
-        ...params,
+        ...paramsWithoutObject,
+        kibana: { object },
       });
     });
 
     it('logs optional event.outcome on the event object', () => {
       service.trackUserAction({
         message: 'Failed action',
-        event: { action: TEST_ACTION, type: 'error', outcome: 'failure' },
+        event: { action: TEST_ACTION, type: ['error'], outcome: 'failure' },
         object: { id: 'obj-e', name: 'Object', type: 'rule', tags: [] },
       });
 
       expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
-        event: { action: TEST_ACTION, type: 'error', outcome: 'failure' },
+        event: { action: TEST_ACTION, type: ['error'], outcome: 'failure' },
       });
     });
 
     it('logs optional top-level ECS error fields', () => {
       service.trackUserAction({
         message: 'User failed to create a rule.',
-        event: { action: TEST_ACTION, type: 'creation', outcome: 'failure' },
+        event: { action: TEST_ACTION, type: ['creation'], outcome: 'failure' },
         object: { id: 'obj-err', name: 'Rule', type: 'rule', tags: [] },
         error: {
           type: 'ResponseError',
@@ -148,7 +248,7 @@ describe('UserActivityService', () => {
     it('merges outcome, error, and metadata into the log meta object', () => {
       const params: TrackUserActionParams = {
         message: 'Merged payload',
-        event: { action: TEST_ACTION, type: 'change', outcome: 'success' },
+        event: { action: TEST_ACTION, type: ['change'], outcome: 'success' },
         object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
         metadata: { attempt: 1 },
         error: { message: 'ignored downstream' },
@@ -158,8 +258,8 @@ describe('UserActivityService', () => {
 
       expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
         message: 'Merged payload',
-        event: { action: TEST_ACTION, type: 'change', outcome: 'success' },
-        object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
+        event: { action: TEST_ACTION, type: ['change'], outcome: 'success' },
+        kibana: { object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] } },
         metadata: { attempt: 1 },
         error: { message: 'ignored downstream' },
       });
@@ -171,7 +271,7 @@ describe('UserActivityService', () => {
       });
 
       service.trackUserAction({
-        event: { action: TEST_ACTION, type: 'creation' },
+        event: { action: TEST_ACTION, type: ['creation'] },
         object: { id: 'obj-2', name: 'My rule', type: 'rule', tags: [] },
       });
 
@@ -190,13 +290,12 @@ describe('UserActivityService', () => {
           email: 'jesuswr@test.com',
           roles: ['superuser', 'normaluser', 'magicknight'],
         },
-        session: { id: 'session-456' },
-        kibana: { space: { id: 'default' } },
+        kibana: { space: { id: 'default' }, session: { id: 'session-456' } },
       });
 
       service.trackUserAction({
         message: 'Test action',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-3', name: 'Object', type: 'visualization', tags: [] },
       });
 
@@ -208,8 +307,11 @@ describe('UserActivityService', () => {
           email: 'jesuswr@test.com',
           roles: ['superuser', 'normaluser', 'magicknight'],
         },
-        session: { id: 'session-456' },
-        kibana: { space: { id: 'default' } },
+        kibana: {
+          space: { id: 'default' },
+          session: { id: 'session-456' },
+          object: { id: 'obj-3', name: 'Object', type: 'visualization', tags: [] },
+        },
       });
     });
 
@@ -224,7 +326,7 @@ describe('UserActivityService', () => {
 
       disabledService.trackUserAction({
         message: 'Should not log',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -245,7 +347,7 @@ describe('UserActivityService', () => {
 
       filteredService.trackUserAction({
         message: 'Should not log',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -266,13 +368,13 @@ describe('UserActivityService', () => {
 
       filteredService.trackUserAction({
         message: 'Should log',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
       filteredService.trackUserAction({
         message: 'Should not log',
-        event: { action: OTHER_ACTION, type: 'change' },
+        event: { action: OTHER_ACTION, type: ['change'] },
         object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -297,13 +399,13 @@ describe('UserActivityService', () => {
 
       filteredService.trackUserAction({
         message: 'Should log',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
       filteredService.trackUserAction({
         message: 'Should not log',
-        event: { action: OTHER_ACTION, type: 'change' },
+        event: { action: OTHER_ACTION, type: ['change'] },
         object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -328,13 +430,13 @@ describe('UserActivityService', () => {
 
       filteredService.trackUserAction({
         message: 'Should log',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
       filteredService.trackUserAction({
         message: 'Should not log',
-        event: { action: OTHER_ACTION, type: 'change' },
+        event: { action: OTHER_ACTION, type: ['change'] },
         object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -359,17 +461,104 @@ describe('UserActivityService', () => {
 
       filteredService.trackUserAction({
         message: 'Should not log',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
       filteredService.trackUserAction({
         message: 'Should not log',
-        event: { action: OTHER_ACTION, type: 'change' },
+        event: { action: OTHER_ACTION, type: ['change'] },
         object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
       });
 
       expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(0);
+    });
+  });
+
+  describe('kibana.saved_object', () => {
+    beforeEach(() => {
+      service = new UserActivityService(core).setup({ logging: loggingService });
+    });
+
+    const createStartedService = (registeredTypeNames: string[]) => {
+      const userActivityService = new UserActivityService(core);
+      userActivityService.setup({ logging: loggingService });
+      const typeRegistry = typeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue(
+        registeredTypeNames.map((name) => ({ name } as SavedObjectsType))
+      );
+      return userActivityService.start({ typeRegistry });
+    };
+
+    it('emits kibana.saved_object when object.type is a registered saved object type', () => {
+      const startedService = createStartedService(['dashboard', 'index-pattern']);
+
+      startedService.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: {
+          object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+          saved_object: { type: 'dashboard', id: 'dash-1' },
+        },
+      });
+    });
+
+    it('omits kibana.saved_object when object.type is not a registered saved object type', () => {
+      const startedService = createStartedService(['dashboard']);
+
+      startedService.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'rule-1', name: 'My Rule', type: 'rule', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'rule-1', name: 'My Rule', type: 'rule', tags: [] } },
+      });
+      expect(logCalls[0][1]).not.toHaveProperty('kibana.saved_object');
+    });
+
+    it('omits kibana.saved_object when the type registry is not available yet', () => {
+      // `service` only went through setup, so the registry has not been read.
+      service.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] } },
+      });
+      expect(logCalls[0][1]).not.toHaveProperty('kibana.saved_object');
+    });
+
+    it('reads the type registry only once at start', () => {
+      const userActivityService = new UserActivityService(core);
+      const setupContract = userActivityService.setup({ logging: loggingService });
+      const typeRegistry = typeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue([{ name: 'dashboard' } as SavedObjectsType]);
+      userActivityService.start({ typeRegistry });
+
+      setupContract.trackUserAction({
+        message: 'First',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'Dash', type: 'dashboard', tags: [] },
+      });
+      setupContract.trackUserAction({
+        message: 'Second',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-2', name: 'Dash', type: 'dashboard', tags: [] },
+      });
+
+      expect(typeRegistry.getAllTypes).toHaveBeenCalledTimes(1);
+      expect(loggingSystemMock.collect(core.logger).info).toHaveLength(2);
     });
   });
 
@@ -386,7 +575,7 @@ describe('UserActivityService', () => {
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -394,24 +583,41 @@ describe('UserActivityService', () => {
       expect(logCalls[0][1]).toMatchObject({
         user: { id: 'user-1', name: 'testuser' },
         client: { ip: '127.0.0.1', address: '127.0.0.1' },
+        source: { ip: '127.0.0.1', address: '127.0.0.1' },
       });
     });
 
-    it('sets session context', () => {
+    it('does not emit source fields when there is no client ip', () => {
       service.setInjectedContext({
-        session: { id: 'session-abc' },
+        user: { id: 'user-1', name: 'testuser' },
       });
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: '1', name: 'Test', type: 'test', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).not.toHaveProperty('source');
+    });
+
+    it('sets session context under kibana.session', () => {
+      service.setInjectedContext({
+        kibana: { session: { id: 'session-abc' } },
+      });
+
+      service.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls[0][1]).toMatchObject({
-        session: { id: 'session-abc' },
+        kibana: { session: { id: 'session-abc' } },
       });
+      expect(logCalls[0][1]).not.toHaveProperty('session');
     });
 
     it('sets kibana space context', () => {
@@ -422,7 +628,7 @@ describe('UserActivityService', () => {
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -440,7 +646,7 @@ describe('UserActivityService', () => {
 
       service.setInjectedContext({
         user: { name: 'testuser' },
-        session: { id: 'session-1' },
+        kibana: { session: { id: 'session-1' } },
       });
 
       service.setInjectedContext({
@@ -449,15 +655,14 @@ describe('UserActivityService', () => {
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls[0][1]).toMatchObject({
         user: { id: 'user-1', name: 'testuser' },
-        session: { id: 'session-1' },
-        kibana: { space: { id: 'space-1' } },
+        kibana: { space: { id: 'space-1' }, session: { id: 'session-1' } },
       });
     });
 
@@ -465,12 +670,12 @@ describe('UserActivityService', () => {
       const chainA = Promise.resolve().then(async () => {
         service.setInjectedContext({
           user: { name: 'user-a' },
-          session: { id: 'session-a' },
+          kibana: { session: { id: 'session-a' } },
         });
         await timer(100);
         service.trackUserAction({
           message: 'Action A',
-          event: { action: TEST_ACTION, type: 'change' },
+          event: { action: TEST_ACTION, type: ['change'] },
           object: { id: 'a', name: 'A', type: 'test', tags: [] },
         });
       });
@@ -478,12 +683,12 @@ describe('UserActivityService', () => {
       const chainB = Promise.resolve().then(async () => {
         service.setInjectedContext({
           user: { name: 'user-b' },
-          session: { id: 'session-b' },
+          kibana: { session: { id: 'session-b' } },
         });
         await timer(10);
         service.trackUserAction({
           message: 'Action B',
-          event: { action: TEST_ACTION, type: 'change' },
+          event: { action: TEST_ACTION, type: ['change'] },
           object: { id: 'b', name: 'B', type: 'test', tags: [] },
         });
       });
@@ -494,12 +699,12 @@ describe('UserActivityService', () => {
       // B finishes first due to shorter timer
       expect(logCalls[0][1]).toMatchObject({
         user: { name: 'user-b' },
-        session: { id: 'session-b' },
+        kibana: { session: { id: 'session-b' } },
       });
       // A finishes second but keeps its values
       expect(logCalls[1][1]).toMatchObject({
         user: { name: 'user-a' },
-        session: { id: 'session-a' },
+        kibana: { session: { id: 'session-a' } },
       });
     });
 
@@ -508,8 +713,7 @@ describe('UserActivityService', () => {
         // Parent sets initial context
         service.setInjectedContext({
           user: { name: 'parent-user' },
-          session: { id: 'parent-session' },
-          kibana: { space: { id: 'parent-space' } },
+          kibana: { space: { id: 'parent-space' }, session: { id: 'parent-session' } },
         });
 
         // Child async operation should inherit parent's context
@@ -523,7 +727,7 @@ describe('UserActivityService', () => {
 
           service.trackUserAction({
             message: 'Child action',
-            event: { action: TEST_ACTION, type: 'change' },
+            event: { action: TEST_ACTION, type: ['change'] },
             object: { id: 'child', name: 'Child', type: 'test', tags: [] },
           });
         });
@@ -533,8 +737,7 @@ describe('UserActivityService', () => {
       // Should have both parent's context and child's additions
       expect(logCalls[0][1]).toMatchObject({
         user: { name: 'parent-user' },
-        session: { id: 'parent-session' },
-        kibana: { space: { id: 'child-space' } },
+        kibana: { space: { id: 'child-space' }, session: { id: 'parent-session' } },
       });
     });
   });
@@ -547,7 +750,7 @@ describe('UserActivityService', () => {
       // Verify service is working
       setupContract.trackUserAction({
         message: 'Before stop',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
       expect(loggingSystemMock.collect(core.logger).info).toHaveLength(1);
@@ -558,7 +761,7 @@ describe('UserActivityService', () => {
       // Verify service is disabled
       setupContract.trackUserAction({
         message: 'After stop',
-        event: { action: TEST_ACTION, type: 'change' },
+        event: { action: TEST_ACTION, type: ['change'] },
         object: { id: '2', name: 'Test', type: 'test', tags: [] },
       });
       expect(loggingSystemMock.collect(core.logger).info).toHaveLength(1);
@@ -574,7 +777,7 @@ describe('UserActivityService', () => {
       const trackAction = () => {
         service.trackUserAction({
           message: 'Test action',
-          event: { action: TEST_ACTION, type: 'change' },
+          event: { action: TEST_ACTION, type: ['change'] },
           object: { id: '1', name: 'Test', type: 'test', tags: [] },
         });
       };

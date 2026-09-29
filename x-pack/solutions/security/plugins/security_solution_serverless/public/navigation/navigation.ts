@@ -25,9 +25,8 @@ export const registerSolutionNavigation = async (
     (productType) => productType.product_line === ProductLine.aiSoc
   );
 
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
+  const agentBuilderNavAtTop = await firstValueFrom(
+    services.featureFlags.getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
   );
 
   // Do not pass a defaultOverride: when userValue is unset, get() must use the registered

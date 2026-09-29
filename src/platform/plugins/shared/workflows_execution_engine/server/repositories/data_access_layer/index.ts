@@ -31,7 +31,7 @@ export { createDataClientBundle } from './implementations/create_data_client_bun
 export {
   getBulkUpdaterWriteResult,
   type BulkUpdaterWriteResult,
-} from './lib/bulk_updater_write_result';
+} from './lib/bulk/bulk_updater_write_result';
 
 export { bulkUpdaterItem, isBulkUpdaterItem } from './types';
 export type {

@@ -40,6 +40,7 @@ export interface OperationExecutionContext {
   failures: PanelFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
+  sectionIdsByKey: Map<string, string>;
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;

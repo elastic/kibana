@@ -97,7 +97,9 @@ export function ApmEmbeddableContext({
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
-  const isCpsEnabled = deps.coreStart.featureFlags.getBooleanValue(
+  // Descendants read the services below while they render, so the flag has to be resolved by the
+  // first render. The core hook seeds it from the synchronous evaluation, then follows changes.
+  const isCpsEnabled = deps.coreStart.featureFlags.useBooleanValue(
     OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
     OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
   );
@@ -115,6 +117,7 @@ export function ApmEmbeddableContext({
             ...deps.coreStart,
             apmSourcesAccess: deps.pluginsStart.apmSourcesAccess,
             dataViews: deps.pluginsStart.dataViews,
+            logsDataAccess: deps.pluginsStart.logsDataAccess,
             slo: deps.pluginsStart.slo,
             telemetry: deps.telemetry,
           }}

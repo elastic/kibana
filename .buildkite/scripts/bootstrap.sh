@@ -32,6 +32,9 @@ BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
+if [[ "${BOOTSTRAP_NO_FROZEN_LOCKFILE:-}" ]]; then
+  BOOTSTRAP_PARAMS+=(--no-frozen-lockfile)
+fi
 
 # Use the packages that are baked into the agent image, if they exist, as a cache
 # But only for agents not mounting the workspace on a local ssd or in memory
@@ -49,9 +52,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
     if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
       echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
-      mkdir -p ./.moon/cache
-      echo "Extracting moon-cache.tar.zst to ./.moon/cache"
-      tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+      extract_moon_cache ~/moon-cache.tar.zst || true
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
@@ -75,7 +76,8 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   rm -rf node_modules
 
   echo "--- pnpm install and bootstrap, attempt 2"
-  pnpm kbn bootstrap --force-install
+  BOOTSTRAP_PARAMS+=(--force-install)
+  pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then

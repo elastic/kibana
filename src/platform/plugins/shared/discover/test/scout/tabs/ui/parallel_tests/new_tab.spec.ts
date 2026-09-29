@@ -50,10 +50,9 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       'tab 1: create a new tab, create another data view from search bar, set query and filter',
       async () => {
         await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await expect(discover.getUninitializedPrompt()).toBeVisible();
 
-        await discover.createDataViewFromSearchBar({ name: 'logsta' });
-        await discover.waitUntilTabIsLoaded();
+        await discover.createDataViewFromSearchBar({ name: 'logsta', waitUntilLoaded: false });
 
         await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpeg' });
         await discover.writeAndSubmitKqlQuery(KQL_QUERY);
@@ -63,10 +62,9 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
     await spaceTest.step('tab 2: create another new tab in ES|QL mode', async () => {
       await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
       await discover.selectTextBaseLang();
-      await discover.waitUntilTabIsLoaded();
-      expect(await discover.getEsqlQueryValue()).toBe('FROM logsta* | SORT @timestamp DESC');
+      expect(await discover.getEsqlQueryValue()).toBe('');
     });
 
     await spaceTest.step(
@@ -90,7 +88,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       'a new tab inherits the active data view with an empty query and no filters',
       async () => {
         await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await expect(discover.getUninitializedPrompt()).toBeVisible();
         expect(await discover.getSelectedDataViewName()).toBe('logsta*');
         expect(await queryBar.getQuery()).toBe('');
         expect(await filterBar.getFilterCount()).toBe(0);
@@ -100,7 +98,6 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
   spaceTest('should create a new tab in ES|QL mode', async ({ pageObjects }) => {
     const { discover, unifiedTabs } = pageObjects;
-    const defaultQuery = 'FROM logst* | SORT @timestamp DESC';
     const updatedQuery = 'FROM logst* | LIMIT 1050';
 
     // tab 0 - created automatically with the default data view
@@ -111,13 +108,12 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
     });
 
     await spaceTest.step(
-      'tab 1: new ES|QL tab defaults to FROM logst* and accepts an edited query',
+      'tab 1: new ES|QL tab starts empty and accepts an edited query',
       async () => {
         await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await expect(discover.getUninitializedPrompt()).toBeVisible();
         await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
-        expect(await discover.getEsqlQueryValue()).toBe(defaultQuery);
+        expect(await discover.getEsqlQueryValue()).toBe('');
 
         await discover.codeEditor.setCodeEditorValue(updatedQuery);
         await discover.submitQuery();
@@ -126,10 +122,10 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       }
     );
 
-    await spaceTest.step('tab 2: another new tab resets to the default FROM logst*', async () => {
+    await spaceTest.step('tab 2: another new tab starts with an empty ES|QL query', async () => {
       await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      expect(await discover.getEsqlQueryValue()).toBe(defaultQuery);
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
+      expect(await discover.getEsqlQueryValue()).toBe('');
     });
   });
 

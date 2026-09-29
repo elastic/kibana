@@ -13,8 +13,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import type { DocumentVersionManager } from './document_version_manager';
 
-import type { SharedBulkItem } from '../../lib/shared_bulk';
-import { sharedBulk } from '../../lib/shared_bulk';
+import type { SharedBulkItem } from '../../lib/bulk/shared_bulk';
+import { sharedBulk } from '../../lib/bulk/shared_bulk';
 import type {
   BulkItemResponse,
   BulkPlainItem,

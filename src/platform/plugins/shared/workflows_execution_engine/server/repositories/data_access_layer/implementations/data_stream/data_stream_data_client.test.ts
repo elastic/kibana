@@ -107,7 +107,7 @@ describe('DataStreamDataClient', () => {
       2,
       expect.objectContaining({
         operations: [
-          { update: { _id: 'a', _index: BACKING_INDEX } },
+          { update: { _id: 'a', _index: BACKING_INDEX, retry_on_conflict: 3 } },
           { doc: { id: 'a', createdAt: CREATED_AT, status: 'running' } },
         ],
       })

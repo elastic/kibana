@@ -50,17 +50,15 @@ export * from './src/playwright/ui_components';
 export {
   AppMenu,
   ContentListWrapper,
+  Controls,
   DataGrid,
   DiscoverApp,
   FilterBar,
   LensApp,
   QueryBar,
   UnifiedTabs,
-  buildContentListSearch,
-  buildContentListUrlRegex,
   ListingTable,
 } from './src/playwright/page_objects';
-export type { ContentListUrlState } from './src/playwright/page_objects';
 
 // Scout core types
 export type {

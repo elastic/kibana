@@ -15,7 +15,7 @@ import { ACTION_POLICY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-ty
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
-import { PolicyMatcher } from '../../lib/dispatcher/state';
+import { formatMatcher } from '../common/format_matcher';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
 
 interface CreateActionPolicySmlTypeOptions {
@@ -76,7 +76,7 @@ export const createActionPolicySmlType = ({
       const attrs = so.attributes;
       const name = attrs?.name ?? originId;
       const description = attrs?.description ?? '';
-      const matcher = PolicyMatcher.of(attrs?.matcher).toKql() ?? '';
+      const matcher = attrs?.matcher ? formatMatcher(attrs.matcher) : '';
       const groupingMode = attrs?.groupingMode ?? '';
       const destinations = attrs?.destinations?.map((d) => `${d.type}:${d.id}`).join(', ') ?? '';
 

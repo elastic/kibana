@@ -61,7 +61,6 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/otel-semantic-conventions'
-  - '@kbn/nightshift-ai'
   - '@kbn/streams-ai'
   - '@kbn/spaces-plugin'
   - '@kbn/usage-collection-plugin'
@@ -89,6 +88,7 @@ dependsOn:
   - '@kbn/sample-log-parser'
   - '@kbn/workflows-extensions'
   - '@kbn/agent-builder-sml-plugin'
+  - '@kbn/server-http-tools'
 tags:
   - plugin
   - prod

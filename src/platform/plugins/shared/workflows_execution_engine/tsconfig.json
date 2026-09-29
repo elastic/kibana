@@ -5,6 +5,7 @@
   },
   "include": [
     "index.ts",
+    "test_helpers.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",

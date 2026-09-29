@@ -28,6 +28,7 @@ import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
+import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
@@ -48,6 +49,8 @@ const i18nTexts = {
 
 export interface WorkflowExecutionPanelProps {
   execution: WorkflowExecutionDto | null;
+  /** Paginated steps-list `total`; callout when this exceeds the UI page budget. */
+  stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -64,6 +67,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
     execution,
     definition,
+    stepExecutionsTotal = 0,
     showBackButton = true,
     error,
     onStepExecutionClick,
@@ -81,6 +85,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     const showDoneButton = Boolean(
       !showBackButton && execution && isTerminalStatus(execution.status)
     );
+    const loadedCount = execution?.stepExecutions.length ?? 0;
 
     return (
       <EuiFlexGroup
@@ -118,9 +123,16 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
           <EuiPanel paddingSize="m" hasShadow={false} css={{ overflowY: 'auto' }}>
+            {execution && (
+              <StepExecutionsTruncatedCallout
+                executionId={execution.id}
+                loadedCount={loadedCount}
+              />
+            )}
             <WorkflowStepExecutionTree
               definition={definition}
               execution={execution ?? null}
+              stepExecutionsTotal={stepExecutionsTotal}
               error={error}
               onStepExecutionClick={onStepExecutionClick}
               selectedId={selectedStepExecutionId ?? null}
