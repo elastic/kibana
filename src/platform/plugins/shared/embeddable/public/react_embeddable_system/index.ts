@@ -10,6 +10,15 @@
 export { PanelIncompatibleError } from './panel_incompatible_error';
 export { PanelNotFoundError } from './panel_not_found_error';
 export { registerEmbeddablePublicDefinition } from './react_embeddable_registry';
+
+/**
+ * Kicks off the embeddable renderer async chunk (buildEmbeddable, PresentationPanel,
+ * PhaseTracker). Call this at dashboard module load time — before loadDashboardApi() starts —
+ * so the chunk loads in parallel with the saved object server fetch.
+ */
+export const prefetchEmbeddableRenderer = (): void => {
+  import('../async_module');
+};
 export { EmbeddableRenderer } from './react_embeddable_renderer';
 export { EmbeddableRendererContext } from './embeddable_renderer_context';
 export type { QuickActionIds } from './embeddable_renderer_context';

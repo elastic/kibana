@@ -9,10 +9,14 @@
 
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { prefetchEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { DashboardRendererProps } from './dashboard_renderer';
 import { untilPluginStartServicesReady } from '../services/kibana_services';
 
 const Component = dynamic(async () => {
+  // Fire embeddable renderer chunk in parallel with the dashboard module chunk so both
+  // download simultaneously rather than sequentially.
+  prefetchEmbeddableRenderer();
   const [{ DashboardRenderer }] = await Promise.all([
     import('./dashboard_module'),
     untilPluginStartServicesReady(),
