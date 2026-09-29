@@ -63,6 +63,7 @@ describe('WaffleMetricControls', () => {
 
     const dropdownButton = screen.getByTestId('infraInventoryMetricDropdown');
     await user.click(dropdownButton);
+
     const modeSwitcher = screen.getByTestId('infraModeSwitcherAddMetricButton');
     expect(modeSwitcher).toBeDisabled();
   });
