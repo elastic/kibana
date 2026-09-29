@@ -801,6 +801,34 @@ describe('WorkersService', () => {
       return { service, getAttachmentServiceMock };
     };
 
+    // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
+    // when the enable half is refused: the preflight check has to run, and fail, before the
+    // settings write, or the operator is left with a bumped revision and a Worker that still
+    // is not enabled — a state its own optimistic UI overlay cannot recover from without a
+    // second, separate save.
+    it('combined settings+enable PATCH: does not persist settings when the enable is blocked', async () => {
+      const harness = createPersistentHarness();
+      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(
+        TRIAGE,
+        {
+          settings: { extras: { autoCloseConfidenceScoreMinThreshold: 0.5 } },
+          settingsRevision: null,
+          enabled: true,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
+      expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(false);
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
     it('preflight fail: blocks with a reason and does not enable the Worker', async () => {
       const harness = createPersistentHarness();
       (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });

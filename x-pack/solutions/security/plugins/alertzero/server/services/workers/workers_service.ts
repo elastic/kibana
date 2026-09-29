@@ -231,6 +231,28 @@ export class WorkersService {
       workflowIdSuffix: spaceId,
     });
 
+    const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+    let alertTriageAttachmentService: AlertTriageAttachmentService | undefined;
+
+    // Validate the enable half before writing anything: a combined settings-and-enable PATCH
+    // must not persist new settings (below) when the enable half is refused, or the operator
+    // is left with a bumped revision and no way back to a consistent "not yet enabled" state.
+    // `status.workflowId` is deterministic regardless of install state, so this can run first.
+    if (isAlertTriageWorker && patch.enabled) {
+      const blockedReason = await this.checkAlertAnalysisPreflight(request);
+      if (blockedReason) {
+        return { outcome: 'blocked', reason: blockedReason };
+      }
+
+      alertTriageAttachmentService = await this.getAlertTriageAttachmentService(
+        request,
+        status.workflowId
+      );
+      if (!alertTriageAttachmentService) {
+        return { outcome: 'blocked', reason: 'ruleAttachmentUnavailable' };
+      }
+    }
+
     if (touchesSettings) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
@@ -296,28 +318,17 @@ export class WorkersService {
         if (!status.installed) return { outcome: 'unavailable' };
       }
 
-      const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
-
-      if (isAlertTriageWorker && patch.enabled) {
-        const blockedReason = await this.checkAlertAnalysisPreflight(request);
-        if (blockedReason) {
-          return { outcome: 'blocked', reason: blockedReason };
-        }
-
+      if (isAlertTriageWorker && patch.enabled && alertTriageAttachmentService) {
         // Attach-then-enable: the Worker only fires from rules carrying its action, so enabling
-        // without attaching produces a Worker that never runs.
-        const attachmentService = await this.getAlertTriageAttachmentService(
-          request,
-          status.workflowId
-        );
-        if (!attachmentService) {
-          return { outcome: 'blocked', reason: 'ruleAttachmentUnavailable' };
-        }
+        // without attaching produces a Worker that never runs. Preflight and attachment-service
+        // resolution already ran above, before anything was written.
         // A failed bulk edit leaves the Worker off, not enabled-but-unattached.
-        await attachAlertTriageWorkerToAllRules(attachmentService).catch((err: Error) => {
-          this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
-          throw err;
-        });
+        await attachAlertTriageWorkerToAllRules(alertTriageAttachmentService).catch(
+          (err: Error) => {
+            this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+            throw err;
+          }
+        );
       }
 
       await management.updateWorkflow(
