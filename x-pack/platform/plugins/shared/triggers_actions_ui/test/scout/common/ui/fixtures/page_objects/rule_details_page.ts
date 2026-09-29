@@ -9,6 +9,7 @@ import type { EuiDataGridObject, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
+  ALERTS_TABLE_EXPAND_COLUMN_ID,
   BIGGER_TIMEOUT,
   RULE_DETAILS_APP_PATH,
   RULE_DETAILS_TEST_SUBJECTS,
@@ -59,9 +60,7 @@ export class RuleDetailsPage {
     await expect(this.alertsTableEmptyState).toBeVisible({ timeout: BIGGER_TIMEOUT });
   }
 
-  async filterAlertsByKql(query: string) {
-    await this.alertsQueryInput.pressSequentially(query);
-    await expect(this.alertsQueryInput).toHaveValue(query);
+  async submitAlertsQuery() {
     await this.alertsQuerySubmitButton.click();
   }
 
@@ -74,24 +73,24 @@ export class RuleDetailsPage {
   }
 
   /**
-   * Opens the alert details flyout for the row at `rowIndex` and switches it to the
-   * fields table tab, which lists every raw alert field (unlike the grid, whose
-   * columns are virtualized out of the DOM past the viewport width).
+   * Opens the alert details flyout for the row at `rowIndex` on its fields table tab,
+   * which lists every raw alert field regardless of which grid columns are rendered.
    */
   async openAlertFieldsTable(rowIndex = 0) {
-    await this.page
-      .locator(
-        `[data-gridcell-row-index="${rowIndex}"] [data-test-subj="${RULE_DETAILS_TEST_SUBJECTS.ROW_EXPAND}"]`
-      )
+    await this.alertsTable
+      .cell(rowIndex, ALERTS_TABLE_EXPAND_COLUMN_ID)
+      .getByTestId(RULE_DETAILS_TEST_SUBJECTS.ROW_EXPAND)
       .click();
     await this.alertFlyout.waitFor({ state: 'visible' });
     await this.page.testSubj.click(RULE_DETAILS_TEST_SUBJECTS.FLYOUT_TABLE_TAB);
+    await this.alertFlyoutFieldsTablePanel.waitFor({ state: 'visible' });
   }
 
   async filterAlertFieldsTable(query: string) {
-    await this.alertFlyoutFieldsTablePanel
-      .getByPlaceholder('Filter by Field, Value, or Description...')
-      .fill(query);
+    await this.page.testSubj.fill(
+      RULE_DETAILS_TEST_SUBJECTS.FLYOUT_FIELDS_TABLE_FILTER_INPUT,
+      query
+    );
   }
 
   /**

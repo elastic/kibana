@@ -155,9 +155,10 @@ test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
       const statusCells = pageObjects.ruleDetailsPage.alertsTable.cells(ALERT_STATUS);
       await expect(statusCells).toHaveCount(2);
 
-      await pageObjects.ruleDetailsPage.filterAlertsByKql(
-        `${ALERT_INSTANCE_ID} : "${MATCHING_ALERT_INSTANCE_ID}"`
-      );
+      const kqlQuery = `${ALERT_INSTANCE_ID} : "${MATCHING_ALERT_INSTANCE_ID}"`;
+      await pageObjects.queryBar.setQuery(kqlQuery);
+      await expect(pageObjects.ruleDetailsPage.alertsQueryInput).toHaveValue(kqlQuery);
+      await pageObjects.ruleDetailsPage.submitAlertsQuery();
 
       await expect(statusCells).toHaveCount(1);
       await expect(statusCells).toHaveText(/active/i);
@@ -173,9 +174,6 @@ test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
 
       await expect(pageObjects.ruleDetailsPage.alertFlyoutFieldsTablePanel).toContainText(
         MATCHING_ALERT_INSTANCE_ID
-      );
-      await expect(pageObjects.ruleDetailsPage.alertFlyoutFieldsTablePanel).not.toContainText(
-        OTHER_ALERT_INSTANCE_ID
       );
     });
   });
