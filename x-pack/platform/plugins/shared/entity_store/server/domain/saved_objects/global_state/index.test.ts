@@ -13,6 +13,7 @@ import { EntityStoreGlobalStateClient } from '.';
 import { EntityStoreGlobalStateTypeName } from './types';
 import {
   DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+  DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
   LATEST_LOG_EXTRACTION_DEFAULTS,
   type EntityStoreGlobalStateOverrides,
 } from './constants';
@@ -89,6 +90,7 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(state?.historySnapshot).toEqual({
         status: 'started',
         frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+        retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
       });
     });
   });
@@ -165,15 +167,20 @@ describe('EntityStoreGlobalStateClient', () => {
           frequency: '12h',
           lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
         },
-      });
+      } as EntityStoreGlobalStateOverrides);
 
       const state = await client.init({
-        historySnapshot: { status: 'started', frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY },
+        historySnapshot: {
+          status: 'started',
+          frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+          retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+        },
       });
 
       expect(state.historySnapshot).toEqual({
         status: 'started',
         frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+        retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
         lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
       });
     });
