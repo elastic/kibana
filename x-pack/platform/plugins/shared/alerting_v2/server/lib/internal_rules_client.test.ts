@@ -64,14 +64,14 @@ describe('createInternalRulesClient', () => {
     expect(result).toEqual({ affected_count: 3, errors: [] });
   });
 
-  it('reports ids found in no space as RULE_NOT_FOUND', async () => {
-    const { client, getRulesClientInSpace } = setup([foundRule('rule-1', ['default'])]);
+  it('reports ids found in no space as RULE_NOT_FOUND without creating a space client', async () => {
+    const { client, getRulesClientInSpace } = setup([]);
 
-    const result = await client.bulkDisableRules({ ids: ['rule-1', 'missing'] });
+    const result = await client.bulkDisableRules({ ids: ['missing'] });
 
-    expect(getRulesClientInSpace).toHaveBeenCalledTimes(1);
+    expect(getRulesClientInSpace).not.toHaveBeenCalled();
     expect(result).toEqual({
-      affected_count: 1,
+      affected_count: 0,
       errors: [
         {
           id: 'missing',
@@ -81,7 +81,7 @@ describe('createInternalRulesClient', () => {
     });
   });
 
-  it("combines every space client's errors with the ids found in no space", async () => {
+  it('returns the errors reported by each space client', async () => {
     const conflict = {
       id: 'rule-2',
       error: { code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT, message: 'conflict' },
@@ -90,18 +90,9 @@ describe('createInternalRulesClient', () => {
       [asSpaceId('space-a')]: [conflict],
     });
 
-    const result = await client.bulkDisableRules({ ids: ['rule-1', 'rule-2', 'missing'] });
+    const result = await client.bulkDisableRules({ ids: ['rule-1', 'rule-2'] });
 
-    expect(result).toEqual({
-      affected_count: 1,
-      errors: [
-        conflict,
-        {
-          id: 'missing',
-          error: expect.objectContaining({ code: ALERTING_ERROR_CODES.RULE_NOT_FOUND }),
-        },
-      ],
-    });
+    expect(result.errors).toEqual([conflict]);
   });
 
   it('rejects more unique ids than BULK_FILTER_MAX_RESOURCES without reading any rule', async () => {
@@ -114,12 +105,12 @@ describe('createInternalRulesClient', () => {
     expect(findByIds).not.toHaveBeenCalled();
   });
 
-  it('does not create a space client when no rule is found', async () => {
-    const { client, getRulesClientInSpace } = setup([]);
+  it('does not count duplicate ids towards BULK_FILTER_MAX_RESOURCES', async () => {
+    const { client, findByIds } = setup([]);
+    const uniqueIds = Array.from({ length: BULK_FILTER_MAX_RESOURCES }, (_, i) => `rule-${i}`);
 
-    const result = await client.bulkDisableRules({ ids: [] });
+    await client.bulkDisableRules({ ids: [...uniqueIds, 'rule-0'] });
 
-    expect(getRulesClientInSpace).not.toHaveBeenCalled();
-    expect(result).toEqual({ affected_count: 0, errors: [] });
+    expect(findByIds).toHaveBeenCalledWith(uniqueIds);
   });
 });

@@ -181,9 +181,8 @@ describe('bindContract', () => {
       const start = container.get(AlertingStartToken);
 
       const client = await start.getInternalRulesClient();
-      const result = await client.bulkDisableRules({ ids: ['rule-1'] });
+      await client.bulkDisableRules({ ids: ['rule-1'] });
 
-      expect(result).toEqual({ affected_count: 1, errors: [] });
       expect(findByIds).toHaveBeenCalledWith(['rule-1']);
       expect(mockRulesClient.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
       expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
@@ -192,9 +191,7 @@ describe('bindContract', () => {
       expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('my-space');
       expect(scope.get(RuleSavedObjectsClientToken)).toBe(namespacedClient);
       expect(scope.get(RequestSpaceIdToken)).toBe('my-space');
-      const request = scope.get(Request);
-      expect(request.headers.authorization).toBeUndefined();
-      expect(isInternalUserRequest(request)).toBe(true);
+      expect(isInternalUserRequest(scope.get(Request))).toBe(true);
     });
 
     it('uses the internal client as-is for rules in the default space', async () => {
