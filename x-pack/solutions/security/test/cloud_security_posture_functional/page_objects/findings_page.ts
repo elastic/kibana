@@ -374,7 +374,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
   const isLatestFindingsTableThere = async () => {
-    const table = await testSubjects.findAll('docTable');
+    const table = await testSubjects.findAll('docTable', 0);
     return table.length > 0;
   };
 

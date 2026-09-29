@@ -108,12 +108,13 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     return nodes[0];
   }
 
-  async getNodesByIdCount(nodeId: string): Promise<number> {
+  async getNodesByIdCount(nodeId: string, timeout?: number): Promise<number> {
     await this.waitGraphIsLoaded();
     const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
     await graph.scrollIntoView();
     const nodes = await graph.findAllByCssSelector(
-      `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
+      `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`,
+      timeout
     );
     return nodes.length;
   }
@@ -124,7 +125,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async assertNodeDoesNotExist(nodeId: string): Promise<void> {
-    const count = await this.getNodesByIdCount(nodeId);
+    const count = await this.getNodesByIdCount(nodeId, 0);
     expect(count).to.be(0);
   }
 

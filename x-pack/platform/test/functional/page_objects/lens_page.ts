@@ -198,7 +198,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async addFieldToTooltip(fieldName: string) {
       const lastIndex = (
-        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]')
+        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]', 0)
       ).length;
       await retry.try(async () => {
         await testSubjects.click('lnsXY-annotation-tooltip-add_field');
@@ -791,7 +791,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setTermsNumberOfValues(value: number) {
       const valuesInput = await this.getNumericFieldReady('indexPattern-terms-values');
       await valuesInput.type(`${value}`);
-      await common.sleep(500);
+      const expectedLabel = value === 1 ? 'Top value' : `Top ${value} values`;
+      await retry.waitFor('terms number of values to commit', async () => {
+        const dimensionTriggers = await testSubjects.findAll('lns-dimensionTrigger');
+        const triggerLabels = await Promise.all(
+          dimensionTriggers.map(async (trigger) => await trigger.getVisibleText())
+        );
+        return triggerLabels.some((label) => label.replace(/\u200b/g, '').includes(expectedLabel));
+      });
     },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
@@ -1026,14 +1033,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await header.waitUntilLoadingHasFinished();
     },
     async waitForSearchInputValue(subVisualizationId: string, searchTerm?: string) {
-      await retry.try(async () => {
-        await this.searchOnChartSwitch(subVisualizationId, searchTerm);
-        await common.sleep(1000); // give time for the value to be typed
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
+      await retry.waitFor('chart switch search results to update', async () => {
         const searchInputValue = await testSubjects.getAttribute('lnsChartSwitchSearch', 'value');
         const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
-        if (searchInputValue !== queryTerm) {
-          throw new Error('Search input value is not the expected value');
-        }
+        const optionExists = await testSubjects.exists(
+          `lnsChartSwitchPopover_${subVisualizationId}`
+        );
+        return searchInputValue === queryTerm && optionExists;
       });
     },
 
@@ -1742,14 +1749,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return Number(renderingCount);
       }
       await header.waitUntilLoadingHasFinished();
+      let previousCount: number | undefined;
+      let stableSince = Date.now();
+
       await retry.waitFor('rendering count to stabilize', async () => {
-        const firstCount = await getRenderingCount();
+        const currentCount = await getRenderingCount();
 
-        await common.sleep(1000);
+        if (currentCount !== previousCount) {
+          previousCount = currentCount;
+          stableSince = Date.now();
+        }
 
-        const secondCount = await getRenderingCount();
-
-        return firstCount === secondCount;
+        // A few fast polls can finish before a debounced render starts. Preserve the previous
+        // one-second stability window while still checking for a new render during that window.
+        return Date.now() - stableSince >= 1000;
       });
     },
 
@@ -1789,7 +1802,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         // The no-data popover can open late after navigation and cover the layer header.
         await timePicker.ensureHiddenNoDataPopover();
         // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 0);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
@@ -1806,6 +1819,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
+      if (await testSubjects.exists(`lns-layerPanel-${index}`)) {
+        return;
+      }
+
       const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
 
       if (tabs[index]) {

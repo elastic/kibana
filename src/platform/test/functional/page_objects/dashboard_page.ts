@@ -310,15 +310,26 @@ export class DashboardPageObject extends FtrService {
 
   public async switchToEditMode() {
     this.log.debug('Switching to edit mode');
-    if (await this.testSubjects.exists('dashboardEditMode')) {
-      // if the dashboard is not already in edit mode
-      await this.testSubjects.click('dashboardEditMode');
-    }
+    let editModeRequested = false;
+    await this.retry.waitFor('edit mode controls', async () => {
+      if (await this.getIsInEditMode()) {
+        return true;
+      }
+
+      if (!editModeRequested && (await this.testSubjects.exists('dashboardEditMode'))) {
+        await this.testSubjects.click('dashboardEditMode');
+        editModeRequested = true;
+      }
+
+      return false;
+    });
+
     // wait until the count of dashboard panels equals the count of drag handles
     await this.retry.waitFor('in edit mode', async () => {
-      const panels = await this.find.allByCssSelector('[data-test-subj="embeddablePanel"]');
+      const panels = await this.find.allByCssSelector('[data-test-subj="embeddablePanel"]', 0);
       const dragHandles = await this.find.allByCssSelector(
-        '[data-test-subj="embeddablePanelDragHandle"]'
+        '[data-test-subj="embeddablePanelDragHandle"]',
+        0
       );
       return panels.length === dragHandles.length;
     });
@@ -348,12 +359,17 @@ export class DashboardPageObject extends FtrService {
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
+    // Probe edit mode first because most callers invoke this while editing. These controls are
+    // mutually exclusive with the view mode control, so waiting for the latter only adds delay.
+    if (await this.getIsInEditMode()) {
+      return false;
+    }
     // Check if the "edit" button exists (indicates we're in view mode)
     if (await this.testSubjects.exists('dashboardEditMode')) {
       return true;
     }
-    // If we're not in edit mode, we're in view mode
-    return !(await this.getIsInEditMode());
+    // Read-only dashboards have no mode controls and are effectively in view mode.
+    return true;
   }
 
   public async ensureDashboardIsInEditMode() {
@@ -474,10 +490,23 @@ export class DashboardPageObject extends FtrService {
       }
     }
     await this.testSubjects.click('dashboardListingCreateButton');
+
+    let createConfirmationExists = false;
+    await this.retry.try(async () => {
+      createConfirmationExists = await this.testSubjects.exists('dashboardCreateConfirm');
+      const dashboardIsReady = await this.find.existsByCssSelector(
+        '[data-dashboard-controls-ready="true"]',
+        0
+      );
+      if (!createConfirmationExists && !dashboardIsReady) {
+        throw new Error('waiting for the new dashboard or its confirmation prompt');
+      }
+    });
+
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.waitForExists('dashboardCreateConfirm', { timeout: 2000 })) {
+    if (createConfirmationExists) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
@@ -676,9 +705,7 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', {
-      timeout: 2000,
-    });
+    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal');
 
     if (!isSaveModalOpen) {
       if (await this.appMenu.menuItemExists('dashboardInteractiveSaveMenuItem')) {
@@ -929,7 +956,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async verifyNoRenderErrors() {
-    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError', 0);
     for (const errorEmbeddable of errorEmbeddables) {
       this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
     }
