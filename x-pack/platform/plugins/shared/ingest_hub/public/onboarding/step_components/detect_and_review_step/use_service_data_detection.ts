@@ -13,7 +13,7 @@ import { DATA_STREAM_API_ROUTES, DATA_STREAM_INDEX_PATTERN_REGEX } from '@kbn/fl
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
-import type { HasDataResponse } from '../../../../common/detection_api';
+import type { HasDataResponse } from '../../../../common/core/detection_api';
 
 const POLL_INTERVAL_MS = 10_000;
 const TIMEOUT_MS = 10 * 60 * 1_000; // 10 minutes
