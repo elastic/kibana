@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import type {
   InvestigationStructuredOutput,
   InvestigationStatus,
@@ -28,7 +27,8 @@ export interface InvestigationTaskOutput {
   conversation_id?: string;
   workflow_status?: InvestigationStatus;
   structured_report?: InvestigationStructuredOutput;
-  conversation?: { rounds: ConversationRound[] };
+  report_truncated?: boolean;
+  conversation_round_count?: number;
   traceId?: string;
   execution_error?: string;
 }

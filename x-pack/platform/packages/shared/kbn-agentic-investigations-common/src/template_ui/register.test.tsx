@@ -21,7 +21,7 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
 } from './register';
-import type { RenderAssignees } from './types';
+import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -115,6 +115,45 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(contract.getTemplateUIDefinition('investigation')?.tabs).toEqual([
       'investigation.overview',
     ]);
+  });
+
+  it('threads renderProposedActions into the overview tab with the conversation id', async () => {
+    const { contract } = createFakeService();
+    const renderProposedActions = jest.fn(({ conversationId }: { conversationId: string }) => (
+      <span>proposed actions for {conversationId}</span>
+    ));
+    register(contract, { renderProposedActions });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    expect(await screen.findByText('proposed actions for conversation-1')).toBeInTheDocument();
+  });
+
+  it('omits the proposed actions section when no renderer is supplied', async () => {
+    const { contract } = createFakeService();
+    register(contract);
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    // Waits for the lazy overview slot's chunk to resolve before asserting it stayed absent.
+    expect(
+      await screen.findByText('A second sign-in replayed the same session cookie.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
   });
 
   it('registers the template UI definition with a header and footer', () => {
@@ -258,7 +297,7 @@ describe('registerEscalationTemplateUI', () => {
     metadata: { status: 'open', assignees: ['uid-1'] },
   };
 
-  it('registers the template with an empty tabs list and a header only', () => {
+  it('registers the template with an overview tab and a header only (no footer)', () => {
     const { contract } = createFakeService();
 
     registerEscalationTemplateUI({
@@ -268,7 +307,7 @@ describe('registerEscalationTemplateUI', () => {
     });
 
     const definition = contract.getTemplateUIDefinition('escalation');
-    expect(definition?.tabs).toEqual([]);
+    expect(definition?.tabs).toEqual(['escalation.overview']);
     expect(definition?.detailsFlyout?.header).toBeDefined();
     expect(definition?.detailsFlyout?.footer).toBeUndefined();
   });
@@ -326,5 +365,84 @@ describe('registerEscalationTemplateUI', () => {
 
     expect(await screen.findByText('open')).toBeInTheDocument();
     expect(screen.getByTestId('escalationHeaderBlocks')).toBeInTheDocument();
+  });
+
+  it('registers the escalation.overview tab', () => {
+    const { contract } = createFakeService();
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      name: 'Escalation',
+    });
+
+    const tab = contract.getTab('escalation.overview');
+    expect(tab).toBeDefined();
+    expect(tab?.label).toBe('Overview');
+  });
+
+  it('renders the overview tab and forwards linkedInvestigationIds to renderLinkedInvestigations', async () => {
+    const { contract } = createFakeService();
+    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn(() => null);
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      name: 'Escalation',
+      renderLinkedInvestigations,
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    const conversationWithLinks: Conversation = {
+      ...escalationConversation,
+      metadata: { status: 'open', linked_investigations: ['inv-1', 'inv-2'] },
+    };
+
+    renderWithKibanaRenderContext(
+      <TabContent conversation={conversationWithLinks} isOpenedFromChat={false} />
+    );
+
+    await waitFor(() => expect(renderLinkedInvestigations).toHaveBeenCalled());
+    expect(renderLinkedInvestigations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        escalationId: 'escalation-1',
+        linkedInvestigationIds: ['inv-1', 'inv-2'],
+        onOpenInvestigation: expect.any(Function),
+      })
+    );
+  });
+
+  it('navigates via openFullscreenConversation with openDetails:true when onOpenInvestigation is called', async () => {
+    const { contract, openFullscreenConversation } = createFakeService();
+    let capturedOnOpen: ((args: { conversationId: string; agentId: string }) => void) | undefined;
+    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn((props) => {
+      capturedOnOpen = props.onOpenInvestigation;
+      return null;
+    });
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      name: 'Escalation',
+      renderLinkedInvestigations,
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    renderWithKibanaRenderContext(
+      <TabContent conversation={escalationConversation} isOpenedFromChat={false} />
+    );
+
+    await waitFor(() => expect(capturedOnOpen).toBeDefined());
+    capturedOnOpen!({ conversationId: 'inv-1', agentId: 'agent-42' });
+
+    expect(openFullscreenConversation).toHaveBeenCalledWith({
+      conversationId: 'inv-1',
+      agentId: 'agent-42',
+      openDetails: true,
+    });
   });
 });

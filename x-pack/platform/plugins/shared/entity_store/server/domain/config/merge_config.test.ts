@@ -339,6 +339,31 @@ describe('getMergedConfig', () => {
       expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
     });
 
+    it('attaches samplingRate to the config for a sampling-capable non-priority process', () => {
+      const merged = getMergedConfig('user', {}, undefined, 'nonPriority', {
+        samplingRate: 0.5,
+      });
+
+      expect(merged.samplingRate).toBe(0.5);
+    });
+
+    it('omits samplingRate when no override is set', () => {
+      const merged = getMergedConfig('user', {}, undefined, 'nonPriority');
+
+      expect(merged).not.toHaveProperty('samplingRate');
+    });
+
+    it('omits samplingRate in priority and single modes even when the override carries one', () => {
+      const override = { samplingRate: 0.5 };
+
+      expect(getMergedConfig('user', {}, undefined, 'priority', override)).not.toHaveProperty(
+        'samplingRate'
+      );
+      expect(getMergedConfig('user', {}, undefined, 'single', override)).not.toHaveProperty(
+        'samplingRate'
+      );
+    });
+
     it('nonPriorityOverride has no effect in priority mode', () => {
       const merged = getMergedConfig('user', {}, undefined, 'priority', {
         maxLogsPerWindowCapBehavior: 'drop',

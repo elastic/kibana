@@ -15,7 +15,10 @@ import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { queryKeys } from '../query_keys';
-import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import {
+  useAdditionalEpisodesDataSource,
+  useQueryV2Source,
+} from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
@@ -64,6 +67,7 @@ export const useFetchAlertingEpisodesQuery = ({
   timeRange,
 }: UseFetchAlertingEpisodesQueryOptions) => {
   const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
+  const queryV2Source = useQueryV2Source();
   const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
 
@@ -78,7 +82,8 @@ export const useFetchAlertingEpisodesQuery = ({
     filterState,
     sortState,
     timeRange ?? undefined,
-    additionalEpisodesDataSource?.id
+    additionalEpisodesDataSource?.id,
+    queryV2Source
   );
 
   const query = useQuery<CombinedEpisodesResult>({
@@ -108,6 +113,7 @@ export const useFetchAlertingEpisodesQuery = ({
               timeRange,
             })
             .then((episodes) => episodes.map((episode) => ({ ...episode, source_id: source.id }))),
+        queryV2Source,
       });
 
       const v2Episodes: AlertEpisode[] = (v2 ?? []).map((ep) => ({

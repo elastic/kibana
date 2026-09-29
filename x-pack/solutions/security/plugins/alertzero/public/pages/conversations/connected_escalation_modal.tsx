@@ -15,6 +15,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,7 +23,7 @@ import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-com
 import {
   useListEscalations,
   useCreateEscalation,
-  useAddToEscalation,
+  useAttachToEscalation,
   useCurrentUserProfile,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
@@ -86,7 +87,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       refetch: refetchEscalations,
     } = useListEscalations({ searchQuery: incidentSearch });
     const createEscalation = useCreateEscalation();
-    const addToEscalation = useAddToEscalation();
+    const attachToEscalation = useAttachToEscalation();
 
     if (!conversationId) return null;
 
@@ -106,7 +107,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     return (
       <EuiModal
         onClose={onClose}
-        style={{ width: 600 }}
+        style={{ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.s }}
         aria-labelledby="escalationModalTitle"
         data-test-subj="escalationModal"
       >
@@ -131,7 +132,11 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             <EuiFlexItem>
               <EuiCheckableCard
                 id="escalation-mode-create"
-                label={T.modes.create.label}
+                label={
+                  <EuiTitle size="xs">
+                    <h4>{T.modes.create.label}</h4>
+                  </EuiTitle>
+                }
                 checked={mode === 'create'}
                 onChange={() => setMode('create')}
                 data-test-subj="escalationModalModeCreate"
@@ -145,7 +150,11 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             <EuiFlexItem>
               <EuiCheckableCard
                 id="escalation-mode-add-to-existing"
-                label={T.modes.addToExisting.label}
+                label={
+                  <EuiTitle size="xs">
+                    <h4>{T.modes.addToExisting.label}</h4>
+                  </EuiTitle>
+                }
                 checked={mode === 'addToExisting'}
                 onChange={() => setMode('addToExisting')}
                 data-test-subj="escalationModalModeAddToExisting"
@@ -211,7 +220,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             searchQuery={incidentSearch}
             onSearchChange={setIncidentSearch}
             onSubmit={(escalationId) =>
-              addToEscalation.mutate(
+              attachToEscalation.mutate(
                 { escalationId, linkedInvestigationId: conversationId },
                 {
                   onSuccess: () => {
@@ -229,7 +238,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                 }
               )
             }
-            isSubmitting={addToEscalation.isLoading}
+            isSubmitting={attachToEscalation.isLoading}
             onCancel={onClose}
           />
         )}
