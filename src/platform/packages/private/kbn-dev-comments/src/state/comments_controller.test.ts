@@ -452,7 +452,7 @@ describe('createCommentsController', () => {
   });
 
   describe('panel thread', () => {
-    it('shows a thread in the panel in place of the pin or guide, and forgets it with comment mode', async () => {
+    it('shows a thread in the panel in place of the pin or guide, and forgets it with comment mode or the page', async () => {
       const { services } = createHost();
       const controller = createCommentsController(services);
       controller.start();
@@ -477,6 +477,32 @@ describe('createCommentsController', () => {
       controller.showInPanel('lost');
       controller.setActive(false);
       expect(controller.store.getState().panelThreadId).toBeNull();
+
+      controller.setActive(true);
+      controller.showInPanel('lost');
+      await services.navigateToPath('/app/two');
+      expect(controller.store.getState().panelThreadId).toBeNull();
+    });
+
+    it('gives way to a thread opened at its pin, by a click or by a guide that found its element', async () => {
+      const { services } = createHost();
+      const controller = createCommentsController(services);
+      controller.start();
+      const lost = createComment('lost');
+      controller.store.setState({ comments: [lost], active: true });
+
+      controller.showInPanel('lost');
+      controller.openThread('lost');
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ panelThreadId: null, activeThreadId: 'lost' })
+      );
+
+      controller.showInPanel('lost');
+      await controller.guideTo(lost);
+      controller.stopGuide(true);
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ panelThreadId: null, activeThreadId: 'lost', guide: null })
+      );
     });
   });
 

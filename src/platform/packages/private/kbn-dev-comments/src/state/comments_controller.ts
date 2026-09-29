@@ -193,6 +193,13 @@ const takeGuideHandoff = (): GuideHandoff | null => {
 const droppingDraft = (state: CommentsState): Partial<CommentsState> =>
   state.pending?.saving ? {} : { pending: null };
 
+/** Opens the thread at its pin; one shown in the panel gives way: one thread at a time. */
+const openingPin = (id: string, focusPin: boolean): Partial<CommentsState> => ({
+  activeThreadId: id,
+  focusPinId: focusPin ? id : null,
+  panelThreadId: null,
+});
+
 /** A screenshot that was asked for could not be taken; the comment is not saved without it. */
 class ScreenshotError extends Error {}
 
@@ -375,13 +382,14 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       return;
     }
     // A guide survives the navigation it asked for (to the comment's page), nothing
-    // else; a draft being saved is kept until the save settles, so that a failure
-    // can hand it back with its text instead of losing it.
+    // else, threads included; a draft being saved is kept until the save settles, so
+    // that a failure can hand it back with its text instead of losing it.
     const guided = guide && comments.find(({ id }) => id === guide.id);
     store.setState((state) => ({
       pageKey,
       activeThreadId: null,
       focusPinId: null,
+      panelThreadId: null,
       guide: guided?.route.pageKey === pageKey ? guide : null,
       ...droppingDraft(state),
     }));
@@ -528,7 +536,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
           comments: [...state.comments, created],
           ...(state.pending?.id === draft.id ? { pending: null } : {}),
           ...(state.pending?.id === draft.id && state.pageKey === draft.route.pageKey
-            ? { activeThreadId: created.id, focusPinId: created.id }
+            ? openingPin(created.id, true)
             : {}),
         }));
       } catch (error) {
@@ -581,11 +589,11 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     },
 
     openThread(id, { focusPin = false } = {}) {
-      store.setState((state) => ({
-        activeThreadId: id,
-        focusPinId: focusPin ? id : null,
-        ...(id ? droppingDraft(state) : {}),
-      }));
+      store.setState((state) =>
+        id
+          ? { ...openingPin(id, focusPin), ...droppingDraft(state) }
+          : { activeThreadId: null, focusPinId: null }
+      );
     },
 
     pinFocused(id) {
@@ -638,7 +646,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       }
       store.setState({
         guide: null,
-        ...(found ? { activeThreadId: guide.id, focusPinId: guide.id } : {}),
+        ...(found ? openingPin(guide.id, true) : {}),
       });
     },
 

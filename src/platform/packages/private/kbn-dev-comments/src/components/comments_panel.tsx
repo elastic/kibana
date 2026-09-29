@@ -413,6 +413,7 @@ const PanelRow = ({
         }
       `}
       data-test-subj={`devCommentsPanelItem-${comment.id}`}
+      data-comment-id={comment.id}
     >
       <button
         type="button"
@@ -604,10 +605,12 @@ export const CommentsPanel = () => {
       const page = Array.from(
         container.querySelectorAll<HTMLElement>('[data-test-subj="devCommentsPanelPage"]')
       ).find((section) => section.dataset.pageKey === left.route.pageKey);
+      // Compared as strings: a selector built from the host's ids could be invalid.
+      const row = Array.from(
+        container.querySelectorAll<HTMLElement>('[data-test-subj^="devCommentsPanelItem-"]')
+      ).find((element) => element.dataset.commentId === left.id);
       const target =
-        container.querySelector<HTMLElement>(
-          `[data-test-subj="devCommentsPanelItem-${left.id}"] > button`
-        ) ??
+        row?.querySelector<HTMLElement>(':scope > button') ??
         // The accordion's trigger, not its arrow, which is out of the tab order.
         page?.querySelector<HTMLElement>('button[aria-expanded]:not([tabindex="-1"])') ??
         container.querySelector<HTMLElement>('[data-test-subj="devCommentsPanelFilter"]');

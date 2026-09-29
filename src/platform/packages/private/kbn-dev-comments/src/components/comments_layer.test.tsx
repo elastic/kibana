@@ -729,6 +729,20 @@ describe('CommentsLayer', () => {
     expect(controller.store.getState().active).toBe(false);
   });
 
+  it('finds the row to go back to by its id, even one with selector syntax in it', async () => {
+    const id = 'comment-"1]';
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([createComment(id)]) });
+    act(() => controller.setActive(true));
+    await screen.findByTestId(`devCommentsPanelItem-${id}`);
+
+    act(() => controller.showInPanel(id));
+    fireEvent.click(await screen.findByTestId('devCommentsPanelBack'));
+    const row = await screen.findByTestId(`devCommentsPanelItem-${id}`);
+    await waitFor(() =>
+      expect(document.activeElement).toBe(within(row).getByRole('button', { name: /Comment/ }))
+    );
+  });
+
   it('shows any comment in the panel from its row menu', async () => {
     const controller = await renderLayer();
     act(() => controller.setActive(true));
@@ -747,6 +761,20 @@ describe('CommentsLayer', () => {
     act(() => controller.setActive(true));
     expect(await screen.findByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
     expect(screen.queryByTestId('devCommentsPanelThread')).toBeNull();
+  });
+
+  it('shows one thread at a time: a pin opened while the panel shows a thread takes its place', async () => {
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    const pin = await screen.findByTestId('devCommentsPin-a');
+
+    act(() => controller.showInPanel('a'));
+    await screen.findByTestId('devCommentsPanelThread');
+    fireEvent.click(pin);
+    await waitFor(() => expect(screen.queryByTestId('devCommentsPanelThread')).toBeNull());
+    expect(screen.getAllByTestId('devCommentsThread')).toHaveLength(1);
+    expect(screen.getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
+    expect(controller.store.getState()).toMatchObject({ activeThreadId: 'a', panelThreadId: null });
   });
 
   it('guides to a covered element by waiting for what covers it to be closed', async () => {
