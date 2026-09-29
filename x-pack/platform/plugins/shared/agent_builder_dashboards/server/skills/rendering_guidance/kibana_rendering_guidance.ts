@@ -38,7 +38,8 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
 - If the generation result includes panel \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
-- For an \`add_controls\` failure, first retry that control once with a field listed in its \`error\` that clearly fits the same intent. If none fits, tell the user in one sentence which filter could not be added because its field is not available in the data. Do not repeat the raw \`error\`, index names, or field lists.
+- For an \`add_controls\` failure about a field that is not mapped or not numeric, first retry that control once with a field listed in its \`error\` that clearly fits the same intent. If none fits, tell the user in one sentence which filter could not be added because its field is not available in the data. Do not repeat the raw \`error\`, index names, or field lists.
+- For any other \`add_controls\` failure, such as a second time slider, explain it in one short sentence in the user's terms.
 
 ## Rendering Edge Cases
 
