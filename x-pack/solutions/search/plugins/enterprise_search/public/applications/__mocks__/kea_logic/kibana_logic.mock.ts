@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';

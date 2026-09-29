@@ -779,7 +779,9 @@ describe('create()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Action type ".cases" is not registered.]`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `[Error: Action type ".cases" is not registered.]`
+    );
   });
 });
 
@@ -1140,7 +1142,9 @@ describe('get()', () => {
 
     await expect(
       actionsClient.get({ id: 'system-connector-.cases' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Connector system-connector-.cases not found]`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `[Error: Connector system-connector-.cases not found]`
+    );
   });
 
   it('does not throw when getting a system action if throwIfSystemAction=false', async () => {
@@ -1477,7 +1481,9 @@ describe('getBulk()', () => {
 
     await expect(
       actionsClient.getBulk({ ids: ['1', 'testPreconfigured', 'system-connector-.cases'] })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Connector system-connector-.cases not found]`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `[Error: Connector system-connector-.cases not found]`
+    );
   });
 
   test('should throw an error if a system action is requested', async () => {

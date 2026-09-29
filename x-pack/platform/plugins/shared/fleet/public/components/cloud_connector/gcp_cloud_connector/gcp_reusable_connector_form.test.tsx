@@ -33,7 +33,7 @@ interface UseGetCloudConnectorsReturn {
   isLoading: boolean;
 }
 
-const mockUseGetCloudConnectors = (vi.mocked(await import('../hooks/use_get_cloud_connectors')))
+const mockUseGetCloudConnectors = vi.mocked(await import('../hooks/use_get_cloud_connectors'))
   .useGetCloudConnectors as MockedFunction<
   (options?: { cloudProvider?: string; accountType?: string }) => UseGetCloudConnectorsReturn
 >;

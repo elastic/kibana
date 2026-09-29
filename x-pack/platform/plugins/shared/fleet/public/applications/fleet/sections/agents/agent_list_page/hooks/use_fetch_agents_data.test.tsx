@@ -143,7 +143,9 @@ describe('useFetchAgentsData', () => {
   beforeEach(async () => {
     mockErrorToast.mockReset();
     mockErrorToast.mockResolvedValue({});
-    const { sendGetAgentTagsForRq, sendGetActionStatus } = vi.mocked(await import('../../../../hooks'));
+    const { sendGetAgentTagsForRq, sendGetActionStatus } = vi.mocked(
+      await import('../../../../hooks')
+    );
     sendGetAgentTagsForRq.mockReturnValue({ items: ['tag1', 'tag2'] });
     sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
   });

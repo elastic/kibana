@@ -155,7 +155,9 @@ describe('ensureAuthorized', () => {
 
     await expect(
       actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Unauthorized to create a "myType" action]`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `[Error: Unauthorized to create a "myType" action]`
+    );
   });
 
   test('checks additional privileges correctly', async () => {

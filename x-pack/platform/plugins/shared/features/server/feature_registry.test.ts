@@ -483,7 +483,9 @@ describe('FeatureRegistry', () => {
 
       expect(() =>
         featureRegistry.registerKibanaFeature(duplicateFeature)
-      ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: Feature with id test-feature is already registered.]`
+      );
     });
 
     ['contains space', 'contains_invalid()_chars', ''].forEach((prohibitedChars) => {
@@ -3715,7 +3717,9 @@ describe('FeatureRegistry', () => {
       featureRegistry.registerElasticsearchFeature(feature);
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: Feature with id test-feature is already registered.]`
+      );
     });
 
     it('cannot register elasticsearch feature after lockRegistration has been called', () => {
@@ -3763,7 +3767,9 @@ describe('FeatureRegistry', () => {
     featureRegistry.registerElasticsearchFeature(elasticsearchFeature);
     expect(() =>
       featureRegistry.registerKibanaFeature(kibanaFeature)
-    ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Feature with id test-feature is already registered.]`
+    );
   });
 
   it('does not allow an Elasticsearch feature to share an id with a Kibana feature', () => {
@@ -3789,6 +3795,8 @@ describe('FeatureRegistry', () => {
     featureRegistry.registerKibanaFeature(kibanaFeature);
     expect(() =>
       featureRegistry.registerElasticsearchFeature(elasticsearchFeature)
-    ).toThrowErrorMatchingInlineSnapshot(`[Error: Feature with id test-feature is already registered.]`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Feature with id test-feature is already registered.]`
+    );
   });
 });

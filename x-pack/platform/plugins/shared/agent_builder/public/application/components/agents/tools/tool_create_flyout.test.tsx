@@ -30,9 +30,9 @@ vi.mock('../../tools/form/tool_form', async () => {
 
 const { useCreateTool } = vi.mocked(await import('../../../hooks/tools/use_create_tools'));
 const { useToolForm } = vi.mocked(await import('../../../hooks/tools/use_tool_form'));
-const { getCreatePayloadFromData } = vi.mocked(await import(
-  '../../tools/form/registry/tools_form_registry'
-));
+const { getCreatePayloadFromData } = vi.mocked(
+  await import('../../tools/form/registry/tools_form_registry')
+);
 
 const mockFormData = {
   type: ToolType.esql,

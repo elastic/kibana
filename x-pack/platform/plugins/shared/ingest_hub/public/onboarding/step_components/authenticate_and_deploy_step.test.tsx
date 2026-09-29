@@ -781,7 +781,7 @@ describe('AuthenticateAndDeployStep', () => {
   // hasStaleMiPolicies to be gated out (!isAgentBased) and old MI policies to be left behind.
   describe('deployment method lock', () => {
     async function getMockDeploymentMethodCard(): Mock {
-      return (vi.mocked(await import('./authenticate_and_deploy_step/deployment_method_card')))
+      return vi.mocked(await import('./authenticate_and_deploy_step/deployment_method_card'))
         .DeploymentMethodCard;
     }
 

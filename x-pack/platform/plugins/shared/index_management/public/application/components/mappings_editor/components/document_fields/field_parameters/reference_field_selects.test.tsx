@@ -68,7 +68,7 @@ const FormWrapper = ({
   );
 };
 
-const mockUseMappingsState = (vi.mocked(await import('../../../mappings_state_context')))
+const mockUseMappingsState = vi.mocked(await import('../../../mappings_state_context'))
   .useMappingsState as Mock;
 
 const ReferenceFieldValueSpy = () => {

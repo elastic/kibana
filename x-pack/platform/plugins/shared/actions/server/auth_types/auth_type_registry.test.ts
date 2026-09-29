@@ -55,7 +55,9 @@ describe('AuthTypeRegistry', () => {
       const authTypeRegistry = new AuthTypeRegistry();
       expect(() =>
         authTypeRegistry.register(getAuthType({ schema: z.string() }))
-      ).toThrowErrorMatchingInlineSnapshot(`[Error: Auth type "my-auth-type" has an invalid schema.]`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: Auth type "my-auth-type" has an invalid schema.]`
+      );
     });
   });
 

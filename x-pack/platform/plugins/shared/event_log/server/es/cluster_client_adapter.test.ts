@@ -617,7 +617,9 @@ describe('doesDataStreamExist', () => {
     clusterClient.indices.getDataStream.mockRejectedValue(new Error('Fail'));
     await expect(
       clusterClientAdapter.doesDataStreamExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: error checking existance of data stream: Fail]`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `[Error: error checking existance of data stream: Fail]`
+    );
   });
 });
 

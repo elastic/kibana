@@ -66,9 +66,9 @@ describe('Skills', () => {
   });
 
   it('shows loading state when skills are loading', async () => {
-    const useAgentSkillsMock = (vi.mocked(await import(
-      '../../../../../../../hooks/skills/use_agent_skills'
-    ))) as {
+    const useAgentSkillsMock = vi.mocked(
+      await import('../../../../../../../hooks/skills/use_agent_skills')
+    ) as {
       useAgentSkills: () => unknown;
     };
     const originalImpl = useAgentSkillsMock.useAgentSkills;
@@ -104,9 +104,9 @@ describe('Skills', () => {
     });
 
     it('keeps reporting content across every word of a multi-word skill name', async () => {
-      const useAgentSkillsMock = (vi.mocked(await import(
-        '../../../../../../../hooks/skills/use_agent_skills'
-      ))) as {
+      const useAgentSkillsMock = vi.mocked(
+        await import('../../../../../../../hooks/skills/use_agent_skills')
+      ) as {
         useAgentSkills: () => unknown;
       };
       const originalImpl = useAgentSkillsMock.useAgentSkills;
@@ -141,9 +141,9 @@ describe('Skills', () => {
     });
 
     it('reports content while loading, even with zero skills so far', async () => {
-      const useAgentSkillsMock = (vi.mocked(await import(
-        '../../../../../../../hooks/skills/use_agent_skills'
-      ))) as {
+      const useAgentSkillsMock = vi.mocked(
+        await import('../../../../../../../hooks/skills/use_agent_skills')
+      ) as {
         useAgentSkills: () => unknown;
       };
       const originalImpl = useAgentSkillsMock.useAgentSkills;
