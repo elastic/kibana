@@ -487,52 +487,57 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       reportIdSlug: 'aws-iam-assume-role',
       sourceId: 'aws-iam-assume-role',
       name: 'AWS IAM AssumeRole Activity',
-      title: 'AWS IAM AssumeRole abuse escalates access to escalated-role in account 123456789012',
+      title:
+        'Local PowerShell-to-AWS-CLI process chain on WIN-ANALYST01 precedes AssumeRole escalation into escalated-role',
       body:
         // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
         // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
-        'Analysts attribute repeated sts.AssumeRole calls escalating dev-user (dev-user@corp.example) ' +
-        'into escalated-role within AWS account 123456789012 to the TA-DEMO-SHADOW-ADMIN intrusion set, ' +
-        'originating from 192[.]0[.]2[.]30 ' +
-        '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31). The assumed role was then used toward ' +
-        'AdministratorAccess and S3 staging on corp-prod-data, consistent with TA-DEMO-SHADOW-ADMIN ' +
-        'tradecraft in the broader IAM ' +
-        'privilege-escalation campaign in this account. Hunt ATT&CK T1078.004 for sts.AssumeRole ' +
-        'in aws.cloudtrail logs.',
+        // Endpoint-led story (distinct from the primary aws-iam scenario's CloudTrail framing):
+        // hunts the powershell.exe -> aws.exe process chain on WIN-ANALYST01 as the leading
+        // indicator, with the resulting sts.AssumeRole call as confirmation.
+        'Endpoint telemetry on WIN-ANALYST01 shows dev-user (dev-user@corp.example), working from ' +
+        '192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31), launching powershell.exe, ' +
+        'which spawns aws.exe to issue sts.AssumeRole into escalated-role within AWS account ' +
+        '123456789012. Analysts attribute the activity to the TA-DEMO-SHADOW-ADMIN intrusion set. ' +
+        'Hunt the local process chain itself — powershell.exe spawning aws.exe (T1059.001) — on ' +
+        'WIN-ANALYST01 as the leading indicator, with the AssumeRole call (T1078.004) as ' +
+        'confirmation, rather than waiting on CloudTrail alone.',
       historicArticles: [
         {
-          title: 'AssumeRole chaining note: escalated-role reused across sessions',
+          title:
+            'Endpoint note: powershell.exe spawns aws.exe on WIN-ANALYST01 ahead of AssumeRole',
           body:
             // Keep the anchored actor name in this slot's body directly (mirrors scenario.body) so
             // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
-            'A follow-up note attributed to the TA-DEMO-SHADOW-ADMIN intrusion set on repeated sts.AssumeRole calls into escalated-role in account ' +
-            '123456789012 by dev-user (dev-user@corp.example) from 192[.]0[.]2[.]30 (192.0.2.30) and ' +
-            '192[.]0[.]2[.]31 (192.0.2.31). Sessions preceded AdministratorAccess and corp-prod-data ' +
-            'staging, consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Hunt T1078.004 for AssumeRole in aws.cloudtrail.',
+            'A follow-up note attributed to the TA-DEMO-SHADOW-ADMIN intrusion set describes dev-user ' +
+            '(dev-user@corp.example) at 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
+            '(192.0.2.31) running powershell.exe on WIN-ANALYST01, which spawns aws.exe to call ' +
+            'sts.AssumeRole into escalated-role in account 123456789012. Hunt the powershell.exe -> ' +
+            'aws.exe chain (T1059.001) on WIN-ANALYST01 ahead of the AssumeRole call (T1078.004).',
         },
         {
-          title: 'CloudTrail retrospective: sts.AssumeRole into escalated-role',
+          title: 'Endpoint retrospective: aws.exe spawned from powershell.exe on WIN-ANALYST01',
           body:
-            'Retrospective covering sts.AssumeRole activity elevating dev-user into escalated-role ' +
-            'in account 123456789012. Source IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
-            '(192.0.2.31) align with dev-user@corp.example. Watch for AdministratorAccess and ' +
-            'corp-prod-data access afterward. Technique: T1078.004.',
+            'Retrospective on WIN-ANALYST01 covering powershell.exe spawning aws.exe to escalate ' +
+            'dev-user into escalated-role in account 123456789012. Source IPs 192[.]0[.]2[.]30 ' +
+            '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) align with dev-user@corp.example. ' +
+            'Technique: T1059.001 for the process chain, T1078.004 for the resulting AssumeRole.',
         },
         {
-          title: 'Role-assumption playbook update for escalated-role in 123456789012',
+          title: 'Playbook update: hunt powershell.exe/aws.exe on WIN-ANALYST01 before AssumeRole',
           body:
-            'Playbook update for escalated-role assumption in account 123456789012. Seed with ' +
+            'Playbook update for WIN-ANALYST01: watch for powershell.exe launching aws.exe ahead of ' +
+            'sts.AssumeRole into escalated-role in account 123456789012. Seed with ' +
             'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
-            '192[.]0[.]2[.]31 (192.0.2.31), and downstream AdministratorAccess plus corp-prod-data ' +
-            'access. ATT&CK: T1078.004.',
+            '192[.]0[.]2[.]31 (192.0.2.31). ATT&CK: T1059.001, T1078.004.',
         },
         {
-          title: 'AssumeRole telemetry refresh for CloudTrail monitoring teams',
+          title: 'Telemetry refresh: process chain fields for Tier 2 execute on WIN-ANALYST01',
           body:
-            'Telemetry refresh for CloudTrail monitors tracking sts.AssumeRole into escalated-role ' +
-            'in 123456789012 en route to AdministratorAccess and corp-prod-data: 192[.]0[.]2[.]30 ' +
-            '(192.0.2.30), 192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user. ' +
-            'Keep hunts aligned to T1078.004.',
+            'Telemetry refresh for WIN-ANALYST01 reminding hunters that powershell.exe spawning ' +
+            'aws.exe (T1059.001) toward escalated-role in account 123456789012 precedes the ' +
+            'sts.AssumeRole call (T1078.004): 192[.]0[.]2[.]30 (192.0.2.30), 192[.]0[.]2[.]31 ' +
+            '(192.0.2.31), dev-user@corp.example, short name dev-user.',
         },
       ],
       articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
@@ -545,12 +550,14 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       narrative: [
         '123456789012',
         'escalated-role',
-        'AdministratorAccess',
-        'corp-prod-data',
+        'WIN-ANALYST01',
+        'powershell.exe',
+        'aws.exe',
         'T1078.004',
+        'T1059.001',
       ],
-      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security'],
-      mitre: ['T1078.004'],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security', 'endpoint'],
+      mitre: ['T1078.004', 'T1059.001'],
       categories: ['cloud-security', 'insider-threat'],
       regions: ['north-america', 'global'],
       historicSourceAliases: {
@@ -564,22 +571,22 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           adversary: {
             signal: 'HIGH',
             summary:
-              'Attributed to the TA-DEMO-SHADOW-ADMIN intrusion set; this report captures the role-assumption phase of the same privilege-escalation activity, with the actor repeatedly reusing one escalated role across multiple sessions.',
+              'Attributed to the TA-DEMO-SHADOW-ADMIN intrusion set; this report captures the local process-execution phase (PowerShell launching the AWS CLI) that precedes the same privilege-escalation activity, staged directly from the compromised endpoint rather than an external API client.',
           },
           capability: {
             signal: 'PARTIAL',
             summary:
-              'Observed tradecraft is limited to repeated role-assumption calls escalating into a single higher-privileged role; no defense-evasion or data-access follow-through is captured in this report, only the escalation mechanism itself.',
+              'Tradecraft observed here is endpoint-native: a PowerShell process spawns the AWS CLI to issue the role-assumption call, rather than the call originating from an already-authenticated external session; no defense-evasion or data-access follow-through is captured in this report.',
           },
           infrastructure: {
             signal: 'PARTIAL',
             summary:
-              'The same two source IP addresses seen elsewhere in this campaign issue the role-assumption calls; no additional infrastructure, staging systems, or C2 channels are described.',
+              'The same two source IP addresses seen elsewhere in this campaign are associated with the endpoint issuing the process chain; no additional infrastructure, staging systems, or C2 channels are described.',
           },
           victim: {
             signal: 'HIGH',
             summary:
-              'The target is the same AWS account and escalated IAM role referenced across this campaign; the report is scoped to a single compromised account rather than a broader victim set.',
+              'The target is the analyst workstation (WIN-ANALYST01) used to reach the same AWS account and escalated IAM role referenced across this campaign, indicating the actor operated directly from a compromised endpoint rather than a remote API client.',
           },
         },
       },
