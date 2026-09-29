@@ -48,10 +48,13 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
   });
 
   it('restricts the shared ML index to the supplied job IDs before the entity lookup', () => {
-    const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1', '24h', [], [
-      'job-a',
-      'job-b',
-    ]);
+    const query = buildEntitiesWithAnomaliesCountQuery(
+      mockEuid,
+      '.entities-v1',
+      '24h',
+      [],
+      ['job-a', 'job-b']
+    );
     const jobPredicate = 'job_id IN ("job-a", "job-b")';
     const whereIdx = query.indexOf(jobPredicate);
     const joinIdx = query.indexOf('| LOOKUP JOIN');
