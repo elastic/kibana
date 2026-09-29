@@ -6,6 +6,16 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
+import type {
+  AttachmentTimelineEvent,
+  ExecutionAbortedEvent,
+  ExecutionFailedEvent,
+  ExecutionPartialRunSummary,
+  ExecutionStartedEvent,
+  ExecutionTerminatedEvent,
+} from './timeline_events';
+import { TimelineEventType } from './timeline_events';
+import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
@@ -13,6 +23,7 @@ import type {
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundOrigin,
+  ConversationRoundStep,
   RoundInput,
   BackgroundExecutionState,
   SubagentRosterEntry,
@@ -41,6 +52,7 @@ export enum ChatEventType {
   promptRequest = 'prompt_request',
   roundStarted = 'round_started',
   roundComplete = 'round_complete',
+  roundInterrupted = 'round_interrupted',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
@@ -324,12 +336,24 @@ export interface RoundCompleteEventData {
   round: ConversationRound;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
+  /**
+   * Present only on a resumed round. Carries the resume execution (`exec_k`) as its own round so the
+   * persistence layer can append it to the timeline append-only, without rewriting the pause.
+   */
+  resume_execution?: {
+    follow_up_round: ConversationRound;
+  };
   /** if the prompt state was updated during the round, contains the up-to-date version */
   conversation_state?: ConversationInternalState;
   /**
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /**
+   * Attachment lifecycle events produced by this round: `chat_input` changes (attachments sent with
+   * the message) and `execution` changes (made by tools). Persisted alongside the round's events.
+   */
+  attachment_events?: AttachmentTimelineEvent[];
   /**
    * Set when this round initialized the bash/VFS workspace for this conversation.
    */
@@ -342,6 +366,63 @@ export const isRoundCompleteEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is RoundCompleteEvent => {
   return event.type === ChatEventType.roundComplete;
+};
+
+// Round interrupted
+
+/** The two ways an execution can end without an outcome. */
+export type ExecutionInterruptionType = 'failed' | 'aborted';
+
+/** The run errored; `error` is exactly what the client received. */
+export interface ExecutionFailedInterruption {
+  type: 'failed';
+  error: SerializedExecutionError;
+}
+
+/** The run was cancelled; `aborted_by` tells where the abort came from, when known. */
+export interface ExecutionAbortedInterruption {
+  type: 'aborted';
+  aborted_by?: ExecutionAbortReason;
+}
+
+/** How an execution was interrupted. */
+export type ExecutionInterruption = ExecutionFailedInterruption | ExecutionAbortedInterruption;
+
+/**
+ * Emitted by the agent handler when the run errors (or is cancelled) after it started: what is
+ * known about the partial run, so the runner can persist it as a failed / aborted execution.
+ * Internal plumbing — stripped from consumer-facing streams like `round_started`.
+ */
+export interface RoundInterruptedEventData {
+  /** The runner's round id (the persisted id differs for a HITL resume). */
+  round_id: string;
+  started_at: string;
+  /**
+   * The processed round input, as the success path stores it on the round: inline attachments
+   * replaced by refs, refs accessed during the run merged in, `attachment_context` rendered.
+   */
+  input: RoundInput;
+  /** Steps completed before the interruption, in order. */
+  steps: ConversationRoundStep[];
+  summary: ExecutionPartialRunSummary;
+  /** Full attachment state at interruption time, same source as `RoundCompleteEventData.attachments`. */
+  attachments: VersionedAttachment[];
+  /** `chat_input` and `execution` attachment changes, built as for `round_complete`. */
+  attachment_events?: AttachmentTimelineEvent[];
+  workspace_id?: string;
+  /** True when the interrupted run was a HITL resume of a paused round. */
+  resumed?: boolean;
+}
+
+export type RoundInterruptedEvent = ChatEventBase<
+  ChatEventType.roundInterrupted,
+  RoundInterruptedEventData
+>;
+
+export const isRoundInterruptedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is RoundInterruptedEvent => {
+  return event.type === ChatEventType.roundInterrupted;
 };
 
 // conversation created
@@ -505,12 +586,37 @@ export type ChatAgentEvent =
   | ThinkingCompleteEvent
   | RoundStartedEvent
   | RoundCompleteEvent
+  | RoundInterruptedEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
   | SubagentRosterUpdatedEvent
   | UserQuestionAskedEvent
   | UserQuestionAnsweredEvent;
+
+export const isExecutionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionStartedEvent => {
+  return event.type === TimelineEventType.executionStarted;
+};
+
+export const isExecutionTerminatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionTerminatedEvent => {
+  return event.type === TimelineEventType.executionTerminated;
+};
+
+export const isExecutionFailedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionFailedEvent => {
+  return event.type === TimelineEventType.executionFailed;
+};
+
+export const isExecutionAbortedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionAbortedEvent => {
+  return event.type === TimelineEventType.executionAborted;
+};
 
 /**
  * All types of events that can be emitted from the chat API.
@@ -519,4 +625,8 @@ export type ChatEvent =
   | ChatAgentEvent
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
-  | ConversationIdSetEvent;
+  | ConversationIdSetEvent
+  | ExecutionStartedEvent
+  | ExecutionTerminatedEvent
+  | ExecutionFailedEvent
+  | ExecutionAbortedEvent;

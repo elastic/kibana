@@ -36,6 +36,13 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 jest.mock('./use_kibana', () => ({
   useKibana: () => ({
     services: {
+      application: {
+        capabilities: {
+          nightshift: {
+            show: true,
+          },
+        },
+      },
       significantEvents: {
         significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
       },

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
@@ -47,6 +48,8 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+
+const ClassicRulesPageStub = () => null;
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -150,6 +153,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       }
       return ruleTypeRegistry.get(ruleTypeId).format;
     },
+    getClassicRulesPage: (props) => React.createElement(ClassicRulesPageStub, props),
   };
 }
 

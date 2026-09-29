@@ -23,6 +23,8 @@ import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
 import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
+import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
+
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
@@ -46,4 +48,5 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(getNotesStepDefinition);
   workflowsExtensions.registerStepDefinition(updateNoteStepDefinition);
   workflowsExtensions.registerStepDefinition(createRuleStepDefinition);
+  workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
 };

@@ -33,6 +33,7 @@ import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import type { DashboardRedirect } from '../dashboard_app/types';
+import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 
 import { Dashboard404Page } from './dashboard_404';
@@ -152,6 +153,10 @@ export function DashboardRenderer({
         onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
+        if (err instanceof SavedObjectNotFound && savedObjectId) {
+          getDashboardRecentlyAccessedService().remove(savedObjectId);
+          coreServices.chrome.recentlyAccessed.remove(savedObjectId);
+        }
         if (!canceled) {
           apm.captureError(err, {
             labels: {

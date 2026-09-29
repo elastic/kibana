@@ -10,7 +10,7 @@
 import { randomBytes } from 'node:crypto';
 import { HITL_TOKEN_EXPIRES_AT_INPUT_FIELD, HITL_TOKEN_HASH_INPUT_FIELD } from '@kbn/workflows';
 import { computeTokenHmac } from '@kbn/workflows/server';
-import { parseDuration } from '../../utils';
+import { computeHitlWaitDeadlineMs } from './hitl_timeout_helpers';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -29,8 +29,16 @@ export function mintHitlExternalResumeToken({
   execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
   timeout: string;
 }): HitlExternalResumeToken {
+  const deadlineMs = computeHitlWaitDeadlineMs(
+    stepExecutionRuntime.stepExecution?.startedAt,
+    timeout
+  );
+  if (deadlineMs === undefined) {
+    throw new Error('HITL resume token requires a started wait');
+  }
+
   const token = randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + parseDuration(timeout)).toISOString();
+  const expiresAt = new Date(deadlineMs).toISOString();
   return {
     token,
     tokenHash: computeTokenHmac(

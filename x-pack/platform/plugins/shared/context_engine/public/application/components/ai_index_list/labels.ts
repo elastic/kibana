@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AiIndexType } from '../../../../common/http_api/ai_indices';
-import type { AiIndexOwner } from '../../utils/ai_index_owner';
 
 export const AI_INDEX_TYPE_LABEL: Record<AiIndexType, string> = {
   index: i18n.translate('xpack.contextEngine.landing.card.type.index', {
@@ -18,7 +17,7 @@ export const AI_INDEX_TYPE_LABEL: Record<AiIndexType, string> = {
   }),
 };
 
-export const AI_INDEX_OWNER_LABEL: Record<AiIndexOwner, string> = {
+export const AI_INDEX_OWNER_LABEL: Record<'managed' | 'user', string> = {
   managed: i18n.translate('xpack.contextEngine.landing.owner.managed', {
     defaultMessage: 'Managed',
   }),

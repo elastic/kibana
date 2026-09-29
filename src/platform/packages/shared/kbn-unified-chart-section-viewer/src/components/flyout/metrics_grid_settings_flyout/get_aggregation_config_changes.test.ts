@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsGridSettings } from '@kbn/discover-utils';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 
 const gridSettings: MetricsGridSettings = {
+  ...METRICS_GRID_SETTINGS_DEFAULTS,
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',

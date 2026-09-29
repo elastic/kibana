@@ -28,8 +28,8 @@ import { i18n } from '@kbn/i18n';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 import { getServices } from '../services';
-import type { EsqlDataResult } from '../utils/fetch_esql_data';
 
 interface EsqlPreviewSectionProps {
   esqlQuery: string;
@@ -122,6 +122,7 @@ export const EsqlPreviewSection = ({
   return (
     <EuiAccordion
       id={accordionId}
+      data-test-subj="customContentEsqlSection"
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -172,7 +173,7 @@ export const EsqlPreviewSection = ({
               <EuiText size="xs" color="subdued">
                 {i18n.translate('xpack.customContent.editFlyout.esqlSection.timePickerHint', {
                   defaultMessage:
-                    'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
+                    'To connect the query to the dashboard time filter, add a WHERE clause with the named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
                 })}
               </EuiText>
             </EuiFlexItem>

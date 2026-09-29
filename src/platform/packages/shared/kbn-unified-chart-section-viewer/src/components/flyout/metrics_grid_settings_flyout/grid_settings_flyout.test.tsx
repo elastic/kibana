@@ -12,7 +12,17 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 import { GridSettingsFlyout } from './grid_settings_flyout';
-import type { MetricsGridSettings } from '@kbn/discover-utils';
+import { type MetricsGridSettings } from '@kbn/discover-utils';
+
+jest.mock('@kbn/discover-utils', () => {
+  const { METRICS_GRID_HISTOGRAM_PERCENTILES, METRICS_GRID_SIMPLE_AGGREGATIONS } =
+    jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
+
+  return {
+    METRICS_GRID_HISTOGRAM_PERCENTILES,
+    METRICS_GRID_SIMPLE_AGGREGATIONS,
+  };
+});
 
 const mockTrackAggregationConfigChanged = jest.fn();
 
@@ -26,6 +36,8 @@ const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
+  dimensions: [],
+  searchTerm: '',
 };
 
 const counterSelect = new EuiSuperSelectTestHarness('metricsExperienceGridSettingsCounterSelect');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { firstValueFrom, type Observable } from 'rxjs';
 
 import type { FeatureFlagsStart as FeatureFlagsStartPublic } from '@kbn/core/public';
 import type { FeatureFlagsStart as FeatureFlagsStartServer } from '@kbn/core/server';
@@ -94,16 +94,16 @@ function getFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartSe
   ): Promise<[boolean | number | string, Observable<boolean | number | string>]> {
     switch (flag.type) {
       case 'boolean': {
-        const value = await service.getBooleanValue(flag.id, flag.fallback);
-        return [value, service.getBooleanValue$(flag.id, value)];
+        const value$ = service.getBooleanValue$(flag.id, flag.fallback);
+        return [await firstValueFrom(value$), value$];
       }
       case 'number': {
-        const value = await service.getNumberValue(flag.id, flag.fallback);
-        return [value, service.getNumberValue$(flag.id, value)];
+        const value$ = service.getNumberValue$(flag.id, flag.fallback);
+        return [await firstValueFrom(value$), value$];
       }
       case 'string': {
-        const value = await service.getStringValue(flag.id, flag.fallback);
-        return [value, service.getStringValue$(flag.id, value)];
+        const value$ = service.getStringValue$(flag.id, flag.fallback);
+        return [await firstValueFrom(value$), value$];
       }
       default: {
         throw new Error('unsupported flag type');

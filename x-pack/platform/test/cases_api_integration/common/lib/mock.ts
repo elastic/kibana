@@ -43,6 +43,9 @@ export const defaultUser = {
   username: 'elastic',
   profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
 };
+
+export const userActionSourceUser = { type: 'user', id: 'user' };
+export const userActionSourceApi = { type: 'api', id: 'api' };
 /**
  * A null filled user will occur when the security plugin is disabled
  */

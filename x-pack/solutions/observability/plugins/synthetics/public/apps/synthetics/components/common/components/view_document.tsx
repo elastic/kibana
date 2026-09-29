@@ -7,7 +7,6 @@
 
 import {
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -15,6 +14,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { MouseEvent } from 'react';
 import React, { useState } from 'react';
@@ -84,19 +84,16 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             {remoteDataViewError ? (
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
-                color="danger"
-                iconType="warning"
                 title={i18n.translate(
                   'xpack.synthetics.monitorDetails.summary.viewDocument.error',
                   {
                     defaultMessage: 'Unable to load document from remote cluster',
                   }
                 )}
-              >
-                {String(remoteDataViewError.message ?? remoteDataViewError)}
-              </EuiCallOut>
+                text={String(remoteDataViewError.message ?? remoteDataViewError)}
+              />
             ) : dataView?.id && hit ? (
               <UnifiedDocViewer hit={hit} dataView={dataView} />
             ) : (

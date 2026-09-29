@@ -38,7 +38,7 @@ export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library
 
 /**
  * Global Advanced Setting gating the global Workflow Executions view
- * (`/app/workflows/executions`).
+ * (`/app/workflows/executions`) and the execution flyout on workflow detail.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
  * readable from any browser plugin that consumes the workflows UI without
@@ -48,11 +48,24 @@ export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
   'workflowsManagement:globalExecutionsView:enabled';
 
 /**
+ * Gates the failed-step error panel "Diagnose with AI Agent" handoff.
+ * Package assembly and CTA wiring ship regardless; default off until rollout.
+ */
+export const WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID =
+  'workflows:executionFlyout:aiDiagnose:enabled';
+
+/**
  * Max length for YAML `connector-id` (triggers, steps, HITL channels) and reported
  * connector ids. Covers Actions saved-object ids, user-friendly aliases, and HITL
  * connector names.
  */
 export const CONNECTOR_ID_MAX_LENGTH = 512;
+
+/**
+ * Explicit trigger binding for every connector instance of the same connector event type.
+ * Must be quoted in YAML (`"*"`); unquoted `*` is YAML alias syntax.
+ */
+export const ALL_CONNECTOR_IDS = '*';
 
 /**
  * Upper bound on a KQL condition (step `if` and trigger `on.condition`).

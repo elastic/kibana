@@ -26,6 +26,7 @@ describe('getHistoryUsersRoute', () => {
     };
 
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },
@@ -254,7 +255,7 @@ describe('getHistoryUsersRoute', () => {
 
       mockOsqueryContext = {
         ...mockOsqueryContext,
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         getStartServices: jest.fn().mockResolvedValue([
           {
             elasticsearch: {

@@ -80,6 +80,9 @@ export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
 export const CASE_TEMPLATE_DETAILS_URL = `${CASE_TEMPLATES_URL}/{template_id}` as const;
+export const CASE_FIELD_DEFINITIONS_URL = `${CASES_URL}/field_definitions` as const;
+export const CASE_FIELD_DEFINITION_DETAILS_URL =
+  `${CASE_FIELD_DEFINITIONS_URL}/{field_definition_id}` as const;
 // Public discovery of the `extended_fields` a caller may apply. `fields` is a static segment,
 // so — like `templates`/`reporters`/`tags` — it resolves ahead of the `{case_id}` param route.
 export const CASE_FIELDS_URL = `${CASES_URL}/fields` as const;
@@ -89,6 +92,9 @@ export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as co
 
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
+
+export const CASE_ATTACHMENTS_URL = `${CASE_DETAILS_URL}/attachments` as const;
+export const CASE_ATTACHMENT_DETAILS_URL = `${CASE_ATTACHMENTS_URL}/{id}` as const;
 
 export const CASE_FILES_URL = `${CASE_DETAILS_URL}/files` as const;
 
@@ -174,6 +180,7 @@ export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
 export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
 export const MAX_USER_ACTION_AUTHORS_FILTER_LENGTH = 100 as const;
+export const MAX_USER_ACTION_SOURCES_FILTER_LENGTH = 10 as const;
 export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 /**
@@ -197,6 +204,7 @@ export const MAX_DELETE_IDS_LENGTH = 100 as const;
 export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
+export const MAX_ATTACHMENT_TYPES_PER_QUERY = 20 as const;
 export const MAX_USER_ACTIONS_PER_CASE = 10000 as const;
 export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
 export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
@@ -213,6 +221,10 @@ export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
+export const MAX_FIELD_DEFINITION_ID_LENGTH = 36 as const; // uuidv4 length
+export const MAX_FIELD_DEFINITION_NAME_LENGTH = 50 as const;
+export const MAX_FIELD_DEFINITION_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_FIELD_DEFINITION_DEFINITION_LENGTH = 30000 as const;
 /**
  * Caps on the templates-v2 / extended-fields system, enforced on new writes only (existing data is
  * never retroactively rejected). These bound what the public mutative template API can create so
@@ -390,6 +402,7 @@ export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
+export const NO_ACTION_SOURCE_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 export const MAX_OBSERVABLES_PER_CASE = 50;
 
@@ -473,6 +486,9 @@ export const OWNER_FIELD = 'owner';
 
 export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
 
+/** v4 UUID — 8-4-4-4-12 hex + 4 hyphens */
+export const OBSERVABLE_ID_MAX_LENGTH = 36;
+
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
@@ -540,6 +556,16 @@ export const CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE =
 export const CASES_TEMPLATE_APPLIED_EVENT_TYPE = 'cases_template_applied' as const;
 
 export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as const;
+
+/**
+ * Field Library management events. One confirmed UI write each, never a total — see
+ * `register_management_events`.
+ */
+export const CASES_FIELD_DEFINITION_CREATED_EVENT_TYPE = 'cases_field_definition_created' as const;
+
+export const CASES_FIELD_DEFINITION_UPDATED_EVENT_TYPE = 'cases_field_definition_updated' as const;
+
+export const CASES_FIELD_DEFINITION_DELETED_EVENT_TYPE = 'cases_field_definition_deleted' as const;
 
 /**
  * Exporting this to make it easier to track the usage across the codebase

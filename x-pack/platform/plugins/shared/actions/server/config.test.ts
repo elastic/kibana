@@ -613,6 +613,22 @@ describe('config validation', () => {
     });
   });
 
+  describe('auth.ears.enabled default', () => {
+    test('defaults enabled to true when ears.url is set but enabled is omitted', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com' } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(true);
+    });
+
+    test('respects explicit enabled: false when ears.url is set', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com', enabled: false } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(false);
+    });
+  });
+
   describe('auth.ears.ssl', () => {
     test('accepts certificate and key together', () => {
       const result = configSchema.validate({
@@ -683,6 +699,76 @@ describe('config validation', () => {
       const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
 
       expect(result.relay?.url).toEqual('http://relay.test');
+    });
+  });
+
+  describe('relay.uiam', () => {
+    test('defaults to disabled on serverless', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: false });
+    });
+
+    test('can be enabled on serverless when mTLS is configured', () => {
+      const result = configSchema.validate(
+        {
+          relay: {
+            url: 'https://relay.test',
+            ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+            uiam: { enabled: true },
+          },
+        },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: true });
+    });
+
+    test('rejects being enabled without mTLS configured', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: true }
+        )
+      ).toThrow(
+        '[relay]: must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set'
+      );
+    });
+
+    test('rejects being enabled with only a certificate configured', () => {
+      expect(() =>
+        configSchema.validate(
+          {
+            relay: {
+              url: 'https://relay.test',
+              ssl: { certificate: '/path/to/cert.pem' },
+              uiam: { enabled: true },
+            },
+          },
+          { serverless: true }
+        )
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
+    });
+
+    test('is rejected outside serverless', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: false }
+        )
+      ).toThrow(/\[relay\.uiam\]/);
+    });
+
+    test('is absent outside serverless when not specified', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: false }
+      );
+
+      expect(result.relay?.uiam).toBeUndefined();
     });
   });
 

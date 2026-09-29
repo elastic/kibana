@@ -60,7 +60,7 @@ export async function addMonitor(
     body: monitor,
     responseType: 'json',
   });
-  expect(res).toHaveStatusCode(statusCode);
+  expect(res, JSON.stringify(res.body)).toHaveStatusCode(statusCode);
   return res;
 }
 

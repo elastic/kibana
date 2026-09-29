@@ -6,6 +6,7 @@
  */
 
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { omitBy } from 'lodash';
 import { allowedAppCategories, type AlertDeletionContext } from '../alert_deletion_client';
 import { deleteAlertsForQuery, getActiveAlertsQuery, getInactiveAlertsQuery } from '.';
@@ -13,7 +14,7 @@ import { deleteAlertsForQuery, getActiveAlertsQuery, getInactiveAlertsQuery } fr
 export const deleteAlertsForSpace = async (
   context: AlertDeletionContext,
   settings: RulesSettingsAlertDeleteProperties,
-  spaceId: string,
+  spaceId: SpaceId,
   signal: AbortSignal
 ): Promise<{ numAlertsDeleted: number; errors?: string[] }> => {
   const taskManager = await context.taskManagerStartPromise;

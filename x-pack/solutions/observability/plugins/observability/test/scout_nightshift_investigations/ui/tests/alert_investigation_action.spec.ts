@@ -51,8 +51,8 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      await browserAuth.loginWithCustomRole(INVESTIGATE_ALERT_ROLE);
       await mockInvestigationApi(page);
+      await browserAuth.loginWithCustomRole(INVESTIGATE_ALERT_ROLE);
     });
 
     test.afterAll(async ({ esClient }) => {
@@ -81,14 +81,14 @@ test.describe(
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
-          request.url().endsWith(`/internal/observability/alerts/${alertId}/investigate`)
+          request.url().endsWith('/internal/nightshift/investigations')
       );
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickInvestigate();
 
-      expect((await requestPromise).url()).toContain(
-        `/internal/observability/alerts/${alertId}/investigate`
-      );
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', id: alertId },
+      });
     });
 
     test('sends an investigation request from the alert detail action menu', async ({
@@ -101,13 +101,50 @@ test.describe(
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
-          request.url().endsWith(`/internal/observability/alerts/${alertId}/investigate`)
+          request.url().endsWith('/internal/nightshift/investigations')
       );
       await pageObjects.alertPage.clickInvestigate();
 
-      expect((await requestPromise).url()).toContain(
-        `/internal/observability/alerts/${alertId}/investigate`
-      );
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', id: alertId },
+      });
+    });
+
+    test('views a completed investigation from an alert row action', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.alertsTablePage.gotoWithAppState({
+        kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+      });
+      await expect
+        .poll(() => pageObjects.alertsTablePage.getRowCount(), { timeout: 30_000 })
+        .toBe(1);
+
+      await pageObjects.alertsTablePage.openActionsMenuForRow(0);
+      await pageObjects.alertsTablePage.clickViewInvestigation();
+
+      await expect
+        .poll(() => page.url())
+        .toContain(`/app/nightshift?investigationId=investigation-1`);
+      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
+    });
+
+    test('views a completed investigation from the alert detail action menu', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.alertPage.goto(alertId);
+      await pageObjects.alertPage.openActionsMenu();
+
+      await pageObjects.alertPage.clickViewInvestigation();
+
+      await expect
+        .poll(() => page.url())
+        .toContain(`/app/nightshift?investigationId=investigation-1`);
+      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
   }
 );

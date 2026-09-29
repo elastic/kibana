@@ -62,6 +62,16 @@ describe('inboundEventsRoute', () => {
     expect(addVersionMock).toHaveBeenCalledWith(
       expect.objectContaining({
         version: INBOUND_EVENTS_API_VERSION,
+        validate: expect.objectContaining({
+          response: expect.objectContaining({
+            200: expect.objectContaining({
+              description: expect.stringMatching(/handshake/i),
+            }),
+            202: expect.anything(),
+            404: expect.anything(),
+            500: expect.anything(),
+          }),
+        }),
       }),
       expect.any(Function)
     );

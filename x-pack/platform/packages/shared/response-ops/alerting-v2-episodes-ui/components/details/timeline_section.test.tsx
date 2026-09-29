@@ -54,7 +54,7 @@ const mockAction: EpisodeActionHistoryEntry = {
   actor: 'user-uid-1',
   episode_id: 'ep-1',
   group_hash: 'hash-1',
-  tags: null,
+  tags: [],
   assignee_uid: null,
   expiry: null,
   reason: null,

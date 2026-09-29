@@ -1,5 +1,5 @@
 {
-  "sha1": "e9bf888c812798339b181438d99346faae32516e",
+  "sha1": "c70a8c021d0e4e1a9091a2ea2ac7ff180294a6fd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -265,59 +265,55 @@
       }
     },
     {
-      "id": "d477aadf04adbc2-d5bf7aa0c833ea4",
-      "title": "API key invalidation on rule operations enable rule preserves existing API keys without invalidation",
-      "expectedStatus": "skipped",
+      "id": "d477aadf04adbc2-5e658227a7cbb3c",
+      "title": "[NON-MKI] API key invalidation on rule operations enable rule preserves existing API keys without invalidation",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 49,
-        "column": 59
+        "line": 53,
+        "column": 27
       }
     },
     {
-      "id": "d477aadf04adbc2-a91a1d94d723dae",
-      "title": "API key invalidation on rule operations update rule rotates both apiKey and uiamApiKey",
-      "expectedStatus": "skipped",
+      "id": "d477aadf04adbc2-d52ae8d5213b298",
+      "title": "[NON-MKI] API key invalidation on rule operations update rule rotates both apiKey and uiamApiKey",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 92,
-        "column": 16
+        "line": 93,
+        "column": 57
       }
     },
     {
-      "id": "d477aadf04adbc2-32d3d50cf3d8948",
-      "title": "API key invalidation on rule operations update_api_key rotates both apiKey and uiamApiKey",
-      "expectedStatus": "skipped",
+      "id": "d477aadf04adbc2-2c75ff7b462bb14",
+      "title": "[NON-MKI] API key invalidation on rule operations update_api_key rotates both apiKey and uiamApiKey",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 156,
-        "column": 28
+        "line": 152,
+        "column": 25
       }
     },
     {
-      "id": "d477aadf04adbc2-7bf0ffd8af69858",
-      "title": "API key invalidation on rule operations bulk enable preserves existing API keys without invalidation",
-      "expectedStatus": "skipped",
+      "id": "d477aadf04adbc2-3832c6b6dab7d2e",
+      "title": "[NON-MKI] API key invalidation on rule operations bulk enable preserves existing API keys without invalidation",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 211,
-        "column": 22
+        "line": 203,
+        "column": 27
       }
     },
     {

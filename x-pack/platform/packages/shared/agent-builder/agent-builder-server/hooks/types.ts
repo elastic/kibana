@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, ConversationRound } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
@@ -22,6 +23,13 @@ interface AgentHookContextBase {
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
+  /**
+   * Id of the conversation this round belongs to. Absent for standalone (sub-agent) runs.
+   * Present but ephemeral for `ai.agent` workflow steps that set neither `create-conversation`
+   * nor `conversation_id`: those resolve a placeholder conversation that is never persisted, so
+   * the id is safe to correlate a single round but not to key anything that must outlive it.
+   */
+  conversationId?: string;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
@@ -37,10 +45,17 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
   toolHandlerContext: ToolHandlerContext;
 }
 
+export interface AfterExecutionHookContext extends AgentHookContextBase {
+  round: ConversationRound;
+  conversationId?: string;
+  agentConfiguration: AgentConfiguration;
+}
+
 export interface HookContextByLifecycle {
   [HookLifecycle.beforeAgent]: BeforeAgentHookContext;
   [HookLifecycle.beforeToolCall]: BeforeToolCallHookContext;
   [HookLifecycle.afterToolCall]: AfterToolCallHookContext;
+  [HookLifecycle.afterExecution]: AfterExecutionHookContext;
 }
 
 export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextByLifecycle[E];
@@ -58,6 +73,7 @@ export interface HookHandlerResultByLifecycle {
   [HookLifecycle.afterToolCall]: {
     toolReturn?: RunToolReturn;
   };
+  [HookLifecycle.afterExecution]: Record<string, never>;
 }
 
 export type HookHandlerResult<E extends HookLifecycle = HookLifecycle> =

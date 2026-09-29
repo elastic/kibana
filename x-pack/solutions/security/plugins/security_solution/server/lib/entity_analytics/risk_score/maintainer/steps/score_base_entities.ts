@@ -373,3 +373,81 @@ const applyBaseScoreModifiers = ({
 
   return { entityIds: scores.map((score) => score.entity_id), scores: finalScores, entities };
 };
+
+/**
+ * Writes a zero base score for one entity, using the modifiers on its entity store record.
+ *
+ * An entity with no alert in the engine's range produces no score above, so its last score
+ * document stays in place with whatever criticality and watchlists it was written with. A full
+ * engine run clears that up in `resetToZero`; this lets a single-entity recalculation do the
+ * same right away instead of leaving the old values on screen until the next run.
+ */
+export const persistZeroBaseScore = async ({
+  crudClient,
+  logger,
+  entityType,
+  entityId,
+  now,
+  watchlistConfigs,
+  calculationRunId,
+  writer,
+  idBasedRiskScoringEnabled,
+  refresh,
+}: {
+  crudClient: EntityUpdateClient;
+  logger: ScopedLogger;
+  entityType: EntityType;
+  entityId: string;
+  now: string;
+  watchlistConfigs: Map<string, WatchlistObject>;
+  calculationRunId: string;
+  writer: RiskEngineDataWriter;
+  idBasedRiskScoringEnabled: boolean;
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+}): Promise<number> => {
+  const entities = await fetchEntitiesByIds({
+    crudClient,
+    entityIds: [entityId],
+    logger,
+    errorContext: 'Error fetching entity for the zero base score. Skipping the zero score write',
+  });
+
+  // Without the entity we would write a score carrying no modifiers at all, which is worse than
+  // leaving the previous score alone.
+  if (!entities.has(entityId)) {
+    logger.debug(`Skipping zero base score for ${entityId}: entity not found in store`);
+    return 0;
+  }
+
+  const scores = applyScoreModifiersFromEntities({
+    now,
+    identifierType: entityType,
+    scoreType: 'base',
+    calculationRunId,
+    page: {
+      scores: [
+        { entity_id: entityId, alert_count: 0, score: 0, normalized_score: 0, risk_inputs: [] },
+      ],
+      identifierField: 'entity.id',
+    },
+    entities,
+    watchlistConfigs,
+  });
+
+  const scoresWrittenRiskIndex = await persistScoresToRiskIndex({
+    writer,
+    entityType,
+    scores,
+    logger,
+    refresh,
+  });
+  await persistScoresToEntityStore({
+    crudClient,
+    logger,
+    entityType,
+    scores,
+    enabled: idBasedRiskScoringEnabled,
+  });
+
+  return scoresWrittenRiskIndex;
+};

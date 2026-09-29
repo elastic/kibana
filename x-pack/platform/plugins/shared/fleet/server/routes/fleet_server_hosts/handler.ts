@@ -21,6 +21,7 @@ import { FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService, fleetServerHostService } from '../../services';
 
 import type {
+  FleetRequestHandler,
   FleetServerHost,
   GetOneFleetServerHostRequestSchema,
   PostFleetServerHostRequestSchema,
@@ -54,6 +55,18 @@ function ensureNoDuplicateSecrets(fleetServerHost: Partial<FleetServerHost>) {
   if (fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key) {
     throw Boom.badRequest('Cannot specify both ssl.agent_key and secrets.ssl.agent_key');
   }
+}
+
+function sanitizeFleetServerHostForNonSettingsRead(host: FleetServerHost): FleetServerHost {
+  const { secrets, ...hostWithoutSecrets } = host;
+  const sanitizedHost: FleetServerHost = { ...hostWithoutSecrets };
+
+  if (host.ssl) {
+    const { key, es_key, agent_key, ...sslWithoutSecrets } = host.ssl;
+    sanitizedHost.ssl = sslWithoutSecrets;
+  }
+
+  return sanitizedHost;
 }
 
 async function checkFleetServerHostsWriteAPIsAllowed(
@@ -215,10 +228,18 @@ export const putFleetServerHostHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
+export const getAllFleetServerHostsHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  const fleetContext = await context.fleet;
   const res = await fleetServerHostService.list();
+  const items = fleetContext.authz.fleet.readSettings
+    ? res.items
+    : res.items.map(sanitizeFleetServerHostForNonSettingsRead);
   const body = {
-    items: res.items,
+    items,
     page: res.page,
     perPage: res.perPage,
     total: res.total,

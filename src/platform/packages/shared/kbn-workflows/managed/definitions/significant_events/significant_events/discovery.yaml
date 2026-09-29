@@ -41,6 +41,10 @@ triggers:
         default: 80
         required: false
         description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+      - name: rootTriggeredBy
+        type: string
+        required: false
+        description: 'Root workflow trigger type propagated by a managed driver.'
 outputs:
   - name: processedCount
     type: number
@@ -54,6 +58,41 @@ consts:
   INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
 
 steps:
+  - name: bootstrap_cleanup_workflow
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
+  - name: check_budget
+    type: kibana.request
+    if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+      body:
+        group: 'detection'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
+  - name: exit_if_budget_denied
+    type: if
+    condition: '${{ steps.check_budget.output.allowed == false }}'
+    steps:
+      - name: output_budget_denied
+        type: workflow.output
+        with:
+          processedCount: 0
+          hasWork: false
+          suppressedRuleCount: 0
+
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
     type: data.set
@@ -166,6 +205,8 @@ steps:
     connector-id-by-feature: 'significant_events_discovery'
     plugin-id: 'significant_events_discovery'
     aggregate-by: 'significant_events'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
     with:
@@ -182,12 +223,10 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every detection that is done this cycle: (1) already-recorded
-              known noise/false-positive that exited after the confirmation query without
-              events_write, or (2) a detection whose events_write result was written: true
-              or skipped with reason existing_active_event or unchanged_outcome.
-              Failed (bulk_error) or unattempted writes (except the already-recorded-noise
-              exit) must not be included.
+              rule_uuid of every detection that is done this cycle: a detection whose
+              events_write result was written: true or skipped with reason
+              existing_active_event or unchanged_outcome.
+              Failed (bulk_error) or unattempted writes must not be included.
               Used both as a hallucination guardrail (schema validation forces the agent
               to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -397,9 +436,8 @@ steps:
                       ${{ steps.resolve_open_event.error == null
                         and steps.resolve_open_event.output.hits.hits[0] != null }}
                     steps:
-                      # The dedupe gate lives on this wrapping `if` step because
-                      # `workflow.executeAsync` does not support an inline `if`
-                      # (it is silently stripped during schema parsing).
+                      # Keep the dedupe condition as a wrapping step so an investigation starts
+                      # only after event deduplication.
                       - name: guard_missing_investigation
                         type: if
                         condition: >-
@@ -407,26 +445,29 @@ steps:
                             or steps.check_prior_investigation.output.count == 0 }}
                         steps:
                           - name: trigger_investigation
-                            type: workflow.executeAsync
+                            type: nightshift.triggerInvestigation
                             with:
-                              workflow-id: 'system-significant-events-investigation'
-                              inputs:
-                                message: |
-                                  {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
+                              subject_type: significant_event
+                              subject_id: '{{ foreach.item.event_id }}'
+                              message: |
+                                {{ steps.resolve_open_event.output.hits.hits[0]._source.title | truncate: 512, '' }}
 
-                                  {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
+                                {{ steps.resolve_open_event.output.hits.hits[0]._source.summary | truncate: 7000, '' }}
 
-                                  Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
-                                stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
-                                concurrency_key: '{{ foreach.item.event_id }}'
-                                context:
-                                  source: 'significant_event'
-                                  trigger_type: 'automatic'
-                                  event_uuid: '{{ foreach.item.event_uuid }}'
-                                  event_id: '{{ foreach.item.event_id }}'
-                                  status: '{{ foreach.item.status }}'
-                                  causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
-                                  blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
+                                Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis | truncate: 2000, '' }}
+                              title: '{{ steps.resolve_open_event.output.hits.hits[0]._source.title }}'
+                              summary: '{{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}'
+                              stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
+                              concurrency_key: '{{ foreach.item.event_id }}'
+                              trigger_type: automatic
+                              context:
+                                event_uuid: '{{ foreach.item.event_uuid }}'
+                                event_id: '{{ foreach.item.event_id }}'
+                                status: '{{ foreach.item.status }}'
+                                causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
+                                blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
+                            on-failure:
+                              continue: true
 
   - name: output_result
     type: workflow.output

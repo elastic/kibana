@@ -30,6 +30,7 @@ export {
   builtinWorkflowInputDefinitionRefValuesForZod,
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
   mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
 } from './spec/builtin_workflow_input_definitions';
 export type { JsonSchema } from './spec/schema/common/json_model_shape_schema';
@@ -108,6 +109,24 @@ export {
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
 
+// The action-workflow contract. Exported from the root entry (rather than only
+// from `./managed`) so a consumer can validate `consts.actionMetadata` without
+// pulling every managed workflow definition into its bundle.
+export {
+  ACTION_WORKFLOW_INPUT,
+  ACTION_WORKFLOW_TAG,
+  actionApprovalPolicySchema,
+  actionCategorySchema,
+  actionImpactSchema,
+  actionMetadataSchema,
+} from './managed/action_workflow';
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionImpact,
+  ActionMetadata,
+} from './managed/action_workflow';
+
 export {
   isWorkflowValidationRuleId,
   WORKFLOW_VALIDATION_RULE_IDS,
@@ -118,3 +137,17 @@ export type {
   WorkflowValidationRuleOwner,
   WorkflowValidationRules,
 } from './validation/rules';
+
+export {
+  WORKFLOW_ACCESS_CONTROL_ROLES,
+  workflowAccessControlSchema,
+  storedWorkflowAccessControlSchema,
+  getWorkflowPermissions,
+} from './common/access_control';
+export type {
+  WorkflowAccessControl,
+  WorkflowAccessControlRole,
+  WorkflowAccessOperation,
+  WorkflowPermissions,
+  WorkflowAccessSubject,
+} from './common/access_control';

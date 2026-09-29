@@ -8,10 +8,20 @@
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
+import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { useHostTabs } from '../../application/tabs_context';
 import { experimentalBadge } from '../../components/experimental_badge';
+import { paths } from '../../constants';
+import {
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
+import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
   defaultMessage: 'Rules',
@@ -22,6 +32,8 @@ const getRulesListMenu = ({
   onCreateEsqlRule,
   onCreateWithAgent,
   onBuildSequence,
+  showBuildSequence,
+  showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
@@ -29,23 +41,27 @@ const getRulesListMenu = ({
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   onBuildSequence: () => void;
+  showBuildSequence: boolean;
+  showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }): AppHeaderMenu => ({
-  items: [
-    {
-      id: 'buildSequence',
-      label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
-        defaultMessage: 'Build a sequence',
-      }),
-      iconType: 'branch',
-      tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
-        defaultMessage: 'Chain rules to detect multi-step alert patterns',
-      }),
-      testId: 'createSequenceRuleButton',
-      run: onBuildSequence,
-    },
-  ],
+  items: showBuildSequence
+    ? [
+        {
+          id: 'buildSequence',
+          label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
+            defaultMessage: 'Build a sequence (Experimental)',
+          }),
+          iconType: 'branch',
+          tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
+            defaultMessage: 'Chain rules to detect multi-step alert patterns',
+          }),
+          testId: 'createSequenceRuleButton',
+          run: onBuildSequence,
+        },
+      ]
+    : [],
   primaryActionItem: {
     id: 'createRule',
     label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
@@ -71,18 +87,22 @@ const getRulesListMenu = ({
           run: onCreateEsqlRule,
           testId: 'createEsqlRuleButton',
         },
-        {
-          id: 'createWithAgent',
-          label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
-            defaultMessage: 'Create with agent',
-          }),
-          iconType: 'sparkles' as const,
-          order: 1,
-          run: onCreateWithAgent,
-          testId: 'createWithAgentButton',
-          disableButton: createWithAgentDisabled,
-          tooltipContent: createWithAgentTooltipText,
-        },
+        ...(showCreateWithAgent
+          ? [
+              {
+                id: 'createWithAgent',
+                label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
+                  defaultMessage: 'Create with agent (Experimental)',
+                }),
+                iconType: 'sparkles' as const,
+                order: 1,
+                run: onCreateWithAgent,
+                testId: 'createWithAgentButton',
+                disableButton: createWithAgentDisabled,
+                tooltipContent: createWithAgentTooltipText,
+              },
+            ]
+          : []),
       ],
     },
   },
@@ -94,8 +114,6 @@ export interface RulesListHeaderProps {
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   onBuildSequence: () => void;
-  createWithAgentDisabled?: boolean;
-  createWithAgentTooltipText?: string;
 }
 
 /**
@@ -109,11 +127,56 @@ export const RulesListHeader = ({
   onCreateEsqlRule,
   onCreateWithAgent,
   onBuildSequence,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
 }: RulesListHeaderProps) => {
   const phase = useContentListPhase();
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
+
+  const application = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+  const hostTabs = useHostTabs();
+  const showBuildSequence = useAlertingV2ExperimentalFeatures();
+  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
+  const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
+
+  const defaultTabs = useMemo<AppHeaderTab[]>(() => {
+    const headerTabs: AppHeaderTab[] = [
+      {
+        id: 'v2Rules',
+        label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
+          defaultMessage: 'V2 rules',
+        }),
+        isSelected: true,
+        href: basePath.prepend(paths.ruleList),
+        badge: {
+          iconType: 'sparkles',
+          tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
+            defaultMessage: 'New',
+          }),
+        },
+        'data-test-subj': 'v2RulesTab',
+      },
+    ];
+
+    if (canAccessTriggersActionsRules(application.capabilities)) {
+      headerTabs.push({
+        id: 'v1Rules',
+        label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
+          defaultMessage: 'V1 rules',
+        }),
+        isSelected: false,
+        href: basePath.prepend(triggersActionsRoute),
+        'data-test-subj': 'v1RulesTab',
+      });
+    }
+
+    // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
+    return headerTabs.length > 1 ? headerTabs : [];
+  }, [basePath, application.capabilities]);
+
+  const tabs = hostTabs ?? defaultTabs;
 
   const headerMenu = useMemo(
     () =>
@@ -123,6 +186,8 @@ export const RulesListHeader = ({
             onCreateEsqlRule,
             onCreateWithAgent,
             onBuildSequence,
+            showBuildSequence,
+            showCreateWithAgent,
             createWithAgentDisabled,
             createWithAgentTooltipText,
           })
@@ -133,6 +198,8 @@ export const RulesListHeader = ({
       onCreateEsqlRule,
       onCreateWithAgent,
       onBuildSequence,
+      showBuildSequence,
+      showCreateWithAgent,
       createWithAgentDisabled,
       createWithAgentTooltipText,
     ]
@@ -143,6 +210,7 @@ export const RulesListHeader = ({
       <AppHeader
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
+        tabs={tabs}
         badges={[experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}

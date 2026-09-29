@@ -29,12 +29,13 @@ import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
 import { OverviewCardView } from './overview_cards_view/overview_card_view';
+import { OverviewTableColumnSelector } from './compact_view/components/overview_table_column_selector';
 
 export const OverviewGrid = memo(
   ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
     const dispatch = useDispatch();
 
-    const { status, loaded: isInitialized, loading } = useOverviewStatusState();
+    const { status, loaded: isInitialized, loading, total } = useOverviewStatusState();
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
     const setFlyoutConfigCallback = useCallback(
@@ -70,7 +71,7 @@ export const OverviewGrid = memo(
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <OverviewPaginationInfo
-                  total={status ? monitorsSortedByStatus.length : undefined}
+                  total={status ? total ?? monitorsSortedByStatus.length : undefined}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -90,6 +91,7 @@ export const OverviewGrid = memo(
           <EuiFlexItem grow={false}>
             <SortFields />
           </EuiFlexItem>
+          {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
           <EuiFlexItem grow={false}>
             <GroupFields />
           </EuiFlexItem>

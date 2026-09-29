@@ -10,6 +10,7 @@
 import type { ByteSizeValue } from '@kbn/config-schema';
 import type { Duration } from 'moment-timezone';
 import type { LayoutConfigType } from '../layout';
+import type { LogFileWriteErrorHandler } from './write_error';
 
 /**
  * Configuration of a rolling-file appender
@@ -37,6 +38,20 @@ export interface RollingFileAppenderConfig {
    * The {@link RetentionPolicy | retention strategy} to use to know which files to keep.
    */
   retention?: RetentionPolicyConfig;
+}
+
+/**
+ * Plugin-only extension of {@link RollingFileAppenderConfig}: options that cannot be expressed
+ * in YAML, accepted exclusively through {@link LoggingServiceSetup.configure}.
+ *
+ * @public
+ */
+export interface RollingFileAppenderPluginConfig extends RollingFileAppenderConfig {
+  /**
+   * Opts this appender out of crashing the process when the log file cannot be written.
+   * See {@link LogFileWriteErrorHandler}.
+   */
+  onWriteError?: LogFileWriteErrorHandler;
 }
 
 /**

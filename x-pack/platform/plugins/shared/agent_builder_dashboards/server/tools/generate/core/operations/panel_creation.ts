@@ -15,8 +15,9 @@ import {
 import type { PanelFailure } from '../utils';
 import { getErrorMessage } from '../utils';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import type { InlinePanelOperationType } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
-import type { ResolveCustomContentTemplate } from './types';
+import type { ResolveAttachmentPanel, ResolveCustomContentTemplate } from './types';
 import {
   PANEL_TYPE_DEFINITIONS,
   type AddPanelsItemInput,
@@ -180,19 +181,23 @@ const getResolvedPanelCreationRequests = ({
  * - `source: 'config'`: built by value from the panel type's registry definition.
  * - `source: 'request'`: read from the up-front parallel resolution (keyed by
  *   panel input index).
+ * - `source: 'attachment'`: built from the referenced visualization attachment.
  *
- * Returns `undefined` and records a failure when a panel request didn't resolve.
+ * Returns `undefined` and records a failure when a panel request or attachment
+ * didn't resolve.
  */
 export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests,
   operationIndex,
   operationType,
   failures,
+  resolveAttachmentPanel,
 }: {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
-  operationType: DashboardOperation['operation'];
+  operationType: InlinePanelOperationType;
   failures: PanelFailure[];
+  resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
     getResolvedPanelCreationRequests({
@@ -206,6 +211,18 @@ export const createPanelInputMaterializer = ({
       return {
         panelContent: PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config),
       };
+    }
+
+    if (item.source === 'attachment') {
+      if (!resolveAttachmentPanel) {
+        throw new Error('Attachment panel resolver is required for attachment-source panels.');
+      }
+      const resolved = resolveAttachmentPanel(item.attachment_id, operationType);
+      if (resolved.type === 'failure') {
+        failures.push(resolved.failure);
+        return undefined;
+      }
+      return { panelContent: resolved.panelContent };
     }
 
     const resolvedRequest = resolvedRequestByInputIndex.get(panelInputIndex);
@@ -244,7 +261,7 @@ export const applyCustomContentTemplates = async (
       if (!prompt || persistedConfig.template) return;
 
       try {
-        const template = await resolveTemplate({ prompt, esqlQuery });
+        const { template } = await resolveTemplate({ prompt, esqlQuery });
         panel.panelContent = {
           ...panel.panelContent,
           config: { ...persistedConfig, esql_query: toEsqlQueryState(esqlQuery), template },
@@ -270,7 +287,7 @@ export const mergeAndResolveCustomContentEdit = async (
     editConfig.esqlQuery,
     readEsqlQuery(existing)
   );
-  const template = await resolveTemplate({
+  const { template } = await resolveTemplate({
     prompt: editConfig.prompt ?? '',
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,

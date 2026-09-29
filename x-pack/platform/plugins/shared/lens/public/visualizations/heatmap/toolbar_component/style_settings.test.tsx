@@ -7,8 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { OperationDescriptor } from '@kbn/lens-common';
@@ -48,9 +47,9 @@ const renderComponent = (props: Partial<Props> = {}) => {
   return render(<HeatmapStyleSettings {...defaultProps} {...props} />);
 };
 
-const clickButtonByName = async (name: string | RegExp, container?: HTMLElement) => {
+const clickButtonByName = (name: string | RegExp, container?: HTMLElement) => {
   const query = container ? within(container) : screen;
-  await userEvent.click(query.getByRole('button', { name }));
+  fireEvent.click(query.getByRole('button', { name }));
 };
 
 describe('heatmap style settings', () => {
@@ -100,11 +99,11 @@ describe('heatmap style settings', () => {
     expect(screen.getByTestId('lnsHeatmapXAxisSortOrder')).not.toBeDisabled();
   });
 
-  it('should have called setState with the proper value of xAxisLabelRotation', async () => {
+  it('should have called setState with the proper value of xAxisLabelRotation', () => {
     renderComponent();
 
     const orientationGroup = screen.getByRole('group', { name: 'Orientation' });
-    await clickButtonByName(/vertical/i, orientationGroup);
+    clickButtonByName(/vertical/i, orientationGroup);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       ...defaultProps.state,
