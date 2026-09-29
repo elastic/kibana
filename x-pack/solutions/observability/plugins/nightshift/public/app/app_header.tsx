@@ -57,8 +57,8 @@ export function NightshiftAppHeader({
 }: {
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
-  onSettingsClick: () => void | Promise<void>;
-  settingsHref: string;
+  onSettingsClick?: () => void | Promise<void>;
+  settingsHref?: string;
 }): React.ReactElement {
   const menu = useMemo<AppMenuConfig>(
     () => ({
@@ -74,17 +74,21 @@ export function NightshiftAppHeader({
           },
           testId: 'nightshiftManagementLink',
         },
-        {
-          id: 'nightshiftSettings',
-          label: settingsLabel,
-          iconType: 'gear',
-          href: settingsHref,
-          run: (params) => {
-            applyEbtProps(settingsEbtProps, params);
-            void onSettingsClick();
-          },
-          testId: 'nightshiftSettingsLink',
-        },
+        ...(onSettingsClick && settingsHref
+          ? [
+              {
+                id: 'nightshiftSettings',
+                label: settingsLabel,
+                iconType: 'gear' as const,
+                href: settingsHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(settingsEbtProps, params);
+                  void onSettingsClick();
+                },
+                testId: 'nightshiftSettingsLink',
+              },
+            ]
+          : []),
       ],
     }),
     [managementHref, onManagementClick, onSettingsClick, settingsHref]

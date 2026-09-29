@@ -34,12 +34,28 @@ describe('ConversationDetailsFlyoutFooter', () => {
     const onOpenChat = jest.fn();
 
     renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={onOpenChat} />
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={onOpenChat}
+      />
     );
 
     fireEvent.click(screen.getByTestId('investigationFlyoutOpenChat'));
 
     expect(onOpenChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides Open in chat when the flyout was opened from within chat, which is already there', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat
+        onOpenChat={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
   it('opens the escalation modal via onOpenEscalation when the button is clicked', () => {
@@ -48,6 +64,7 @@ describe('ConversationDetailsFlyoutFooter', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
         investigation={investigation}
+        isOpenedFromChat={false}
         onOpenChat={jest.fn()}
         onOpenEscalation={onOpenEscalation}
       />
@@ -66,6 +83,7 @@ describe('ConversationDetailsFlyoutFooter', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
         investigation={investigation}
+        isOpenedFromChat={false}
         onOpenChat={jest.fn()}
         onCloseInvestigation={() => <div>Dismiss proposal</div>}
       />

@@ -20,7 +20,11 @@ import {
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
-import { FetcherConfigSchema, KibanaHttpMethodSchema, KibanaStepMetaSchema } from '@kbn/workflows';
+import {
+  KibanaFetcherConfigSchema,
+  KibanaHttpMethodSchema,
+  KibanaStepMetaSchema,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -534,7 +538,7 @@ export const staticConnectors: BaseConnectorContract[] = [
         .describe(
           'Multipart form-data fields. Use instead of body for APIs that require file uploads (e.g. /api/saved_objects/_import). Mutually exclusive with body.'
         ),
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
     }),
     outputSchema: z

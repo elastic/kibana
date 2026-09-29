@@ -39,6 +39,10 @@ import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summar
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
+jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
+  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+}));
+
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
 // the dismiss modal's select needs for real.
 jest.mock('@kbn/proposals-plugin/public', () => ({
@@ -221,12 +225,13 @@ const proposal: ProposalItem = {
   conversationId: 'inv-1',
   conversationTitle: 'Impossible travel — exec account',
   conversationAgentId: 'elastic-ai-agent',
+  title: 'Investigate impossible travel',
   comment: 'MFA satisfied from two countries in 40 minutes.',
   status: 'pending',
   impact: 'high',
   confidence: 'high',
   category: 'investigate',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
   conversationAssignees: [],
@@ -294,6 +299,15 @@ beforeEach(() => {
     refetch: jest.fn(),
   });
   mockOpenCount(0);
+});
+
+describe('ConversationsPage scan failures', () => {
+  it('mounts the scan-failure callout', () => {
+    mockProposals({});
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
+  });
 });
 
 describe('ConversationsPage details flyout', () => {
@@ -446,6 +460,8 @@ describe('ConversationsPage decisions', () => {
     id: 'prop-1',
     conversationTitle: 'Impossible travel — exec account',
     category: 'respond',
+    // What `create()` stores for a caller that names nothing itself.
+    title: 'Revoke sessions',
     actionWorkflowId: 'system-alertzero-action-revoke-sessions',
     actionInput: { user: 'cfo@corp' },
     action: { name: 'Revoke sessions' },
@@ -464,7 +480,9 @@ describe('ConversationsPage decisions', () => {
   // The recommended action lives in the ⋮ menu, not on the card.
   const openApproval = () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
-    fireEvent.click(screen.getByText('Revoke sessions'));
+    // By role: the card's summary carries the same text, because the title the
+    // server stored for this proposal is the action's own name.
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
   it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {
