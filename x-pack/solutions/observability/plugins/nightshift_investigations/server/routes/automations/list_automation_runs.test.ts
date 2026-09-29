@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { listAutomationRunsRoute } from './list_automation_runs';
 
 const { handler } = listAutomationRunsRoute['GET /internal/nightshift/automations/{id}/runs'];
+
+const mockRequest = httpServerMock.createKibanaRequest();
 
 const mockGet = jest.fn();
 const getAutomationsSoClient = jest.fn().mockReturnValue({ get: mockGet });
@@ -23,17 +26,19 @@ const mockContext = {
       client: { getCurrentNamespace: jest.fn().mockReturnValue('default') },
     },
   }),
+  resolve: jest.fn(),
 };
 
-const call = (id: string, query: { page?: number; size?: number } = {}) =>
-  // @ts-expect-error -- partial mock; handler only uses the fields listed here
-  handler({
-    request: {},
+const call = (id: string, query: { page?: number; size?: number } = {}) => {
+  // @ts-expect-error -- mock intentionally omits unused handler context properties
+  return handler({
+    request: mockRequest,
     params: { path: { id }, query: { page: query.page ?? 1, size: query.size ?? 20 } },
     getAutomationsSoClient,
     getWorkflowsManagement,
     context: mockContext,
   });
+};
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -58,7 +63,7 @@ it('returns mapped runs when the automation has a workflowId', async () => {
   const result = await call('auto-1');
 
   expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
-    { workflowId: 'wf-1', omitStepRuns: true, page: 1, size: 20 },
+    { workflowId: 'wf-1', omitStepRuns: true, page: 1, size: 20, request: mockRequest },
     'default'
   );
   expect(result).toEqual({

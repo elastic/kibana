@@ -59,6 +59,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         omitStepRuns: true,
         page: params.query.page,
         size: params.query.size,
+        request,
       },
       spaceId
     );
