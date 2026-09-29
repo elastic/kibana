@@ -68,7 +68,7 @@ describe('useIngestReceiptToast', () => {
     expect(addSuccess).not.toHaveBeenCalled();
   });
 
-  it('polls the verification route with the created key and endpoint', async () => {
+  it('polls the verification route with the created key', async () => {
     mockCallApi.mockResolvedValue({ received: false });
 
     renderHook(() => useIngestReceiptToast({ [ApiEndpointId.OpenTelemetry]: 'key-id' }));
@@ -78,7 +78,7 @@ describe('useIngestReceiptToast', () => {
       'GET /internal/observability_onboarding/api_endpoints/verification',
       {
         signal: expect.any(AbortSignal),
-        params: { query: { apiKeyId: 'key-id', endpointId: ApiEndpointId.OpenTelemetry } },
+        params: { query: { apiKeyId: 'key-id' } },
       }
     );
   });
@@ -168,7 +168,7 @@ describe('useIngestReceiptToast', () => {
     expect(mockCallApi).toHaveBeenLastCalledWith(
       'GET /internal/observability_onboarding/api_endpoints/verification',
       expect.objectContaining({
-        params: { query: { apiKeyId: 'second-key-id', endpointId: ApiEndpointId.OpenTelemetry } },
+        params: { query: { apiKeyId: 'second-key-id' } },
       })
     );
     expect(addSuccess).toHaveBeenCalledTimes(2);
@@ -207,7 +207,7 @@ describe('useIngestReceiptToast', () => {
     expect(mockCallApi).toHaveBeenLastCalledWith(
       'GET /internal/observability_onboarding/api_endpoints/verification',
       expect.objectContaining({
-        params: { query: { apiKeyId: 'second-key-id', endpointId: ApiEndpointId.OpenTelemetry } },
+        params: { query: { apiKeyId: 'second-key-id' } },
       })
     );
     expect(addSuccess).not.toHaveBeenCalled();
@@ -237,7 +237,7 @@ describe('useIngestReceiptToast', () => {
   it('polls each endpoint that has a key independently', async () => {
     mockCallApi.mockImplementation((_endpoint, options) =>
       Promise.resolve({
-        received: options.params.query.endpointId === ApiEndpointId.Elasticsearch,
+        received: options.params.query.apiKeyId === 'elasticsearch-key-id',
       })
     );
 

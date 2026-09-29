@@ -48,6 +48,9 @@ export interface ApiEndpointApiKeyResponse {
 
 export interface ApiEndpointVerificationResponse {
   received: boolean;
+  // Where the newest receipt came in. Unset when nothing was received.
+  ingestPath?: string;
+  signal?: string;
 }
 
 const MAX_API_KEY_ID_LENGTH = 64;
@@ -246,18 +249,13 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
   params: t.type({
     query: t.type({
       apiKeyId: apiKeyIdRt,
-      endpointId: t.keyof({
-        [ApiEndpointId.Prometheus]: null,
-        [ApiEndpointId.OpenTelemetry]: null,
-        [ApiEndpointId.Elasticsearch]: null,
-      }),
     }),
   }),
   async handler(resources): Promise<ApiEndpointVerificationResponse> {
     const {
       context,
       params: {
-        query: { apiKeyId, endpointId },
+        query: { apiKeyId },
       },
     } = resources;
 
@@ -288,17 +286,17 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
       throw Boom.notFound();
     }
 
-    // Only the existence of a recent receipt is reported, so no document body is needed.
-    const response = await client.asInternalUser.search({
+    // Each endpoint gets its own key, so the key alone identifies the endpoint.
+    const response = await client.asInternalUser.search<Partial<Record<string, string>>>({
       index: INGEST_RECEIPTS_DATA_STREAM,
       ignore_unavailable: true,
       size: 1,
-      _source: false,
+      _source: [INGEST_RECEIPT_FIELDS.ingestPath, INGEST_RECEIPT_FIELDS.signal],
+      sort: [{ [INGEST_RECEIPT_FIELDS.timestamp]: { order: 'desc' } }],
       query: {
         bool: {
           filter: [
             { term: { [INGEST_RECEIPT_FIELDS.apiKeyId]: apiKeyId } },
-            { term: { [INGEST_RECEIPT_FIELDS.endpointId]: endpointId } },
             {
               range: {
                 [INGEST_RECEIPT_FIELDS.timestamp]: {
@@ -311,7 +309,15 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
-    return { received: response.hits.hits.length > 0 };
+    const [hit] = response.hits.hits;
+    if (!hit) {
+      return { received: false };
+    }
+    return {
+      received: true,
+      ingestPath: hit._source?.[INGEST_RECEIPT_FIELDS.ingestPath],
+      signal: hit._source?.[INGEST_RECEIPT_FIELDS.signal],
+    };
   },
 });
 

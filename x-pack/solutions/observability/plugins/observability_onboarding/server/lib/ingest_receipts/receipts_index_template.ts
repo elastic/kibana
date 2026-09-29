@@ -37,7 +37,6 @@ export const getReceiptsIndexTemplate = (): IndicesPutIndexTemplateRequest => ({
         [INGEST_RECEIPT_FIELDS.apiKeyId]: { type: 'keyword' },
         [INGEST_RECEIPT_FIELDS.targetId]: { type: 'keyword' },
         [INGEST_RECEIPT_FIELDS.targetType]: { type: 'keyword' },
-        [INGEST_RECEIPT_FIELDS.endpointId]: { type: 'keyword' },
         [INGEST_RECEIPT_FIELDS.ingestPath]: { type: 'keyword' },
         [INGEST_RECEIPT_FIELDS.signal]: { type: 'keyword' },
       },

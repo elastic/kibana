@@ -107,7 +107,7 @@ export function useIngestReceiptToast(apiKeyIds: Partial<Record<ApiEndpointId, s
     try {
       const { received } = await callObservabilityOnboardingApi(
         'GET /internal/observability_onboarding/api_endpoints/verification',
-        { signal: controller.signal, params: { query: { apiKeyId, endpointId } } }
+        { signal: controller.signal, params: { query: { apiKeyId } } }
       );
       // The answer can still land after the key changed, in a slow browser and in tests that ignore the signal.
       if (!received || apiKeyIdsRef.current[endpointId] !== apiKeyId) {

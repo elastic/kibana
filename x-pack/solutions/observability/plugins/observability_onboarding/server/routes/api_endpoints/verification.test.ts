@@ -8,7 +8,6 @@
 import { isRight } from 'fp-ts/Either';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ApiEndpointId } from '../../../common/api_endpoints';
 import { INGEST_RECEIPTS_DATA_STREAM } from '../../../common/ingest_receipts';
 import { IS_INGEST_RECEIPTS_ENABLED } from '../../../common/feature_flags';
 import { apiEndpointsRouteRepository } from './route';
@@ -28,36 +27,23 @@ const createEsResponseError = (statusCode: number, body: Record<string, unknown>
 describe('verification query codec', () => {
   const { params } = apiEndpointsRouteRepository[verificationEndpoint];
 
-  it.each(['opentelemetry', 'prometheus', 'elasticsearch'])('accepts %s', (endpointId) => {
-    expect(isRight(params.decode({ query: { apiKeyId: 'key-id', endpointId } }))).toBe(true);
+  it('accepts an API key id', () => {
+    expect(isRight(params.decode({ query: { apiKeyId: 'key-id' } }))).toBe(true);
   });
 
-  it.each(['supabase', 'vercel', 'netlify'])(
-    'rejects %s because it never produces receipts',
-    (endpointId) => {
-      expect(isRight(params.decode({ query: { apiKeyId: 'key-id', endpointId } }))).toBe(false);
-    }
-  );
-
   it('requires the API key id', () => {
-    expect(isRight(params.decode({ query: { endpointId: 'opentelemetry' } }))).toBe(false);
+    expect(isRight(params.decode({ query: {} }))).toBe(false);
   });
 
   // An empty id makes Elasticsearch list every key the caller owns, so the ownership check
   // would pass for anybody holding a key.
   it('rejects an empty API key id', () => {
-    expect(isRight(params.decode({ query: { apiKeyId: '', endpointId: 'opentelemetry' } }))).toBe(
-      false
-    );
+    expect(isRight(params.decode({ query: { apiKeyId: '' } }))).toBe(false);
   });
 
   it('rejects an API key id longer than 64 characters', () => {
-    expect(
-      isRight(params.decode({ query: { apiKeyId: 'a'.repeat(65), endpointId: 'opentelemetry' } }))
-    ).toBe(false);
-    expect(
-      isRight(params.decode({ query: { apiKeyId: 'a'.repeat(64), endpointId: 'opentelemetry' } }))
-    ).toBe(true);
+    expect(isRight(params.decode({ query: { apiKeyId: 'a'.repeat(65) } }))).toBe(false);
+    expect(isRight(params.decode({ query: { apiKeyId: 'a'.repeat(64) } }))).toBe(true);
   });
 });
 
@@ -69,11 +55,9 @@ describe('verification handler', () => {
 
   const createResources = ({
     apiKeyId = 'key-id',
-    endpointId = ApiEndpointId.OpenTelemetry,
     ingestReceiptsEnabled = true,
   }: {
     apiKeyId?: string;
-    endpointId?: ApiEndpointId;
     ingestReceiptsEnabled?: boolean;
   } = {}) =>
     ({
@@ -94,7 +78,7 @@ describe('verification handler', () => {
           },
         }),
       },
-      params: { query: { apiKeyId, endpointId } },
+      params: { query: { apiKeyId } },
     } as unknown as Parameters<typeof handler>[0]);
 
   beforeEach(() => {
@@ -142,10 +126,30 @@ describe('verification handler', () => {
     expect(getApiKey).toHaveBeenCalledWith({ id: 'key-id', owner: true, active_only: true });
   });
 
-  it('reports a receipt when the search matches', async () => {
-    search.mockResolvedValue({ hits: { hits: [{ _id: 'receipt-id' }] } });
+  it('reports a receipt with where it came in when the search matches', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'receipt-id', _source: { ingestPath: '/v1/metrics', signal: 'metrics' } }],
+      },
+    });
 
-    await expect(handler(createResources())).resolves.toEqual({ received: true });
+    await expect(handler(createResources())).resolves.toEqual({
+      received: true,
+      ingestPath: '/v1/metrics',
+      signal: 'metrics',
+    });
+  });
+
+  it('reports a receipt without a signal for endpoints that have none', async () => {
+    search.mockResolvedValue({
+      hits: { hits: [{ _id: 'receipt-id', _source: { ingestPath: '/_bulk' } }] },
+    });
+
+    await expect(handler(createResources())).resolves.toEqual({
+      received: true,
+      ingestPath: '/_bulk',
+      signal: undefined,
+    });
   });
 
   it('reports nothing received when the search returns no hit', async () => {
@@ -163,18 +167,18 @@ describe('verification handler', () => {
     );
   });
 
-  it('filters on the API key id, the endpoint id and the recency window', async () => {
-    await handler(createResources({ endpointId: ApiEndpointId.Prometheus }));
+  it('reads the newest receipt for the API key id within the recency window', async () => {
+    await handler(createResources());
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         size: 1,
-        _source: false,
+        _source: ['ingestPath', 'signal'],
+        sort: [{ '@timestamp': { order: 'desc' } }],
         query: {
           bool: {
             filter: [
               { term: { apiKeyId: 'key-id' } },
-              { term: { endpointId: 'prometheus' } },
               { range: { '@timestamp': { gte: 'now-15m' } } },
             ],
           },

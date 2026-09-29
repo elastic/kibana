@@ -18,7 +18,6 @@ export const INGEST_RECEIPT_FIELDS = {
   apiKeyId: 'apiKeyId',
   targetId: 'targetId',
   targetType: 'targetType',
-  endpointId: 'endpointId',
   ingestPath: 'ingestPath',
   signal: 'signal',
 } as const;
