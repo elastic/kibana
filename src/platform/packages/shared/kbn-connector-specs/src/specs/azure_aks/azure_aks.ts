@@ -447,7 +447,7 @@ export const AzureAks: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Set the node count of an AKS node pool. Use count=0 to drain and stop all nodes in the pool, or increase the count to scale out. This is a manual scale override; if autoscaler is enabled on the pool, it may override the count after scaling completes.',
+        'Set the node count of an AKS node pool. Use count=0 to drain and stop all nodes in a User pool, or increase the count to scale out. This is a manual scale override; if autoscaler is enabled on the pool, it may override the count after scaling completes. count=0 is rejected for a System pool — AKS requires at least 1 node to keep running system-critical pods.',
       input: ScaleNodePoolInputSchema,
       handler: async (ctx, input: ScaleNodePoolInput) => {
         try {
@@ -466,6 +466,19 @@ export const AzureAks: ConnectorSpec = {
           const current = await ctx.client.get(`${ARM_BASE}${poolPath}`, {
             params: { 'api-version': AKS_API_VERSION },
           });
+
+          // ARM requires count >= 1 for a System pool (it must keep running
+          // system-critical pods) and only allows count=0 on a User pool.
+          // Sending 0 for a System pool is rejected by ARM, but with an error
+          // that doesn't name the pool's mode as the reason, so this is
+          // checked up front to give the agent an actionable message instead.
+          if (input.count === 0 && current.data?.properties?.mode === 'System') {
+            throw new Error(
+              `Node pool '${input.nodePoolName}' is a System pool and cannot be scaled to 0. ` +
+                'System pools must keep at least 1 node running system-critical pods; scale a User pool to 0 instead.'
+            );
+          }
+
           const response = await ctx.client.put(
             `${ARM_BASE}${poolPath}`,
             { properties: { ...current.data?.properties, count: input.count } },

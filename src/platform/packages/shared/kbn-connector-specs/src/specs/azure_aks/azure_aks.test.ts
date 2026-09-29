@@ -170,6 +170,102 @@ describe('AzureAks', () => {
         expect.any(Object)
       );
     });
+
+    it('rejects count=0 on a System pool instead of sending a doomed PUT', async () => {
+      mockClient.get.mockResolvedValueOnce({
+        data: { properties: { count: 1, vmSize: 'Standard_D2s_v4', mode: 'System' } },
+      });
+      await expect(
+        AzureAks.actions.scaleNodePool.handler(mockContext, {
+          resourceGroupName: RG,
+          clusterName: CLUSTER,
+          nodePoolName: 'nodepool1',
+          count: 0,
+        })
+      ).rejects.toThrow('System pool');
+      expect(mockClient.put).not.toHaveBeenCalled();
+    });
+
+    it('allows count=0 on a User pool', async () => {
+      mockClient.get.mockResolvedValueOnce({
+        data: { properties: { count: 2, vmSize: 'Standard_D2s_v4', mode: 'User' } },
+      });
+      mockClient.put.mockResolvedValueOnce({
+        data: { properties: { provisioningState: 'Updating' } },
+      });
+      await AzureAks.actions.scaleNodePool.handler(mockContext, {
+        resourceGroupName: RG,
+        clusterName: CLUSTER,
+        nodePoolName: 'userpool1',
+        count: 0,
+      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        expect.stringContaining('/agentPools/userpool1'),
+        { properties: { count: 0, vmSize: 'Standard_D2s_v4', mode: 'User' } },
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('getClusterCredentials', () => {
+    it('requests the azure format by default, as a query param', async () => {
+      mockClient.post.mockResolvedValueOnce({ data: { kubeconfigs: [{ value: 'abc' }] } });
+      await AzureAks.actions.getClusterCredentials.handler(mockContext, {
+        resourceGroupName: RG,
+        clusterName: CLUSTER,
+      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        expect.stringContaining('/listClusterUserCredential'),
+        {},
+        expect.objectContaining({ params: expect.objectContaining({ format: 'azure' }) })
+      );
+    });
+
+    it('requests the exec format when specified, as a query param (not the body)', async () => {
+      mockClient.post.mockResolvedValueOnce({ data: { kubeconfigs: [{ value: 'abc' }] } });
+      await AzureAks.actions.getClusterCredentials.handler(mockContext, {
+        resourceGroupName: RG,
+        clusterName: CLUSTER,
+        format: 'exec',
+      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        expect.stringContaining('/listClusterUserCredential'),
+        {},
+        expect.objectContaining({ params: expect.objectContaining({ format: 'exec' }) })
+      );
+    });
+  });
+
+  describe('stopCluster', () => {
+    it('POSTs to the stop endpoint and reports acceptance', async () => {
+      mockClient.post.mockResolvedValueOnce({ data: '' });
+      const result = await AzureAks.actions.stopCluster.handler(mockContext, {
+        resourceGroupName: RG,
+        clusterName: CLUSTER,
+      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        expect.stringContaining('/stop'),
+        {},
+        expect.any(Object)
+      );
+      expect(result).toEqual(expect.objectContaining({ status: 'accepted' }));
+    });
+  });
+
+  describe('startCluster', () => {
+    it('POSTs to the start endpoint and reports acceptance', async () => {
+      mockClient.post.mockResolvedValueOnce({ data: '' });
+      const result = await AzureAks.actions.startCluster.handler(mockContext, {
+        resourceGroupName: RG,
+        clusterName: CLUSTER,
+      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        expect.stringContaining('/start'),
+        {},
+        expect.any(Object)
+      );
+      expect(result).toEqual(expect.objectContaining({ status: 'accepted' }));
+    });
   });
 
   describe('runCommand', () => {
