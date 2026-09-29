@@ -15,7 +15,7 @@ import type { ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
-import type { HasDataResponse } from '../../../../common/detection_api';
+import type { HasDataResponse } from '../../../../common/core/detection_api';
 import {
   DEFAULT_SERVICE_SETTINGS,
   SERVICE_SETTINGS_SESSION_KEY,
