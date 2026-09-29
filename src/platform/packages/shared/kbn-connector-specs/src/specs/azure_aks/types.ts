@@ -9,6 +9,30 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+/**
+ * Every action below except `listSubscriptions` needs a subscription ID.
+ * It normally comes from the connector's configured `subscriptionId`, but an
+ * agent following the documented discovery loop
+ * (`listSubscriptions` → `listResourceGroups` → ...) has no way to carry a
+ * *discovered* subscription ID into the next call when the connector has
+ * none configured — every subsequent action would fail with "Set it in the
+ * connector configuration", even though the value was just discovered in the
+ * previous step. This optional input lets an action's own subscriptionId
+ * override the configured one, so the discovery loop can complete without
+ * requiring the user to edit the connector first.
+ */
+const subscriptionIdInputSchema = z
+  .string()
+  .max(100)
+  .regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    'Must be a valid Azure subscription ID (GUID).'
+  )
+  .optional()
+  .describe(
+    'Azure subscription ID to use for this call. Optional if the connector has a Subscription ID configured; required otherwise (e.g. immediately after listSubscriptions when none is configured).'
+  );
+
 // =============================================================================
 // listSubscriptions
 // =============================================================================
@@ -20,7 +44,11 @@ export type ListSubscriptionsInput = z.infer<typeof ListSubscriptionsInputSchema
 // listResourceGroups
 // =============================================================================
 
-export const ListResourceGroupsInputSchema = lazySchema(() => z.object({}));
+export const ListResourceGroupsInputSchema = lazySchema(() =>
+  z.object({
+    subscriptionId: subscriptionIdInputSchema,
+  })
+);
 export type ListResourceGroupsInput = z.infer<typeof ListResourceGroupsInputSchema>;
 
 // =============================================================================
@@ -29,6 +57,7 @@ export type ListResourceGroupsInput = z.infer<typeof ListResourceGroupsInputSche
 
 export const ListClustersInputSchema = lazySchema(() =>
   z.object({
+    subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z
       .string()
       .max(90)
@@ -46,6 +75,7 @@ export type ListClustersInput = z.infer<typeof ListClustersInputSchema>;
 
 export const GetClusterInputSchema = lazySchema(() =>
   z.object({
+    subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
     clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
   })
@@ -65,6 +95,7 @@ export type ListNodePoolsInput = GetClusterInput;
 
 export const GetNodePoolInputSchema = lazySchema(() =>
   z.object({
+    subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
     clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
     nodePoolName: z.string().min(1).max(12).describe('Name of the agent pool.'),
@@ -78,6 +109,7 @@ export type GetNodePoolInput = z.infer<typeof GetNodePoolInputSchema>;
 
 export const ScaleNodePoolInputSchema = lazySchema(() =>
   z.object({
+    subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
     clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
     nodePoolName: z.string().min(1).max(12).describe('Name of the agent pool to scale.'),
@@ -109,6 +141,7 @@ export type StartClusterInput = GetClusterInput;
 
 export const GetClusterCredentialsInputSchema = lazySchema(() =>
   z.object({
+    subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
     clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
     format: z
@@ -128,6 +161,7 @@ export type GetClusterCredentialsInput = z.infer<typeof GetClusterCredentialsInp
 
 export const RunCommandInputSchema = lazySchema(() =>
   z.object({
+    subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
     clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
     command: z

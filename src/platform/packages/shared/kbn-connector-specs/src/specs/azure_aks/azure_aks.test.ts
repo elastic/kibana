@@ -115,6 +115,27 @@ describe('AzureAks', () => {
         'Subscription ID'
       );
     });
+
+    it('uses a subscriptionId passed in the input when none is configured, completing the discovery loop', async () => {
+      const ctxNoSub = { ...mockContext, config: {} } as unknown as ActionContext;
+      const discovered = '33333333-3333-3333-3333-333333333333';
+      mockClient.get.mockResolvedValueOnce({ data: { value: [] } });
+      await AzureAks.actions.listResourceGroups.handler(ctxNoSub, { subscriptionId: discovered });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `https://management.azure.com/subscriptions/${discovered}/resourcegroups`,
+        expect.any(Object)
+      );
+    });
+
+    it('prefers an input subscriptionId over the configured one', async () => {
+      const override = '44444444-4444-4444-4444-444444444444';
+      mockClient.get.mockResolvedValueOnce({ data: { value: [] } });
+      await AzureAks.actions.listResourceGroups.handler(mockContext, { subscriptionId: override });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `https://management.azure.com/subscriptions/${override}/resourcegroups`,
+        expect.any(Object)
+      );
+    });
   });
 
   describe('listClusters', () => {

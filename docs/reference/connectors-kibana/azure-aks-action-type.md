@@ -33,7 +33,7 @@ You can create an Azure Kubernetes Service connector in **{{stack-manage-app}} >
 ### Connector configuration [azure-aks-connector-configuration]
 
 Subscription ID (optional)
-:   The Azure subscription ID (a GUID) that contains your AKS clusters. This field is optional — you can omit it and use `listSubscriptions` to discover available subscriptions at runtime. Most other actions require a subscription ID to be configured here.
+:   The Azure subscription ID (a GUID) that contains your AKS clusters. This field is optional — you can omit it and use `listSubscriptions` to discover available subscriptions at runtime, then pass the discovered ID as `subscriptionId` on subsequent calls. Every other action needs a subscription ID either configured here or supplied on the call.
 
 Token URL
 :   The Azure AD v2.0 token endpoint for your tenant: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`, with `{tenant-id}` replaced by your Azure AD tenant ID.
@@ -51,16 +51,18 @@ See [Prerequisites](#azure-aks-prerequisites) for the roles the app registration
 | Action | Description |
 |--------|-------------|
 | `listSubscriptions` | List all Azure subscriptions accessible to the service principal. No parameters. |
-| `listResourceGroups` | List all resource groups in the configured subscription. No parameters. |
-| `listClusters` | List AKS clusters in the subscription, optionally scoped to a resource group. Parameters: `resourceGroupName` (optional). |
-| `getCluster` | Get full details for a single AKS cluster. Parameters: `resourceGroupName`, `clusterName` (both required). |
-| `listNodePools` | List all node pools in an AKS cluster. Parameters: `resourceGroupName`, `clusterName` (both required). |
-| `getNodePool` | Get full details for a single node pool. Parameters: `resourceGroupName`, `clusterName`, `nodePoolName` (all required). |
-| `scaleNodePool` | Set the node count of a node pool. Parameters: `resourceGroupName`, `clusterName`, `nodePoolName`, `count` (all required). |
-| `stopCluster` | Deallocate all node VMs in a cluster. Parameters: `resourceGroupName`, `clusterName` (both required). |
-| `startCluster` | Start a previously stopped cluster. Parameters: `resourceGroupName`, `clusterName` (both required). |
-| `getClusterCredentials` | Retrieve a base64-encoded kubeconfig for a cluster. Parameters: `resourceGroupName`, `clusterName` (both required), `format` (`azure` or `exec`, default `azure`). |
-| `runCommand` | Run a shell command inside the cluster (for example, `kubectl get pods -A`). Parameters: `resourceGroupName`, `clusterName`, `command` (all required). Waits up to 60 seconds and returns the exit code and output. |
+| `listResourceGroups` | List all resource groups in the subscription. Parameters: `subscriptionId` (optional — overrides the configured subscription for this call). |
+| `listClusters` | List AKS clusters in the subscription, optionally scoped to a resource group. Parameters: `subscriptionId` (optional), `resourceGroupName` (optional). |
+| `getCluster` | Get full details for a single AKS cluster. Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName` (both required). |
+| `listNodePools` | List all node pools in an AKS cluster. Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName` (both required). |
+| `getNodePool` | Get full details for a single node pool. Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName`, `nodePoolName` (all required). |
+| `scaleNodePool` | Set the node count of a node pool. Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName`, `nodePoolName`, `count` (all required). |
+| `stopCluster` | Deallocate all node VMs in a cluster. Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName` (both required). |
+| `startCluster` | Start a previously stopped cluster. Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName` (both required). |
+| `getClusterCredentials` | Retrieve a base64-encoded kubeconfig for a cluster. Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName` (both required), `format` (`azure` or `exec`, default `azure`). |
+| `runCommand` | Run a shell command inside the cluster (for example, `kubectl get pods -A`). Parameters: `subscriptionId` (optional), `resourceGroupName`, `clusterName`, `command` (all required). Waits up to 60 seconds and returns the exit code and output. |
+
+For every action other than `listSubscriptions`, `subscriptionId` is required unless a Subscription ID is configured on the connector — an agent that discovers a subscription via `listSubscriptions` can pass it straight into the next call without editing the connector configuration.
 
 ## Connector networking configuration [action-settings]
 

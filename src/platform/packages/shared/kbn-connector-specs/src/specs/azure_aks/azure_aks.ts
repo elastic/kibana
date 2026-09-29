@@ -37,6 +37,7 @@ import {
   RunCommandInputSchema,
 } from './types';
 import type {
+  ListResourceGroupsInput,
   ListClustersInput,
   GetClusterInput,
   GetNodePoolInput,
@@ -114,12 +115,20 @@ async function getAllPages(
   return nextLink ? { value, truncated: true } : { value };
 }
 
-/** Reads the configured subscription ID, throwing a descriptive error if absent. */
-function requireSubscriptionId(ctx: ActionContext): string {
-  const subscriptionId = ctx.config?.subscriptionId as string | undefined;
+/**
+ * Resolves the subscription ID for an action call: an explicit `input`
+ * value takes precedence over the connector's configured one. This lets an
+ * agent that just discovered a subscription via `listSubscriptions` pass it
+ * straight into the next call, rather than requiring the user to set it in
+ * the connector configuration first — the discovery loop the `skill` text
+ * below documents does not work without this.
+ */
+function requireSubscriptionId(ctx: ActionContext, input?: { subscriptionId?: string }): string {
+  const subscriptionId =
+    input?.subscriptionId ?? (ctx.config?.subscriptionId as string | undefined);
   if (!subscriptionId) {
     throw new Error(
-      'This action requires a Subscription ID. Set it in the connector configuration.'
+      'This action requires a Subscription ID. Pass one in as "subscriptionId", or set it in the connector configuration.'
     );
   }
   return subscriptionId;
@@ -295,7 +304,7 @@ export const AzureAks: ConnectorSpec = {
             'core.kibanaConnectorSpecs.azureAks.config.subscriptionId.helpText',
             {
               defaultMessage:
-                'The Azure subscription that contains your AKS clusters. Required for all actions except listSubscriptions.',
+                'The Azure subscription that contains your AKS clusters. Every action except listSubscriptions needs a subscription ID, either configured here or passed in as "subscriptionId" on the individual call.',
             }
           ),
         }),
@@ -326,11 +335,11 @@ export const AzureAks: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List all resource groups in the configured subscription. Use this to discover which resource groups contain AKS clusters before calling listClusters with a specific group. Every page of results is followed, so the list is complete unless "truncated" is true.',
+        'List all resource groups in the subscription. Use this to discover which resource groups contain AKS clusters before calling listClusters with a specific group. Every page of results is followed, so the list is complete unless "truncated" is true.',
       input: ListResourceGroupsInputSchema,
-      handler: async (ctx) => {
+      handler: async (ctx, input: ListResourceGroupsInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           return await getAllPages(
             ctx,
             `${ARM_BASE}/subscriptions/${subscriptionId}/resourcegroups`,
@@ -352,7 +361,7 @@ export const AzureAks: ConnectorSpec = {
       input: ListClustersInputSchema,
       handler: async (ctx, input: ListClustersInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const path = input?.resourceGroupName
             ? `/subscriptions/${subscriptionId}/resourceGroups/${encodeURIComponent(
                 input.resourceGroupName
@@ -376,7 +385,7 @@ export const AzureAks: ConnectorSpec = {
       input: GetClusterInputSchema,
       handler: async (ctx, input: GetClusterInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const response = await ctx.client.get(
             `${ARM_BASE}${clusterBasePath(
               subscriptionId,
@@ -401,7 +410,7 @@ export const AzureAks: ConnectorSpec = {
       input: ListNodePoolsInputSchema,
       handler: async (ctx, input: GetClusterInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           return await getAllPages(
             ctx,
             `${ARM_BASE}${clusterBasePath(
@@ -426,7 +435,7 @@ export const AzureAks: ConnectorSpec = {
       input: GetNodePoolInputSchema,
       handler: async (ctx, input: GetNodePoolInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const response = await ctx.client.get(
             `${ARM_BASE}${clusterBasePath(
               subscriptionId,
@@ -451,7 +460,7 @@ export const AzureAks: ConnectorSpec = {
       input: ScaleNodePoolInputSchema,
       handler: async (ctx, input: ScaleNodePoolInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const poolPath = `${clusterBasePath(
             subscriptionId,
             input.resourceGroupName,
@@ -501,7 +510,7 @@ export const AzureAks: ConnectorSpec = {
       input: StopClusterInputSchema,
       handler: async (ctx, input: GetClusterInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const response = await ctx.client.post(
             `${ARM_BASE}${clusterBasePath(
               subscriptionId,
@@ -527,7 +536,7 @@ export const AzureAks: ConnectorSpec = {
       input: StartClusterInputSchema,
       handler: async (ctx, input: GetClusterInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const response = await ctx.client.post(
             `${ARM_BASE}${clusterBasePath(
               subscriptionId,
@@ -553,7 +562,7 @@ export const AzureAks: ConnectorSpec = {
       input: GetClusterCredentialsInputSchema,
       handler: async (ctx, input: GetClusterCredentialsInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const response = await ctx.client.post(
             `${ARM_BASE}${clusterBasePath(
               subscriptionId,
@@ -584,7 +593,7 @@ export const AzureAks: ConnectorSpec = {
       input: RunCommandInputSchema,
       handler: async (ctx, input: RunCommandInput) => {
         try {
-          const subscriptionId = requireSubscriptionId(ctx);
+          const subscriptionId = requireSubscriptionId(ctx, input);
           const basePath = clusterBasePath(
             subscriptionId,
             input.resourceGroupName,
