@@ -165,8 +165,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
     const bucketArnInput = page.testSubj
       .locator('serviceSettingsFlyout-aws-s3-field-bucket_arn')
-      .locator('input, textarea')
-      .first();
+      .getByRole('textbox');
     await bucketArnInput.fill('arn:aws:s3:::new-drift-bucket');
     await bucketArnInput.press('Enter');
     await page.testSubj.click('serviceSettingsFlyout-saveButton');
@@ -1169,7 +1168,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // SO PUT must persist the new agentPolicyIds so resume hydrates the correct selection.
     const soRequest = await soPutPromise;
     const soPutBody = JSON.parse(soRequest.postData() ?? '{}');
-    expect(soPutBody.agentPolicyIds).toEqual([NEW_AGENT_POLICY_ID]);
+    expect(soPutBody.agentPolicyIds).toStrictEqual([NEW_AGENT_POLICY_ID]);
   });
 
   test('drift check error: SO GET failure shows error callout, Retry re-fetches and recovers', async ({
