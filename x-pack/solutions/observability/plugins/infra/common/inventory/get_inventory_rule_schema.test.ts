@@ -19,12 +19,12 @@ describe('getInventoryRuleSchema', () => {
     expect(getInventoryRuleSchema('pod', null)).toBe('ecs');
   });
 
-  it('follows the stored pod schema when the selector is enabled, defaulting to ecs', () => {
+  it('follows the stored pod schema when the selector is enabled, like every other node type', () => {
     expect(getInventoryRuleSchema('pod', 'semconv', true)).toBe('semconv');
     expect(getInventoryRuleSchema('pod', 'ecs', true)).toBe('ecs');
-    // Omitted schema still defaults to ecs so the kubernetes node filter is kept.
-    expect(getInventoryRuleSchema('pod', undefined, true)).toBe('ecs');
-    expect(getInventoryRuleSchema('pod', null, true)).toBe('ecs');
+    // An omitted schema stays omitted, so the search is not narrowed to one schema.
+    expect(getInventoryRuleSchema('pod', undefined, true)).toBeUndefined();
+    expect(getInventoryRuleSchema('pod', null, true)).toBeUndefined();
   });
 
   it('keeps the pod coerce when the control is explicitly disabled', () => {
@@ -51,9 +51,9 @@ describe('getInventoryRuleSchema', () => {
     expect(getInventoryRuleSchema('host', 'ecs')).toBe('ecs');
   });
 
-  it('falls back to the default schema for a host rule that has none', () => {
-    expect(getInventoryRuleSchema('host', undefined)).toBe('semconv');
-    expect(getInventoryRuleSchema('host', null)).toBe('semconv');
+  it('leaves a host rule that has no schema omitted', () => {
+    expect(getInventoryRuleSchema('host', undefined)).toBeUndefined();
+    expect(getInventoryRuleSchema('host', null)).toBeUndefined();
   });
 });
 

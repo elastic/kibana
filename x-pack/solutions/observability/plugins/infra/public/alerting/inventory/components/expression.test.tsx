@@ -243,8 +243,8 @@ describe('Expression', () => {
     expect(previewSchema({ nodeType: 'host', schema: 'semconv' }).schema).toBe('semconv');
   });
 
-  it('falls back to the default schema for a host rule that has none', () => {
-    expect(previewSchema({ nodeType: 'host' }).schema).toBe('semconv');
+  it('leaves the preview schema omitted for a host rule that has none', () => {
+    expect(previewSchema({ nodeType: 'host' }).schema).toBeUndefined();
   });
 
   describe('Schema control', () => {
@@ -279,11 +279,11 @@ describe('Expression', () => {
       expect(previewSchema({ nodeType: 'pod', schema: 'ecs' }).schema).toBe('ecs');
     });
 
-    it('shows the schema a pod rule without a stored schema actually evaluates', () => {
+    it('treats a pod rule without a stored schema like a host rule without one', () => {
       mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
 
-      expect(selectedSchema({ nodeType: 'pod' })).toBe('ecs');
-      expect(previewSchema({ nodeType: 'pod' }).schema).toBe('ecs');
+      expect(selectedSchema({ nodeType: 'pod' })).toBe(DEFAULT_SCHEMA);
+      expect(previewSchema({ nodeType: 'pod' }).schema).toBeUndefined();
     });
 
     it('shows the stored schema of a pod rule', () => {

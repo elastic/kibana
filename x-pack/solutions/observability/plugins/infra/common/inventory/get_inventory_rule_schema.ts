@@ -11,23 +11,29 @@ import {
   type DataSchemaFormat,
   type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
-import { DEFAULT_SCHEMA } from '../constants';
 
 /**
  * Schema an Inventory Threshold rule evaluates, and the flyout preview requests.
- * Returns the schema an Inventory Threshold rule should use based on the node type and schema selection settings.
+ *
+ * Without the pod Schema control a stored Hosts `semconv` must not query kubeletstats,
+ * so pods coerce to `ecs`. The stored param is left unchanged, so switching For back to
+ * Hosts still shows OpenTelemetry. Once the control is enabled pods follow the stored
+ * param like every other node type.
+ *
+ * An omitted schema stays omitted. Do not substitute `DEFAULT_SCHEMA`: that constant is
+ * `semconv`, which drops the legacy `cpu`/`tx`/`rx` aggregations and filters the search
+ * down to OpenTelemetry documents.
  */
 export const getInventoryRuleSchema = (
   nodeType: InventoryItemType,
   schema: DataSchemaFormat | null | undefined,
   isPodSchemaSelectorEnabled: boolean = false
-): DataSchemaFormat => {
-  if (nodeType === 'pod') {
-    const storedSchema = isPodSchemaSelectorEnabled ? schema : undefined;
-    return storedSchema ?? 'ecs';
+): DataSchemaFormat | undefined => {
+  if (nodeType === 'pod' && !isPodSchemaSelectorEnabled) {
+    return 'ecs';
   }
 
-  return schema ?? DEFAULT_SCHEMA;
+  return schema ?? undefined;
 };
 
 /**
