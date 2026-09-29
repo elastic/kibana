@@ -114,7 +114,11 @@ spaceTest.describe(
         await dashboard.waitForRenderComplete();
         await dashboard.ensureEditMode();
         await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+        await expect(lens.applyFlyoutButton).toBeDisabled();
+
         await lens.layers.activateLayerTab(1);
+        await expect(lens.applyFlyoutButton).toBeDisabled();
+
         await lens.dimensions.openDimensionEditor(
           `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           1

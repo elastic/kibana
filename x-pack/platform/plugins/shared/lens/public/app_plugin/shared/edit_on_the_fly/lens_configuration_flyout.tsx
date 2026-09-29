@@ -120,6 +120,10 @@ export function LensEditConfigurationFlyout({
     if (isNewPanel) return true;
 
     const previousAttrs = previousAttributes.current;
+    const previousReferences = [
+      ...previousAttrs.references,
+      ...(previousAttrs.state.internalReferences ?? []),
+    ];
     // Persisted secondary datasources (for example, a form-based reference line on
     // an ES|QL chart) must participate in dirty detection. Include the current active
     // datasource as well so datasource conversions are still detected.
@@ -144,7 +148,7 @@ export function LensEditConfigurationFlyout({
           ? currentDatasource.getPersistableState(previousDatasourceState)
           : {
               state: previousDatasourceState,
-              references: previousAttrs.references,
+              references: previousReferences,
             };
 
       if (

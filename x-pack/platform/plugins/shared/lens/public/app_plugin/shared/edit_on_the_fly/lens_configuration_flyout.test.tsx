@@ -547,6 +547,39 @@ describe('LensEditConfigurationFlyout', () => {
     expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
+  it('keeps apply disabled when an unchanged secondary datasource uses internal references', async () => {
+    const internalReference = {
+      type: 'index-pattern',
+      id: 'ad-hoc-data-view',
+      name: 'indexpattern-datasource-layer-reference-line',
+    };
+    const multiDatasourceAttributes = {
+      ...esqlLensAttributes,
+      state: {
+        ...esqlLensAttributes.state,
+        datasourceStates: {
+          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+        },
+        internalReferences: [internalReference],
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+    datasourceMap.formBased.isEqual.mockImplementationOnce(
+      (previousState, previousReferences, currentState) =>
+        previousState === currentState && previousReferences.includes(internalReference)
+    );
+
+    await renderConfigFlyout({ attributes: multiDatasourceAttributes }, undefined, {
+      datasourceStates: {
+        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedState },
+      },
+      activeDatasourceId: 'textBased',
+    });
+
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
+  });
+
   it('enables apply when a secondary form-based datasource changes on an ES|QL panel', async () => {
     const multiDatasourceAttributes = {
       ...esqlLensAttributes,
