@@ -713,7 +713,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
+                No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
 
       # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
       # action is recorded `failed`, cloned and re-parked for another decision, and an

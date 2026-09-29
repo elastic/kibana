@@ -795,6 +795,25 @@ describe('floor_alert_triage — proposal outcomes', () => {
     ).toBe(false);
   });
 
+  it.each([
+    [1, 'is tagged az:false_positive', 'it is still open'],
+    [3, 'are tagged az:false_positive', 'they are still open'],
+  ])(
+    'post_comment_outcome_expired does not claim %i candidate alert(s) are still open',
+    (count, tagged, stillOpen) => {
+      // A closure attempt that partially succeeded before the proposal expired can leave some
+      // candidates already closed, so the comment must not assert they all remain open.
+      const comment = stepByName('post_comment_outcome_expired');
+      const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
+      const rendered = renderString(template, { variables: { fp_candidate_count: count } });
+
+      expect(rendered).toContain(tagged);
+      expect(rendered).toContain('may already be closed');
+      expect(rendered).toContain(`rather than assuming ${stillOpen}`);
+      expect(rendered).not.toContain('remain open');
+    }
+  );
+
   it('leaves the Investigation open on an unexpected outcome', () => {
     expect(
       flatten(stepByName('handle_unknown_outcome')?.steps ?? []).some(
