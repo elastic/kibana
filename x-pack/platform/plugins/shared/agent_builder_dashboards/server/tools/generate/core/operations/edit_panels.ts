@@ -30,11 +30,18 @@ import { defineOperation } from './types';
 
 type RequestRenderer = NonNullable<EditPanelRequestInput['renderer']>;
 
-const RENDERER_BY_EMBEDDABLE_TYPE = new Map<string, RequestRenderer>([
-  [LENS_EMBEDDABLE_TYPE, 'lens'],
-  [VEGA_VIS_TYPE, 'vega'],
-  [CUSTOM_CONTENT_EMBEDDABLE_TYPE, 'custom_content'],
-]);
+const EMBEDDABLE_TYPE_BY_RENDERER: Record<RequestRenderer, string> = {
+  lens: LENS_EMBEDDABLE_TYPE,
+  vega: VEGA_VIS_TYPE,
+  custom_content: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+};
+
+const RENDERER_BY_EMBEDDABLE_TYPE = new Map(
+  Object.entries(EMBEDDABLE_TYPE_BY_RENDERER).map(([renderer, embeddableType]) => [
+    embeddableType,
+    renderer as RequestRenderer,
+  ])
+);
 
 /** An edit that passed validation; request edits carry their resolution request. */
 type ValidEdit =
