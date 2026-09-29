@@ -42343,7 +42343,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart an Elastic Agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -43787,7 +43787,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart multiple Elastic Agents.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-restart
       parameters:
         - description: A required header to protect against CSRF attacks
