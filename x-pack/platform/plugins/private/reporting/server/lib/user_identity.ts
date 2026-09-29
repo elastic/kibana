@@ -7,6 +7,11 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, IClusterClient, KibanaRequest } from '@kbn/core/server';
+import {
+  decodeApiKeyId,
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 import type { ReportingUser } from '../types';
 
 /** A stable, realm-aware identity for authorization checks on scheduled reports. */
@@ -39,39 +44,6 @@ interface ApiKeyOwner {
   username?: string;
 }
 
-/**
- * Copied from `@kbn/core-security-server`, which exports neither `isUiamCredential` nor
- * `extractApiKeyIdFromAuthzHeader` on 9.3. Delete both copies and import them once 9.3 is out of
- * support.
- */
-const UIAM_CREDENTIALS_PREFIX = 'essu_';
-
-const extractApiKeyCredentialsFromAuthzHeader = (
-  authorizationHeader: string | string[] | undefined
-): string | undefined => {
-  if (typeof authorizationHeader !== 'string') {
-    return undefined;
-  }
-  const prefix = 'apikey ';
-  if (!authorizationHeader.toLowerCase().startsWith(prefix)) {
-    return undefined;
-  }
-  return authorizationHeader.slice(prefix.length);
-};
-
-/**
- * Only valid for Elasticsearch API keys, sent as `base64(id:secret)`. A UIAM credential is a raw
- * secret with no id envelope, so decoding one yields binary noise rather than an id.
- */
-const decodeApiKeyId = (encodedApiKey: string | undefined): string | undefined => {
-  if (encodedApiKey === undefined) {
-    return undefined;
-  }
-  const decoded = Buffer.from(encodedApiKey, 'base64').toString();
-  const [id] = decoded.split(':');
-  return id.trim() === '' ? undefined : id;
-};
-
 interface ApiKeyContext {
   id?: string;
   /** UIAM keys have no Elasticsearch counterpart, so their creator cannot be looked up. */
@@ -89,15 +61,17 @@ const getApiKeyContext = ({
   user: ApiKeyAuthUser;
   request: KibanaRequest;
 }): ApiKeyContext => {
-  const credentials = extractApiKeyCredentialsFromAuthzHeader(request.headers.authorization);
-  const isUiam =
-    user.api_key?.managed_by === 'cloud' ||
-    credentials?.startsWith(UIAM_CREDENTIALS_PREFIX) === true;
+  const authzHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+  const isUiam = user.api_key?.managed_by === 'cloud' || isUiamCredential(authzHeader ?? '');
 
-  return {
-    id: user.api_key?.id ?? (isUiam ? undefined : decodeApiKeyId(credentials)),
-    isUiam,
-  };
+  // `decodeApiKeyId` assumes `base64(id:secret)`. A UIAM credential is a raw secret with no id
+  // envelope, so decoding one yields binary noise rather than an id.
+  const idFromHeader =
+    !isUiam && authzHeader?.scheme.toLowerCase() === 'apikey'
+      ? decodeApiKeyId(authzHeader.credentials)
+      : undefined;
+
+  return { id: user.api_key?.id ?? idFromHeader, isUiam };
 };
 
 /**

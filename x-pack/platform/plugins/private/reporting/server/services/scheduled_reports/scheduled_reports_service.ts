@@ -65,6 +65,13 @@ interface BulkOperationResult {
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
+/**
+ * Names the acting principal in authorization warnings. An API key is named by its id: a UIAM key
+ * reports that id as its username, so a username alone would not identify the actor.
+ */
+const describePrincipal = ({ username, apiKeyId }: ReportingUserIdentity): string =>
+  apiKeyId !== undefined ? `API key "${apiKeyId}"` : `User "${username ?? 'unknown'}"`;
+
 export class ScheduledReportsService {
   private identityPromise?: Promise<ReportingUserIdentity>;
 
@@ -310,7 +317,7 @@ export class ScheduledReportsService {
       const authErrors = this._formatAndAuditBulkDeleteAuthErrors({
         bulkGetErrors,
         unauthorizedSchedules,
-        username: identity.username,
+        principal: describePrincipal(identity),
       });
       this._auditBulkGetAuthorized({
         action: ScheduledReportAuditAction.DELETE,
@@ -380,11 +387,11 @@ export class ScheduledReportsService {
   private _formatAndAuditBulkDeleteAuthErrors({
     bulkGetErrors,
     unauthorizedSchedules,
-    username,
+    principal,
   }: {
     bulkGetErrors: SavedObjectErrorResult[];
     unauthorizedSchedules: SavedObject<ScheduledReportType>[];
-    username?: string;
+    principal: string;
   }) {
     const bulkErrors: BulkOperationError[] = [];
     bulkGetErrors.forEach((so) => {
@@ -404,7 +411,7 @@ export class ScheduledReportsService {
         id: so.id,
       });
       this.logger.warn(
-        `User "${username}" attempted to delete scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
+        `${principal} attempted to delete scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
       );
       this._auditLog({
         action: ScheduledReportAuditAction.DELETE,
@@ -685,7 +692,9 @@ export class ScheduledReportsService {
             id: so.id,
           });
           this.logger.warn(
-            `User "${identity.username}" attempted to ${operation} scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
+            `${describePrincipal(identity)} attempted to ${operation} scheduled report "${
+              so.id
+            }" created by "${so.attributes.createdBy}" without sufficient privileges.`
           );
           this._auditLog({
             action,
@@ -760,7 +769,9 @@ export class ScheduledReportsService {
   }): Promise<IKibanaResponse> {
     const identity = await this._getIdentity(user);
     this.logger.warn(
-      `User "${identity.username}" attempted to update scheduled report "${id}" without sufficient privileges.`
+      `${describePrincipal(
+        identity
+      )} attempted to update scheduled report "${id}" without sufficient privileges.`
     );
     this._auditLog({
       action,

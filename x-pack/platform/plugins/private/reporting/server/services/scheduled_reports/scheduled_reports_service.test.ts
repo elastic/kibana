@@ -2207,6 +2207,44 @@ describe('ScheduledReportsService', () => {
       );
     });
 
+    it('names a UIAM api key by its key id, which it also reports as its username', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: {
+          headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' },
+          path: '/',
+        } as unknown as KibanaRequest,
+      });
+      const otherKeyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'other-uiam-key-id',
+          createdByApiKeyId: 'other-uiam-key-id',
+        },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [otherKeyReport] }));
+
+      await scheduledReportsService.bulkDelete({
+        user: {
+          username: 'uiam-key-id',
+          authentication_type: 'api_key',
+          api_key: { id: 'uiam-key-id', managed_by: 'cloud' },
+        } as unknown as ReportingUser,
+        ids: [otherKeyReport.id],
+      });
+
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `API key "uiam-key-id" attempted to delete scheduled report "${otherKeyReport.id}" created by "other-uiam-key-id" without sufficient privileges.`
+      );
+    });
+
     it('should handle errors in bulk get', async () => {
       soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
         saved_objects: [
