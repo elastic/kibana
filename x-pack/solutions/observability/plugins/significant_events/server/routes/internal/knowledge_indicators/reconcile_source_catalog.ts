@@ -52,10 +52,11 @@ export async function retireSourceKnowledge({
  * A disabled source with a running onboarding execution has that run cancelled
  * before its owned rules are disabled.
  * Enabled sources that own rules have those rules enabled, unless maintenance is paused.
- * Ids that still have knowledge indicators or owned rules but no catalog row are retired.
  * A running execution whose slug has no catalog row is cancelled. Executions are
  * keyed by slug and live in the request space, so they are matched against this
  * space's catalog only.
+ * Ids that still have knowledge indicators or owned rules but no catalog row are
+ * then retired.
  */
 export async function reconcileSourceCatalog({
   sourcesClient,
@@ -92,6 +93,17 @@ export async function reconcileSourceCatalog({
     }
   }
 
+  // Cancel before retiring: a run left going could write indicators or rules back for a
+  // source that is gone.
+  if (onboardingClient) {
+    for (const sourceSlug of runningSourceSlugs) {
+      if (catalogSlugs.has(sourceSlug)) {
+        continue;
+      }
+      await onboardingClient.cancelBySourceSlug({ sourceSlug, request });
+    }
+  }
+
   const reconcileIds = await kiClient.getStreamNamesToReconcile();
   const survivingReconcileIds: string[] = [];
   for (const sourceId of reconcileIds) {
@@ -100,15 +112,6 @@ export async function reconcileSourceCatalog({
       continue;
     }
     await retireSourceKnowledge({ sourceId, kiClient });
-  }
-
-  if (onboardingClient) {
-    for (const sourceSlug of runningSourceSlugs) {
-      if (catalogSlugs.has(sourceSlug)) {
-        continue;
-      }
-      await onboardingClient.cancelBySourceSlug({ sourceSlug, request });
-    }
   }
 
   return { sources, reconcileIds: survivingReconcileIds };

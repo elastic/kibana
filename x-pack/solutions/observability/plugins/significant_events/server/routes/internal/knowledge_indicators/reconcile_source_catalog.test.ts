@@ -197,6 +197,23 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalled();
   });
 
+  it('cancels the run of a deleted source before retiring its knowledge', async () => {
+    const kiClient = makeKiClient(['gone-source']);
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([]),
+      kiClient,
+      onboardingClient: onboardingWithRuns(['gone-source-slug']),
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'gone-source-slug', request });
+    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('gone-source');
+    expect(cancelBySourceSlug.mock.invocationCallOrder[0]).toBeLessThan(
+      kiClient.deleteOwnedRules.mock.invocationCallOrder[0]
+    );
+  });
+
   it('cancels a run for a deleted source in a space other than default', async () => {
     const otherRequest = { spaceId: 'other' } as KibanaRequest;
 
