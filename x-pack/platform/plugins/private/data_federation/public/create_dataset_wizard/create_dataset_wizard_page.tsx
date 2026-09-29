@@ -106,8 +106,7 @@ export function CreateDatasetWizardPage({
 
     setIsSaving(true);
     try {
-      const formPayload = buildDatasetPayload(values);
-      const payload: DataSetWithName = formPayload;
+      const payload = buildDatasetPayload(values);
       await datasetsClient.add(payload);
 
       const previousId = initialDataSet?.name.trim();
