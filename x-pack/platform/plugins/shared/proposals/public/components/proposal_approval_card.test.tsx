@@ -395,15 +395,14 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('explains an expiry the workflow settled before the deadline', () => {
-      // Attempt exhaustion settles `expired` while the computed `expired` flag
-      // is still false, and nobody decided — so this is the expiry callout,
-      // not a decision.
+      // Attempt exhaustion settles `expired` while the computed `expired` flag is still false,
+      // and nobody decided — `getProposalDecision` still reports a real (actor-less) decision
+      // for it, so `ApprovalContent`'s own "Expired" badge shows alongside this callout rather
+      // than instead of it.
       setupMocks(baseProposal({ expired: false, status: 'expired' }));
-      const { getByTestId, queryByTestId } = render(
-        <ProposalApprovalCard proposalId={PROPOSAL_ID} />
-      );
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('warning-callout')).toBeInTheDocument();
-      expect(queryByTestId('approval-decision')).toBeNull();
+      expect(getByTestId('approval-decision')).toHaveTextContent('expired:');
     });
 
     it('names a fallback actor rather than hiding a decision that plainly exists', () => {
