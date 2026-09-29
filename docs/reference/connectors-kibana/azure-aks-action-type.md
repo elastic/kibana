@@ -53,7 +53,7 @@ The app registration must have at least the **Azure Kubernetes Service Cluster U
 
 ## Connector networking configuration [action-settings]
 
-Use the [Action configuration settings](((kibana-ref))/alert-action-settings-kb.html#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Prerequisites [azure-aks-prerequisites]
 
