@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { McpClient, StreamableHTTPError, UnauthorizedError, type FetchLike } from '@kbn/mcp-client';
+import {
+  McpClient,
+  McpError,
+  McpErrorCode,
+  McpNotConnectedError,
+  StreamableHTTPError,
+  UnauthorizedError,
+  type FetchLike,
+} from '@kbn/mcp-client';
 import type { BuildContext } from '../../clients/client_type_spec';
 import {
   createMcpClientType,
@@ -706,6 +714,11 @@ describe('createMcpClientType', () => {
       [Object.assign(new Error('socket gone'), { code: 'UND_ERR_SOCKET' }), true],
       [Object.assign(new Error('socket gone'), { code: 'UND_ERR_CLOSED' }), true],
       [Object.assign(new Error('socket gone'), { code: 'UND_ERR_DESTROYED' }), true],
+      [new McpError(McpErrorCode.ConnectionClosed, 'Connection closed'), true],
+      [new McpNotConnectedError('kibana-mcp', '1.0.0'), true],
+      [new Error('Not connected'), true],
+      [new McpError(McpErrorCode.RequestTimeout, 'Request timed out'), false],
+      [new McpError(McpErrorCode.InvalidParams, 'bad params'), false],
       [new StreamableHTTPError(500, 'boom'), false],
       [new Error('boom'), false],
     ])('classifies terminal errors', (error, expected) => {

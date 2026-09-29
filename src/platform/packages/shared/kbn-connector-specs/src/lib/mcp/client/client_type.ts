@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { McpClient, StreamableHTTPError, UnauthorizedError, type FetchLike } from '@kbn/mcp-client';
+import {
+  McpClient,
+  McpError,
+  McpErrorCode,
+  McpNotConnectedError,
+  StreamableHTTPError,
+  UnauthorizedError,
+  type FetchLike,
+} from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
 import { createFetchResource, type McpFetchResource } from './fetch_resource';
 import { createSseGatedFetch } from './sse_fetch';
@@ -20,6 +28,8 @@ const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 const USER_ERROR_HTTP_STATUS_CODES = new Set([401, 403]);
 const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
 const SOCKET_HANG_UP = 'socket hang up';
+// Thrown by the SDK protocol layer once its transport is gone.
+const SDK_NOT_CONNECTED_MESSAGE = 'Not connected';
 const TRANSIENT_ERROR_CODES = new Set([
   'ECONNREFUSED',
   'ECONNRESET',
@@ -271,6 +281,17 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
   shouldInvalidateOnError(err: unknown): boolean {
     return matchesErrorOrCause(err, (current) => {
       if (current instanceof UnauthorizedError) {
+        return true;
+      }
+      // The SDK dropped its transport: pending requests fail with ConnectionClosed and later
+      // requests with "Not connected". Nothing reconnects a pooled client, so drop it.
+      if (current instanceof McpNotConnectedError) {
+        return true;
+      }
+      if (current instanceof McpError) {
+        return current.code === McpErrorCode.ConnectionClosed;
+      }
+      if (current instanceof Error && current.message === SDK_NOT_CONNECTED_MESSAGE) {
         return true;
       }
       if (current instanceof StreamableHTTPError) {
