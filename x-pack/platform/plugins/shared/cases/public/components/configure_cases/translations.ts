@@ -315,23 +315,21 @@ export const BACK_TO_CASES = i18n.translate('xpack.cases.settings.backToCases', 
   defaultMessage: 'Cases',
 });
 
-export const WORKFLOW_TAGS_TITLE = i18n.translate(
-  'xpack.cases.configureCases.workflowTags.title',
-  { defaultMessage: 'Available workflow tags' }
-);
+export const WORKFLOW_TAGS_TITLE = i18n.translate('xpack.cases.configureCases.workflowTags.title', {
+  defaultMessage: 'Available workflow tags',
+});
 
 export const WORKFLOW_TAGS_DESCRIPTION = i18n.translate(
   'xpack.cases.configureCases.workflowTags.description',
   {
     defaultMessage:
-      'Select one or more tags to limit which workflows appear in workflow selectors. When no tags are configured, all workflows are shown.',
+      'Select one or more tags to limit which workflows appear in Cases workflow selectors. When no tags are configured, all workflows are shown. Tags only filter the list; they do not restrict which workflows users can run.',
   }
 );
 
-export const WORKFLOW_TAGS_LABEL = i18n.translate(
-  'xpack.cases.configureCases.workflowTags.label',
-  { defaultMessage: 'Workflow tags' }
-);
+export const WORKFLOW_TAGS_LABEL = i18n.translate('xpack.cases.configureCases.workflowTags.label', {
+  defaultMessage: 'Workflow tags',
+});
 
 const ADD_WORKFLOW_TAG_LABEL = (searchValue: string) =>
   i18n.translate('xpack.cases.configureCases.workflowTags.addWorkflowTag', {

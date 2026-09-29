@@ -110,20 +110,49 @@ export const useCanRunCaseWorkflow = (): boolean => {
   );
 };
 
+const rejectAllWorkflows = (): boolean => false;
+
+export interface CaseWorkflowTagsState {
+  /** `undefined` until the owner's case configuration has been fetched successfully. */
+  workflowTags: readonly string[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}
+
 /**
- * Reads the configured workflow tags from the current owner's case configuration and
- * returns memoised `filterWorkflow` / `sortWorkflow` functions for the pickers.
- * Falls back to `NO_WORKFLOW_TAGS` (show all) while the configuration is loading.
+ * Reads the configured workflow tags from the current owner's case configuration.
+ * The configuration query is seeded with placeholder `initialData` (no tags), so tags
+ * are only reported once a fetch has completed without error.
+ */
+export const useCaseWorkflowTags = (): CaseWorkflowTagsState => {
+  const { data: configuration, isFetched, isError } = useGetCaseConfiguration();
+
+  return {
+    workflowTags: isFetched && !isError ? configuration.workflowTags : undefined,
+    isLoading: !isFetched,
+    isError,
+  };
+};
+
+/**
+ * Returns memoised `filterWorkflow` / `sortWorkflow` functions for the pickers based on the
+ * configured workflow tags. Rejects every workflow until the configuration is available so
+ * the pickers never show a list that ignores the configured tags.
  */
 export const useCaseWorkflowFilters = (): {
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
 } => {
-  const { data: configuration } = useGetCaseConfiguration();
-  const workflowTags = configuration?.workflowTags ?? NO_WORKFLOW_TAGS;
+  const { workflowTags } = useCaseWorkflowTags();
 
-  const filterWorkflow = useMemo(() => createCaseWorkflowFilter(workflowTags), [workflowTags]);
-  const sortWorkflow = useMemo(() => createCaseWorkflowComparator(workflowTags), [workflowTags]);
+  const filterWorkflow = useMemo(
+    () => (workflowTags ? createCaseWorkflowFilter(workflowTags) : rejectAllWorkflows),
+    [workflowTags]
+  );
+  const sortWorkflow = useMemo(
+    () => createCaseWorkflowComparator(workflowTags ?? NO_WORKFLOW_TAGS),
+    [workflowTags]
+  );
 
   return { filterWorkflow, sortWorkflow };
 };

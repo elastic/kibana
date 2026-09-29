@@ -15,6 +15,7 @@ import { casesMutationsKeys, casesQueriesKeys } from '../constants';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ConfigurationRequest } from '../../../common/types/api';
+import type { CasesConfigurationUI } from '../types';
 
 type Request = Omit<SnakeToCamelCase<ConfigurationRequest>, 'owner'> & {
   id: string;
@@ -64,7 +65,18 @@ export const usePersistConfiguration = () => {
     },
     {
       mutationKey: casesMutationsKeys.persistCaseConfiguration,
-      onSuccess: () => {
+      onSuccess: (savedConfiguration) => {
+        // Seed the cache with the saved configuration so its new version is used immediately;
+        // otherwise follow-up saves made before the refetch settles fail with a conflict.
+        queryClient.setQueryData<CasesConfigurationUI[] | null>(
+          casesQueriesKeys.configuration({}),
+          (configurations) => [
+            ...(configurations ?? []).filter(
+              ({ owner: configurationOwner }) => configurationOwner !== savedConfiguration.owner
+            ),
+            savedConfiguration,
+          ]
+        );
         queryClient.invalidateQueries(casesQueriesKeys.configuration({}));
         showSuccessToast(i18n.SUCCESS_CONFIGURE);
       },

@@ -1310,7 +1310,13 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
 
       */
-    workflowTags: z.array(z.string().min(1).max(256)).max(100).optional(),
+    workflowTags: z
+      .array(z.string().min(1).max(256))
+      .max(100)
+      .optional()
+      .describe(
+        'Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n'
+      ),
   })
 );
 export type SetCaseConfigurationRequest = z.infer<typeof SetCaseConfigurationRequest>;
@@ -1423,7 +1429,13 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
 
       */
-    workflowTags: z.array(z.string().min(1).max(256)).max(100).optional(),
+    workflowTags: z
+      .array(z.string().min(1).max(256))
+      .max(100)
+      .optional()
+      .describe(
+        'Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n'
+      ),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.
 

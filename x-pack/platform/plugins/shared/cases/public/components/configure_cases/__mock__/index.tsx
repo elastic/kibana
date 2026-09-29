@@ -41,6 +41,8 @@ export const useCaseConfigureResponse = {
   data: mockConfigurationData,
   isLoading: false,
   isFetching: false,
+  isFetched: true,
+  isError: false,
   refetch: jest.fn(),
 };
 

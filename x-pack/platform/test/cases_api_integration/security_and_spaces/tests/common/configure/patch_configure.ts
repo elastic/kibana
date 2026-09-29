@@ -12,6 +12,7 @@ import {
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import type { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import { MAX_LENGTH_PER_TAG } from '@kbn/cases-plugin/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -151,6 +152,61 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           version: configuration.version,
           observableTypes,
+        },
+        400
+      );
+    });
+
+    it('should patch a configuration with workflowTags', async () => {
+      const configuration = await createConfiguration(supertest);
+      expect(configuration.workflowTags).to.eql([]);
+
+      const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        workflowTags: ['soc-triage'],
+      });
+
+      expect(updatedConfiguration.workflowTags).to.eql(['soc-triage']);
+    });
+
+    it('should preserve workflowTags when patching other attributes', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['soc-triage'] } })
+      );
+
+      await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        closure_type: 'close-by-pushing',
+      });
+
+      const [persisted] = await getConfiguration({ supertest });
+      expect(persisted.workflowTags).to.eql(['soc-triage']);
+    });
+
+    it('should clear workflowTags when patched with an empty array', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['soc-triage'] } })
+      );
+
+      const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        workflowTags: [],
+      });
+
+      expect(updatedConfiguration.workflowTags).to.eql([]);
+    });
+
+    it('should not patch a configuration with a workflow tag that is too long', async () => {
+      const configuration = await createConfiguration(supertest);
+
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
+          version: configuration.version,
+          workflowTags: ['a'.repeat(MAX_LENGTH_PER_TAG + 1)],
         },
         400
       );
