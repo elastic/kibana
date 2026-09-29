@@ -37,7 +37,7 @@ export type HuntCoordinatorTier2SkipReason =
   | 'no_environment_hits'
   /**
    * The scope was every log source (`discovered:broad`) and Tier 1 left no matched required index (no confirmed hit, or a hit reached only through an alias), so
-   * hit, so there is no matched index set for Tier 2 to generate against. Deterministic
+   * there is no matched index set for Tier 2 to generate against. Deterministic
    * for this run; not counted as lost coverage.
    */
   | 'no_matched_scope'

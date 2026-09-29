@@ -408,7 +408,11 @@ const resolveGenerationIndex = (
   const matched = matchedIndexPatterns(articleContext, allowlist);
   if (matched.length > 0) return matched.join(',');
   // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
-  const positives = requiredIndices.filter((pattern) => !pattern.startsWith('-'));
+  // Filter positives the same way matched indices are filtered: under a broad scope
+  // `logs-*` itself is refused because it overlaps the agent exclusions.
+  const positives = requiredIndices
+    .filter((pattern) => !pattern.startsWith('-'))
+    .filter((pattern) => isIndexPatternAllowed(pattern, allowlist));
   if (positives.length > 0) return positives.join(',');
   return DEFAULT_GENERATION_INDEX;
 };
