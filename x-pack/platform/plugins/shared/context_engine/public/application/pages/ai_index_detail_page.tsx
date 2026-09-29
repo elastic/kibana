@@ -94,6 +94,7 @@ export const AiIndexDetailPage = () => {
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
     enabled: aiIndex !== undefined,
+    notifyOnError: true,
   });
 
   const showKnowledgeIndicatorsTab =

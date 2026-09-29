@@ -846,4 +846,22 @@ describe('AiIndexDetailPage', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
+
+  it('hides the Knowledge Indicators tab when the KI summary request fails', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      error: new Error('Request timed out'),
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
 });
