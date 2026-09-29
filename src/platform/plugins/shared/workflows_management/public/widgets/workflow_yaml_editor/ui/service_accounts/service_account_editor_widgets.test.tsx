@@ -33,6 +33,7 @@ const account = {
 };
 const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMouseEvent => ({
   event: {
+    defaultPrevented: false,
     browserEvent: new MouseEvent('mousemove'),
     leftButton: false,
     middleButton: false,
@@ -150,6 +151,11 @@ describe('ServiceAccountEditorWidgets', () => {
         isRedoing: false,
         isFlush: false,
         isEolChange: false,
+        get detailedReasonsChangeLengths() {
+          return this.changes.map(
+            (change: monaco.editor.IModelContentChange) => change.rangeLength
+          );
+        },
       });
       jest.mocked(editor.onDidChangeCursorPosition).mock.calls[0][0]({
         position,

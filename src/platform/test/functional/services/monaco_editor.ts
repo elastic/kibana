@@ -16,9 +16,7 @@ import { FtrService } from '../ftr_provider_context';
 
 declare global {
   interface Window {
-    MonacoEnvironment: {
-      monaco?: typeof monaco;
-    };
+    MonacoEnvironment?: monaco.Environment;
   }
 }
 
