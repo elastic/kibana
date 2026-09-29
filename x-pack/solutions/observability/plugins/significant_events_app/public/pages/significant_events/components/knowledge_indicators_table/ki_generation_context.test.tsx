@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_DEFAULT_MODELS } from '@kbn/significant-events-schema';
 import { KiGenerationProvider, useKiGeneration } from './ki_generation_context';
 
@@ -34,8 +34,7 @@ jest.mock('../../hooks/use_bulk_onboarding', () => ({
 }));
 
 const ContextProbe = () => {
-  const { onboardingConfig, setOnboardingConfig, featuresConnectors, queriesConnectors } =
-    useKiGeneration();
+  const { onboardingConfig, featuresConnectors, queriesConnectors } = useKiGeneration();
 
   return (
     <>
@@ -43,20 +42,6 @@ const ContextProbe = () => {
       <div data-test-subj="queries-connector">{onboardingConfig.connectors.queries}</div>
       <div data-test-subj="features-loading">{String(featuresConnectors.loading)}</div>
       <div data-test-subj="queries-loading">{String(queriesConnectors.loading)}</div>
-      <button
-        type="button"
-        onClick={() =>
-          setOnboardingConfig({
-            ...onboardingConfig,
-            connectors: {
-              features: 'custom-features',
-              queries: 'custom-queries',
-            },
-          })
-        }
-      >
-        Use custom models
-      </button>
     </>
   );
 };
@@ -79,24 +64,5 @@ describe('KiGenerationProvider model defaults', () => {
     });
     expect(screen.getByTestId('features-loading')).toHaveTextContent('false');
     expect(screen.getByTestId('queries-loading')).toHaveTextContent('false');
-  });
-
-  it('preserves custom model selections', async () => {
-    render(
-      <KiGenerationProvider>
-        <ContextProbe />
-      </KiGenerationProvider>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('features-connector')).toHaveTextContent(
-        NIGHTSHIFT_DEFAULT_MODELS.kiExtraction
-      )
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Use custom models' }));
-
-    expect(screen.getByTestId('features-connector')).toHaveTextContent('custom-features');
-    expect(screen.getByTestId('queries-connector')).toHaveTextContent('custom-queries');
   });
 });

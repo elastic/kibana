@@ -49,15 +49,6 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
           5 * 60_000
       );
-      await fetch('/internal/search_inference_endpoints/settings', {
-        method: 'PUT',
-        headers: { 'elastic-api-version': '1' },
-        body: JSON.stringify({
-          features: [
-            { feature_id: 'significant_events_investigation', endpoints: [{ id: connector.id }] },
-          ],
-        }),
-      });
       await expect
         .poll(
           async () =>

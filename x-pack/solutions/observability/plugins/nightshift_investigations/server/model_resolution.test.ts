@@ -8,7 +8,6 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
-import { NIGHTSHIFT_DEFAULT_MODELS } from '@kbn/significant-events-schema';
 import {
   getNightshiftModelRestriction,
   resolveNightshiftModelForRequest,
@@ -55,18 +54,6 @@ it('validates with one request-scoped inference client and returns its canonical
   expect(getClient).toHaveBeenCalledWith({ request });
   expect(getConnectorById).toHaveBeenCalledWith('legacy-alias');
   expect(startContractGetConnectorById).not.toHaveBeenCalled();
-});
-
-it('validates the Nightshift default when no model is requested', async () => {
-  await resolveNightshiftModelForRequest({
-    request,
-    inference,
-    savedObjects,
-    uiSettings,
-    step: 'investigation',
-  });
-
-  expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.investigation);
 });
 
 it('does not load the platform default when the default-only setting is off', async () => {

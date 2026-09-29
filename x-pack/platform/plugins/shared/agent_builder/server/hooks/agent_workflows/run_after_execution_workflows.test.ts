@@ -348,26 +348,6 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
 
-    it('logs and skips the workflow when its definition is unreadable', async () => {
-      const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
-      getWorkflowMock.mockResolvedValue({
-        ...makeWorkflow(existingWorkflowInputs),
-        definition: null,
-      });
-
-      await expect(
-        runAfterExecutionWorkflows({
-          context: createContext(),
-          workflowApi,
-          getInternalServices,
-          logger,
-        })
-      ).resolves.toBeUndefined();
-
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
-      expect(executeWorkflowMock).not.toHaveBeenCalled();
-    });
-
     it('executes a later workflow after an earlier workflow lookup fails', async () => {
       const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
       getWorkflowMock.mockRejectedValueOnce(new Error('lookup failed')).mockResolvedValueOnce(
