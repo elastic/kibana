@@ -23,7 +23,10 @@ export interface GetRenderIntegrationsParams {
   policyTemplates?: IacPolicyTemplateSelection[];
 }
 
-/** Integrations to send to IaCP; empty when nothing can contribute to the template. */
+/**
+ * Integrations to send to IaCP. A package with no enabled policy template is left out; an empty
+ * result means there is nothing to render.
+ */
 export const getRenderIntegrations = ({
   integrations,
   packageName,
@@ -42,7 +45,10 @@ export interface RenderArtifactTemplateParams {
   integrations: RenderIacTemplateIntegration[];
   /** Stored template digest; IaCP answers `render: false` when the stack still matches it. */
   templateSha?: string;
-  /** Existing stack to update; makes the launch URL a stack-update deep link. */
+  /**
+   * Provider deployment identity of an existing stack (AWS: CloudFormation stack ARN); makes the
+   * launch URL a stack-update deep link.
+   */
   deploymentId?: string;
   stackParams?: Readonly<Record<string, string>>;
   /** Package's static quick-create URL; the launch URL keeps its console host and query params. */
