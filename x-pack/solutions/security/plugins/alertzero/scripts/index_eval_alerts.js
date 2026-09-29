@@ -252,6 +252,12 @@ const ALERT_TEMPLATES = [
   {
     label: 'tier2-shellcode',
     expected: 'true_positive',
+    // Paired with tier3-wmi under one shared rule (see `ruleGroup` below): a generic
+    // behavioral-engine rule firing across two hosts with different outcomes is a realistic
+    // "one rule, mixed verdict" batch, and the eval fixture otherwise never exercises the
+    // Worker's batch classification, grouped impact/counts, or a proposal that closes only
+    // the false positives from a mixed batch — every alert gets its own randomUUID rule.
+    ruleGroup: 'mixed-behavioral',
     ruleName: 'Malicious Behavior Detection Alert: Shellcode Injection via Memory',
     ruleDescription:
       'Elastic Defend behavioral engine detected shellcode injection into a remote process.',
@@ -282,6 +288,8 @@ const ALERT_TEMPLATES = [
   {
     label: 'tier3-wmi',
     expected: 'false_positive',
+    // Paired with tier2-shellcode — see the comment there.
+    ruleGroup: 'mixed-behavioral',
     ruleName: 'Malicious Behavior Detection Alert: Suspicious WMI Execution',
     ruleDescription:
       'Elastic Defend behavioral engine detected WMI process execution, which can be used for remote execution.',
@@ -415,6 +423,9 @@ async function indexAlerts() {
   // Use a single run prefix so all 8 alerts share a run id — easier to grep
   const runId = randomUUID().slice(0, 8);
   const indexed = [];
+  // Alerts sharing a `ruleGroup` get the same rule identity below instead of buildDoc's default
+  // (a fresh randomUUID per alert), so the batch they land in actually spans one rule.
+  const ruleUuidByGroup = new Map();
 
   for (const tmpl of ALERT_TEMPLATES) {
     const alertUuid = randomUUID();
@@ -423,6 +434,13 @@ async function indexAlerts() {
     // Tag for easy cleanup; preserve label for Worker trigger payload
     doc['kibana.alert.rule.tags'] = ['eval-fixture'];
     doc['kibana.alert.rule.rule_id'] = `eval-rule-${tmpl.label}`;
+    if (tmpl.ruleGroup) {
+      if (!ruleUuidByGroup.has(tmpl.ruleGroup)) {
+        ruleUuidByGroup.set(tmpl.ruleGroup, randomUUID());
+      }
+      doc['kibana.alert.rule.uuid'] = ruleUuidByGroup.get(tmpl.ruleGroup);
+      doc['kibana.alert.rule.rule_id'] = `eval-rule-${tmpl.ruleGroup}`;
+    }
 
     await esRequest('PUT', `/${INDEX}/_doc/${alertUuid}`, doc);
     indexed.push({
