@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { deriveExemplarsIndex } from './derive_exemplars_index';
+import { deriveExemplarsIndex, resolveExemplarsIndex } from './derive_exemplars_index';
 
 describe('deriveExemplarsIndex', () => {
   it('swaps the metrics- prefix for exemplars- on an OTel data stream', () => {
@@ -79,5 +79,42 @@ describe('deriveExemplarsIndex', () => {
 
   it('returns undefined for whitespace-only input', () => {
     expect(deriveExemplarsIndex('   ')).toBeUndefined();
+  });
+});
+
+describe('resolveExemplarsIndex', () => {
+  const metricItem = { indexName: 'metrics-generic.otel-default' };
+
+  it('prefers the typed source when it is a single concrete OTel index', () => {
+    expect(resolveExemplarsIndex(metricItem, 'metrics-generic.otel-production')).toBe(
+      'exemplars-generic.otel-production'
+    );
+  });
+
+  it('falls back to the metric item when the typed source is a pattern', () => {
+    expect(resolveExemplarsIndex(metricItem, 'metrics-*')).toBe('exemplars-generic.otel-default');
+  });
+
+  it('falls back to the metric item when no source was typed', () => {
+    expect(resolveExemplarsIndex(metricItem, undefined)).toBe('exemplars-generic.otel-default');
+  });
+
+  it('falls back to the metric item when the typed source is a backing index', () => {
+    expect(
+      resolveExemplarsIndex(metricItem, '.ds-metrics-generic.otel-default-2026.09.25-000001')
+    ).toBe('exemplars-generic.otel-default');
+  });
+
+  it('returns undefined when neither the source nor the metric item is an OTel data stream', () => {
+    expect(
+      resolveExemplarsIndex(
+        { indexName: 'metrics-system.cpu-default' },
+        'metrics-system.cpu-default'
+      )
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when the metric item index is a pattern and no source was typed', () => {
+    expect(resolveExemplarsIndex({ indexName: 'metrics-*' }, undefined)).toBeUndefined();
   });
 });

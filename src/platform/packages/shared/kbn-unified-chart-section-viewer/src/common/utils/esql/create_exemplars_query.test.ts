@@ -23,10 +23,13 @@ const mockMetric: ParsedMetricItem = {
     { name: 'resource.attributes.service.name' },
   ],
 };
+const TEST_EXEMPLARS_INDEX = 'exemplars-generic.otel-default';
 
 describe('createExemplarsQuery', () => {
   it('builds the exemplars query for an OTel metric', () => {
-    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
+    expect(
+      createExemplarsQuery({ exemplarsIndex: TEST_EXEMPLARS_INDEX, metricItem: mockMetric })
+    ).toBe(
       `
 SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
@@ -39,7 +42,10 @@ FROM exemplars-generic.otel-default
   });
 
   it('nullifies unmapped fields so a dimension absent from the exemplars stream cannot fail KEEP', () => {
-    const query = createExemplarsQuery({ metricItem: mockMetric });
+    const query = createExemplarsQuery({
+      exemplarsIndex: TEST_EXEMPLARS_INDEX,
+      metricItem: mockMetric,
+    });
 
     expect(query.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(true);
   });
@@ -47,6 +53,7 @@ FROM exemplars-generic.otel-default
   it('appends each non-empty where statement as its own WHERE pipe before KEEP', () => {
     expect(
       createExemplarsQuery({
+        exemplarsIndex: TEST_EXEMPLARS_INDEX,
         metricItem: mockMetric,
         whereStatements: [
           ' attributes.http.route == "/orders" ',
@@ -70,7 +77,12 @@ FROM exemplars-generic.otel-default
   });
 
   it('keeps only the trace correlation columns when the metric declares no dimensions', () => {
-    expect(createExemplarsQuery({ metricItem: { ...mockMetric, dimensionFields: [] } })).toBe(
+    expect(
+      createExemplarsQuery({
+        exemplarsIndex: TEST_EXEMPLARS_INDEX,
+        metricItem: { ...mockMetric, dimensionFields: [] },
+      })
+    ).toBe(
       `
 SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
@@ -85,6 +97,7 @@ FROM exemplars-generic.otel-default
   it('honours an explicit maxRows override', () => {
     expect(
       createExemplarsQuery({
+        exemplarsIndex: TEST_EXEMPLARS_INDEX,
         metricItem: { ...mockMetric, dimensionFields: [] },
         maxRows: 25,
       })
@@ -103,6 +116,7 @@ FROM exemplars-generic.otel-default
   it('escapes double quotes in the metric name string value', () => {
     expect(
       createExemplarsQuery({
+        exemplarsIndex: TEST_EXEMPLARS_INDEX,
         metricItem: {
           ...mockMetric,
           metricName: 'metrics.odd"name',
@@ -124,6 +138,7 @@ FROM exemplars-generic.otel-default
   it('escapes backslashes in the metric name string value', () => {
     expect(
       createExemplarsQuery({
+        exemplarsIndex: TEST_EXEMPLARS_INDEX,
         metricItem: { ...mockMetric, metricName: 'metrics.odd\\name', dimensionFields: [] },
       })
     ).toContain('WHERE metric_name == "odd\\\\name"');
@@ -131,6 +146,7 @@ FROM exemplars-generic.otel-default
 
   it('does not repeat a dimension that collides with a shared exemplar column', () => {
     const query = createExemplarsQuery({
+      exemplarsIndex: TEST_EXEMPLARS_INDEX,
       metricItem: {
         ...mockMetric,
         dimensionFields: [{ name: 'trace.id' }, { name: 'attributes.http.route' }],
@@ -142,57 +158,22 @@ FROM exemplars-generic.otel-default
     );
   });
 
-  describe('index resolution', () => {
-    it('prefers originalSource when the user typed a single concrete index', () => {
-      expect(
-        createExemplarsQuery({
-          metricItem: { ...mockMetric, dimensionFields: [] },
-          originalSource: 'metrics-generic.otel-production',
-        })
-      ).toContain('FROM exemplars-generic.otel-production');
-    });
-
-    it('falls back to indexName when originalSource is a pattern', () => {
-      expect(
-        createExemplarsQuery({
-          metricItem: { ...mockMetric, dimensionFields: [] },
-          originalSource: 'metrics-*',
-        })
-      ).toContain('FROM exemplars-generic.otel-default');
-    });
-
-    it('falls back to indexName when originalSource is a backing index that cannot be mapped', () => {
-      expect(
-        createExemplarsQuery({
-          metricItem: { ...mockMetric, dimensionFields: [] },
-          originalSource: '.ds-metrics-generic.otel-default-2026.09.25-000001',
-        })
-      ).toContain('FROM exemplars-generic.otel-default');
-    });
-  });
-
   describe('returns an empty string so callers skip the fetch', () => {
-    it('when the metrics index is not an OTel data stream', () => {
+    it('when the metric name is missing', () => {
       expect(
         createExemplarsQuery({
-          metricItem: { ...mockMetric, indexName: 'metrics-system.cpu-default' },
+          exemplarsIndex: TEST_EXEMPLARS_INDEX,
+          metricItem: { ...mockMetric, metricName: '' },
         })
       ).toBe('');
-    });
-
-    it('when the metrics index is a wildcard pattern', () => {
-      expect(createExemplarsQuery({ metricItem: { ...mockMetric, indexName: 'metrics-*' } })).toBe(
-        ''
-      );
-    });
-
-    it('when the metric name is missing', () => {
-      expect(createExemplarsQuery({ metricItem: { ...mockMetric, metricName: '' } })).toBe('');
     });
   });
 
   it('never aggregates, so a grid breakdown cannot change which exemplars are fetched', () => {
-    const query = createExemplarsQuery({ metricItem: mockMetric });
+    const query = createExemplarsQuery({
+      exemplarsIndex: TEST_EXEMPLARS_INDEX,
+      metricItem: mockMetric,
+    });
 
     expect(query).not.toContain('STATS');
     expect(query).not.toContain(' BY ');

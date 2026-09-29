@@ -247,6 +247,11 @@ describe('useFetchExemplars', () => {
     renderHook(() => useFetchExemplars(params));
 
     await flushAsync();
+    expect(mockCreateExemplarsQuery).toHaveBeenCalledWith({
+      metricItem: mockMetric,
+      exemplarsIndex: 'exemplars-generic.otel-default',
+      whereStatements: undefined,
+    });
     expect(mockProbe).toHaveBeenCalledWith({
       fetchId: params.fetchParams.lastReloadRequestTime,
       search: params.services.data.search.search,

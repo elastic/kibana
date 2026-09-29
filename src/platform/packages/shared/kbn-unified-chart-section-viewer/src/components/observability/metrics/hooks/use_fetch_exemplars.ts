@@ -69,8 +69,12 @@ export const useFetchExemplars = ({
 
       // Non-OTel metrics have no exemplars stream and never probe.
       const exemplarsIndex = resolveExemplarsIndex(metricItem, originalSource);
-      const esqlQuery = createExemplarsQuery({ metricItem, whereStatements, originalSource });
-      if (!exemplarsIndex || !esqlQuery) {
+      if (!exemplarsIndex) {
+        return undefined;
+      }
+
+      const esqlQuery = createExemplarsQuery({ metricItem, exemplarsIndex, whereStatements });
+      if (!esqlQuery) {
         return undefined;
       }
 

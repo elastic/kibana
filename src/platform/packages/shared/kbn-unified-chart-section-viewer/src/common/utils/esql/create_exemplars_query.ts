@@ -15,7 +15,6 @@ import {
   EXEMPLARS_METRIC_NAME_FIELD,
   EXEMPLARS_VALUE_FIELD,
 } from '../../constants';
-import { resolveExemplarsIndex } from '../exemplars/derive_exemplars_index';
 import type { ParsedMetricItem } from '../../../types';
 
 const { TIMESTAMP_FIELD, TRACE_ID_FIELD, SPAN_ID_FIELD } = fieldConstants;
@@ -31,26 +30,26 @@ const BASE_COLUMNS = [
 
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
+  /** The metric's exemplars data stream, from `resolveExemplarsIndex`. */
+  exemplarsIndex: string;
   whereStatements?: string[];
-  originalSource?: string;
   maxRows?: number;
 }
 
 /**
- * Builds the ES|QL query that fetches OTel exemplars for one metric, or `''` when the metric
- * cannot have exemplars. Takes no breakdown accessors on purpose: breaking the chart down
- * does not change which exemplars are fetched.
+ * Builds the ES|QL query that fetches OTel exemplars for one metric from `exemplarsIndex`, or
+ * `''` when the metric has no name. Takes no breakdown accessors on purpose: breaking the chart
+ * down does not change which exemplars are fetched.
  */
 export function createExemplarsQuery({
   metricItem,
+  exemplarsIndex,
   whereStatements = [],
-  originalSource,
   maxRows = EXEMPLARS_MAX_ROWS,
 }: CreateExemplarsQueryParams): string {
   const { metricName, dimensionFields } = metricItem;
-  const exemplarsIndex = resolveExemplarsIndex(metricItem, originalSource);
 
-  if (!exemplarsIndex || !metricName) {
+  if (!metricName) {
     return '';
   }
 
