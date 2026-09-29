@@ -17,9 +17,9 @@ import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
 import { useCustomBranding } from './chrome_hooks';
-import { resolveChromeNextAnnouncement } from './resolve_chrome_next_announcement';
+import { resolveChromeHeaderAnnouncement } from './resolve_chrome_header_announcement';
 
-// Classic and Chrome Next both append this brand. Revisit in https://github.com/elastic/kibana/issues/289752
+// Classic and project chrome both append this brand. Revisit in https://github.com/elastic/kibana/issues/289752
 const DEFAULT_BRAND = 'Elastic';
 const TITLE_SEPARATOR = ' - ';
 
@@ -137,7 +137,7 @@ export const HeaderPageAnnouncer: FC<{
   );
 };
 
-export const ChromeNextPageAnnouncer: FC = () => {
+export const ChromeHeaderPageAnnouncer: FC = () => {
   const chrome = useChromeService();
   const { application } = useChromeComponentsDeps();
 
@@ -152,7 +152,7 @@ export const ChromeNextPageAnnouncer: FC = () => {
   const location = useObservable(application.currentLocation$, '');
   const brand = useCustomBranding()?.pageTitle || DEFAULT_BRAND;
 
-  const pageTitle = resolveChromeNextAnnouncement({
+  const pageTitle = resolveChromeHeaderAnnouncement({
     inline,
     registeredTitle: registered?.title,
     docTitleParts,

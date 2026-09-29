@@ -15,7 +15,7 @@ import {
 } from './detections';
 import type { DetectionClient } from './detections';
 import { EventService, eventsDataStream, type StoredEvent, type eventsMappings } from './events';
-import type { EventClient } from './events';
+import type { EventClient, RuleEventsClient } from './events';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
 export interface SignificantEventsServices {
@@ -26,6 +26,16 @@ export interface SignificantEventsServices {
 export interface SignificantEventsClients {
   getDetectionClient: () => Promise<DetectionClient>;
   getEventClient: () => Promise<EventClient>;
+  /**
+   * Flag-aware accessor for read-only `{id}`/list lookups migrated onto `RuleEventsClient`
+   * (currently: `eventsSearchRoute`, `eventsLifecycleRoute`, `eventsGetRoute`,
+   * `eventsTriggerInvestigationRoute`). Honors
+   * `useRuleEventsRead`. Only call this for handlers that exclusively call `findByEventId` (or
+   * the list/search equivalent) — any handler needing `EventClient`-only methods (`bulkCreate`,
+   * `findByEventUuid`, `findLatestActive`, `emitTrigger`, …) must keep using `getEventClient()`,
+   * which always returns `EventClient` regardless of the flag.
+   */
+  getEventSearchClient: () => Promise<EventClient | RuleEventsClient>;
 }
 
 export function createSignificantEventsServices(): SignificantEventsServices {
@@ -41,13 +51,25 @@ export function createSignificantEventsClients({
   esClient,
   space,
   triggerEmitter,
+  useRuleEventsRead,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
+  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
+  useRuleEventsRead?: boolean;
 }): SignificantEventsClients {
+  const buildEventClientOptions = async () => ({
+    dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
+      eventsDataStream.name
+    ),
+    esClient,
+    space,
+    triggerEmitter,
+  });
+
   return {
     getDetectionClient: async () =>
       services.detection.getClient({
@@ -58,14 +80,18 @@ export function createSignificantEventsClients({
         esClient,
         space,
       }),
-    getEventClient: async () =>
-      services.event.getClient({
-        dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
-          eventsDataStream.name
-        ),
-        esClient,
-        space,
-        triggerEmitter,
-      }),
+    getEventClient: async () => {
+      const eventClientOptions = await buildEventClientOptions();
+      // Remaining callers of `getEventClient()` (e.g. `eventsUpdateRoute`, agent-builder tools,
+      // workflow triggers, the cleanup job) use the full `EventClient` surface (`bulkCreate`,
+      // `findByEventUuid`, `findLatestActive`, `emitTrigger`, …), which `RuleEventsClient`
+      // intentionally does not implement (#1517). This accessor always returns `EventClient`,
+      // independent of `useRuleEventsRead` — the flag only affects `getEventSearchClient()`.
+      return services.event.getClient(eventClientOptions) as EventClient;
+    },
+    getEventSearchClient: async () => {
+      const eventClientOptions = await buildEventClientOptions();
+      return services.event.getClient({ ...eventClientOptions, useRuleEventsRead });
+    },
   };
 }
