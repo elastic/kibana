@@ -89,6 +89,8 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
+export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
+
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;
 

@@ -64,6 +64,8 @@ import {
   nightshiftSecretsEncryptionParams,
   nightshiftSecretsSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+  nightshiftAutomationSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
@@ -138,6 +140,7 @@ export class NightshiftInvestigationsPlugin
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
 
@@ -324,6 +327,8 @@ export class NightshiftInvestigationsPlugin
           getTriggerEmitter,
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
+          getAutomationsSoClient: this.getAutomationsSoClient,
+          getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
           getCortexPageStore: (request: KibanaRequest) => {
@@ -496,6 +501,18 @@ export class NightshiftInvestigationsPlugin
           workflowsManagement: this.workflowsManagement,
         }),
     });
+  };
+
+  private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {
+    if (!this.savedObjects) {
+      throw new Error('savedObjects is not available — plugin start() has not been called');
+    }
+    return this.savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE],
+      })
+      .asScopedToNamespace(spaceId);
   };
 
   private createInvestigationRepository = (
