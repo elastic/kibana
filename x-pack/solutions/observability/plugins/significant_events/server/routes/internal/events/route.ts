@@ -242,12 +242,14 @@ const eventsAttachInvestigationRoute = createServerRoute({
     body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
+    const { getEventClient, getEventSearchClient, getAlertEventsClient, licensing } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     return attachInvestigationToEvent({
       eventClient: await getEventClient(),
+      eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
       investigation: params.body,
       alertEventsClient: await getAlertEventsClient(),
