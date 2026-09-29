@@ -12,7 +12,10 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CreateDatasetAdditionalSettings } from './create_dataset_settings';
+import {
+  CreateDatasetAdditionalSettings,
+  CreateDatasetFormatField,
+} from './create_dataset_settings';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from '../create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
@@ -57,6 +60,7 @@ const renderSettings = () => {
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+            <CreateDatasetFormatField control={control} />
             <CreateDatasetAdditionalSettings control={control} />
             <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
           </KibanaContextProvider>
@@ -106,7 +110,8 @@ describe('CreateDatasetSettings', () => {
     const { getByTestId, queryByTestId } = renderSettings();
 
     expect(queryByTestId('createDatasetAdditionalSettingsToggle')).toBeNull();
-    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeVisible();
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
   });
 
   it('updates format in form state', async () => {
@@ -140,10 +145,10 @@ describe('CreateDatasetSettings', () => {
     expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
   });
 
-  it('shows schema_resolution', () => {
-    const { getByTestId } = renderSettings();
+  it('does not show schema_resolution', () => {
+    const { queryByTestId } = renderSettings();
 
-    expect(getByTestId('createDatasetSettingsSchemaResolution')).toBeVisible();
+    expect(queryByTestId('createDatasetSettingsSchemaResolution')).toBeNull();
   });
 
   it('shows no format-specific fields when no format is selected', () => {
@@ -263,12 +268,12 @@ describe('CreateDatasetSettings', () => {
   });
 
   describe('Parquet format', () => {
-    it('shows parquet advanced fields when parquet is selected', async () => {
-      const { getByTestId } = renderSettings();
+    it('shows no parquet-specific advanced fields when parquet is selected', async () => {
+      const { getByTestId, queryByTestId } = renderSettings();
       await selectFormat(getByTestId, 'parquet');
 
-      expect(getByTestId('createDatasetSettingsOptimizedReader')).toBeVisible();
-      expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeVisible();
+      expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
+      expect(queryByTestId('createDatasetSettingsLateMaterialization')).toBeNull();
     });
   });
 });
@@ -324,7 +329,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
   });
 
-  it('shows parquet common and advanced settings when parquet is selected', () => {
+  it('shows only shared advanced settings when parquet is selected', () => {
     const { getByTestId, queryByTestId } = renderAdditionalSettings('parquet');
 
     expect(queryByTestId('createDatasetWizardCommonSettings')).toBeNull();
@@ -336,9 +341,9 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
-    expect(getByTestId('createDatasetParquetAdvancedSettings')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsOptimizedReader')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsLateMaterialization')).toBeNull();
   });
 
   it('shows csv/tsv common and advanced settings when csv is selected', () => {
@@ -378,7 +383,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     const quoteRow = quoteField.closest('.euiFormRow');
     expect(quoteRow).not.toBeNull();
     expect(within(quoteRow as HTMLElement).getByText('"')).toBeInTheDocument();
-    expect(within(quoteRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
+    expect(quoteRow).toHaveTextContent('" by default');
     const columnPrefixField = getByTestId('createDatasetSettingsColumnPrefix') as HTMLInputElement;
     expect(columnPrefixField).toHaveValue('');
     expect(columnPrefixField).toHaveAttribute(
@@ -387,9 +392,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     );
     const columnPrefixRow = columnPrefixField.closest('.euiFormRow');
     expect(columnPrefixRow).not.toBeNull();
-    expect(
-      within(columnPrefixRow as HTMLElement).getByText(/Prefix for generated field names/)
-    ).toBeInTheDocument();
+    expect(columnPrefixRow).toHaveTextContent('col by default');
     const escapeField = getByTestId('createDatasetSettingsEscape') as HTMLInputElement;
     expect(escapeField).toHaveValue('');
     expect(escapeField).toHaveAttribute(
@@ -399,7 +402,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     const escapeRow = escapeField.closest('.euiFormRow');
     expect(escapeRow).not.toBeNull();
     expect(within(escapeRow as HTMLElement).getByText('\\')).toBeInTheDocument();
-    expect(within(escapeRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
+    expect(escapeRow).toHaveTextContent('\\ by default');
     // API-only / passthrough-only fields are never shown in the UI
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
     expect(queryByTestId('createDatasetSettingsComment')).toBeNull();
@@ -418,12 +421,12 @@ describe('CreateDatasetAdditionalSettings', () => {
     const quoteField = getByTestId('createDatasetSettingsQuote') as HTMLInputElement;
     const quoteRow = quoteField.closest('.euiFormRow');
     expect(quoteRow).not.toBeNull();
-    expect(within(quoteRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
+    expect(quoteRow).toHaveTextContent('empty by default');
 
     const escapeField = getByTestId('createDatasetSettingsEscape') as HTMLInputElement;
     const escapeRow = escapeField.closest('.euiFormRow');
     expect(escapeRow).not.toBeNull();
-    expect(within(escapeRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
+    expect(escapeRow).toHaveTextContent('empty by default');
   });
 
   it('shows ndjson common settings and no ndjson advanced settings when ndjson is selected', () => {
