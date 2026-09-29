@@ -590,12 +590,12 @@ steps:
 
               # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the
               # same tag (e.g. az:false_positive removed and re-added), so keep them separate.
-              # Per-alert foreach mirrors set_az_tags so one failing alert cannot abort the batch.
+              # `continue: true` sits on each SetAlertTags step, next to its retry, like
+              # attach_alert_chunk does: on the foreach it would leave the whole loop at the first
+              # failure and skip the remaining candidates and record_retag_failure.
               - name: retag_dismissed_alerts
                 type: foreach
                 foreach: "${{ variables.fp_candidate_ids }}"
-                on-failure:
-                  continue: true
                 steps:
                   - name: remove_fp_tag
                     type: kibana.SetAlertTags
@@ -603,6 +603,7 @@ steps:
                       retry:
                         max-attempts: 3
                         delay: 5s
+                      continue: true
                     with:
                       ids:
                         - "{{ foreach.item }}"
@@ -616,6 +617,7 @@ steps:
                       retry:
                         max-attempts: 3
                         delay: 5s
+                      continue: true
                     with:
                       ids:
                         - "{{ foreach.item }}"
@@ -625,7 +627,8 @@ steps:
                           - "{{ variables.dismissed_tag }}"
 
                   # Both calls above retry, then continue past a persistent failure, so this
-                  # alert's tags may be left partway through the swap. Counted (not failed
+                  # alert's tags may be left partway through the swap and the loop moves on to
+                  # the next candidate. Counted (not failed
                   # loudly) so post_comment_outcome_dismissed can report the shortfall instead
                   # of unconditionally claiming every FP candidate was re-tagged.
                   - name: record_retag_failure

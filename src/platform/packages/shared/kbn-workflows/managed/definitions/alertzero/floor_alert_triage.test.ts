@@ -300,7 +300,7 @@ describe('floor_alert_triage — post_comment_outcome_dismissed', () => {
 
 // ---------------------------------------------------------------------------
 // retag_dismissed_alerts — per-alert tag-update failures are counted, not
-// silently swallowed by the loop's on-failure: continue: true
+// silently swallowed by `continue: true` on the tag steps
 // ---------------------------------------------------------------------------
 
 describe('floor_alert_triage — retag_dismissed_alerts failure tracking', () => {
@@ -309,14 +309,22 @@ describe('floor_alert_triage — retag_dismissed_alerts failure tracking', () =>
     expect(mapStep?.with?.failed_retag_count).toBe(0);
   });
 
-  it('retries remove_fp_tag and add_dismissed_tag before the loop continues past a failure', () => {
+  it('retries remove_fp_tag and add_dismissed_tag, then continues past a persistent failure', () => {
     const removeFpTag = stepByName('remove_fp_tag');
     const addDismissedTag = stepByName('add_dismissed_tag');
-    const loop = stepByName('retag_dismissed_alerts');
 
     expect(removeFpTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(removeFpTag?.['on-failure']?.continue).toBe(true);
     expect(addDismissedTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(loop?.['on-failure']?.continue).toBe(true);
+    expect(addDismissedTag?.['on-failure']?.continue).toBe(true);
+  });
+
+  // `continue: true` on a foreach exits the whole loop at the first inner failure, so the
+  // remaining candidates would never be re-tagged and record_retag_failure would never run.
+  it('does not put continue on the loop itself, which would abandon the remaining candidates', () => {
+    const loop = stepByName('retag_dismissed_alerts');
+
+    expect(loop?.['on-failure']).toBeUndefined();
   });
 
   it('increments the counter when either tag call recorded an error', () => {
