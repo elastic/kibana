@@ -496,10 +496,17 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             // is reflected on resume rather than presenting the original method's form.
             authMethod: toSOAuthMethod(agentCredentialMethod),
             status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
-            // Persist per-instance package-policy mapping on new-policy success so hydration
-            // restores the correct (new) IDs — without this the SO's policyIdsByInstance stays
-            // at the old values, and resume attaches subsequent edits to deleted policies.
-            ...(isNewPolicyDeploy && mergedFailed.length === 0 ? { policyIdsByInstance } : {}),
+            // Persist per-instance package-policy mapping on success. New-policy mode: use only
+            // the freshly created IDs (priorIds reference the old cleanup targets). Existing-policy
+            // mode: merge priorIds so added-service IDs are not lost on resume (without this, the
+            // SO keeps its old map and treats the added service as undeployed, creating a duplicate).
+            ...(mergedFailed.length === 0
+              ? {
+                  policyIdsByInstance: isNewPolicyDeploy
+                    ? policyIdsByInstance
+                    : { ...priorIds, ...policyIdsByInstance },
+                }
+              : {}),
             ...(cleanupFullySucceeded || (dirtyUpdateApplied && mergedFailed.length === 0)
               ? {
                   services: selectedServiceIds,

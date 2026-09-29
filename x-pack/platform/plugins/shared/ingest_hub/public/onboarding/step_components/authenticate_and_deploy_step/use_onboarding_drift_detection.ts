@@ -116,7 +116,12 @@ export function useOnboardingDriftDetection({
             ? toSOAuthMethod(agentBasedDeployment.agentCredentialMethod)
             : authMethod;
         const authDirty = detectAuthDrift(
-          { authMethod: sessionAuthMethod, connectorId },
+          // Agent-based never uses a connector; exclude connectorId so a stale value retained
+          // from a prior MI selection doesn't trigger false drift on every agent-based return.
+          {
+            authMethod: sessionAuthMethod,
+            connectorId: deploymentMethod === 'agent_based' ? undefined : connectorId,
+          },
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
         const agentPoliciesDirty = detectAgentPoliciesDrift(

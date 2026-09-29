@@ -20,6 +20,11 @@ import {
 const MOCK_AWS_PACKAGE = {
   item: {
     version: '7.1.1',
+    // Package-level vars are required so buildPackageVars can include credential keys in PUT bodies.
+    vars: [
+      { name: 'access_key_id', type: 'text' },
+      { name: 'secret_access_key', type: 'password' },
+    ],
     policy_templates: [
       {
         name: 'elb',
@@ -239,9 +244,12 @@ test.describe(
 
       await deployButton.click();
 
-      // Dirty redeploy must PUT the MI policy — body must carry the changed bucket_arn value.
+      // Dirty redeploy must PUT the MI policy — body must carry the changed bucket_arn and both
+      // credential keys (access_key_id and secret_access_key); a regression dropping either stops ingestion.
       const miPutRequest = await miPutPromise;
       expect(miPutRequest.postData()).toContain('new-drift-bucket');
+      expect(miPutRequest.postData()).toContain('AKIAIOSFODNN7EXAMPLE');
+      expect(miPutRequest.postData()).toContain('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
       // After dirty redeploy, SO must be written with the new serviceVars.
       const soRequest = await soPutPromise;
       expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain(
@@ -502,8 +510,9 @@ test.describe(
 
       const miPutRequest = await miPutPromise;
       const miPutBody = JSON.parse(miPutRequest.postData() ?? '{}');
-      // Credential vars must be included in the PUT body.
+      // Both credential vars must reach Fleet — a regression dropping either key stops ingestion.
       expect(JSON.stringify(miPutBody)).toContain('AKIAIOSFODNN7EXAMPLE');
+      expect(JSON.stringify(miPutBody)).toContain('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
       await soPutPromise;
 
       // isDirty clears → drift callout disappears.
