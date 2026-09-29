@@ -861,7 +861,10 @@ describe('AuthenticateAndDeployStep', () => {
       // First render: agent-only service selected, method starts as MI → auto-forced to agent_based.
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: ['awsfargate'] },
-        awsServicesMap: new Map([['awsfargate', agentService], ['guardduty', miService]]),
+        awsServicesMap: new Map([
+          ['awsfargate', agentService],
+          ['guardduty', miService],
+        ]),
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: mockSetDeploymentMethod,
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
@@ -873,7 +876,10 @@ describe('AuthenticateAndDeployStep', () => {
       // Second render: agent-only service removed, method now agent_based (was auto-forced).
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: ['guardduty'] },
-        awsServicesMap: new Map([['awsfargate', agentService], ['guardduty', miService]]),
+        awsServicesMap: new Map([
+          ['awsfargate', agentService],
+          ['guardduty', miService],
+        ]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: mockSetDeploymentMethod,
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
