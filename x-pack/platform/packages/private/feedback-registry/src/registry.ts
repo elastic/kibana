@@ -47,11 +47,8 @@ const feedbackRegistry: FeedbackRegistry = new Map([
   ['observability-overview:cases_create', casesLoader],
   ['observability-overview:cases_configure', casesLoader],
   ['observability-overview:cases_templates', casesLoader],
-  // AlertZero is its own chrome app (`alertzero`), so unlike Cases the app id is not
-  // namespaced under a host app. The plain app id is what the header reports on the app root
-  // route, while each deep link registers its own nav link (`alertzero:<deepLinkId>`) and is
-  // therefore reported when the user is on that page. See
-  // x-pack/solutions/security/plugins/alertzero/public/deep_links.ts for the deep link ids.
+  // The app root and every deep link each register their own nav link id, so all of them must
+  // map to the AlertZero questions (ids: x-pack/solutions/security/plugins/alertzero/public/deep_links.ts).
   ['alertzero', alertZeroLoader],
   ['alertzero:alerts', alertZeroLoader],
   ['alertzero:attacks', alertZeroLoader],

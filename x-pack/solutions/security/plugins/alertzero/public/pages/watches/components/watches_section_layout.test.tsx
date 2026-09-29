@@ -117,8 +117,7 @@ describe('WatchesSectionLayout', () => {
     expect(history.location.pathname).toBe(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
   });
 
-  // Regression: Libra review on #293174 found the Watches header dropped the Documentation link
-  // that AppChromeLayout passes on every other route, because WatchesSectionLayout never read it.
+  // WatchesSectionLayout renders its own compact header; it must still pass the documentation link through.
   it('passes the Security solution documentation link to the header', () => {
     renderShell();
 

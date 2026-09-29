@@ -8,12 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-/**
- * Documentation link for the header overflow (⋮) menu, shared by every AlertZero route's
- * header (`AppChromeLayout`'s own heading, and `WatchesSectionLayout`'s compact `AppHeader`).
- * Together with the globally registered feedback handler (rendered by the header itself as a
- * "Feedback" entry), this matches the prototype's overflow menu: Documentation + Give feedback.
- */
+/** Documentation link for the header overflow menu; the header renders the Feedback entry itself. */
 export const useAlertZeroDocumentationLink = (): string | undefined => {
   const { services } = useKibana<CoreStart>();
   return services.docLinks?.links.siem.guide;
