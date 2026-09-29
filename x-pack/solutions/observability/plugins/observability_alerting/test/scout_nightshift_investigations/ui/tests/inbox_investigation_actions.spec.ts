@@ -8,11 +8,11 @@
 import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../fixtures';
+import { test } from '../../../scout/ui/fixtures';
 import {
   setAlertingV2EnabledSetting,
   unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
+} from '../../../scout/ui/fixtures/alerting_v2_setting';
 
 const suffix = randomUUID();
 const alertId = `nightshift-v2-alert-${suffix}`;
@@ -21,20 +21,27 @@ const ruleName = `Nightshift v2 test rule ${suffix}`;
 const alertIndex = '.alerts-observability.apm.alerts-default';
 
 const mockNightshiftApis = async (page: any) => {
-  await page.route('**/internal/nightshift/investigations/availability', async (route: any) => {
-    await route.fulfill({ status: 200, json: { available: true } });
-  });
-  await page.route('**/internal/nightshift/investigations?*', async (route: any) => {
-    await route.fulfill({
-      status: 200,
-      json: {
-        results: [],
-        page: 1,
-        size: 2,
-        total: 0,
-      },
-    });
-  });
+  await page.route(
+    (url: URL) => url.pathname.endsWith('/internal/nightshift/investigations/availability'),
+    async (route: any) => {
+      await route.fulfill({ status: 200, json: { available: true } });
+    }
+  );
+  await page.route(
+    (url: URL) =>
+      url.pathname.endsWith('/internal/nightshift/investigations') && url.searchParams.size > 0,
+    async (route: any) => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          results: [],
+          page: 1,
+          size: 2,
+          total: 0,
+        },
+      });
+    }
+  );
   await page.route(
     (url: URL) =>
       url.pathname.endsWith('/internal/nightshift/investigations') && url.searchParams.size === 0,
@@ -77,7 +84,8 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, page }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
+      await setAlertingV2EnabledSetting(kbnClient, true);
       await mockNightshiftApis(page);
       await browserAuth.loginAsAdmin();
     });
@@ -102,10 +110,19 @@ test.describe(
       await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
       await expect(alerting.episodesListPage).toBeVisible();
 
-      const menuButton = page.testSubj.locator('unifiedDataTable_additionalRowControl_actionsMenu');
+      const menuButton = page
+        .getByRole('row')
+        .filter({ hasText: ruleName })
+        .getByRole('button', { name: 'Additional actions' });
       await expect(menuButton).toBeVisible({ timeout: 30_000 });
 
+      const investigationsPromise = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/internal/nightshift/investigations?')
+      );
       await menuButton.click();
+      await investigationsPromise;
       const investigateItem = page.testSubj.locator('investigateAlert');
       await expect(investigateItem).toBeVisible();
 
@@ -156,48 +173,75 @@ test.describe(
       pageObjects,
     }) => {
       let status: 'running' | 'completed' = 'running';
-      await page.route('**/internal/nightshift/investigations?*', async (route: any) => {
-        await route.fulfill({
-          status: 200,
-          json: {
-            results: [{ investigation_id: 'investigation-1', status }],
-            page: 1,
-            size: 2,
-            total: 1,
-          },
-        });
-      });
-
+      await page.route(
+        (url: URL) =>
+          url.pathname.endsWith('/internal/nightshift/investigations') && url.searchParams.size > 0,
+        async (route: any) => {
+          await route.fulfill({
+            status: 200,
+            json: {
+              results: [{ investigation_id: 'investigation-1', status }],
+              page: 1,
+              size: 2,
+              total: 1,
+            },
+          });
+        }
+      );
       const alerting = pageObjects.observabilityAlerting;
       await alerting.gotoInboxFilteredByRule(ruleId);
       await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
       await expect(alerting.episodesListPage).toBeVisible();
 
-      const menuButton = page.testSubj.locator('unifiedDataTable_additionalRowControl_actionsMenu');
+      const menuButton = page
+        .getByRole('row')
+        .filter({ hasText: ruleName })
+        .getByRole('button', { name: 'Additional actions' });
       await expect(menuButton).toBeVisible({ timeout: 30_000 });
 
+      const investigationsPromise = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/internal/nightshift/investigations?')
+      );
       await menuButton.click();
+      await investigationsPromise;
       const investigateItem = page.testSubj.locator('investigateAlert');
       const viewItem = page.testSubj.locator('viewAlertInvestigation');
 
       await expect(investigateItem).toBeVisible();
-      await expect(investigateItem).toBeDisabled();
+      await expect(investigateItem).toHaveAttribute('aria-disabled', 'true');
       await expect(viewItem).not.toBeVisible();
 
       await page.keyboard.press('Escape');
 
       status = 'completed';
+      await page.reload();
+      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(menuButton).toBeVisible({ timeout: 30_000 });
 
+      const completedInvestigationsPromise = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/internal/nightshift/investigations?')
+      );
       await menuButton.click();
+      await completedInvestigationsPromise;
       await expect(viewItem).toBeVisible();
       await expect(investigateItem).not.toBeVisible();
 
-      await page.route('**/app/nightshift*', async (route: any) => {
-        await route.abort();
-      });
-      await viewItem.click().catch(() => {});
+      await viewItem.click();
+      await pageObjects.observabilityAlerting.gotoInboxFilteredByRule(ruleId);
+      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(menuButton).toBeVisible({ timeout: 30_000 });
 
+      const viewedInvestigationsPromise = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/internal/nightshift/investigations?')
+      );
       await menuButton.click();
+      await viewedInvestigationsPromise;
       await expect(viewItem).toBeVisible();
       await expect(investigateItem).toBeVisible();
       await expect(investigateItem).toHaveText('Re-investigate');
