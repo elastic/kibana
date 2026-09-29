@@ -1856,6 +1856,24 @@ describe('extract_iocs — adjudication context window', () => {
     expect(ioc?.context).not.toContain('Docs mention');
   });
 
+  it("does not let the value's own path text satisfy its own attribution cue", () => {
+    // The URL's own path contains "payload", a cue word. Without excluding the
+    // matched span from cue scoring, both occurrences would trivially match and
+    // the tie-break would fall back to "later occurrence" regardless of which
+    // one has real attribution.
+    const url = 'https://evil.example/payload';
+    const result = extractIocs({
+      text:
+        `The attacker downloaded ${url} during the intrusion. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `See the vendor write-up at ${url} for background.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'url' && entry.value === url);
+
+    expect(ioc?.context).toContain('attacker downloaded');
+    expect(ioc?.context).not.toContain('vendor write-up');
+  });
+
   it('builds context from the refanged text, so a defanged occurrence is included', () => {
     const canonical = 'https://evil.example/payload.exe';
     const defanged = 'hxxps://evil[.]example/payload.exe';

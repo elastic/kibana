@@ -62,8 +62,18 @@ const ATTRIBUTION_CONTEXT_CUE =
 const windowAround = (source: string, offset: number, length: number, radius: number): string =>
   source.slice(Math.max(0, offset - radius), Math.min(source.length, offset + length + radius));
 
-const hasAttributionCue = (source: string, offset: number, length: number): boolean =>
-  ATTRIBUTION_CONTEXT_CUE.test(windowAround(source, offset, length, CONTEXT_WINDOW_CHARS));
+// Exclude the matched span itself: a value like "/payload" or "evil-dropper.com"
+// would otherwise satisfy its own cue regardless of the surrounding prose, making
+// every occurrence of such a value look attributed and collapsing the tie-break
+// to "prefer the later occurrence" no matter which one actually has attribution.
+const hasAttributionCue = (source: string, offset: number, length: number): boolean => {
+  const before = source.slice(Math.max(0, offset - CONTEXT_WINDOW_CHARS), offset);
+  const after = source.slice(
+    offset + length,
+    Math.min(source.length, offset + length + CONTEXT_WINDOW_CHARS)
+  );
+  return ATTRIBUTION_CONTEXT_CUE.test(before) || ATTRIBUTION_CONTEXT_CUE.test(after);
+};
 
 export interface ExtractIocsResult {
   /** How many IOCs were found, before the nested-object cap. */
