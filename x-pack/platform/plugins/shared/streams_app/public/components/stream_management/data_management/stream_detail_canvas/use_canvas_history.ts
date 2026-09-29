@@ -30,6 +30,12 @@ interface UseCanvasHistoryArgs<NodeType extends Node, EdgeType extends Edge, Ext
 export interface CanvasHistory {
   /** Capture the current state BEFORE a mutating action so it can be undone. */
   record: () => void;
+  /** Remember the current canvas until a later save succeeds or fails. */
+  hold: () => void;
+  /** Keep the held snapshot as an undo step. */
+  commit: () => void;
+  /** Drop the held snapshot. */
+  discard: () => void;
   undo: () => void;
   redo: () => void;
   /** Clear the stacks, e.g. when the underlying data is reloaded. */
@@ -65,6 +71,9 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
   // nodes, and that write can look like a new edit. Hold the lock until this
   // commit's effects have run, then release it so the next real edit is recorded.
   const isApplyingRef = useRef(false);
+  // A create is undone only after its save succeeds. Hold the pre-create canvas
+  // here, and ignore other history writes until that save settles.
+  const heldRef = useRef<Snapshot<NodeType, EdgeType, Extra> | null>(null);
 
   useEffect(() => {
     isApplyingRef.current = false;
@@ -80,12 +89,33 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
   }, []);
 
   const record = useCallback(() => {
-    if (isApplyingRef.current) {
+    if (isApplyingRef.current || heldRef.current) {
       return;
     }
     setPast((stack) => [...stack, captureSnapshot()].slice(-HISTORY_LIMIT));
     setFuture([]);
   }, [captureSnapshot]);
+
+  const hold = useCallback(() => {
+    if (isApplyingRef.current || heldRef.current) {
+      return;
+    }
+    heldRef.current = captureSnapshot();
+  }, [captureSnapshot]);
+
+  const commit = useCallback(() => {
+    const held = heldRef.current;
+    if (!held) {
+      return;
+    }
+    heldRef.current = null;
+    setPast((stack) => [...stack, held].slice(-HISTORY_LIMIT));
+    setFuture([]);
+  }, []);
+
+  const discard = useCallback(() => {
+    heldRef.current = null;
+  }, []);
 
   const undo = useCallback(() => {
     const stack = pastRef.current;
@@ -116,32 +146,20 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, E
   }, [captureSnapshot, setNodes, setEdges]);
 
   const reset = useCallback(() => {
+    heldRef.current = null;
     setPast([]);
     setFuture([]);
   }, []);
 
   return {
     record,
+    hold,
+    commit,
+    discard,
     undo,
     redo,
     reset,
     canUndo: past.length > 0,
     canRedo: future.length > 0,
   };
-}
-
-/**
- * Clears history when `value` is replaced. Staged edits keep the same persisted
- * unit, so they stay undoable. A successful save replaces it and drops snapshots
- * that would otherwise write a unit without the component that was just saved.
- */
-export function useResetHistoryOnIdentityChange<T>(value: T, reset: () => void): void {
-  const seenRef = useRef(value);
-  useEffect(() => {
-    if (Object.is(seenRef.current, value)) {
-      return;
-    }
-    seenRef.current = value;
-    reset();
-  }, [reset, value]);
 }

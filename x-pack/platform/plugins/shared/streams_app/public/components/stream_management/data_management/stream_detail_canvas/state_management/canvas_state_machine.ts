@@ -42,7 +42,13 @@ import {
   canvasUrlSchema,
   type CanvasUrlSchema,
 } from '../../../../../../common/url_schema';
-import type { CanvasStateServiceDeps, CanvasUrlInput, CanvasUrlEvent, CanvasState } from './types';
+import type {
+  CanvasCreateHistoryRef,
+  CanvasStateServiceDeps,
+  CanvasUrlInput,
+  CanvasUrlEvent,
+  CanvasState,
+} from './types';
 
 export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
@@ -164,6 +170,9 @@ export const canvasStateMachine = setup({
     }),
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
     notifyUnitSaved: getPlaceholderFor(createNotifyUnitSavedAction),
+    holdCreateHistory: getPlaceholderFor(createHoldCreateHistoryAction),
+    commitCreateHistory: getPlaceholderFor(createCommitCreateHistoryAction),
+    discardCreateHistory: getPlaceholderFor(createDiscardCreateHistoryAction),
     notifySourcesUnitSaveStarted: sendTo(
       ({ context }) => context.sourcesRef,
       () => ({ type: 'unit.save.started' as const })
@@ -414,7 +423,7 @@ export const canvasStateMachine = setup({
               on: {
                 'unit.changed': {
                   target: 'validating',
-                  actions: 'prepareChangedUnitSave',
+                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
                 },
                 'unit.save': {
                   guard: 'hasUnsavedUnitChanges',
@@ -449,7 +458,7 @@ export const canvasStateMachine = setup({
                 'unit.reload': { target: 'reloading' },
                 'unit.changed': {
                   target: 'validating',
-                  actions: 'prepareChangedUnitSave',
+                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
                 },
               },
             },
@@ -467,6 +476,7 @@ export const canvasStateMachine = setup({
                     guard: 'isSavingComponentChange',
                     target: 'saveFailed',
                     actions: [
+                      'discardCreateHistory',
                       'storeUnitFailure',
                       'rollbackToPersistedUnit',
                       'syncComponentSaveFailure',
@@ -499,6 +509,9 @@ export const canvasStateMachine = setup({
                     'syncSavedUnitToOriginator',
                     'syncSavedUnitToPeer',
                     'notifyUnitSaved',
+                    // Commit while the create intent is still set. storePersistedUnitDefinition
+                    // clears it.
+                    'commitCreateHistory',
                     'storePersistedUnitDefinition',
                   ],
                 },
@@ -507,6 +520,7 @@ export const canvasStateMachine = setup({
                     guard: 'isSavingComponentChange',
                     target: 'saveFailed',
                     actions: [
+                      'discardCreateHistory',
                       'storeUnitFailure',
                       'rollbackToPersistedUnit',
                       'syncComponentSaveFailure',
@@ -530,7 +544,7 @@ export const canvasStateMachine = setup({
               on: {
                 'unit.changed': {
                   target: 'validating',
-                  actions: 'prepareChangedUnitSave',
+                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
                 },
                 'unit.save': {
                   guard: 'hasUnsavedUnitChanges',
@@ -586,7 +600,10 @@ export function createCanvasMachineImplementations({
   loadUnitDefinition,
   validateUnitDefinition = validateCanvasUnitDefinition,
   persistUnitDefinition,
-}: CanvasStateServiceDeps): MachineImplementationsFrom<typeof canvasStateMachine> {
+  createHistoryRef,
+}: CanvasStateServiceDeps & {
+  createHistoryRef: CanvasCreateHistoryRef;
+}): MachineImplementationsFrom<typeof canvasStateMachine> {
   return {
     actors: {
       initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
@@ -604,6 +621,9 @@ export function createCanvasMachineImplementations({
       syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
       notifyUnitFailure: createNotifyUnitFailureAction({ core }),
       notifyUnitSaved: createNotifyUnitSavedAction({ core }),
+      holdCreateHistory: createHoldCreateHistoryAction(createHistoryRef),
+      commitCreateHistory: createCommitCreateHistoryAction(createHistoryRef),
+      discardCreateHistory: createDiscardCreateHistoryAction(createHistoryRef),
     },
   };
 }
@@ -673,6 +693,30 @@ function createPersistUnitDefinitionActor({
   return fromPromise(async ({ input }: { input: Unit }) => ({
     unitDefinition: await persistUnitDefinition(input),
   }));
+}
+
+function createHoldCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    if (context.savingComponentIntent === 'create') {
+      createHistoryRef.current.hold();
+    }
+  };
+}
+
+function createCommitCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    if (context.savingComponentIntent === 'create') {
+      createHistoryRef.current.commit();
+    }
+  };
+}
+
+function createDiscardCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    if (context.savingComponentIntent === 'create') {
+      createHistoryRef.current.discard();
+    }
+  };
 }
 
 function createNotifyUnitSavedAction({ core }: Pick<CanvasStateServiceDeps, 'core'>) {

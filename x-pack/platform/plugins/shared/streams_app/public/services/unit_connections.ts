@@ -8,13 +8,13 @@
 import type { Unit } from './unit_repository';
 
 /**
- * Wires one source to the destinations the canvas connects it to.
+ * Wires sources to destinations.
  *
  * Each source has its own pipeline. Unconditional wires are that pipeline's
- * `destinations` list. Conditional wires are `routes` rules, which cannot
- * share a pipeline with `destinations`. A new wire on a pipeline that already
- * uses routes is stored as a catch-all rule so a later condition can be set
- * on it without changing the connection model.
+ * `destinations` list, which can name several destinations. Conditional wires
+ * are `routes` rules, which cannot share a pipeline with `destinations`. A new
+ * wire on a pipeline that already uses routes is stored as a catch-all rule so
+ * a later condition can be set on it without changing the connection model.
  */
 
 type UnitPipeline = Unit['unit']['pipelines'][number];
@@ -228,17 +228,6 @@ const detachSource = (unit: Unit, pipelineIndex: number, sourceId: string): Unit
     )
   );
 };
-
-const isConnected = (unit: Unit, sourceId: string, destinationId: string): boolean =>
-  unit.unit.pipelines.some((pipeline) => {
-    if (!readIdentifiers(pipeline.config, 'sources').includes(sourceId)) {
-      return false;
-    }
-    if (pipelineUsesRoutes(pipeline)) {
-      return routesIncludeDestination(readRoutes(pipeline.config), destinationId);
-    }
-    return readIdentifiers(pipeline.config, 'destinations').includes(destinationId);
-  });
 
 const pushConnection = (
   connections: UnitConnection[],
@@ -471,14 +460,11 @@ export const moveUnitConnection = (
   if (previousSourceId === sourceId && previousDestinationId === destinationId) {
     return unit;
   }
-  if (
-    !canConnectSourceToDestination(unit, sourceId, destinationId) &&
-    !isConnected(unit, sourceId, destinationId)
-  ) {
+  const released = disconnectSourceFromDestination(unit, previousSourceId, previousDestinationId);
+  if (!canConnectSourceToDestination(released, sourceId, destinationId)) {
     return unit;
   }
-  const connected = connectSourceToDestination(unit, sourceId, destinationId);
-  return disconnectSourceFromDestination(connected, previousSourceId, previousDestinationId);
+  return connectSourceToDestination(released, sourceId, destinationId);
 };
 
 /** Drops a deleted component id from pipeline source and destination lists. */

@@ -84,6 +84,16 @@ describe('unit connections', () => {
     ]);
   });
 
+  it('lets several sources share one destination', () => {
+    const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
+    const next = connectSourceToDestination(connected, 'bulk-input', 'es-logs');
+
+    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
+      { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'direct' },
+      { sourceId: 'bulk-input', destinationId: 'es-logs', forwarding: 'direct' },
+    ]);
+  });
+
   it('does not cross-connect a second source', () => {
     const logs = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
     const next = connectSourceToDestination(logs, 'bulk-input', 'es-metrics');
@@ -255,6 +265,20 @@ describe('unit connections', () => {
     expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
       { sourceId: 'bulk-input', destinationId: 'es-metrics', forwarding: 'direct' },
       { sourceId: 'bulk-input', destinationId: 'es-logs', forwarding: 'direct' },
+    ]);
+  });
+
+  it('moves a line onto a free destination', () => {
+    const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
+    const next = moveUnitConnection(connected, {
+      previousSourceId: 'otlp-input',
+      previousDestinationId: 'es-logs',
+      sourceId: 'otlp-input',
+      destinationId: 'es-metrics',
+    });
+
+    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
+      { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'direct' },
     ]);
   });
 

@@ -14,6 +14,17 @@ import type { SourcesActorRef } from '../../../../streams_layout/sources/state_m
 import type { SourceApiKeyGenerationDeps } from '../../../../streams_layout/sources/source_api_keys';
 import type { SourceEnvironmentLoader } from '../../../../streams_layout/sources/source_environment';
 
+/** Undo steps for a source or destination create, driven by the canvas save transitions. */
+export interface CanvasCreateHistoryHandlers {
+  hold: () => void;
+  commit: () => void;
+  discard: () => void;
+}
+
+export interface CanvasCreateHistoryRef {
+  current: CanvasCreateHistoryHandlers;
+}
+
 export interface CanvasStateServiceDeps {
   core: CoreStart;
   urlStateStorageContainer: IKbnUrlStateStorage;

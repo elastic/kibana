@@ -33,6 +33,7 @@ export function ConnectionHandle({
   destinationId,
 }: ConnectionHandleProps) {
   const connectionTargets = useContext(ConnectionTargetsContext);
+  const canStart = type === 'source' && isConnectable;
   const highlighted =
     type === 'target' &&
     destinationId !== undefined &&
@@ -49,14 +50,16 @@ export function ConnectionHandle({
       type={type}
       position={position}
       isConnectable={isConnectable}
-      isConnectableStart={type === 'source' && isConnectable}
+      isConnectableStart={canStart}
       isConnectableEnd={type === 'target' && isConnectable}
       className={className || undefined}
       aria-label={
         type === 'source'
-          ? i18n.translate('xpack.streams.canvas.connectionHandle.connectAriaLabel', {
-              defaultMessage: 'Drag to connect this source',
-            })
+          ? canStart
+            ? i18n.translate('xpack.streams.canvas.connectionHandle.connectAriaLabel', {
+                defaultMessage: 'Drag to connect this source',
+              })
+            : undefined
           : i18n.translate('xpack.streams.canvas.connectionHandle.receiveAriaLabel', {
               defaultMessage: 'Drop to connect a source',
             })

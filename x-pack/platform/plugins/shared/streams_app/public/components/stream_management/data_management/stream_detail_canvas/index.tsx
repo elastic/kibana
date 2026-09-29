@@ -51,7 +51,7 @@ import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
-import { useCanvasHistory, useResetHistoryOnIdentityChange } from './use_canvas_history';
+import { useCanvasHistory } from './use_canvas_history';
 import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
 import {
   DESTINATION_NODE_TYPE,
@@ -64,13 +64,13 @@ import {
 import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
 import {
   CanvasStateContextProvider,
+  useBindCanvasCreateHistory,
   useCanvasEvents,
   useCanvasHasUnsavedChanges,
   useCanvasIsInitializing,
   useCanvasIsSaving,
   useCanvasIsUnitUnavailable,
   useCanvasNodePositions,
-  useCanvasPersistedUnit,
   useCanvasUnitDefinition,
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
@@ -315,7 +315,7 @@ function StreamsCanvasInner() {
       unitDefinition,
     ]
   );
-  const { record, undo, redo, reset, canUndo, canRedo } = useCanvasHistory({
+  const { record, hold, commit, discard, undo, redo, reset, canUndo, canRedo } = useCanvasHistory({
     nodes,
     edges,
     extra: {
@@ -327,6 +327,9 @@ function StreamsCanvasInner() {
     setEdges,
     onRestore: restoreHistory,
   });
+  // The machine holds this canvas when a create save starts, then commits or
+  // discards that step from the persist success and failure transitions.
+  useBindCanvasCreateHistory({ hold, commit, discard });
   const graphNodeIdsRef = useRef('');
   const graphEdgeIdsRef = useRef('');
 
@@ -360,9 +363,6 @@ function StreamsCanvasInner() {
   useEffect(() => {
     reset();
   }, [classicNodeIds, reset]);
-  // A saved source or destination must not be removed by undoing an older edit.
-  const persistedUnit = useCanvasPersistedUnit();
-  useResetHistoryOnIdentityChange(persistedUnit, reset);
 
   // Tracks whether a pointer drag is in progress so we snapshot each gesture
   // exactly once.

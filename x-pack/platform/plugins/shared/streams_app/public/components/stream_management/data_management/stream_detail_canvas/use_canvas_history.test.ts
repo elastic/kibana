@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import type { Edge, Node } from '@xyflow/react';
-import { useCanvasHistory, useResetHistoryOnIdentityChange } from './use_canvas_history';
+import { useCanvasHistory } from './use_canvas_history';
 
 const initialNodes: Node[] = [{ id: 'a', position: { x: 0, y: 0 }, data: {} }];
 
@@ -145,22 +145,41 @@ describe('useCanvasHistory', () => {
     expect(result.current.history.canRedo).toBe(false);
   });
 
-  it('resets history when the persisted value is replaced', () => {
-    const persisted = { revision: 1 };
-    const replacement = { revision: 2 };
-    const reset = jest.fn();
-    const { rerender } = renderHook(
-      ({ value }: { value: { revision: number } }) => useResetHistoryOnIdentityChange(value, reset),
-      { initialProps: { value: persisted } }
-    );
+  it('keeps a held snapshot only once it is committed', () => {
+    const { result } = renderHook(() => useHistoryHarness());
 
-    expect(reset).not.toHaveBeenCalled();
+    act(() => result.current.history.hold());
+    act(() => {
+      result.current.setMarker(1);
+      result.current.setNodes(moveFirstNodeTo(100));
+    });
+    act(() => result.current.history.record());
+    expect(result.current.history.canUndo).toBe(false);
 
-    rerender({ value: persisted });
-    expect(reset).not.toHaveBeenCalled();
+    act(() => result.current.history.commit());
+    expect(result.current.history.canUndo).toBe(true);
 
-    rerender({ value: replacement });
-    expect(reset).toHaveBeenCalledTimes(1);
+    act(() => result.current.history.undo());
+    expect(result.current.marker).toBe(0);
+    expect(result.current.nodes[0].position.x).toBe(0);
+    expect(result.current.history.canRedo).toBe(true);
+
+    act(() => result.current.history.redo());
+    expect(result.current.marker).toBe(1);
+    expect(result.current.nodes[0].position.x).toBe(100);
+  });
+
+  it('drops a held snapshot without adding an undo step', () => {
+    const { result } = renderHook(() => useHistoryHarness());
+
+    act(() => result.current.history.record());
+    act(() => result.current.history.hold());
+    act(() => result.current.setMarker(1));
+    act(() => result.current.history.discard());
+
+    expect(result.current.history.canUndo).toBe(true);
+    act(() => result.current.history.undo());
+    expect(result.current.marker).toBe(0);
   });
 
   it('is a no-op to undo or redo when the stacks are empty', () => {
