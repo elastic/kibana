@@ -27,21 +27,27 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
-const createFieldCapsEsClient = (fieldTypes: Record<string, string>) => {
+type FieldCapsMapping = string | { readonly type: string; readonly aggregatable: boolean };
+
+/** Mock `_field_caps`. A plain `text` mapping is not aggregatable; list several mappings for a conflict. */
+const createFieldCapsEsClient = (
+  fields: Readonly<Record<string, FieldCapsMapping | readonly FieldCapsMapping[]>>
+) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.fieldCaps.mockResolvedValue({
     indices: ['kibana_sample_data_logs'],
     fields: Object.fromEntries(
-      Object.entries(fieldTypes).map(([fieldName, type]) => [
+      Object.entries(fields).map(([fieldName, mappings]) => [
         fieldName,
-        {
-          [type]: {
-            type,
-            aggregatable: type !== 'text',
-            searchable: true,
-            metadata_field: false,
-          },
-        },
+        Object.fromEntries(
+          [mappings].flat().map((mapping) => {
+            const { type, aggregatable } =
+              typeof mapping === 'string'
+                ? { type: mapping, aggregatable: mapping !== 'text' }
+                : mapping;
+            return [type, { type, aggregatable, searchable: true, metadata_field: false }];
+          })
+        ),
       ])
     ),
   });
@@ -2886,394 +2892,174 @@ describe('add_controls / remove_controls operations', () => {
     expect(after2.pinned_panels).toHaveLength(2);
   });
 
-  it('add_controls silently leaves out an unmapped control the user did not request', async () => {
-    const esClient = createFieldCapsEsClient({ host: 'keyword', 'host.keyword': 'keyword' });
+  describe('field validation', () => {
+    type ControlsInput = Extract<DashboardOperation, { operation: 'add_controls' }>['controls'];
+    const index = 'kibana_sample_data_logs';
 
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
-            {
-              type: 'options_list_control',
-              field_name: 'method',
-              index: 'kibana_sample_data_logs',
-            },
-          ],
-        },
+    const addControls = (
+      controls: ControlsInput,
+      esClient: ReturnType<typeof createFieldCapsEsClient>,
+      dashboardData: DashboardAttachmentData = emptyDashboard
+    ) =>
+      executeDashboardOperations({
+        dashboardData,
+        operations: [{ operation: 'add_controls', controls }],
+        logger,
+        esClient,
+      });
+
+    const getEsqlQueries = ({ pinned_panels: pinnedPanels = [] }: DashboardAttachmentData) =>
+      pinnedPanels.map(
+        (panel) => (panel as unknown as { config: { esql_query?: string } }).config.esql_query
+      );
+
+    it('keeps controls on supported field types', async () => {
+      const { dashboardData, failures } = await addControls(
+        [
+          { type: 'options_list_control', field_name: 'client.ip', index },
+          { type: 'options_list_control', field_name: 'status', index },
+          { type: 'range_slider_control', field_name: 'bytes', index },
+        ],
+        createFieldCapsEsClient({ 'client.ip': 'ip', status: 'keyword', bytes: 'long' })
+      );
+
+      expect(failures).toEqual([]);
+      expect(getEsqlQueries(dashboardData)).toEqual([
+        `FROM ${index} | STATS BY \`client.ip\``,
+        `FROM ${index} | STATS BY status`,
+        `FROM ${index} | STATS BY bytes`,
+      ]);
+    });
+
+    it.each([
+      ['a non-aggregatable text field', 'text'],
+      ['an aggregatable text field', { type: 'text', aggregatable: true }],
+    ] as const)('uses the keyword sibling of %s', async (_, hostMapping) => {
+      const { dashboardData, failures } = await addControls(
+        [{ type: 'options_list_control', field_name: 'host', index }],
+        createFieldCapsEsClient({ host: hostMapping, 'host.keyword': 'keyword' })
+      );
+
+      expect(failures).toEqual([]);
+      expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY \`host.keyword\``]);
+    });
+
+    const notMapped = `Not mapped on index "${index}".`;
+    const notAggregatable = `Is not aggregatable on index "${index}".`;
+    const conflicting = `Has conflicting mappings on index "${index}".`;
+    const optionsListType = `options_list_control needs a keyword, numeric, date, ip, boolean, or version field on index "${index}".`;
+    const rangeSliderType = `range_slider_control needs a numeric field on index "${index}".`;
+
+    it.each([
+      ['options_list_control', 'is not mapped', {}, notMapped],
+      [
+        'options_list_control',
+        'is text without a keyword sibling',
+        { field: 'text' },
+        notAggregatable,
       ],
-      logger,
-      esClient,
-    });
-
-    expect(dashboardData.pinned_panels).toHaveLength(1);
-    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
-    expect((kept.config as Record<string, unknown>).esql_query).toBe(
-      'FROM kibana_sample_data_logs | STATS BY host'
-    );
-    expect(failures).toEqual([]);
-  });
-
-  it('add_controls rewrites a text field to the aggregatable keyword sibling', async () => {
-    const esClient = createFieldCapsEsClient({ host: 'text', 'host.keyword': 'keyword' });
-
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'options_list_control',
-              field_name: 'host',
-              index: 'kibana_sample_data_logs',
-              title: 'Host',
-            },
-          ],
-        },
+      [
+        'options_list_control',
+        'is keyword and text across indices',
+        { field: ['keyword', 'text'] },
+        conflicting,
       ],
-      logger,
-      esClient,
-    });
-
-    expect(failures).toEqual([]);
-    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
-    expect((control.config as Record<string, unknown>).esql_query).toBe(
-      'FROM kibana_sample_data_logs | STATS BY `host.keyword`'
-    );
-  });
-
-  it('add_controls prefers the keyword sibling over an aggregatable text field', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.fieldCaps.mockResolvedValue({
-      indices: ['kibana_sample_data_logs'],
-      fields: {
-        host: {
-          text: { type: 'text', aggregatable: true, searchable: true, metadata_field: false },
-        },
-        'host.keyword': {
-          keyword: { type: 'keyword', aggregatable: true, searchable: true, metadata_field: false },
-        },
-      },
-    });
-
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
-          ],
-        },
+      [
+        'range_slider_control',
+        'is long and integer across indices',
+        { field: ['long', 'integer'] },
+        conflicting,
       ],
-      logger,
-      esClient,
-    });
-
-    expect(failures).toEqual([]);
-    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
-    expect((control.config as Record<string, unknown>).esql_query).toBe(
-      'FROM kibana_sample_data_logs | STATS BY `host.keyword`'
-    );
-  });
-
-  it('add_controls reports an unmapped user-requested control as a failure', async () => {
-    const esClient = createFieldCapsEsClient({ host: 'keyword', 'host.keyword': 'keyword' });
-
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'options_list_control',
-              field_name: 'method',
-              index: 'kibana_sample_data_logs',
-              user_requested: true,
-            },
-          ],
-        },
+      [
+        'options_list_control',
+        'is aggregate_metric_double',
+        { field: 'aggregate_metric_double' },
+        optionsListType,
       ],
-      logger,
-      esClient,
-    });
-
-    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
-    expect(failures).toEqual([
-      {
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: 'method',
-        error: 'Not mapped on index "kibana_sample_data_logs".',
-      },
-    ]);
-  });
-
-  it('add_controls reports a mapped text field without a keyword sibling as not aggregatable', async () => {
-    const esClient = createFieldCapsEsClient({ message: 'text' });
-
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'options_list_control',
-              field_name: 'message',
-              index: 'kibana_sample_data_logs',
-              user_requested: true,
-            },
-          ],
-        },
+      ['options_list_control', 'is geo_point', { field: 'geo_point' }, optionsListType],
+      ['range_slider_control', 'is keyword', { field: 'keyword' }, rangeSliderType],
+      [
+        'range_slider_control',
+        'is aggregate_metric_double',
+        { field: 'aggregate_metric_double' },
+        rangeSliderType,
       ],
-      logger,
-      esClient,
+    ] as const)('reports a user-requested %s whose field %s', async (type, _, fields, error) => {
+      const { dashboardData, failures } = await addControls(
+        [{ type, field_name: 'field', index, user_requested: true }],
+        createFieldCapsEsClient(fields)
+      );
+
+      expect(getEsqlQueries(dashboardData)).toEqual([]);
+      expect(failures).toEqual([
+        { type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls, identifier: 'field', error },
+      ]);
     });
 
-    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
-    expect(failures).toEqual([
-      {
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: 'message',
-        error: 'Is not aggregatable on index "kibana_sample_data_logs".',
-      },
-    ]);
-  });
+    it('silently leaves out an unresolved control the user did not request', async () => {
+      const { dashboardData, failures } = await addControls(
+        [{ type: 'options_list_control', field_name: 'method', index }],
+        createFieldCapsEsClient({})
+      );
 
-  it('add_controls rejects options lists on field types that cannot back a dropdown', async () => {
-    const esClient = createFieldCapsEsClient({
-      'client.ip': 'ip',
-      latency: 'aggregate_metric_double',
-      location: 'geo_point',
+      expect(getEsqlQueries(dashboardData)).toEqual([]);
+      expect(failures).toEqual([]);
     });
 
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
+    it('groups user-requested failures that share a reason', async () => {
+      const { failures } = await addControls(
+        ['http_method', 'status_code'].map((fieldName) => ({
+          type: 'options_list_control' as const,
+          field_name: fieldName,
+          index,
+          user_requested: true,
+        })),
+        createFieldCapsEsClient({})
+      );
+
+      expect(failures).toEqual([
         {
-          operation: 'add_controls',
-          controls: ['client.ip', 'latency', 'location'].map((fieldName) => ({
-            type: 'options_list_control' as const,
-            field_name: fieldName,
-            index: 'kibana_sample_data_logs',
-            user_requested: true,
-          })),
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+          identifier: 'http_method, status_code',
+          error: notMapped,
         },
-      ],
-      logger,
-      esClient,
+      ]);
     });
 
-    expect(dashboardData.pinned_panels).toHaveLength(1);
-    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
-    expect((kept.config as Record<string, unknown>).esql_query).toBe(
-      'FROM kibana_sample_data_logs | STATS BY `client.ip`'
-    );
-    expect(failures).toEqual([
-      {
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: 'latency, location',
-        error:
-          'options_list_control needs a keyword, numeric, date, ip, boolean, or version field on index "kibana_sample_data_logs".',
-      },
-    ]);
-  });
+    it('requests only candidate fields, once per index, with the dashboard project routing', async () => {
+      const esClient = createFieldCapsEsClient({ host: 'keyword' });
 
-  it('add_controls keeps a numeric range slider and rejects a keyword one', async () => {
-    const esClient = createFieldCapsEsClient({
-      bytes: 'long',
-      status: 'keyword',
-      latency: 'aggregate_metric_double',
+      await addControls(
+        [
+          { type: 'options_list_control', field_name: 'host', index },
+          { type: 'options_list_control', field_name: 'service.name', index },
+        ],
+        esClient,
+        { ...emptyDashboard, project_routing: '_alias:*' }
+      );
+
+      expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index,
+          fields: ['host', 'host.keyword', 'service.name', 'service.name.keyword'],
+          project_routing: '_alias:*',
+        })
+      );
     });
 
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'range_slider_control',
-              field_name: 'bytes',
-              index: 'kibana_sample_data_logs',
-            },
-            {
-              type: 'range_slider_control',
-              field_name: 'status',
-              index: 'kibana_sample_data_logs',
-              user_requested: true,
-            },
-            {
-              type: 'range_slider_control',
-              field_name: 'latency',
-              index: 'kibana_sample_data_logs',
-              user_requested: true,
-            },
-          ],
-        },
-      ],
-      logger,
-      esClient,
+    it('keeps controls unvalidated when field loading fails', async () => {
+      const esClient = createFieldCapsEsClient({});
+      esClient.fieldCaps.mockRejectedValue(new Error('field caps unavailable'));
+
+      const { dashboardData, failures } = await addControls(
+        [{ type: 'options_list_control', field_name: 'host', index, user_requested: true }],
+        esClient
+      );
+
+      expect(failures).toEqual([]);
+      expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY host`]);
     });
-
-    expect(dashboardData.pinned_panels).toHaveLength(1);
-    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
-    expect(kept.type).toBe('range_slider_control');
-    expect((kept.config as Record<string, unknown>).esql_query).toBe(
-      'FROM kibana_sample_data_logs | STATS BY bytes'
-    );
-    expect(failures).toEqual([
-      {
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: 'status, latency',
-        error: 'range_slider_control needs a numeric field on index "kibana_sample_data_logs".',
-      },
-    ]);
-  });
-
-  it('add_controls reports conflicting mappings for a field not aggregatable in every index', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.fieldCaps.mockResolvedValue({
-      indices: ['logs-a', 'logs-b'],
-      fields: {
-        host: {
-          keyword: { type: 'keyword', aggregatable: true, searchable: true, metadata_field: false },
-          text: { type: 'text', aggregatable: false, searchable: true, metadata_field: false },
-        },
-      },
-    });
-
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'options_list_control',
-              field_name: 'host',
-              index: 'logs-*',
-              user_requested: true,
-            },
-          ],
-        },
-      ],
-      logger,
-      esClient,
-    });
-
-    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
-    expect(failures).toEqual([
-      {
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: 'host',
-        error: 'Has conflicting mappings on index "logs-*".',
-      },
-    ]);
-  });
-
-  it('add_controls reports conflicting mappings for a numeric field with different types', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.fieldCaps.mockResolvedValue({
-      indices: ['logs-a', 'logs-b'],
-      fields: {
-        bytes: {
-          long: { type: 'long', aggregatable: true, searchable: true, metadata_field: false },
-          integer: { type: 'integer', aggregatable: true, searchable: true, metadata_field: false },
-        },
-      },
-    });
-
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'range_slider_control',
-              field_name: 'bytes',
-              index: 'logs-*',
-              user_requested: true,
-            },
-          ],
-        },
-      ],
-      logger,
-      esClient,
-    });
-
-    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
-    expect(failures).toEqual([
-      {
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: 'bytes',
-        error: 'Has conflicting mappings on index "logs-*".',
-      },
-    ]);
-  });
-
-  it('add_controls loads fields once per index with the dashboard project routing', async () => {
-    const esClient = createFieldCapsEsClient({ host: 'keyword' });
-
-    await executeDashboardOperations({
-      dashboardData: { ...emptyDashboard, project_routing: '_alias:*' },
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
-            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
-          ],
-        },
-      ],
-      logger,
-      esClient,
-    });
-
-    expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
-    expect(esClient.fieldCaps).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'kibana_sample_data_logs',
-        fields: ['host', 'host.keyword'],
-        project_routing: '_alias:*',
-      })
-    );
-  });
-
-  it('add_controls keeps controls unvalidated when field loading fails', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.fieldCaps.mockRejectedValue(new Error('field caps unavailable'));
-
-    const { dashboardData, failures } = await executeDashboardOperations({
-      dashboardData: emptyDashboard,
-      operations: [
-        {
-          operation: 'add_controls',
-          controls: [
-            {
-              type: 'options_list_control',
-              field_name: 'host',
-              index: 'kibana_sample_data_logs',
-              user_requested: true,
-            },
-          ],
-        },
-      ],
-      logger,
-      esClient,
-    });
-
-    expect(failures).toEqual([]);
-    expect(dashboardData.pinned_panels).toHaveLength(1);
-    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
-    expect((kept.config as Record<string, unknown>).esql_query).toBe(
-      'FROM kibana_sample_data_logs | STATS BY host'
-    );
   });
 
   it('remove_controls removes by id and leaves others intact', async () => {
