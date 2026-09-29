@@ -919,6 +919,7 @@ export const createSignificantEventsMaintenanceService = ({
     failures: SignificantEventsMaintenanceFailure[]
   ): Promise<number> => {
     if (!server.nightshiftInvestigations) {
+      failures.push({ target: 'investigations', error: 'Investigations plugin is not available' });
       return 0;
     }
     try {

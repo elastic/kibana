@@ -41,6 +41,7 @@ const resetRegisteredDataStream = async (
     await dataStreams.initializeClient(name);
   } catch (error) {
     failures.push({ target: `data-stream:${name}:initialize`, error: toMessage(error) });
+    return false;
   }
 
   let exists = false;
@@ -66,6 +67,8 @@ const resetRegisteredDataStream = async (
 
   let documentCount: number | undefined;
   try {
+    // `_count` is search-based; refresh first so unrefreshed writes cannot masquerade as empty.
+    await esClient.indices.refresh({ index: name });
     documentCount = (await esClient.count({ index: name })).count;
   } catch (error) {
     failures.push({ target: `data-stream:${name}:count`, error: toMessage(error) });

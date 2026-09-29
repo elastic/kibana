@@ -226,10 +226,11 @@ function makeService(params?: {
   knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
   ownedRuleIdsByStream?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
+  /** `null` models the investigations plugin being unavailable. */
   investigations?: {
     deleted: number;
     failures: Array<{ id: string; spaceId: string; error: string }>;
-  };
+  } | null;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -271,6 +272,7 @@ function makeService(params?: {
       streamDocuments.set(name, 0);
       return { acknowledged: true };
     }),
+    refresh: jest.fn(async () => ({})),
   };
   const esClient = {
     indices,
@@ -280,9 +282,11 @@ function makeService(params?: {
   };
   const initializeClient = jest.fn(async (_name: string) => ({}));
   const asScoped = jest.fn(() => ({ asCurrentUser: esClient }));
-  const deleteAllInvestigations = params?.investigations
-    ? jest.fn(async () => params.investigations!)
-    : undefined;
+  const investigations =
+    params?.investigations === null
+      ? undefined
+      : params?.investigations ?? { deleted: 0, failures: [] };
+  const deleteAllInvestigations = investigations ? jest.fn(async () => investigations) : undefined;
 
   const globalUiSettingsClient = makeUiSettingsClient(
     {
@@ -931,6 +935,58 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name: EVENTS_DATA_STREAM });
       expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
         name: KNOWLEDGE_INDICATORS_DATA_STREAM,
+      });
+    });
+
+    it('leaves a registered stream untouched when its initializer fails', async () => {
+      const { api } = makeManagementApi();
+      const { service, initializeClient, esClient } = makeService({
+        management: api,
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 3, [EVENTS_DATA_STREAM]: 2 },
+      });
+      initializeClient.mockRejectedValueOnce(new Error('template install failed'));
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.partialFailures).toContainEqual({
+        target: `data-stream:${DETECTIONS_DATA_STREAM}:initialize`,
+        error: 'template install failed',
+      });
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalledWith(
+        { name: DETECTIONS_DATA_STREAM },
+        expect.anything()
+      );
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
+        { name: EVENTS_DATA_STREAM },
+        expect.anything()
+      );
+      expect(summary.deleted?.dataStreams).toBe(1);
+    });
+
+    it('refreshes a registered stream before counting so unrefreshed writes are wiped', async () => {
+      const { api } = makeManagementApi();
+      const { service, esClient } = makeService({
+        management: api,
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
+      });
+
+      await service.reset({ request: REQUEST });
+
+      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+        esClient.count.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('records a partial failure when the investigations plugin is unavailable', async () => {
+      const { api } = makeManagementApi();
+      const { service } = makeService({ management: api, investigations: null });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.deleted?.investigations).toBe(0);
+      expect(summary.partialFailures).toContainEqual({
+        target: 'investigations',
+        error: 'Investigations plugin is not available',
       });
     });
 
