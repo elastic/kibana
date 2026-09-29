@@ -177,14 +177,6 @@ export function CreateDatasetAdditionalSettings({
   );
 }
 
-function OrcCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return <div data-test-subj="createDatasetOrcCommonSettings" />;
-}
-
-function OrcAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return <div data-test-subj="createDatasetOrcAdvancedSettings" />;
-}
-
 function NdjsonAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return null;
 }
