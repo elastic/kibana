@@ -34,8 +34,7 @@ const readFirstAssignee = (value: MetadataFieldValue | undefined): string | null
   return readString(value) ?? null;
 };
 
-/** Returns the full list of assignee uid strings from the metadata, defaulting to `[]`. */
-const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
+const readStringArray = (value: MetadataFieldValue | undefined): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((v): v is string => typeof v === 'string' && v.length > 0);
 };
@@ -116,12 +115,13 @@ const toTimelineEvents = (events: Conversation['events']): TimelineEvent[] =>
  */
 export const conversationToEscalationHeader = (
   conversation: Conversation
-): { status: string; assigneeUids: string[] } => {
+): { status: string; assigneeUids: string[]; linkedInvestigationIds: string[] } => {
   const metadata = conversation.metadata ?? {};
   return {
     // The server treats a missing status as 'open' (escalations_service filters on `not closed`).
     status: readString(metadata.status) ?? 'open',
-    assigneeUids: readAssignees(metadata.assignees),
+    assigneeUids: readStringArray(metadata.assignees),
+    linkedInvestigationIds: readStringArray(metadata.linked_investigations),
   };
 };
 
@@ -151,7 +151,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     status: readString(metadata.status),
     severity: readString(metadata.severity),
     assignee: readFirstAssignee(metadata.assignees),
-    assignees: readAssignees(metadata.assignees),
+    assignees: readStringArray(metadata.assignees),
     // `summary` is the long form; `description` is the single-line one. Prefer the richer field and
     // fall back, because a template only requires `status`.
     summary: readString(metadata.summary) ?? readString(metadata.description),
