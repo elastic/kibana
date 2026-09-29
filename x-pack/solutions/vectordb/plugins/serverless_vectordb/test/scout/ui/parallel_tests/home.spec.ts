@@ -7,12 +7,18 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { mockDeploymentStats, seedReturningUser, spaceTest } from '../fixtures';
+import {
+  mockDeploymentStats,
+  mockOnboardingApiKey,
+  seedReturningUser,
+  spaceTest,
+} from '../fixtures';
 
 spaceTest.describe('Vector DB home page', { tag: [...tags.serverless.vectordb] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
     await seedReturningUser(page);
+    await mockOnboardingApiKey(page);
   });
 
   spaceTest(
@@ -71,8 +77,9 @@ spaceTest.describe('Vector DB home page', { tag: [...tags.serverless.vectordb] }
     await mockDeploymentStats(page, { indicesCount: 3, documentsCount: 10 });
     await pageObjects.vectordbHome.goto();
 
-    await expect(pageObjects.vectordbHome.dataCard).toBeVisible();
-    await expect(pageObjects.vectordbHome.banner).toBeHidden();
+    const { vectordbHome } = pageObjects;
+    await expect(vectordbHome.statValue('homePageDataCard', 'totalIndices')).toHaveText('3');
+    await expect(vectordbHome.banner).toBeHidden();
   });
 
   spaceTest(

@@ -7,12 +7,18 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { mockDeploymentStats, seedReturningUser, spaceTest } from '../fixtures';
+import {
+  mockDeploymentStats,
+  mockOnboardingApiKey,
+  seedReturningUser,
+  spaceTest,
+} from '../fixtures';
 
 spaceTest.describe('Vector DB home page by role', { tag: [...tags.serverless.vectordb] }, () => {
   spaceTest.beforeEach(async ({ page }) => {
     await seedReturningUser(page);
     await mockDeploymentStats(page, { indicesCount: 2, documentsCount: 8 });
+    await mockOnboardingApiKey(page);
   });
 
   spaceTest(

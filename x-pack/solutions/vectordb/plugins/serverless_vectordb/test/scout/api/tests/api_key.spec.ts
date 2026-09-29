@@ -12,20 +12,38 @@ import {
   apiTest,
   API_KEY_API_PATH,
   COMMON_HEADERS,
+  getSessionUsername,
   invalidateApiKeyByName,
   invalidateOnboardingApiKeys,
   ONBOARDING_KEY_NAME_PREFIX,
 } from '../fixtures';
 
+// Kibana access, but no API key privileges
+const NO_API_KEY_PRIVILEGES_ROLE = {
+  kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
+  elasticsearch: { cluster: [], indices: [] },
+};
+
 apiTest.describe('Vector DB onboarding API key API', { tag: [...tags.serverless.vectordb] }, () => {
-  // the route only issues a key when the caller has no active one, so every test starts from
-  // a project with none
+  let testUsernames: string[];
+
+  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    testUsernames = await Promise.all(
+      (['admin', 'viewer'] as const).map(async (role) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(role);
+        return getSessionUsername(apiClient, cookieHeader);
+      })
+    );
+  });
+
+  // the route only issues a key when the caller has no active one, so every test starts with
+  // none for the users it calls as
   apiTest.beforeEach(async ({ esClient }) => {
-    await invalidateOnboardingApiKeys(esClient);
+    await invalidateOnboardingApiKeys(esClient, testUsernames);
   });
 
   apiTest.afterAll(async ({ esClient }) => {
-    await invalidateOnboardingApiKeys(esClient);
+    await invalidateOnboardingApiKeys(esClient, testUsernames);
   });
 
   apiTest(
@@ -97,6 +115,57 @@ apiTest.describe('Vector DB onboarding API key API', { tag: [...tags.serverless.
       await invalidateApiKeyByName(esClient, requestedName);
     }
   });
+
+  apiTest('issues an onboarding key to the viewer role', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+    const response = await apiClient.post(API_KEY_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      body: {},
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(typeof response.body.encoded).toBe('string');
+  });
+
+  apiTest(
+    'issues an onboarding key even when another user already holds one',
+    async ({ apiClient, samlAuth }) => {
+      const viewer = await samlAuth.asInteractiveUser('viewer');
+      const viewerResponse = await apiClient.post(API_KEY_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...viewer.cookieHeader },
+        body: {},
+        responseType: 'json',
+      });
+      expect(typeof viewerResponse.body.id).toBe('string');
+
+      const admin = await samlAuth.asInteractiveUser('admin');
+      const adminResponse = await apiClient.post(API_KEY_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...admin.cookieHeader },
+        body: {},
+        responseType: 'json',
+      });
+
+      expect(adminResponse).toHaveStatusCode(200);
+      expect(typeof adminResponse.body.id).toBe('string');
+    }
+  );
+
+  apiTest(
+    'rejects a request from a user without API key privileges',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(NO_API_KEY_PRIVILEGES_ROLE);
+
+      const response = await apiClient.post(API_KEY_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: {},
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+    }
+  );
 
   apiTest('rejects an unauthenticated request', async ({ apiClient }) => {
     const response = await apiClient.post(API_KEY_API_PATH, {

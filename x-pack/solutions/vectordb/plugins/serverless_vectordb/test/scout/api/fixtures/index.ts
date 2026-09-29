@@ -13,4 +13,8 @@ export {
   ONBOARDING_KEY_NAME_PREFIX,
   STARRED_DASHBOARDS_COUNT_API_PATH,
 } from './constants';
-export { invalidateApiKeyByName, invalidateOnboardingApiKeys } from './api_keys';
+export {
+  getSessionUsername,
+  invalidateApiKeyByName,
+  invalidateOnboardingApiKeys,
+} from './api_keys';

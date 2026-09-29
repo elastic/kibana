@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { DEPLOYMENT_STATS_API_PATH } from './constants';
+import { API_KEY_API_PATH, DEPLOYMENT_STATS_API_PATH } from './constants';
 
 interface NewIndexDetails {
   indexName: string;
@@ -55,6 +55,25 @@ export const mockDeploymentStats = async (
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ ...EMPTY_DEPLOYMENT_STATS, ...stats }),
+    })
+  );
+};
+
+/**
+ * Stubs the onboarding API key route, which the home page and setup guide call on load. The real
+ * route creates an Elasticsearch API key that stays behind after the test ends. The route itself
+ * is tested in the API suite.
+ */
+export const mockOnboardingApiKey = async (page: ScoutPage) => {
+  await page.route(`**${API_KEY_API_PATH}`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 'vectordb-scout-mock-key-id',
+        name: 'vectordb-onboarding-scout-mock',
+        encoded: 'vectordb-scout-mock-key',
+      }),
     })
   );
 };

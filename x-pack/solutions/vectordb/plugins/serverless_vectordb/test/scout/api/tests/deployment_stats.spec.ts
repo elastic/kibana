@@ -45,6 +45,12 @@ apiTest.describe('Vector DB deployment stats API', { tag: [...tags.serverless.ve
       .map(([field]) => `${field}: ${typeof body[field]}`);
 
     expect(unexpectedTypes).toStrictEqual([]);
+
+    // index and document counts are asserted against seeded data in deployment_stats_privileges
+    const { dashboardsCount, apiKeysCount, expiringApiKeysCount } = body;
+    expect(typeof dashboardsCount).toBe('number');
+    expect(typeof apiKeysCount).toBe('number');
+    expect(typeof expiringApiKeysCount).toBe('number');
   });
 
   apiTest('rejects an unauthenticated request', async ({ apiClient }) => {

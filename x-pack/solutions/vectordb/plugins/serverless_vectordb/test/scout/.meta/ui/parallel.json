@@ -1,5 +1,5 @@
 {
-  "sha1": "d8c8128e4b5d79e95276771e3e649548302028d9",
+  "sha1": "ea5cc864790b27a781d234c4a00d558097ac1c4b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,13 +14,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home_roles.spec.ts",
-        "line": 15,
-        "column": 72
+        "line": 20,
+        "column": 76
       }
     },
     {
-      "id": "9be9aa64608f4bb-ad9693de2d92c23",
-      "title": "Vector DB home page by role withholds the data management action from a viewer",
+      "id": "9be9aa64608f4bb-6c379998e03742f",
+      "title": "Vector DB home page by role withholds the data management action from a viewer role",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb",
@@ -28,27 +28,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home_roles.spec.ts",
-        "line": 21,
-        "column": 25
+        "line": 26,
+        "column": 27
       }
     },
     {
-      "id": "9be9aa64608f4bb-09b7351a7118c4a",
-      "title": "Vector DB home page by role still walks a viewer through the setup guide",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home_roles.spec.ts",
-        "line": 29,
-        "column": 3
-      }
-    },
-    {
-      "id": "5e800d3dd5cbcb7-c651882e9a3989b",
-      "title": "Vector DB home page lays out the welcome header, stat cards and documentation link",
+      "id": "5e800d3dd5cbcb7-56344bc25bf48d1",
+      "title": "Vector DB home page displays the welcome header, stat cards and documentation link",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb",
@@ -56,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 13,
-        "column": 57
+        "line": 19,
+        "column": 23
       }
     },
     {
@@ -70,12 +56,12 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 24,
+        "line": 30,
         "column": 15
       }
     },
     {
-      "id": "5e800d3dd5cbcb7-e7006f0fbf3ac22",
+      "id": "5e800d3dd5cbcb7-ea663514de64869",
       "title": "Vector DB home page directs an empty project into the setup guide from the banner",
       "expectedStatus": "passed",
       "tags": [
@@ -84,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 40,
+        "line": 46,
         "column": 22
       }
     },
@@ -98,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 49,
+        "line": 55,
         "column": 18
       }
     },
@@ -112,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 59,
-        "column": 56
+        "line": 65,
+        "column": 71
       }
     },
     {
@@ -126,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 76,
-        "column": 18
+        "line": 80,
+        "column": 13
       }
     },
     {
@@ -140,134 +126,134 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 88,
-        "column": 31
+        "line": 91,
+        "column": 19
       }
     },
     {
-      "id": "b95eaf634048f07-cdd96736f1802c3",
-      "title": "Vector DB onboarding sends a first-time user from the app root into the setup guide",
+      "id": "8188b076e8d464c-77ea00af90c6d0a",
+      "title": "Vector DB onboarding navigation steps back from the search step to the ingest step",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_navigation.spec.ts",
+        "line": 16,
+        "column": 59
+      }
+    },
+    {
+      "id": "8188b076e8d464c-58521790ad9b4fe",
+      "title": "Vector DB onboarding navigation skipping the setup guide lands on the home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_navigation.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "8188b076e8d464c-b6f67c7a58cd412",
+      "title": "Vector DB onboarding navigation returns a wizard step opened without a path to path selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_navigation.spec.ts",
+        "line": 26,
+        "column": 24
+      }
+    },
+    {
+      "id": "8188b076e8d464c-50ca4221566edbf",
+      "title": "Vector DB onboarding navigation carries the chosen snippet language across steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_navigation.spec.ts",
+        "line": 31,
+        "column": 75
+      }
+    },
+    {
+      "id": "8188b076e8d464c-56c9222e0ccc2a0",
+      "title": "Vector DB onboarding navigation explains a concept when its pill is opened",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_navigation.spec.ts",
+        "line": 44,
+        "column": 22
+      }
+    },
+    {
+      "id": "f7c4c2f98ad15a4-886d0579bbba8f7",
+      "title": "Vector DB onboarding paths sends a first-time user from the app root into the setup guide",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_paths.spec.ts",
         "line": 13,
-        "column": 51
+        "column": 57
       }
     },
     {
-      "id": "b95eaf634048f07-5ba2197632bd9ed",
-      "title": "Vector DB onboarding offers both embedding paths alongside the project connection details",
+      "id": "f7c4c2f98ad15a4-17ff825fb7eac34",
+      "title": "Vector DB onboarding paths offers both embedding paths alongside the project connection details",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
-        "line": 19,
-        "column": 20
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_paths.spec.ts",
+        "line": 20,
+        "column": 18
       }
     },
     {
-      "id": "b95eaf634048f07-fda8d78cfef2fbe",
-      "title": "Vector DB onboarding walks the generate embeddings path through to the home page",
+      "id": "f7c4c2f98ad15a4-e5aad347a2613ce",
+      "title": "Vector DB onboarding paths walks the generate embeddings path through to the home page",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_paths.spec.ts",
         "line": 30,
-        "column": 25
+        "column": 32
       }
     },
     {
-      "id": "b95eaf634048f07-4f2abcb81d425da",
-      "title": "Vector DB onboarding walks the bring your own embeddings path through to the home page",
+      "id": "f7c4c2f98ad15a4-9ae200f1162d391",
+      "title": "Vector DB onboarding paths walks the bring your own embeddings path through to the home page",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_paths.spec.ts",
         "line": 54,
         "column": 22
-      }
-    },
-    {
-      "id": "b95eaf634048f07-eb9baa8c098827b",
-      "title": "Vector DB onboarding steps back from the search step to the ingest step",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
-        "line": 81,
-        "column": 27
-      }
-    },
-    {
-      "id": "b95eaf634048f07-985c19fc368a58a",
-      "title": "Vector DB onboarding skipping the setup guide lands on the home page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
-        "line": 89,
-        "column": 22
-      }
-    },
-    {
-      "id": "b95eaf634048f07-97cfc7bd7ccfce0",
-      "title": "Vector DB onboarding returns a wizard step opened without a path to path selection",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
-        "line": 96,
-        "column": 22
-      }
-    },
-    {
-      "id": "b95eaf634048f07-75016b3beb70056",
-      "title": "Vector DB onboarding carries the chosen snippet language across steps",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
-        "line": 101,
-        "column": 9
-      }
-    },
-    {
-      "id": "b95eaf634048f07-667e8707c4077df",
-      "title": "Vector DB onboarding explains a concept when its pill is opened",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding.spec.ts",
-        "line": 113,
-        "column": 11
       }
     }
   ]

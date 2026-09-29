@@ -39,4 +39,4 @@ export const spaceTest = spaceBase.extend<
 });
 
 export { seedReturningUser } from './browser_state';
-export { mockDeploymentStats } from './mocks';
+export { mockDeploymentStats, mockOnboardingApiKey } from './mocks';
