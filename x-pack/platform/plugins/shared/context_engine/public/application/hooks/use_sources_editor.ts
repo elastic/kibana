@@ -52,9 +52,15 @@ export const useSourcesEditor = ({
 
   const cancel = useCallback(() => setSession(undefined), []);
 
-  const setSelectedSources = useCallback((selectedSources: SelectedSource[]) => {
-    setSession((current) => (current ? { ...current, selectedSources } : current));
-  }, []);
+  const setSelectedSources = useCallback(
+    (selectedSources: SelectedSource[]) => {
+      if (isSaving) {
+        return;
+      }
+      setSession((current) => (current ? { ...current, selectedSources } : current));
+    },
+    [isSaving]
+  );
 
   const hasChanges = useMemo(() => {
     if (!session) {
