@@ -206,23 +206,26 @@ export const translations = {
   cancelButtonLabel: i18n.translate('xpack.esqlViews.managementPage.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
-  selectRow: i18n.translate('xpack.esqlViews.managementPage.selectRow', {
+  selectRowAriaLabel: i18n.translate('xpack.esqlViews.managementPage.selectRowAriaLabel', {
     defaultMessage: 'Select this row',
   }),
-  openInDiscoverAction: i18n.translate('xpack.esqlViews.managementPage.openInDiscoverAction', {
-    defaultMessage: 'Open in Discover',
-  }),
-  openInDiscoverActionDescription: i18n.translate(
-    'xpack.esqlViews.managementPage.openInDiscoverActionDescription',
+  openInDiscoverButtonLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.openInDiscoverButtonLabel',
+    {
+      defaultMessage: 'Open in Discover',
+    }
+  ),
+  openInDiscoverButtonTooltip: i18n.translate(
+    'xpack.esqlViews.managementPage.openInDiscoverButtonTooltip',
     {
       defaultMessage: 'Open this view in Discover',
     }
   ),
-  deleteAction: i18n.translate('xpack.esqlViews.managementPage.deleteAction', {
+  deleteViewButtonLabel: i18n.translate('xpack.esqlViews.managementPage.deleteViewButtonLabel', {
     defaultMessage: 'Delete',
   }),
-  bulkDeleteButton: (count: number) =>
-    i18n.translate('xpack.esqlViews.managementPage.bulkDeleteButton', {
+  bulkDeleteButtonLabel: (count: number) =>
+    i18n.translate('xpack.esqlViews.managementPage.bulkDeleteButtonLabel', {
       defaultMessage: 'Delete {count, plural, one {# view} other {# views}}',
       values: { count },
     }),
@@ -237,14 +240,14 @@ export const translations = {
         '{count, plural, one {This permanently deletes the view from Elasticsearch. Any query that references this view will fail, including queries in dashboards, alerts, and other saved objects.} other {This permanently deletes # views from Elasticsearch. Any query that references these views will fail, including queries in dashboards, alerts, and other saved objects.}}',
       values: { count },
     }),
-  deleteModalCancelButton: i18n.translate(
-    'xpack.esqlViews.managementPage.deleteModal.cancelButton',
+  deleteModalCancelButtonLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.deleteModal.cancelButtonLabel',
     {
       defaultMessage: 'Cancel',
     }
   ),
-  deleteModalConfirmButton: i18n.translate(
-    'xpack.esqlViews.managementPage.deleteModal.confirmButton',
+  deleteModalConfirmButtonLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.deleteModal.confirmButtonLabel',
     {
       defaultMessage: 'Delete',
     }

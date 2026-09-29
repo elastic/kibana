@@ -52,7 +52,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
 
   const onDeleted = useCallback(() => {
     setSelectedViews([]);
-    reload();
+    void reload();
   }, [reload]);
 
   const { viewsPendingDelete, isDeleting, requestDelete, cancelDelete, confirmDelete } =

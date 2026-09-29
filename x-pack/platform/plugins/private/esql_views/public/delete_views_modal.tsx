@@ -36,8 +36,8 @@ export const DeleteViewsModal: FunctionComponent<DeleteViewsModalProps> = ({
       isLoading={isDeleting}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      cancelButtonText={translations.deleteModalCancelButton}
-      confirmButtonText={translations.deleteModalConfirmButton}
+      cancelButtonText={translations.deleteModalCancelButtonLabel}
+      confirmButtonText={translations.deleteModalConfirmButtonLabel}
       data-test-subj="esqlViewsDeleteConfirmModal"
     >
       <p data-test-subj="esqlViewsDeleteDescription">{translations.deleteModalBody(count)}</p>

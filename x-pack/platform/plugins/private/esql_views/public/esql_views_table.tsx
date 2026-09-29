@@ -161,7 +161,7 @@ const ViewActions: FunctionComponent<ViewActionsProps> = ({
               onDelete([view]);
             }}
           >
-            {translations.deleteAction}
+            {translations.deleteViewButtonLabel}
           </EuiContextMenuItem>,
         ]}
       />
@@ -224,8 +224,8 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         name: translations.actionsColumn,
         actions: [
           {
-            name: translations.openInDiscoverAction,
-            description: translations.openInDiscoverActionDescription,
+            name: translations.openInDiscoverButtonLabel,
+            description: translations.openInDiscoverButtonTooltip,
             type: 'icon',
             icon: 'discoverApp',
             color: 'text',
@@ -234,7 +234,6 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
             'data-test-subj': 'esqlViewsOpenInDiscoverAction',
           },
           {
-            name: translations.actionsColumn,
             render: (view, isEnabled) => (
               <ViewActions view={view} isEnabled={isEnabled} onEdit={onEdit} onDelete={onDelete} />
             ),
@@ -251,7 +250,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
     () => ({
       selected: selectedViews,
       onSelectionChange,
-      selectableMessage: () => translations.selectRow,
+      selectableMessage: () => translations.selectRowAriaLabel,
     }),
     [onSelectionChange, selectedViews]
   );
@@ -286,7 +285,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
             iconType="trash"
             onClick={() => onDelete(selectedViews)}
           >
-            {translations.bulkDeleteButton(selectedViews.length)}
+            {translations.bulkDeleteButtonLabel(selectedViews.length)}
           </EuiButton>
         ) : undefined,
       toolsRight: (
