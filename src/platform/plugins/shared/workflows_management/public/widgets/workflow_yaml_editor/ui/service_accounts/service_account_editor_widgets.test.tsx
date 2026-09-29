@@ -59,14 +59,22 @@ const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMous
   },
 });
 
-const setup = (enabled = true, yaml = 'settings:\n  run_as: ') => {
+const setup = (enabled = true, yaml = 'settings:\n  run_as: ', canManage = false) => {
   const directory = {
     isEnabled: () => enabled,
     get: jest.fn().mockResolvedValue(account),
     list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
   jest.mocked(useServiceAccountEditor).mockReturnValue(createServiceAccountEditor(directory));
-  jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(createStartServicesMock()));
+  const services = createStartServicesMock();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    management: { security: { service_accounts: canManage } },
+  };
+  services.application.getUrlForApp.mockReturnValue(
+    '/s/space/app/management/security/service_accounts'
+  );
+  jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
   const { editor, model } = createMockMonacoEditor(yaml, {
     addContentWidget: jest.fn((widget) => document.body.appendChild(widget.getDomNode())),
     removeContentWidget: jest.fn((widget) => widget.getDomNode().remove()),
@@ -95,7 +103,7 @@ const setup = (enabled = true, yaml = 'settings:\n  run_as: ') => {
       await descriptor.run(editor);
     });
   };
-  return { ...result, editor, model, directory, action };
+  return { ...result, editor, model, directory, action, services };
 };
 
 describe('ServiceAccountEditorWidgets', () => {
@@ -277,6 +285,85 @@ describe('ServiceAccountEditorWidgets', () => {
     jest.mocked(editor.getOption).mockReturnValue(true);
     fireEvent.click(option);
     expect(editor.executeEdits).not.toHaveBeenCalled();
+  });
+
+  it('marks the assigned account independently from the keyboard highlight', async () => {
+    const { directory, action } = setup(true, 'settings:\n  run_as: opaque-id');
+    directory.list.mockResolvedValue({
+      serviceAccounts: [{ ...account, id: 'other', name: 'Other' }, account],
+    });
+    const assigned = await screen.findByRole('option', { name: 'Investigation reader viewer' });
+    expect(assigned).toHaveAttribute('aria-current', 'true');
+    expect(assigned).toHaveAttribute('aria-selected', 'true');
+    await action('next');
+    expect(assigned).toHaveAttribute('aria-current', 'true');
+    expect(assigned).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('explains restricted access without offering management or changing the ID', async () => {
+    const { directory, editor } = setup(true, 'settings:\n  run_as: opaque-id', true);
+    directory.list.mockResolvedValue({ error: 'forbidden' });
+    expect(await screen.findByText(/Ask your administrator for access/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Learn more about permissions/ })).toHaveAttribute(
+      'target',
+      '_blank'
+    );
+    expect(screen.queryByRole('link', { name: /Manage/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(editor.executeEdits).not.toHaveBeenCalled();
+  });
+
+  it('shows an empty directory separately from restricted access', async () => {
+    const { directory } = setup();
+    directory.list.mockResolvedValue({ serviceAccounts: [] });
+    expect(
+      await screen.findByText('No service accounts available to run this workflow.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Ask your administrator/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+
+  it('retries a failed directory request without editing YAML', async () => {
+    const { directory, editor } = setup();
+    directory.list.mockResolvedValue({ error: 'unavailable' });
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load service accounts.');
+    directory.list.mockResolvedValue({ serviceAccounts: [account] });
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    await screen.findByRole('option');
+    expect(directory.list).toHaveBeenLastCalledWith(undefined, true);
+    expect(editor.executeEdits).not.toHaveBeenCalled();
+  });
+
+  it.each([true, false])('gates Manage on the management capability (%s)', async (canManage) => {
+    const { services } = setup(true, 'settings:\n  run_as: ', canManage);
+    await screen.findByRole('option');
+    const link = screen.queryByRole('link', { name: /Manage/ });
+    if (canManage) {
+      expect(link).toHaveAttribute('href', '/s/space/app/management/security/service_accounts');
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(services.application.getUrlForApp).toHaveBeenCalledWith('management', {
+        path: '/security/service_accounts',
+      });
+    } else expect(link).not.toBeInTheDocument();
+  });
+
+  it('keeps popup controls available after editor blur and supports Escape', async () => {
+    jest.useFakeTimers();
+    const { editor } = setup(true, 'settings:\n  run_as: ', true);
+    await act(async () => {
+      jest.advanceTimersByTime(100);
+    });
+    const link = screen.getByRole('link', { name: /Manage/ });
+    jest.mocked(editor.hasTextFocus).mockReturnValue(false);
+    act(() => {
+      link.focus();
+      jest.mocked(editor.onDidBlurEditorText).mock.calls[0][0]();
+      jest.advanceTimersByTime(200);
+    });
+    expect(link).toHaveFocus();
+    fireEvent.keyDown(link, { key: 'Escape' });
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(editor.focus).toHaveBeenCalled();
   });
 
   it('attaches no widgets and makes no directory calls when disabled', () => {

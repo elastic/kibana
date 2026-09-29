@@ -8,6 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { QueryClient } from '@kbn/react-query';
 import { createServiceAccountDirectory } from './service_account_directory';
 
@@ -55,10 +56,35 @@ describe('service account directory', () => {
     http.get.mockResolvedValue({ serviceAccounts: [], nextPage: 'opaque-page' });
     const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
     const page = await directory.list();
-    await directory.list(page?.nextPage);
+    if (!page || 'error' in page) throw new Error('Expected a directory page');
+    await directory.list(page.nextPage);
     expect(http.get).toHaveBeenLastCalledWith('/internal/security/service_account', {
       query: { limit: 100, after: 'opaque-page' },
     });
+  });
+
+  it.each([403, 404, 500])(
+    'distinguishes denied list access from HTTP %s failures',
+    async (status) => {
+      http.get.mockRejectedValue(
+        createHttpFetchError('Failed', 'Error', undefined, { status } as Response)
+      );
+      const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+      expect(await directory.list()).toEqual({
+        error: status === 403 ? 'forbidden' : 'unavailable',
+      });
+      expect(http.get).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('refreshes a cached failure when the user retries', async () => {
+    http.get
+      .mockRejectedValueOnce(new Error('Offline'))
+      .mockResolvedValueOnce({ serviceAccounts: [] });
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    expect(await directory.list()).toEqual({ error: 'unavailable' });
+    expect(await directory.list(undefined, true)).toEqual({ serviceAccounts: [] });
+    expect(http.get).toHaveBeenCalledTimes(2);
   });
 
   it('uses a separate cache for a separate authenticated app context', async () => {

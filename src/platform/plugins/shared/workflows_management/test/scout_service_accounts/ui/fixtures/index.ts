@@ -9,6 +9,8 @@
 
 import { randomUUID } from 'node:crypto';
 import type { ScoutWorkerFixtures } from '@kbn/scout';
+import { mockServiceAccountDirectory } from './mocks';
+import type { DirectoryState } from './mocks';
 import type { WorkflowServiceAccount } from '../../../../public/entities/service_accounts';
 import { spaceTest } from '../../../scout/ui/fixtures';
 import { cleanupEsServiceAccounts } from '../../api/fixtures/cleanup_es_service_accounts';
@@ -46,12 +48,16 @@ const serviceAccountFixture = async (
 
 export const test = spaceTest.extend<
   {
+    directoryState: { set: (state: DirectoryState) => void };
     workflowId: string;
     boundWorkflowId: string;
     paginatedDirectory: { requestedCursors: Array<string | null> };
   },
   { serviceAccount: WorkflowServiceAccount; replacementServiceAccount: WorkflowServiceAccount }
 >({
+  directoryState: async ({ page, serviceAccount }, use) => {
+    await use(await mockServiceAccountDirectory(page, serviceAccount));
+  },
   serviceAccount: [serviceAccountFixture, { scope: 'worker' }],
   replacementServiceAccount: [serviceAccountFixture, { scope: 'worker' }],
   boundWorkflowId: async ({ apiServices, serviceAccount, replacementServiceAccount }, use) => {

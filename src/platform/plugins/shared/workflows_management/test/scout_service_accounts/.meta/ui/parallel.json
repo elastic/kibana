@@ -61,6 +61,62 @@
       }
     },
     {
+      "id": "beb9bedc7d0a68d-bbf99183eb3fb8e",
+      "title": "Service account picker states opens from the empty prompt and preserves YAML when focusing Manage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 15,
+        "column": 8
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-8e37ce0b72d02a0",
+      "title": "Service account picker states explains denied directory access instead of claiming the directory is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 34,
+        "column": 84
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-ecfb7ac43477cda",
+      "title": "Service account picker states retries a temporary failure and selects the recovered account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 52,
+        "column": 18
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-87fe89aa8805d39",
+      "title": "Service account picker states shows a genuinely empty directory without permission guidance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 59,
+        "column": 98
+      }
+    },
+    {
       "id": "65bbacf416ac297-43eccf3b79377a3",
       "title": "Changing a saved workflow service account replaces an existing ID and supports searching by name",
       "expectedStatus": "passed",
