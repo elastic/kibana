@@ -62,7 +62,7 @@ export const runAfterExecutionWorkflows = async ({
     params: step.params as Record<string, unknown>,
   }));
 
-  const connectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
+  const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
   const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
 
   const workflowParams: AfterExecutionWorkflowParams = {
@@ -71,7 +71,7 @@ export const runAfterExecutionWorkflows = async ({
     round_id: round.id,
     ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
     ...(context.agentId ? { agent_id: context.agentId } : {}),
-    ...(connectorId ? { connector_id: connectorId } : {}),
+    ...(roundConnectorId ? { round_connector_id: roundConnectorId } : {}),
     ...(workflowContext !== undefined ? { workflow_context: workflowContext } : {}),
     tool_calls: toolCalls,
   };

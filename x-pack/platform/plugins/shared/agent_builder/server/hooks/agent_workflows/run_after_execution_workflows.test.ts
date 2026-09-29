@@ -155,7 +155,7 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('workflow params', () => {
-    it('passes prompt, response, ids, connector_id, workflow_context, and tool_calls', async () => {
+    it('passes prompt, response, ids, round_connector_id, workflow_context, and tool_calls', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const workflowContext = {
         'nightshift.semantic_memory.recall': {
@@ -197,7 +197,7 @@ describe('runAfterExecutionWorkflows', () => {
             round_id: 'round-1',
             agent_id: 'ag-1',
             conversation_id: 'cv-1',
-            connector_id: 'current-connector',
+            round_connector_id: 'current-connector',
             workflow_context: workflowContext,
             tool_calls: [],
           }),
@@ -205,7 +205,7 @@ describe('runAfterExecutionWorkflows', () => {
       );
     });
 
-    it('omits agent_id, conversation_id, and connector_id when undefined or blank', async () => {
+    it('omits agent_id, conversation_id, and round_connector_id when undefined or blank', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         agentId: undefined,
@@ -225,7 +225,7 @@ describe('runAfterExecutionWorkflows', () => {
       const params = executeWorkflowMock.mock.calls[0][0].workflowParams as Record<string, unknown>;
       expect(params).not.toHaveProperty('agent_id');
       expect(params).not.toHaveProperty('conversation_id');
-      expect(params).not.toHaveProperty('connector_id');
+      expect(params).not.toHaveProperty('round_connector_id');
       expect(params).not.toHaveProperty('workflow_context');
     });
 
