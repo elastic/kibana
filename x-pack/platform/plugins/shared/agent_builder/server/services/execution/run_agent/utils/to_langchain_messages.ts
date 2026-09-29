@@ -24,9 +24,11 @@ import {
   groupTimelineRounds,
   groupTimelineEntries,
   isAwaitingPrompt,
+  isTimelineCustomEvent,
   isTimelineRound,
   roundInterruption,
   roundResponse,
+  type ProcessedCustomEvent,
   type ProcessedTimelineEvent,
   type TimelineRound,
 } from './context_timeline';
@@ -34,6 +36,7 @@ import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { renderHistorySteps } from './render_steps_to_messages';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
+import { formatConversationEvent } from './conversation_event_presentation';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -119,6 +122,10 @@ export const prepareMessages = async ({
       );
       continue;
     }
+    if (isTimelineCustomEvent(entry)) {
+      messages.push(customEventToLangchain(entry.event));
+      continue;
+    }
     // a standalone user message: no execution to render
     messages.push(
       formatUserInput({
@@ -185,6 +192,13 @@ export const roundToLangchain = async (
 
   return messages;
 };
+
+/**
+ * The message a custom conversation event contributes to the history: a user-role message
+ * carrying the event's LLM representation, like the other system notices.
+ */
+export const customEventToLangchain = (event: ProcessedCustomEvent): HumanMessage =>
+  createUserMessage(formatConversationEvent(event));
 
 export const formatUserInput = ({
   input,

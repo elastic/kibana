@@ -51,7 +51,7 @@ const editorStyleMap = {
       },
 
       // Before-decoration badges
-      '.connector-name-badge': {
+      '.connector-name-badge, .service-account-name-badge': {
         display: 'inline-block',
         backgroundColor: transparentize(euiTheme.colors.success, 0.1),
         color: euiTheme.colors.successText,
@@ -61,6 +61,15 @@ const editorStyleMap = {
         fontSize: '12px',
         fontWeight: 500,
         lineHeight: '1.4',
+      },
+
+      '.service-account-name-badge-unavailable': {
+        display: 'inline-block',
+        backgroundColor: euiTheme.colors.lightShade,
+        color: euiTheme.colors.textSubdued,
+        padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
+        borderRadius: euiTheme.border.radius.small,
+        marginRight: euiTheme.size.s,
       },
 
       '.workflow-name-badge': {
