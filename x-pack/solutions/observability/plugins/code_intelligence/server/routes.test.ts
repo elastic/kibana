@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
+import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
 import type { ExtractionService } from './extraction_service';
 import { registerRoutes } from './routes';
 
@@ -31,7 +32,7 @@ const startHandler = (start: ExtractionService['start']): Handler => {
   return handler;
 };
 
-const invoke = (handler: Handler) => {
+const invoke = (handler: Handler, repository = 'elastic/example') => {
   const response = {
     accepted: jest.fn(),
     badRequest: jest.fn(),
@@ -39,12 +40,32 @@ const invoke = (handler: Handler) => {
     customError: jest.fn(),
   };
   const context = { core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: {} } } }) };
-  const request = { body: { repository: 'elastic/example', revision: 'HEAD' } };
+  const request = { body: { repository, revision: 'HEAD' } };
   return handler(context, request, response).then(() => response);
 };
 
 describe('POST /internal/code_intelligence/extractions', () => {
-  it('maps a run already in progress for the repository to 409 Conflict', async () => {
+  it('maps a run this instance tracks to 409 Conflict with its extraction id', async () => {
+    const response = await invoke(
+      startHandler(() => {
+        throw new ExtractionAlreadyRunningError('elastic/example', 'running-id');
+      })
+    );
+
+    expect(response.conflict).toHaveBeenCalledWith({
+      body: {
+        message: 'An extraction for elastic/example is already running.',
+        attributes: {
+          code: 'extraction_already_running',
+          repository: 'elastic/example',
+          extractionId: 'running-id',
+        },
+      },
+    });
+    expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('omits the extraction id when another instance holds the run', async () => {
     const response = await invoke(
       startHandler(() => {
         throw new ExtractionAlreadyRunningError('elastic/example');
@@ -52,19 +73,52 @@ describe('POST /internal/code_intelligence/extractions', () => {
     );
 
     expect(response.conflict).toHaveBeenCalledWith({
-      body: { message: 'An extraction for elastic/example is already running.' },
+      body: {
+        message: 'An extraction for elastic/example is already running.',
+        attributes: { code: 'extraction_already_running', repository: 'elastic/example' },
+      },
     });
-    expect(response.customError).not.toHaveBeenCalled();
   });
 
-  it('keeps 429 for tracking capacity errors', async () => {
+  it('maps a repository missing from the configuration to 400 with its code', async () => {
+    const start = jest.fn();
+    const response = await invoke(startHandler(start), 'elastic/unknown');
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: 'Repository is not configured.',
+        attributes: { code: 'repository_not_configured', repository: 'elastic/unknown' },
+      },
+    });
+    expect(start).not.toHaveBeenCalled();
+  });
+
+  it('maps tracking capacity errors to 429 with their code', async () => {
     const response = await invoke(
       startHandler(() => {
-        throw new Error('Extraction tracking capacity is full.');
+        throw new ExtractionCapacityExhaustedError();
       })
     );
 
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 429 }));
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 429,
+      body: {
+        message: 'Extraction tracking capacity is full.',
+        attributes: { code: 'extraction_capacity_exhausted', repository: 'elastic/example' },
+      },
+    });
     expect(response.conflict).not.toHaveBeenCalled();
+  });
+
+  it('leaves unexpected errors to the router instead of reporting them as capacity', async () => {
+    const failure = new Error('Elasticsearch is unavailable.');
+
+    await expect(
+      invoke(
+        startHandler(() => {
+          throw failure;
+        })
+      )
+    ).rejects.toBe(failure);
   });
 });

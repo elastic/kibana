@@ -8,9 +8,18 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
+import {
+  START_EXTRACTION_ERROR_CODES,
+  type StartExtractionErrorAttributes,
+} from '../common/start_extraction_errors';
 import { ElasticsearchCatalogWriter } from './adapters/elasticsearch_catalog';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
+import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
 import type { ExtractionService } from './extraction_service';
+
+const errorAttributes = (
+  attributes: StartExtractionErrorAttributes
+): StartExtractionErrorAttributes & Record<string, unknown> => ({ ...attributes });
 
 const repositoryIdentity = schema.string({ minLength: 3, maxLength: 256 });
 const revision = schema.string({ minLength: 1, maxLength: 255 });
@@ -55,13 +64,22 @@ export const registerRoutes = ({
     },
     async (context, request, response) => {
       const { extractionService, getSpaceId } = getServices();
-      if (!repositories.has(request.body.repository)) {
-        return response.badRequest({ body: { message: 'Repository is not configured.' } });
+      const { repository } = request.body;
+      if (!repositories.has(repository)) {
+        return response.badRequest({
+          body: {
+            message: 'Repository is not configured.',
+            attributes: errorAttributes({
+              code: START_EXTRACTION_ERROR_CODES.repositoryNotConfigured,
+              repository,
+            }),
+          },
+        });
       }
       try {
         const { elasticsearch } = await context.core;
         const id = await extractionService.start(
-          request.body.repository,
+          repository,
           request.body.revision,
           request,
           getSpaceId(request),
@@ -70,12 +88,31 @@ export const registerRoutes = ({
         return response.accepted({ body: { id } });
       } catch (error) {
         if (error instanceof ExtractionAlreadyRunningError) {
-          return response.conflict({ body: { message: error.message } });
+          return response.conflict({
+            body: {
+              message: error.message,
+              attributes: errorAttributes({
+                code: START_EXTRACTION_ERROR_CODES.alreadyRunning,
+                repository,
+                ...(error.extractionId === undefined ? {} : { extractionId: error.extractionId }),
+              }),
+            },
+          });
         }
-        return response.customError({
-          statusCode: 429,
-          body: { message: error instanceof Error ? error.message : 'Extraction could not start.' },
-        });
+        if (error instanceof ExtractionCapacityExhaustedError) {
+          return response.customError({
+            statusCode: 429,
+            body: {
+              message: error.message,
+              attributes: errorAttributes({
+                code: START_EXTRACTION_ERROR_CODES.capacityExhausted,
+                repository,
+              }),
+            },
+          });
+        }
+        // The router logs unexpected errors and answers 500 without leaking their details.
+        throw error;
       }
     }
   );

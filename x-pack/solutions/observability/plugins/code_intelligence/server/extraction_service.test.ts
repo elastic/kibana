@@ -11,6 +11,7 @@ import { LockAcquisitionError, type LockManagerService } from '@kbn/lock-manager
 import type { CatalogWriter } from './domain/ports/catalog_writer';
 import { extractRepository } from './extract_repository';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
+import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
 import { ExtractionService } from './extraction_service';
 
 jest.mock('./extract_repository', () => ({ extractRepository: jest.fn() }));
@@ -86,11 +87,14 @@ describe('ExtractionService same-repository guard', () => {
     pendingRuns();
     const extractionService = service();
 
-    await start(extractionService, 'elastic/example');
+    const running = await start(extractionService, 'elastic/example');
 
-    await expect(start(extractionService, 'elastic/example')).rejects.toBeInstanceOf(
-      ExtractionAlreadyRunningError
-    );
+    const refusal = start(extractionService, 'elastic/example');
+    await expect(refusal).rejects.toBeInstanceOf(ExtractionAlreadyRunningError);
+    await expect(refusal).rejects.toMatchObject({
+      repository: 'elastic/example',
+      extractionId: running,
+    });
     expect(extractRepositoryMock).toHaveBeenCalledTimes(1);
   });
 
@@ -114,9 +118,12 @@ describe('ExtractionService same-repository guard', () => {
 
     await start(instanceA, 'elastic/example');
 
-    await expect(start(instanceB, 'elastic/example')).rejects.toBeInstanceOf(
-      ExtractionAlreadyRunningError
-    );
+    const refusal = start(instanceB, 'elastic/example');
+    await expect(refusal).rejects.toBeInstanceOf(ExtractionAlreadyRunningError);
+    await expect(refusal).rejects.toMatchObject({
+      repository: 'elastic/example',
+      extractionId: undefined,
+    });
     expect(extractRepositoryMock).toHaveBeenCalledTimes(1);
     await expect(start(instanceB, 'elastic/other')).resolves.toEqual(expect.any(String));
   });
@@ -141,5 +148,17 @@ describe('ExtractionService same-repository guard', () => {
 
     expect(extractionService.get(first)?.status).toBe('completed');
     await expect(start(extractionService, 'elastic/example')).resolves.toEqual(expect.any(String));
+  });
+
+  it('refuses a new run once 100 runs are tracked', async () => {
+    pendingRuns();
+    const extractionService = service();
+    for (let index = 0; index < 100; index++) {
+      await start(extractionService, `elastic/example-${index}`);
+    }
+
+    await expect(start(extractionService, 'elastic/one-too-many')).rejects.toBeInstanceOf(
+      ExtractionCapacityExhaustedError
+    );
   });
 });
