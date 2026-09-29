@@ -96,48 +96,66 @@ const QueryPreview: FunctionComponent<{ query: string; viewName: string }> = ({
   );
 };
 
-interface ViewRowActionsMenuProps {
+interface ViewActionsProps {
   view: EsqlView;
   isEnabled: boolean;
+  onEdit?: (view: EsqlView) => void;
   onDelete: (views: EsqlView[]) => void;
 }
 
-const ViewRowActionsMenu: FunctionComponent<ViewRowActionsMenuProps> = ({
+const ViewActions: FunctionComponent<ViewActionsProps> = ({
   view,
   isEnabled,
+  onEdit,
   onDelete,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
+  const actionsLabel = translations.actionsForViewAriaLabel(view.name);
 
   return (
     <EuiPopover
-      aria-label={translations.allActions}
+      aria-label={actionsLabel}
+      anchorPosition="downRight"
       button={
-        <EuiToolTip content={translations.allActions} disableScreenReaderOutput>
+        <EuiToolTip content={actionsLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            aria-label={translations.allActionsForView(view.name)}
+            aria-label={actionsLabel}
             color="text"
-            iconType="ellipsis"
+            data-test-subj="esqlViewsActionsButton"
+            iconType="boxesVertical"
             isDisabled={!isEnabled}
             hasAriaDisabled={!isEnabled}
             onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-            data-test-subj="esqlViewsRowActionsButton"
           />
         </EuiToolTip>
       }
-      isOpen={isPopoverOpen}
       closePopover={closePopover}
-      anchorPosition="leftCenter"
+      isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
       <EuiContextMenuPanel
         items={[
+          ...(onEdit
+            ? [
+                <EuiContextMenuItem
+                  data-test-subj="esqlViewsEditButton"
+                  icon="pencil"
+                  key="edit"
+                  onClick={() => {
+                    closePopover();
+                    onEdit(view);
+                  }}
+                >
+                  {translations.editViewButtonLabel}
+                </EuiContextMenuItem>,
+              ]
+            : []),
           <EuiContextMenuItem
-            key="delete"
+            data-test-subj="esqlViewsDeleteButton"
             icon="trash"
             color="danger"
-            data-test-subj="esqlViewsDeleteAction"
+            key="delete"
             onClick={() => {
               closePopover();
               onDelete([view]);
@@ -158,6 +176,7 @@ interface EsqlViewsTableProps {
   isDiscoverAvailable: boolean;
   selectedViews: EsqlView[];
   onSelectionChange: (views: EsqlView[]) => void;
+  onEdit?: (view: EsqlView) => void;
   onReload: () => void;
   onDelete: (views: EsqlView[]) => void;
   onOpenInDiscover: (view: EsqlView) => void;
@@ -170,6 +189,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
   isDiscoverAvailable,
   selectedViews,
   onSelectionChange,
+  onEdit,
   onReload,
   onDelete,
   onOpenInDiscover,
@@ -202,7 +222,6 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
       },
       {
         name: translations.actionsColumn,
-        width: '120px',
         actions: [
           {
             name: translations.openInDiscoverAction,
@@ -215,15 +234,17 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
             'data-test-subj': 'esqlViewsOpenInDiscoverAction',
           },
           {
-            name: translations.allActions,
+            name: translations.actionsColumn,
             render: (view, isEnabled) => (
-              <ViewRowActionsMenu view={view} isEnabled={isEnabled} onDelete={onDelete} />
+              <ViewActions view={view} isEnabled={isEnabled} onEdit={onEdit} onDelete={onDelete} />
             ),
           },
         ],
+        width: '120px',
+        'data-test-subj': 'esqlViewsActionsColumn',
       },
     ],
-    [isDiscoverAvailable, onDelete, onOpenInDiscover]
+    [isDiscoverAvailable, onDelete, onEdit, onOpenInDiscover]
   );
 
   const selection = useMemo<EuiTableSelectionType<EsqlView>>(

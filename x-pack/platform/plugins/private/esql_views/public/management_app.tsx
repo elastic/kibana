@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
+import type { ComponentType, FunctionComponent } from 'react';
 import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { IToasts } from '@kbn/core/public';
+import type { ESQLEditorProps } from '@kbn/esql-editor';
 import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
 import { DeleteViewsModal } from './delete_views_modal';
+import { EsqlViewForm } from './esql_view_form';
 import { EsqlViewsTable } from './esql_views_table';
 import { getViewEsqlQuery } from './get_view_esql_query';
 import { translations } from './translations';
@@ -22,21 +24,30 @@ import { useDeleteEsqlViews } from './use_delete_esql_views';
 import { useEsqlViews } from './use_esql_views';
 
 interface ManagementAppProps {
+  canCreate: boolean;
+  canEdit: boolean;
   client: EsqlViewsClient;
   isDiscoverAvailable: boolean;
   discoverLocator?: DiscoverEsqlLocator;
   documentationUrl: string;
+  EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
   toasts: IToasts;
 }
 
+type FormState = { type: 'create' } | { type: 'edit'; view: EsqlView };
+
 export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
+  canCreate,
+  canEdit,
   client,
   isDiscoverAvailable,
   discoverLocator,
   documentationUrl,
+  EsqlEditor,
   toasts,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
+  const [formState, setFormState] = useState<FormState>();
   const [selectedViews, setSelectedViews] = useState<EsqlView[]>([]);
 
   const onDeleted = useCallback(() => {
@@ -107,6 +118,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         isDiscoverAvailable={isDiscoverAvailable && discoverLocator !== undefined}
         selectedViews={selectedViews}
         onSelectionChange={setSelectedViews}
+        onEdit={canEdit ? (view) => setFormState({ type: 'edit', view }) : undefined}
         onReload={reload}
         onDelete={requestDelete}
         onOpenInDiscover={openInDiscover}
@@ -114,18 +126,42 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
     );
   }
 
+  const menu: AppHeaderMenu | undefined =
+    canCreate && status === 'success'
+      ? {
+          primaryActionItem: {
+            id: 'createEsqlView',
+            iconType: 'plusCircle',
+            label: translations.createViewButtonLabel,
+            run: () => setFormState({ type: 'create' }),
+            testId: 'esqlViewsCreateButton',
+          },
+        }
+      : undefined;
+
   return (
     <div data-test-subj="esqlViewsManagementPage">
       <AppHeader
         title={PLUGIN_NAME}
-        description={{
-          text: translations.pageDescription,
-          learnMoreUrl: documentationUrl,
-        }}
+        description={translations.pageDescription}
+        docLink={documentationUrl}
+        menu={menu}
         spacing="bleed"
       />
       <EuiSpacer size="l" />
       {content}
+      {formState && (
+        <EsqlViewForm
+          client={client}
+          EsqlEditor={EsqlEditor}
+          onClose={() => setFormState(undefined)}
+          onSave={async () => {
+            await reload();
+            setFormState(undefined);
+          }}
+          view={formState.type === 'edit' ? formState.view : undefined}
+        />
+      )}
       {viewsPendingDelete.length > 0 && (
         <DeleteViewsModal
           views={viewsPendingDelete}

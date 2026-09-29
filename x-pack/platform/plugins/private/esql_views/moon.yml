@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/config-schema'
   - '@kbn/core'
+  - '@kbn/esql'
   - '@kbn/deeplinks-analytics'
   - '@kbn/esql-language'
   - '@kbn/esql-types'
@@ -27,6 +28,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/i18n'
   - '@kbn/management-plugin'
+  - '@kbn/esql-editor'
   - '@kbn/share-plugin'
   - '@kbn/utility-types'
 tags:
