@@ -63,6 +63,7 @@ const FlyoutTemplateResolved = ({
   children,
   size = 'm',
   session = 'start',
+  paddingSize,
   flyoutMenuProps,
   tabs: tabsProp,
   tabBarProps,
@@ -183,14 +184,14 @@ const FlyoutTemplateResolved = ({
       {...euiFlyoutProps}
       size={size}
       session={session}
-      paddingSize="m"
+      paddingSize={paddingSize}
       data-test-subj={dataTestSubj}
       flyoutMenuDisplayMode="auto"
       flyoutMenuProps={hasMenuProps ? mergedMenuProps : undefined}
       aria-label={flyoutAriaLabel}
       aria-labelledby={flyoutAriaLabelledBy}
     >
-      <FlyoutTemplateConfigProvider value={{ dataTestSubj }}>
+      <FlyoutTemplateConfigProvider value={{ dataTestSubj, paddingSize }}>
         <FlyoutTabsProvider value={tabsContextValue}>
           <FlyoutHeaderCollapseProvider value={collapseState}>
             {headerItem && (

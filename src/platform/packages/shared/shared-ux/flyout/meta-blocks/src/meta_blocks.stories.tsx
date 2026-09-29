@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { MetaBlocks } from '..';
 import type { MetaBlock, MetaBlocksProps } from './types';
@@ -80,7 +79,6 @@ const meta: Meta<MetaBlocksProps & StoryArgs> = {
 export default meta;
 
 const MetaBlocksDemo: React.FC<StoryArgs> = ({ numberOfItems }) => {
-  const { euiTheme } = useEuiTheme();
   const [items, setItems] = useState<MetaBlock[]>(() => getRandomItems(numberOfItems));
 
   const setRandomItems = () => {
@@ -95,7 +93,6 @@ const MetaBlocksDemo: React.FC<StoryArgs> = ({ numberOfItems }) => {
     <EuiFlyout
       onClose={action('Flyout closed')}
       size="m"
-      paddingSize="m"
       aria-labelledby="flyoutTitle"
       minWidth={324}
       resizable
@@ -114,8 +111,7 @@ const MetaBlocksDemo: React.FC<StoryArgs> = ({ numberOfItems }) => {
           <p>Component is in the flyout header with {numberOfItems} key-value pairs.</p>
         </EuiText>
       </EuiFlyoutBody>
-      {/* Matches `FlyoutTemplate.Footer`, which pads evenly where `EuiFlyout` pads less vertically. */}
-      <EuiFlyoutFooter style={{ padding: euiTheme.size.base }}>
+      <EuiFlyoutFooter>
         <EuiButton onClick={setRandomItems}>Randomize Items</EuiButton>
       </EuiFlyoutFooter>
     </EuiFlyout>
