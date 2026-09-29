@@ -80,6 +80,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration,
+    isCaseConfigurationFetched,
     isConfigurationFetchError,
     isLoadingConnectors,
     connectors,
@@ -242,7 +243,12 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   >
                     <WorkflowTags
                       isLoading={isLoadingCaseConfiguration}
-                      disabled={isLoadingCaseConfiguration || !permissions.settings}
+                      disabled={
+                        isLoadingCaseConfiguration ||
+                        !isCaseConfigurationFetched ||
+                        isConfigurationFetchError ||
+                        !permissions.settings
+                      }
                       workflowTags={workflowTags}
                       onChange={onChangeWorkflowTags}
                     />

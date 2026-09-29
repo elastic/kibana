@@ -609,6 +609,50 @@ describe('ConfigureCasesRedesign', () => {
       });
     });
 
+    it('disables workflow tags until the configuration has been fetched', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: true,
+        isFetched: false,
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeDisabled();
+    });
+
+    it('disables workflow tags when the configuration GET fails', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: false,
+        isError: true,
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeDisabled();
+    });
+
+    it('keeps workflow tags enabled while a fetched configuration is refetching', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: configurationWithWorkflowSettings,
+        isFetching: true,
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeEnabled();
+    });
+
     it('preserves observable types and workflow tags when deleting a custom field', async () => {
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
