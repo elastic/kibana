@@ -1545,3 +1545,59 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
   });
 });
+
+describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investigation', () => {
+  const INVESTIGATION_ID = 'inv-slack';
+  const EXECUTION_ID = 'exec-follow-up';
+
+  const makeFollowUpExecution = (inputs: Record<string, unknown> = {}) => ({
+    id: EXECUTION_ID,
+    workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+    status: ExecutionStatus.RUNNING,
+    startedAt: '2024-01-02T00:00:00Z',
+    executedBy: 'slack-app',
+    context: { inputs: { investigation_id: INVESTIGATION_ID, ...inputs } },
+  });
+
+  it.each<InvestigationStatus>(['pending', 'completed', 'failed'])(
+    'moves a %s investigation to running for the run that names it',
+    async (status) => {
+      repository.get.mockResolvedValue(
+        makeRecord({ status }, { id: INVESTIGATION_ID, version: 'v2' })
+      );
+      mockManagement.getWorkflowExecution.mockResolvedValue(makeFollowUpExecution());
+
+      await makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID);
+
+      expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith(
+        EXECUTION_ID,
+        SPACE_ID,
+        expect.anything()
+      );
+      expect(repository.update).toHaveBeenCalledWith({
+        id: INVESTIGATION_ID,
+        patch: { status: 'running', started_at: '2024-01-02T00:00:00Z', executed_by: 'slack-app' },
+        version: 'v2',
+      });
+    }
+  );
+
+  it('rejects a run that names a different investigation', async () => {
+    repository.get.mockResolvedValue(makeRecord({}, { id: INVESTIGATION_ID }));
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeFollowUpExecution({ investigation_id: 'someone-else' })
+    );
+
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a continuation of an investigation that does not exist', async () => {
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+  });
+});

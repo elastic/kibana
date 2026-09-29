@@ -58,6 +58,9 @@ describe('Nightshift investigation workflow', () => {
       'emit_investigation_started',
       'investigate',
       'persist_investigation_completed',
+      'render_investigation_canvas',
+      'update_investigation_canvas',
+      'add_investigation_canvas',
       'persist_investigation_failed',
       'emit_investigation_completed',
       'emit_investigation_failed',
@@ -100,5 +103,33 @@ describe('Nightshift investigation workflow', () => {
 
     expect(requestSteps.length).toBeGreaterThan(0);
     expect(unscoped.map(({ name, with: params }) => `${name}: ${params?.path}`)).toEqual([]);
+  });
+
+  it('addresses a continued investigation by its id rather than the run', () => {
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
+
+    for (const { with: params } of requestSteps) {
+      expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');
+    }
+    expect(requireStep('persist_investigation_started').with?.body).toEqual({
+      execution_id: '{{ execution.id }}',
+    });
+    expect(requireStep('investigate').with).toMatchObject({
+      conversation_id: '${{ inputs.conversation_id }}',
+    });
+  });
+
+  it('knows nothing about Slack', () => {
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
+  });
+
+  it('adds the canvas only when no earlier run created it', () => {
+    expect(requireStep('update_investigation_canvas').if).toBe(
+      '${{ steps.investigate.error == null }}'
+    );
+    expect(requireStep('add_investigation_canvas')).toMatchObject({
+      if: '${{ steps.investigate.error == null and steps.update_investigation_canvas.error != null }}',
+      with: { id: '{{ inputs.investigation_id | default: execution.id }}', type: 'text' },
+    });
   });
 });
