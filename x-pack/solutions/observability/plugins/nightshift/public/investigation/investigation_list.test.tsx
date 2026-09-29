@@ -49,10 +49,7 @@ const renderSections = (sections: InvestigationSectionState[]) =>
 
 describe('InvestigationList', () => {
   it('keeps skeletons visible while a section is loading', () => {
-    renderSections([
-      makeSection('critical', { isInitialLoading: true }),
-      makeSection('high'),
-    ]);
+    renderSections([makeSection('critical', { isInitialLoading: true }), makeSection('high')]);
 
     expect(
       screen.getByTestId('nightshiftInvestigationSectionSkeleton-critical')
@@ -75,9 +72,7 @@ describe('InvestigationList', () => {
     renderSections([makeSection('critical', { error: new Error('Network unavailable') })]);
 
     expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('nightshiftInvestigationSectionRetry-critical')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSectionRetry-critical')).toBeInTheDocument();
   });
 
   it('shows a single empty state when every section is empty', () => {
@@ -89,9 +84,7 @@ describe('InvestigationList', () => {
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftInvestigationSection-critical')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
   });
 
   it('renders in progress first and failed last', () => {
