@@ -79,7 +79,6 @@ interface YamlWorkflow {
 }
 
 const reviewDefinition = parse(ALERTZERO_COVERAGE_REVIEW_WORKFLOW.yaml) as YamlWorkflow;
-const gateDefinition = parse(CREATE_PROPOSAL_WORKFLOW.yaml) as YamlWorkflow;
 const creationDefinition = parse(ALERTZERO_RULE_CREATION_WORKFLOW.yaml) as YamlWorkflow;
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
@@ -517,13 +516,26 @@ describe('Detection Coverage review', () => {
       );
     });
 
-    // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up to
-    // 168h; the engine's default 6h timeout would cancel it.
-    it('outlives the proposal gate it waits on', () => {
-      expect(String(reviewDefinition.settings?.timeout)).toMatch(/^\d+h$/);
-      expect(hours(reviewDefinition.settings?.timeout)).toBeGreaterThan(
-        hours(gateDefinition.settings?.timeout)
+    // The review parks in WAITING_FOR_CHILD while the gate holds the decision, and the
+    // engine's default 6h workflow timeout would cancel it under the analyst. What it
+    // has to outlive is the deadline its own proposals get, not the gate workflow's
+    // `settings.timeout` — that is a sentinel meaning "never" (`52w`), so comparing
+    // against it would only assert that this timeout is longer than a year.
+    it('outlives the decision deadline its own proposals get', () => {
+      // None of this review's gates passes `expiresIn`, so each takes the gate's 72h
+      // default. A gate that starts asking for its own deadline has to be checked
+      // against the ceiling here.
+      const proposals = allReviewSteps.filter(
+        ({ type, with: input }) =>
+          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW.id
       );
+      expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
+      for (const proposal of proposals) {
+        expect(inputsOf(proposal).expiresIn).toBeUndefined();
+      }
+
+      expect(String(reviewDefinition.settings?.timeout)).toMatch(/^\d+h$/);
+      expect(hours(reviewDefinition.settings?.timeout)).toBeGreaterThan(72);
     });
   });
 

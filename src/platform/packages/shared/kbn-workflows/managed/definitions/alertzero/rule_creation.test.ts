@@ -36,7 +36,6 @@ interface YamlWorkflow {
 }
 
 const worker = parse(ALERTZERO_RULE_CREATION_WORKFLOW.yaml) as YamlWorkflow;
-const gate = parse(CREATE_PROPOSAL_WORKFLOW.yaml) as YamlWorkflow;
 const action = parse(ALERTZERO_ACTION_CREATE_RULE_WORKFLOW.yaml) as YamlWorkflow;
 
 const stepByName = (name: string) => worker.steps.find((step) => step.name === name);
@@ -207,11 +206,21 @@ describe('Detection Rule Creation worker', () => {
       );
     });
 
-    // The worker parks in WAITING_FOR_CHILD while the gate holds the decision for up to
-    // 168h; the engine's default 6h timeout would cancel it.
-    it('outlives the proposal gate it waits on', () => {
+    // The worker parks in WAITING_FOR_CHILD while the gate holds the decision, and the
+    // engine's default 6h workflow timeout would cancel it under the analyst. What it
+    // has to outlive is the deadline its own proposal gets, not the gate workflow's
+    // `settings.timeout` — that is a sentinel meaning "never" (`52w`), so comparing
+    // against it would only assert that this timeout is longer than a year.
+    it('outlives the decision deadline its own proposal gets', () => {
+      // This proposal passes no `expiresIn`, so it takes the gate's 72h default. A
+      // caller that starts passing its own deadline has to be checked against the
+      // ceiling here.
+      const proposal = stepByName('propose_creation');
+      expect(proposal?.with?.['workflow-id']).toBe(CREATE_PROPOSAL_WORKFLOW.id);
+      expect(inputsOf(proposal).expiresIn).toBeUndefined();
+
       expect(String(worker.settings?.timeout)).toMatch(/^\d+h$/);
-      expect(hours(worker.settings?.timeout)).toBeGreaterThan(hours(gate.settings?.timeout));
+      expect(hours(worker.settings?.timeout)).toBeGreaterThan(72);
     });
   });
 
