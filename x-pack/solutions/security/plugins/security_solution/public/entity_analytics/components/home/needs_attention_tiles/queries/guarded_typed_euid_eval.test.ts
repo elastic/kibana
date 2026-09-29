@@ -11,9 +11,7 @@ describe('evalGuardedTypedEuids', () => {
   it('writes a CASE+MV_APPEND EVAL into the given column', () => {
     const evalClause = evalGuardedTypedEuids('derived_euids');
     expect(evalClause).toContain('| EVAL derived_euids = CASE(');
-    expect(evalClause).toContain(
-      'MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)'
-    );
+    expect(evalClause).toContain('MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)');
     expect(evalClause).toContain('MV_APPEND(user_euid, host_euid)');
     expect(evalClause).toContain('MV_APPEND(user_euid, service_euid)');
     expect(evalClause).toContain('MV_APPEND(host_euid, service_euid)');

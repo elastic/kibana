@@ -40,9 +40,7 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
 
   it('combines present EUIDs with guarded MV_APPEND so multi-entity records keep every type', () => {
     const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1');
-    expect(query).toContain(
-      'MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)'
-    );
+    expect(query).toContain('MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)');
     expect(query).toContain('MV_APPEND(user_euid, host_euid)');
     expect(query).toContain('MV_APPEND(user_euid, service_euid)');
     expect(query).toContain('MV_APPEND(host_euid, service_euid)');
