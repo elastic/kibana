@@ -368,11 +368,7 @@ export class DashboardPageObject extends FtrService {
     if (!(await this.getIsInEditMode())) return;
 
     // The top nav stays disabled for a moment after a save, and a click on it is silently dropped.
-    await this.retry.waitFor('"Exit edit" to be enabled', async () => {
-      return this.testSubjects.isEnabled('dashboardViewOnlyMode');
-    });
-
-    await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
+    await this.appMenu.clickMenuItem('dashboardViewOnlyMode', { waitForEnabled: true });
 
     if (!accept) return;
 
@@ -383,7 +379,9 @@ export class DashboardPageObject extends FtrService {
       await this.common.clickConfirmOnModal();
     }
 
-    await this.testSubjects.existOrFail('dashboardEditMode', { timeout: 10_000 });
+    await this.retry.waitFor('the dashboard to be in view mode', async () => {
+      return this.appMenu.menuItemExists('dashboardEditMode');
+    });
   }
 
   public async clickDiscardChanges(accept = true) {
