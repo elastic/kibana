@@ -5,9 +5,9 @@ Dashboard supports a dedicated by-value `vega` panel. Its stored config holds a 
 optional. The string is preserved exactly, so comments and formatting round-trip.
 
 The panel query and filters are combined with the dashboard's query and filters. Like the
-dashboard's own search, they only reach the data sources that ask for it: Elasticsearch data
-sources with `%context%: true` or the `%dashboard_context-*%` placeholders, and every ES|QL data
-source. A data source that sends its own `body.query` without `%context%` ignores them. Data views
+dashboard's own search, they only reach the data sources that ask for it: Elasticsearch and ES|QL
+data sources with `%context%: true`, and Elasticsearch data sources with the
+`%dashboard_context-*%` placeholders. A data source that sends its own `body.query` without `%context%` ignores them. Data views
 referenced by panel filters are stored as saved object references, so they follow the dashboard
 through export, import, and copy to space.
 

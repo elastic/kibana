@@ -595,7 +595,7 @@ describe('vegaEmbeddableFactory', () => {
     api.applySerializedState({
       spec: {
         format: 'hjson',
-        value: `{ data: { url: { "%type%": "esql", query: "${esql}" } } }`,
+        value: `{ data: { url: { "%type%": "esql", "%context%": true, query: "${esql}" } } }`,
       },
       title: 'Initial title',
     });

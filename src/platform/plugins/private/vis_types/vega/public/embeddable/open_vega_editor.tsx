@@ -43,14 +43,13 @@ export const openVegaEditor = ({
       const api = await loadApi();
       if (!api) return;
 
-      if (closed) {
-        if (isNewPanel && apiIsPresentationContainer(parentApi)) {
-          parentApi.removePanel(api.uuid);
-        }
-        return;
+      const content = await api.getEditPanel?.({ ariaLabelledBy, closeFlyout, isNewPanel });
+      // Content that resolves after close never mounts, so its unmount revert never runs. Still
+      // return it: a falsy result makes openLazyFlyout close again and warn that loading failed.
+      if (closed && isNewPanel && apiIsPresentationContainer(parentApi)) {
+        parentApi.removePanel(api.uuid);
       }
-
-      return api.getEditPanel?.({ ariaLabelledBy, closeFlyout, isNewPanel });
+      return content;
     },
   });
 
