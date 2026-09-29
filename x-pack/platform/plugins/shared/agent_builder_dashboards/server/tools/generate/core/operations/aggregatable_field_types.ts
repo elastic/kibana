@@ -9,10 +9,13 @@ import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/ty
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
-/** A field that can back a `STATS BY` across the whole index, or one whose mappings conflict. */
-export type ControlFieldCapability = { types: string[] } | { conflicting: true };
+/** Whether a mapped field can back a `STATS BY` across the whole index, and why not. */
+export type ControlFieldCapability =
+  | { status: 'usable'; types: string[] }
+  | { status: 'conflicting' }
+  | { status: 'not_aggregatable' };
 
-/** Field capabilities keyed by name. Fields missing or not aggregatable anywhere are absent. */
+/** Field capabilities keyed by name. Fields not mapped on the index are absent. */
 export type ControlFieldCapabilities = Map<string, ControlFieldCapability>;
 
 interface FieldTypesTarget {
@@ -37,13 +40,13 @@ const isAggregatableEverywhere = (capabilities: FieldCapsFieldCapability[]): boo
 
 const toControlFieldCapability = (
   capabilities: FieldCapsFieldCapability[]
-): ControlFieldCapability | undefined => {
+): ControlFieldCapability => {
   if (isAggregatableEverywhere(capabilities)) {
-    return { types: capabilities.map(({ type }) => type) };
+    return { status: 'usable', types: capabilities.map(({ type }) => type) };
   }
   return capabilities.length > 1 && capabilities.some(({ aggregatable }) => aggregatable)
-    ? { conflicting: true }
-    : undefined;
+    ? { status: 'conflicting' }
+    : { status: 'not_aggregatable' };
 };
 
 const fetchAggregatableFieldTypes = async ({
@@ -64,10 +67,10 @@ const fetchAggregatableFieldTypes = async ({
     ...(projectRouting ? { project_routing: projectRouting } : {}),
   });
   return new Map(
-    Object.entries(response.fields).flatMap(([fieldName, capsByType]) => {
-      const capability = toControlFieldCapability(Object.values(capsByType));
-      return capability ? [[fieldName, capability] as const] : [];
-    })
+    Object.entries(response.fields).map(
+      ([fieldName, capsByType]) =>
+        [fieldName, toControlFieldCapability(Object.values(capsByType))] as const
+    )
   );
 };
 

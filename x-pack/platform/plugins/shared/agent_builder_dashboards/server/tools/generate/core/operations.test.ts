@@ -3012,6 +3012,38 @@ describe('add_controls / remove_controls operations', () => {
     ]);
   });
 
+  it('add_controls reports a mapped text field without a keyword sibling as not aggregatable', async () => {
+    const esClient = createFieldCapsEsClient({ message: 'text' });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'message',
+              index: 'kibana_sample_data_logs',
+              user_requested: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
+    expect(failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: 'message',
+        error: 'Is not aggregatable on index "kibana_sample_data_logs".',
+      },
+    ]);
+  });
+
   it('add_controls keeps a numeric range slider and rejects a keyword one', async () => {
     const esClient = createFieldCapsEsClient({ bytes: 'long', status: 'keyword' });
 

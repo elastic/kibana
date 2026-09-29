@@ -153,7 +153,7 @@ const getUsableFieldTypes = (
   fieldName: string
 ): string[] | undefined => {
   const capability = capabilities.get(fieldName);
-  return capability && 'types' in capability ? capability.types : undefined;
+  return capability?.status === 'usable' ? capability.types : undefined;
 };
 
 /**
@@ -245,12 +245,14 @@ const resolveControlField = (
   const candidates = getFieldCandidates(control);
   const resolvedFieldName = pickFieldName(candidates, capabilities);
   if (resolvedFieldName === undefined) {
-    const hasConflictingMappings = candidates.some((candidate) => capabilities.has(candidate));
-    return {
-      reason: hasConflictingMappings
-        ? `Has conflicting mappings on index "${control.index}".`
-        : `Not mapped on index "${control.index}".`,
-    };
+    const statuses = candidates.map((candidate) => capabilities.get(candidate)?.status);
+    if (statuses.includes('conflicting')) {
+      return { reason: `Has conflicting mappings on index "${control.index}".` };
+    }
+    if (statuses.includes('not_aggregatable')) {
+      return { reason: `Is not aggregatable on index "${control.index}".` };
+    }
+    return { reason: `Not mapped on index "${control.index}".` };
   }
 
   if (
