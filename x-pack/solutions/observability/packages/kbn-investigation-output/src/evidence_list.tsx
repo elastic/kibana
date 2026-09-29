@@ -16,16 +16,16 @@ export interface EvidenceItemProps {
   evidence: InvestigationEvidence;
 }
 
-/** One observation: its Markdown description followed by its chart, when it has one. */
+/** One observation: its chart, when it has one, followed by its Markdown description. */
 export const EvidenceItem: React.FC<EvidenceItemProps> = ({ evidence: { description, chart } }) => (
   <>
-    <EvidenceMarkdown>{description}</EvidenceMarkdown>
     {chart && (
       <>
-        <EuiSpacer size="s" />
         <EvidenceChart chart={chart} />
+        <EuiSpacer size="s" />
       </>
     )}
+    <EvidenceMarkdown>{description}</EvidenceMarkdown>
   </>
 );
 

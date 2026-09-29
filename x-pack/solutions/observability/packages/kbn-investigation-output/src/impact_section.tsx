@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type {
   InvestigationImpact,
   InvestigationImpactEntity,
 } from '@kbn/significant-events-schema';
+import { EvidenceChart } from './evidence_chart';
 import { EvidenceItem } from './evidence_list';
 import { EvidenceMarkdown } from './evidence_markdown';
+import { getVisibleImpactParts } from './impact_layout_budget';
 
 export interface ImpactSectionProps {
   impact: InvestigationImpact;
@@ -42,12 +48,29 @@ const EntityHeader: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity 
   </EuiFlexGroup>
 );
 
-/** One impacted entity; its evidence is collapsed by default so the impact summary leads. */
-const ImpactEntity: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity }) => {
+/**
+ * One impacted entity, as a row of the shared entity panel. Its evidence is collapsed by default
+ * so the impact summary leads.
+ */
+const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntity; isLast: boolean }> = ({
+  entity,
+  isLast,
+}) => {
+  const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationImpactEntity' });
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+    <EuiPanel
+      color="transparent"
+      hasShadow={false}
+      paddingSize="none"
+      borderRadius="none"
+      data-test-subj="investigationOutputImpactEntity"
+      css={css`
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
+      `}
+    >
       {entity.evidence ? (
         <EuiAccordion
           id={accordionId}
@@ -55,7 +78,7 @@ const ImpactEntity: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity 
           paddingSize="none"
           data-test-subj="investigationOutputImpactEntityAccordion"
         >
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <EvidenceItem evidence={entity.evidence} />
         </EuiAccordion>
       ) : (
@@ -66,16 +89,24 @@ const ImpactEntity: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity 
 };
 
 /**
- * What the investigation found was affected: the impact narrative and the evidence backing it,
- * then any impacted entities with the evidence that ties each of them to the incident.
+ * What the investigation found was affected: the impact narrative, the evidence backing it (chart
+ * first), then the impacted entities in one shared panel. Only as much as fits a rough height
+ * budget is shown up front; the rest is behind "Show more".
  */
-export const ImpactSection: React.FC<ImpactSectionProps> = ({
-  impact: { summary, evidence, entities = [] },
-}) => {
+export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
+  const { summary, evidence, entities = [] } = impact;
+  const [isExpanded, setIsExpanded] = useState(false);
   const hasSummary = Boolean(summary?.trim());
   if (!hasSummary && !evidence && entities.length === 0) {
     return null;
   }
+
+  const visible = getVisibleImpactParts(impact);
+  const showEvidenceChart = Boolean(evidence?.chart) && (isExpanded || visible.showEvidenceChart);
+  const showEvidenceDescription =
+    Boolean(evidence?.description.trim()) && (isExpanded || visible.showEvidenceDescription);
+  const shownEntities = isExpanded ? entities : entities.slice(0, visible.visibleEntityCount);
+  const showEvidence = showEvidenceChart || showEvidenceDescription;
 
   return (
     <div data-test-subj="investigationOutputImpact">
@@ -84,29 +115,56 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({
           {summary ?? ''}
         </EvidenceMarkdown>
       )}
-      {evidence && (
+      {evidence && showEvidence && (
         <>
           {hasSummary && <EuiSpacer size="s" />}
           <div data-test-subj="investigationOutputImpactEvidence">
-            <EvidenceItem evidence={evidence} />
+            {showEvidenceChart && evidence.chart && <EvidenceChart chart={evidence.chart} />}
+            {showEvidenceChart && showEvidenceDescription && <EuiSpacer size="s" />}
+            {showEvidenceDescription && <EvidenceMarkdown>{evidence.description}</EvidenceMarkdown>}
           </div>
         </>
       )}
-      {entities.length > 0 && (
+      {shownEntities.length > 0 && (
         <>
-          {(hasSummary || evidence) && <EuiSpacer size="s" />}
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            {entities.map((entity, index) => (
-              <EuiFlexItem
+          {(hasSummary || showEvidence) && <EuiSpacer size="s" />}
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="none"
+            data-test-subj="investigationOutputImpactEntities"
+          >
+            {shownEntities.map((entity, index) => (
+              <ImpactEntityRow
                 key={`${entity.name}-${index}`}
-                grow={false}
-                data-test-subj="investigationOutputImpactEntity"
-              >
-                <ImpactEntity entity={entity} />
-              </EuiFlexItem>
+                entity={entity}
+                isLast={index === shownEntities.length - 1}
+              />
             ))}
-          </EuiFlexGroup>
+          </EuiPanel>
         </>
+      )}
+      {visible.isTruncated && (
+        <EuiFlexGroup justifyContent="center" responsive={false} gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              color="text"
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+              onClick={() => setIsExpanded((expanded) => !expanded)}
+              aria-expanded={isExpanded}
+              data-test-subj="investigationOutputImpactShowMore"
+            >
+              {isExpanded
+                ? i18n.translate('xpack.investigationOutput.impact.showLess', {
+                    defaultMessage: 'Show less',
+                  })
+                : i18n.translate('xpack.investigationOutput.impact.showMore', {
+                    defaultMessage: 'Show more',
+                  })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </div>
   );

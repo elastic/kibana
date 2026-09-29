@@ -8,7 +8,16 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { EvidenceChart } from '@kbn/significant-events-schema';
 import { ImpactSection } from './impact_section';
+
+const sampleChart: EvidenceChart = {
+  type: 'bar',
+  title: 'Failed requests',
+  x_axis: { type: 'time' },
+  y_axis: {},
+  series: [{ name: 'failures', points: [{ x: '2026-07-28T14:00:00Z', y: 3 }] }],
+};
 
 describe('ImpactSection', () => {
   it('renders nothing without a summary, evidence, or entities', () => {
@@ -72,5 +81,68 @@ describe('ImpactSection', () => {
 
     // An entity without evidence has nothing to expand.
     expect(screen.queryByRole('button', { name: /payments-db/ })).not.toBeInTheDocument();
+  });
+
+  it('renders all entities in one shared panel', () => {
+    render(
+      <I18nProvider>
+        <ImpactSection
+          impact={{ entities: [{ name: 'checkout-service' }, { name: 'payments-db' }] }}
+        />
+      </I18nProvider>
+    );
+
+    const panel = screen.getByTestId('investigationOutputImpactEntities');
+    expect(
+      panel.querySelectorAll('[data-test-subj="investigationOutputImpactEntity"]')
+    ).toHaveLength(2);
+  });
+
+  it('puts the evidence chart before its description', () => {
+    render(
+      <I18nProvider>
+        <ImpactSection
+          impact={{
+            summary: 'Checkout failed.',
+            evidence: { description: 'Failed requests per minute.', chart: sampleChart },
+          }}
+        />
+      </I18nProvider>
+    );
+
+    const evidence = screen.getByTestId('investigationOutputImpactEvidence');
+    const chart = screen.getByTestId('investigationEvidenceChart');
+    const description = screen.getByText('Failed requests per minute.');
+    const order = Array.from(evidence.querySelectorAll('*'));
+    expect(order.indexOf(chart)).toBeLessThan(order.indexOf(description));
+  });
+
+  it('hides what does not fit behind "Show more" and reveals it on click', () => {
+    const entities = Array.from({ length: 20 }, (_, index) => ({ name: `service-${index}` }));
+    render(
+      <I18nProvider>
+        <ImpactSection impact={{ summary: 'Checkout failed.', entities }} />
+      </I18nProvider>
+    );
+
+    const shownBefore = screen.getAllByTestId('investigationOutputImpactEntity').length;
+    expect(shownBefore).toBeLessThan(20);
+
+    fireEvent.click(screen.getByTestId('investigationOutputImpactShowMore'));
+    expect(screen.getAllByTestId('investigationOutputImpactEntity')).toHaveLength(20);
+    expect(screen.getByTestId('investigationOutputImpactShowMore')).toHaveTextContent('Show less');
+
+    fireEvent.click(screen.getByTestId('investigationOutputImpactShowMore'));
+    expect(screen.getAllByTestId('investigationOutputImpactEntity')).toHaveLength(shownBefore);
+  });
+
+  it('renders no "Show more" when everything fits', () => {
+    render(
+      <I18nProvider>
+        <ImpactSection impact={{ summary: 'Checkout failed.', entities: [{ name: 'checkout' }] }} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('investigationOutputImpactShowMore')).not.toBeInTheDocument();
   });
 });
