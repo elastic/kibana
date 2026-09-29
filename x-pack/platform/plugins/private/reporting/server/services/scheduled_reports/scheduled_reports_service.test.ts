@@ -31,8 +31,7 @@ import { ScheduledReportsService } from './scheduled_reports_service';
 import type { UpdateScheduledReportParams } from './types/update';
 import { buildOwnedByFilter } from './lib/ownership';
 
-const legacyOwnedByFilterNode = (username: string) =>
-  buildOwnedByFilter({ id: undefined, username });
+const legacyOwnedByFilterNode = (username: string) => buildOwnedByFilter({ ids: [], username });
 
 const fakeRawRequest = {
   headers: {
@@ -492,6 +491,7 @@ describe('ScheduledReportsService', () => {
         expect.objectContaining({
           filter: buildOwnedByFilter({
             id: 'realm:["native","default_native","rshared"]',
+            ids: ['realm:["native","default_native","rshared"]'],
             username: 'rshared',
           }),
         })
@@ -994,7 +994,7 @@ describe('ScheduledReportsService', () => {
       });
     });
 
-    it('stamps createdById on disable for a legacy report matched by username (lazy upgrade)', async () => {
+    it('leaves a legacy report unstamped on disable, so ownership is never claimed by a read-write path', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -1022,14 +1022,7 @@ describe('ScheduledReportsService', () => {
       });
 
       expect(soClient.bulkUpdate).toHaveBeenCalledWith([
-        {
-          id: legacyReport.id,
-          type: 'scheduled_report',
-          attributes: {
-            enabled: false,
-            createdById: 'realm:["native","default_native","rshared"]',
-          },
-        },
+        { id: legacyReport.id, type: 'scheduled_report', attributes: { enabled: false } },
       ]);
     });
 
@@ -2728,7 +2721,7 @@ describe('ScheduledReportsService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('stamps createdById on update for a legacy report matched by username (lazy upgrade)', async () => {
+    it('leaves a legacy report unstamped on update, so ownership is never claimed implicitly', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -2755,7 +2748,6 @@ describe('ScheduledReportsService', () => {
         schedule: mockSchedule,
         title: 'foobar',
         notification: mockNotification,
-        createdById: 'realm:["native","default_native","rshared"]',
       });
     });
 

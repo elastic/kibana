@@ -125,7 +125,7 @@ export class ScheduledReportsService {
       });
     }
 
-    const { authorized, upgradeCreatedById } = await this._canUpdateReport({ id, user });
+    const { authorized } = await this._canUpdateReport({ id, user });
     if (!authorized) {
       throw await this._buildNotFoundError({ user, id, action: ScheduledReportAuditAction.UPDATE });
     }
@@ -138,7 +138,6 @@ export class ScheduledReportsService {
         title,
         schedule,
         notification,
-        createdById: upgradeCreatedById,
       });
       await this._updateScheduledReportTaskSchedule({ id, schedule });
 
@@ -508,8 +507,7 @@ export class ScheduledReportsService {
     title,
     schedule,
     notification,
-    createdById,
-  }: { id: string; createdById?: string } & UpdateScheduledReportParams) {
+  }: { id: string } & UpdateScheduledReportParams) {
     await this.savedObjectsClient.update<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
       id,
@@ -517,7 +515,6 @@ export class ScheduledReportsService {
         title,
         schedule,
         notification,
-        ...(createdById ? { createdById } : {}),
       }
     );
   }
@@ -534,18 +531,14 @@ export class ScheduledReportsService {
     }
   }
 
-  /**
-   * Checks whether `user` may update the scheduled report `id`. `upgradeCreatedById` is set when
-   * the report is a legacy document matched by username alone, and must be written back on the
-   * update so subsequent requests match on the stable id instead.
-   */
+  /** Checks whether `user` may update the scheduled report `id`. */
   private async _canUpdateReport({
     user,
     id,
   }: {
     user: ReportingUser;
     id: string;
-  }): Promise<{ authorized: boolean; upgradeCreatedById?: string }> {
+  }): Promise<{ authorized: boolean }> {
     if (this.userCanManageReporting) {
       return { authorized: true };
     }
@@ -556,16 +549,12 @@ export class ScheduledReportsService {
       id
     );
 
-    if (!isScheduledReportOwner({ report: reportToUpdate.attributes, currentUser: identity })) {
-      return { authorized: false };
-    }
-
-    const upgradeCreatedById =
-      reportToUpdate.attributes.createdById === undefined && identity.id !== undefined
-        ? identity.id
-        : undefined;
-
-    return { authorized: true, upgradeCreatedById };
+    return {
+      authorized: isScheduledReportOwner({
+        report: reportToUpdate.attributes,
+        currentUser: identity,
+      }),
+    };
   }
 
   private async _bulkOperation({
@@ -588,7 +577,6 @@ export class ScheduledReportsService {
         errors: bulkErrors,
         scheduledReportSavedObjectsToUpdate,
         updatedScheduledReportIds: enabledScheduledReportIds,
-        createdByIdUpgrades,
       } = await this._addLogForBulkOperationScheduledReports({
         action: enable ? ScheduledReportAuditAction.ENABLE : ScheduledReportAuditAction.DISABLE,
         scheduledReportSavedObjects: bulkGetResult.saved_objects,
@@ -601,7 +589,6 @@ export class ScheduledReportsService {
         const bulkUpdateResult = await this._updateScheduledReportSavedObjectEnabledState({
           scheduledReportSavedObjectsToUpdate,
           shouldEnable: enable,
-          createdByIdUpgrades,
         });
 
         for (const so of bulkUpdateResult.saved_objects) {
@@ -650,24 +637,16 @@ export class ScheduledReportsService {
   private async _updateScheduledReportSavedObjectEnabledState({
     scheduledReportSavedObjectsToUpdate,
     shouldEnable,
-    createdByIdUpgrades,
   }: {
     scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>>;
     shouldEnable: boolean;
-    createdByIdUpgrades: Map<string, string>;
   }): Promise<SavedObjectsBulkUpdateResponse<ScheduledReportType>> {
     return await this.savedObjectsClient.bulkUpdate<ScheduledReportType>(
-      scheduledReportSavedObjectsToUpdate.map((so) => {
-        const createdById = createdByIdUpgrades.get(so.id);
-        return {
-          id: so.id,
-          type: so.type,
-          attributes: {
-            enabled: shouldEnable,
-            ...(createdById ? { createdById } : {}),
-          },
-        };
-      })
+      scheduledReportSavedObjectsToUpdate.map((so) => ({
+        id: so.id,
+        type: so.type,
+        attributes: { enabled: shouldEnable },
+      }))
     );
   }
 
@@ -686,7 +665,6 @@ export class ScheduledReportsService {
     const scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>> = [];
     const identity = await this._getIdentity(user);
     const updatedScheduledReportIds: Set<string> = new Set();
-    const createdByIdUpgrades: Map<string, string> = new Map();
 
     for (const so of scheduledReportSavedObjects) {
       if (isSavedObjectErrorResult(so)) {
@@ -729,22 +707,10 @@ export class ScheduledReportsService {
             outcome: 'unknown',
           });
           scheduledReportSavedObjectsToUpdate.push(so);
-          if (
-            !this.userCanManageReporting &&
-            so.attributes.createdById === undefined &&
-            identity.id !== undefined
-          ) {
-            createdByIdUpgrades.set(so.id, identity.id);
-          }
         }
       }
     }
-    return {
-      errors,
-      scheduledReportSavedObjectsToUpdate,
-      updatedScheduledReportIds,
-      createdByIdUpgrades,
-    };
+    return { errors, scheduledReportSavedObjectsToUpdate, updatedScheduledReportIds };
   }
 
   private async _updateScheduledReportTaskEnabledState({

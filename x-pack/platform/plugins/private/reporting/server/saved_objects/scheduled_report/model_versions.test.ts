@@ -25,11 +25,14 @@ describe('scheduledReportModelVersions v6', () => {
   const v6 = scheduledReportModelVersions['6']!;
   const v6Schemas = v6.schemas!;
 
-  it('adds the createdById mapping', () => {
+  it('adds the ownership mappings', () => {
     expect(v6.changes).toEqual([
       {
         type: 'mappings_addition',
-        addedMappings: { createdById: { type: 'keyword', ignore_above: 1024 } },
+        addedMappings: {
+          createdById: { type: 'keyword', ignore_above: 1024 },
+          createdByApiKeyId: { type: 'keyword', ignore_above: 1024 },
+        },
       },
     ]);
   });
@@ -43,7 +46,13 @@ describe('scheduledReportModelVersions v6', () => {
     ).not.toThrow();
   });
 
-  it('accepts documents with no createdById (legacy)', () => {
+  it('accepts createdByApiKeyId on create', () => {
+    expect(() =>
+      asObjectSchema(v6Schemas.create).validate({ ...baseAttributes, createdByApiKeyId: 'key-1' })
+    ).not.toThrow();
+  });
+
+  it('accepts documents with neither ownership id (legacy)', () => {
     expect(() => asObjectSchema(v6Schemas.create).validate(baseAttributes)).not.toThrow();
   });
 

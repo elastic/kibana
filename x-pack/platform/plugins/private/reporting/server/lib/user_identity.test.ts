@@ -7,12 +7,14 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { httpServerMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getReportingUserIdentity, resolveApiKeyOwner, toStableUserId } from './user_identity';
+import { getReportingUserIdentity, resolveApiKeyOwner, toStableUserIds } from './user_identity';
 
-describe('toStableUserId', () => {
-  it('prefers profile uid when present', async () => {
+const esApiKeyHeader = (id: string) => `ApiKey ${Buffer.from(`${id}:secret`).toString('base64')}`;
+
+describe('toStableUserIds', () => {
+  it('returns both the profile uid and the realm-qualified id for an interactive session', async () => {
     await expect(
-      toStableUserId({
+      toStableUserIds({
         authUser: {
           username: 'rshared',
           profile_uid: 'profile-123',
@@ -20,74 +22,87 @@ describe('toStableUserId', () => {
           authentication_realm: { type: 'native', name: 'default_native' },
         },
       })
-    ).resolves.toBe('profile-123');
+    ).resolves.toEqual(['profile-123', 'realm:["native","default_native","rshared"]']);
   });
 
   it('falls back to a realm-qualified id when profile uid is missing, distinguishing same-username principals across realms', async () => {
     await expect(
-      toStableUserId({
+      toStableUserIds({
         authUser: {
           username: 'rshared',
           authentication_type: 'realm',
           authentication_realm: { type: 'file', name: 'default_file' },
         },
       })
-    ).resolves.toBe('realm:["file","default_file","rshared"]');
+    ).resolves.toEqual(['realm:["file","default_file","rshared"]']);
 
     await expect(
-      toStableUserId({
+      toStableUserIds({
         authUser: {
           username: 'rshared',
           authentication_type: 'realm',
           authentication_realm: { type: 'native', name: 'default_native' },
         },
       })
-    ).resolves.toBe('realm:["native","default_native","rshared"]');
+    ).resolves.toEqual(['realm:["native","default_native","rshared"]']);
   });
 
-  it('returns undefined when realm information is incomplete', async () => {
+  it('returns no ids when realm information is incomplete and there is no profile uid', async () => {
     await expect(
-      toStableUserId({ authUser: { username: 'rshared', authentication_type: 'realm' } })
-    ).resolves.toBeUndefined();
+      toStableUserIds({ authUser: { username: 'rshared', authentication_type: 'realm' } })
+    ).resolves.toEqual([]);
     await expect(
-      toStableUserId({
+      toStableUserIds({
         authUser: {
           authentication_type: 'realm',
           authentication_realm: { type: 'native', name: 'default_native' },
         },
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual([]);
   });
 
-  it('resolves an API-key owner profile uid via the injected callback', async () => {
-    const resolveApiKeyOwnerFn = jest.fn().mockResolvedValue({ profileUid: 'profile-from-key' });
-
+  it('returns both representations of the api key owner so either may be matched', async () => {
     await expect(
-      toStableUserId({
+      toStableUserIds({
         authUser: { username: 'rshared', authentication_type: 'api_key' },
-        resolveApiKeyOwner: resolveApiKeyOwnerFn,
+        resolveApiKeyOwner: async () => ({
+          profileUid: 'profile-from-key',
+          realmType: 'file',
+          realmName: 'default_file',
+          username: 'rshared',
+        }),
       })
-    ).resolves.toBe('profile-from-key');
-    expect(resolveApiKeyOwnerFn).toHaveBeenCalledTimes(1);
+    ).resolves.toEqual(['profile-from-key', 'realm:["file","default_file","rshared"]']);
   });
 
   it('falls back to a realm-qualified id built from the api key document when no profile uid is available', async () => {
-    const resolveApiKeyOwnerFn = jest.fn().mockResolvedValue({
-      realmType: 'file',
-      realmName: 'default_file',
-      username: 'rshared',
-    });
-
     await expect(
-      toStableUserId({
+      toStableUserIds({
         authUser: { username: 'rshared', authentication_type: 'api_key' },
-        resolveApiKeyOwner: resolveApiKeyOwnerFn,
+        resolveApiKeyOwner: async () => ({
+          realmType: 'file',
+          realmName: 'default_file',
+          username: 'rshared',
+        }),
       })
-    ).resolves.toBe('realm:["file","default_file","rshared"]');
+    ).resolves.toEqual(['realm:["file","default_file","rshared"]']);
   });
 
-  it('produces the same id for an api-key-created schedule as the owner would get from an interactive session', async () => {
-    const viaApiKey = await toStableUserId({
+  it('never derives an id from the synthetic realm reported for api-key auth', async () => {
+    await expect(
+      toStableUserIds({
+        authUser: {
+          username: 'rshared',
+          authentication_type: 'api_key',
+          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+        },
+        resolveApiKeyOwner: async () => undefined,
+      })
+    ).resolves.toEqual([]);
+  });
+
+  it('produces overlapping ids for an api key and its owner interactive session', async () => {
+    const viaApiKey = await toStableUserIds({
       authUser: { username: 'rshared', authentication_type: 'api_key' },
       resolveApiKeyOwner: async () => ({
         realmType: 'file',
@@ -95,7 +110,7 @@ describe('toStableUserId', () => {
         username: 'rshared',
       }),
     });
-    const viaSession = await toStableUserId({
+    const viaSession = await toStableUserIds({
       authUser: {
         username: 'rshared',
         authentication_type: 'realm',
@@ -103,43 +118,20 @@ describe('toStableUserId', () => {
       },
     });
 
-    expect(viaApiKey).toBe(viaSession);
+    expect(viaApiKey).toEqual(viaSession);
   });
 
-  it('returns undefined for api_key auth when the key document lacks realm information', async () => {
-    const resolveApiKeyOwnerFn = jest.fn().mockResolvedValue({ username: 'rshared' });
-
+  it('de-duplicates when the request and the key document report the same profile uid', async () => {
     await expect(
-      toStableUserId({
-        authUser: { username: 'rshared', authentication_type: 'api_key' },
-        resolveApiKeyOwner: resolveApiKeyOwnerFn,
-      })
-    ).resolves.toBeUndefined();
-  });
-
-  it('returns undefined for api_key auth when the owner cannot be resolved at all', async () => {
-    await expect(
-      toStableUserId({
-        authUser: { username: 'rshared', authentication_type: 'api_key' },
-        resolveApiKeyOwner: async () => undefined,
-      })
-    ).resolves.toBeUndefined();
-  });
-
-  it('does not invoke the api key resolver when a profile uid is already present', async () => {
-    const resolveApiKeyOwnerFn = jest.fn();
-
-    await expect(
-      toStableUserId({
+      toStableUserIds({
         authUser: {
           username: 'rshared',
           profile_uid: 'profile-123',
           authentication_type: 'api_key',
         },
-        resolveApiKeyOwner: resolveApiKeyOwnerFn,
+        resolveApiKeyOwner: async () => ({ profileUid: 'profile-123' }),
       })
-    ).resolves.toBe('profile-123');
-    expect(resolveApiKeyOwnerFn).not.toHaveBeenCalled();
+    ).resolves.toEqual(['profile-123']);
   });
 });
 
@@ -150,17 +142,11 @@ describe('resolveApiKeyOwner', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('looks up the api key by id decoded from the authorization header', async () => {
-    const apiKeyId = 'api-key-id';
-    const request = httpServerMock.createKibanaRequest({
-      headers: {
-        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
-      },
-    });
+  it('looks up the api key by id', async () => {
     esClient.security.getApiKey.mockResolvedValue({
       api_keys: [
         {
-          id: apiKeyId,
+          id: 'api-key-id',
           profile_uid: 'profile-from-api-key',
           realm: 'default_file',
           realm_type: 'file',
@@ -169,11 +155,11 @@ describe('resolveApiKeyOwner', () => {
       ],
     } as never);
 
-    const result = await resolveApiKeyOwner({ request, esClient });
+    const result = await resolveApiKeyOwner({ id: 'api-key-id', esClient });
 
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
       with_profile_uid: true,
-      id: apiKeyId,
+      id: 'api-key-id',
     });
     expect(result).toEqual({
       profileUid: 'profile-from-api-key',
@@ -183,22 +169,13 @@ describe('resolveApiKeyOwner', () => {
     });
   });
 
-  it('returns undefined when there is no authorization header', async () => {
-    const request = httpServerMock.createKibanaRequest();
+  it('returns undefined when the key is not found', async () => {
+    esClient.security.getApiKey.mockResolvedValue({ api_keys: [] } as never);
 
-    const result = await resolveApiKeyOwner({ request, esClient });
-
-    expect(result).toBeUndefined();
-    expect(esClient.security.getApiKey).not.toHaveBeenCalled();
+    await expect(resolveApiKeyOwner({ id: 'api-key-id', esClient })).resolves.toBeUndefined();
   });
 
   it('treats a 403 from the api key lookup as unresolvable', async () => {
-    const apiKeyId = 'api-key-id';
-    const request = httpServerMock.createKibanaRequest({
-      headers: {
-        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
-      },
-    });
     esClient.security.getApiKey.mockRejectedValue(
       new errors.ResponseError({
         statusCode: 403,
@@ -209,16 +186,10 @@ describe('resolveApiKeyOwner', () => {
       })
     );
 
-    await expect(resolveApiKeyOwner({ request, esClient })).resolves.toBeUndefined();
+    await expect(resolveApiKeyOwner({ id: 'api-key-id', esClient })).resolves.toBeUndefined();
   });
 
   it('propagates non-403 errors from the api key lookup', async () => {
-    const apiKeyId = 'api-key-id';
-    const request = httpServerMock.createKibanaRequest({
-      headers: {
-        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
-      },
-    });
     esClient.security.getApiKey.mockRejectedValue(
       new errors.ResponseError({
         statusCode: 500,
@@ -229,26 +200,28 @@ describe('resolveApiKeyOwner', () => {
       })
     );
 
-    await expect(resolveApiKeyOwner({ request, esClient })).rejects.toThrow();
+    await expect(resolveApiKeyOwner({ id: 'api-key-id', esClient })).rejects.toThrow();
   });
 });
 
 describe('getReportingUserIdentity', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
+  let scopedEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createClusterClient();
+    scopedEsClient = esClient.asScoped().asCurrentUser;
   });
 
   it('returns an empty identity when there is no authenticated user', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     await expect(getReportingUserIdentity({ user: undefined, request, esClient })).resolves.toEqual(
-      {}
+      { ids: [] }
     );
   });
 
-  it('returns the profile uid and username for an interactive session', async () => {
+  it('returns the profile uid, the realm-qualified id and the username for an interactive session', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     await expect(
@@ -262,7 +235,12 @@ describe('getReportingUserIdentity', () => {
         request,
         esClient,
       })
-    ).resolves.toEqual({ id: 'profile-123', username: 'rshared' });
+    ).resolves.toEqual({
+      id: 'profile-123',
+      ids: ['profile-123', 'realm:["native","default_native","rshared"]'],
+      apiKeyId: undefined,
+      username: 'rshared',
+    });
   });
 
   it('returns distinct ids for the same username in different realms', async () => {
@@ -283,5 +261,152 @@ describe('getReportingUserIdentity', () => {
 
     expect(fileIdentity.username).toBe(nativeIdentity.username);
     expect(fileIdentity.id).not.toBe(nativeIdentity.id);
+  });
+
+  it('reports the api key id and resolves the owner for an elasticsearch api key', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: esApiKeyHeader('api-key-id') },
+    });
+    scopedEsClient.security.getApiKey.mockResolvedValue({
+      api_keys: [
+        {
+          id: 'api-key-id',
+          profile_uid: 'profile-from-key',
+          realm: 'default_native',
+          realm_type: 'native',
+          username: 'rshared',
+        },
+      ],
+    } as never);
+
+    await expect(
+      getReportingUserIdentity({
+        user: {
+          username: 'rshared',
+          authentication_type: 'api_key',
+          api_key: { id: 'api-key-id', managed_by: 'elasticsearch' },
+        } as never,
+        request,
+        esClient,
+      })
+    ).resolves.toEqual({
+      id: 'profile-from-key',
+      ids: ['profile-from-key', 'realm:["native","default_native","rshared"]'],
+      apiKeyId: 'api-key-id',
+      username: 'rshared',
+    });
+  });
+
+  it('decodes the api key id from the authorization header when the user does not report it', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: esApiKeyHeader('header-key-id') },
+    });
+    scopedEsClient.security.getApiKey.mockResolvedValue({ api_keys: [] } as never);
+
+    const identity = await getReportingUserIdentity({
+      user: { username: 'rshared', authentication_type: 'api_key' } as never,
+      request,
+      esClient,
+    });
+
+    expect(identity.apiKeyId).toBe('header-key-id');
+    expect(scopedEsClient.security.getApiKey).toHaveBeenCalledWith({
+      with_profile_uid: true,
+      id: 'header-key-id',
+    });
+  });
+
+  it('still reports the api key id when the owner lookup is forbidden', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: esApiKeyHeader('api-key-id') },
+    });
+    scopedEsClient.security.getApiKey.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 403,
+        body: { error: { type: 'security_exception' }, status: 403 },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
+
+    await expect(
+      getReportingUserIdentity({
+        user: {
+          username: 'rshared',
+          authentication_type: 'api_key',
+          api_key: { id: 'api-key-id', managed_by: 'elasticsearch' },
+        } as never,
+        request,
+        esClient,
+      })
+    ).resolves.toEqual({
+      id: undefined,
+      ids: [],
+      apiKeyId: 'api-key-id',
+      username: 'rshared',
+    });
+  });
+
+  it('identifies a UIAM api key by its descriptor without querying elasticsearch', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' },
+    });
+
+    await expect(
+      getReportingUserIdentity({
+        user: {
+          username: 'uiam-key-id',
+          authentication_type: 'api_key',
+          api_key: { id: 'uiam-key-id', managed_by: 'cloud' },
+          authentication_realm: { type: '_cloud_api_key', name: '_cloud_api_key' },
+        } as never,
+        request,
+        esClient,
+      })
+    ).resolves.toEqual({
+      id: undefined,
+      ids: [],
+      apiKeyId: 'uiam-key-id',
+      username: 'uiam-key-id',
+    });
+    expect(scopedEsClient.security.getApiKey).not.toHaveBeenCalled();
+  });
+
+  it('never decodes a UIAM credential as an elasticsearch api key', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' },
+    });
+
+    const identity = await getReportingUserIdentity({
+      user: { username: 'uiam-key-id', authentication_type: 'api_key' } as never,
+      request,
+      esClient,
+    });
+
+    expect(identity.apiKeyId).toBeUndefined();
+    expect(scopedEsClient.security.getApiKey).not.toHaveBeenCalled();
+  });
+
+  it('keeps the profile uid of a UIAM session, which authenticates without an api key', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    await expect(
+      getReportingUserIdentity({
+        user: {
+          username: '1806480617',
+          profile_uid: 'profile-uiam',
+          authentication_type: 'token',
+          authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
+        } as never,
+        request,
+        esClient,
+      })
+    ).resolves.toEqual({
+      id: 'profile-uiam',
+      ids: ['profile-uiam', 'realm:["saml","cloud-saml-kibana","1806480617"]'],
+      apiKeyId: undefined,
+      username: '1806480617',
+    });
   });
 });

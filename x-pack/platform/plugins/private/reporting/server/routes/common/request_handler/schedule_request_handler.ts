@@ -143,7 +143,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     const auditLogger = await reporting.getAuditLogger(req);
     const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
 
-    const { id: createdById } = await getReportingUserIdentity({
+    const { id: createdById, apiKeyId: createdByApiKeyId } = await getReportingUserIdentity({
       user,
       request: req,
       esClient: await reporting.getEsClient(),
@@ -175,6 +175,7 @@ export class ScheduleRequestHandler extends RequestHandler<
       // this fallback is just to satisfy the type
       createdBy: user ? user.username : 'unknown',
       ...(createdById ? { createdById } : {}),
+      ...(createdByApiKeyId ? { createdByApiKeyId } : {}),
       enabled: true,
       jobType,
       meta: {

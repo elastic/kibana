@@ -10,12 +10,22 @@ import type { ElasticsearchClient, IClusterClient, KibanaRequest } from '@kbn/co
 import type { ReportingUser } from '../types';
 
 /**
- * A stable, realm-aware identity for authorization checks on scheduled reports. Ownership
- * comparisons should prefer `id`; `username` is for display, logging, and matching saved objects
- * created before `id` existed.
+ * A stable, realm-aware identity for authorization checks on scheduled reports.
+ *
+ * `ids` holds every id the acting human may legitimately own documents under. A user profile uid
+ * and a realm-qualified id denote the same principal, and which one a document stores depends on
+ * what was resolvable when it was created, so ownership must match against all of them. `id` is
+ * the preferred one, written when creating a document.
+ *
+ * `apiKeyId` is set when the request is authenticated with an API key. A key owns only the
+ * documents it created, never the rest of its creator's, so it is matched separately from `ids`.
+ *
+ * `username` is for display, logging, and matching documents created before ids existed.
  */
 export interface ReportingUserIdentity {
   id?: string;
+  ids: string[];
+  apiKeyId?: string;
   username?: string;
 }
 
@@ -26,6 +36,10 @@ interface StableUserIdAuthUser {
   authentication_realm?: { type?: string; name?: string };
 }
 
+interface ApiKeyAuthUser {
+  api_key?: { id?: string; managed_by?: string };
+}
+
 interface ApiKeyOwner {
   profileUid?: string;
   realmType?: string;
@@ -34,10 +48,12 @@ interface ApiKeyOwner {
 }
 
 /**
- * Copied from `@kbn/core-security-server`, which does not export this on 9.3. Delete this copy and
- * import it once 9.3 is out of support.
+ * Identifies UIAM (Elastic Cloud) credentials. Copied from `@kbn/core-security-server`, which does
+ * not export `isUiamCredential` on 9.3. Delete this copy and import it once 9.3 is out of support.
  */
-const extractApiKeyIdFromAuthzHeader = (
+const UIAM_CREDENTIALS_PREFIX = 'essu_';
+
+const extractApiKeyCredentialsFromAuthzHeader = (
   authorizationHeader: string | string[] | undefined
 ): string | undefined => {
   if (typeof authorizationHeader !== 'string') {
@@ -47,14 +63,60 @@ const extractApiKeyIdFromAuthzHeader = (
   if (!authorizationHeader.toLowerCase().startsWith(prefix)) {
     return undefined;
   }
-  const encodedApiKey = authorizationHeader.slice(prefix.length);
+  return authorizationHeader.slice(prefix.length);
+};
+
+/**
+ * Copied from `@kbn/core-security-server`, which does not export this on 9.3. Delete this copy and
+ * import it once 9.3 is out of support.
+ *
+ * Only valid for Elasticsearch API keys, which are sent as `base64(id:secret)`. A UIAM credential
+ * is a raw secret with no id envelope, so decoding one yields binary noise rather than an id.
+ */
+const decodeApiKeyId = (encodedApiKey: string | undefined): string | undefined => {
+  if (encodedApiKey === undefined) {
+    return undefined;
+  }
   const decoded = Buffer.from(encodedApiKey, 'base64').toString();
   const [id] = decoded.split(':');
   return id.trim() === '' ? undefined : id;
 };
 
+interface ApiKeyContext {
+  id?: string;
+  /**
+   * UIAM keys are managed by Elastic Cloud and have no Elasticsearch counterpart, so their creator
+   * cannot be looked up and documents they create are owned by the key alone.
+   */
+  isUiam: boolean;
+}
+
 /**
- * Resolves the creator of an API key via Elasticsearch, when available.
+ * Describes the API key a request is authenticated with.
+ *
+ * Elasticsearch reports the key id on the authenticated user for both Elasticsearch- and
+ * Cloud-managed keys; decoding the authorization header is a fallback for the former only.
+ */
+const getApiKeyContext = ({
+  user,
+  request,
+}: {
+  user: ApiKeyAuthUser;
+  request: KibanaRequest;
+}): ApiKeyContext => {
+  const credentials = extractApiKeyCredentialsFromAuthzHeader(request.headers.authorization);
+  const isUiam =
+    user.api_key?.managed_by === 'cloud' ||
+    credentials?.startsWith(UIAM_CREDENTIALS_PREFIX) === true;
+
+  return {
+    id: user.api_key?.id ?? (isUiam ? undefined : decodeApiKeyId(credentials)),
+    isUiam,
+  };
+};
+
+/**
+ * Resolves the creator of an Elasticsearch API key, when available.
  *
  * `getCurrentUser` for API-key auth often omits `profile_uid`, and reports the same synthetic
  * `_es_api_key` realm for every key, so neither can distinguish principals. Looking up the key
@@ -62,22 +124,14 @@ const extractApiKeyIdFromAuthzHeader = (
  * ownership matches the creator's interactive sessions.
  */
 export const resolveApiKeyOwner = async ({
-  request,
+  id,
   esClient,
 }: {
-  request: KibanaRequest;
+  id: string;
   esClient: ElasticsearchClient;
 }): Promise<ApiKeyOwner | undefined> => {
-  const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-  if (!id) {
-    return undefined;
-  }
-
   try {
-    const response = await esClient.security.getApiKey({
-      with_profile_uid: true,
-      id,
-    });
+    const response = await esClient.security.getApiKey({ with_profile_uid: true, id });
     const apiKey = response.api_keys?.[0];
     if (!apiKey) {
       return undefined;
@@ -98,53 +152,54 @@ export const resolveApiKeyOwner = async ({
 };
 
 /**
- * Builds a stable principal id for scheduled-report ownership checks.
- *
- * Usernames alone are not unique across Elasticsearch authentication realms (e.g. file vs
- * native). Prefer the Kibana user profile uid when present; otherwise encode realm type/name
- * with the username so same-username principals in different realms remain distinct.
- *
- * The `realm:` prefix keeps synthetic ids distinguishable from profile uids.
+ * Usernames alone are not unique across Elasticsearch authentication realms (e.g. file vs native),
+ * so realm type and name are encoded with the username. The `realm:` prefix keeps synthetic ids
+ * distinguishable from profile uids.
  */
-export const toStableUserId = async ({
+const toRealmId = (
+  realmType: string | undefined,
+  realmName: string | undefined,
+  username: string | undefined
+): string | undefined =>
+  realmType && realmName && username
+    ? `realm:${JSON.stringify([realmType, realmName, username])}`
+    : undefined;
+
+/**
+ * Builds every stable principal id the acting human may own documents under, preferred first.
+ *
+ * A principal resolves to a profile uid once they have an activated profile and to a
+ * realm-qualified id otherwise, so both are returned when both are derivable. Documents created
+ * under either representation then remain accessible when the other is preferred later.
+ */
+export const toStableUserIds = async ({
   authUser,
   resolveApiKeyOwner: resolveOwner,
 }: {
   authUser: StableUserIdAuthUser;
   resolveApiKeyOwner?: () => Promise<ApiKeyOwner | undefined>;
-}): Promise<string | undefined> => {
-  const isApiKey = authUser.authentication_type === 'api_key';
+}): Promise<string[]> => {
+  const ids: Array<string | undefined> = [authUser.profile_uid];
 
-  if (authUser.profile_uid) {
-    return authUser.profile_uid;
-  }
-
-  if (isApiKey) {
+  if (authUser.authentication_type === 'api_key') {
+    // The realm reported for API-key auth is synthetic and shared by every key, so the creator's
+    // real realm can only come from the key itself.
     const apiKeyOwner = await resolveOwner?.();
-    if (!apiKeyOwner) {
-      return undefined;
-    }
-    if (apiKeyOwner.profileUid) {
-      return apiKeyOwner.profileUid;
-    }
-    if (apiKeyOwner.realmType && apiKeyOwner.realmName && apiKeyOwner.username) {
-      return `realm:${JSON.stringify([
-        apiKeyOwner.realmType,
-        apiKeyOwner.realmName,
-        apiKeyOwner.username,
-      ])}`;
-    }
-    return undefined;
+    ids.push(
+      apiKeyOwner?.profileUid,
+      toRealmId(apiKeyOwner?.realmType, apiKeyOwner?.realmName, apiKeyOwner?.username)
+    );
+  } else {
+    ids.push(
+      toRealmId(
+        authUser.authentication_realm?.type,
+        authUser.authentication_realm?.name,
+        authUser.username
+      )
+    );
   }
 
-  const realmType = authUser.authentication_realm?.type;
-  const realmName = authUser.authentication_realm?.name;
-  const { username } = authUser;
-  if (!realmType || !realmName || !username) {
-    return undefined;
-  }
-
-  return `realm:${JSON.stringify([realmType, realmName, username])}`;
+  return [...new Set(ids.filter((id): id is string => id !== undefined))];
 };
 
 /**
@@ -161,14 +216,22 @@ export const getReportingUserIdentity = async ({
   esClient: IClusterClient;
 }): Promise<ReportingUserIdentity> => {
   if (!user) {
-    return {};
+    return { ids: [] };
   }
 
-  const id = await toStableUserId({
-    authUser: user,
-    resolveApiKeyOwner: () =>
-      resolveApiKeyOwner({ request, esClient: esClient.asScoped(request).asCurrentUser }),
-  });
+  const apiKey =
+    user.authentication_type === 'api_key' ? getApiKeyContext({ user, request }) : undefined;
 
-  return { id, username: user.username };
+  let resolveOwner: (() => Promise<ApiKeyOwner | undefined>) | undefined;
+  if (apiKey && !apiKey.isUiam) {
+    const { id } = apiKey;
+    if (id !== undefined) {
+      resolveOwner = () =>
+        resolveApiKeyOwner({ id, esClient: esClient.asScoped(request).asCurrentUser });
+    }
+  }
+
+  const ids = await toStableUserIds({ authUser: user, resolveApiKeyOwner: resolveOwner });
+
+  return { id: ids[0], ids, apiKeyId: apiKey?.id, username: user.username };
 };

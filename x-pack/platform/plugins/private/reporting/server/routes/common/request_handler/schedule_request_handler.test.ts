@@ -309,6 +309,7 @@ describe('Handle request to schedule', () => {
         expect.objectContaining({
           createdBy: 'testymcgee',
           createdById: 'profile-from-api-key',
+          createdByApiKeyId: apiKeyId,
         }),
         { id: 'mock-report-id' }
       );
@@ -316,6 +317,63 @@ describe('Handle request to schedule', () => {
         with_profile_uid: true,
         id: apiKeyId,
       });
+    });
+
+    test('records only the api key id for a UIAM key, whose creator cannot be resolved', async () => {
+      const esClient = await reportingCore.getEsClient();
+      const scopedEsClient = esClient.asScoped(mockRequest);
+
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'uiam-key-id',
+          authentication_type: 'api_key',
+          api_key: { id: 'uiam-key-id', managed_by: 'cloud' },
+          authentication_realm: { type: '_cloud_api_key', name: '_cloud_api_key' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        // @ts-ignore
+        req: { ...mockRequest, headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' } },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      const attributes = (soClient.create as jest.Mock).mock.calls[0][1];
+      expect(attributes.createdByApiKeyId).toBe('uiam-key-id');
+      expect(attributes.createdById).toBeUndefined();
+      expect(scopedEsClient.asCurrentUser.security.getApiKey).not.toHaveBeenCalled();
+    });
+
+    test('records no api key id for a report created through a session', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        // @ts-ignore
+        req: mockRequest,
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      const attributes = (soClient.create as jest.Mock).mock.calls[0][1];
+      expect(attributes.createdByApiKeyId).toBeUndefined();
     });
 
     test('creates a scheduled_report saved object with notification', async () => {
