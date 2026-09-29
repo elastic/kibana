@@ -3044,6 +3044,45 @@ describe('add_controls / remove_controls operations', () => {
     ]);
   });
 
+  it('add_controls rejects options lists on field types that cannot back a dropdown', async () => {
+    const esClient = createFieldCapsEsClient({
+      'client.ip': 'ip',
+      latency: 'aggregate_metric_double',
+      location: 'geo_point',
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: ['client.ip', 'latency', 'location'].map((fieldName) => ({
+            type: 'options_list_control' as const,
+            field_name: fieldName,
+            index: 'kibana_sample_data_logs',
+            user_requested: true,
+          })),
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect((kept.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY `client.ip`'
+    );
+    expect(failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: 'latency, location',
+        error:
+          'options_list_control needs a keyword, numeric, date, ip, boolean, or version field on index "kibana_sample_data_logs".',
+      },
+    ]);
+  });
+
   it('add_controls keeps a numeric range slider and rejects a keyword one', async () => {
     const esClient = createFieldCapsEsClient({
       bytes: 'long',

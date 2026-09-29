@@ -153,8 +153,25 @@ const SCALAR_NUMERIC_FIELD_TYPES: ReadonlySet<string> = new Set([
   ES_FIELD_TYPES.UNSIGNED_LONG,
 ]);
 
-const isScalarNumeric = (types: string[]): boolean =>
-  types.length > 0 && types.every((type) => SCALAR_NUMERIC_FIELD_TYPES.has(type));
+/**
+ * Types an options list can group on with `STATS BY` and show as dropdown values. Field caps
+ * reports `constant_keyword` and `wildcard` as `keyword`. Other aggregatable types either fail
+ * in ES|QL (`aggregate_metric_double`, ranges, `binary`) or produce unusable values (geo,
+ * `histogram`, `flattened`).
+ */
+const OPTIONS_LIST_FIELD_TYPES: ReadonlySet<string> = new Set([
+  ...SCALAR_NUMERIC_FIELD_TYPES,
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.TEXT,
+  ES_FIELD_TYPES.VERSION,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.BOOLEAN,
+  ES_FIELD_TYPES.DATE,
+  ES_FIELD_TYPES.DATE_NANOS,
+]);
+
+const hasOnlyAllowedTypes = (types: string[], allowedTypes: ReadonlySet<string>): boolean =>
+  types.length > 0 && types.every((type) => allowedTypes.has(type));
 
 const TEXT_FIELD_TYPES: ReadonlySet<string> = new Set([
   ES_FIELD_TYPES.TEXT,
@@ -268,11 +285,21 @@ const resolveControlField = (
     return { reason: `Not mapped on index "${control.index}".` };
   }
 
+  const resolvedFieldTypes = getUsableFieldTypes(capabilities, resolvedFieldName) ?? [];
   if (
     control.type === RANGE_SLIDER_CONTROL &&
-    !isScalarNumeric(getUsableFieldTypes(capabilities, resolvedFieldName) ?? [])
+    !hasOnlyAllowedTypes(resolvedFieldTypes, SCALAR_NUMERIC_FIELD_TYPES)
   ) {
     return { reason: `range_slider_control needs a numeric field on index "${control.index}".` };
+  }
+
+  if (
+    control.type === OPTIONS_LIST_CONTROL &&
+    !hasOnlyAllowedTypes(resolvedFieldTypes, OPTIONS_LIST_FIELD_TYPES)
+  ) {
+    return {
+      reason: `options_list_control needs a keyword, numeric, date, ip, boolean, or version field on index "${control.index}".`,
+    };
   }
 
   return { resolvedFieldName };
