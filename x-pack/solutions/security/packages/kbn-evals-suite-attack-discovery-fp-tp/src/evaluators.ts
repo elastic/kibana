@@ -49,25 +49,34 @@ const sourceStatusMismatches = (
     claimed: string;
     seen: number | undefined;
     failed: boolean | undefined;
+    coverageMissing: boolean;
   }> = [
     {
       label: 'entity_store',
       claimed: entityStore,
       seen: coverage?.entities?.seen,
       failed: coverage?.entities?.failed,
+      coverageMissing: coverage?.entities === undefined,
     },
     {
       label: 'raw_events',
       claimed: rawEvents,
       seen: coverage?.events?.seen,
       failed: coverage?.events?.failed,
+      coverageMissing: coverage?.events === undefined,
     },
   ];
-  return checks.flatMap(({ label, claimed, seen, failed }) => {
+  return checks.flatMap(({ label, claimed, seen, failed, coverageMissing }) => {
     if (claimed === 'hits' && !seen) {
       return [`source-status line claims ${label} hits but coverage reports ${seen ?? 'no'} seen`];
     }
     if (claimed === 'empty') {
+      // Missing coverage is not evidence a source was empty -- it means the run never
+      // reported whether the query even ran. Reject the claim before trusting undefined
+      // seen/failed as "ran and found nothing".
+      if (coverageMissing) {
+        return [`source-status line claims ${label} empty but coverage for ${label} is missing`];
+      }
       if (failed) {
         return [`source-status line claims ${label} empty but the query actually failed`];
       }
@@ -176,7 +185,29 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   if (attackDiscoveryIdEcho !== attackDiscoveryId) {
     problems.push(`attack_discovery_id "${attackDiscoveryIdEcho}" does not echo the input`);
   }
+  problems.push(...worldCheckProblems(output.raw?.checks));
   return problems;
+};
+
+/**
+ * The three world checks the prompt's mandatory self-check requires a bullet for
+ * (`alert_linkage` is a precondition, not a world check, and is excluded). Missing any
+ * one of these means the self-check was skipped without the evaluator ever noticing --
+ * the source-status line can pass while the run omits the checks meant to expose
+ * rationalized contradictions.
+ */
+const REQUIRED_WORLD_CHECKS = ['entity_role', 'process_parent', 'network_destination'] as const;
+
+const worldCheckProblems = (checks: unknown[] | undefined): string[] => {
+  const reported = new Set(
+    (checks ?? [])
+      .filter((check): check is { name?: unknown } => typeof check === 'object' && check !== null)
+      .map((check) => check.name)
+  );
+  const missing = REQUIRED_WORLD_CHECKS.filter((name) => !reported.has(name));
+  return missing.length > 0
+    ? [`checks is missing required world-check entries: ${missing.join(', ')}`]
+    : [];
 };
 
 const failureProblems = (output: FpTpTaskOutput): string[] => [
