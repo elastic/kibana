@@ -11,6 +11,7 @@ import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../../mappings';
 import { STEP_USAGE_MAPPING } from '../../../mappings/common';
+import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from '../constants';
 
 // The shared STEP_USAGE_MAPPING in common.ts uses `type: 'nested'`, which is not in
 // @kbn/es-mappings's SupportedMappingPropertyType and therefore cannot satisfy the
@@ -36,7 +37,7 @@ const DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
 } satisfies MappingsDefinition;
 
 export const WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION = {
-  name: '.workflows-executions-data-stream',
+  name: WORKFLOWS_EXECUTIONS_DATA_STREAM,
   version: 1,
   hidden: true,
   settings: {
