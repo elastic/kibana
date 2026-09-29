@@ -715,8 +715,11 @@ steps:
               message: >-
                 No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
 
-      # Any other terminal status means the gate settled in a way this Worker does not
-      # expect. Leave the Investigation open so an analyst looks at it.
+      # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
+      # action is recorded `failed`, cloned and re-parked for another decision, and an
+      # exhausted attempt budget settles as `expired`, so this Worker never sees `failed`.
+      # Anything else means the gate contract changed. Leave the Investigation open so an
+      # analyst looks at it.
       - name: handle_unknown_outcome
         type: if
         condition: "${{ variables.proposal_outcome == 'unknown' }}"
@@ -727,12 +730,12 @@ steps:
               continue: true
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              # Does not assert every candidate remains open: this outcome can follow
-              # action_close_alerts_false_positive's fail_incomplete_close, which fires after
-              # a partial SetAlertsStatus update (conflicts: proceed lets some alerts close
-              # before the count mismatch throws). Whether that happened is not observable
-              # here — the gate's own output carries no per-alert result — so this reports
-              # the ambiguity instead of a specific (possibly wrong) closed/open count.
+              # Does not assert every candidate remains open: an earlier close attempt may have
+              # partly succeeded (action_close_alerts_false_positive's fail_incomplete_close
+              # fires after a partial SetAlertsStatus update, since conflicts: proceed lets some
+              # alerts close before the count mismatch throws). The gate's own output carries no
+              # per-alert result, so this reports the ambiguity instead of a specific (possibly
+              # wrong) closed/open count.
               message: >-
                 ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
 
