@@ -58,7 +58,29 @@ describe('ExemplarsAvailabilityProvider', () => {
 
     await probe({ ...requestParams, fetchId, onError: jest.fn() });
 
-    expect(mockFetch).toHaveBeenCalledWith(requestParams);
+    expect(mockFetch).toHaveBeenCalledWith({ ...requestParams, signal: expect.any(AbortSignal) });
+  });
+
+  it('aborts the superseded probe when the fetch id changes', async () => {
+    const probe = renderProbe();
+
+    await probe({ ...requestParams, fetchId, onError: jest.fn() });
+    const first = mockFetch.mock.calls[0][0].signal!;
+    await probe({ ...requestParams, fetchId: fetchId + 1, onError: jest.fn() });
+    const second = mockFetch.mock.calls[1][0].signal!;
+
+    expect(first.aborted).toBe(true);
+    expect(second.aborted).toBe(false);
+  });
+
+  it('aborts the pending probe when the provider unmounts', async () => {
+    const { result, unmount } = renderHook(() => useExemplarsAvailabilityProbe(), { wrapper });
+
+    await result.current({ ...requestParams, fetchId, onError: jest.fn() });
+    const { signal } = mockFetch.mock.calls[0][0];
+    unmount();
+
+    expect(signal!.aborted).toBe(true);
   });
 
   it('shares one request between concurrent callers', async () => {

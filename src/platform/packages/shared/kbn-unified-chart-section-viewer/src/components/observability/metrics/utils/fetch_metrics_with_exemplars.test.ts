@@ -52,7 +52,16 @@ describe('fetchMetricsWithExemplars', () => {
     );
   });
 
-  it('sends the probe query under the exemplars execution context, bounded to the time range, without filters or signal', async () => {
+  it('forwards the abort signal to the query', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue(probeResponse([]));
+    const { signal } = new AbortController();
+
+    await fetchMetricsWithExemplars({ ...params, signal });
+
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+  });
+
+  it('sends the probe query under the exemplars execution context, bounded to the time range, without filters', async () => {
     mockExecuteEsqlQuery.mockResolvedValue(probeResponse([]));
 
     await fetchMetricsWithExemplars(params);

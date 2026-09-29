@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useCallback, useContext, useRef } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import {
   fetchMetricsWithExemplars,
@@ -15,7 +15,8 @@ import {
   type MetricsWithExemplars,
 } from '../utils/fetch_metrics_with_exemplars';
 
-export interface ProbeExemplarsAvailabilityParams extends FetchMetricsWithExemplarsParams {
+export interface ProbeExemplarsAvailabilityParams
+  extends Omit<FetchMetricsWithExemplarsParams, 'signal'> {
   /**
    * Identifies the Discover fetch the caller belongs to (`fetchParams.lastReloadRequestTime`).
    * Every chart in one fetch shares a single probe; a new id starts a new probe, so a metric
@@ -39,13 +40,15 @@ const ExemplarsAvailabilityContext = createContext<ProbeExemplarsAvailability | 
 interface CachedProbe {
   fetchId: number;
   request: Promise<MetricsWithExemplars>;
+  controller: AbortController;
 }
 
 /**
  * Shares one exemplars availability probe between every chart in the grid for each Discover
  * fetch, including an empty or failed result, so charts mounted later in the same fetch (the
- * next grid page) do not probe again. The probe never rejects: a failure is reported once
- * through `onError` and resolves to an empty set.
+ * next grid page) do not probe again. A newer fetch aborts the superseded probe rather than
+ * letting it finish server-side. The probe never rejects: a failure is reported once through
+ * `onError` and resolves to an empty set.
  */
 export const ExemplarsAvailabilityProvider = ({ children }: { children: React.ReactNode }) => {
   const cachedProbe = useRef<CachedProbe | undefined>(undefined);
@@ -56,19 +59,26 @@ export const ExemplarsAvailabilityProvider = ({ children }: { children: React.Re
       if (cached?.fetchId === fetchId) {
         return cached.request;
       }
+      cached?.controller.abort();
 
-      const request = fetchMetricsWithExemplars(requestParams).catch((error: unknown) => {
+      const controller = new AbortController();
+      const request = fetchMetricsWithExemplars({
+        ...requestParams,
+        signal: controller.signal,
+      }).catch((error: unknown) => {
         if (!isSuppressedFetchError(error)) {
           onError(error);
         }
         return NO_METRICS;
       });
-      cachedProbe.current = { fetchId, request };
+      cachedProbe.current = { fetchId, request, controller };
 
       return request;
     },
     []
   );
+
+  useEffect(() => () => cachedProbe.current?.controller.abort(), []);
 
   return (
     <ExemplarsAvailabilityContext.Provider value={probe}>

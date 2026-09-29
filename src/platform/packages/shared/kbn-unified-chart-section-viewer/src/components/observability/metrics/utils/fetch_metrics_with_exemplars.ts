@@ -45,6 +45,8 @@ export interface FetchMetricsWithExemplarsParams {
   timeRange: TimeRange;
   uiSettings: IUiSettingsClient;
   profileId: string;
+  /** Owned by the shared provider, which aborts a probe once a newer Discover fetch supersedes it. */
+  signal?: AbortSignal;
 }
 
 export const fetchMetricsWithExemplars = async ({
@@ -53,13 +55,15 @@ export const fetchMetricsWithExemplars = async ({
   timeRange,
   uiSettings,
   profileId,
+  signal,
 }: FetchMetricsWithExemplarsParams): Promise<MetricsWithExemplars> => {
   // Bounded to the Discover time range: the per-chart fetches use the same window, so a metric
-  // whose exemplars fall outside it would fetch nothing anyway. No signal or filters, because the
-  // result is shared by every chart in the fetch.
+  // whose exemplars fall outside it would fetch nothing anyway. No filters, because the result is
+  // shared by every chart in the fetch.
   const { rawResponse } = await executeEsqlQuery({
     esqlQuery: EXEMPLARS_PROBE_QUERY,
     search,
+    signal,
     dataView,
     timeRange,
     uiSettings,
