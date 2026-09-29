@@ -32,6 +32,7 @@ import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_d
 import {
   detectServiceVarsDrift,
   detectAuthDrift,
+  detectAgentPoliciesDrift,
 } from './authenticate_and_deploy_step/detect_drift';
 import { toSOAuthMethod } from './authenticate_and_deploy_step/agent_based_section/credential_method_selector';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
@@ -141,21 +142,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     deploymentMethod === 'agent_based'
       ? agentBasedDeploymentFromFlow.selectedAgentPolicyIds.slice().sort().join(',')
       : '';
-  // Stores the SO-derived dirty result so the replace-form cancel handler can merge it without
-  // re-fetching. Starts false; updated once the SO fetch resolves.
+  // SO-derived dirty result — merged by the replace-form cancel handler without re-fetching.
   const driftDirtyRef = useRef(false);
-  // Tracks whether the static-key replace form is currently dirty (new keys typed but not yet
-  // submitted). Used by the drift effect to merge form dirty with SO-derived dirty so that a
-  // clean SO comparison can still clear isDirty when the form has not been touched.
+  // Replace-form dirty — merged with SO-derived dirty so a clean SO doesn't clear isDirty
+  // while the user has unsaved keys in the static-key form.
   const replaceFormDirtyRef = useRef(false);
-  // Sequence counter used to discard responses from stale drift fetches (e.g. connector changed
-  // while a prior fetch was in flight). Only the response whose id matches the current counter
-  // updates state.
+  // Sequence counter to discard stale drift fetch responses.
   const driftCheckIdRef = useRef(0);
-  // False until the drift check resolves — gates isMiDone and isAgentDone so that Next is never
-  // enabled based on a stale "no drift" assumption while a fetch is in flight.
-  // Initialised to true when there is no deployment to check (fresh deploy / no edit mode) so
-  // that isMiDone is not blocked for users who have never deployed before.
+  // false until drift check resolves — gates Next. true for fresh deploys (no SO to check).
   const [driftSettled, setDriftSettled] = useState(!onboardingDeploymentId);
   const [driftCheckError, setDriftCheckError] = useState(false);
   const [driftRetryKey, setDriftRetryKey] = useState(0);
@@ -191,9 +185,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           awsServicesMap,
           deployedInstanceIds
         );
-        // In agent-based mode, authMethod is only written to session in edit mode; use
-        // agentCredentialMethod (the canonical UI state) converted to SO format so an unchanged
-        // return to Step 3 does not falsely report auth drift.
+        // Agent-based: use agentCredentialMethod (canonical UI state) so an unchanged return
+        // to Step 3 doesn't falsely report auth drift (authMethod not written to session).
         const sessionAuthMethod =
           deploymentMethod === 'agent_based'
             ? toSOAuthMethod(agentBasedDeploymentFromFlow.agentCredentialMethod)
@@ -202,35 +195,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           { authMethod: sessionAuthMethod, connectorId },
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
-        // Detect agent policy selection drift: if the user has changed which agent policies
-        // are targeted, the existing policies must be re-attached to the new selection.
-        // Only applicable in agent_based mode — MI SOs never write agentPolicyIds, so comparing
-        // against an MI SO would always report drift when a selection is held in session.
-        const agentPoliciesDirty = (() => {
-          if (deploymentMethod !== 'agent_based') return false;
-          const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds } =
-            agentBasedDeploymentFromFlow;
-          if (agentHostsMode === 'new') {
-            // Flyout created the new policy but packages not yet deployed to it: dirty until
-            // the next deploy attaches package policies to the new agent policy.
-            if (agentPolicyId && !(item.agentPolicyIds ?? []).includes(agentPolicyId)) return true;
-            // Mode switch without flyout: dirty when a prior deployment exists (4131926221,
-            // 4132097877). Guard on !agentPolicyId so a successful new-policy deploy (which
-            // writes agentPolicyId) is not treated as drift on the next mount.
-            if ((item.agentPolicyIds ?? []).length > 0 && !agentPolicyId) return true;
-            return false;
-          }
-          const selected = new Set(selectedAgentPolicyIds);
-          if (selected.size === 0 && agentHostsMode !== 'existing') return false;
-          const deployed = new Set(item.agentPolicyIds ?? []);
-          return selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id));
-        })();
+        const agentPoliciesDirty = detectAgentPoliciesDrift(
+          {
+            deploymentMethod,
+            agentHostsMode: agentBasedDeploymentFromFlow.agentHostsMode,
+            agentPolicyId: agentBasedDeploymentFromFlow.agentPolicyId,
+            selectedAgentPolicyIds: agentBasedDeploymentFromFlow.selectedAgentPolicyIds,
+          },
+          { agentPolicyIds: item.agentPolicyIds }
+        );
         const dirty = dirtyVarIds.length > 0 || authDirty || agentPoliciesDirty;
         driftDirtyRef.current = dirty;
-        // Merge SO-derived drift with replace-form dirty so that a clean drift result (dirty=false)
-        // still clears isDirty when the replace form has not been touched. Previously this write
-        // was suppressed in static-key mode entirely, leaving isDirty=true even after the user
-        // reverted their service-var changes and came back to Step 3.
+        // Merge with replace-form dirty: a clean SO result still clears isDirty when the form
+        // hasn't been touched.
         updateDetectAndReviewStep({
           isDirty: dirty || replaceFormDirtyRef.current,
           isAuthDirty: authDirty,
@@ -260,9 +237,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     agentBasedDeploymentFromFlow?.agentPolicyId,
   ]);
 
-  // Called by ManagedIntegrationsSection when the static-key replace form becomes ready or is
-  // cancelled. Merges the form's own dirty with the SO-derived drift so that cancelling the
-  // replace form correctly clears the callout when there is no underlying service-var drift.
+  // Called when the static-key replace form becomes ready or is cancelled — merges form dirty
+  // with SO-derived drift so cancelling correctly clears the callout when no service-var drift.
   const handleReplaceFormDirtyChange = useCallback(
     (replaceFormDirty: boolean) => {
       replaceFormDirtyRef.current = replaceFormDirty;
@@ -299,9 +275,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     onContinue: () => {},
   });
   const isDirty = detectAndReviewStep.isDirty ?? false;
-  // Keep driftDirtyRef in sync with the persisted isDirty so that a successful deploy (which clears
-  // isDirty) also resets the ref. Without this, the stale true from the pre-deploy comparison merges
-  // with the StaticKeysReplaceView's initial onReadyChange(false) on remount and restores isDirty.
+  // Sync driftDirtyRef with isDirty so a successful deploy (which clears isDirty) also resets the
+  // ref — otherwise the stale pre-deploy value merges with StaticKeysReplaceView's onReadyChange(false).
   useEffect(() => {
     if (!isDirty) {
       driftDirtyRef.current = false;
@@ -311,20 +286,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     }
   }, [isDirty]);
   const [deployAttempted, setDeployAttempted] = useState(false);
-  // Not done when isDirty: force the Deploy button visible so the user can apply updated settings.
-  // isDirty is checked in both branches: a failed dirty redeploy leaves isDirty true, so a
-  // deploy attempt with zero failedInstances must not enable Next while drift is unresolved.
-  // driftSettled gates both: Next must not enable while the SO fetch is in flight, because the
-  // response could flip isDirty=true and make isMiDone false again.
-  // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
-  // remount (after navigating Back/Next), the callout and Retry must still appear even though no
-  // deploy was attempted in this component lifetime.
+  // hasFailed not gated on deployAttempted: persisted failures on Back/Next remount must still
+  // show the callout even without a new deploy attempt.
   const hasFailed = !isDeploying && failedInstances.length > 0;
-  // hasFailed is checked in the isAlreadyDeployed arm: a partial dirty redeploy (one policy
-  // PUT succeeds, another fails) leaves failedInstances set. If the user then reverts their
-  // settings in Step 2, the drift check clears isDirty (session matches the unwritten SO), but
-  // failedInstances still reflects the in-flight Fleet state. Allowing Next here would let the
-  // user skip past the unresolved failure; the retry path clears failedInstances on success.
+  // hasFailed checked in isAlreadyDeployed: a partial dirty-redeploy (one PUT fails) leaves
+  // failedInstances set — reverting settings clears isDirty but failedInstances persists.
   const isMiDone =
     driftSettled &&
     // The already-deployed arm must check !isDeploying and failedInstances independently:
@@ -374,11 +340,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     driftSettled &&
     ((isAgentAlreadyDeployed && !isDirty) ||
       (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0 && !isDirty));
-  // Unlike MI's hasFailed, this IS gated on agentDeployAttempted. failedInstances is a single
-  // shared session key that the MI path also writes, so an un-gated check would surface a stale
-  // MI failure (or one from a previous session) as an agent-based "Deployment failed" callout.
-  // The agent-based path has no equivalent of MI's "persisted failure must survive remount"
-  // requirement, because agentPolicyId is its durable success flag.
+  // Gated on agentDeployAttempted (unlike MI): failedInstances is shared with MI, so an
+  // un-gated check would surface stale MI failures as agent-based errors.
   const agentHasFailed =
     agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length > 0;
 

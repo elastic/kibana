@@ -76,11 +76,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
   const setAgentCredentials = useCallback((creds: AgentCredentialVars | undefined) => {
     agentCredentialsRef.current = creds;
   }, []);
-  // Deliberately NOT seeded from detectAndReviewStep.failedInstances, unlike useDeploy.
-  // failedInstances is one shared session key that the managed-integration path also writes, so
-  // seeding would surface a stale MI failure as an agent-based "Deployment failed" callout that
-  // survives restarts. The agent path doesn't need the persisted-failure-survives-remount
-  // behaviour MI relies on, because agentPolicyId is its durable success flag.
+  // Not seeded from detectAndReviewStep.failedInstances: MI also writes that key, so seeding
+  // would surface stale MI failures as agent-based errors. agentPolicyId is the success flag.
   const [failedInstances, setFailedInstances] = useState<string[]>([]);
 
   const targets: DeployGroup[] = useMemo(
@@ -93,14 +90,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
 
-  // Deploy is "already done" when every target instance has a persisted package policy id AND
-  // there is no pending cleanup to run.
-  // This covers both paths durably:
-  //   - New policy: agentPolicyId is set in session storage AND policyIdsByInstance is populated.
-  //   - Existing policy: agentPolicyId is never set, but policyIdsByInstance is populated after
-  //     a successful deploy — this prevents re-deploying on Back+Next in existing mode.
-  // Returns false when cleanup is needed so handleNext doesn't short-circuit before calling
-  // handleDeploy (which runs the cleanup even when no new targets need to be deployed).
+  // true when every target has a package policy and no cleanup is pending. false on pending
+  // cleanup so handleNext calls handleDeploy (which runs cleanup even with no new targets).
   const isAlreadyDeployed = useMemo(() => {
     if (targets.length === 0) return false;
     const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
@@ -126,19 +117,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       const alreadyDeployedIds = new Set(
         Object.keys(detectAndReviewStep.policyIdsByInstance ?? {})
       );
-      // For retries, keep only groups that have at least one instanceId to retry.
-      // For fresh deploys, skip groups where every instance already has a package policy —
-      // this handles incremental service additions (deploy A, add B, Next should only deploy B).
-      // Exception: when the user switches to 'new' agent-policy mode without having created the
-      // policy yet, include ALL active instances so deployNewAgentPolicy runs for every group and
-      // the dirty update does not re-attach instances to the old policy IDs.
+      // Retry: groups with at least one failed instance. Fresh: skip already-deployed groups,
+      // except isNewPolicySwitch (new mode, no flyout yet) — always include all instances.
       const isNewPolicySwitch =
         !isRetry &&
         agentBasedDeployment.agentHostsMode === 'new' &&
         !agentBasedDeployment.agentPolicyId;
-      // Broader than isNewPolicySwitch: also true on Retry of a failed switch (isRetry=true,
-      // but agentHostsMode still 'new' and agentPolicyId still unset). Used for old-policy
-      // cleanup staging and policyIdsByInstance preservation across retries.
+      // Like isNewPolicySwitch but also true on Retry — used for cleanup staging and policyIdsByInstance preservation.
       const isNewPolicyDeploy =
         agentBasedDeployment.agentHostsMode === 'new' && !agentBasedDeployment.agentPolicyId;
       const targetsToDeploy = isRetry
@@ -147,21 +132,14 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         ? targets
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
-      // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
-      // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
-      // reconciled targets (which already filters by selectedServiceIds).
+      // Step-1 deselections skip removeDeployInstance — detect stale entries via reconciled targets.
       const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
       const liveStalePolicyIds = buildLiveStalePolicyIds(
         detectAndReviewStep.policyIdsByInstance ?? {},
         activeInstanceIds
       );
-      // Snapshot the old package policies BEFORE the new-policy deploy runs. They become orphaned
-      // once deployNewAgentPolicy succeeds, but must NOT be cleaned up until after that succeeds —
-      // if creation fails, Retry must keep the old IDs intact to retry creation rather than
-      // attempting dirty PUTs against already-deleted policies.
-      // isNewPolicyDeploy (not isNewPolicySwitch) so Retry of a failed creation also snapshots:
-      // on the first failure policyIdsByInstance is preserved (not cleared), so Retry reads the
-      // same old IDs here and stages them after a successful retry creation.
+      // Snapshot old policies before new-policy deploy — stage cleanup only after success so a
+      // failed creation leaves IDs intact for Retry. isNewPolicyDeploy covers Retry too.
       const oldPolicyIdsByInstance: Record<string, string> = isNewPolicyDeploy
         ? { ...(detectAndReviewStep.policyIdsByInstance ?? {}) }
         : {};
@@ -198,8 +176,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
 
-      // Hoisted so the catch block can best-effort update the SO on unexpected errors,
-      // including agent policy ids, services, serviceVars, and authMethod known at failure time.
+      // Hoisted for best-effort SO update in the catch block.
       let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
       let resolvedAgentPolicyIds: string[] = [];
       const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
@@ -218,8 +195,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           agentCredentials: agentCredentialsRef.current,
         };
 
-        // Track instance IDs successfully cleaned up so the SO update can exclude their
-        // stale policy IDs when building packagePolicyIds.
+        // Cleaned instance IDs — excluded from packagePolicyIds in the SO update.
         let cleanedLiveStale: string[] = [];
         // Hoisted so the cleanup-only early return can decide whether to refresh the SO.
         let remainingPending: Record<string, string> =
@@ -240,14 +216,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             selectedAgentPolicyIds: targetPolicyIds,
             agentCredentials: agentCredentialsRef.current,
           });
-          // Only prune instances whose policy cleanup actually succeeded — failed cleanups
-          // remain in pendingCleanupPolicyIds for retry on the next deploy attempt.
+          // Only prune successfully cleaned instances — failures stay in pendingCleanupPolicyIds.
           const succeededIds = new Set([
             ...cleanupOps.toDelete,
             ...cleanupOps.toUpdate.map((u) => u.policyId),
           ]);
-          // Agent-based deploy has no "update" semantics — a policy is either deleted or kept
-          // entirely, so no survivingInstanceIds filter is needed here.
+          // No update semantics in agent-based — no survivingInstanceIds filter needed.
           cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
           removeDeployInstances(cleanedLiveStale);
           remainingPending = buildRemainingPending(
@@ -257,19 +231,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
         }
 
-        // Dirty update: update already-deployed package policies with current settings.
-        // Runs unconditionally when isDirty — before deploying new targets — so that existing
-        // policies are always brought up to date in the same run even when the user adds a service
-        // alongside the setting change.
-        // Skipped when switching to 'new' agent-policy mode (isNewPolicySwitch): in that case all
-        // instances are re-deployed to the newly created policy via deployNewAgentPolicy below, so
-        // updating the old policy IDs here would be wrong.
+        // Update deployed policies with current settings (isDirty). Runs before new targets so
+        // add-service+edit updates existing policies in the same run. Skipped on isNewPolicySwitch.
         let dirtyUpdateApplied = false;
         if ((detectAndReviewStep.isDirty ?? false) && !isNewPolicySwitch) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
-          // Build byPolicy from active instances only — exclude instances removed by cleanup in this
-          // run (cleanedLiveStale) and any not currently in activeInstanceIds, so we don't
-          // re-add inputs that were just removed by the cleanup step above.
+          // Active instances only — exclude cleanedLiveStale and deselected instances.
           const byPolicy = new Map<string, string[]>();
           for (const [instanceId, policyId] of Object.entries(
             detectAndReviewStep.policyIdsByInstance ?? {}
@@ -304,11 +271,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               }
             });
             if (redeployResults.some((r) => r.status === 'rejected')) {
-              // Surface the failure so the error callout shows and the user can retry.
-              // Also include undeployed new target IDs so Retry re-queues them alongside the
-              // existing-policy updates — without this they are dropped from failedInstances and
-              // never deployed when the user clicks Retry after a mixed dirty+new-target failure
-              // .
+              // Also include undeployed new targets so Retry re-queues them alongside policy updates.
               const allActiveIds = [
                 ...Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
                   (id) => activeInstanceIds.has(id) && !cleanedLiveStale.includes(id)
@@ -330,14 +293,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             }
           }
 
-          // Policy updates succeeded — mark applied so later paths can include updated
-          // serviceVars/authMethod in SO writes and the cleanup-only path clears isDirty.
+          // Mark applied so SO writes include new settings and the cleanup-only path clears isDirty.
           dirtyUpdateApplied = true;
 
-          // Pure dirty-redeploy case: no new targets AND cleanup fully succeeded.
-          // When cleanup partially failed (remainingPending non-empty), fall through to
-          // the cleanup-only path so isDirty is cleared without writing an incomplete
-          // post-cleanup state to the SO.
+          // Pure dirty redeploy (no new targets, cleanup fully succeeded) — fall through if partial.
           if (targetsToDeploy.length === 0 && Object.keys(remainingPending).length === 0) {
             if (onboardingDeploymentId) {
               const postCleanupIds = Object.fromEntries(
@@ -345,8 +304,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                   ([id]) => !cleanedLiveStale.includes(id)
                 )
               );
-              // Check SO write result — if it fails, keep isDirty so the user can retry
-              // rather than silently losing the updated settings.
+              // Keep isDirty if SO write fails so settings change isn't silently lost.
               const soOk = await updateDeployment(onboardingDeploymentId, {
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
@@ -356,8 +314,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 packagePolicyIds: [...new Set(Object.values(postCleanupIds))],
                 policyIdsByInstance: postCleanupIds,
                 authMethod: toSOAuthMethod(agentCredentialMethod),
-                // Persist selected agent policies so resume restores the correct selection
-                // .
+                // Persist agentPolicyIds for resume.
                 ...(targetPolicyIds.length > 0 ? { agentPolicyIds: targetPolicyIds } : {}),
               });
               if (!soOk) {
@@ -367,8 +324,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               }
             }
             setIsDeploying(false);
-            // Clear stale failure state from prior deploy attempts so agentHasFailed does not
-            // linger after a successful dirty redeploy.
+            // Clear stale failures so agentHasFailed doesn't linger after a successful dirty redeploy.
             setFailedInstances([]);
             updateDetectAndReviewStep({ isDeploying: false, isDirty: false, failedInstances: [] });
             return { failed: false };
@@ -380,15 +336,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           setIsDeploying(false);
           updateDetectAndReviewStep({
             isDeploying: false,
-            // Dirty update policy changes succeeded (dirtyUpdateApplied=true) even though cleanup
-            // partially failed — clear isDirty so the user can navigate without re-deploying
-            // policies that are already up to date.
+            // Cleanup partially failed but policy updates succeeded — clear isDirty.
             ...(dirtyUpdateApplied ? { isDirty: false } : {}),
           });
-          // Only refresh the SO services list when ALL cleanup succeeded — both explicit
-          // pendingCleanupPolicyIds (Step 4 deselections) AND live-stale entries (Step 1
-          // deselections). A failed live-stale cleanup is not tracked in remainingPending, so
-          // check that every live-stale instance was actually cleaned (i.e., all are in cleanedLiveStale).
+          // Refresh SO services only when all cleanup succeeded (explicit + live-stale).
           const allLiveStaleSucceeded = Object.keys(liveStalePolicyIds).every((id) =>
             cleanedLiveStale.includes(id)
           );

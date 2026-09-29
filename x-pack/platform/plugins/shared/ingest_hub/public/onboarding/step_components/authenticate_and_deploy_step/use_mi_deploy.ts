@@ -250,9 +250,7 @@ export function useMiDeploy({
       // persisted policyIdsByInstance — filtering by deleted policyId alone misses toUpdate cases
       // where the policy survives with fewer inputs but the removed instance should not reappear.
       let cleanedInstanceIds = new Set<string>();
-      // Set when cleanup runs on the initial deploy path (targets.length > 0 branch). Written to
-      // state in the final shared update so succeeded entries are cleared after the deploy SO write.
-      // undefined means cleanup didn't run this invocation; the retry path writes mid-flight instead.
+      // undefined when cleanup didn't run; retry path writes mid-flight, initial path in final update.
       let remainingPending: Record<string, string> | undefined;
       let dirtyUpdateApplied = false;
 
@@ -274,11 +272,8 @@ export function useMiDeploy({
           byPolicy.get(policyId)!.push(instanceId);
         }
         if (byPolicy.size === 0) {
-          // No policies resolved from policyIdsByInstance. If deployed policies exist but none
-          // resolved, instances are absent from session (e.g. ?deploymentId resume that skipped
-          // Step 2). Fail closed so the caller does not clear isDirty without any Fleet PUT —
-          // the auth change would be written to the SO record but not applied to the integration
-          // . An empty policyIdsByInstance is a legitimate no-op (nothing deployed).
+          // Fail closed when policyIdsByInstance has entries but none resolved (e.g. ?deploymentId
+          // resume skipped Step 2) — prevents clearing isDirty without a Fleet PUT.
           return Object.keys(policyIdsByInstance).length > 0
             ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
             : { hadFailures: false, allFailedIds: [] };

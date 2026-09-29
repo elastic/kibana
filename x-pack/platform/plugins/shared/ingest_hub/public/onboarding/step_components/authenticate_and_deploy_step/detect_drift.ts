@@ -110,3 +110,33 @@ export function detectAuthDrift(
     session.connectorId !== (so.connectorId ?? undefined)
   );
 }
+
+/**
+ * Returns true when the agent policy selection has drifted from the last-deployed SO state.
+ * Only meaningful for agent_based deployments — MI SOs never write agentPolicyIds.
+ */
+export function detectAgentPoliciesDrift(
+  session: {
+    deploymentMethod: string;
+    agentHostsMode?: string;
+    agentPolicyId?: string;
+    selectedAgentPolicyIds?: string[];
+  },
+  so: { agentPolicyIds?: string[] | null }
+): boolean {
+  if (session.deploymentMethod !== 'agent_based') return false;
+  const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds } = session;
+  if (agentHostsMode === 'new') {
+    // Flyout created the new policy but packages not yet deployed to it: dirty until
+    // the next deploy attaches package policies to the new agent policy.
+    if (agentPolicyId && !(so.agentPolicyIds ?? []).includes(agentPolicyId)) return true;
+    // Mode switch without flyout: dirty when a prior deployment exists. Guard on !agentPolicyId
+    // so a successful new-policy deploy (which writes agentPolicyId) is not treated as drift.
+    if ((so.agentPolicyIds ?? []).length > 0 && !agentPolicyId) return true;
+    return false;
+  }
+  const selected = new Set(selectedAgentPolicyIds);
+  if (selected.size === 0 && agentHostsMode !== 'existing') return false;
+  const deployed = new Set(so.agentPolicyIds ?? []);
+  return selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id));
+}
