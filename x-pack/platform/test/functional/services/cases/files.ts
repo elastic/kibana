@@ -30,8 +30,8 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       await common.setFileInputPath(fileInputPath);
       await testSubjects.click('uploadButton');
 
-      // hide the upload notification
-      await (await find.byCssSelector('[data-test-subj="toastCloseButton"]')).click();
+      // Dismiss the success toast; the first upload waits on the one-time `.kibana_blob_storage` index creation, so it can exceed the default 10s find timeout.
+      await (await find.byCssSelector('[data-test-subj="toastCloseButton"]', 30_000)).click();
 
       // wait for the modal (and its overlay mask) to be removed so the caller's next click isn't intercepted
       await testSubjects.missingOrFail('cases-files-add-modal');

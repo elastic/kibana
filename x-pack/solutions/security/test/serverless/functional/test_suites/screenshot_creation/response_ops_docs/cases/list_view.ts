@@ -13,11 +13,12 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
   const cases = getService('cases');
-  const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage', 'svlCommonNavigation']);
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'svlCommonNavigation']);
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const svlUserManager = getService('svlUserManager');
   const owner = SECURITY_SOLUTION_OWNER;
   let caseIdSuspiciousEmail: string;
@@ -70,7 +71,12 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
 
     it('cases list screenshot', async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor(
+        'the cases list to render',
+        async () =>
+          (await testSubjects.exists('case-details-link')) ||
+          (await testSubjects.exists('cases-list-item-title'))
+      );
       await svlCommonScreenshots.takeScreenshot('cases-home-page', screenshotDirectories);
     });
 
@@ -80,7 +86,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         `/cases/${caseIdSuspiciousEmail}`,
         undefined
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
       await cases.common.waitForCaseViewToLoad();
       await pageObjects.svlCommonNavigation.sidenav.toggle(true);
       await svlCommonScreenshots.takeScreenshot('cases-ui-open', screenshotDirectories, 1400, 1024);
