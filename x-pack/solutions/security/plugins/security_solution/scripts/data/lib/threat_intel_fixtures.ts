@@ -274,57 +274,60 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'resetting passwords, stripping MFA (user.mfa.factor.deactivate), and granting Super Admin to ' +
         'finance and IT accounts including cfo@corp.example and it-admin@corp.example. Immediate ' +
         'business impact includes system.api_token.create and privileged app group membership while ' +
-        'payroll and ERP SSO remain exposed. This is an ongoing breach with ransomware-adjacent ' +
-        'extortion risk; revoke sessions and lock down Super Admin immediately. Hunt ATT&CK ' +
-        'T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
+        'payroll and ERP SSO remain exposed. The Super Admin grant and the API token creation both ' +
+        "landed from it-admin's workstation ADMIN-WS02. This is an ongoing breach with " +
+        'ransomware-adjacent extortion risk; revoke sessions and lock down Super Admin immediately. ' +
+        'Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
       historicArticles: [
         {
           title: 'Follow-up: Okta session replay still tied to finance SSO abuse',
           body:
             'A follow-up bulletin revisits stolen Okta sessions from 192[.]0[.]2[.]50 (192.0.2.50) ' +
             'where operators continue targeting cfo@corp.example and it-admin@corp.example. Watch for ' +
-            'user.mfa.factor.deactivate ahead of Super Admin grants and api token creation. Prior ' +
-            'detections still map to ATT&CK T1078.004, T1556, T1098, and T1136.003 in okta.system.',
+            'user.mfa.factor.deactivate ahead of Super Admin grants and api token creation, both ' +
+            'issued from workstation ADMIN-WS02. Prior detections still map to ATT&CK T1078.004, ' +
+            'T1556, T1098, and T1136.003 in okta.system.',
         },
         {
           title: 'Identity campaign note: MFA strip patterns against Okta Super Admin',
           body:
             'Campaign analysts catalogued MFA strip sequences (user.mfa.factor.deactivate) before ' +
             'privileged role changes. Related infrastructure includes 192[.]0[.]2[.]50 (192.0.2.50) and ' +
-            'mailbox pivots into cfo@corp.example plus it-admin@corp.example. Map hunts to T1078.004, ' +
-            'T1556, T1098, and T1136.003 when reviewing Okta admin audit trails.',
+            'mailbox pivots into cfo@corp.example plus it-admin@corp.example, whose workstation ' +
+            'ADMIN-WS02 issued the role change. Map hunts to T1078.004, T1556, T1098, and T1136.003 ' +
+            'when reviewing Okta admin audit trails.',
         },
         {
           title: 'Okta tenant hardening advisory after Russian IP session theft',
           body:
             'Hardening guidance after session theft from Russian IP space 192[.]0[.]2[.]50 (192.0.2.50). ' +
             'Validate that cfo@corp.example and it-admin@corp.example cannot receive Super Admin without ' +
-            'break-glass review, and alert on user.mfa.factor.deactivate. Coverage should include ' +
-            'T1078.004, T1556, T1098, and T1136.003 across identity telemetry.',
+            'break-glass review, and alert on user.mfa.factor.deactivate from workstation ADMIN-WS02. ' +
+            'Coverage should include T1078.004, T1556, T1098, and T1136.003 across identity telemetry.',
         },
         {
           title: 'Threat research: LAPSUS$-style Okta privilege chains in enterprise tenants',
           body:
             'Research summary of LAPSUS$-style Okta privilege chains using 192[.]0[.]2[.]50 (192.0.2.50). ' +
-            'Observed mailbox and admin targets include cfo@corp.example and it-admin@corp.example with ' +
-            'user.mfa.factor.deactivate as an early signal. Technique coverage: T1078.004, T1556, T1098, ' +
-            'and T1136.003.',
+            'Observed mailbox and admin targets include cfo@corp.example and it-admin@corp.example, ' +
+            'operating from workstation ADMIN-WS02, with user.mfa.factor.deactivate as an early signal. ' +
+            'Technique coverage: T1078.004, T1556, T1098, and T1136.003.',
         },
         {
           title: 'Okta API token creation spikes after stolen session reuse',
           body:
             'Operators reusing stolen sessions from 192[.]0[.]2[.]50 (192.0.2.50) were seen creating API ' +
-            'tokens after elevating cfo@corp.example and it-admin@corp.example. Correlate ' +
-            'user.mfa.factor.deactivate with Super Admin membership changes. Hunt ATT&CK T1078.004, ' +
-            'T1556, T1098, and T1136.003 in okta.system logs.',
+            'tokens from workstation ADMIN-WS02 after elevating cfo@corp.example and ' +
+            'it-admin@corp.example. Correlate user.mfa.factor.deactivate with Super Admin membership ' +
+            'changes. Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 in okta.system logs.',
         },
         {
           title: 'Detection coverage refresh for Okta Super Admin and MFA disable events',
           body:
             'Detection engineering refresh for Okta Super Admin abuse. Seed hunts with IP ' +
-            '192[.]0[.]2[.]50 (192.0.2.50), users cfo@corp.example and it-admin@corp.example, and ' +
-            'user.mfa.factor.deactivate. Retain ATT&CK mappings T1078.004, T1556, T1098, and T1136.003 ' +
-            'for identity takeover playbooks.',
+            '192[.]0[.]2[.]50 (192.0.2.50), users cfo@corp.example and it-admin@corp.example, ' +
+            'workstation ADMIN-WS02, and user.mfa.factor.deactivate. Retain ATT&CK mappings ' +
+            'T1078.004, T1556, T1098, and T1136.003 for identity takeover playbooks.',
         },
       ],
       categories: ['insider-threat', 'cloud-security'],
@@ -338,7 +341,14 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         { type: 'email', value: 'cfo@corp.example' },
         { type: 'email', value: 'it-admin@corp.example' },
       ],
-      narrative: ['user.mfa.factor.deactivate', 'T1078.004', 'T1556', 'T1098', 'T1136.003'],
+      narrative: [
+        'user.mfa.factor.deactivate',
+        'ADMIN-WS02',
+        'T1078.004',
+        'T1556',
+        'T1098',
+        'T1136.003',
+      ],
       tags: ['threat-intel', 'pack:okta', 'okta', 'identity'],
       mitre: ['T1078.004', 'T1556', 'T1098', 'T1136.003'],
     },
@@ -847,55 +857,59 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'detection coverage. Watch for service account system:serviceaccount:default:compromised-sa ' +
         '(short name compromised-sa) in cluster prod-us-east-1 accessing secrets such as ' +
         'db-credentials, creating clusterrolebindings/escalation-binding toward cluster-admin, and ' +
-        'traffic from 192[.]0[.]2[.]60 (192.0.2.60). Related behaviors may include pod exec against ' +
-        'exec-pod and kube-system ConfigMap changes. Apply as monitoring guidance; the advisory does ' +
-        'not claim your cluster is under active compromise. Hunt ATT&CK T1552.007, T1078, and T1610 ' +
-        'in kubernetes.audit logs.',
+        'traffic from 192[.]0[.]2[.]60 (192.0.2.60). The credentials the service account used were ' +
+        'baked into CI runner ci-runner-03, which is where the API calls actually originated. Related ' +
+        'behaviors may include pod exec against exec-pod and kube-system ConfigMap changes. Apply as ' +
+        'monitoring guidance; the advisory does not claim your cluster is under active compromise. ' +
+        'Hunt ATT&CK T1552.007, T1078, and T1610 in kubernetes.audit logs.',
       historicArticles: [
         {
           title: 'Cluster audit review: compromised-sa secret reads in prod-us-east-1',
           body:
             'Audit review for cluster prod-us-east-1 where system:serviceaccount:default:compromised-sa ' +
-            '(compromised-sa) read db-credentials and created escalation-binding. Source IP ' +
-            '192[.]0[.]2[.]60 (192.0.2.60) also appeared near exec-pod activity. Hunt T1552.007, T1078, ' +
-            'and T1610 in kubernetes.audit.',
+            '(compromised-sa) read db-credentials and created escalation-binding from ci-runner-03. ' +
+            'Source IP 192[.]0[.]2[.]60 (192.0.2.60) also appeared near exec-pod activity. Hunt ' +
+            'T1552.007, T1078, and T1610 in kubernetes.audit.',
         },
         {
           title: 'Service-account lateral movement patterns toward cluster-admin bindings',
           body:
             'Lateral movement patterns for system:serviceaccount:default:compromised-sa (compromised-sa) ' +
-            'creating escalation-binding toward cluster-admin in prod-us-east-1. Correlate secret access ' +
-            'to db-credentials, exec-pod, and 192[.]0[.]2[.]60 (192.0.2.60). Techniques T1552.007, T1078, ' +
-            'T1610 remain primary.',
+            'creating escalation-binding toward cluster-admin in prod-us-east-1, issued from ' +
+            'ci-runner-03. Correlate secret access to db-credentials, exec-pod, and 192[.]0[.]2[.]60 ' +
+            '(192.0.2.60). Techniques T1552.007, T1078, T1610 remain primary.',
         },
         {
           title: 'Kubernetes secret theft advisory for db-credentials in shared namespaces',
           body:
             'Advisory on db-credentials theft via system:serviceaccount:default:compromised-sa ' +
-            '(compromised-sa) in prod-us-east-1. Monitor 192[.]0[.]2[.]60 (192.0.2.60), ' +
-            'escalation-binding creation, and exec-pod. Map detections to T1552.007, T1078, and T1610.',
+            '(compromised-sa) in prod-us-east-1, run from ci-runner-03. Monitor 192[.]0[.]2[.]60 ' +
+            '(192.0.2.60), escalation-binding creation, and exec-pod. Map detections to T1552.007, ' +
+            'T1078, and T1610.',
         },
         {
           title: 'Pod exec abuse notes tied to compromised-sa in prod-us-east-1',
           body:
             'Pod exec notes for exec-pod when driven by system:serviceaccount:default:compromised-sa ' +
-            '(compromised-sa) in prod-us-east-1. Related IOCs include 192[.]0[.]2[.]60 (192.0.2.60), ' +
-            'db-credentials access, and escalation-binding. Cover ATT&CK T1552.007, T1078, and T1610.',
+            '(compromised-sa) from ci-runner-03 in prod-us-east-1. Related IOCs include ' +
+            '192[.]0[.]2[.]60 (192.0.2.60), db-credentials access, and escalation-binding. Cover ' +
+            'ATT&CK T1552.007, T1078, and T1610.',
         },
         {
           title: 'RBAC escalation-binding detections for Kubernetes audit pipelines',
           body:
             'RBAC detections for escalation-binding in prod-us-east-1 involving ' +
-            'system:serviceaccount:default:compromised-sa (compromised-sa). Seed with IP ' +
-            '192[.]0[.]2[.]60 (192.0.2.60), db-credentials reads, and exec-pod. Techniques: T1552.007, ' +
-            'T1078, T1610.',
+            'system:serviceaccount:default:compromised-sa (compromised-sa) from ci-runner-03. Seed ' +
+            'with IP 192[.]0[.]2[.]60 (192.0.2.60), db-credentials reads, and exec-pod. Techniques: ' +
+            'T1552.007, T1078, T1610.',
         },
         {
           title: 'Container platform IOC pack: compromised-sa and 192.0.2.60 revisit',
           body:
             'IOC pack revisit for system:serviceaccount:default:compromised-sa (compromised-sa), ' +
-            '192[.]0[.]2[.]60 (192.0.2.60), prod-us-east-1, db-credentials, escalation-binding, and ' +
-            'exec-pod. Keep kubernetes.audit hunts on T1552.007, T1078, and T1610.',
+            '192[.]0[.]2[.]60 (192.0.2.60), prod-us-east-1, ci-runner-03, db-credentials, ' +
+            'escalation-binding, and exec-pod. Keep kubernetes.audit hunts on T1552.007, T1078, ' +
+            'and T1610.',
         },
       ],
       articleUrl: 'https://www.elastic.co/security-labs/teampcp-container-attack-scenario',
@@ -907,6 +921,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       narrative: [
         'compromised-sa',
         'prod-us-east-1',
+        'ci-runner-03',
         'db-credentials',
         'escalation-binding',
         'exec-pod',
@@ -936,54 +951,59 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'GitHub org corp-example, source IP 192[.]0[.]2[.]70 (192.0.2.70), and invitee ' +
         'malicious-actor-x@external.example as illustrative indicators. Historical write-ups also ' +
         'referenced making corp-example/payment-service public, deploy_key.create, secret-scanning ' +
-        'alert dismissals, and fine-grained PATs. No immediate incident response is requested; this ' +
-        'catalogs previously reported indicators for optional hunting. Related ATT&CK references: ' +
-        'T1567, T1098, and T1195 in github.audit telemetry.',
+        "alert dismissals, and fine-grained PATs, all issued from the contractor's build machine " +
+        'DEV-BUILD03. No immediate incident response is requested; this catalogs previously reported ' +
+        'indicators for optional hunting. Related ATT&CK references: T1567, T1098, and T1195 in ' +
+        'github.audit telemetry.',
       historicArticles: [
         {
           title: 'Supply-chain bulletin: contractor invite patterns in corp-example org',
           body:
             'Bulletin on contractor invites in org corp-example. Watch ' +
             'dev-contractor-42@corp.example (dev-contractor-42), invitee malicious-actor-x@external.example, ' +
-            'and source IP 192[.]0[.]2[.]70 (192.0.2.70) near payment-service visibility changes and ' +
-            'deploy_key.create. Optional hunts: T1567, T1098, T1195.',
+            'source IP 192[.]0[.]2[.]70 (192.0.2.70), and build machine DEV-BUILD03 near ' +
+            'payment-service visibility changes and deploy_key.create. Optional hunts: T1567, T1098, ' +
+            'T1195.',
         },
         {
           title: 'GitHub audit revisit: deploy_key.create around payment-service exposure',
           body:
             'Audit revisit for deploy_key.create when corp-example/payment-service exposure coincided ' +
             'with dev-contractor-42@corp.example (dev-contractor-42) and malicious-actor-x@external.example ' +
-            'from 192[.]0[.]2[.]70 (192.0.2.70). Map github.audit to T1567, T1098, and T1195.',
+            'from 192[.]0[.]2[.]70 (192.0.2.70), issued from DEV-BUILD03. Map github.audit to T1567, ' +
+            'T1098, and T1195.',
         },
         {
           title: 'PAT and secret-scanning dismissal patterns in contractor abuse reporting',
           body:
             'Reporting on fine-grained PATs and secret-scanning dismissals linked to ' +
             'dev-contractor-42@corp.example (dev-contractor-42) in corp-example, IP ' +
-            '192[.]0[.]2[.]70 (192.0.2.70), and malicious-actor-x@external.example. payment-service and ' +
-            'deploy_key.create remain useful pivots for T1567, T1098, T1195.',
+            '192[.]0[.]2[.]70 (192.0.2.70), build machine DEV-BUILD03, and ' +
+            'malicious-actor-x@external.example. payment-service and deploy_key.create remain useful ' +
+            'pivots for T1567, T1098, T1195.',
         },
         {
           title: 'Org hardening note after public flip of corp-example/payment-service',
           body:
             'Hardening note after corp-example/payment-service was made public. Review activity from ' +
-            'dev-contractor-42@corp.example (dev-contractor-42), malicious-actor-x@external.example, and ' +
-            '192[.]0[.]2[.]70 (192.0.2.70), including deploy_key.create. Techniques T1567, T1098, T1195.',
+            'dev-contractor-42@corp.example (dev-contractor-42), malicious-actor-x@external.example, ' +
+            '192[.]0[.]2[.]70 (192.0.2.70), and build machine DEV-BUILD03, including deploy_key.create. ' +
+            'Techniques T1567, T1098, T1195.',
         },
         {
           title: 'External invitee tracking for malicious-actor-x across GitHub orgs',
           body:
             'Invitee tracking for malicious-actor-x@external.example alongside ' +
             'dev-contractor-42@corp.example (dev-contractor-42) in corp-example. Correlate ' +
-            '192[.]0[.]2[.]70 (192.0.2.70), payment-service, and deploy_key.create. Hunt T1567, T1098, ' +
-            'and T1195 in github.audit.',
+            '192[.]0[.]2[.]70 (192.0.2.70), build machine DEV-BUILD03, payment-service, and ' +
+            'deploy_key.create. Hunt T1567, T1098, and T1195 in github.audit.',
         },
         {
           title: 'GitHub supply-chain IOC catalog refresh for optional hunting',
           body:
             'IOC catalog refresh: 192[.]0[.]2[.]70 (192.0.2.70), dev-contractor-42@corp.example, ' +
-            'dev-contractor-42, malicious-actor-x@external.example, corp-example, payment-service, and ' +
-            'deploy_key.create. Keep optional hunts on T1567, T1098, and T1195.',
+            'dev-contractor-42, malicious-actor-x@external.example, corp-example, payment-service, ' +
+            'DEV-BUILD03, and deploy_key.create. Keep optional hunts on T1567, T1098, and T1195.',
         },
       ],
       articleUrl: 'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
@@ -996,6 +1016,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       narrative: [
         'corp-example',
         'payment-service',
+        'DEV-BUILD03',
         'deploy_key.create',
         'T1567',
         'T1098',
