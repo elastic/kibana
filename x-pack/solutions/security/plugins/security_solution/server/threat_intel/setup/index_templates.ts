@@ -970,10 +970,16 @@ const migrateExistingCoreEnrichmentMappings = async (
         contentProps?.article_url &&
         extractedProps?.artifacts &&
         iocProps?.deferred_unreviewed &&
+        coreProps?.model_id &&
         coreProps?.context_mode &&
         coreProps?.context_coverage &&
         coreProps?.context_chars &&
         coreProps?.source_chars &&
+        adjudicationProps?.provider &&
+        adjudicationProps?.reviewed &&
+        adjudicationProps?.approved &&
+        adjudicationProps?.downgraded &&
+        adjudicationProps?.deterministic_references &&
         adjudicationProps?.deferred_unreviewed &&
         diamondProps?.context_mode &&
         diamondProps?.context_coverage &&
@@ -1500,11 +1506,17 @@ interface RequiredMapping {
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.artifacts' },
+  { path: 'extracted.core.model_id' },
   { path: 'extracted.core.context_mode' },
   { path: 'extracted.core.context_coverage' },
   { path: 'extracted.core.context_chars' },
   { path: 'extracted.core.source_chars' },
   { path: 'extracted.core.adjudication' },
+  { path: 'extracted.core.adjudication.provider' },
+  { path: 'extracted.core.adjudication.reviewed' },
+  { path: 'extracted.core.adjudication.approved' },
+  { path: 'extracted.core.adjudication.downgraded' },
+  { path: 'extracted.core.adjudication.deterministic_references' },
   { path: 'extracted.core.adjudication.deferred_unreviewed' },
   { path: 'extracted.diamond' },
   { path: 'extracted.diamond.context_mode' },
