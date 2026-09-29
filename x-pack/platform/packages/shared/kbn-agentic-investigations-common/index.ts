@@ -73,6 +73,8 @@ export {
   type AttachmentGroupRenderer,
   type AttachmentGroupRendererProps,
   type AttachmentGroupRendererRegistry,
+  registerAttachmentGroupRenderer,
+  getAttachmentGroupRenderer,
 } from './src/components/attachments';
 
 export {

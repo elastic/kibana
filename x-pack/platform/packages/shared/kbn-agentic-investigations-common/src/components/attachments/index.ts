@@ -20,3 +20,4 @@ export type {
   AttachmentGroupRendererProps,
   AttachmentGroupRendererRegistry,
 } from './types';
+export { registerAttachmentGroupRenderer, getAttachmentGroupRenderer } from './registry';

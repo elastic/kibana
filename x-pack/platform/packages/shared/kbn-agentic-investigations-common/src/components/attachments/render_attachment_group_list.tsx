@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { DefaultAttachmentGroupRenderer } from './renderers/default_attachment_group_renderer';
+import { getAttachmentGroupRenderer } from './registry';
+import { AttachmentGroupErrorBoundary } from './attachment_group_error_boundary';
 import type { AttachmentGroup } from './types';
 
 export interface RenderAttachmentGroupListProps {
@@ -15,10 +17,30 @@ export interface RenderAttachmentGroupListProps {
   attachmentsService: AttachmentServiceStartContract;
 }
 
-/** Renders one attachment group using the default renderer. Custom renderers are added in step 2+. */
+/** Renders one attachment group using the custom renderer registered for its id, falling back to the default. */
 export const RenderAttachmentGroupList = ({
   group,
   attachmentsService,
-}: RenderAttachmentGroupListProps) => (
-  <DefaultAttachmentGroupRenderer group={group} attachmentsService={attachmentsService} />
-);
+}: RenderAttachmentGroupListProps) => {
+  const CustomRenderer = getAttachmentGroupRenderer(group.id);
+
+  if (!CustomRenderer) {
+    return <DefaultAttachmentGroupRenderer group={group} attachmentsService={attachmentsService} />;
+  }
+
+  return (
+    <AttachmentGroupErrorBoundary
+      fallback={
+        <DefaultAttachmentGroupRenderer group={group} attachmentsService={attachmentsService} />
+      }
+    >
+      <Suspense
+        fallback={
+          <DefaultAttachmentGroupRenderer group={group} attachmentsService={attachmentsService} />
+        }
+      >
+        <CustomRenderer group={group} attachmentsService={attachmentsService} />
+      </Suspense>
+    </AttachmentGroupErrorBoundary>
+  );
+};
