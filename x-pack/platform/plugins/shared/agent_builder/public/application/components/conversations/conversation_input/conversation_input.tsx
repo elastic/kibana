@@ -30,7 +30,6 @@ import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
@@ -166,15 +165,12 @@ const InputContainer: React.FC<
  */
 const useTriggerMode = () => {
   const conversationId = useConversationId();
-  const isSharedConversation = useIsSharedConversation();
-  const isExperimentalEnabled = useExperimentalFeatures();
+  const isSelectable = useIsSharedConversation();
 
   const [choice, setChoice] = useState<{
     conversationId?: string;
     triggerMode: ChatTriggerMode;
   }>();
-
-  const isSelectable = isSharedConversation && isExperimentalEnabled;
 
   if (!isSelectable && choice) {
     setChoice(undefined);

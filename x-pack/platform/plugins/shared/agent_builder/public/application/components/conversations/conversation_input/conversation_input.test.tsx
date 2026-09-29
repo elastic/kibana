@@ -27,7 +27,6 @@ import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 
@@ -120,9 +119,6 @@ jest.mock('./attachment_group_pill', () => ({
 jest.mock('../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(),
 }));
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: jest.fn(),
-}));
 jest.mock('../../../hooks/use_current_user', () => ({
   useCurrentUser: jest
     .fn()
@@ -170,7 +166,6 @@ const mockedUseSendUserMessage = jest.mocked(useSendUserMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
-const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockedUseInputDraft = jest.mocked(useInputDraft);
 
 const submitMessage = jest.fn();
@@ -226,7 +221,6 @@ describe('ConversationInput', () => {
         upload: jest.fn().mockResolvedValue(undefined),
       },
     } as never);
-    mockedUseExperimentalFeatures.mockReturnValue(true);
     mockedUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
     sendUserMessage.mockResolvedValue({ id: 'conv-1' });
     mockedUseSendUserMessage.mockReturnValue({
@@ -279,14 +273,6 @@ describe('ConversationInput', () => {
 
     it('is not offered for a conversation that is not shared', () => {
       mockedUseIsSharedConversation.mockReturnValue(false);
-
-      renderInput(<ConversationInput />);
-
-      expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
-    });
-
-    it('is not offered when experimental features are off', () => {
-      mockedUseExperimentalFeatures.mockReturnValue(false);
 
       renderInput(<ConversationInput />);
 
