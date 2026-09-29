@@ -6,7 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  invokeHandler,
+  mockSourcesClient,
+  sourceWithSlug,
+} from '../../utils/test_helpers';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -119,9 +124,20 @@ describe('event_search tool', () => {
       createMockToolContext()
     );
 
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('other');
+    if (!('results' in result) || result.results[0].type !== 'other') {
+      throw new Error('expected an other tool result');
     }
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        sources: [
+          {
+            slug: 'logs.checkout',
+            title: 'logs.checkout',
+            view_name: '$.nightshift.sources.default.logs.checkout',
+          },
+        ],
+      })
+    );
     expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith({
       success: true,
       result_count: 1,
@@ -144,7 +160,7 @@ describe('event_search tool', () => {
   it('accepts searches that omit slugs', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_uuid: 'e2' }],
+      events: [{ event_uuid: 'e2', stream_names: ['source-uuid'] }],
       view: 'compact',
       page: 1,
       total: 1,
@@ -154,7 +170,12 @@ describe('event_search tool', () => {
       getEventClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
-      sourcesClient: mockSourcesClient(['logs.checkout']),
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({
+          sources: [sourceWithSlug('nginx-errors', { id: 'source-uuid', title: 'Nginx errors' })],
+          total: 1,
+        }),
+      },
     });
 
     const tool = createSearchEventsTool({
@@ -170,8 +191,20 @@ describe('event_search tool', () => {
       createMockToolContext()
     );
 
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('other');
+    if (!('results' in result) || result.results[0].type !== 'other') {
+      throw new Error('expected an other tool result');
     }
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        sources: [
+          {
+            slug: 'nginx-errors',
+            title: 'Nginx errors',
+            view_name: '$.nightshift.sources.default.nginx-errors',
+          },
+        ],
+        events: [expect.objectContaining({ stream_names: ['nginx-errors'] })],
+      })
+    );
   });
 });

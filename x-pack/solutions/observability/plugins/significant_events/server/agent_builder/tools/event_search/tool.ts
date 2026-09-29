@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { significantEventSchema } from '@kbn/significant-events-schema';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -33,6 +34,7 @@ import {
   loadSourceCatalog,
   resolveSourcesBySlug,
   toSourceRef,
+  type SourceCatalog,
 } from '../../utils/resolve_source_slugs';
 import { presentStoredSourceFields, sourceSlugsSchema } from '../../utils/stored_source_fields';
 
@@ -175,6 +177,32 @@ const searchEventsSchema = significantEventSchema
     path: ['event_ids'],
   });
 
+/**
+ * Filter sources first, then any other catalog source named on the returned
+ * events. An unscoped search has no filter, and a scoped hit can still name
+ * another source, so titles have to come from the page and not only `slugs`.
+ */
+function sourcesForSearchResult(
+  catalog: SourceCatalog,
+  filterSources: readonly NightshiftSource[],
+  events: ReadonlyArray<{ stream_names?: readonly string[] }>
+): NightshiftSource[] {
+  const seen = new Set<string>();
+  const storedIds = [
+    ...filterSources.map((source) => source.id),
+    ...events.flatMap((event) => event.stream_names ?? []),
+  ];
+
+  return storedIds.flatMap((storedId) => {
+    const source = catalog.byId.get(storedId);
+    if (!source || seen.has(source.id)) {
+      return [];
+    }
+    seen.add(source.id);
+    return [source];
+  });
+}
+
 export function createSearchEventsTool({
   getScopedClients,
   server,
@@ -229,13 +257,13 @@ export function createSearchEventsTool({
         await assertSignificantEventsAccess({ server, licensing });
         const { slugs, ...searchParams } = toolParams;
         const catalog = await loadSourceCatalog(sourcesClient);
-        const sources = slugs ? resolveSourcesBySlug(catalog, slugs) : undefined;
+        const filterSources = slugs ? resolveSourcesBySlug(catalog, slugs) : [];
 
         const data = await searchEventsToolHandler({
           eventClient: await getEventClient(),
           params: {
             ...searchParams,
-            stream_names: sources?.map((source) => source.id),
+            stream_names: slugs ? filterSources.map((source) => source.id) : undefined,
             query,
           },
         });
@@ -256,7 +284,9 @@ export function createSearchEventsTool({
               type: ToolResultType.other,
               data: {
                 ...data,
-                ...(sources ? { sources: sources.map(toSourceRef) } : {}),
+                sources: sourcesForSearchResult(catalog, filterSources, data.events).map(
+                  toSourceRef
+                ),
                 events: data.events.map((event) =>
                   presentStoredSourceFields(catalog, {
                     ...event,
