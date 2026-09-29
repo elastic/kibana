@@ -13,6 +13,7 @@ import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -115,6 +116,7 @@ import {
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
 import { applyManagedOtlpDefaults } from './utils/managed_otlp';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -1062,9 +1064,10 @@ class OutputService {
 
   public async delete(
     id: string,
-    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
-      fromPreconfiguration: false,
-    }
+    {
+      fromPreconfiguration = false,
+      request,
+    }: { fromPreconfiguration?: boolean; request?: KibanaRequest } = {}
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting output ${id}`);
@@ -1083,6 +1086,34 @@ class OutputService {
 
     if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
+    if (request) {
+      // Collect agent-policy and package-policy spaces before any mutation.
+      // Fail closed if SO_SEARCH_LIMIT is hit.
+      const [agentPolicySpaces, packagePolicySpaces] = await Promise.all([
+        agentPolicyService.getSpacesForPoliciesUsingOutput(id),
+        packagePolicyService.getSpacesForPoliciesUsingOutput(id),
+      ]);
+      if (agentPolicySpaces.truncated || packagePolicySpaces.truncated) {
+        throw new OutputUnauthorizedError(
+          `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
+        );
+      }
+      const allSpaceIds = new Set([
+        ...agentPolicySpaces.spaceIds,
+        ...packagePolicySpaces.spaceIds,
+      ]);
+      const apiPrivileges =
+        packagePolicySpaces.spaceIds.size > 0
+          ? ['integrations-all', 'fleet-agent-policies-all']
+          : ['fleet-agent-policies-all'];
+      await assertPrivilegesInSpaces({
+        request,
+        spaceIds: allSpaceIds,
+        apiPrivileges,
+        errorMessage: `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`,
+      });
     }
 
     await packagePolicyService.removeOutputFromAll(
