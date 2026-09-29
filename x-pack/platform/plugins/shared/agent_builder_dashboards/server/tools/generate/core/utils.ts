@@ -18,44 +18,14 @@ export interface PanelFailure {
 }
 
 /**
- * Control the server left out because its field cannot back a control.
+ * Controls the server left out because their field cannot back a control.
  */
 export interface SkippedControl {
-  identifier: string;
-  fieldName: string;
-  index: string;
-  reason: string;
-  availableFields: string[];
-}
-
-interface SkippedControlGroup {
   field_names: string[];
   index: string;
   reason: string;
   available_fields: string[];
 }
-
-/**
- * Collapse skipped controls sharing an index, reason, and alternatives into one entry.
- */
-export const groupSkippedControls = (skippedControls: SkippedControl[]): SkippedControlGroup[] => {
-  const groups = new Map<string, SkippedControlGroup>();
-  for (const { fieldName, index, reason, availableFields } of skippedControls) {
-    const key = JSON.stringify([index, reason, availableFields]);
-    const group = groups.get(key);
-    if (group) {
-      group.field_names.push(fieldName);
-    } else {
-      groups.set(key, {
-        field_names: [fieldName],
-        index,
-        reason,
-        available_fields: availableFields,
-      });
-    }
-  }
-  return [...groups.values()];
-};
 
 /**
  * Type-safe extraction of error message from unknown error.

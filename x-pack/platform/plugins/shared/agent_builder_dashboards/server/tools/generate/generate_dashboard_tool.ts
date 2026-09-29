@@ -25,7 +25,6 @@ import {
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
-  groupSkippedControls,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
@@ -201,8 +200,7 @@ Use operations[] to:
                   )
                 ),
                 failures: failures.length > 0 ? failures : undefined,
-                skipped_controls:
-                  skippedControls.length > 0 ? groupSkippedControls(skippedControls) : undefined,
+                skipped_controls: skippedControls.length > 0 ? skippedControls : undefined,
               },
             },
           ],

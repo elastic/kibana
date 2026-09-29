@@ -2922,12 +2922,10 @@ describe('add_controls / remove_controls operations', () => {
     expect(failures).toEqual([]);
     expect(skippedControls).toEqual([
       {
-        identifier: 'controls[1]',
-        fieldName: 'method',
+        field_names: ['method'],
         index: 'kibana_sample_data_logs',
-        reason:
-          'Not mapped on the index. Columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.',
-        availableFields: ['host', 'host.keyword'],
+        reason: 'Not mapped on the index.',
+        available_fields: ['host', 'host.keyword'],
       },
     ]);
   });

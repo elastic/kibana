@@ -37,9 +37,9 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Remember the dashboard's \`attachment_id\`. On later updates, pass the same \`attachment_id\` back as \`dashboardAttachmentId\` so generation edits the existing dashboard in place.
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
-- Describe the result in the user's terms: what the dashboard shows and which filters it offers. Do not explain how panels or controls are built, such as field mappings, ES|QL-derived columns, why you picked one field over another, or that nothing failed.
+- Describe the result in the user's terms: what the dashboard shows and which filters it offers. Do not explain how panels or controls are built, such as field mappings or why you picked one field over another.
 - If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
-- \`data.skipped_controls\` lists controls the server left out because their field cannot back a control. They are not failures. If you added those controls on your own initiative, do not mention them to the user, in progress updates or in the final answer. If the user explicitly asked for a control, say in one sentence which one could not be added and why. Retry a skipped control only with a field from the entry's \`available_fields\` that clearly matches the same intent (e.g. \`response.keyword\` for a status code); otherwise leave it out.
+- \`data.skipped_controls\` lists controls left out because their field cannot back one. Mention them only if the user asked for those controls. Retry only with a field from \`available_fields\` that clearly matches the same intent.
 
 ## Rendering Edge Cases
 
