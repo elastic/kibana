@@ -171,7 +171,7 @@ pnpm data:generate --clean -n 120 --episodes ep1 \
   --kibanaUrl http://127.0.0.1:5601/kbn
 ```
 
-Requires mustard Kibana to have created `.kibana-threat-reports` (start Hub once against the same ES) before `--threat-intel-reports` can index. Generate logs should include `Seeded N historic threat report(s)` (expect **48** = 12×4 packs) ending ~24h before `--end-date`. If that line is missing, historic seeding did not run.
+Requires mustard Kibana to have created `.kibana-threat-reports` (start Hub once against the same ES) before `--threat-intel-reports` can index. Generate logs should include `Seeded N historic threat report(s)` (expect **96** = 12 × 8 scenarios across all packs; 60 for `--packs=aws-iam` alone, which carries 5 of the 8 scenarios) ending ~24h before `--end-date`. If that line is missing, historic seeding did not run.
 
 ### Mustard demo script (pipeline + Tier 1 / Tier 2 hunts)
 
