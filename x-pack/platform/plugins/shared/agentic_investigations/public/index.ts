@@ -22,7 +22,7 @@ export {
   useLinkedInvestigations,
   useListEscalations,
   useCreateEscalation,
-  useAddToEscalation,
+  useAttachToEscalation,
   useSetEscalationStatus,
   useEscalationClosePreview,
 } from './escalations/hooks/use_escalations_api';

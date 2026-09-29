@@ -184,18 +184,136 @@ describe('ElasticInferenceServiceModelsPage', () => {
   });
 
   it('renders the table view when the view mode is switched', async () => {
-    const { getByTestId, getByText, queryByText } = await renderPopulatedPage();
+    const { getAllByTestId, getByTestId, queryByTestId, queryByText } = await renderPopulatedPage();
+
+    expect(queryByTestId('contentListFooter-pagination')).not.toBeInTheDocument();
 
     fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
 
-    await waitFor(() => expect(getByTestId('content-list-table')).toBeInTheDocument());
-    expect(getByText('Model')).toBeInTheDocument();
-    expect(getByText('Provider')).toBeInTheDocument();
-    expect(getByText('Type')).toBeInTheDocument();
+    const table = await waitFor(() => getByTestId('content-list-table'));
+    expect(table).toHaveTextContent('Model name');
+    expect(table).toHaveTextContent('Type');
+    expect(table).toHaveTextContent('Provider');
+    expect(table).toHaveTextContent('Released');
+    expect(table).toHaveTextContent('End of Life');
     expect(queryByText('Supported tasks')).not.toBeInTheDocument();
+    expect(getByTestId('contentListFooter-pagination')).toBeInTheDocument();
 
-    fireEvent.click(getByText('Jina Reranker v2'));
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });
+    fireEvent.keyUp(searchBox, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() =>
+      expect(
+        getAllByTestId('content-list-table-item-link').some(
+          (link) => link.textContent === 'Jina Reranker v2'
+        )
+      ).toBe(true)
+    );
+
+    const typeCell = getAllByTestId('eisTableType').find((cell) => cell.textContent === 'Rerank');
+    const providerCell = getAllByTestId('eisTableProvider').find(
+      (cell) => cell.textContent === 'Jina'
+    );
+    const releasedCell = getAllByTestId('eisTableReleased').find((cell) =>
+      cell.textContent?.includes('2024-06-25')
+    );
+    const endOfLifeCell = getAllByTestId('eisTableEndOfLife').find((cell) =>
+      cell.textContent?.includes('--')
+    );
+    expect(typeCell).toBeDefined();
+    expect(providerCell).toBeDefined();
+    expect(releasedCell).toBeDefined();
+    expect(endOfLifeCell).toBeDefined();
+
+    const modelLink = getAllByTestId('content-list-table-item-link').find(
+      (link) => link.textContent === 'Jina Reranker v2'
+    );
+    if (!modelLink) {
+      throw new Error('Jina Reranker v2 link was not rendered');
+    }
+    fireEvent.click(modelLink);
     expect(getByTestId('modelDetailFlyout')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-card'));
+    await waitFor(() => expect(queryByTestId('content-list-table')).not.toBeInTheDocument());
+    expect(queryByTestId('contentListFooter-pagination')).not.toBeInTheDocument();
+  });
+
+  it('renders a future end-of-life date in the table', async () => {
+    const modelName = 'Visible EOL model';
+    mockUseEisModels.mockReturnValue({
+      data: [
+        {
+          inference_id: 'visible-eol',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'visible-eol-model' },
+          metadata: {
+            heuristics: {
+              status: 'ga',
+              release_date: '2024-01-01',
+              end_of_life_date: '2027-12-01',
+            },
+            display: { name: modelName, model_creator: 'Elastic' },
+          },
+        },
+      ] as EisInferenceEndpoint[],
+      isLoading: false,
+      isError: false,
+    });
+    const { getAllByTestId, getByTestId } = renderPage();
+
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
+    await waitFor(() =>
+      expect(
+        getAllByTestId('content-list-table-item-link').some(
+          (link) => link.textContent === modelName
+        )
+      ).toBe(true)
+    );
+
+    const endOfLifeCell = getAllByTestId('eisTableEndOfLife').find((cell) =>
+      cell.textContent?.includes('2027-12-01')
+    );
+    expect(endOfLifeCell).toBeDefined();
+  });
+
+  it('shows the next page of models when paging the table', async () => {
+    const pagedEndpoints = Array.from({ length: 26 }, (_, index) => {
+      const name = `Paged model ${String(index + 1).padStart(2, '0')}`;
+      return {
+        inference_id: `paged-${name}`,
+        task_type: 'chat_completion',
+        service: 'elastic',
+        service_settings: { model_id: name },
+        metadata: { display: { name, model_creator: 'Elastic' } },
+      } as EisInferenceEndpoint;
+    });
+    mockUseEisModels.mockReturnValue({ data: pagedEndpoints, isLoading: false, isError: false });
+    const { getAllByTestId, getByTestId } = renderPage();
+
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
+    await waitFor(() => expect(getAllByTestId('content-list-table-item-link')).toHaveLength(25));
+
+    const firstPageNames = getAllByTestId('content-list-table-item-link').map(
+      (link) => link.textContent
+    );
+    expect(firstPageNames).not.toContain('Paged model 26');
+
+    fireEvent.click(getByTestId('pagination-button-next'));
+    await waitFor(() =>
+      expect(
+        getAllByTestId('content-list-table-item-link').some(
+          (link) => link.textContent === 'Paged model 26'
+        )
+      ).toBe(true)
+    );
+    expect(
+      getAllByTestId('content-list-table-item-link').some(
+        (link) => link.textContent === 'Paged model 01'
+      )
+    ).toBe(false);
   });
 
   it('opens model detail flyout when clicking a card with valid model_id', async () => {

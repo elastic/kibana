@@ -7,6 +7,12 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import {
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+} from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
@@ -93,9 +99,8 @@ describe('hydrateCortexWorkspace', () => {
 describe('runCortexOptimize', () => {
   const esClient = { search: jest.fn() } as never;
   const request = { headers: {} } as never;
-  const getInference = jest.fn().mockReturnValue({
-    getClient: jest.fn().mockReturnValue({}),
-  });
+  const getClient = jest.fn().mockReturnValue({});
+  const getInference = jest.fn().mockReturnValue({ getClient });
   const getSearchInferenceEndpoints = jest.fn().mockReturnValue({
     endpoints: {
       getForFeature: jest.fn().mockResolvedValue({
@@ -112,6 +117,7 @@ describe('runCortexOptimize', () => {
       assistantMessage: 'redis',
       esClient,
       spaceId: 'default',
+      interactionId: 'execution-1',
       analytics: coreMock.createSetup().analytics,
       getInference,
       getSearchInferenceEndpoints,
@@ -125,6 +131,25 @@ describe('runCortexOptimize', () => {
   it('runs for the Nightshift investigation agent', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
     expect(optimizeCortex).toHaveBeenCalled();
+  });
+
+  it('attributes the optimize LLM call to significant events investigation spend', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+    expect(getClient).toHaveBeenCalledWith({
+      request,
+      bindTo: {
+        connectorId: 'connector-1',
+        metadata: {
+          connectorTelemetry: {
+            pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+            aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+            productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+            productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+            interactionId: 'execution-1',
+          },
+        },
+      },
+    });
   });
 
   it('skips another agent', async () => {
