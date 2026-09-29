@@ -361,6 +361,19 @@ export const extractDiamond = async (
       `extract_diamond single call failed, falling back to per-vertex: ` +
         `${(singleCallErr as Error).message} report_id=${reportId}`
     );
+    // The single-call overflow retry already selected a degraded window. Reuse
+    // that same text for four vertex prompts and a smaller Reasoning window can
+    // overflow every call. Shrink again before the fallback loop, but keep the
+    // true source length for coverage metadata.
+    if (context.mode === 'degraded_context') {
+      const originalChars = context.original_chars;
+      const shrunk = selectOverflowRetryArticleContext(context.text);
+      context = {
+        ...shrunk,
+        original_chars: originalChars,
+        coverage: originalChars > 0 ? shrunk.selected_chars / originalChars : 0,
+      };
+    }
   }
 
   // Per-vertex fallback on the same model handles parse errors on the combined

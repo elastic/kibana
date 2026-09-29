@@ -154,6 +154,30 @@ describe('extractDiamond', () => {
       String(singleInvoke.mock.calls[0][0]).length
     );
   });
+
+  it('shrinks context again for per-vertex fallback after overflow retry fails', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const text = `${'start '.repeat(50_000)}MIDDLE_DIAMOND${' end'.repeat(50_000)}`;
+    const { model, singleInvoke, vertexInvoke } = buildModel({
+      singleCall: jest.fn().mockRejectedValue(overflow),
+      perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(singleInvoke).toHaveBeenCalledTimes(2);
+    expect(vertexInvoke).toHaveBeenCalled();
+    expect(result.extraction_mode).toBe('per_vertex_fallback');
+    expect(result.context_mode).toBe('degraded_context');
+    expect(String(vertexInvoke.mock.calls[0][0]).length).toBeLessThan(
+      String(singleInvoke.mock.calls[1][0]).length
+    );
+    expect(result.adversary).toEqual(HIGH_VERTEX);
+  });
 });
 
 // Each vertex summary is mapped `semantic_text`, so its length is an embedding charge
