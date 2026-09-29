@@ -73,6 +73,26 @@ const fillForm = async () => {
 };
 
 describe('ServiceAccountsApp', () => {
+  it('creates an account with an optional description', async () => {
+    const { create } = renderApp();
+    await fillForm();
+    await user.type(
+      screen.getByTestId('createServiceAccountDescription'),
+      'Reads investigation events.'
+    );
+    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    expect(create).toHaveBeenCalledWith({
+      name: account.name,
+      roles: ['workflow_reader'],
+      description: 'Reads investigation events.',
+    });
+  });
+
+  it('does not offer descriptions on Serverless while UIAM does not support them', () => {
+    renderApp({ isServerless: true });
+    expect(screen.queryByTestId('createServiceAccountDescription')).not.toBeInTheDocument();
+  });
+
   it('opens the create flyout from the directory action', async () => {
     const { history } = renderApp({ pathname: '/' });
     expect(screen.queryByTestId('createServiceAccountFlyout')).not.toBeInTheDocument();

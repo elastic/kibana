@@ -12,6 +12,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
@@ -91,7 +92,7 @@ describe('WorkflowsPlugin', () => {
   describe('setup()', () => {
     it('keeps Core service accounts when the Security plugin also supplies a contract', async () => {
       coreSetup.uiSettings.get.mockReturnValue(true);
-      const dependencies = { ...createStartServicesMock(), security: { authc: {} } };
+      const dependencies = { ...createStartServicesMock(), security: securityMock.createStart() };
       coreSetup.getStartServices.mockResolvedValue([
         coreStart,
         dependencies,
@@ -193,7 +194,11 @@ describe('WorkflowsPlugin', () => {
       beforeEach(() => {
         updates$ = new Subject();
         coreStart.settings.client.getUpdate$.mockReturnValue(updates$);
-        plugin.start(coreStart, { ...createStartServicesMock(), ...startDeps });
+        plugin.start(coreStart, {
+          ...createStartServicesMock(),
+          ...startDeps,
+          security: securityMock.createStart(),
+        });
       });
 
       afterEach(() => plugin.stop());

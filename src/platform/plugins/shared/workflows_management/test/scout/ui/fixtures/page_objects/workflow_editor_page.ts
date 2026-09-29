@@ -385,6 +385,32 @@ export class WorkflowEditorPage {
     await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
   }
 
+  async openCreateServiceAccount(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Create account' }).click();
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor();
+  }
+
+  async fillServiceAccount(name: string, description: string): Promise<void> {
+    const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
+    await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
+    await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
+    await flyout.getByRole('combobox').fill('viewer');
+    await this.page.testSubj.locator('roleOption-viewer').click();
+    await this.page.testSubj.locator('serviceAccountNameInput').click();
+  }
+
+  async submitServiceAccount(): Promise<void> {
+    await this.page.testSubj.locator('createServiceAccountSubmit').click();
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor({ state: 'hidden' });
+  }
+
+  async cancelCreateServiceAccount(): Promise<void> {
+    await this.page.testSubj
+      .locator('createServiceAccountFlyout')
+      .getByRole('button', { name: 'Cancel' })
+      .click();
+  }
+
   async focusServiceAccountControls(): Promise<void> {
     await this.page.keyboard.press('Shift+Tab');
   }

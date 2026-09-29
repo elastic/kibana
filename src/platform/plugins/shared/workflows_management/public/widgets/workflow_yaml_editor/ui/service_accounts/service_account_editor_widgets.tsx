@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiScreenReaderOnly,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -21,6 +22,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 import { ServiceAccountDetails, ServiceAccountRoles } from './service_account_details';
 import { ServiceAccountPickerPanel } from './service_account_picker_panel';
 import type { WorkflowServiceAccount } from '../../../../entities/service_accounts';
@@ -50,7 +52,13 @@ export const ServiceAccountEditorWidgets = ({
   editor: monaco.editor.IStandaloneCodeEditor | null;
 }) => {
   const accounts = useServiceAccountEditor();
-  const { cloud, serverless } = useKibana().services;
+  const { cloud, serverless, security, securityUi } = useKibana().services;
+  const queryClient = useQueryClient();
+  const [creation, setCreation] = useState<{
+    model: monaco.editor.ITextModel;
+    version: number;
+    position: monaco.IPosition;
+  } | null>(null);
   const { euiTheme } = useEuiTheme();
   const [popup, setPopup] = useState<Popup | null>(null);
   const popupRef = useRef(popup);
@@ -169,6 +177,7 @@ export const ServiceAccountEditorWidgets = ({
       editor.focus();
     };
     const complete = async (refresh = false) => {
+      clearTimeout(completionTimer);
       const model = editor.getModel();
       const position = editor.getPosition();
       const value = model && position && getRunAsValue(model, position);
@@ -464,123 +473,185 @@ export const ServiceAccountEditorWidgets = ({
     node?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
   }, [node, popup]);
 
-  if (!node || !popup) return null;
+  const flyout =
+    creation &&
+    securityUi.components.getCreateServiceAccount({
+      onClose: () => {
+        setCreation(null);
+        editor?.focus();
+      },
+      onCreated: (account) => {
+        void queryClient.invalidateQueries({ queryKey: ['workflows', 'serviceAccounts'] });
+        setCreation(null);
+        // A create response must never overwrite another workflow or a changed draft.
+        if (
+          !editor ||
+          editor.getModel() !== creation.model ||
+          creation.model.isDisposed() ||
+          creation.model.getVersionId() !== creation.version ||
+          !accounts.isEnabled() ||
+          !security.serviceAccounts.canCreate() ||
+          editor.getOption(monaco.editor.EditorOption.readOnly)
+        )
+          return;
+        const value = getRunAsValue(creation.model, monaco.Position.lift(creation.position));
+        if (!value) return;
+        chooseRef.current({
+          label: account.name,
+          account: { ...account, enabled: true, assumable: true },
+          kind: monaco.languages.CompletionItemKind.Value,
+          range: value.range,
+          insertText:
+            (creation.model.getLineContent(value.range.startLineNumber)[
+              value.range.startColumn - 2
+            ] === ':'
+              ? ' '
+              : '') + JSON.stringify(account.id),
+        });
+      },
+    });
+  if (!node || !popup) return flyout;
   const selectedSuggestion =
     popup.kind === 'suggestions' ? popup.suggestions[popup.selected] : undefined;
-  return createPortal(
-    <EuiPanel
-      paddingSize={popup.kind === 'details' ? 'm' : 'none'}
-      hasShadow
-      data-test-subj="serviceAccountEditorPopup"
-      onFocusCapture={() => clearTimeout(closeTimer.current)}
-      onBlurCapture={() => {
-        closeTimer.current = setTimeout(() => {
-          if (!node.contains(document.activeElement) && !editor?.hasTextFocus()) closeRef.current();
-        }, 150);
-      }}
-      onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          event.stopPropagation();
-          dismissRef.current();
-        }
-      }}
-      onMouseEnter={() => clearTimeout(closeTimer.current)}
-      onMouseLeave={() => {
-        closeTimer.current = setTimeout(() => {
-          if (!node.contains(document.activeElement)) closeRef.current();
-        }, 250);
-      }}
-      css={css({
-        width: popup.kind === 'details' ? 340 : 440,
-        maxWidth: 'calc(100vw - 32px)',
-        maxHeight: 320,
-        overflowY: 'auto',
-      })}
-    >
-      {popup.kind === 'details' ? (
-        <ServiceAccountDetails
-          account={popup.account}
-          environment={{
-            isServerless: cloud?.isServerlessEnabled ?? Boolean(serverless),
-            projectName: cloud?.serverless.projectName,
-            projectId: cloud?.serverless.projectId,
-            projectType: cloud?.serverless.projectType,
+  return (
+    <>
+      {flyout}
+      {createPortal(
+        <EuiPanel
+          paddingSize={popup.kind === 'details' ? 'm' : 'none'}
+          hasShadow
+          data-test-subj="serviceAccountEditorPopup"
+          onFocusCapture={() => clearTimeout(closeTimer.current)}
+          onBlurCapture={() => {
+            closeTimer.current = setTimeout(() => {
+              if (!node.contains(document.activeElement) && !editor?.hasTextFocus())
+                closeRef.current();
+            }, 150);
           }}
-        />
-      ) : (
-        <ServiceAccountPickerPanel
-          status={popup.status}
-          hasSuggestions={popup.suggestions.length > 0}
-          filtered={popup.filtered}
-          onRetry={() => retryRef.current()}
+          onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              event.stopPropagation();
+              dismissRef.current();
+            }
+          }}
+          onMouseEnter={() => clearTimeout(closeTimer.current)}
+          onMouseLeave={() => {
+            closeTimer.current = setTimeout(() => {
+              if (!node.contains(document.activeElement)) closeRef.current();
+            }, 250);
+          }}
+          css={css({
+            width: popup.kind === 'details' ? 340 : 440,
+            maxWidth: 'calc(100vw - 32px)',
+            maxHeight: 320,
+            ...(popup.kind === 'suggestions'
+              ? { display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+              : { overflowY: 'auto' }),
+          })}
         >
-          <div
-            role="listbox"
-            aria-label={i18n.translate('workflows.editor.serviceAccountPickerAriaLabel', {
-              defaultMessage: 'Service accounts',
-            })}
-          >
-            {popup.suggestions.map((suggestion, index) => (
-              <EuiButtonEmpty
-                key={suggestion.account?.id ?? 'loadMore'}
-                role="option"
-                aria-selected={index === popup.selected}
-                aria-current={suggestion.account?.id === popup.accountId ? 'true' : undefined}
-                color="text"
-                size="s"
-                flush="both"
-                data-test-subj="serviceAccountSuggestion"
-                onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault()}
-                onClick={() => chooseRef.current(suggestion)}
-                contentProps={{ css: css({ width: '100%', minWidth: 0 }) }}
-                textProps={false}
-                css={css({
-                  width: '100%',
-                  padding: euiTheme.size.s,
-                  height: 'auto',
-                  textAlign: 'left',
-                  whiteSpace: 'normal',
-                  fontWeight: euiTheme.font.weight.regular,
-                  backgroundColor:
-                    index === popup.selected ? euiTheme.colors.backgroundBasePrimary : undefined,
+          {popup.kind === 'details' ? (
+            <ServiceAccountDetails
+              account={popup.account}
+              environment={{
+                isServerless: cloud?.isServerlessEnabled ?? Boolean(serverless),
+                projectName: cloud?.serverless.projectName,
+                projectId: cloud?.serverless.projectId,
+                projectType: cloud?.serverless.projectType,
+              }}
+            />
+          ) : (
+            <ServiceAccountPickerPanel
+              status={popup.status}
+              hasSuggestions={popup.suggestions.length > 0}
+              filtered={popup.filtered}
+              onRetry={() => retryRef.current()}
+              onCreate={() => {
+                const model = editor?.getModel();
+                if (!model || !accounts.isEnabled() || !security.serviceAccounts.canCreate())
+                  return;
+                setCreation({ model, version: model.getVersionId(), position: popup.position });
+                dismissRef.current();
+              }}
+            >
+              <div
+                role="listbox"
+                css={css({ minHeight: 0, overflowY: 'auto' })}
+                aria-label={i18n.translate('workflows.editor.serviceAccountPickerAriaLabel', {
+                  defaultMessage: 'Service accounts',
                 })}
               >
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  responsive={false}
-                  css={css({ width: '100%' })}
-                >
-                  {suggestion.account && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={suggestion.account.id === popup.accountId ? 'check' : 'user'}
-                        aria-hidden={true}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem css={css({ minWidth: 0, overflowWrap: 'anywhere' })}>
-                    {getSuggestionLabel(suggestion)}
-                  </EuiFlexItem>
-                  {suggestion.account && (
-                    <EuiFlexItem grow={false}>
-                      <ServiceAccountRoles roles={suggestion.account.roles} />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiButtonEmpty>
-            ))}
-          </div>
-          <EuiScreenReaderOnly>
-            <div role="status" aria-live="polite">
-              {selectedSuggestion && getSuggestionLabel(selectedSuggestion)}{' '}
-              {selectedSuggestion?.account?.roles.join(', ')}
-            </div>
-          </EuiScreenReaderOnly>
-        </ServiceAccountPickerPanel>
+                {popup.suggestions.map((suggestion, index) => (
+                  <EuiButtonEmpty
+                    key={suggestion.account?.id ?? 'loadMore'}
+                    role="option"
+                    aria-selected={index === popup.selected}
+                    aria-current={suggestion.account?.id === popup.accountId ? 'true' : undefined}
+                    color="text"
+                    size="s"
+                    flush="both"
+                    data-test-subj="serviceAccountSuggestion"
+                    onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) =>
+                      event.preventDefault()
+                    }
+                    onClick={() => chooseRef.current(suggestion)}
+                    contentProps={{ css: css({ width: '100%', minWidth: 0 }) }}
+                    textProps={false}
+                    css={css({
+                      width: '100%',
+                      padding: euiTheme.size.s,
+                      height: 'auto',
+                      textAlign: 'left',
+                      whiteSpace: 'normal',
+                      fontWeight: euiTheme.font.weight.regular,
+                      backgroundColor:
+                        index === popup.selected
+                          ? euiTheme.colors.backgroundBasePrimary
+                          : undefined,
+                    })}
+                  >
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                      css={css({ width: '100%' })}
+                    >
+                      {suggestion.account && (
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon
+                            type={suggestion.account.id === popup.accountId ? 'check' : 'user'}
+                            aria-hidden={true}
+                          />
+                        </EuiFlexItem>
+                      )}
+                      <EuiFlexItem css={css({ minWidth: 0, overflowWrap: 'anywhere' })}>
+                        <span>{getSuggestionLabel(suggestion)}</span>
+                        {suggestion.account?.description && (
+                          <EuiText size="xs" color="subdued" component="span">
+                            {suggestion.account.description}
+                          </EuiText>
+                        )}
+                      </EuiFlexItem>
+                      {suggestion.account && (
+                        <EuiFlexItem grow={false}>
+                          <ServiceAccountRoles roles={suggestion.account.roles} />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiButtonEmpty>
+                ))}
+              </div>
+              <EuiScreenReaderOnly>
+                <div role="status" aria-live="polite">
+                  {selectedSuggestion && getSuggestionLabel(selectedSuggestion)}{' '}
+                  {selectedSuggestion?.account?.roles.join(', ')}
+                </div>
+              </EuiScreenReaderOnly>
+            </ServiceAccountPickerPanel>
+          )}
+        </EuiPanel>,
+        node
       )}
-    </EuiPanel>,
-    node
+    </>
   );
 };

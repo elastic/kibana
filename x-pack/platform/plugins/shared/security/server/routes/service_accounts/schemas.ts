@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { ServiceAccountRoleLimits } from '../../../common/service_accounts';
 import {
   getCreateServiceAccountParamsSchema,
+  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
@@ -40,7 +41,8 @@ const BODY_FRAMING_BYTES = 64;
  *
  * Each role name character is counted as two bytes. Elasticsearch accepts only printable ASCII in
  * role names, and the widest of those in JSON are `"` and `\`, which escape to two bytes. The name
- * is limited to ASCII letters, digits, hyphens and underscores, so one byte each.
+ * is limited to ASCII letters, digits, hyphens and underscores, so one byte each. Description
+ * characters may need six bytes each when JSON encodes control characters as Unicode escapes.
  */
 export const getCreateServiceAccountMaxBodyBytes = ({
   maxRoles,
@@ -48,6 +50,7 @@ export const getCreateServiceAccountMaxBodyBytes = ({
 }: ServiceAccountRoleLimits): number =>
   maxRoles * (2 * maxRoleNameLength + ROLE_FRAMING_BYTES) +
   SERVICE_ACCOUNT_NAME_MAX_LENGTH +
+  6 * SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH +
   BODY_FRAMING_BYTES;
 
 export const getCreateServiceAccountBodySchema = (limits: ServiceAccountRoleLimits) =>

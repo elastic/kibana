@@ -122,6 +122,16 @@ describe('UiamServiceAccounts', () => {
   });
 
   describe('#create', () => {
+    it('rejects unsupported descriptions without sending a UIAM request', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          description: 'description',
+        })
+      ).rejects.toThrow('Service account descriptions are not supported on Serverless.');
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
     it('forwards the caller access token, the requested roles as application-only `role_assignments` and the derived `assumable_by`', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 

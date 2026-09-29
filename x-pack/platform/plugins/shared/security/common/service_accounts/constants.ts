@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-/**
- * Maximum length of a service account's human-readable display name.
- */
+/** Maximum description length accepted by Elasticsearch. */
+export const SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH = 1000;
+
+/** Maximum length of a service account's human-readable display name. */
 export const SERVICE_ACCOUNT_NAME_MAX_LENGTH = 128;
 
 /**
