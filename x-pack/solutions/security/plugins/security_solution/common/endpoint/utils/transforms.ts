@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  TransformGetTransformStatsTransformStats,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { isEndpointPackageV2 } from './package_v2';
 import { usageTracker } from '../data_loaders/usage_tracker';
@@ -16,6 +19,7 @@ import {
   METADATA_CURRENT_TRANSFORM_V2,
   METADATA_TRANSFORMS_PATTERN,
   METADATA_TRANSFORMS_PATTERN_V2,
+  METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
 } from '../constants';
@@ -82,10 +86,31 @@ export const startMetadataTransforms = usageTracker.track(
     await startTransformWithRetry(esClient, currentTransformId);
 
     if (agentIds.length > 0) {
-      await waitForCurrentMetdataDocs(esClient, agentIds);
+      await waitForMetadataDocs({
+        esClient,
+        index: metadataCurrentIndexPattern,
+        agentIdField: 'agent.id',
+        agentIds,
+        transformId: currentTransformId,
+        label: 'current endpoint metadata',
+      });
     }
 
     await startTransformWithRetry(esClient, unitedTransformId);
+
+    // Host APIs read the united index. The current index can be ready while this
+    // transform is still catching up, or while a parallel test has stopped it.
+    if (agentIds.length > 0) {
+      await waitForMetadataDocs({
+        esClient,
+        index: METADATA_UNITED_INDEX,
+        agentIdField: 'united.endpoint.agent.id',
+        agentIds,
+        transformId: unitedTransformId,
+        label: 'united endpoint metadata',
+        extraFilters: [{ term: { 'united.agent.active': { value: true } } }],
+      });
+    }
   }
 );
 
@@ -192,39 +217,54 @@ async function areMetadataTransformsReady(esClient: Client, version: string): Pr
   );
 }
 
-async function waitForCurrentMetdataDocs(esClient: Client, agentIds: string[]) {
-  const query = agentIds.length
-    ? {
-        bool: {
-          filter: [
-            {
-              terms: {
-                'agent.id': agentIds,
-              },
-            },
-          ],
-        },
-      }
-    : {
-        match_all: {},
-      };
-  const size = agentIds.length || 1;
-  const areCurrentDocsReady = async (): Promise<boolean> =>
-    (
+async function waitForMetadataDocs({
+  esClient,
+  index,
+  agentIdField,
+  agentIds,
+  transformId,
+  label,
+  extraFilters = [],
+}: {
+  esClient: Client;
+  index: string;
+  agentIdField: string;
+  agentIds: string[];
+  transformId: string;
+  label: string;
+  extraFilters?: QueryDslQueryContainer[];
+}): Promise<void> {
+  const size = agentIds.length;
+  const areDocsReady = async (): Promise<boolean> => {
+    const totalHits = (
       await esClient.search({
-        index: metadataCurrentIndexPattern,
-        query,
-        size,
+        index,
+        query: {
+          bool: {
+            filter: [{ terms: { [agentIdField]: agentIds } }, ...extraFilters],
+          },
+        },
+        size: 0,
         rest_total_hits_as_int: true,
+        ignore_unavailable: true,
+        allow_no_indices: true,
       })
-    ).hits.total === size;
+    ).hits.total;
+    const total = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
 
-  const isReady = await waitFor(areCurrentDocsReady);
+    if (total === size) {
+      return true;
+    }
+
+    // Parallel suites share these transforms and stop them while indexing.
+    await startTransformWithRetry(esClient, transformId);
+    return false;
+  };
+
+  const isReady = await waitFor(areDocsReady);
   if (!isReady) {
     throw new Error(
-      `Timed out waiting for ${size} current endpoint metadata docs${
-        agentIds.length ? ` for agent ids [${agentIds.join(', ')}]` : ''
-      }`
+      `Timed out waiting for ${size} ${label} docs for agent ids [${agentIds.join(', ')}]`
     );
   }
 }

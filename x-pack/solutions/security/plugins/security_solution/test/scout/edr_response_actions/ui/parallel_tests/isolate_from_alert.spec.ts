@@ -58,17 +58,27 @@ spaceTest.describe(
         const agentStatus = page.testSubj.locator(AGENT_STATUS_CELL);
 
         const openAlertFlyout = async () => {
-          await alertsTablePage.navigate();
-          // The summary charts fill the viewport and the events table stays unmounted
-          // until they are collapsed.
-          const charts = page.testSubj.locator('alerts-charts-panel');
-          const chartsToggle = charts.getByTestId('query-toggle-header');
-          if (
-            (await chartsToggle.count()) > 0 &&
-            (await chartsToggle.getAttribute('aria-expanded')) === 'true'
-          ) {
-            await chartsToggle.click();
+          // Endpoint Security alerts land in the same table and push this row out of
+          // the virtualized grid. A rule-name filter leaves a single row.
+          await page.gotoApp('security/alerts', {
+            params: {
+              query: `(language:kuery,query:'kibana.alert.rule.name: "${host.ruleName}"')`,
+            },
+          });
+          // The charts header mounts after navigation. Collapsing it gives the events
+          // table a height; until then the rule cell is not in the DOM.
+          const chartsToggle = page.testSubj
+            .locator('alerts-charts-panel')
+            .getByTestId('query-toggle-header')
+            .and(page.locator('[aria-label="Charts"]'));
+          await chartsToggle.waitFor({ state: 'visible' });
+          const expandedChartsToggle = chartsToggle.and(page.locator('[aria-expanded="true"]'));
+          if (await expandedChartsToggle.isVisible()) {
+            await expandedChartsToggle.click();
           }
+          await chartsToggle
+            .and(page.locator('[aria-expanded="false"]'))
+            .waitFor({ state: 'visible' });
           await alertsTablePage.waitForRuleAlert(host.ruleName);
           await alertsTablePage.expandAlertDetailsFlyout(host.ruleName);
           await documentFlyout.waitForAlertFlyout();
