@@ -127,6 +127,12 @@ export function startTrackingDashboardLoadTelemetry(
     });
 }
 
+/**
+ * Returns an integer describing how dashboard results were accelerated:
+ *   0 - no acceleration (standard query execution)
+ *   1 - at least one panel used ES|QL approximation
+ *   2 - at least one panel used cached data (not yet implemented)
+ */
 function getAccelerationStrategy(children: unknown[]): number {
   // TODO: return 2 before either check below if any panel uses cached data
   if (
