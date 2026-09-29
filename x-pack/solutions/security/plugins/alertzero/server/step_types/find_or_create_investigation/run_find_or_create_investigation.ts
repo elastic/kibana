@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/core/server';
 import {
   agentBuilderDefaultAgentId,
-  DEFAULT_CONVERSATION_TITLE,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import {
@@ -78,22 +77,6 @@ export const runFindOrCreateInvestigation = async (
   const investigationConversationId = buildHuntInvestigationConversationId(reportId);
   const triggerAttachmentId = buildHuntTriggerAttachmentId({ spaceId, reportId });
 
-  let created = true;
-  try {
-    await conversationClient.create({
-      id: investigationConversationId,
-      agentId: agentBuilderDefaultAgentId,
-      title: `${DEFAULT_CONVERSATION_TITLE}: Hunt Watch ${reportId}`,
-      templateId: HUNT_INVESTIGATION_TEMPLATE_ID,
-    });
-  } catch (error) {
-    if (!isConversationAlreadyExistsError(error)) {
-      throw error;
-    }
-    await conversationClient.get(investigationConversationId);
-    created = false;
-  }
-
   let report: FindOrCreateInvestigationReportSummary | undefined;
   if (loadReport) {
     try {
@@ -106,6 +89,22 @@ export const runFindOrCreateInvestigation = async (
         }`
       );
     }
+  }
+
+  let created = true;
+  try {
+    await conversationClient.create({
+      id: investigationConversationId,
+      agentId: agentBuilderDefaultAgentId,
+      title: report?.title ?? reportId,
+      templateId: HUNT_INVESTIGATION_TEMPLATE_ID,
+    });
+  } catch (error) {
+    if (!isConversationAlreadyExistsError(error)) {
+      throw error;
+    }
+    await conversationClient.get(investigationConversationId);
+    created = false;
   }
 
   return {

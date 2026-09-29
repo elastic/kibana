@@ -56,9 +56,26 @@ describe('runFindOrCreateInvestigation', () => {
       created: true,
     });
     expect(conversationClient.create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: conversationId, templateId: HUNT_INVESTIGATION_TEMPLATE_ID })
+      expect.objectContaining({
+        id: conversationId,
+        title: reportId,
+        templateId: HUNT_INVESTIGATION_TEMPLATE_ID,
+      })
     );
     expect(conversationClient.get).not.toHaveBeenCalled();
+  });
+
+  it('titles the Investigation with the report title when available', async () => {
+    const conversationClient = buildClient();
+
+    await runFindOrCreateInvestigation(
+      { spaceId, reportId },
+      { conversationClient, loadReport: jest.fn().mockResolvedValue(reportContext) }
+    );
+
+    expect(conversationClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'CloudTrail retrospective' })
+    );
   });
 
   it('treats a verified 409 as success and reports the Investigation as pre-existing', async () => {
