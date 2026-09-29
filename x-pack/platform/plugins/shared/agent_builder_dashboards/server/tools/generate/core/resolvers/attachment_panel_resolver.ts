@@ -18,9 +18,9 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   createPanelFailureResult,
   type InlinePanelOperationType,
+  type PanelContent,
   type PanelContentAttempt,
 } from '../resolve_panel';
-import type { PanelContent } from '../operations/panels';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {

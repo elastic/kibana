@@ -6,23 +6,22 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import {
-  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  toEsqlQueryState,
-  type CustomContentState,
-} from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
-import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
+import {
+  createPanelFailureResult,
+  type PanelContent,
+  type PanelContentAttempt,
+} from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { getErrorMessage } from '../utils';
 import {
-  PANEL_TYPE_DEFINITIONS,
+  buildConfigPanelContent,
   editPanelItemSchema,
+  getConfigPanelEditError,
   type EditPanelItem,
   type EditPanelRequestInput,
+  type PanelResolutionRequest,
 } from './panels';
-import { mergeAndResolveCustomContentEdit } from './panel_creation';
 import { defineOperation } from './types';
 
 /** An edit that passed validation, always carrying the existing panel snapshot. */
@@ -31,8 +30,33 @@ interface ValidEdit {
   existingPanel: AttachmentPanel;
 }
 
-const missingPanelResolverError =
-  'Inline panel resolver is required for edit_panels panel requests.';
+/** Maps an edit request input onto the resolution request for its renderer. */
+const toPanelResolutionRequest = (
+  panelInput: EditPanelRequestInput,
+  existingPanel: AttachmentPanel
+): PanelResolutionRequest => {
+  const base = {
+    operationType: 'edit_panels' as const,
+    identifier: panelInput.panelId,
+    existingPanel,
+  };
+
+  if (panelInput.renderer === 'custom_content') {
+    const { renderer, query, esql } = panelInput;
+    return { ...base, renderer, nlQuery: query, esql };
+  }
+
+  const { renderer, query, esql, chartType, preserveESQL } = panelInput;
+  return {
+    ...base,
+    renderer,
+    nlQuery: query,
+    esql,
+    chartType,
+    preserveESQL,
+    applyChartRules: panelInput.renderer === 'vega' ? undefined : panelInput.applyChartRules,
+  };
+};
 
 export const editPanelsOperation = defineOperation({
   schema: z
@@ -41,7 +65,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing. Report this limitation and only replace them when the user explicitly approves.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega panels and custom content panels (source: "request" with the panel\'s renderer), and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing. Report this limitation and only replace them when the user explicitly approves.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -52,13 +76,6 @@ export const editPanelsOperation = defineOperation({
           .failure
       );
     };
-
-    const hasPanelRequestEdits = operation.panels.some(
-      (panelInput): panelInput is EditPanelRequestInput => panelInput.source === 'request'
-    );
-    if (hasPanelRequestEdits && !resolvePanelContent) {
-      throw new Error(missingPanelResolverError);
-    }
 
     const panelIndex = indexPanelsById(dashboardData.panels);
 
@@ -86,124 +103,81 @@ export const editPanelsOperation = defineOperation({
       }
 
       if (panelInput.source === 'config') {
-        const validation = PANEL_TYPE_DEFINITIONS[panelInput.type].validateConfigEdit?.(
-          existingPanel
-        ) ?? { ok: true };
-        if (!validation.ok) {
-          recordFailure(panelInput.panelId, validation.error);
+        const error = getConfigPanelEditError(panelInput.type, existingPanel);
+        if (error) {
+          recordFailure(panelInput.panelId, error);
           continue;
         }
-        validEdits.push({ panelInput, existingPanel });
-        continue;
       }
 
-      // Panel request edits: the resolver enforces the Lens-type check and
-      // returns a failure attempt if the existing panel isn't supported.
+      // Panel request edits: each renderer's resolver checks that the existing
+      // panel is one it can edit and returns a failure attempt otherwise.
       validEdits.push({ panelInput, existingPanel });
     }
 
     // Resolve valid panel request edits in parallel from the entry-time snapshot.
-    const validPanelRequestEdits = validEdits.filter(
-      (validEdit): validEdit is ValidEdit & { panelInput: EditPanelRequestInput } =>
-        validEdit.panelInput.source === 'request'
+    const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
+    const panelRequests = validEdits.flatMap(({ panelInput, existingPanel }) =>
+      panelInput.source === 'request'
+        ? [
+            {
+              panelId: panelInput.panelId,
+              request: toPanelResolutionRequest(panelInput, existingPanel),
+            },
+          ]
+        : []
     );
 
-    const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
-    if (validPanelRequestEdits.length > 0) {
+    if (panelRequests.length > 0) {
       if (!resolvePanelContent) {
-        throw new Error(missingPanelResolverError);
+        throw new Error('Inline panel resolver is required for edit_panels panel requests.');
       }
 
       const attempts = await Promise.all(
-        validPanelRequestEdits.map(({ panelInput, existingPanel }) =>
-          resolvePanelContent({
-            type: panelInput.type,
-            operationType: operation.operation,
-            identifier: panelInput.panelId,
-            nlQuery: panelInput.query,
-            chartType: panelInput.chartType,
-            esql: panelInput.esql,
-            preserveESQL: panelInput.preserveESQL,
-            applyChartRules: panelInput.applyChartRules,
-            existingPanel,
-          })
-        )
+        panelRequests.map(({ request }) => resolvePanelContent(request))
       );
-      validPanelRequestEdits.forEach(({ panelInput }, i) => {
-        panelContentAttemptByPanelId.set(panelInput.panelId, attempts[i]);
+      panelRequests.forEach(({ panelId }, i) => {
+        panelContentAttemptByPanelId.set(panelId, attempts[i]);
       });
     }
 
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
-    for (const { panelInput, existingPanel } of validEdits) {
+    for (const { panelInput } of validEdits) {
+      const { panelId } = panelInput;
+      let panelContent: PanelContent;
+      let authoringNote: string | undefined;
+
       if (panelInput.source === 'config') {
-        let resolvedConfig: typeof panelInput.config | CustomContentState;
-        try {
-          resolvedConfig =
-            panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && existingPanel
-              ? context.resolveCustomContentTemplate
-                ? await mergeAndResolveCustomContentEdit(
-                    panelInput.config,
-                    existingPanel.config as CustomContentState,
-                    context.resolveCustomContentTemplate
-                  )
-                : {
-                    ...(existingPanel.config as CustomContentState),
-                    ...(panelInput.config.esqlQuery !== undefined
-                      ? { esql_query: toEsqlQueryState(panelInput.config.esqlQuery ?? undefined) }
-                      : {}),
-                  }
-              : panelInput.config;
-        } catch (err) {
-          recordFailure(panelInput.panelId, getErrorMessage(err));
+        panelContent = buildConfigPanelContent(panelInput.type, panelInput.config);
+      } else {
+        const attempt = panelContentAttemptByPanelId.get(panelId);
+        if (!attempt) {
+          throw new Error(`Panel edit result for panel "${panelId}" is missing.`);
+        }
+
+        if (attempt.type === 'failure') {
+          context.failures.push(attempt.failure);
           continue;
         }
 
-        const panelContent =
-          PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(resolvedConfig);
-        const updateResult = updatePanelInDashboard({
-          dashboardData: nextDashboardData,
-          panelId: panelInput.panelId,
-          transformPanel: (panel) => ({ ...panel, ...panelContent }),
-        });
-
-        if (!updateResult.updated) {
-          recordFailure(panelInput.panelId, `Panel "${panelInput.panelId}" not found.`);
-          continue;
-        }
-
-        nextDashboardData = updateResult.dashboardData;
-        continue;
-      }
-
-      const attempt = panelContentAttemptByPanelId.get(panelInput.panelId);
-      if (!attempt) {
-        throw new Error(`Panel edit result for panel "${panelInput.panelId}" is missing.`);
-      }
-
-      if (attempt.type === 'failure') {
-        context.failures.push(attempt.failure);
-        continue;
+        ({ panelContent, authoringNote } = attempt);
       }
 
       const updateResult = updatePanelInDashboard({
         dashboardData: nextDashboardData,
-        panelId: panelInput.panelId,
-        transformPanel: (panel) => ({ ...panel, ...attempt.panelContent }),
+        panelId,
+        transformPanel: (panel) => ({ ...panel, ...panelContent }),
       });
 
       if (!updateResult.updated) {
-        recordFailure(panelInput.panelId, `Panel "${panelInput.panelId}" not found.`);
+        recordFailure(panelId, `Panel "${panelId}" not found.`);
         continue;
       }
 
       nextDashboardData = updateResult.dashboardData;
-      if (attempt.authoringNote) {
-        context.panelAuthoringNotes.push({
-          panelId: panelInput.panelId,
-          authoringNote: attempt.authoringNote,
-        });
+      if (authoringNote) {
+        context.panelAuthoringNotes.push({ panelId, authoringNote });
       }
     }
 

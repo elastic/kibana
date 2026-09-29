@@ -60,8 +60,8 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
 };
 
 /**
- * Default implementation of the generate core's `ResolvePanelContent` seam for
- * `vis` panels.
+ * Resolves Lens and Vega panel requests for the generate core's
+ * `ResolvePanelContent` seam (see `panel_resolver.ts`).
  *
  * Builds inline visualization panel content from natural language / ES|QL using
  * Kibana plumbing (model provider, ES client, the visualization builders). It
@@ -70,10 +70,6 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * (`buildVegaConfig`), and returns it to the core through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
- * It ships in `core/resolvers/` so any caller of the generation core — the
- * dashboard tool or a CLI host — gets a ready-to-use vis resolver from one
- * place. It is still wired in through the `resolvePanelContent` seam, so tests
- * can inject a fake and a host can substitute its own resolver if ever needed.
  */
 export const createVisPanelResolver = ({
   logger,

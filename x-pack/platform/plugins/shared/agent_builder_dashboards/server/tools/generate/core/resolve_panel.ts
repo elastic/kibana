@@ -11,14 +11,18 @@ import type { PanelFailure } from './utils';
 /**
  * Type-agnostic primitives for inline panel content resolution: the resolution
  * result, the failure helper, and the request fields shared by every panel type.
- * Each panel type contributes its own request shape (see `operations/panels/<type>`),
+ * Each renderer contributes its own request shape (see `operations/panels/<type>`),
  * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
- * whose default implementation lives in `resolvers/vis_panel_resolver.ts`.
+ * whose default implementation lives in `resolvers/panel_resolver.ts`.
  */
+
+/** Resolved panel content: the embeddable `type` plus its by-value `config`. */
+export type PanelContent = Pick<AttachmentPanel, 'type' | 'config'>;
+
 export type PanelContentAttempt =
   | {
       type: 'success';
-      panelContent: Pick<AttachmentPanel, 'type' | 'config'>;
+      panelContent: PanelContent;
       authoringNote?: string;
     }
   | {
@@ -36,8 +40,8 @@ export interface PanelAuthoringNote {
 }
 
 /**
- * Fields common to every panel resolution request, independent of panel type.
- * Per-type modules extend this with a discriminating `type` literal and their
+ * Fields common to every panel resolution request, independent of renderer.
+ * Per-renderer modules extend this with a `renderer` discriminator and their
  * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
  */
 export interface PanelResolutionRequestBase {

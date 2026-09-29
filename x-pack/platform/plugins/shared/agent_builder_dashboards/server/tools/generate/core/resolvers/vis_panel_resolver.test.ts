@@ -61,7 +61,6 @@ describe('createVisPanelResolver', () => {
     });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'add_panels',
       identifier: 'show total requests',
       nlQuery: 'show total requests',
@@ -101,7 +100,6 @@ describe('createVisPanelResolver', () => {
 
     await expect(
       resolveVisPanel({
-        type: 'vis',
         operationType: 'add_panels',
         identifier: 'show total requests',
         nlQuery: 'show total requests',
@@ -127,7 +125,6 @@ describe('createVisPanelResolver', () => {
     });
 
     await resolveVisPanel({
-      type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'change the title',
@@ -163,7 +160,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'add_panels',
       identifier: 'a small multiples chart',
       nlQuery: 'a small multiples chart',
@@ -191,7 +187,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'add_panels',
       identifier: 'total requests',
       nlQuery: 'total requests',
@@ -215,7 +210,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'make it a line chart',
@@ -248,7 +242,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'Enhance this panel',
@@ -279,7 +272,6 @@ describe('createVisPanelResolver', () => {
     });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'refine this analysis',
