@@ -77,7 +77,10 @@ describe('AzureAks', () => {
 
     it('follows nextLink and reports truncation when the page cap is hit', async () => {
       mockClient.get.mockResolvedValue({
-        data: { value: [{ id: 'sub1' }], nextLink: 'https://management.azure.com/subscriptions?skip=next' },
+        data: {
+          value: [{ id: 'sub1' }],
+          nextLink: 'https://management.azure.com/subscriptions?skip=next',
+        },
       });
       const result = await AzureAks.actions.listSubscriptions.handler(mockContext, {});
       expect(mockClient.get.mock.calls.length).toBeGreaterThan(1);
@@ -170,6 +173,39 @@ describe('AzureAks', () => {
   });
 
   describe('runCommand', () => {
+    beforeEach(() => jest.useFakeTimers({ doNotFake: ['performance'] }));
+    afterEach(() => {
+      // Drop any sleep still pending on a failed expectation, so the suite leaves no open handle.
+      jest.clearAllTimers();
+      jest.useRealTimers();
+    });
+
+    /**
+     * Run the handler to completion under fake timers. The poller interleaves
+     * awaited HTTP calls with `setTimeout` sleeps, so each iteration has to
+     * flush the microtask queue *and* advance the clock; looping until the
+     * promise settles keeps the test independent of the exact number of polls.
+     */
+    const runToCompletion = async <T>(promise: Promise<T>): Promise<T> => {
+      let settled = false;
+      const tracked = promise.then(
+        (value) => {
+          settled = true;
+          return value;
+        },
+        (error) => {
+          settled = true;
+          throw error;
+        }
+      );
+      for (let i = 0; i < 200 && !settled; i++) {
+        await Promise.resolve();
+        await Promise.resolve();
+        jest.advanceTimersByTime(2000);
+      }
+      return tracked;
+    };
+
     it('sends a flat body without a properties wrapper', async () => {
       mockClient.post.mockResolvedValueOnce({ headers: {}, data: { status: 'Succeeded' } });
       await AzureAks.actions.runCommand.handler(mockContext, {
@@ -182,6 +218,63 @@ describe('AzureAks', () => {
         { command: 'kubectl get nodes' },
         expect.any(Object)
       );
+    });
+
+    it('polls the Location header and returns the completed result', async () => {
+      mockClient.post.mockResolvedValueOnce({
+        headers: { location: 'https://management.azure.com/operation/123' },
+        data: {},
+      });
+      mockClient.get.mockResolvedValueOnce({
+        data: { properties: { provisioningState: 'Succeeded', exitCode: 0 } },
+      });
+      const result = await runToCompletion(
+        AzureAks.actions.runCommand.handler(mockContext, {
+          resourceGroupName: RG,
+          clusterName: CLUSTER,
+          command: 'kubectl get nodes',
+        })
+      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://management.azure.com/operation/123');
+      expect(result).toEqual({ properties: { provisioningState: 'Succeeded', exitCode: 0 } });
+    });
+
+    it('refuses to poll a cross-origin Location header (would leak the bearer token)', async () => {
+      mockClient.post.mockResolvedValueOnce({
+        headers: { location: 'https://evil.example/operation/123' },
+        data: {},
+      });
+      const result = await AzureAks.actions.runCommand.handler(mockContext, {
+        resourceGroupName: RG,
+        clusterName: CLUSTER,
+        command: 'kubectl get nodes',
+      });
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: 'error',
+          message: expect.stringContaining('evil.example'),
+        })
+      );
+    });
+
+    it('propagates a non-retryable polling error instead of masking it as a timeout', async () => {
+      mockClient.post.mockResolvedValueOnce({
+        headers: { location: 'https://management.azure.com/operation/123' },
+        data: {},
+      });
+      mockClient.get.mockRejectedValueOnce({
+        response: { status: 403, statusText: 'Forbidden', data: {} },
+      });
+      await expect(
+        runToCompletion(
+          AzureAks.actions.runCommand.handler(mockContext, {
+            resourceGroupName: RG,
+            clusterName: CLUSTER,
+            command: 'kubectl get nodes',
+          })
+        )
+      ).rejects.toThrow('Access denied');
     });
   });
 

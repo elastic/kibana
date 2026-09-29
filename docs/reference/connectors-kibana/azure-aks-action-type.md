@@ -9,11 +9,22 @@ applies_to:
 
 # Azure Kubernetes Service (AKS) connector [azure-aks-action-type]
 
-The Azure Kubernetes Service (AKS) connector connects directly to the Azure Resource Manager (ARM) REST API. It lets a workflow or agent inspect and control AKS clusters without leaving Elastic: list subscriptions and resource groups, discover clusters and node pools, scale node counts, stop or start clusters to manage costs, retrieve kubeconfig credentials, and run ad-hoc `kubectl` or `helm` commands inside a cluster.
+The Azure Kubernetes Service (AKS) connector connects directly to the Azure Resource Manager (ARM) REST API. It lets an agent inspect and control AKS clusters without leaving Elastic: list subscriptions and resource groups, discover clusters and node pools, scale node counts, stop or start clusters to manage costs, retrieve kubeconfig credentials, and run ad-hoc `kubectl` or `helm` commands inside a cluster.
+
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
 
 ## Overview
 
-This is a **custom connector** that authenticates as an Azure AD app registration (service principal) using the OAuth 2.0 Client Credentials grant. The token is scoped to `https://management.azure.com/.default` (the Azure Resource Manager audience).
+This connector authenticates as an Azure AD app registration (service principal) using the OAuth 2.0 Client Credentials grant. The token is scoped to `https://management.azure.com/.default` (the Azure Resource Manager audience).
+
+## Prerequisites [azure-aks-prerequisites]
+
+1. **Azure AD app registration** — Create an app registration in Azure Active Directory and generate a client secret.
+2. **Role assignments** — Assign the appropriate role to the service principal on each AKS cluster or resource group:
+   - **Reader** (subscription scope) — required for `listSubscriptions` and `listResourceGroups`
+   - **Azure Kubernetes Service Cluster User Role** — minimum for cluster/node-pool read-only actions
+   - **Azure Kubernetes Service Contributor Role** — required for scale, stop, start, and run-command
+3. **Token URL** — Construct the token URL using your tenant ID: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`
 
 ## Create connectors in {{kib}} [define-azure-aks-ui]
 
@@ -33,7 +44,7 @@ Client ID
 Client Secret
 :   A client secret created for the Azure AD app registration.
 
-The app registration must have at least the **Azure Kubernetes Service Cluster User Role** on the target clusters for read-only actions. For control-plane actions (scale, stop, start, run-command), the **Azure Kubernetes Service Contributor Role** is required.
+See [Prerequisites](#azure-aks-prerequisites) for the roles the app registration needs.
 
 ## Available actions [azure-aks-available-actions]
 
@@ -49,16 +60,9 @@ The app registration must have at least the **Azure Kubernetes Service Cluster U
 | `stopCluster` | Deallocate all node VMs in a cluster. Parameters: `resourceGroupName`, `clusterName` (both required). |
 | `startCluster` | Start a previously stopped cluster. Parameters: `resourceGroupName`, `clusterName` (both required). |
 | `getClusterCredentials` | Retrieve a base64-encoded kubeconfig for a cluster. Parameters: `resourceGroupName`, `clusterName` (both required), `format` (`azure` or `exec`, default `azure`). |
-| `runCommand` | Run a shell command inside the cluster (e.g. `kubectl get pods -A`). Parameters: `resourceGroupName`, `clusterName`, `command` (all required). Waits up to 60 seconds and returns the exit code and output. |
+| `runCommand` | Run a shell command inside the cluster (for example, `kubectl get pods -A`). Parameters: `resourceGroupName`, `clusterName`, `command` (all required). Waits up to 60 seconds and returns the exit code and output. |
 
 ## Connector networking configuration [action-settings]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Prerequisites [azure-aks-prerequisites]
-
-1. **Azure AD app registration** — Create an app registration in Azure Active Directory and generate a client secret.
-2. **Role assignments** — Assign the appropriate role to the service principal on each AKS cluster or resource group:
-   - **Azure Kubernetes Service Cluster User Role** — minimum for read-only actions
-   - **Azure Kubernetes Service Contributor Role** — required for scale, stop, start, and run-command
-3. **Token URL** — Construct the token URL using your tenant ID: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`

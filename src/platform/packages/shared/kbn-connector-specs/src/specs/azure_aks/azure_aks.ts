@@ -179,6 +179,20 @@ async function pollAsyncOperation(
   const MAX_POLLS = 30;
   const POLL_INTERVAL_MS = 2000;
 
+  // The Location header is server-supplied data, and `ctx.client` carries the
+  // service principal's bearer token as a default header (see
+  // `oauth_client_credentials`'s `configure`). Requesting an
+  // attacker-influenced or otherwise off-origin Location with that client
+  // would hand the token to whatever host it names, so the origin is
+  // checked once, up front, before any polling begins.
+  const targetUrl = new URL(locationUrl);
+  if (targetUrl.protocol !== 'https:' || targetUrl.origin !== new URL(ARM_BASE).origin) {
+    return {
+      status: 'error',
+      message: `Refusing to poll operation status at an unexpected origin: ${targetUrl.origin}`,
+    };
+  }
+
   for (let i = 0; i < MAX_POLLS; i++) {
     await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     try {
@@ -191,9 +205,15 @@ async function pollAsyncOperation(
       ) {
         return resp.data as Record<string, unknown>;
       }
-    } catch {
-      // Continue polling on transient errors; the 202 result location
-      // may 404 briefly while Azure sets up the result.
+    } catch (error) {
+      const status = (error as { response?: { status?: number } }).response?.status;
+      // A transient 404 is expected while Azure sets up the result; anything
+      // else (in particular 401/403) will not resolve by retrying, so it is
+      // surfaced immediately instead of being masked as a generic timeout
+      // after 60 seconds of fruitless polling.
+      if (status !== 404) {
+        throwAzureError(error);
+      }
     }
   }
   return { status: 'timeout', message: 'Operation did not complete within 60 seconds.' };
