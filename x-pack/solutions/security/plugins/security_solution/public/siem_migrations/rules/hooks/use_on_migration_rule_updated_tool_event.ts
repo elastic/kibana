@@ -12,7 +12,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT,
   type SiemMigrationRuleUpdatedToolEventData,
-} from '../../../../common/siem_migrations/tool_events';
+} from '../../../../common/siem_migrations/rules/events';
 
 /**
  * Subscribes to agent builder tool events and calls `callback` when the

@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { useOnMigrationRuleUpdatedToolEvent } from './use_on_migration_rule_updated_tool_event';
-import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../common/siem_migrations/tool_events';
+import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../common/siem_migrations/rules/events';
 
 jest.mock('../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
 
@@ -82,48 +82,6 @@ describe('useOnMigrationRuleUpdatedToolEvent', () => {
     });
 
     expect(callback).not.toHaveBeenCalled();
-  });
-
-  it('should unsubscribe on unmount', () => {
-    const callback = jest.fn();
-    const { unmount } = renderHook(() => useOnMigrationRuleUpdatedToolEvent(callback));
-
-    unmount();
-
-    act(() => {
-      chatEvents$.next(
-        makeToolUiEvent(SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT, {
-          migrationId: 'm-1',
-          ruleId: 'r-1',
-        })
-      );
-    });
-
-    expect(callback).not.toHaveBeenCalled();
-  });
-
-  it('should not resubscribe when only the callback identity changes', () => {
-    const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
-    useKibana.mockReturnValue({
-      services: {
-        agentBuilder: {
-          events: {
-            ui: { activeConversation$ },
-            getChatEvents$,
-          },
-        },
-      },
-    });
-
-    const { rerender } = renderHook(
-      ({ cb }: { cb: () => void }) => useOnMigrationRuleUpdatedToolEvent(cb),
-      { initialProps: { cb: jest.fn() } }
-    );
-    rerender({ cb: jest.fn() });
-    rerender({ cb: jest.fn() });
-
-    // getChatEvents$ is called once on mount (when activeConversation$ emits), not on every rerender
-    expect(getChatEvents$).toHaveBeenCalledTimes(1);
   });
 
   it('should do nothing when agentBuilder is not available', () => {

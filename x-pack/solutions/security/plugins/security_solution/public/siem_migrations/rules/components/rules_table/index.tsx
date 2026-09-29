@@ -57,7 +57,7 @@ import {
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useOnMigrationRuleUpdatedToolEvent } from '../../hooks/use_on_migration_rule_updated_tool_event';
-import type { SiemMigrationRuleUpdatedToolEventData } from '../../../../../common/siem_migrations/tool_events';
+import type { SiemMigrationRuleUpdatedToolEventData } from '../../../../../common/siem_migrations/rules/events';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -295,14 +295,13 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const ruleActionsFactory = useCallback(
       (migrationRule: RuleMigrationRule, closeRulePreview: () => void) => {
-        const isInstalled = !!migrationRule.elastic_rule?.id;
         const canMigrationRuleBeInstalled =
           !isRulesLoading &&
-          !isInstalled &&
+          !migrationRule.elastic_rule?.id &&
           migrationRule.translation_result === MigrationTranslationResult.FULL;
         return (
           <EuiFlexGroup>
-            {isSiemMigrationAgentBuilderEnabled && !isInstalled && (
+            {isSiemMigrationAgentBuilderEnabled && !migrationRule.elastic_rule?.id && (
               <EuiFlexItem grow={false}>
                 <AddMigrationRuleToChatButton rule={migrationRule} />
               </EuiFlexItem>

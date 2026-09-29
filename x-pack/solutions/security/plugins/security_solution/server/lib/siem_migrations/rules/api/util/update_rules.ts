@@ -37,8 +37,9 @@ export const transformToInternalUpdateRuleMigrationData = (
 ): InternalUpdateRuleMigrationRule => {
   const { elastic_rule } = ruleMigration;
   // Prebuilt match takes precedence. Must use truthiness (not != null) so a `prebuilt_rule_id: null`
-  // unmatch falls through to the query branch below.
-  if (elastic_rule?.prebuilt_rule_id) {
+  // unmatch falls through to the query branch below. Title is required alongside the id to confirm
+  // a complete, correct match.
+  if (elastic_rule?.prebuilt_rule_id && elastic_rule?.title) {
     return { ...ruleMigration, translation_result: MigrationTranslationResultEnum.full };
   }
   if (elastic_rule?.query == null) {

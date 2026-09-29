@@ -33,11 +33,8 @@ const makeCurrentRule = (
 
 describe('getEsqlQueryUpdatePatch', () => {
   const mockLogger = loggingSystemMock.createLogger();
-  // Build the real validateEsql so the tests below can wrap it in a jest.fn and assert on calls.
-  // sanitizeQuery inside strips [macro:…]/[lookup:…] before parsing, so the real validator
-  // happily accepts placeholder-laden queries — the placeholder check in getEsqlQueryUpdatePatch
-  // must run BEFORE the validator is ever called.
   const validateEsql = getValidateEsql({ logger: mockLogger });
+  const validateEsqlSpy = jest.fn(validateEsql);
 
   const validQuery = 'FROM logs-endpoint.events.process-* | LIMIT 10';
 
@@ -46,44 +43,40 @@ describe('getEsqlQueryUpdatePatch', () => {
   });
 
   it('should reject a query that contains a macro placeholder without calling validateEsql', async () => {
-    const spy = jest.fn(validateEsql);
     await expect(
       getEsqlQueryUpdatePatch('[macro:foo] | LIMIT 10', undefined, {
-        validateEsql: spy,
+        validateEsql: validateEsqlSpy,
         currentRule: makeCurrentRule(),
       })
     ).rejects.toThrow(/unresolved placeholder/);
-    expect(spy).not.toHaveBeenCalled();
+    expect(validateEsqlSpy).not.toHaveBeenCalled();
   });
 
   it('should reject a query that contains a lookup placeholder without calling validateEsql', async () => {
-    const spy = jest.fn(validateEsql);
     await expect(
       getEsqlQueryUpdatePatch('FROM logs-* | WHERE field == [lookup:bar]', undefined, {
-        validateEsql: spy,
+        validateEsql: validateEsqlSpy,
         currentRule: makeCurrentRule(),
       })
     ).rejects.toThrow(/unresolved placeholder/);
-    expect(spy).not.toHaveBeenCalled();
+    expect(validateEsqlSpy).not.toHaveBeenCalled();
   });
 
   it('should reject a query that contains the missing-index-pattern placeholder without calling validateEsql', async () => {
-    const spy = jest.fn(validateEsql);
     await expect(
       getEsqlQueryUpdatePatch(`FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER} | LIMIT 10`, undefined, {
-        validateEsql: spy,
+        validateEsql: validateEsqlSpy,
         currentRule: makeCurrentRule(),
       })
     ).rejects.toThrow(/unresolved placeholder/);
-    expect(spy).not.toHaveBeenCalled();
+    expect(validateEsqlSpy).not.toHaveBeenCalled();
   });
 
   it('should surface a validateEsql error verbatim', async () => {
-    const spy = jest.fn(validateEsql);
-    spy.mockResolvedValueOnce({ error: 'Unexpected token at position 5' });
+    validateEsqlSpy.mockResolvedValueOnce({ error: 'Unexpected token at position 5' });
     await expect(
       getEsqlQueryUpdatePatch('FROM logs-* BAD SYNTAX', undefined, {
-        validateEsql: spy,
+        validateEsql: validateEsqlSpy,
         currentRule: makeCurrentRule(),
       })
     ).rejects.toThrow('ES|QL validation failed: Unexpected token at position 5');
@@ -91,7 +84,7 @@ describe('getEsqlQueryUpdatePatch', () => {
 
   it('should return the patch on a valid query without integration_ids (no prebuilt match)', async () => {
     const result = await getEsqlQueryUpdatePatch(validQuery, undefined, {
-      validateEsql,
+      validateEsql: validateEsqlSpy,
       currentRule: makeCurrentRule(),
     });
     expect(result).toEqual({ query: validQuery, query_language: 'esql' });
@@ -100,7 +93,7 @@ describe('getEsqlQueryUpdatePatch', () => {
 
   it('should include integration_ids in the patch when supplied (no prebuilt match)', async () => {
     const result = await getEsqlQueryUpdatePatch(validQuery, ['endpoint'], {
-      validateEsql,
+      validateEsql: validateEsqlSpy,
       currentRule: makeCurrentRule(),
     });
     expect(result).toEqual({
@@ -115,7 +108,7 @@ describe('getEsqlQueryUpdatePatch', () => {
 
     it('should clear prebuilt_rule_id and reset title and description to the original rule values', async () => {
       const result = await getEsqlQueryUpdatePatch(validQuery, undefined, {
-        validateEsql,
+        validateEsql: validateEsqlSpy,
         currentRule: prebuiltMatchedRule,
       });
       expect(result).toEqual({
@@ -137,7 +130,7 @@ describe('getEsqlQueryUpdatePatch', () => {
       } as unknown as RuleMigrationRule;
 
       const result = await getEsqlQueryUpdatePatch(validQuery, undefined, {
-        validateEsql,
+        validateEsql: validateEsqlSpy,
         currentRule: ruleNoDescription,
       });
       expect(result).toMatchObject({ description: 'Original Rule Title' });
@@ -145,21 +138,20 @@ describe('getEsqlQueryUpdatePatch', () => {
 
     it('should include integration_ids alongside the unmatch fields', async () => {
       const result = await getEsqlQueryUpdatePatch(validQuery, ['endpoint'], {
-        validateEsql,
+        validateEsql: validateEsqlSpy,
         currentRule: prebuiltMatchedRule,
       });
       expect(result).toMatchObject({ prebuilt_rule_id: null, integration_ids: ['endpoint'] });
     });
 
     it('should still reject placeholder queries before emitting unmatch fields', async () => {
-      const spy = jest.fn(validateEsql);
       await expect(
         getEsqlQueryUpdatePatch('[macro:foo] | LIMIT 10', undefined, {
-          validateEsql: spy,
+          validateEsql: validateEsqlSpy,
           currentRule: prebuiltMatchedRule,
         })
       ).rejects.toThrow(/unresolved placeholder/);
-      expect(spy).not.toHaveBeenCalled();
+      expect(validateEsqlSpy).not.toHaveBeenCalled();
     });
   });
 });

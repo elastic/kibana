@@ -11,7 +11,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../common/siem_migrations/constants';
-import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../../common/siem_migrations/tool_events';
+import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../../common/siem_migrations/rules/events';
 import type { GetRuleMigrationRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
@@ -54,20 +54,10 @@ const schema = z.object({
     .max(10_000)
     .optional()
     .describe(
-      'The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. ' +
-        'Can be combined with new integration_ids, provided the index in the query is created ' +
-        'from those integrations. Mutually exclusive with prebuilt_rule — if both are supplied, ' +
-        'prebuilt_rule takes precedence. ' +
-        'When supplied for a rule that currently has a prebuilt rule match, the match is cleared ' +
-        'and the rule title and description revert to the original rule values. ' +
-        'Cannot be used on rules that are already installed (elastic_rule.id is set).'
+      `The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. Can be combined with new integration_ids, provided the index in the query is created from those integrations. Mutually exclusive with prebuilt_rule — if both are supplied, prebuilt_rule takes precedence. When supplied for a rule that currently has a prebuilt rule match, the match is cleared and the rule title and description revert to the original rule values. Cannot be used on rules that are already installed (elastic_rule.id is set).`
     ),
   prebuilt_rule: PreBuiltRuleSchema.optional().describe(
-    'The correct prebuilt rule match (id and title). Provide ONLY when the matched prebuilt rule ' +
-      'needs to be updated. Can be combined with new integration_ids, provided the prebuilt rule ' +
-      'relies on data from those integrations. Mutually exclusive with esql_query — if both are ' +
-      'supplied, prebuilt_rule takes precedence. ' +
-      'Cannot be used on rules that are already installed (elastic_rule.id is set).'
+    `The correct prebuilt rule match (id and title). Provide ONLY when the matched prebuilt rule needs to be updated. Can be combined with new integration_ids, provided the prebuilt rule relies on data from those integrations. Mutually exclusive with esql_query — if both are supplied, prebuilt_rule takes precedence. Cannot be used on rules that are already installed (elastic_rule.id is set).`
   ),
   integration_ids: z
     .array(z.string().min(1).max(256))
@@ -75,18 +65,14 @@ const schema = z.object({
     .max(10)
     .optional()
     .describe(
-      'The correct integration id(s). Must be supplied together with esql_query or prebuilt_rule — ' +
-        'integration_ids cannot be updated on its own. Pass one or more integration ids (up to 10).'
+      `The correct integration id(s). Must be supplied together with esql_query or prebuilt_rule — integration_ids cannot be updated on its own. Pass one or more integration ids (up to 10).`
     ),
   comment: z
     .string()
     .min(1)
     .max(10_000)
     .describe(
-      'REQUIRED. A markdown explanation of what you changed and why, covering every aspect you ' +
-        "are updating in this call. It is appended to the rule's comment history and shown to the " +
-        'user in the rule details flyout, so write it for that reader. Follow the examples in the ' +
-        'skill instructions for the expected shape.'
+      `REQUIRED. A markdown explanation of what you changed and why, covering every aspect you are updating in this call. It is appended to the rule's comment history and shown to the user in the rule details flyout, so write it for that reader. Follow the examples in the skill instructions for the expected shape.`
     ),
 });
 

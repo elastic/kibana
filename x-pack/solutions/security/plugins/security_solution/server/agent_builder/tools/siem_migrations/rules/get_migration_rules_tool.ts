@@ -128,11 +128,7 @@ export const getMigrationRulesTool = (
 
 Only include the parameters you actually need. Boolean filter fields (is_fully_translated, is_failed, etc.) filter when set — omit them entirely when you are not filtering by that condition. Omit search_term and ids when not in use (do not pass empty strings or empty arrays). Omit pagination and sort params unless you need non-default values.
 
-<<<<<<< HEAD
 Returns: id, original rule (title, description, vendor, query, query_language), translated elastic rule (title, prebuilt rule id, integration ids, ES|QL query, query language), translation result, status, comments.
-=======
-Returns projected fields only (migration item id, original title, vendor, installed Elastic rule id, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
->>>>>>> main
 
 Read-only.`,
     schema,

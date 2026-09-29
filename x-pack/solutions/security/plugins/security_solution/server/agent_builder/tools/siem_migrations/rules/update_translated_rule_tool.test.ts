@@ -14,7 +14,7 @@ import {
 } from '../../../__mocks__/test_helpers';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { updateTranslatedRuleTool } from './update_translated_rule_tool';
-import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../../common/siem_migrations/tool_events';
+import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../../common/siem_migrations/rules/events';
 
 const mockProductFeaturesService = {
   isEnabled: jest.fn().mockReturnValue(true),
