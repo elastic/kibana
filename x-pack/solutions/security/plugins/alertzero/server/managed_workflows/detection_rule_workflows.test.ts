@@ -335,7 +335,7 @@ describe('detection rule workflows', () => {
       ).toEqual([
         ['propose_query'],
         ['propose_risk_score'],
-        ['propose_exception'],
+        ['attach_exception', 'propose_exception'],
         ['incomplete_threshold_output', 'propose_threshold'],
         ['propose_schedule'],
       ]);
@@ -786,6 +786,46 @@ describe('detection rule workflows', () => {
         expect(JSON.stringify(refresh.with)).toContain('steps.refetch_rule.output | json');
       });
 
+      // No agent runs in the investigation to reference an attachment, so without
+      // `render_inline` the analyst only finds these in the attachment list.
+      it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception'])(
+        'renders %s inline in the investigation',
+        (stepName) => {
+          const step = reviewSteps.find(({ name }) => name === stepName)!;
+
+          expect(step.with?.render_inline).toBe(true);
+          expect(step.with?.conversation_id).toBe(
+            '{{ steps.create_investigation.output.conversation_id }}'
+          );
+          expect(step['on-failure']).toEqual({ continue: true });
+        }
+      );
+
+      // The card previews the same item the action creates, but its historical
+      // description must not claim that a still-pending or dismissed item was added.
+      it('attaches the proposed exception with lifecycle-neutral wording', () => {
+        const attach = reviewSteps.find(({ name }) => name === 'attach_exception')!;
+        const propose = reviewSteps.find(({ name }) => name === 'propose_exception')!;
+        const {
+          rule_id: ruleId,
+          description: actionDescription,
+          ...exceptionItem
+        } = (propose.with?.inputs as { actionInput: Record<string, unknown> }).actionInput;
+
+        expect(attach.type).toBe('ai.attachment.add');
+        expect(attach.with?.type).toBe('security.exception');
+        expect(attach.with?.data).toEqual({
+          ...exceptionItem,
+          description:
+            'Proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts.',
+        });
+        expect(ruleId).toBe('{{ inputs.rule_uuid }}');
+        expect(actionDescription).toBe(
+          'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
+        );
+        expect(reviewSteps.indexOf(attach)).toBeLessThan(reviewSteps.indexOf(propose));
+      });
+
       // Both backtests run inside one preview worker execution, and the proposal
       // gates are the only other children: one synchronous child per wake-up cycle
       // is safe, while two consecutive child calls share one immediate-resume slot
@@ -835,6 +875,60 @@ describe('detection rule workflows', () => {
         expect(comment).toContain('Approving still applies the proposed query');
         expect(comment).not.toContain('not previewed or applied automatically');
         expect(comment).not.toContain('marks these alerts acknowledged');
+      });
+
+      // Appended with `trigger_mode: never` so the note does not run the investigation
+      // agent. A direct request rather than the journal note workflow keeps the
+      // proposal gate the only synchronous child in its wake-up cycle.
+      it('posts the diagnosis reasoning to the investigation without running the agent', () => {
+        const note = reviewSteps.find(({ name }) => name === 'post_reasoning')!;
+        const body = note.with?.body as Record<string, string>;
+
+        expect(note.type).toBe('kibana.request');
+        expect(note.with?.method).toBe('POST');
+        expect(note.with?.path).toBe('/s/{{ workflow.spaceId }}/api/chat/converse');
+        expect(note.if).toContain('steps.create_investigation.output.conversation_id != null');
+        expect(note['on-failure']).toEqual({ continue: true });
+        expect(body.conversation_id).toBe(
+          '{{ steps.create_investigation.output.conversation_id }}'
+        );
+        expect(body.trigger_mode).toBe('never');
+        expect(body.input).toContain(
+          '{{ steps.diagnose_rule.output.structured_output.reasoning }}'
+        );
+        expect(reviewSteps.indexOf(note)).toBeLessThan(
+          reviewSteps.findIndex(({ name }) => name === 'compose_proposal')
+        );
+      });
+
+      // The proposal only carries the reasoning when the note did not land, so a
+      // failed post cannot drop it from everything the analyst sees.
+      it.each([
+        ['leaves the reasoning out of the proposal when the note landed', {}, false],
+        [
+          'keeps the reasoning in the proposal when the note failed',
+          { error: { message: 'boom' } },
+          true,
+        ],
+      ])('%s', (_scenario, postReasoning, expectReasoning) => {
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const comment = createWorkflowLiquidEngine().parseAndRenderSync(
+          String((compose.with as Record<string, string>).comment),
+          {
+            inputs: { fp_count: 2, alert_ids: ['a', 'b'] },
+            steps: {
+              diagnose_rule: {
+                output: {
+                  structured_output: { change_type: 'manual', reasoning: '1. Unique reasoning' },
+                },
+              },
+              post_reasoning: postReasoning,
+            },
+          }
+        );
+
+        expect(comment.includes('**Reasoning**')).toBe(expectReasoning);
+        expect(comment.includes('1. Unique reasoning')).toBe(expectReasoning);
       });
 
       // A skipped step renders as nil, so `nil == 'succeeded'` is false and the

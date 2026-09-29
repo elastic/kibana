@@ -168,6 +168,7 @@ steps:
       type: security.rule
       origin: "{{ steps.fetch_rule.output.rule_id }}"
       description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
 
@@ -629,6 +630,35 @@ steps:
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
+  # The diagnosis reasoning goes to the investigation as a note rather than into the
+  # proposal, which keeps only what the decision needs. `trigger_mode: never` appends
+  # a user_message without running the investigation agent. Called directly rather
+  # than through the journal note workflow, because this run allows one synchronous
+  # child per wake-up cycle and the proposal gate below is that child. User messages
+  # render as plain text, so no markdown. If the note fails, compose_proposal keeps
+  # the reasoning so the analyst still sees it.
+  - name: post_reasoning
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.reasoning != blank }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+
+          {{ steps.diagnose_rule.output.structured_output.reasoning }}
+        trigger_mode: never
+    on-failure:
+      continue: true
+
   - name: compose_proposal
     type: data.set
     with:
@@ -650,9 +680,11 @@ steps:
 
         **False positive pattern**
         {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        {% if steps.post_reasoning.error %}
 
         **Reasoning**
         {{ steps.diagnose_rule.output.structured_output.reasoning }}
+        {% endif %}
 
         **Sample alerts**
         {{ steps.compose_evidence.output.sample_alerts }}
@@ -778,6 +810,23 @@ steps:
       # Not a rule edit: an exception item has its own action.
       - match: exception
         steps:
+          # The proposed item as its own card, laid out the way the Detection Rules
+          # UI lays out an exception. Its name, description and entries must match
+          # the action input below, so the card shows exactly what approving creates.
+          - name: attach_exception
+            type: ai.attachment.add
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              id: "proposed-exception"
+              type: security.exception
+              data:
+                name: "Tuning: {{ steps.fetch_rule.output.name }}"
+                description: "Proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
+                entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+              description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
+              render_inline: true
+            on-failure:
+              continue: true
           - name: propose_exception
             type: workflow.execute
             with:
@@ -932,6 +981,7 @@ steps:
         text: "{{ steps.refetch_rule.output | json }}"
         attachmentLabel: "{{ steps.refetch_rule.output.name }}"
       description: "Rule after applied tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
 
