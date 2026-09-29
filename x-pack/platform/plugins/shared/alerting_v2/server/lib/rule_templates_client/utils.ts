@@ -11,8 +11,11 @@ import {
   type RuleTemplateResponse,
 } from '@kbn/alerting-v2-schemas';
 import type { KueryNode } from '@kbn/es-query';
+import type { SavedObjectsFindOptions } from '@kbn/core/server';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { nodeBuilder } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
+import { escapeTermsInclude } from '../escape_terms_include';
 
 const ATTRIBUTES_PREFIX = `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes`;
 
@@ -22,6 +25,19 @@ export const RULE_TEMPLATE_SEARCH_FIELDS = ['rule.metadata.name', 'rule.metadata
 
 export const buildEngineV2Filter = (): KueryNode =>
   nodeBuilder.is(`${ATTRIBUTES_PREFIX}.engine`, 'v2');
+
+export const buildRuleTemplateTagsAggregation = (
+  search?: string
+): NonNullable<SavedObjectsFindOptions['aggs']> => ({
+  tags: {
+    terms: {
+      field: RULE_TEMPLATE_TAGS_FIELD,
+      size: TAGS_RESPONSE_LIMIT,
+      order: { _count: 'desc' },
+      ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
+    },
+  },
+});
 
 export const buildFindRuleTemplatesFilter = (tags?: string[]): KueryNode => {
   const engineFilter = buildEngineV2Filter();
