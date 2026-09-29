@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
 import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
@@ -74,10 +73,11 @@ const FLOOR_MS = 20;
 test.describe(
   'Workflow editor: validation performance',
   {
+    // Local-only: on Cloud the marker cascade lands behind network-bound ESQL validation.
     tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.security.complete,
+      '@local-stateful-classic',
+      '@local-serverless-observability_complete',
+      '@local-serverless-security_complete',
     ],
   },
   () => {
