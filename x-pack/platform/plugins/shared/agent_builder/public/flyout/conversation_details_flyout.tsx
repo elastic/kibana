@@ -24,13 +24,16 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
-import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
+import {
+  BUILTIN_TAB_IDS,
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+} from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 
-const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
+export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
 });
 
@@ -267,9 +270,10 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   return (
     <EuiFlyout
       onClose={onClose}
-      session="never"
+      session="start"
+      historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
-      flyoutMenuProps={{}}
+      flyoutMenuProps={{ title: FLYOUT_TITLE }}
       size="s"
       type="push"
       paddingSize="m"
