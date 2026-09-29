@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const PROPOSAL_WITHOUT_ACTION_LABEL = i18n.translate(
-  'xpack.proposals.proposals.noAutomatedAction',
-  { defaultMessage: 'No automated action' }
-);
+export { EntityChip } from './entity_chip';
+export type { EntityChipProps } from './entity_chip';
