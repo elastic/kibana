@@ -15,6 +15,11 @@ import {
 import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
 import { WaffleMetricControls } from '.';
 import userEvent from '@testing-library/user-event';
+
+jest.mock('./metrics_context_menu', () => ({
+  MetricsContextMenu: () => null,
+}));
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const renderWithProviders = (children: React.ReactNode) =>
@@ -35,7 +40,7 @@ const createMockCustomMetric = (): SnapshotCustomMetricInput => ({
 
 describe('WaffleMetricControls', () => {
   it(`doesn't allow adding more metrics when there are already ${SNAPSHOT_API_MAX_METRICS} metrics`, async () => {
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup();
 
     const options = Array.from(
       { length: Math.floor(SNAPSHOT_API_MAX_METRICS / 2) },
@@ -58,7 +63,6 @@ describe('WaffleMetricControls', () => {
 
     const dropdownButton = screen.getByTestId('infraInventoryMetricDropdown');
     await user.click(dropdownButton);
-
     const modeSwitcher = screen.getByTestId('infraModeSwitcherAddMetricButton');
     expect(modeSwitcher).toBeDisabled();
   });
