@@ -34,8 +34,12 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
   isDisabled,
   onChange,
 }) => {
-  const [draft, setDraft] = useState(() => toDisplay(current));
-  const draftRef = useRef(toDisplay(current));
+  // '' is a distinct, uncommitted draft state — not a user-entered 0. `Number('')` is 0, so
+  // treating an emptied field as 0 would drop the closure floor to 0% on blur (every
+  // false-positive verdict becomes eligible for a close proposal or supervised auto-close)
+  // any time the field passes through empty while being edited.
+  const [draft, setDraft] = useState<number | ''>(() => toDisplay(current));
+  const draftRef = useRef<number | ''>(toDisplay(current));
   const lastPersistedRef = useRef(toDecimal(toDisplay(current)));
   const onChangeRef = useRef(onChange);
 
@@ -49,6 +53,13 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
   }, [current]);
 
   const persist = useCallback(() => {
+    if (draftRef.current === '') {
+      // Blurred while empty: restore the last persisted value rather than writing a 0% floor.
+      const restored = toDisplay(lastPersistedRef.current);
+      draftRef.current = restored;
+      setDraft(restored);
+      return;
+    }
     const decimal = toDecimal(draftRef.current);
     if (decimal === lastPersistedRef.current) {
       return;
@@ -58,7 +69,13 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
   }, []);
 
   const onValueChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = Number(event.target.value);
+    const { value } = event.target;
+    if (value === '') {
+      draftRef.current = '';
+      setDraft('');
+      return;
+    }
+    const raw = Number(value);
     if (!Number.isFinite(raw) || raw < 0 || raw > 100) {
       return;
     }

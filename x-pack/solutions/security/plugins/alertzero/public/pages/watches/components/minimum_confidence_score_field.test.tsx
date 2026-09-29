@@ -85,6 +85,30 @@ describe('MinimumConfidenceScoreField', () => {
     expect(input().value).toBe('70');
   });
 
+  it('clearing the field and blurring restores the last persisted value instead of writing 0', () => {
+    const { onChange, input } = renderField(0.85);
+
+    fireEvent.change(input(), { target: { value: '' } });
+    expect(input().value).toBe('');
+
+    fireEvent.blur(input());
+
+    expect(input().value).toBe('85');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('clearing, typing a new value, then blurring persists the typed value (not 0)', () => {
+    const { onChange, input } = renderField(0.85);
+
+    fireEvent.change(input(), { target: { value: '' } });
+    fireEvent.change(input(), { target: { value: '9' } });
+    fireEvent.change(input(), { target: { value: '90' } });
+    fireEvent.blur(input());
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith(0.9);
+  });
+
   it('does not fire onChange again after a server echo of the same value', () => {
     const { onChange, rerender, input } = renderField(0.85);
 
