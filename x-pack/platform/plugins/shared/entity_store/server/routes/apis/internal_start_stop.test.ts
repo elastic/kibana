@@ -142,6 +142,21 @@ describe('internal start/stop', () => {
       expect(result).toEqual({ status: 200, payload: { ok: true, stopped: ['user'] } });
     });
 
+    // stopProcess writes ERROR when task removal failed, so the task may still be scheduled.
+    // Skipping ERROR would make the retry report success without touching anything.
+    it('retries a process left in error by a failed stop', async () => {
+      const { ctx, assetManager } = createCtx([engine({ nonPriorityStatus: ENGINE_STATUS.ERROR })]);
+
+      const result = await handleInternalStop(
+        ctx,
+        createReq({ entityTypes: ['user'], process: 'nonPriority' }),
+        createRes()
+      );
+
+      expect(assetManager.stopProcess).toHaveBeenCalledWith('user', 'nonPriority');
+      expect(result).toEqual({ status: 200, payload: { ok: true, stopped: ['user'] } });
+    });
+
     it('stops the maintainers once no engine is left started', async () => {
       const { ctx, maintainers, assetManager } = createCtx([engine({})]);
       assetManager.getStatus
@@ -201,6 +216,36 @@ describe('internal start/stop', () => {
       );
 
       expect(assetManager.startProcess).not.toHaveBeenCalled();
+      expect(result).toEqual({ status: 200, payload: { ok: true, started: [] } });
+    });
+
+    it('retries a process left in error by a failed start when process is both', async () => {
+      const { ctx, assetManager } = createCtx([engine({ nonPriorityStatus: ENGINE_STATUS.ERROR })]);
+
+      const result = await handleInternalStart(
+        ctx,
+        createReq({ entityTypes: ['user'], process: 'both' }),
+        createRes()
+      );
+
+      expect(assetManager.start).toHaveBeenCalledWith(expect.anything(), 'user');
+      expect(result).toEqual({ status: 200, payload: { ok: true, started: ['user'] } });
+    });
+
+    // `host` never has nonPriorityStatus written, so an unset field must not look like a
+    // process that needs starting.
+    it('leaves a running ungated type alone when process is both', async () => {
+      const { ctx, assetManager } = createCtx([
+        engine({ type: 'host', nonPriorityStatus: undefined }),
+      ]);
+
+      const result = await handleInternalStart(
+        ctx,
+        createReq({ entityTypes: ['host'], process: 'both' }),
+        createRes()
+      );
+
+      expect(assetManager.start).not.toHaveBeenCalled();
       expect(result).toEqual({ status: 200, payload: { ok: true, started: [] } });
     });
 

@@ -17,7 +17,7 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 import { ENGINE_STATUS } from '../../domain/constants';
-import type { EngineDescriptor } from '../../domain/saved_objects';
+import type { EngineDescriptor, EngineStatus } from '../../domain/saved_objects';
 
 /** `both` reproduces the public start/stop behaviour; the other two toggle a single task. */
 const ProcessParam = z.enum(['priority', 'nonPriority', 'both']).default('both');
@@ -43,6 +43,29 @@ type SingleProcess = Exclude<Process, 'both'>;
  */
 const statusFor = (engine: EngineDescriptor, process: SingleProcess) =>
   process === EXTRACTION_MODE.nonPriority ? engine.nonPriorityStatus : engine.status;
+
+/**
+ * A process is worth stopping when it is running, and also when it is in ERROR: `stopProcess`
+ * and `stop` write ERROR when task removal failed, which can leave the task scheduled. Skipping
+ * ERROR would make the retry report success without touching anything.
+ */
+const needsStop = (status: EngineStatus | null | undefined): boolean =>
+  status === ENGINE_STATUS.STARTED || status === ENGINE_STATUS.ERROR;
+
+/** Anything not already running is worth starting, ERROR from a failed attempt included. */
+const needsStart = (status: EngineStatus | null | undefined): boolean =>
+  status !== ENGINE_STATUS.STARTED;
+
+/**
+ * For `both`, a type qualifies when either of its processes does. `nonPriorityStatus` only counts
+ * for types that run a non-priority process; the rest never have the field written.
+ */
+const pairedQualifies = (
+  engine: EngineDescriptor,
+  qualifies: (status: EngineStatus | null | undefined) => boolean
+): boolean =>
+  qualifies(engine.status) ||
+  (hasPriorityExtractionGate(engine.type) && qualifies(engine.nonPriorityStatus));
 
 /**
  * Resolves the types to act on. An explicit list is taken as-is so an impossible request is
@@ -99,15 +122,11 @@ export async function handleInternalStart(
   const installed = new Map(engines.map((engine) => [engine.type, engine]));
 
   if (process === 'both') {
-    // Either status being stopped is enough: the two can diverge once the single-process routes
-    // have been used, and `both` has to end with both running.
+    // Either process needing a start is enough: the two can diverge once the single-process
+    // routes have been used, and `both` has to end with both running.
     const toStart = entityTypes.filter((type) => {
       const engine = installed.get(type);
-      if (engine === undefined) return false;
-      return (
-        engine.status === ENGINE_STATUS.STOPPED ||
-        engine.nonPriorityStatus === ENGINE_STATUS.STOPPED
-      );
+      return engine !== undefined && pairedQualifies(engine, needsStart);
     });
     await Promise.all(toStart.map((type) => assetManager.start(req, type)));
     if (toStart.length > 0) {
@@ -118,7 +137,7 @@ export async function handleInternalStart(
 
   const toStart = entityTypes.filter((type) => {
     const engine = installed.get(type);
-    return engine !== undefined && statusFor(engine, process) !== ENGINE_STATUS.STARTED;
+    return engine !== undefined && needsStart(statusFor(engine, process));
   });
   await Promise.all(toStart.map((type) => assetManager.startProcess(req, type, process)));
 
@@ -147,15 +166,11 @@ export async function handleInternalStop(
   const installed = new Map(engines.map((engine) => [engine.type, engine]));
 
   if (process === 'both') {
-    // Either status being started is enough, otherwise stopping priority on its own first would
-    // make `both` skip the type and leave non-priority extraction running.
+    // Either process needing a stop is enough, otherwise stopping priority on its own first
+    // would make `both` skip the type and leave non-priority extraction running.
     const toStop = entityTypes.filter((type) => {
       const engine = installed.get(type);
-      if (engine === undefined) return false;
-      return (
-        engine.status === ENGINE_STATUS.STARTED ||
-        engine.nonPriorityStatus === ENGINE_STATUS.STARTED
-      );
+      return engine !== undefined && pairedQualifies(engine, needsStop);
     });
     await Promise.all(toStop.map((type) => assetManager.stop(type)));
     if (toStop.length > 0) {
@@ -169,7 +184,7 @@ export async function handleInternalStop(
 
   const toStop = entityTypes.filter((type) => {
     const engine = installed.get(type);
-    return engine !== undefined && statusFor(engine, process) === ENGINE_STATUS.STARTED;
+    return engine !== undefined && needsStop(statusFor(engine, process));
   });
   await Promise.all(toStop.map((type) => assetManager.stopProcess(type, process)));
 

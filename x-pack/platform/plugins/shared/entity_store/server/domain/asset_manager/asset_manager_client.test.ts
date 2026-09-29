@@ -673,6 +673,25 @@ describe('AssetManagerClient', () => {
         });
       });
 
+      // `priority` and `single` resolve to the same task id, so a `priority` request on a type
+      // with no priority variant acts on its only task. That is the right outcome, but the
+      // frequency comes from DEFAULT_CONFIG_BY_MODE.priority while the single path takes the
+      // code default. They agree today; this fails loudly if they ever diverge and a `priority`
+      // call starts silently rescheduling ungated types at a different cadence.
+      it('startProcess priority keeps an ungated type on its single-process frequency', async () => {
+        const dualProcessClient = createDualProcessClient();
+
+        await dualProcessClient.start({} as KibanaRequest, 'host');
+        const [singleArgs] = mockScheduleExtractEntityTask.mock.calls.at(-1)!;
+
+        mockScheduleExtractEntityTask.mockClear();
+        await dualProcessClient.startProcess({} as KibanaRequest, 'host', EXTRACTION_MODE.priority);
+        const [priorityArgs] = mockScheduleExtractEntityTask.mock.calls.at(-1)!;
+
+        expect(priorityArgs.extractionMode ?? EXTRACTION_MODE.single).toBe(EXTRACTION_MODE.single);
+        expect(priorityArgs.frequency).toBe(singleArgs.frequency);
+      });
+
       it('stopProcess removes only the non-priority task', async () => {
         await createDualProcessClient().stopProcess('user', EXTRACTION_MODE.nonPriority);
 

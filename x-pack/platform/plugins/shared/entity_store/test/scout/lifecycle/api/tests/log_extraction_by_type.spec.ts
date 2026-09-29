@@ -71,8 +71,14 @@ apiTest.describe(
       await waitForStoreNotInstalled(apiClient, defaultHeaders);
     });
 
-    apiTest.afterEach(async ({ apiClient }) => {
+    apiTest.afterEach(async ({ apiClient, apiServices, kbnClient }) => {
       await uninstallAllEntityTypes(apiClient, defaultHeaders).catch(() => {});
+      // This suite forces the dual-process flag off, so teardown has to drop the override
+      // instead of leaving the next suite with it. Only `null` removes it.
+      await apiServices.core.settings({
+        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
+      });
+      await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
     });
 
     apiTest(

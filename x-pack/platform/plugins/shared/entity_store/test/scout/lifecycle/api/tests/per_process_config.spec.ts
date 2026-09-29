@@ -15,6 +15,7 @@ import {
 } from '../../../common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2, FF_DUAL_PROCESS_ENABLED } from '../../../../../common';
 import {
+  forceLogExtraction,
   getStatus,
   installAllEntityTypes,
   uninstallAllEntityTypes,
@@ -82,11 +83,15 @@ apiTest.describe(
       expect((await installAllEntityTypes(apiClient, publicHeaders)).statusCode).toBe(201);
     });
 
-    apiTest.afterEach(async ({ apiClient, apiServices }) => {
+    apiTest.afterEach(async ({ apiClient, apiServices, kbnClient }) => {
       await uninstallAllEntityTypes(apiClient, publicHeaders).catch(() => {});
+      // Remove the override rather than writing `false`: the deployment may have the flag on,
+      // and writing a value would hand the next suite a state it never asked for.
+      // `setDynamicConfigOverrides` merges by flattened key, so only `null` actually removes it.
       await apiServices.core.settings({
-        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false },
+        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
       });
+      await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
     });
 
     apiTest('stores a non-priority override and reports it on status', async ({ apiClient }) => {
@@ -206,6 +211,43 @@ apiTest.describe(
         expect(await taskExists(kbnClient, PRIORITY_TASK_ID)).toBe(true);
       }
     );
+
+    apiTest('runs a forced extraction as the requested process', async ({ apiClient }) => {
+      const toDateISO = new Date().toISOString();
+      const fromDateISO = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+      for (const process of ['priority', 'nonPriority'] as const) {
+        const response = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'user',
+          fromDateISO,
+          toDateISO,
+          process
+        );
+
+        expect(response.statusCode).toBe(200);
+        expect((response.body as { success: boolean }).success).toBe(true);
+      }
+    });
+
+    // `host` runs one process, so naming a dual-process one is rejected rather than run as a
+    // failed extraction that writes an error onto a healthy engine.
+    apiTest('rejects a forced extraction process the type does not run', async ({ apiClient }) => {
+      const toDateISO = new Date().toISOString();
+      const fromDateISO = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+      const response = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'host',
+        fromDateISO,
+        toDateISO,
+        'nonPriority'
+      );
+
+      expect(response.statusCode).toBe(400);
+    });
 
     apiTest(
       'rejects an effective config whose delay exceeds the stored lookback period',
