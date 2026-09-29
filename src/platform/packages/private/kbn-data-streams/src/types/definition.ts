@@ -39,19 +39,6 @@ export interface DataStreamDefinition<
   version: number;
 
   /**
-   * How an incremented `version` is applied to an existing data stream:
-   * - `put_mapping`: the updated mappings are applied to the current write index. Only backwards
-   *   compatible mapping changes are supported.
-   * - `rollover`: existing backing indices are left untouched and the data stream is lazily rolled
-   *   over, so the next write creates a new backing index from the updated template. Supports
-   *   breaking mapping changes (e.g. converting a field to an `alias`). The template mappings are
-   *   stamped with `_meta.version` and every initialization rolls over a write index with an older
-   *   stamp, so an interrupted upgrade is completed on the next start.
-   * @default 'put_mapping'
-   */
-  mappingsUpdateStrategy?: 'put_mapping' | 'rollover';
-
-  /**
    * The index template definition for the data stream.
    *
    * This template definition corresponds to types from ES:

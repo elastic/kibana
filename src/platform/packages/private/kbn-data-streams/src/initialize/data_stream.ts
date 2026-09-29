@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import invariant from 'node:assert';
 import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { prettyPrintAndSortKeys } from '@kbn/utils';
@@ -14,8 +15,6 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 import type { AnyDataStreamDefinition } from '../types';
-import { getDeployedVersion } from './exists_checks';
-import { getMappingsVersion, rolloverIfWriteIndexOutdated } from './rollover';
 
 function normalizeLifecycle(
   lifecycle: api.IndicesDataStreamLifecycleWithRollover | undefined
@@ -91,44 +90,6 @@ async function applyDataStreamLifecycle({
 }
 
 /**
- * Checks the write index on every start, not only on a version bump, so that an upgrade interrupted
- * between the index template update and the rollover is completed.
- */
-async function updateDataStreamWithRollover({
-  logger,
-  elasticsearchClient,
-  dataStream,
-  existingDataStream,
-  existingIndexTemplate,
-}: {
-  logger: Logger;
-  elasticsearchClient: ElasticsearchClient;
-  dataStream: AnyDataStreamDefinition;
-  existingDataStream: api.IndicesDataStream;
-  existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem | undefined;
-}): Promise<void> {
-  const version = dataStream.version;
-  // `existingIndexTemplate` is read before the index template is initialized: when it was missing or
-  // older, it has just been replaced by the current template, stamped with `version`.
-  const templateUpdated =
-    !existingIndexTemplate || getDeployedVersion(existingIndexTemplate, dataStream.name) < version;
-
-  logger.debug(`Data stream already exists: ${dataStream.name}, checking write index mappings`);
-  await rolloverIfWriteIndexOutdated({
-    logger,
-    elasticsearchClient,
-    existingDataStream,
-    templateMappingsVersion: templateUpdated
-      ? version
-      : getMappingsVersion(existingIndexTemplate.index_template.template?.mappings),
-  });
-
-  if (templateUpdated && lifecycleDefinitionChanged({ existingIndexTemplate, dataStream })) {
-    await applyDataStreamLifecycle({ logger, elasticsearchClient, dataStream });
-  }
-}
-
-/**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
  *
  * Endeavour to be idempotent and race-condition safe.
@@ -157,19 +118,12 @@ export async function initializeDataStream({
     return { uptoDate: false };
   }
 
-  if (existingDataStream && dataStream.mappingsUpdateStrategy === 'rollover') {
-    await updateDataStreamWithRollover({
-      logger,
-      elasticsearchClient,
-      dataStream,
-      existingDataStream,
-      existingIndexTemplate,
-    });
-    return { uptoDate: true };
-  }
-
   if (existingIndexTemplate) {
-    const deployedVersion = getDeployedVersion(existingIndexTemplate, dataStream.name);
+    const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
+    invariant(
+      typeof deployedVersion === 'number' && deployedVersion > 0,
+      `Datastream ${dataStream.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
+    );
 
     // Only short-circuit when the data stream itself already exists. If the template was
     // installed earlier (e.g. via `initializeTemplate`) but the data stream was never

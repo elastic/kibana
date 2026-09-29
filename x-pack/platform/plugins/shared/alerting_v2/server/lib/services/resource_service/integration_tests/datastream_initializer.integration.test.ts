@@ -15,10 +15,12 @@ import type { ResourceDefinition } from '../../../../resources/datastreams/types
 import { DatastreamInitializer } from '../datastream_initializer';
 
 // Distinct name to avoid colliding with any running prod/dev data stream.
-const TEST_DATA_STREAM = '.rule-events-rollover-integration-test';
+const TEST_DATA_STREAM = '.rule-events-migration-integration-test';
 
-// Simplified v6 mappings: episode.* are real fields.
-const v6Mappings: MappingsDefinition = {
+// Simplified v6 mappings: episode.* are real keyword/long fields, no alias.
+// These match the shape that existed before the episode→alert rename.
+// Typed as MappingsDefinition so putIndexTemplate overload resolves correctly.
+const v6MappingsRaw: MappingsDefinition = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },
@@ -59,15 +61,16 @@ const v7Mappings: MappingsDefinition = {
   },
 };
 
-const createDefinition = (version: number, mappings: MappingsDefinition): ResourceDefinition => ({
+const v7Definition: ResourceDefinition = {
   key: `data_stream:${TEST_DATA_STREAM}`,
   dataStreamName: TEST_DATA_STREAM,
-  version,
-  mappings,
+  version: 7,
+  mappings: v7Mappings,
   lifecycle: {},
-});
+  episodeToAlertMigration: true,
+};
 
-describe('DatastreamInitializer — episode→alert rename (integration)', () => {
+describe('DatastreamInitializer — episode→alert migration (integration)', () => {
   let esServer: EsTestCluster;
   let logger: Logger;
 
@@ -97,152 +100,144 @@ describe('DatastreamInitializer — episode→alert rename (integration)', () =>
     await cleanup();
   });
 
-  const initialize = (version: number, mappings: MappingsDefinition) =>
-    new DatastreamInitializer(
-      logger,
-      esServer.getClient(),
-      createDefinition(version, mappings)
-    ).initialize();
-
-  const getDataStream = async () => {
-    const {
-      data_streams: [dataStream],
-    } = await esServer.getClient().indices.getDataStream({ name: TEST_DATA_STREAM });
-    return dataStream;
-  };
-
-  const getIndexMappings = async (index: string) => {
-    const {
-      [index]: { mappings },
-    } = await esServer.getClient().indices.getMapping({ index });
-    return mappings;
-  };
-
-  const writeAlertEvent = (id: string, alert: Record<string, unknown>) =>
-    esServer.getClient().create({
-      index: TEST_DATA_STREAM,
-      id,
-      document: { '@timestamp': new Date().toISOString(), space_id: 'default', ...alert },
-      refresh: true,
-    });
-
-  // Recreates the state left by the v6 plugin: an index template without a mappings version
-  // and a data stream holding a document written with the episode.* field names.
-  const seedV6DataStream = async () => {
+  // Installs a v6-shaped template and data stream with real episode.* fields,
+  // then writes one document using the old field names.
+  const seedLegacyDataStream = async () => {
     const esClient = esServer.getClient();
 
     await esClient.indices.putIndexTemplate({
       name: TEST_DATA_STREAM,
       index_patterns: [`${TEST_DATA_STREAM}*`],
-      data_stream: { hidden: true },
+      data_stream: {},
       priority: 100,
       _meta: { version: 6, managed: true, previousVersions: [] },
-      template: { mappings: v6Mappings },
+      template: {
+        mappings: v6MappingsRaw,
+        settings: { 'index.auto_expand_replicas': '0-1' },
+      },
     });
+
     await esClient.indices.createDataStream({ name: TEST_DATA_STREAM });
-    await writeAlertEvent('legacy-doc', {
-      episode: { id: 'legacy-episode', status: 'active', status_count: 3 },
+
+    await esClient.create({
+      index: TEST_DATA_STREAM,
+      id: 'legacy-doc-1',
+      document: {
+        '@timestamp': new Date().toISOString(),
+        episode: { id: 'ep-abc', status: 'active', status_count: 3 },
+        space_id: 'default',
+      },
+      refresh: true,
     });
   };
 
-  it('keeps existing backing indices and rolls over on the next write when upgrading from v6', async () => {
+  it('detects a v6 data stream and wipes it, then recreates with v7 alias mappings', async () => {
     const esClient = esServer.getClient();
-    await seedV6DataStream();
-    const {
-      indices: [{ index_name: legacyBackingIndex }],
-    } = await getDataStream();
+    await seedLegacyDataStream();
 
-    await initialize(7, v7Mappings);
+    // Sanity: v6 doc is there
+    const before = await esClient.count({ index: TEST_DATA_STREAM });
+    expect(before.count).toBe(1);
 
-    const {
-      index_templates: [indexTemplate],
-    } = await esClient.indices.getIndexTemplate({ name: TEST_DATA_STREAM });
-    expect(indexTemplate.index_template._meta?.version).toBe(7);
-    expect(indexTemplate.index_template.template?.mappings?._meta).toEqual({ version: 7 });
+    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
+    await initializer.initialize();
 
-    // No mapping update and no data loss: the legacy backing index is untouched.
-    const upgradedDataStream = await getDataStream();
-    expect(upgradedDataStream.generation).toBe(1);
-    expect(upgradedDataStream.rollover_on_write).toBe(true);
-    expect((await esClient.count({ index: TEST_DATA_STREAM })).count).toBe(1);
-    const legacyMappings = await getIndexMappings(legacyBackingIndex);
-    expect(legacyMappings.properties).toMatchObject({
-      episode: { properties: { id: { type: 'keyword' } } },
-    });
-    expect(legacyMappings.properties).not.toHaveProperty('alert');
+    // All legacy docs wiped
+    const after = await esClient.count({ index: TEST_DATA_STREAM });
+    expect(after.count).toBe(0);
 
-    await writeAlertEvent('new-doc', { alert: { id: 'new-alert', status: 'active' } });
-
-    const rolledOverDataStream = await getDataStream();
-    expect(rolledOverDataStream.generation).toBe(2);
-    expect(rolledOverDataStream.rollover_on_write).toBe(false);
-    const writeIndexMappings = await getIndexMappings(
-      rolledOverDataStream.indices[rolledOverDataStream.indices.length - 1].index_name
+    // episode.id should be an alias in the live mapping
+    const mappingResponse = await esClient.indices.getMapping({ index: TEST_DATA_STREAM });
+    const backingIndex = Object.keys(mappingResponse)[0];
+    // JSON.parse/stringify converts to plain any so we can navigate without a cast
+    const mappingJson = JSON.parse(
+      JSON.stringify(mappingResponse[backingIndex].mappings.properties)
     );
-    expect(writeIndexMappings._meta).toEqual({ version: 7 });
-    expect(writeIndexMappings.properties).toMatchObject({
-      alert: { properties: { id: { type: 'keyword' } } },
-      episode: { properties: { id: { type: 'alias', path: 'alert.id' } } },
-    });
-
-    // Restarting does not schedule another rollover.
-    await initialize(7, v7Mappings);
-    const restartedDataStream = await getDataStream();
-    expect(restartedDataStream.generation).toBe(2);
-    expect(restartedDataStream.rollover_on_write).toBe(false);
+    expect(mappingJson?.episode?.properties?.id?.type).toBe('alias');
+    expect(mappingJson?.episode?.properties?.id?.path).toBe('alert.id');
   });
 
-  it('resolves episode.* in ES|QL across backing indices created before and after the upgrade', async () => {
+  it('queries via episode.* aliases resolve to alert.* source fields after migration', async () => {
     const esClient = esServer.getClient();
-    await seedV6DataStream();
-    await initialize(7, v7Mappings);
-    await writeAlertEvent('new-doc', { alert: { id: 'new-alert', status: 'active' } });
+    await seedLegacyDataStream();
 
-    const { values } = await esClient.esql.query({
-      query: `FROM ${TEST_DATA_STREAM} | WHERE episode.status == "active" | KEEP episode.id | SORT episode.id`,
-    });
-    expect(values).toEqual([['legacy-episode'], ['new-alert']]);
+    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
+    await initializer.initialize();
 
-    const { values: stats } = await esClient.esql.query({
-      query: `FROM ${TEST_DATA_STREAM} | STATS count = COUNT(*) BY episode.id | SORT episode.id`,
+    // Write a v7 doc using alert.* field names
+    await esClient.create({
+      index: TEST_DATA_STREAM,
+      id: 'new-doc-1',
+      document: {
+        '@timestamp': new Date().toISOString(),
+        alert: { id: 'alert-xyz', status: 'active', status_count: 2 },
+        space_id: 'default',
+      },
+      refresh: true,
     });
-    expect(stats).toEqual([
-      [1, 'legacy-episode'],
-      [1, 'new-alert'],
-    ]);
+
+    // Query through the episode.id alias — must find the doc
+    const byEpisodeId = await esClient.search({
+      index: TEST_DATA_STREAM,
+      query: { term: { 'episode.id': 'alert-xyz' } },
+    });
+    expect(byEpisodeId.hits.hits).toHaveLength(1);
+
+    // Query by the canonical alert.id — must also find it
+    const byAlertId = await esClient.search({
+      index: TEST_DATA_STREAM,
+      query: { term: { 'alert.id': 'alert-xyz' } },
+    });
+    expect(byAlertId.hits.hits).toHaveLength(1);
   });
 
-  it('rejects documents written with episode.* once the data stream has rolled over', async () => {
-    await seedV6DataStream();
-    await initialize(7, v7Mappings);
-    await writeAlertEvent('new-doc', { alert: { id: 'new-alert', status: 'active' } });
+  it('skips the wipe when episode.id is already an alias (idempotent)', async () => {
+    const esClient = esServer.getClient();
 
-    // Accepted during a rolling upgrade: nodes still running v6 fail to write episode.* fields.
-    await expect(
-      writeAlertEvent('old-node-doc', { episode: { id: 'old-node-episode', status: 'active' } })
-    ).rejects.toThrow(/field alias/);
-  });
+    // Fresh v7 install — no legacy data
+    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
+    await initializer.initialize();
 
-  it('does not roll over an existing data stream when the version is unchanged', async () => {
-    await seedV6DataStream();
-
-    await initialize(6, v6Mappings);
-
-    const dataStream = await getDataStream();
-    expect(dataStream.generation).toBe(1);
-    expect(dataStream.rollover_on_write).toBe(false);
-  });
-
-  it('creates the data stream with the v7 mappings on a fresh install', async () => {
-    await initialize(7, v7Mappings);
-
-    const dataStream = await getDataStream();
-    expect(dataStream.generation).toBe(1);
-    expect(dataStream.rollover_on_write).toBe(false);
-    const writeIndexMappings = await getIndexMappings(dataStream.indices[0].index_name);
-    expect(writeIndexMappings._meta).toEqual({ version: 7 });
-    expect(writeIndexMappings.properties).toMatchObject({
-      episode: { properties: { id: { type: 'alias', path: 'alert.id' } } },
+    await esClient.create({
+      index: TEST_DATA_STREAM,
+      id: 'doc-1',
+      document: {
+        '@timestamp': new Date().toISOString(),
+        alert: { id: 'alert-1', status: 'active', status_count: 1 },
+        space_id: 'default',
+      },
+      refresh: true,
     });
+
+    const countBefore = await esClient.count({ index: TEST_DATA_STREAM });
+    expect(countBefore.count).toBe(1);
+
+    // Re-initialize — must not wipe
+    const initializer2 = new DatastreamInitializer(logger, esClient, v7Definition);
+    await initializer2.initialize();
+
+    const countAfter = await esClient.count({ index: TEST_DATA_STREAM });
+    expect(countAfter.count).toBe(1);
+  });
+
+  it('skips the wipe when no template exists (fresh install path)', async () => {
+    const esClient = esServer.getClient();
+
+    // No template, no data stream — fresh cluster state
+    const initializer = new DatastreamInitializer(logger, esClient, v7Definition);
+    await initializer.initialize();
+
+    // Data stream should have been created from scratch with v7 mappings
+    const {
+      data_streams: [ds],
+    } = await esClient.indices.getDataStream({ name: TEST_DATA_STREAM });
+    expect(ds).toBeDefined();
+
+    const mappingResponse = await esClient.indices.getMapping({ index: TEST_DATA_STREAM });
+    const backingIndex = Object.keys(mappingResponse)[0];
+    const mappingJson = JSON.parse(
+      JSON.stringify(mappingResponse[backingIndex].mappings.properties)
+    );
+    expect(mappingJson?.episode?.properties?.id?.type).toBe('alias');
   });
 });

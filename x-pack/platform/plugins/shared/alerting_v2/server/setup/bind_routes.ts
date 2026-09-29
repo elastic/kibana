@@ -70,6 +70,7 @@ import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action
 import { MatchActionPoliciesRoute } from '../routes/action_policies/match_action_policies_route';
 import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templates_route';
 import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
+import { ResetDataStreamsRoute } from '../routes/reset_data_streams_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -131,6 +132,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 
   bind(Route).toConstantValue(SuggestUserProfilesRoute);
+  bind(Route).toConstantValue(ResetDataStreamsRoute);
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
   bind(Route).toConstantValue(MatchActionPoliciesRoute);

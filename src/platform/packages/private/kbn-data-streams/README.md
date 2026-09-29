@@ -160,7 +160,7 @@ When registering a data stream, the following reserved keys are automatically va
 * **`kibana`**: Reserved for system properties (e.g., `kibana.space_ids`)
 * **`_id`**: Reserved for document identifiers (cannot be defined in mappings)
 
-The `kibana.space_ids` mapping is automatically injected during registration. These validations occur via `registerDataStream()`. When the data stream version is incremented, mappings are applied to the write index (or to the next backing index with the [rollover strategy](#rollover-strategy)).
+The `kibana.space_ids` mapping is automatically injected during registration. These validations occur via `registerDataStream()`. When the data stream version is incremented, mappings are applied to the write index.
 
 ## Mapping updates
 
@@ -168,21 +168,6 @@ Mapping updates will apply to the current write-index and your index template. T
 
 > !IMPORTANT
 > Mapping updates will only be applied once you INCREMENT the template version number in your data stream definition. As you update your definition it is highly recommended that you retain past definitions so that you can test your upgrade path before releasing new mappings.
-
-### Rollover strategy
-
-Set `mappingsUpdateStrategy: 'rollover'` on the definition to never update existing backing indices in place. When the version is incremented, the index template is updated and the data stream is lazily rolled over ([docs](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-rollover)): the next write creates a new backing index from the updated template, and existing backing indices keep the mappings they were created with.
-
-```ts
-const dataStream: DataStreamDefinition<typeof mappings> = {
-  name: 'my-data-stream',
-  version: 2,
-  mappingsUpdateStrategy: 'rollover',
-  template: { mappings },
-};
-```
-
-With this strategy the template mappings are stamped with `_meta.version`. Every initialization compares the write index stamp with the index template's and rolls over a write index that is behind, so an upgrade interrupted between the template update and the rollover is completed on the next start. Queries spanning backing indices created before and after the change must handle both mapping shapes (for example, by keeping old field names as `alias` fields).
 
 ## Lifecycle management
 
@@ -192,9 +177,9 @@ Define `template.lifecycle` (for example `data_retention`) to configure data str
 
 ### A note on backwards compatibility
 
-By default, these tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error initializing your client as it will try to update the current write index with your new mappings.
+These tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error initializing your client as it will try to update the current write index with your new mappings.
 
-If you need to make a breaking change to mappings, use the [rollover strategy](#rollover-strategy) or consider using search-time runtime mappings.
+If you need to make a breaking change to mappings, consider using search-time runtime mappings.
 
 ### Search-time runtime mappings (incoming)
 
