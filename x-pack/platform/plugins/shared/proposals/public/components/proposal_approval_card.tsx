@@ -251,7 +251,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           showHeader={false}
           title={actionName}
           tone={getProposalTone(liveProposal)}
-          iconType="lock"
           comment={liveProposal.comment}
           decision={decision}
           isSubmitting={isSubmitting}
@@ -259,9 +258,11 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
         >
-          {/* An expired proposal nobody decided is not itself an outcome `ApprovalContent`
-              models — `decision` covers only a human's actual approve/dismiss. */}
-          {isExpired && !decision && (
+          {/* `ApprovalContent`'s own badge already says "Expired"; this callout adds the
+              explanation the badge alone has no room for. `getProposalDecision` reports a
+              gate timeout as a real (actor-less) decision, so `decision` is set here too —
+              gating on `isExpired` alone, not on `decision`'s absence. */}
+          {isExpired && (
             <>
               <EuiSpacer size="m" />
               <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
