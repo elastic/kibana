@@ -238,7 +238,10 @@ describe('LandingPage', () => {
     mockUseInvestigationsCount.mockReturnValue(investigationsResult(0));
 
     // Use a custom queryClient and core so we can keep PATCHes in-flight.
-    type Settler = { resolve: () => void; reject: (err: Error) => void };
+    interface Settler {
+      resolve: () => void;
+      reject: (err: Error) => void;
+    }
     const settlers: Settler[] = [];
     const httpPatch = jest.fn().mockImplementation(
       () =>
