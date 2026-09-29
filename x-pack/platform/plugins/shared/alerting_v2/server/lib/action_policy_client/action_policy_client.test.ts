@@ -1350,7 +1350,6 @@ describe('ActionPolicyClient', () => {
         output: { statusCode: 404 },
       });
     });
-
   });
 
   describe('upsertActionPolicy', () => {
