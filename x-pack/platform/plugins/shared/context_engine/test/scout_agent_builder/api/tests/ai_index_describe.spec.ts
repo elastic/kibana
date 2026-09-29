@@ -296,7 +296,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     // Semantic branch needs a deployed inference endpoint: checked structurally here, and by the
     // ES|QL parser in unit tests.
     const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
-    expect(hybrid.startsWith(`FROM ${INDEX_A} METADATA _id, _index, _score\n| FORK\n`)).toBe(true);
+    expect(hybrid).toContain(
+      `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
+        '| FORK\n'
+    );
     expect(hybrid).toContain('\n| FUSE\n');
 
     const run = async (query: string, params?: Record<string, string>) => {
@@ -380,7 +384,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
+    expect(block).toContain(
+      `\nBacking Elasticsearch target (use only in ES|QL queries): ${MISSING_INDEX}\n`
+    );
     expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
   });
 });
