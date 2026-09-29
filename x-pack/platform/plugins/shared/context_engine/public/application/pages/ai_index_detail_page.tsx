@@ -33,7 +33,6 @@ import {
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { KiListPanel } from '../components/ki';
-import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useKiList } from '../hooks/use_ki_list';
@@ -75,11 +74,17 @@ export const AiIndexDetailPage = () => {
   const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
-  const [isEditingSources, setIsEditingSources] = useState(false);
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
+
+  // Hide the callout as soon as the user adds a source.
+  useEffect(() => {
+    if (showCreatedCallout && aiIndex && aiIndex.sources.length > 0) {
+      setShowCreatedCallout(false);
+    }
+  }, [aiIndex, showCreatedCallout]);
 
   // Remove aiIndexCreated from location state after it has been shown
   useEffect(() => {
@@ -198,9 +203,8 @@ export const AiIndexDetailPage = () => {
           <EuiSpacer size="m" />
           <SourcesPanel
             isLoading={isLoading}
-            sources={aiIndex?.sources ?? []}
-            canEdit={aiIndex !== undefined}
-            onEditSources={() => setIsEditingSources(true)}
+            aiIndex={aiIndex}
+            onSaved={refetch}
             isManaged={hideEditControls}
           />
           <EuiSpacer size="m" />
@@ -255,17 +259,6 @@ export const AiIndexDetailPage = () => {
       )}
 
       {selectedTab === 'knowledge_indicators' && aiIndex && <KiListPanel aiIndex={aiIndex} />}
-
-      {isEditingSources && aiIndex && (
-        <EditSourcesFlyout
-          aiIndex={aiIndex}
-          onClose={() => setIsEditingSources(false)}
-          onSaved={() => {
-            setIsEditingSources(false);
-            refetch();
-          }}
-        />
-      )}
     </>
   );
 
