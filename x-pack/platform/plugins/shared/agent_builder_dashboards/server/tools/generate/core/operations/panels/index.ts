@@ -98,6 +98,16 @@ export const buildConfigPanelContent = (
   return { type: embeddableType, config: toEmbeddableConfig ? toEmbeddableConfig(config) : config };
 };
 
+/** Finds the by-value panel type stored as the given embeddable type, if any. */
+export const findConfigPanelType = (
+  embeddableType: string
+): { type: ConfigPanelInput['type']; label: string } | undefined => {
+  const entry = Object.entries(CONFIG_PANEL_TYPES).find(
+    ([, definition]) => definition.embeddableType === embeddableType
+  );
+  return entry && { type: entry[0] as ConfigPanelInput['type'], label: entry[1].label };
+};
+
 /** Returns an error message when a by-value edit targets a panel of a different type. */
 export const getConfigPanelEditError = (
   type: ConfigPanelInput['type'],

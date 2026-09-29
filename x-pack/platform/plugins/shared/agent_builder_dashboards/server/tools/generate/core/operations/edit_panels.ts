@@ -6,6 +6,9 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import {
   createPanelFailureResult,
@@ -17,6 +20,7 @@ import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import {
   buildConfigPanelContent,
   editPanelItemSchema,
+  findConfigPanelType,
   getConfigPanelEditError,
   type EditPanelItem,
   type EditPanelRequestInput,
@@ -24,37 +28,68 @@ import {
 } from './panels';
 import { defineOperation } from './types';
 
-/** An edit that passed validation, always carrying the existing panel snapshot. */
-interface ValidEdit {
-  panelInput: EditPanelItem;
-  existingPanel: AttachmentPanel;
-}
+type RequestRenderer = NonNullable<EditPanelRequestInput['renderer']>;
 
-/** Maps an edit request input onto the resolution request for its renderer. */
+const RENDERER_BY_EMBEDDABLE_TYPE = new Map<string, RequestRenderer>([
+  [LENS_EMBEDDABLE_TYPE, 'lens'],
+  [VEGA_VIS_TYPE, 'vega'],
+  [CUSTOM_CONTENT_EMBEDDABLE_TYPE, 'custom_content'],
+]);
+
+/** An edit that passed validation; request edits carry their resolution request. */
+type ValidEdit =
+  | { panelInput: Extract<EditPanelItem, { source: 'config' }> }
+  | { panelInput: EditPanelRequestInput; request: PanelResolutionRequest };
+
+const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
+  const configPanelType = findConfigPanelType(type);
+  return configPanelType
+    ? `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}".`
+    : `Panel "${id}" with type "${type}" is not supported for inline editing.`;
+};
+
+/**
+ * Builds the resolution request for a request edit. The existing panel decides
+ * the renderer, so an edit may omit it; an explicit renderer that disagrees
+ * with the panel fails instead of being rewritten.
+ */
 const toPanelResolutionRequest = (
   panelInput: EditPanelRequestInput,
   existingPanel: AttachmentPanel
-): PanelResolutionRequest => {
+): { request: PanelResolutionRequest } | { error: string } => {
+  const renderer = RENDERER_BY_EMBEDDABLE_TYPE.get(existingPanel.type);
+  if (!renderer) {
+    return { error: getUneditablePanelError(existingPanel) };
+  }
+  if (panelInput.renderer && panelInput.renderer !== renderer) {
+    return {
+      error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited with renderer: "${panelInput.renderer}". Use renderer: "${renderer}".`,
+    };
+  }
+
   const base = {
     operationType: 'edit_panels' as const,
     identifier: panelInput.panelId,
     existingPanel,
   };
 
-  if (panelInput.renderer === 'custom_content') {
-    const { renderer, query, esql } = panelInput;
-    return { ...base, renderer, nlQuery: query, esql };
+  // The second check only narrows `panelInput`: a matching explicit renderer implies the first.
+  if (renderer === 'custom_content' || panelInput.renderer === 'custom_content') {
+    const { query, esql } = panelInput;
+    return { request: { ...base, renderer: 'custom_content', nlQuery: query, esql } };
   }
 
-  const { renderer, query, esql, chartType, preserveESQL } = panelInput;
+  const { query, esql, chartType, preserveESQL } = panelInput;
   return {
-    ...base,
-    renderer,
-    nlQuery: query,
-    esql,
-    chartType,
-    preserveESQL,
-    applyChartRules: panelInput.renderer === 'vega' ? undefined : panelInput.applyChartRules,
+    request: {
+      ...base,
+      renderer,
+      nlQuery: query,
+      esql,
+      chartType,
+      preserveESQL,
+      applyChartRules: panelInput.renderer === 'vega' ? undefined : panelInput.applyChartRules,
+    },
   };
 };
 
@@ -108,36 +143,32 @@ export const editPanelsOperation = defineOperation({
           recordFailure(panelInput.panelId, error);
           continue;
         }
+        validEdits.push({ panelInput });
+        continue;
       }
 
-      // Panel request edits: each renderer's resolver checks that the existing
-      // panel is one it can edit and returns a failure attempt otherwise.
-      validEdits.push({ panelInput, existingPanel });
+      const result = toPanelResolutionRequest(panelInput, existingPanel);
+      if ('error' in result) {
+        recordFailure(panelInput.panelId, result.error);
+        continue;
+      }
+      validEdits.push({ panelInput, request: result.request });
     }
 
     // Resolve valid panel request edits in parallel from the entry-time snapshot.
-    const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
-    const panelRequests = validEdits.flatMap(({ panelInput, existingPanel }) =>
-      panelInput.source === 'request'
-        ? [
-            {
-              panelId: panelInput.panelId,
-              request: toPanelResolutionRequest(panelInput, existingPanel),
-            },
-          ]
-        : []
+    const requestEdits = validEdits.filter(
+      (edit): edit is Extract<ValidEdit, { request: PanelResolutionRequest }> => 'request' in edit
     );
-
-    if (panelRequests.length > 0) {
+    const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
+    if (requestEdits.length > 0) {
       if (!resolvePanelContent) {
         throw new Error('Inline panel resolver is required for edit_panels panel requests.');
       }
-
       const attempts = await Promise.all(
-        panelRequests.map(({ request }) => resolvePanelContent(request))
+        requestEdits.map(({ request }) => resolvePanelContent(request))
       );
-      panelRequests.forEach(({ panelId }, i) => {
-        panelContentAttemptByPanelId.set(panelId, attempts[i]);
+      requestEdits.forEach(({ panelInput }, i) => {
+        panelContentAttemptByPanelId.set(panelInput.panelId, attempts[i]);
       });
     }
 

@@ -23,6 +23,7 @@ import {
   type DashboardOperation,
 } from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
 const createMockLogger = (): Logger =>
@@ -1605,7 +1606,12 @@ describe('executeDashboardOperations', () => {
       ]);
     });
 
-    it('records a failure when editing a non-lens panel inline', async () => {
+    it('records a failure without calling the resolver when a request edit targets a panel with no renderer', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test',
@@ -1626,35 +1632,120 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelContent: createResolvePanelContent({
-          'panel-1': {
-            type: 'failure',
-            failure: {
-              type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
-              identifier: 'panel-1',
-              error:
-                'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',
-            },
-          },
-        }),
+        resolvePanelContent,
       });
 
+      expect(resolvePanelContent).not.toHaveBeenCalled();
       expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
-        expect.objectContaining({
-          id: 'panel-1',
-          type: 'aiOpsLogRateAnalysis',
-          config: { seriesType: 'log_rate' },
-          grid: { x: 0, y: 5, w: 24, h: 9 },
-        }),
+        expect.objectContaining({ id: 'panel-1', config: { seriesType: 'log_rate' } }),
       ]);
       expect(result.failures).toEqual([
         {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
           error:
-            'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',
+            'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline editing.',
         },
       ]);
+    });
+
+    describe('request edit renderer', () => {
+      const editWith = async (
+        existingPanel: AttachmentPanel,
+        panelInput: Record<string, unknown>
+      ) => {
+        const resolvePanelContent = jest.fn<
+          ReturnType<ResolvePanelContent>,
+          Parameters<ResolvePanelContent>
+        >(async () =>
+          createResolvedPanelContent({ type: existingPanel.type, config: { updated: true } })
+        );
+        const result = await executeDashboardOperations({
+          dashboardData: { title: 'Test', panels: [existingPanel] },
+          operations: [
+            {
+              operation: 'edit_panels',
+              panels: [
+                {
+                  source: 'request',
+                  panelId: existingPanel.id,
+                  query: 'change the title',
+                  ...panelInput,
+                },
+              ],
+            } as DashboardOperation,
+          ],
+          logger,
+          resolvePanelContent,
+        });
+        return { result, resolvePanelContent };
+      };
+
+      const customContentPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { template: '<div>Old</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+      const vegaPanel: AttachmentPanel = {
+        id: 'vega-1',
+        type: VEGA_VIS_TYPE,
+        config: { spec: '{}' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
+      };
+
+      it('infers custom_content from the existing panel when renderer is omitted', async () => {
+        const { result, resolvePanelContent } = await editWith(customContentPanel, {});
+
+        expect(resolvePanelContent).toHaveBeenCalledWith(
+          expect.objectContaining({ renderer: 'custom_content', nlQuery: 'change the title' })
+        );
+        expect(result.failures).toEqual([]);
+      });
+
+      it('infers vega from the existing panel when renderer is omitted', async () => {
+        const { resolvePanelContent } = await editWith(vegaPanel, {});
+
+        expect(resolvePanelContent).toHaveBeenCalledWith(
+          expect.objectContaining({ renderer: 'vega' })
+        );
+      });
+
+      it('fails without calling the resolver when an explicit renderer disagrees with the panel', async () => {
+        const { result, resolvePanelContent } = await editWith(vegaPanel, { renderer: 'lens' });
+
+        expect(resolvePanelContent).not.toHaveBeenCalled();
+        expect(result.failures).toEqual([
+          {
+            type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+            identifier: 'vega-1',
+            error: `Panel "vega-1" with type "${VEGA_VIS_TYPE}" cannot be edited with renderer: "lens". Use renderer: "vega".`,
+          },
+        ]);
+      });
+
+      it('fails when custom_content targets a Lens panel', async () => {
+        const { result, resolvePanelContent } = await editWith(createLensPanel('panel-1'), {
+          renderer: 'custom_content',
+        });
+
+        expect(resolvePanelContent).not.toHaveBeenCalled();
+        expect(result.failures[0].error).toBe(
+          `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited with renderer: "custom_content". Use renderer: "lens".`
+        );
+      });
+
+      it('points a request edit on a by-value panel to source: "config"', async () => {
+        const { result, resolvePanelContent } = await editWith(
+          createMarkdownPanel('md-1', 'old text'),
+          {}
+        );
+
+        expect(resolvePanelContent).not.toHaveBeenCalled();
+        expect(result.failures[0].error).toBe(
+          'Panel "md-1" is a markdown panel. Edit it with source: "config", type: "markdown".'
+        );
+      });
     });
 
     it('resolves multiple panel edits in one edit_panels op in parallel', async () => {
