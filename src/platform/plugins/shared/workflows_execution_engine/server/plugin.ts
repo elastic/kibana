@@ -107,7 +107,7 @@ import {
   type WorkflowExecutionForInputRendering,
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
-import { WorkflowEventLoggerService, WorkflowEventQueue } from './workflow_event_logger';
+import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -1967,11 +1967,10 @@ export class WorkflowsExecutionEnginePlugin
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
 
     const logsRepository = new LogsRepository(coreStart.dataStreams, this.logger);
-    const eventQueue = new WorkflowEventQueue(logsRepository, this.logger);
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       logsRepository,
       this.logger,
-      eventQueue,
+      undefined,
       this.config.logging.console
     );
 

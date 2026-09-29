@@ -129,6 +129,9 @@ describe('runNode', () => {
         getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
       } as unknown as jest.Mocked<WorkflowExecutionState>,
       workflowLogger: createMockWorkflowEventLogger(),
+      eventQueue: {
+        flush: jest.fn().mockResolvedValue(undefined),
+      },
       workflowExecutionRepository: {
         getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
       },
@@ -534,6 +537,27 @@ describe('runNode', () => {
       // Error is caught → captureError on the cursor, but the finally block still fires.
       expect(mockParams.workflowExecutionCursor.captureError).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+    });
+
+    it('flushes logs after a step that outlives the monitor race', async () => {
+      let releaseStep: (() => void) | undefined;
+      const stepGate = new Promise<void>((resolve) => {
+        releaseStep = resolve;
+      });
+      mockNodeImplementation.run.mockReturnValue(stepGate);
+      mockRunStackMonitor.mockResolvedValue(undefined);
+      const flush = jest.fn().mockResolvedValue(undefined);
+      mockParams.eventQueue = { flush } as unknown as RunNodeTestParams['eventQueue'];
+
+      await runNode(mockParams);
+
+      expect(flush).not.toHaveBeenCalled();
+
+      releaseStep?.();
+      await stepGate;
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(flush).toHaveBeenCalledWith({ signal: mockParams.signal });
     });
 
     it('calls releaseReadPins on the status !== RUNNING short-circuit even though ensureContextReady never ran', async () => {

@@ -81,6 +81,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
   let nodeImplementation: NodeImplementation | undefined;
+  let runStepPromise: Promise<void> = Promise.resolve();
+  let stepStarted = false;
+  let stepSettled = false;
 
   if (!node) {
     return;
@@ -155,19 +158,21 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * The order of these promises is important - we want to stop monitoring
      */
     const runMonitorPromise = runStackMonitor(params, stepExecutionRuntime, monitorAbortController);
-    let runStepPromise: Promise<void> = Promise.resolve();
 
     // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occurred right before running step, etc.
     if (
       !monitorAbortController.signal.aborted &&
       !stepExecutionRuntime.abortController.signal.aborted
     ) {
+      stepStarted = true;
       runStepPromise = (async () => {
         await Promise.resolve(nodeImplementation.run());
         if (stepExecutionRuntime) {
           await handleExecutionDelay(params, stepExecutionRuntime);
         }
-      })();
+      })().finally(() => {
+        stepSettled = true;
+      });
     }
 
     await Promise.race([runMonitorPromise, runStepPromise]);
@@ -176,6 +181,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     workflowExecutionCursor.captureError(error);
     nodeSpan?.setOutcome('failure');
   } finally {
+    // Monitoring can win the race while the step is still running. Flush after that
+    // step settles so its later logs are indexed, without waiting on the write here.
+    if (stepStarted && !stepSettled) {
+      void runStepPromise.then(
+        () => params.eventQueue.flush({ signal: params.signal }),
+        () => params.eventQueue.flush({ signal: params.signal })
+      );
+    }
+
     monitorAbortController?.abort();
 
     // Run cancellation cleanup in `finally` so it fires on BOTH the normal path

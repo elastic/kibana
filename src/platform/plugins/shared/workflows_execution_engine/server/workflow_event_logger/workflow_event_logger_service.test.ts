@@ -93,6 +93,14 @@ describe('WorkflowEventLoggerService', () => {
     });
   });
 
+  it('does not create loggers when the service has no event queue', () => {
+    const service = new WorkflowEventLoggerService({} as LogsRepository, createLoggerMock());
+
+    expect(() => service.createLogger({})).toThrow(
+      'Workflow event loggers can only be created for an execution that owns an event queue'
+    );
+  });
+
   it('rethrows repository failures from getRecentLogs', async () => {
     const logger = createLoggerMock();
     const repositoryError = new Error('repository down');

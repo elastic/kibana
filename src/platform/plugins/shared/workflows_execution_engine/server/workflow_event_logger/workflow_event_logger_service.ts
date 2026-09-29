@@ -29,11 +29,16 @@ export class WorkflowEventLoggerService implements IWorkflowEventLoggerService {
   constructor(
     private logsRepository: LogsRepository,
     private readonly logger: Logger,
-    private readonly eventQueue: WorkflowEventQueue,
+    private readonly eventQueue?: WorkflowEventQueue,
     private readonly enableConsoleLogging: boolean = false
   ) {}
 
   public createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger {
+    if (!this.eventQueue) {
+      throw new Error(
+        'Workflow event loggers can only be created for an execution that owns an event queue'
+      );
+    }
     return new WorkflowEventLogger(this.logger, this.eventQueue, context, {
       enableConsoleLogging: this.enableConsoleLogging,
     });

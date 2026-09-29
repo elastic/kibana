@@ -204,7 +204,7 @@ describe('WorkflowEventLogger', () => {
     expect(events[1].workflow?.step_id).toBe('step-2');
   });
 
-  it('keeps events logged during a flush for the next flush', async () => {
+  it('writes events logged during a flush in the next batch of the same drain', async () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
     let releaseFlush: (() => void) | undefined;
@@ -230,11 +230,25 @@ describe('WorkflowEventLogger', () => {
       .calls[0][0] as WorkflowLogEvent[];
     expect(firstBatch.map((event) => event.message)).toEqual(['before flush']);
 
-    await eventQueue.flush();
-
     const secondBatch = (logsRepository.createLogs as jest.Mock).mock
       .calls[1][0] as WorkflowLogEvent[];
     expect(secondBatch.map((event) => event.message)).toEqual(['during flush']);
+  });
+
+  it('indexes a large backlog in bounded batches', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
+
+    for (let i = 0; i < 501; i++) {
+      workflowLogger.logInfo(`event-${i}`);
+    }
+
+    await eventQueue.flush();
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+    expect((logsRepository.createLogs as jest.Mock).mock.calls[0][0]).toHaveLength(500);
+    expect((logsRepository.createLogs as jest.Mock).mock.calls[1][0]).toHaveLength(1);
   });
 });
 

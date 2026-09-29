@@ -21,6 +21,15 @@ import type { WorkflowEventFlushOptions } from './types';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
+/** One Elasticsearch bulk request. Larger backlogs drain across subsequent batches. */
+const FLUSH_BATCH_SIZE = 500;
+
+/**
+ * Warn once a flush sees this many pending events. Execution keeps enqueueing;
+ * persistence drains in bounded batches and does not drop events.
+ */
+const BACKLOG_WARN_THRESHOLD = 10_000;
+
 /** Pending workflow events. Writers enqueue; the persistence loop flushes. */
 export class WorkflowEventQueue {
   private events: WorkflowLogEvent[] = [];
@@ -32,32 +41,38 @@ export class WorkflowEventQueue {
   }
 
   public async flush(options: WorkflowEventFlushOptions = {}): Promise<void> {
-    if (this.events.length === 0) return;
+    if (this.events.length > BACKLOG_WARN_THRESHOLD) {
+      this.logger.warn(
+        `Workflow event log persistence is behind; ${this.events.length} events are still queued`
+      );
+    }
 
-    const events = this.events;
-    this.events = [];
+    while (this.events.length > 0) {
+      const events = this.events.splice(0, FLUSH_BATCH_SIZE);
 
-    try {
-      await this.logsRepository.createLogs(events);
+      try {
+        await this.logsRepository.createLogs(events);
 
-      this.logger.debug(`Successfully indexed ${events.length} workflow events`);
-    } catch (error) {
-      if (options.signal && isWorkflowTaskManagerAbortSignal(options.signal)) {
-        // Best-effort flushes are used after Task Manager aborts; do not re-queue
-        // because this process may not get another chance to flush them.
-        this.logger.debug(`Failed to index workflow events during best-effort flush`, {
+        this.logger.debug(`Successfully indexed ${events.length} workflow events`);
+      } catch (error) {
+        if (options.signal && isWorkflowTaskManagerAbortSignal(options.signal)) {
+          // Best-effort flushes are used after Task Manager aborts; do not re-queue
+          // because this process may not get another chance to flush them.
+          this.logger.debug(`Failed to index workflow events during best-effort flush`, {
+            eventsCount: events.length,
+            error: { message: error instanceof Error ? error.message : String(error) },
+          });
+          return;
+        }
+
+        this.logger.error(`Failed to index workflow events: ${error.message}`, {
           eventsCount: events.length,
-          error: { message: error instanceof Error ? error.message : String(error) },
+          error: error.stack,
         });
+
+        this.events = events.concat(this.events);
         return;
       }
-
-      this.logger.error(`Failed to index workflow events: ${error.message}`, {
-        eventsCount: events.length,
-        error: error.stack,
-      });
-
-      this.events.unshift(...events);
     }
   }
 }
