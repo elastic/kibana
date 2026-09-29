@@ -14,24 +14,72 @@ export interface OutputRedactor {
   redact: (text: string) => string;
 }
 
+/** Returns the smallest period of `value` (its length when it has none), via the KMP failure function. */
+const getSmallestPeriod = (value: string): number => {
+  const border = new Array<number>(value.length).fill(0);
+  for (let i = 1, k = 0; i < value.length; i++) {
+    while (k > 0 && value[i] !== value[k]) {
+      k = border[k - 1];
+    }
+    if (value[i] === value[k]) {
+      k++;
+    }
+    border[i] = k;
+  }
+  return value.length - border[value.length - 1];
+};
+
+interface RedactableSecret {
+  value: string;
+  /** Characters to check to extend a match by one repetition of the value's period. */
+  periodTail?: string;
+}
+
+/**
+ * Appends the span of every occurrence of `value` in `text` to `matches`, overlapping ones
+ * included (e.g. `aaaaaaaa` in 15 `a`s), in time linear in the text length.
+ */
+const collectMatches = (
+  text: string,
+  { value, periodTail }: RedactableSecret,
+  matches: Array<[start: number, end: number]>
+): void => {
+  for (let i = text.indexOf(value); i !== -1; ) {
+    const start = i;
+    let end = i + value.length;
+    // An occurrence one period later overlaps this one, so only its last `period` characters are
+    // new: extend by checking just those instead of re-searching the whole value each time.
+    if (periodTail) {
+      while (text.startsWith(periodTail, end)) {
+        end += periodTail.length;
+      }
+    }
+    matches.push([start, end]);
+    // Any other overlapping occurrence starts at least half the value's length after the last
+    // one (by the Fine–Wilf theorem), so resuming the native search right after it stays linear.
+    i = text.indexOf(value, end - value.length + 1);
+  }
+};
+
 /** Creates a redactor that replaces every plain-text occurrence of a secret value. */
 export const createOutputRedactor = (secretValues: Iterable<string>): OutputRedactor => {
-  const values = [...new Set(secretValues)].filter(
-    (value) => value.length >= MIN_REDACTABLE_SECRET_LENGTH
-  );
+  const secrets = [...new Set(secretValues)]
+    .filter((value) => value.length >= MIN_REDACTABLE_SECRET_LENGTH)
+    .map((value): RedactableSecret => {
+      const period = getSmallestPeriod(value);
+      return period < value.length ? { value, periodTail: value.slice(-period) } : { value };
+    });
 
   return {
     // Finds every occurrence first and builds the result once, instead of rebuilding the whole
     // text for every secret it contains (tool results can be megabytes, with up to 100 secrets).
     // The search itself stays on native `indexOf`, which is linear-time and outperformed
     // single-pass regex/JS scanners in benchmarks. Overlapping matches are merged, so a secret
-    // containing or overlapping another one is redacted as a whole.
+    // containing, overlapping or repeating into another occurrence is redacted as a whole.
     redact: (text) => {
       const matches: Array<[start: number, end: number]> = [];
-      for (const value of values) {
-        for (let i = text.indexOf(value); i !== -1; i = text.indexOf(value, i + value.length)) {
-          matches.push([i, i + value.length]);
-        }
+      for (const secret of secrets) {
+        collectMatches(text, secret, matches);
       }
       if (matches.length === 0) {
         return text;
