@@ -120,13 +120,21 @@ interface ScoredOccurrence {
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-/** Case-insensitive host, case-sensitive path/query/hash (URL paths are distinct IOCs). */
-const isUrlBoundary = (char: string | undefined): boolean =>
-  char === undefined || /[\s"'<>)\]},.;]/.test(char);
-
-/** After a bare host match, only true URL terminators (not `/` path or `:port`). */
-const isOmittedRootSlashBoundary = (char: string | undefined): boolean =>
-  char === undefined || /[\s"'<>)\]},;]/.test(char);
+/**
+ * End-of-URL at `index`. A bare `.` / `,` only counts when it is sentence
+ * punctuation (as `extract_iocs` trims), not when it continues a path segment
+ * (`/payload.exe`) or hostname (`evil.example.other`).
+ */
+const isUrlBoundaryAt = (source: string, index: number): boolean => {
+  const char = source[index];
+  if (char === undefined) return true;
+  if (char === '.' || char === ',') {
+    const next = source[index + 1];
+    return next === undefined || /[\s"'<>)\]},;]/.test(next) || next === '.' || next === ',';
+  }
+  // Not `/`, `:`, `?`, or `#`: those continue or reshape the same URL.
+  return /[\s"'<>)\]},;]/.test(char);
+};
 
 /**
  * `new URL('https://evil.example').toString()` normalizes to a trailing `/`.
@@ -160,11 +168,7 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
       let matchedPath: string | undefined;
       for (const pathPart of pathCandidates) {
         const after = hostEnd + pathPart.length;
-        const boundaryOk =
-          pathPart === ''
-            ? isOmittedRootSlashBoundary(source[after])
-            : isUrlBoundary(source[after]);
-        if (source.slice(hostEnd, after) === pathPart && boundaryOk) {
+        if (source.slice(hostEnd, after) === pathPart && isUrlBoundaryAt(source, after)) {
           matchedPath = pathPart;
           break;
         }
@@ -196,27 +200,21 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
           parsed.hash === '' &&
           urlValue.endsWith('/')
         ) {
-          return [
-            { value: urlValue, bareHost: false },
-            { value: urlValue.slice(0, -1), bareHost: true },
-          ];
+          return [urlValue, urlValue.slice(0, -1)];
         }
       } catch {
         // Keep the original value when parsing fails.
       }
-      return [{ value: urlValue, bareHost: false }];
+      return [urlValue];
     })();
-    for (const { value: exactValue, bareHost } of exactValues) {
+    for (const exactValue of exactValues) {
       let from = 0;
       while (from < source.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
         const index = source.indexOf(exactValue, from);
         if (index < 0) break;
         const after = index + exactValue.length;
-        const boundaryOk = bareHost
-          ? isOmittedRootSlashBoundary(source[after])
-          : isUrlBoundary(source[after]);
         from = index + Math.max(exactValue.length, 1);
-        if (boundaryOk) {
+        if (isUrlBoundaryAt(source, after)) {
           const window = source.slice(
             Math.max(0, index - CONTEXT_CHARS),
             Math.min(source.length, after + CONTEXT_CHARS)

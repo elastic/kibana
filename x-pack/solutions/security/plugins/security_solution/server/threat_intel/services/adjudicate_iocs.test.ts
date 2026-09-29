@@ -294,6 +294,15 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).toContain('https://evil.example');
   });
 
+  it('matches a bare host URL before a sentence-final period', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'The attacker beaconed to https://evil.example.',
+      iocs: [candidate('https://evil.example/')],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('attacker beaconed');
+  });
+
   it('does not treat a longer hostname as a bare-host match', () => {
     const prepared = prepareIocAdjudication({
       text: 'Docs mention https://evil.example.other as a CDN hostname.',
@@ -313,6 +322,20 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     });
 
     expect(prepared.reviewable[0].context).toBe('');
+  });
+
+  it('does not attribute a shorter path to a longer path suffix', () => {
+    const shortUrl = 'https://evil.example/payload';
+    const prepared = prepareIocAdjudication({
+      text:
+        'Docs list https://evil.example/payload as a reference. ' +
+        `${'filler prose. '.repeat(40)}` +
+        'The attacker later downloaded https://evil.example/payload.exe.',
+      iocs: [candidate(shortUrl)],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('Docs list');
+    expect(prepared.reviewable[0].context).not.toContain('attacker later downloaded');
   });
 
   it('does not treat a different port as the same origin citation', () => {
