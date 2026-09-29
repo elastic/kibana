@@ -180,6 +180,7 @@ const FlyoutWrapper: React.FC<{ children: React.ReactNode; title: string }> = ({
   <EuiFlyout
     onClose={action('Flyout closed')}
     size="m"
+    paddingSize="m"
     aria-labelledby="flyoutTitle"
     minWidth={324}
     resizable

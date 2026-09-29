@@ -287,9 +287,10 @@ export interface FlyoutFooterProps {
 /**
  * `children` represents the declarative zones rather than free-form flyout content.
  * `flyoutMenuDisplayMode` is always set to `auto`.
+ * `paddingSize` is always set to `m`, so every flyout pads its zones by 16px.
  * `ref` is omitted because the template does not forward it.
  */
-type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'ref';
+type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'paddingSize' | 'ref';
 
 /**
  * Props for the root `FlyoutTemplate` component. Any props not explicitly named by the template,
