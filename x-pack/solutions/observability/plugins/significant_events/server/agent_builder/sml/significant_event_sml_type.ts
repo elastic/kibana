@@ -115,8 +115,7 @@ export const createSignificantEventSmlType = ({
         if (!eventClient) {
           return undefined;
         }
-        const { hits } = await eventClient.findByEventId(originId);
-        const event = hits.at(-1);
+        const event = await eventClient.findLatestByEventId(originId);
 
         if (!event) {
           return undefined;
@@ -148,8 +147,7 @@ export const createSignificantEventSmlType = ({
       }
       const { getEventClient } = await getScopedClients({ request: context.request });
       const eventClient = await getEventClient();
-      const { hits } = await eventClient.findByEventId(originId);
-      const event = hits.at(-1);
+      const event = await eventClient.findLatestByEventId(originId);
 
       if (!event) {
         return undefined;
