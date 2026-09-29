@@ -14,14 +14,14 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { ATTACHMENT_SUMMARY_SHOW_LESS, attachmentSummaryShowMore } from './translations';
+import { ATTACHMENT_GROUP_SHOW_LESS, attachmentGroupShowMore } from './translations';
 
 export const DEFAULT_COLLAPSED_COUNT = 4;
 
-export interface AttachmentSummaryGroupProps {
-  /** The uppercase section header, e.g. "ALERTS". */
+export interface AttachmentGroupListProps {
+  /** The uppercase section header label. */
   title: string;
-  /** The rows to display. Provided by the attachment's renderConversationDetailsContent. */
+  /** The rows to display in this group. */
   rows: React.ReactNode[];
   /**
    * Override the count shown next to the title.
@@ -30,16 +30,16 @@ export interface AttachmentSummaryGroupProps {
   count?: number;
   /**
    * Number of rows visible before "Show more". Defaults to DEFAULT_COLLAPSED_COUNT (4).
-   * Set to Infinity or a number >= rows.length to disable collapsing.
+   * Set to `Infinity` or a number >= `rows.length` to disable collapsing.
    */
   collapsedCount?: number;
 }
 
-/** One titled section inside the attachment summary panel. Owns its own Show more/less toggle. */
-export const AttachmentSummaryGroup = memo<AttachmentSummaryGroupProps>(
+/** One titled group inside the attachments tab. Owns its own Show more/less toggle. */
+export const AttachmentGroupList = memo<AttachmentGroupListProps>(
   ({ title, rows, count, collapsedCount = DEFAULT_COLLAPSED_COUNT }) => {
     const { euiTheme } = useEuiTheme();
-    const listId = useGeneratedHtmlId({ prefix: 'attachmentSummaryGroup' });
+    const listId = useGeneratedHtmlId({ prefix: 'attachmentGroupList' });
     const [isExpanded, setIsExpanded] = useState(false);
 
     if (rows.length === 0) {
@@ -52,14 +52,14 @@ export const AttachmentSummaryGroup = memo<AttachmentSummaryGroupProps>(
     const visibleRows = isCollapsible && !isExpanded ? rows.slice(0, collapsedCount) : rows;
 
     return (
-      <div data-test-subj="attachmentSummaryGroup">
+      <div data-test-subj="attachmentGroupList">
         <div
           css={css({
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
             backgroundColor: euiTheme.colors.backgroundBaseSubdued,
             borderBottom: euiTheme.border.thin,
           })}
-          data-test-subj="attachmentSummaryGroupHeader"
+          data-test-subj="attachmentGroupListHeader"
         >
           <div css={css({ display: 'flex', alignItems: 'baseline', gap: '8px' })}>
             {[title, displayCount].map((part, i) => (
@@ -110,9 +110,9 @@ export const AttachmentSummaryGroup = memo<AttachmentSummaryGroupProps>(
               aria-expanded={isExpanded}
               aria-controls={listId}
               onClick={() => setIsExpanded((expanded) => !expanded)}
-              data-test-subj="attachmentSummaryGroupToggle"
+              data-test-subj="attachmentGroupListToggle"
             >
-              {isExpanded ? ATTACHMENT_SUMMARY_SHOW_LESS : attachmentSummaryShowMore(hiddenCount)}
+              {isExpanded ? ATTACHMENT_GROUP_SHOW_LESS : attachmentGroupShowMore(hiddenCount)}
             </EuiButtonEmpty>
           </div>
         )}
@@ -121,4 +121,4 @@ export const AttachmentSummaryGroup = memo<AttachmentSummaryGroupProps>(
   }
 );
 
-AttachmentSummaryGroup.displayName = 'AttachmentSummaryGroup';
+AttachmentGroupList.displayName = 'AttachmentGroupList';
