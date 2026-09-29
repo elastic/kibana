@@ -145,7 +145,6 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                     <ScanResults
                       action={action}
                       agentId={hostAgentId}
-                      textSize={textSize}
                       data-test-subj={getTestId('results')}
                     />
                   )}
