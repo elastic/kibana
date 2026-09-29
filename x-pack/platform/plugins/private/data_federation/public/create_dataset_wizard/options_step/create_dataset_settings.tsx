@@ -177,9 +177,6 @@ export function CreateDatasetAdditionalSettings({
   );
 }
 
-function NdjsonAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return null;
-}
 
 const FORMAT_HAS_COMMON_SETTINGS: Record<Exclude<DatasetFormatFormValue, ''>, boolean> = {
   csv: true,
