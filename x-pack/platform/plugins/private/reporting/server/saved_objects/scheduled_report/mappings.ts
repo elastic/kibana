@@ -18,9 +18,8 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     },
     createdById: {
       type: 'keyword',
-      // Well above any realm-qualified username (e.g. a SAML NameID or LDAP DN). A value that did
-      // exceed this would not be indexed, and the ownership `list` filter would then treat the
-      // report as a legacy, username-owned document.
+      // Well above any realm-qualified username (e.g. a SAML NameID or LDAP DN). An unindexed
+      // value would make the `list` filter treat the report as legacy, username-owned.
       ignore_above: 1024,
     },
     createdByApiKeyId: {

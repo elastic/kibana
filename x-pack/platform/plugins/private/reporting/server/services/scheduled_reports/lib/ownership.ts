@@ -20,9 +20,7 @@ type ScheduledReportOwnership = Pick<
   'createdBy' | 'createdById' | 'createdByApiKeyId'
 >;
 
-/**
- * A document created before ownership ids existed, whose only record of its creator is a username.
- */
+/** A document predating ownership ids, whose only record of its creator is a username. */
 const isLegacyDocument = (report: ScheduledReportOwnership): boolean =>
   report.createdById === undefined && report.createdByApiKeyId === undefined;
 
@@ -34,14 +32,11 @@ const matchesUsername = (
 /**
  * Checks whether the current principal owns a scheduled report.
  *
- * Ownership is asymmetric: a human owns everything they created, whether through a session or
- * through one of their API keys, while an API key owns only what it created itself. Sharing a key
- * therefore does not hand over the rest of its creator's schedules.
+ * Ownership is asymmetric: a human owns what they created through a session or through any of
+ * their API keys, while a key owns only what it created, so sharing a key hands over nothing else.
  *
  * Username matching cannot distinguish same-username principals across realms, so it is reached
- * only when a document records no owner id: either because it predates them, or because it was
- * created by an API key whose creator could not be resolved. It is never reached for a document
- * that does record one.
+ * only for a document recording no owner id.
  */
 export const isScheduledReportOwner = ({
   report,
@@ -54,8 +49,8 @@ export const isScheduledReportOwner = ({
     if (report.createdByApiKeyId !== undefined) {
       return report.createdByApiKeyId === currentUser.apiKeyId;
     }
-    // A key keeps the access it had to documents created before keys were recorded, but must not
-    // reach anything created since, which is attributed precisely.
+    // A key keeps its access to documents predating key attribution, but must not reach anything
+    // created since, which is attributed precisely.
     return isLegacyDocument(report) && matchesUsername(report, currentUser);
   }
 
@@ -75,8 +70,8 @@ const isAbsent = (field: string): KueryNode =>
   nodeTypes.function.buildNode('not', nodeBuilder.is(field, nodeTypes.wildcard.buildNode('*')));
 
 /**
- * Builds the saved-objects `find` filter restricting results to reports owned by `currentUser`,
- * mirroring `isScheduledReportOwner`.
+ * Builds the saved-objects `find` filter for reports owned by `currentUser`, mirroring
+ * `isScheduledReportOwner`.
  *
  * Returns `undefined` when the identity can match nothing, so callers fail closed instead of
  * running an unfiltered search.

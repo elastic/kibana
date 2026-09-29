@@ -9,23 +9,15 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, IClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { ReportingUser } from '../types';
 
-/**
- * A stable, realm-aware identity for authorization checks on scheduled reports.
- *
- * `ids` holds every id the acting human may legitimately own documents under. A user profile uid
- * and a realm-qualified id denote the same principal, and which one a document stores depends on
- * what was resolvable when it was created, so ownership must match against all of them. `id` is
- * the preferred one, written when creating a document.
- *
- * `apiKeyId` is set when the request is authenticated with an API key. A key owns only the
- * documents it created, never the rest of its creator's, so it is matched separately from `ids`.
- *
- * `username` is for display, logging, and matching documents created before ids existed.
- */
+/** A stable, realm-aware identity for authorization checks on scheduled reports. */
 export interface ReportingUserIdentity {
+  /** Preferred id, written when creating a document. */
   id?: string;
+  /** Every id this human may own documents under: a profile uid and a realm id are the same principal. */
   ids: string[];
+  /** Set for API-key auth. A key owns only what it created, so it is matched separately from `ids`. */
   apiKeyId?: string;
+  /** Display, logging, and matching documents created before ids existed. */
   username?: string;
 }
 
@@ -48,8 +40,9 @@ interface ApiKeyOwner {
 }
 
 /**
- * Identifies UIAM (Elastic Cloud) credentials. Copied from `@kbn/core-security-server`, which does
- * not export `isUiamCredential` on 9.3. Delete this copy and import it once 9.3 is out of support.
+ * Copied from `@kbn/core-security-server`, which exports neither `isUiamCredential` nor
+ * `extractApiKeyIdFromAuthzHeader` on 9.3. Delete both copies and import them once 9.3 is out of
+ * support.
  */
 const UIAM_CREDENTIALS_PREFIX = 'essu_';
 
@@ -67,11 +60,8 @@ const extractApiKeyCredentialsFromAuthzHeader = (
 };
 
 /**
- * Copied from `@kbn/core-security-server`, which does not export this on 9.3. Delete this copy and
- * import it once 9.3 is out of support.
- *
- * Only valid for Elasticsearch API keys, which are sent as `base64(id:secret)`. A UIAM credential
- * is a raw secret with no id envelope, so decoding one yields binary noise rather than an id.
+ * Only valid for Elasticsearch API keys, sent as `base64(id:secret)`. A UIAM credential is a raw
+ * secret with no id envelope, so decoding one yields binary noise rather than an id.
  */
 const decodeApiKeyId = (encodedApiKey: string | undefined): string | undefined => {
   if (encodedApiKey === undefined) {
@@ -84,16 +74,11 @@ const decodeApiKeyId = (encodedApiKey: string | undefined): string | undefined =
 
 interface ApiKeyContext {
   id?: string;
-  /**
-   * UIAM keys are managed by Elastic Cloud and have no Elasticsearch counterpart, so their creator
-   * cannot be looked up and documents they create are owned by the key alone.
-   */
+  /** UIAM keys have no Elasticsearch counterpart, so their creator cannot be looked up. */
   isUiam: boolean;
 }
 
 /**
- * Describes the API key a request is authenticated with.
- *
  * Elasticsearch reports the key id on the authenticated user for both Elasticsearch- and
  * Cloud-managed keys; decoding the authorization header is a fallback for the former only.
  */
@@ -118,10 +103,8 @@ const getApiKeyContext = ({
 /**
  * Resolves the creator of an Elasticsearch API key, when available.
  *
- * `getCurrentUser` for API-key auth often omits `profile_uid`, and reports the same synthetic
- * `_es_api_key` realm for every key, so neither can distinguish principals. Looking up the key
- * itself recovers the creator's profile uid, or failing that their real realm and username, so
- * ownership matches the creator's interactive sessions.
+ * API-key auth often omits `profile_uid` and reports the same synthetic `_es_api_key` realm for
+ * every key, so the creator can only be recovered from the key itself.
  */
 export const resolveApiKeyOwner = async ({
   id,
@@ -152,9 +135,8 @@ export const resolveApiKeyOwner = async ({
 };
 
 /**
- * Usernames alone are not unique across Elasticsearch authentication realms (e.g. file vs native),
- * so realm type and name are encoded with the username. The `realm:` prefix keeps synthetic ids
- * distinguishable from profile uids.
+ * Usernames are not unique across authentication realms (e.g. file vs native), so realm type and
+ * name are encoded with them. The `realm:` prefix keeps these distinguishable from profile uids.
  */
 const toRealmId = (
   realmType: string | undefined,
@@ -166,11 +148,10 @@ const toRealmId = (
     : undefined;
 
 /**
- * Builds every stable principal id the acting human may own documents under, preferred first.
+ * Builds every stable id the acting human may own documents under, preferred first.
  *
- * A principal resolves to a profile uid once they have an activated profile and to a
- * realm-qualified id otherwise, so both are returned when both are derivable. Documents created
- * under either representation then remain accessible when the other is preferred later.
+ * A principal resolves to a profile uid once they have an activated profile and to a realm id
+ * otherwise, so documents created under either representation stay reachable.
  */
 export const toStableUserIds = async ({
   authUser,
@@ -182,8 +163,8 @@ export const toStableUserIds = async ({
   const ids: Array<string | undefined> = [authUser.profile_uid];
 
   if (authUser.authentication_type === 'api_key') {
-    // The realm reported for API-key auth is synthetic and shared by every key, so the creator's
-    // real realm can only come from the key itself.
+    // The realm reported for API-key auth is shared by every key, so the creator's real realm can
+    // only come from the key itself.
     const apiKeyOwner = await resolveOwner?.();
     ids.push(
       apiKeyOwner?.profileUid,
