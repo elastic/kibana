@@ -216,7 +216,14 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
         tier1: {
           status: 'environment_hits_found',
           counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
-          per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
+          per_index: [
+            {
+              index: 'logs-aws.cloudtrail-default',
+              hit_count: 3,
+              required: true,
+              confirming: true,
+            },
+          ],
           resolved_iocs: [{ type: 'hash', value: 'abc123' }],
         },
         tier2: {
@@ -410,7 +417,9 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       tier1: {
         status: 'environment_hits_found',
         counts: { total_hits: 3, returned_hits: 3, affected_hosts: 0, affected_users: 0 },
-        per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
+        per_index: [
+          { index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true, confirming: true },
+        ],
         resolved_iocs: [],
       },
     };
@@ -439,8 +448,8 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
           tier1: {
             ...confirmedTier1.tier1,
             per_index: [
-              { index: 'logs-a', hit_count: 100, required: true },
-              { index: 'logs-b', hit_count: 100, required: false },
+              { index: 'logs-a', hit_count: 100, required: true, confirming: true },
+              { index: 'logs-b', hit_count: 100, required: false, confirming: false },
             ],
           },
         },

@@ -39,13 +39,37 @@ const DEFAULT_ROW_LIMIT = 25;
 const TECHNOLOGY_INDEX_MAP: Record<HuntTechnology, { required: string[]; optional: string[] }> = {
   aws_iam: {
     required: ['logs-aws.*'],
-    optional: ['logs-endpoint.events.*'],
+    optional: [],
   },
   fortigate: {
     required: ['logs-fortinet.*'],
     optional: [],
   },
 };
+
+/**
+ * Host-local telemetry patterns joined onto every non-blocked scope, on
+ * every path: telemetry relevant to a hunt regardless of which technology
+ * the report is "about" (host-local execution evidence is worth searching
+ * whether the report is a cloud, network, or SaaS story). Seeded from the
+ * most common host-telemetry sources: Defend events and alerts, Windows
+ * Security/Sysmon/PowerShell/forwarded, auditd, and the three most common
+ * third-party EDRs. `logs-system.auth-*` is deliberately excluded: it is
+ * noisy on every hunt and would degrade nearly every scope on its own
+ * absence. Presence-checked the same way as `required`/`optional`.
+ */
+export const DEFAULT_BASELINE_TELEMETRY: readonly string[] = [
+  'logs-endpoint.events.*',
+  'logs-endpoint.alerts.*',
+  'logs-system.security-*',
+  'logs-windows.sysmon_operational-*',
+  'logs-windows.powershell*',
+  'logs-windows.forwarded*',
+  'logs-auditd_manager.auditd-*',
+  'logs-crowdstrike.fdr*',
+  'logs-sentinel_one_cloud_funnel.*',
+  'logs-m365_defender.event-*',
+];
 
 const alertsIndexPattern = (spaceId: string): string =>
   `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${spaceId}`;
@@ -147,14 +171,17 @@ export const resolveIndexScope = async ({
 export const HUNT_TECHNOLOGIES = Object.keys(TECHNOLOGY_INDEX_MAP) as HuntTechnology[];
 
 /**
- * Required + optional patterns from every known technology (no space-derived
- * alerts pattern). Used to allowlist caller-supplied Tier 2 generation targets
- * when the hunt has no resolved required-index scope yet.
+ * Required + optional patterns from every known technology, plus the baseline
+ * host-telemetry seed list (no space-derived alerts pattern). Used to
+ * allowlist caller-supplied Tier 2 generation targets when the hunt has no
+ * resolved required-index scope yet.
  */
 export const getKnownHuntIndexPatterns = (): string[] =>
   Array.from(
     new Set(
-      Object.values(TECHNOLOGY_INDEX_MAP).flatMap((entry) => [...entry.required, ...entry.optional])
+      Object.values(TECHNOLOGY_INDEX_MAP)
+        .flatMap((entry) => [...entry.required, ...entry.optional])
+        .concat(DEFAULT_BASELINE_TELEMETRY)
     )
   );
 
@@ -162,11 +189,12 @@ export const getKnownHuntIndexPatterns = (): string[] =>
 export type HuntScopeResolution =
   | 'pinned' // explicit technology, present
   | 'static' // no technology given, at least one known technology present, no vendor/product match
+  | 'baseline' // no known technology (pinned or static) present, but at least one baseline pattern is: host telemetry alone unblocks the scope
   | 'discovered:deterministic' // report vendor/product matched a discovered dataset (wins over a present static technology)
   | 'discovered:model' // every known technology blocked; model match
   | 'discovered:broad' // every known technology blocked, no dataset matched, report has IOCs: Tier 1 searches every log source under the discovery pattern
-  | 'blocked:pinned' // explicit technology, its required indices absent
-  | 'blocked:no_report' // every known technology blocked, nothing to match against
+  | 'blocked:pinned' // explicit technology, its required indices absent, and no baseline pattern present either
+  | 'blocked:no_report' // every known technology blocked, nothing to match against, and no baseline pattern present either
   | 'blocked:discovery_failed' // listSearchSources threw (fail closed)
   | 'blocked:no_datasets' // discovery returned nothing
   | 'blocked:model_unavailable' // deterministic missed, no model was given, report has no IOCs
@@ -185,6 +213,18 @@ export type HuntScope = Omit<ResolvedIndexScope, 'technology'> & {
    * blocked). This is what the coordinator reports on the wire.
    */
   index_patterns: string[];
+  /**
+   * Present baseline host-telemetry patterns (`DEFAULT_BASELINE_TELEMETRY`).
+   * `[]` when blocked.
+   */
+  baseline: string[];
+  /**
+   * `required ∪ baseline`, present-only. Tier 2's allowlist, generation
+   * target, and hit bar — not `required` alone, so a confirmed baseline hit
+   * (host telemetry) can steer and be counted by Tier 2 the same as a
+   * confirmed required-index hit. `[]` when blocked.
+   */
+  tier2_targets: string[];
   resolution: HuntScopeResolution;
 };
 
@@ -234,32 +274,44 @@ const logResolution = (
  * A blocked unpinned scope starts as `blocked:no_report`; the dynamic path in
  * `resolveHuntScope` narrows that when it gets to run.
  */
-const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntScope => {
+const mergeStaticScopes = (
+  scopes: ResolvedIndexScope[],
+  pinned: boolean,
+  baseline: { present: string[]; missing: string[] }
+): HuntScope => {
   const present = scopes.filter((scope) => scope.status !== 'blocked');
   const source = present.length > 0 ? present : scopes;
+  const requiredPresent = present.length > 0;
+  // Host telemetry alone unblocks a scope. `blocked` now means no required
+  // index and no baseline pattern present — not merely "no known technology
+  // present" — whether or not a technology was pinned.
+  const blocked = !requiredPresent && baseline.present.length === 0;
   const status = deriveStatus(
-    present.length === 0,
-    present.some((scope) => scope.status === 'degraded')
+    blocked,
+    !blocked && present.some((scope) => scope.status === 'degraded')
   );
   const required = uniq(source.flatMap((scope) => scope.required));
-  const resolution: HuntScopeResolution =
-    status === 'blocked'
-      ? pinned
-        ? 'blocked:pinned'
-        : 'blocked:no_report'
-      : pinned
+  const resolution: HuntScopeResolution = blocked
+    ? pinned
+      ? 'blocked:pinned'
+      : 'blocked:no_report'
+    : requiredPresent
+    ? pinned
       ? 'pinned'
-      : 'static';
+      : 'static'
+    : 'baseline';
 
   return {
     technologies: present.map((scope) => scope.technology),
     status,
     required,
     optional: uniq(source.flatMap((scope) => scope.optional)),
-    missing: uniq(source.flatMap((scope) => scope.missing)),
+    baseline: baseline.present,
+    missing: uniq([...source.flatMap((scope) => scope.missing), ...baseline.missing]),
     // The wire contract says empty when blocked: `required` still names what was
     // checked (for `missing`), but nothing was hunted against it.
-    index_patterns: status === 'blocked' ? [] : required,
+    index_patterns: blocked ? [] : required,
+    tier2_targets: blocked ? [] : uniq([...required, ...baseline.present]),
     resolution,
     window: scopes[0].window,
     row_limit: scopes[0].row_limit,
@@ -331,6 +383,7 @@ const buildDiscoveredScope = async ({
   blocked,
   resolution,
   logger,
+  baseline,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
@@ -338,6 +391,7 @@ const buildDiscoveredScope = async ({
   blocked: HuntScope;
   resolution: DiscoveredResolution;
   logger?: Logger;
+  baseline: { present: string[]; missing: string[] };
 }): Promise<HuntScope> => {
   const alertsPattern = alertsIndexPattern(spaceId);
   const [, alertsPresent] = await checkPattern(esClient, alertsPattern);
@@ -352,17 +406,22 @@ const buildDiscoveredScope = async ({
     resolution === 'discovered:broad'
       ? []
       : uniq(matches.flatMap((match) => match.search_patterns));
+  // The baseline patterns ride in the same request path as `required` (Tier 1
+  // searches `required ∪ baseline ∪ optional`), so the fits-the-request-path
+  // check has to count them too, before the matched-target list is decided —
+  // otherwise a matched list that fits on its own could still overflow once
+  // baseline is unioned in at search time.
   let required: string[];
   let collapsed = false;
   if (resolution === 'discovered:broad') {
     required = broadSearchPatterns();
-  } else if (fitsRequestPath(matchedTargets)) {
+  } else if (fitsRequestPath([...matchedTargets, ...baseline.present])) {
     required = matchedTargets;
   } else {
     // Too wide to name one by one. Fall back to wildcards per matched vendor token, which
     // keeps unmatched vendors out of the hit bar, and only then to the broad target.
     const byVendor = vendorWildcards(matches);
-    const useVendor = fitsRequestPath(byVendor);
+    const useVendor = fitsRequestPath([...byVendor, ...baseline.present]);
     required = useVendor ? byVendor : broadSearchPatterns();
     collapsed = true;
     logger?.warn(
@@ -376,16 +435,25 @@ const buildDiscoveredScope = async ({
     );
   }
   // A match that had to be collapsed is wider than what matched and reads as degraded,
-  // whichever matcher produced it.
+  // whichever matcher produced it. An absent seed baseline pattern is ordinary
+  // (no one customer runs every source on the list) and does not degrade the
+  // scope; an absent alerts pattern still does.
   const status = resolution === 'discovered:deterministic' && !collapsed ? 'ok' : 'degraded';
+  const finalStatus = alertsPresent ? status : 'degraded';
 
   return {
     technologies: [],
-    status: alertsPresent ? status : 'degraded',
+    status: finalStatus,
     required,
     optional: [alertsPattern],
-    missing: uniq([...blocked.missing, ...(alertsPresent ? [] : [alertsPattern])]),
+    baseline: baseline.present,
+    missing: uniq([
+      ...blocked.missing,
+      ...baseline.missing,
+      ...(alertsPresent ? [] : [alertsPattern]),
+    ]),
     index_patterns: required,
+    tier2_targets: uniq([...required, ...baseline.present]),
     resolution,
     window: blocked.window,
     row_limit: blocked.row_limit,
@@ -438,12 +506,26 @@ export const resolveHuntScope = async ({
   logger?: Logger;
 }): Promise<HuntScope> => {
   const candidates = technology ? [technology] : HUNT_TECHNOLOGIES;
-  const scopes = await Promise.all(
-    candidates.map((candidate) =>
-      resolveIndexScope({ esClient, technology: candidate, spaceId, window, row_limit })
-    )
+  const [scopes, baselineResults] = await Promise.all([
+    Promise.all(
+      candidates.map((candidate) =>
+        resolveIndexScope({ esClient, technology: candidate, spaceId, window, row_limit })
+      )
+    ),
+    Promise.all(DEFAULT_BASELINE_TELEMETRY.map((pattern) => checkPattern(esClient, pattern))),
+  ]);
+  // The seed list is broad on purpose — no one customer is expected to run
+  // every EDR and OS logging source on it — so an absent seed pattern is
+  // ordinary and does not degrade the scope; it is only recorded in `missing`
+  // for visibility.
+  const baseline = baselineResults.reduce<{ present: string[]; missing: string[] }>(
+    (acc, [pattern, present]) => {
+      (present ? acc.present : acc.missing).push(pattern);
+      return acc;
+    },
+    { present: [], missing: [] }
   );
-  const staticScope = mergeStaticScopes(scopes, technology !== undefined);
+  const staticScope = mergeStaticScopes(scopes, technology !== undefined, baseline);
   const finish = (scope: HuntScope, scored?: ModelDatasetMatch['scored']): HuntScope => {
     logResolution(logger, scope, scored);
     return scope;
@@ -489,6 +571,7 @@ export const resolveHuntScope = async ({
         blocked: staticScope,
         logger,
         resolution: 'discovered:broad',
+        baseline,
       })
     );
   };
@@ -520,6 +603,7 @@ export const resolveHuntScope = async ({
         blocked: staticScope,
         logger,
         resolution: 'discovered:deterministic',
+        baseline,
       })
     );
   }
@@ -539,6 +623,7 @@ export const resolveHuntScope = async ({
       blocked: staticScope,
       logger,
       resolution: 'discovered:model',
+      baseline,
     }),
     modelMatch.scored
   );

@@ -66,7 +66,10 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           }
 
           const result = await huntForThreat(esClient, {
-            scope,
+            // This route checks one technology's own scope, not the merged
+            // hunt scope baseline telemetry joins; it never confirms on
+            // baseline the way the coordinator's Tier 1 call does.
+            scope: { ...scope, baseline: [] },
             iocs,
             techniques,
             time_range,

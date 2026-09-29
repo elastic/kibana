@@ -70,6 +70,8 @@ const MAX_ENTITY_NAME_LENGTH = 512;
  * one that lists all of them.
  */
 const MAX_BEHAVIORS = 20;
+/** Matches the SSE schema's `hunt_result.tier2_targets` cap. */
+const MAX_TIER2_TARGETS = 64;
 
 /**
  * Window bounds: the SSE schema requires `.datetime()` (ISO 8601, UTC `Z`), while
@@ -544,16 +546,18 @@ const buildHuntResult = (
     tier1RefCount,
   });
 
-  // Required indices set the hit bar, so when the bucket list overflows the
-  // schema cap they are the rows to keep; optional-index buckets fill the rest.
-  // `sort` is stable, so Tier 1's doc-count order survives within each group.
+  // Confirming indices (required or baseline) set the hit bar, so when the
+  // bucket list overflows the schema cap they are the rows to keep;
+  // optional-index buckets fill the rest. `sort` is stable, so Tier 1's
+  // doc-count order survives within each group.
   const perIndex = [...tier1.per_index]
-    .sort((a, b) => Number(b.required) - Number(a.required))
+    .sort((a, b) => Number(b.confirming) - Number(a.confirming))
     .slice(0, MAX_PER_INDEX)
     .map((entry) => ({
       index: entry.index,
       hit_count: entry.hit_count,
       required: entry.required,
+      confirming: entry.confirming,
     }));
 
   return {
@@ -584,6 +588,9 @@ const buildHuntResult = (
           ...(scoped.length > MAX_BEHAVIORS ? { behaviors_truncated: true } : {}),
         }
       : undefined,
+    ...(result.tier2_targets.length > 0
+      ? { tier2_targets: result.tier2_targets.slice(0, MAX_TIER2_TARGETS) }
+      : {}),
   };
 };
 

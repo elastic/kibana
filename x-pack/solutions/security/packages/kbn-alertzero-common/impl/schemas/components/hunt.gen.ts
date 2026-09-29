@@ -241,6 +241,14 @@ export const HuntForThreatResult = lazySchema(() =>
           .describe(
             "Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`), computed once by Tier 1, not re-derived downstream."
           ),
+        /**
+         * Regex match of this concrete `_index` bucket against `required ∪ baseline`. This, not `required`, is what sets `has_confirmed_hit` and steers Tier 2: a baseline-only match (host telemetry) confirms a hunt the same way a required-index match does; an alerts-alias-only match still does not.
+         */
+        confirming: z
+          .boolean()
+          .describe(
+            'Regex match of this concrete `_index` bucket against `required ∪ baseline`. This, not `required`, is what sets `has_confirmed_hit` and steers Tier 2: a baseline-only match (host telemetry) confirms a hunt the same way a required-index match does; an alerts-alias-only match still does not.'
+          ),
       })
     ),
     message: z.string().optional(),

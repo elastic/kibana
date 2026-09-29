@@ -78,7 +78,14 @@ const sseAttachment = ({
                   affected_hosts: 1,
                   affected_users: 0,
                 },
-                per_index: [{ index: 'logs-endpoint.events*', hit_count: 1, required: true }],
+                per_index: [
+                  {
+                    index: 'logs-endpoint.events*',
+                    hit_count: 1,
+                    required: true,
+                    confirming: true,
+                  },
+                ],
                 resolved_iocs: [],
               },
             }
@@ -97,7 +104,14 @@ const sseAttachment = ({
                   affected_hosts: 0,
                   affected_users: 0,
                 },
-                per_index: [{ index: 'logs-endpoint.events*', hit_count: 0, required: true }],
+                per_index: [
+                  {
+                    index: 'logs-endpoint.events*',
+                    hit_count: 0,
+                    required: true,
+                    confirming: true,
+                  },
+                ],
                 resolved_iocs: [],
               },
             },

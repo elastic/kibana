@@ -12,8 +12,10 @@ export interface HuntForThreatParams {
    * The resolved index scope from A2 (required and optional patterns, plus
    * row_limit/window defaults). Accepts a single-technology scope or the merged
    * multi-technology hunt scope; Tier 1 never reads the technology itself.
+   * `baseline` joins the search set and the confirming set alongside
+   * `required`.
    */
-  scope: Omit<ResolvedIndexScope, 'technology'>;
+  scope: Omit<ResolvedIndexScope, 'technology'> & { baseline: string[] };
   iocs?: HuntIoc[];
   techniques?: string[];
   /** Overrides the scope's window when the caller wants a narrower/wider range for this run. */

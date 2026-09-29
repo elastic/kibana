@@ -114,6 +114,13 @@ const huntResultPerIndexSchema = z.object({
   index: z.string().min(1).max(256),
   hit_count: z.number().int().min(0),
   required: z.boolean(),
+  /**
+   * Match against `required ∪ baseline`. This, not `required`, is what sets
+   * `has_confirmed_hit`: a baseline-only match (host telemetry) confirms a
+   * hunt the same way a required-index match does; an alerts-alias-only
+   * match still does not.
+   */
+  confirming: z.boolean(),
 });
 
 const huntResultTier1Schema = z.object({
@@ -234,6 +241,13 @@ export const huntResultSchema = z
       }),
     tier1: huntResultTier1Schema,
     tier2: huntResultTier2Schema.optional(),
+    /**
+     * `index_patterns` (required) union the present baseline host-telemetry
+     * patterns: what Tier 2 was allowed to read, target, and count as a hit.
+     * A run says what it hunted and what Tier 2 could read separately, since
+     * a baseline-only estate has no required index at all.
+     */
+    tier2_targets: z.array(z.string().min(1).max(256)).max(64).optional(),
   })
   // The Tier 1 status names its own outcome, so a status that disagrees with the counts is a
   // producer bug: the renderer would show both the status and the contradicting counts, and

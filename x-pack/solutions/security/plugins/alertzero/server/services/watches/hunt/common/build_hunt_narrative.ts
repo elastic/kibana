@@ -20,6 +20,7 @@ export interface HuntNarrativeContext {
   reportTitle?: string;
   requiredIndexPatterns?: string[];
   optionalIndexPatterns?: string[];
+  baselineIndexPatterns?: string[];
 }
 
 const MAX_LISTED = 6;
@@ -177,20 +178,20 @@ const describeTier1 = (tier1: HuntForThreatResult, hasConfirmedHit: boolean): st
     return lines;
   }
 
-  const requiredHits = tier1.per_index.filter((entry) => entry.required);
+  const confirmingHits = tier1.per_index.filter((entry) => entry.confirming);
   let confirmation: string;
   if (!tier1.has_confirmed_hit && !hasConfirmedHit) {
     confirmation =
-      'None of those matches were in a required index, so Tier 1 did not confirm the hit on its own.';
+      'None of those matches were in a required or baseline index, so Tier 1 did not confirm the hit on its own.';
   } else if (!tier1.has_confirmed_hit) {
-    confirmation = 'None of those matches were in a required index.';
-  } else if (requiredHits.length > 0) {
+    confirmation = 'None of those matches were in a required or baseline index.';
+  } else if (confirmingHits.length > 0) {
     confirmation = `${plural(
-      requiredHits.reduce((sum, entry) => sum + entry.hit_count, 0),
+      confirmingHits.reduce((sum, entry) => sum + entry.hit_count, 0),
       'match',
       'matches'
     )} landed in ${
-      requiredHits.length === 1 ? 'a required index' : 'required indices'
+      confirmingHits.length === 1 ? 'a required or baseline index' : 'required or baseline indices'
     }, which confirms the hit.`;
   } else {
     confirmation = '';
@@ -206,7 +207,8 @@ const describeTier1 = (tier1: HuntForThreatResult, hasConfirmedHit: boolean): st
     .slice()
     .sort((a, b) => b.hit_count - a.hit_count)
     .slice(0, MAX_LISTED)) {
-    lines.push(`- ${code(entry.index)}${entry.required ? ' (required)' : ''}: ${entry.hit_count}`);
+    const tag = entry.required ? ' (required)' : entry.confirming ? ' (baseline)' : '';
+    lines.push(`- ${code(entry.index)}${tag}: ${entry.hit_count}`);
   }
   if (tier1.per_index.length > MAX_LISTED) {
     lines.push(`- ${plural(tier1.per_index.length - MAX_LISTED, 'more index', 'more indices')}`);
@@ -246,6 +248,9 @@ const describeSearch = (result: HuntCoordinatorCoreResult, ctx: HuntNarrativeCon
   const scope: string[] = [];
   if (ctx.requiredIndexPatterns && ctx.requiredIndexPatterns.length > 0) {
     scope.push(`${ctx.requiredIndexPatterns.map(code).join(', ')} (required)`);
+  }
+  if (ctx.baselineIndexPatterns && ctx.baselineIndexPatterns.length > 0) {
+    scope.push(`${ctx.baselineIndexPatterns.map(code).join(', ')} (baseline)`);
   }
   if (ctx.optionalIndexPatterns && ctx.optionalIndexPatterns.length > 0) {
     scope.push(`${ctx.optionalIndexPatterns.map(code).join(', ')} (optional)`);

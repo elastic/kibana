@@ -57,7 +57,9 @@ describe('resolveIndexScope', () => {
     required: string[];
     optional: string[];
   }>([
-    { technology: 'aws_iam', required: ['logs-aws.*'], optional: ['logs-endpoint.events.*'] },
+    // `logs-endpoint.events.*` moved off aws_iam's `optional` onto the baseline seed
+    // list: `optional` is the space-derived alerts alias only, for every technology.
+    { technology: 'aws_iam', required: ['logs-aws.*'], optional: [] },
     { technology: 'fortigate', required: ['logs-fortinet.*'], optional: [] },
   ])('$technology', ({ technology, required, optional }) => {
     it('is ok when every required and optional pattern (plus alerts) resolves', async () => {
@@ -264,7 +266,10 @@ describe('resolveHuntScope', () => {
   });
 
   it('is degraded when any present technology is degraded', async () => {
-    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-fortinet.*', alertsPattern]));
+    // The alerts alias is the one per-technology optional pattern left once
+    // `logs-endpoint.events.*` moved to the baseline seed list; omitting it
+    // (present on neither technology) degrades every technology's own scope.
+    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-fortinet.*']));
     const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
 
     expect(result.status).toBe('degraded');

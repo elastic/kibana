@@ -73,6 +73,7 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   run_id: 'run-1',
   technologies: ['aws_iam'],
   index_patterns: [],
+  tier2_targets: [],
   tier1: tier1(),
   message: 'Tier 1: no_environment_hits.',
   next_step: 'n/a',
@@ -116,9 +117,19 @@ const hitTier1 = (): HuntCoordinatorTier1 =>
       services: [{ name: 'escalated-role', hit_count: 6 }],
     },
     per_index: [
-      { index: 'logs-aws.cloudtrail.2026.09.25', hit_count: 20, required: true },
-      { index: '.internal.alerts-security.alerts-default-000001', hit_count: 33, required: false },
-      { index: 'logs-endpoint.events.f56865fe.2026.09.25', hit_count: 68, required: false },
+      { index: 'logs-aws.cloudtrail.2026.09.25', hit_count: 20, required: true, confirming: true },
+      {
+        index: '.internal.alerts-security.alerts-default-000001',
+        hit_count: 33,
+        required: false,
+        confirming: false,
+      },
+      {
+        index: 'logs-endpoint.events.f56865fe.2026.09.25',
+        hit_count: 68,
+        required: false,
+        confirming: false,
+      },
     ],
   });
 
@@ -160,7 +171,7 @@ describe('buildHuntNarrative', () => {
         ].join('\n'),
         [
           '**Tier 1: indicator and technique search**',
-          'Tier 1 matched 121 documents across 3 indices. 20 matches landed in a required index, which confirms the hit.',
+          'Tier 1 matched 121 documents across 3 indices. 20 matches landed in a required or baseline index, which confirms the hit.',
           '- `logs-endpoint.events.f56865fe.2026.09.25`: 68',
           '- `.internal.alerts-security.alerts-default-000001`: 33',
           '- `logs-aws.cloudtrail.2026.09.25` (required): 20',
@@ -178,6 +189,17 @@ describe('buildHuntNarrative', () => {
         ].join('\n'),
         '_Hunt run `run-1`._',
       ].join('\n\n')
+    );
+  });
+
+  it('lists baseline patterns next to required and optional under "What was searched"', () => {
+    const narrative = buildHuntNarrative(result({ tier1: hitTier1(), tier2: tier2([]) }), {
+      ...ctx,
+      baselineIndexPatterns: ['logs-endpoint.events.*', 'logs-system.security-*'],
+    });
+
+    expect(narrative).toContain(
+      '- **Indices:** `logs-aws.*` (required); `logs-endpoint.events.*`, `logs-system.security-*` (baseline); `logs-endpoint.events.*`, `.alerts-security.alerts-default` (optional)'
     );
   });
 
@@ -226,6 +248,7 @@ describe('buildHuntNarrative', () => {
               index: '.internal.alerts-security.alerts-default-000001',
               hit_count: 5,
               required: false,
+              confirming: false,
             },
           ],
         }),
@@ -236,7 +259,7 @@ describe('buildHuntNarrative', () => {
 
     expect(narrative).toContain('### Hunt Watch found no confirmed hits');
     expect(narrative).toContain(
-      'Tier 1 matched 5 documents across 1 index. None of those matches were in a required index, so Tier 1 did not confirm the hit on its own.'
+      'Tier 1 matched 5 documents across 1 index. None of those matches were in a required or baseline index, so Tier 1 did not confirm the hit on its own.'
     );
   });
 

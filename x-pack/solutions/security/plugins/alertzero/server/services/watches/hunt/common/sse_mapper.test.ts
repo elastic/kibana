@@ -28,6 +28,8 @@ jest.mock('./resolve_index_scope', () => ({
     // (`logs-aws.*`), not a concrete `_index` bucket name. The fixture must use
     // the pattern so `matchesRequired`'s regex logic is exercised correctly.
     required: ['logs-aws.*'],
+    baseline: [],
+    tier2_targets: ['logs-aws.*'],
     optional: ['.alerts-security.alerts-default'],
     missing: [],
     window: { from: 'now-24h', to: 'now' },
@@ -63,8 +65,18 @@ const HIT_TIER1_RESULT = {
     services: [{ name: 'ci-deploy-role', hit_count: 2 }],
   },
   per_index: [
-    { index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001', hit_count: 3, required: true },
-    { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
+    {
+      index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+      hit_count: 3,
+      required: true,
+      confirming: true,
+    },
+    {
+      index: '.alerts-security.alerts-default',
+      hit_count: 1,
+      required: false,
+      confirming: false,
+    },
   ],
 };
 
@@ -172,6 +184,7 @@ const tier1Result = (
   run_id: 'run-1',
   technologies: ['aws_iam'],
   index_patterns: ['logs-aws.*'],
+  tier2_targets: ['logs-aws.*'],
   has_confirmed_hit: true,
   completeness: 'complete',
   completed_successfully: true,
@@ -189,7 +202,9 @@ const tier1Result = (
     counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
     hits: [],
     affected_assets: { hosts: [], users: [], services: [] },
-    per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true }],
+    per_index: [
+      { index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true, confirming: true },
+    ],
     ...over,
   },
 });
@@ -316,8 +331,18 @@ describe('buildSseData', () => {
     expect(huntResultOf(entry).tier1.status).toBe('environment_hits_found');
     expect(huntResultOf(entry).tier1.counts.total_hits).toBe(4);
     expect(huntResultOf(entry).tier1.per_index).toEqual([
-      { index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001', hit_count: 3, required: true },
-      { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
+      {
+        index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+        hit_count: 3,
+        required: true,
+        confirming: true,
+      },
+      {
+        index: '.alerts-security.alerts-default',
+        hit_count: 1,
+        required: false,
+        confirming: false,
+      },
     ]);
     expect(huntResultOf(entry).tier1.resolved_iocs).toEqual([
       { type: 'hash', value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' },
@@ -672,6 +697,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
             index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
             hit_count: 1,
             required: true,
+            confirming: true,
           },
         ],
       },
@@ -708,6 +734,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
             index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
             hit_count: 1,
             required: true,
+            confirming: true,
           },
         ],
       },
@@ -761,8 +788,14 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
             index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
             hit_count: 1,
             required: true,
+            confirming: true,
           },
-          { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
+          {
+            index: '.alerts-security.alerts-default',
+            hit_count: 1,
+            required: false,
+            confirming: false,
+          },
         ],
       },
       [
@@ -907,6 +940,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
       index: `.ds-logs-aws.cloudtrail-default-2026.07.${String(i + 1).padStart(2, '0')}-000001`,
       hit_count: 1,
       required: i >= 5,
+      confirming: i >= 5,
     }));
     const result = tier1Result({
       per_index: perIndex,
@@ -1056,7 +1090,9 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
       tier1Result({
         hits,
         counts: { total_hits: 50, returned_hits: 50, affected_hosts: 0, affected_users: 0 },
-        per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 50, required: true }],
+        per_index: [
+          { index: 'logs-aws.cloudtrail-default', hit_count: 50, required: true, confirming: true },
+        ],
       }),
       [
         behaviorFixture({
@@ -1158,7 +1194,9 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
         { id: 'evt-datemath', index: 'logs-aws.cloudtrail-default', timestamp: 'now-1d' },
       ],
       counts: { total_hits: 4, returned_hits: 4, affected_hosts: 0, affected_users: 0 },
-      per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 4, required: true }],
+      per_index: [
+        { index: 'logs-aws.cloudtrail-default', hit_count: 4, required: true, confirming: true },
+      ],
     });
 
     expect(schemaIssues(result)).toEqual([]);

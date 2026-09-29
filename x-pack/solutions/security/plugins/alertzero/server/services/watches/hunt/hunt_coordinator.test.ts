@@ -14,8 +14,10 @@ jest.mock('./common/resolve_index_scope', () => ({
   resolveHuntScope: jest.fn().mockResolvedValue({
     technologies: ['aws_iam'],
     index_patterns: ['logs-aws.cloudtrail-*'],
+    tier2_targets: ['logs-aws.cloudtrail-*'],
     status: 'ok',
     required: ['logs-aws.cloudtrail-*'],
+    baseline: [],
     optional: [],
     missing: [],
     window: { from: 'now-24h', to: 'now' },
@@ -235,6 +237,47 @@ describe('huntCoordinator', () => {
       }
     );
     expect(result.index_patterns).toEqual(['logs-aws.cloudtrail-*']);
+  });
+
+  it('reports tier2_targets (required union baseline) alongside index_patterns, and hands it to huntBehavior as required_indices', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    mockScope.mockResolvedValueOnce({
+      technologies: ['aws_iam'],
+      index_patterns: ['logs-aws.cloudtrail-*'],
+      tier2_targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.*'],
+      status: 'ok',
+      required: ['logs-aws.cloudtrail-*'],
+      baseline: ['logs-endpoint.events.*'],
+      optional: [],
+      missing: [],
+      window: { from: 'now-24h', to: 'now' },
+      row_limit: 100,
+    });
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      mockModel,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-tier2-targets',
+        text: 'report text',
+      }
+    );
+
+    expect(result.index_patterns).toEqual(['logs-aws.cloudtrail-*']);
+    expect(result.tier2_targets).toEqual(['logs-aws.cloudtrail-*', 'logs-endpoint.events.*']);
+    expect(mockT2).toHaveBeenCalledWith(
+      mockModel,
+      logger,
+      expect.objectContaining({
+        required_indices: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.*'],
+      }),
+      esClient
+    );
   });
 
   describe('what scope resolution is handed', () => {
@@ -1156,6 +1199,8 @@ describe('huntCoordinator', () => {
   describe('Tier 2 generation targets', () => {
     const tier1WithBuckets = (perIndex: Array<{ index: string; required: boolean }>) => ({
       status: 'environment_hits_found',
+      // `confirming` (required ∪ baseline) sets the hit bar; these fixtures carry no
+      // baseline bucket, so it agrees with `required` for every entry here.
       has_confirmed_hit: perIndex.some((entry) => entry.required),
       searched_iocs: 1,
       searched_techniques: 0,
@@ -1165,7 +1210,11 @@ describe('huntCoordinator', () => {
       counts: { total_hits: 3, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
       hits: [],
       affected_assets: { hosts: [], users: [], services: [] },
-      per_index: perIndex.map((entry) => ({ ...entry, hit_count: 1 })),
+      per_index: perIndex.map((entry) => ({
+        ...entry,
+        confirming: entry.required,
+        hit_count: 1,
+      })),
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
 
@@ -1906,7 +1955,12 @@ describe('huntCoordinator', () => {
       has_confirmed_hit: true,
       counts: { total_hits: 2, returned_hits: 2, affected_hosts: 0, affected_users: 0 },
       per_index: [
-        { index: '.ds-logs-okta.system-default-2026.09.01-000001', hit_count: 2, required: true },
+        {
+          index: '.ds-logs-okta.system-default-2026.09.01-000001',
+          hit_count: 2,
+          required: true,
+          confirming: true,
+        },
       ],
     });
 
@@ -1915,9 +1969,11 @@ describe('huntCoordinator', () => {
       mockScope.mockResolvedValueOnce({
         technologies: [],
         index_patterns: broadPatterns,
+        tier2_targets: broadPatterns,
         status: 'degraded',
         resolution: 'discovered:broad',
         required: broadPatterns,
+        baseline: [],
         optional: [],
         missing: [],
         window: { from: 'now-24h', to: 'now' },

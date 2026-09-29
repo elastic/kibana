@@ -7,12 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { huntForThreat } from './hunt_for_threat';
-import type { ResolvedIndexScope } from '@kbn/alertzero-common';
+import type { HuntForThreatParams } from './types';
 
-const scope: ResolvedIndexScope = {
-  technology: 'aws_iam',
+const scope: HuntForThreatParams['scope'] = {
   status: 'ok',
   required: ['logs-aws.*'],
+  baseline: [],
   optional: ['logs-endpoint.events.*', '.alerts-security.alerts-default'],
   missing: [],
   window: { from: '2026-08-19T00:00:00.000Z', to: '2026-09-18T00:00:00.000Z' },
@@ -357,7 +357,9 @@ describe('huntForThreat', () => {
       iocs: [{ type: 'ip', value: '10.0.0.1' }],
     });
 
-    expect(result.per_index).toEqual([{ index: backingIndex, hit_count: 1, required: true }]);
+    expect(result.per_index).toEqual([
+      { index: backingIndex, hit_count: 1, required: true, confirming: true },
+    ]);
     expect(result.has_confirmed_hit).toBe(true);
   });
 
@@ -391,8 +393,13 @@ describe('huntForThreat', () => {
 
     expect(result.has_confirmed_hit).toBe(true);
     expect(result.per_index).toEqual([
-      { index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true },
-      { index: '.alerts-security.alerts-default', hit_count: 900, required: false },
+      { index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true, confirming: true },
+      {
+        index: '.alerts-security.alerts-default',
+        hit_count: 900,
+        required: false,
+        confirming: false,
+      },
     ]);
     expect(esClient.count).toHaveBeenCalledWith(
       expect.objectContaining({ index: scope.required, query: expect.any(Object) })
@@ -473,6 +480,56 @@ describe('huntForThreat', () => {
     expect(result.has_confirmed_hit).toBe(false);
   });
 
+  it('sets has_confirmed_hit on a baseline-only match, with no required index present', async () => {
+    const baselineOnlyScope: HuntForThreatParams['scope'] = {
+      ...scope,
+      required: [],
+      baseline: ['logs-endpoint.events.*'],
+    };
+    const esClient = buildEsClient(
+      {
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _index: 'logs-endpoint.events.process-default',
+              _id: 'ghi',
+              _score: 1.1,
+              _source: { '@timestamp': '2026-09-01T00:00:00.000Z' },
+            },
+          ],
+        },
+        aggregations: {
+          per_index: { buckets: [{ key: 'logs-endpoint.events.process-default', doc_count: 1 }] },
+          affected_hosts: { buckets: [] },
+          affected_users: { buckets: [] },
+        },
+      },
+      1
+    );
+
+    const result = await huntForThreat(esClient, {
+      scope: baselineOnlyScope,
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
+    });
+
+    expect(result.status).toBe('environment_hits_found');
+    expect(result.has_confirmed_hit).toBe(true);
+    expect(result.per_index).toEqual([
+      {
+        index: 'logs-endpoint.events.process-default',
+        hit_count: 1,
+        required: false,
+        confirming: true,
+      },
+    ]);
+    expect(esClient.count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: [...baselineOnlyScope.required, ...baselineOnlyScope.baseline],
+      })
+    );
+  });
+
   it('searches both required and optional patterns together with ignore_unavailable', async () => {
     const esClient = buildEsClient(emptySearchResponse);
 
@@ -484,6 +541,25 @@ describe('huntForThreat', () => {
         ignore_unavailable: true,
         allow_no_indices: true,
         size: scope.row_limit,
+      })
+    );
+  });
+
+  it('searches required, baseline, and optional patterns together', async () => {
+    const esClient = buildEsClient(emptySearchResponse);
+    const scopeWithBaseline: HuntForThreatParams['scope'] = {
+      ...scope,
+      baseline: ['logs-endpoint.events.*'],
+    };
+
+    await huntForThreat(esClient, {
+      scope: scopeWithBaseline,
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
+    });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: [...scopeWithBaseline.required, ...scopeWithBaseline.baseline, ...scope.optional],
       })
     );
   });

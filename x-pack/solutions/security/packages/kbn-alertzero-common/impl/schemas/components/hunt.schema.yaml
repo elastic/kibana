@@ -281,7 +281,7 @@ components:
           type: array
           items:
             type: object
-            required: [index, hit_count, required]
+            required: [index, hit_count, required, confirming]
             properties:
               index:
                 type: string
@@ -294,5 +294,14 @@ components:
                   resolved technology's required index patterns (e.g.
                   `logs-aws.*`), computed once by Tier 1, not re-derived
                   downstream.
+              confirming:
+                type: boolean
+                description: >-
+                  Regex match of this concrete `_index` bucket against
+                  `required ∪ baseline`. This, not `required`, is what sets
+                  `has_confirmed_hit` and steers Tier 2: a baseline-only match
+                  (host telemetry) confirms a hunt the same way a
+                  required-index match does; an alerts-alias-only match still
+                  does not.
         message:
           type: string

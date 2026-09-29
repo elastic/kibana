@@ -98,6 +98,14 @@ export interface HuntCoordinatorCoreResult {
    * run stopped before a scope existed.
    */
   index_patterns: string[];
+  /**
+   * `index_patterns` union the present baseline host-telemetry patterns: what
+   * Tier 2 was allowed to read, target, and count as a hit — not `index_patterns`
+   * alone, since a host-telemetry-only estate has an empty `index_patterns` but
+   * a non-empty `tier2_targets`. Empty when the scope was blocked or resolution
+   * failed.
+   */
+  tier2_targets: string[];
   tier1: HuntCoordinatorTier1;
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
@@ -237,13 +245,14 @@ const buildArticleContext = (
     const users = tier1.affected_assets.users.map((u) => u.name).filter((n) => n.length > 0);
     if (hosts.length > 0) context.affected_hosts = hosts;
     if (users.length > 0) context.affected_users = users;
-    // Only required-index buckets steer Tier 2 generation: its hit bar counts
-    // required-index rows alone, so a Tier 1 match that landed only in the
-    // alerts (optional) index must not point the generator at the alerts index,
-    // where nothing it returns can ever count. With no required bucket the
-    // generator falls back to the scope's required patterns.
+    // Only confirming buckets (required or baseline host telemetry) steer Tier 2
+    // generation: its hit bar counts confirming rows alone, so a Tier 1 match
+    // that landed only in the alerts (optional) index must not point the
+    // generator at the alerts index, where nothing it returns can ever count.
+    // With no confirming bucket the generator falls back to the scope's
+    // required/baseline patterns.
     const requiredIndices = tier1.per_index
-      .filter((entry) => entry.required)
+      .filter((entry) => entry.confirming)
       .map((entry) => entry.index)
       .slice(0, MAX_MATCHED_INDICES);
     if (requiredIndices.length > 0) {
@@ -367,13 +376,13 @@ const decideTier2Skip = ({
   /** True when the run has report text, or a vendor or product from the report context. */
   hasTier2Input: boolean;
   resolution: HuntScopeResolution;
-  /** Whether any `per_index` bucket is a required index Tier 2 could be pointed at. */
+  /** Whether any `per_index` bucket is a confirming (required or baseline) index Tier 2 could be pointed at. */
   hasMatchedRequiredIndex: boolean;
 }): HuntCoordinatorTier2SkipReason | null => {
   if (tier2When === 'never') return 'configured_never';
   // A broad scope is a wildcard, so Tier 2 needs the concrete indices Tier 1 hit. A
   // hit that arrived through an alias (`logs-archive` over `archive-v1`) confirms
-  // the count but leaves no required-index bucket to generate against, and the
+  // the count but leaves no confirming bucket to generate against, and the
   // broad wildcard itself is not an allowed Tier 2 source, so there is no safe
   // target: skip rather than emit a query the source gate would refuse.
   if (resolution === 'discovered:broad' && (!tier1.has_confirmed_hit || !hasMatchedRequiredIndex)) {
@@ -499,6 +508,7 @@ const huntCoordinatorCore = async (
       run_id,
       technologies: [],
       index_patterns: [],
+      tier2_targets: [],
       tier1: {
         tier: 1,
         ...emptyHuntForThreatResult(
@@ -633,6 +643,7 @@ const huntCoordinatorCore = async (
       run_id,
       technologies: [],
       index_patterns: [],
+      tier2_targets: [],
       tier1: emptyTier1,
       // Not the `on_hits` gate: with no scope there is no required-index allowlist for
       // Tier 2 to generate and execute against, so Tier 2 cannot run even when the run
@@ -653,9 +664,11 @@ const huntCoordinatorCore = async (
   const { technologies, ...indexScope } = scope;
   narrativeContext.requiredIndexPatterns = indexScope.required;
   narrativeContext.optionalIndexPatterns = indexScope.optional;
+  narrativeContext.baselineIndexPatterns = indexScope.baseline;
 
-  // A blocked scope is a failed run, never a clean one: no required index exists,
-  // so there is nothing to hunt and the caller must not write hunt evidence.
+  // A blocked scope is a failed run, never a clean one: no required index and no
+  // baseline pattern exists, so there is nothing to hunt and the caller must not
+  // write hunt evidence.
   if (indexScope.status === 'blocked') {
     const { message, nextStep } = blockedScopeGuidance({
       resolution: scope.resolution,
@@ -671,6 +684,7 @@ const huntCoordinatorCore = async (
       // The wire contract says empty when blocked, whatever the scope carried: nothing
       // was hunted, so nothing is reported as hunted.
       index_patterns: [],
+      tier2_targets: [],
       tier1: {
         tier: 1,
         ...emptyHuntForThreatResult(
@@ -751,6 +765,7 @@ const huntCoordinatorCore = async (
       run_id,
       technologies,
       index_patterns: scope.index_patterns,
+      tier2_targets: scope.tier2_targets,
       tier1,
       tier2_skipped_reason: reason,
       message,
@@ -770,7 +785,7 @@ const huntCoordinatorCore = async (
     tier1: tier1Raw,
     hasTier2Input,
     resolution: scope.resolution,
-    hasMatchedRequiredIndex: tier1Raw.per_index.some((bucket) => bucket.required),
+    hasMatchedRequiredIndex: tier1Raw.per_index.some((bucket) => bucket.confirming),
   });
   if (skipReason) {
     return tier1Only({
@@ -810,6 +825,7 @@ const huntCoordinatorCore = async (
       run_id,
       technologies,
       index_patterns: scope.index_patterns,
+      tier2_targets: scope.tier2_targets,
       tier1,
       tier2_skipped_reason: 'no_report_text',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no report text).`,
@@ -822,16 +838,16 @@ const huntCoordinatorCore = async (
   }
 
   let articleContext = buildArticleContext(tier1Raw, maxSamples);
-  if (!articleContext && indexScope.required.length > 0 && tier1Raw.time_range !== undefined) {
+  if (!articleContext && indexScope.tier2_targets.length > 0 && tier1Raw.time_range !== undefined) {
     const sampleEvents = await sampleRequiredIndexEvents({
       esClient,
-      requiredIndices: indexScope.required,
+      requiredIndices: indexScope.tier2_targets,
       window: tier1Raw.time_range,
       maxSamples,
       logger,
     });
     articleContext = buildArticleContext(tier1Raw, maxSamples, {
-      requiredIndices: indexScope.required,
+      requiredIndices: indexScope.tier2_targets,
       sampleEvents,
     });
   }
@@ -849,7 +865,11 @@ const huntCoordinatorCore = async (
         window: tier1Raw.time_range,
         size,
         row_limit: indexScope.row_limit,
-        required_indices: indexScope.required,
+        // Value is `tier2_targets` (required ∪ baseline); the parameter name
+        // stays `required_indices` — every reader downstream (the allowlist,
+        // the schema probe, the publish/execute gates, the hit bar) treats
+        // whatever this names as the set Tier 2 may read.
+        required_indices: indexScope.tier2_targets,
       },
       esClient
     );
@@ -906,6 +926,7 @@ const huntCoordinatorCore = async (
     run_id,
     technologies,
     index_patterns: scope.index_patterns,
+    tier2_targets: scope.tier2_targets,
     tier1,
     tier2,
     message:

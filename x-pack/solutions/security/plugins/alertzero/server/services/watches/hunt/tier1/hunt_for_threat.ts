@@ -311,16 +311,22 @@ export const huntForThreat = async (
     );
   }
 
-  // `required` and `optional` (which already includes the space-derived alerts
-  // pattern) are searched together with `ignore_unavailable` and `allow_no_indices`.
-  // A scope reaching this point already passed the blocked/degraded gate, so the
-  // search never needs to distinguish required from optional; that distinction only
-  // matters for the hit bar below.
-  const searchIndices = [...scope.required, ...scope.optional];
+  // `required`, `baseline` (host telemetry), and `optional` (which already
+  // includes the space-derived alerts pattern) are searched
+  // together with `ignore_unavailable` and `allow_no_indices`. A scope
+  // reaching this point already passed the blocked/degraded gate, so the
+  // search never needs to distinguish them; that distinction only matters for
+  // the hit bar below.
+  const searchIndices = [...scope.required, ...scope.baseline, ...scope.optional];
   // `per_index` buckets on `_index`, which is a concrete index/data-stream name
   // (e.g. `logs-aws.cloudtrail-default`), never the wildcard pattern it resolved
-  // from (e.g. `logs-aws.*`). Shared with Tier 2 so both hit bars agree.
+  // from (e.g. `logs-aws.*`). `matchesRequired` stays literally "in required"
+  // for anything downstream that still reads it structurally; `matchesConfirming`
+  // is the hit bar and Tier 2's steering signal — `required ∪ baseline`, since a
+  // baseline-only match (host telemetry) confirms a hunt the same way a
+  // required-index match does. Only the alerts alias stays non-confirming.
   const matchesRequired = buildMatchesRequired(scope.required);
+  const matchesConfirming = buildMatchesRequired([...scope.required, ...scope.baseline]);
 
   const huntQuery = {
     bool: {
@@ -402,24 +408,30 @@ export const huntForThreat = async (
     index: b.key,
     hit_count: b.doc_count,
     required: matchesRequired(b.key),
+    confirming: matchesConfirming(b.key),
   }));
 
+  // The confirming indices set the hit bar: `required ∪ baseline`. A
+  // baseline-only match (host telemetry) confirms a hunt the same way a
+  // required-index match does; an alerts-alias-only (optional) match still does
+  // not.
+  const confirmingIndices = [...scope.required, ...scope.baseline];
   // The hit bar cannot be read off `per_index`: those buckets are ordered by doc
-  // count and capped, so a required index holding a single real match can be
+  // count and capped, so a confirming index holding a single real match can be
   // absent from the response while optional indices fill the cap, and the hunt
-  // would call that clean. Count the required patterns on their own instead, and
+  // would call that clean. Count the confirming patterns on their own instead, and
   // let Elasticsearch resolve them exactly as the main search does rather than
   // re-implementing pattern matching over `_index` here. `per_index` stays as
   // display context, except when the count confirms a hit and the capped buckets
-  // show none required: Tier 2 needs those concrete required indices, so recover
-  // them with a terms agg scoped to required patterns alone (optional indices
-  // cannot crowd the cap). An empty `required` would count across every index
+  // show none confirming: Tier 2 needs those concrete confirming indices, so recover
+  // them with a terms agg scoped to the confirming patterns alone (optional indices
+  // cannot crowd the cap). An empty confirming set would count across every index
   // rather than none, so the bar is unreachable by definition instead.
   const requiredMatches =
-    scope.required.length === 0
+    confirmingIndices.length === 0
       ? undefined
       : await esClient.count({
-          index: scope.required,
+          index: confirmingIndices,
           ignore_unavailable: true,
           allow_no_indices: true,
           query: huntQuery,
@@ -431,22 +443,26 @@ export const huntForThreat = async (
     ...(requiredMatches ? shardCoverageGaps('required-index count', requiredMatches) : []),
   ];
   // `ignore_unavailable` stops one missing optional pattern from failing the whole
-  // search, but it applies to the required patterns too: one that resolved at scope
+  // search, but it applies to the confirming patterns too: one that resolved at scope
   // time and was deleted before the count returns zero shards and therefore zero
-  // matches, which is indistinguishable from a searched-and-clean required index.
+  // matches, which is indistinguishable from a searched-and-clean confirming index.
   if (requiredMatches && requiredMatches._shards?.total === 0) {
     incomplete.push({
       reason: 'index_unavailable',
       detail:
-        `No index backed the required patterns (${scope.required.join(', ')}) when the hit bar ` +
-        `was counted, so the hunt never searched the indices that can confirm a hit.`,
+        `No index backed the required/baseline patterns (${confirmingIndices.join(', ')}) when ` +
+        `the hit bar was counted, so the hunt never searched the indices that can confirm a hit.`,
     });
   }
 
-  if (hasConfirmedHit && !perIndex.some((entry) => entry.required) && scope.required.length > 0) {
+  if (
+    hasConfirmedHit &&
+    !perIndex.some((entry) => entry.confirming) &&
+    confirmingIndices.length > 0
+  ) {
     try {
       const requiredOnly = await esClient.search({
-        index: scope.required,
+        index: confirmingIndices,
         ignore_unavailable: true,
         allow_no_indices: true,
         size: 0,
@@ -466,10 +482,11 @@ export const huntForThreat = async (
           index: b.key,
           hit_count: b.doc_count,
           required: matchesRequired(b.key),
+          confirming: matchesConfirming(b.key),
         }))
-        .filter((entry) => entry.required);
+        .filter((entry) => entry.confirming);
       if (recovered.length > 0) {
-        // Required buckets first so Tier 2's matched_indices slice prefers them;
+        // Confirming buckets first so Tier 2's matched_indices slice prefers them;
         // keep the original optional/alias buckets for display.
         const recoveredKeys = new Set(recovered.map((entry) => entry.index));
         perIndex = [...recovered, ...perIndex.filter((entry) => !recoveredKeys.has(entry.index))];
@@ -478,7 +495,7 @@ export const huntForThreat = async (
       incomplete.push({
         reason: 'search_partial',
         detail:
-          `Confirmed a required-index hit but could not recover which required indices matched ` +
+          `Confirmed a hit but could not recover which required/baseline indices matched ` +
           `(${((err as Error).message ?? 'unknown error').slice(0, 200)}), so Tier 2 has no ` +
           `safe target from this run.`,
       });

@@ -101,6 +101,14 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .describe(
         'Index patterns the hunt ran against: the resolved required patterns. Populated whether the scope came from a pinned or environment-resolved technology or from discovered datasets; empty when the scope was blocked or resolution failed.'
       ),
+    /**
+     * `index_patterns` (required) union the present baseline host-local telemetry patterns: Tier 2's allowlist, generation target, and hit bar. A run says what it hunted (`index_patterns`) and what Tier 2 was allowed to read (`tier2_targets`) separately, since a baseline-only scope has an empty `index_patterns` but a non-empty `tier2_targets`. Empty when the scope was blocked or resolution failed.
+     */
+    tier2_targets: z
+      .array(z.string())
+      .describe(
+        "`index_patterns` (required) union the present baseline host-local telemetry patterns: Tier 2's allowlist, generation target, and hit bar. A run says what it hunted (`index_patterns`) and what Tier 2 was allowed to read (`tier2_targets`) separately, since a baseline-only scope has an empty `index_patterns` but a non-empty `tier2_targets`. Empty when the scope was blocked or resolution failed."
+      ),
     tier1: HuntForThreatResult.merge(
       z.object({
         tier: z.number().int(),
