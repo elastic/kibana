@@ -723,6 +723,9 @@ steps:
       workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        # The attack's own name, which `resolve_escalation` already heads the
+        # comment with.
+        title: "{{ inputs.title }}"
         comment: "{{ steps.resolve_escalation.output.comment }}"
         actionWorkflowId: "{{ consts.handoff_to_forensics_action }}"
         actionInput: "${{ steps.resolve_escalation.output.action_input }}"

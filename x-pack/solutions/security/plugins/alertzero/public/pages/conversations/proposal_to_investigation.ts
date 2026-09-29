@@ -110,7 +110,9 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     conversationId: proposal.conversationId,
-    summary: proposal.comment,
+    // The title, not the comment: the card renders this as plain text, so the
+    // comment's markdown came through as literal asterisks and headings.
+    summary: proposal.title,
     // The shared helper, so one proposal reads the same on every surface —
     // except that a proposal naming nothing gets no label at all here, because
     // this doubles as the row button's name and the helper's "no action"

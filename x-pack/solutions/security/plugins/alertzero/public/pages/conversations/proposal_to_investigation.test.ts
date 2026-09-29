@@ -48,6 +48,18 @@ describe('proposalToInvestigation', () => {
       expect(result.primaryActionLabel).toBe('Isolate host');
     });
 
+    // The card renders the summary as plain text, so a markdown comment
+    // arrived as literal asterisks and headings.
+    it('summarises the row with the title rather than the markdown comment', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        title: 'Tune the Okta rule',
+        comment: '**Bold heading**\n\nSome *markdown* body',
+      });
+
+      expect(result.summary).toBe('Tune the Okta rule');
+    });
+
     it('labels the row with the proposal title over the action name', () => {
       const result = proposalToInvestigation({
         ...baseProposal,

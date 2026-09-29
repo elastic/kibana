@@ -22,8 +22,13 @@ settings:
   # so no fixed window is safe here. A sentinel for the same reason the gate's
   # own is one: this workflow has no timeout handler, so a ceiling that fires
   # first cancels the bridge, orphans the parked gate and strands the proposal
-  # `pending`. Tracks the gate's ceiling, and a test pins the relationship.
-  timeout: "52w"
+  # `pending`.
+  #
+  # Strictly longer than the gate's own `52w`, not equal to it: this clock
+  # starts before the gate is launched, so equal ceilings would have the parent
+  # expire first and lose a decision the child had already reached. A test pins
+  # the inequality.
+  timeout: "53w"
 
 triggers:
   - type: manual

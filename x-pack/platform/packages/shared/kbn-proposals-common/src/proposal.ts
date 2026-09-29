@@ -331,6 +331,12 @@ export const proposalChartsSummaryQuerySchema = z
     windowHours: z.coerce.number().int().min(1).max(168).default(24),
     /** The 5 minute floor bounds the response size. */
     bucketMinutes: z.coerce.number().int().min(5).max(1440).default(30),
+    /**
+     * Scopes the counts to one producing feature, matching what its queues
+     * already filter on. Absent counts every producer in the space, which is
+     * only right for a consumer that shows them all.
+     */
+    origin: proposalOriginSchema.optional(),
   })
   /**
    * The two bounds are independently valid but not jointly: 168h at 5-minute

@@ -201,6 +201,9 @@ steps:
       workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        # Raised before any diagnosis, so the comment's own heading is the only
+        # name this proposal has.
+        title: Review rule for tuning
         comment: |-
           **Review rule for tuning?**
 
@@ -640,6 +643,9 @@ steps:
   - name: compose_proposal
     type: data.set
     with:
+      # The same expression the comment's heading uses, lifted out so the
+      # proposal carries it as a field the queue can render as plain text.
+      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}'
       comment: |-
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
@@ -753,6 +759,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -772,6 +779,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -792,6 +800,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
@@ -823,6 +832,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -843,6 +853,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -863,6 +874,7 @@ steps:
           workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            title: "{{ steps.compose_proposal.output.title }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
             impact: low
             # No action, so no inherited category; see the entry gate.

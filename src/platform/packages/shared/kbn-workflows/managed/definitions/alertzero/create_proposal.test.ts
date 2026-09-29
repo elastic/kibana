@@ -130,8 +130,11 @@ describe('AlertZero create proposal bridge', () => {
   // decision. The engine's 6h default would cancel it out from under the
   // analyst, and a cancelled parent runs no handler, so the proposal would
   // strand `pending`.
+  // Strictly, not equally: this workflow's clock starts before it launches
+  // the gate, so matching ceilings would expire the parent first and lose a
+  // decision the child had already reached.
   it('outlives the gate it waits on', () => {
     const ceiling = parseDuration(bridge.settings?.timeout ?? '');
-    expect(ceiling).toBeGreaterThanOrEqual(parseDuration(gate.settings?.timeout ?? ''));
+    expect(ceiling).toBeGreaterThan(parseDuration(gate.settings?.timeout ?? ''));
   });
 });

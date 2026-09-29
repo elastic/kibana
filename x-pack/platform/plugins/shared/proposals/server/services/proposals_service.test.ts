@@ -2246,6 +2246,33 @@ describe('ProposalsService', () => {
       expect(currentOpen).toBe(0);
     });
 
+    // The header count sits directly above queues that filter on `origin`, so
+    // an unscoped chart would contradict the rows beneath it the moment another
+    // solution writes into the same space.
+    it('should scope every query to the origin when one is given', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.chartsSummary({ ...chartsQuery, origin: 'alertzero' }, SPACE_ID);
+
+      const queries = issuedQueries(storage);
+      expect(queries).toHaveLength(4);
+      for (const query of queries) {
+        expect(query).toContain('origin == "alertzero"');
+      }
+    });
+
+    it('should count every producer when no origin is given', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      for (const query of issuedQueries(storage)) {
+        expect(query).not.toContain('origin ==');
+      }
+    });
+
     it('should count only pending, non-superseded proposals as currently open', async () => {
       const storage = createStorage();
       const { service } = createService(storage);

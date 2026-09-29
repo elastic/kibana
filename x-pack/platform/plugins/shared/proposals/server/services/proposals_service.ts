@@ -290,7 +290,7 @@ export class ProposalsService {
    * keeping this to four queries rather than one per bucket.
    */
   async chartsSummary(
-    { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
+    { windowHours, bucketMinutes, origin }: ProposalChartsSummaryQuery,
     spaceId: string
   ): Promise<ProposalChartsSummaryResponse> {
     const now = Date.now();
@@ -308,7 +308,7 @@ export class ProposalsService {
       currentOpen: 0,
     });
 
-    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes };
+    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes, origin };
 
     let anchorResponse;
     let opensResponse;
