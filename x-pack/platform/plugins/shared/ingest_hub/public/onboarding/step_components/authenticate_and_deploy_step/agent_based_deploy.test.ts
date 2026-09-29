@@ -407,34 +407,42 @@ describe('deployNewAgentPolicy', () => {
     expect(body.package_policies[0].namespace).toBe('prod');
   });
 
-  it('gives distinct package policy names to namespaces that sanitize to the same string', async () => {
-    const vpc = makeSimpleService('vpcflow');
-    const s3 = makeSimpleService('s3');
-    const storedServiceVars = {
-      vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: 'prod.eu' },
-      s3: { enabledDataStreams: ['s3'], varsByDataStream: {}, namespace: 'prod_eu' },
-    };
-    const groups = buildAgentBasedTargets(
-      [makeInstance(), makeInstance({ instanceId: 's3', serviceId: 's3', name: 'AWS s3' })],
-      ['vpcflow', 's3'],
-      new Map([
-        ['vpcflow', vpc],
-        ['s3', s3],
-      ]),
-      storedServiceVars
-    );
+  it.each([
+    ['prod.eu', 'prod_eu'],
+    ['prod(}', 'prod)^'],
+  ])(
+    'gives distinct package policy names to namespaces %s and %s, which sanitize to the same string',
+    async (vpcNamespace, s3Namespace) => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1);
+      const vpc = makeSimpleService('vpcflow');
+      const s3 = makeSimpleService('s3');
+      const storedServiceVars = {
+        vpcflow: { enabledDataStreams: ['vpcflow'], varsByDataStream: {}, namespace: vpcNamespace },
+        s3: { enabledDataStreams: ['s3'], varsByDataStream: {}, namespace: s3Namespace },
+      };
+      const groups = buildAgentBasedTargets(
+        [makeInstance(), makeInstance({ instanceId: 's3', serviceId: 's3', name: 'AWS s3' })],
+        ['vpcflow', 's3'],
+        new Map([
+          ['vpcflow', vpc],
+          ['s3', s3],
+        ]),
+        storedServiceVars
+      );
 
-    await deployNewAgentPolicy(groups, {
-      ...BASE_OPTS,
-      storedServiceVars,
-      agentPolicyName: 'AWS Agent Policy 1',
-    });
+      await deployNewAgentPolicy(groups, {
+        ...BASE_OPTS,
+        storedServiceVars,
+        agentPolicyName: 'AWS Agent Policy 1',
+      });
 
-    const names = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies.map(
-      (pp: { name: string }) => pp.name
-    );
-    expect(new Set(names).size).toBe(2);
-  });
+      const names = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies.map(
+        (pp: { name: string }) => pp.name
+      );
+      expect(new Set(names).size).toBe(2);
+      nowSpy.mockRestore();
+    }
+  );
 
   it('passes sys_monitoring: true when withSysMonitoring is true', async () => {
     const svc = makeSimpleService();

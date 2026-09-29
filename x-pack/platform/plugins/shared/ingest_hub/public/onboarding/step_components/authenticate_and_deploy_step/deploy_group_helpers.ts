@@ -39,18 +39,11 @@ export function reconcileInstances(
   return [...kept, ...added];
 }
 
-const shortHash = (value: string): string => {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) % 2147483647;
-  return hash.toString(36);
-};
+const sanitizeGroupId = (groupId: string): string =>
+  groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
 
-// Sanitizing is lossy (`prod.eu` and `prod_eu` both become `prod_eu`), so a hash of the raw groupId
-// keeps policy names of different groups distinct.
-export const buildGroupPolicyNameStem = (group: DeployGroup): string => {
-  const stem = group.groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-  return stem === group.groupId ? stem : `${stem}_${shortHash(group.groupId)}`;
-};
+export const buildGroupPolicyNameStem = (group: DeployGroup): string =>
+  group.policyNameStem ?? sanitizeGroupId(group.groupId);
 
 export const DEFAULT_NAMESPACE = 'default';
 
@@ -92,13 +85,21 @@ export function groupByPackage(
   }
 
   const groups: DeployGroup[] = [];
+  // Sanitizing is lossy (`prod.eu` and `prod_eu` both become `prod_eu`) and groups deploy in the
+  // same millisecond, so a counter keeps the name stems of one deploy distinct.
+  const usedStems = new Set<string>();
   for (const [groupId, { namespace, members }] of bundled) {
+    const baseStem = sanitizeGroupId(groupId);
+    let policyNameStem = baseStem;
+    for (let n = 2; usedStems.has(policyNameStem); n++) policyNameStem = `${baseStem}_${n}`;
+    usedStems.add(policyNameStem);
     groups.push({
       groupId,
       instanceIds: members.map(({ instance }) => instance.instanceId),
       members,
       isDuplicateGroup: false,
       namespace,
+      policyNameStem,
     });
   }
   for (const member of duplicates) {

@@ -999,24 +999,36 @@ describe('useDeploy', () => {
     expect(mockSendCreateAgentlessPolicy.mock.calls[0][0].namespace).toBe('prod');
   });
 
-  it('gives distinct agentless policy names to namespaces that sanitize to the same string', async () => {
-    setupMocks({
-      selectedServiceIds: ['ec2', 'lambda'],
-      serviceVars: {
-        ec2: { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: 'prod.eu' },
-        lambda: { enabledDataStreams: ['lambda'], varsByDataStream: {}, namespace: 'prod_eu' },
-      },
-    });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+  it.each([
+    ['prod.eu', 'prod_eu'],
+    ['prod(}', 'prod)^'],
+  ])(
+    'gives distinct agentless policy names to namespaces %s and %s, which sanitize to the same string',
+    async (ec2Namespace, lambdaNamespace) => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1);
+      setupMocks({
+        selectedServiceIds: ['ec2', 'lambda'],
+        serviceVars: {
+          ec2: { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: ec2Namespace },
+          lambda: {
+            enabledDataStreams: ['lambda'],
+            varsByDataStream: {},
+            namespace: lambdaNamespace,
+          },
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
-    await act(async () => {
-      await result.current.handleDeploy();
-    });
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
 
-    const names = mockSendCreateAgentlessPolicy.mock.calls.map(([body]) => body.name);
-    expect(names).toHaveLength(2);
-    expect(new Set(names).size).toBe(2);
-  });
+      const names = mockSendCreateAgentlessPolicy.mock.calls.map(([body]) => body.name);
+      expect(names).toHaveLength(2);
+      expect(new Set(names).size).toBe(2);
+      nowSpy.mockRestore();
+    }
+  );
 
   it('falls back to the default namespace on the agentless policy when none is set', async () => {
     setupMocks({ selectedServiceIds: ['ec2'] });

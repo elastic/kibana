@@ -85,11 +85,11 @@ describe('InstanceNamespaceField', () => {
     expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('prod');
   });
 
-  it('shows the inherited placeholder when locked with no namespace', () => {
+  it('says the namespace is inherited when locked with no namespace', () => {
     renderField({ namespace: '', isLocked: true });
     expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveAttribute(
       'placeholder',
-      'default'
+      'Inherited from the agent policy'
     );
   });
 });

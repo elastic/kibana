@@ -42,6 +42,8 @@ export interface DeployGroup {
   isDuplicateGroup: boolean;
   /** Namespace shared by every member. Empty means the policy inherits the agent policy's. */
   namespace: string;
+  /** Sanitized policy name prefix for bundled originals, unique within one deploy. */
+  policyNameStem?: string;
 }
 
 export interface GroupDeployOutcome {

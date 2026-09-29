@@ -51,7 +51,11 @@ export const InstanceNamespaceField = ({
       >
         <EuiFieldText
           value={namespace}
-          placeholder={INHERITED_NAMESPACE_PLACEHOLDER}
+          // The deployed policy may sit on an existing agent policy, whose namespace is not always `default`.
+          placeholder={i18n.translate(
+            'xpack.ingestHub.serviceSettingsStep.namespace.lockedInheritedPlaceholder',
+            { defaultMessage: 'Inherited from the agent policy' }
+          )}
           disabled
           data-test-subj="serviceSettings-namespaceField-locked"
         />
