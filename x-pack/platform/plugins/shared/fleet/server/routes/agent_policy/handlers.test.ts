@@ -8,11 +8,11 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { agentPolicyService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 import { listFleetProxies } from '../../services/fleet_proxies';
 
 import type { FleetRequestHandlerContext } from '../..';
-import { xpackMocks } from '../../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { AgentClient } from '../../services/agents';
 import type { AgentPolicy } from '../../types';
 
@@ -174,7 +174,12 @@ describe('Agent policy API handlers', () => {
       const makeStoredDoc = () => ({ data: JSON.parse(JSON.stringify(POLICY_WITH_SECRETS)) });
 
       beforeEach(() => {
+        appContextService.start(createAppContextStartContractMock());
         agentPolicyServiceMock.get.mockResolvedValue({ id: 'policy-1' } as any);
+      });
+
+      afterEach(() => {
+        appContextService.stop();
       });
 
       it('returns 404 when policy is not found in the current Space', async () => {
