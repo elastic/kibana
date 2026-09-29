@@ -67,7 +67,14 @@ export const TimeLabel = ({ at, tooltip = true }: { at: string; tooltip?: boolea
 /** Whether a reply or resolve request is in flight for the comment; kept in the store so remounts cannot forget it. */
 const useThreadBusy = (id: string): boolean => useCommentsState((state) => state.busyIds.has(id));
 
-export const ResolveButton = ({ comment }: { comment: Comment }) => {
+export const ResolveButton = ({
+  comment,
+  onSettled,
+}: {
+  comment: Comment;
+  /** Called once the change is saved, or has failed and been reported. */
+  onSettled?: () => void;
+}) => {
   const controller = useComments();
   const busy = useThreadBusy(comment.id);
   const label = comment.resolved
@@ -81,7 +88,7 @@ export const ResolveButton = ({ comment }: { comment: Comment }) => {
         color={comment.resolved ? 'danger' : 'success'}
         size="xs"
         isDisabled={busy}
-        onClick={() => void controller.setResolved(comment.id, !comment.resolved)}
+        onClick={() => void controller.setResolved(comment.id, !comment.resolved).then(onSettled)}
         aria-label={label}
         data-test-subj="devCommentsToggleResolved"
       />

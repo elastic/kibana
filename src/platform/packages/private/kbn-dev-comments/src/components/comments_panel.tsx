@@ -12,6 +12,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent,
   type PropsWithChildren,
   type ReactElement,
 } from 'react';
@@ -45,7 +46,13 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Comment } from '../types';
 import { useComments, useCommentsState } from './comments_context';
-import { popoverPanelProps, useLayerPortal, useLayerZIndex, usePanelZIndex } from './hooks';
+import {
+  containProps,
+  menuPanelProps,
+  useLayerPortal,
+  useLayerZIndex,
+  usePanelZIndex,
+} from './hooks';
 import { useResolvedAnchors } from './resolved_anchors';
 import { ResolveButton, ThreadContent, TimeLabel } from './thread_content';
 
@@ -119,6 +126,15 @@ const ActionsMenu = ({
   const close = () => setOpen(false);
   const { popover: zIndex } = useLayerZIndex();
   const panelRef = usePanelZIndex(zIndex);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  // Escape closes the menu, focus back on its button; comment mode leaves the key to it.
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      close();
+      buttonRef.current?.focus();
+    }
+  };
   return (
     <EuiPopover
       aria-label={label}
@@ -127,7 +143,9 @@ const ActionsMenu = ({
       panelPaddingSize="none"
       anchorPosition="downRight"
       // EUI renders the menu outside of the layer's containers; it is marked as the layer's all the same.
-      panelProps={popoverPanelProps}
+      // Portalled like the threads: clicks in it stay out of the page, whose popovers and
+      // flyouts would close on them as clicks outside.
+      panelProps={{ ...menuPanelProps, ...containProps, onKeyDown }}
       panelRef={panelRef}
       zIndex={zIndex}
       button={
@@ -137,6 +155,7 @@ const ActionsMenu = ({
             color={color}
             display={display}
             size="xs"
+            buttonRef={buttonRef}
             onClick={() => setOpen(!isOpen)}
             aria-label={label}
             data-test-subj={dataTestSubj}
@@ -206,6 +225,7 @@ const PageGroup = ({
       css={css`
         margin-block-start: ${euiTheme.size.m};
       `}
+      data-page-key={pageKey}
       data-test-subj="devCommentsPanelPage"
     >
       <EuiAccordion
@@ -338,6 +358,33 @@ const PanelRow = ({
     defaultMessage: 'Comment not visible on this page',
   });
   const replies = comment.replies.length;
+
+  // Resolved, the row may leave the list with focus on its Resolve button: focus then
+  // moves on to the next comment, or the previous one, or the filter that hid it. Where
+  // is decided on the click, while the row is still there to tell its neighbors.
+  const focusAfterResolve = useRef<HTMLElement | null>(null);
+  const rememberFocusTarget = () => {
+    const row = rowRef.current;
+    const panel = row?.closest('[data-test-subj="devCommentsPanel"]');
+    if (!row || !panel) {
+      return;
+    }
+    const rows = Array.from(
+      panel.querySelectorAll<HTMLElement>('[data-test-subj^="devCommentsPanelItem-"] > button')
+    );
+    const index = rows.findIndex((button) => row.contains(button));
+    focusAfterResolve.current =
+      rows[index + 1] ??
+      rows[index - 1] ??
+      panel.querySelector<HTMLElement>('[data-test-subj="devCommentsPanelFilter"]');
+  };
+  const restoreFocus = () =>
+    requestAnimationFrame(() => {
+      const focused = document.activeElement;
+      if (!focused || focused === document.body || !focused.isConnected) {
+        focusAfterResolve.current?.focus();
+      }
+    });
 
   return (
     <div
@@ -485,7 +532,9 @@ const PanelRow = ({
             </EuiContextMenuItem>,
           ]}
         />
-        <ResolveButton comment={comment} />
+        <div onClickCapture={rememberFocusTarget}>
+          <ResolveButton comment={comment} onSettled={restoreFocus} />
+        </div>
       </div>
     </div>
   );
@@ -534,6 +583,35 @@ export const CommentsPanel = () => {
   const minimized = useCommentsState((state) => state.panelMinimized);
   const panelThreadId = useCommentsState((state) => state.panelThreadId);
   const panelThread = comments.find((comment) => comment.id === panelThreadId);
+
+  // Back in the list, by Back or Escape, focus returns to the row the thread was shown
+  // from. The row may not be there: its page closed, or the thread resolved meanwhile
+  // and filtered out. Focus then goes to its page, if listed, or to the filter.
+  const shownThread = useRef<Comment | null>(null);
+  useEffect(() => {
+    if (panelThread) {
+      shownThread.current = panelThread;
+      return;
+    }
+    const left = shownThread.current;
+    shownThread.current = null;
+    if (!left || !container) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      const page = Array.from(
+        container.querySelectorAll<HTMLElement>('[data-test-subj="devCommentsPanelPage"]')
+      ).find((section) => section.dataset.pageKey === left.route.pageKey);
+      const target =
+        container.querySelector<HTMLElement>(
+          `[data-test-subj="devCommentsPanelItem-${left.id}"] > button`
+        ) ??
+        // The accordion's trigger, not its arrow, which is out of the tab order.
+        page?.querySelector<HTMLElement>('button[aria-expanded]:not([tabindex="-1"])') ??
+        container.querySelector<HTMLElement>('[data-test-subj="devCommentsPanelFilter"]');
+      target?.focus();
+    });
+  }, [panelThread, container]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   // Resolved comments leave the list as soon as they are resolved, unless asked for.
@@ -561,16 +639,6 @@ export const CommentsPanel = () => {
     }
     element.scrollIntoView({ block: 'center', inline: 'nearest' });
     controller.openThread(comment.id, { focusPin: true });
-  };
-
-  // Back in the list, focus returns to the row the thread was shown from, if it is listed.
-  const back = (comment: Comment) => {
-    controller.showInPanel(null);
-    requestAnimationFrame(() =>
-      container
-        .querySelector<HTMLElement>(`[data-test-subj="devCommentsPanelItem-${comment.id}"] button`)
-        ?.focus()
-    );
   };
 
   return createPortal(
@@ -697,7 +765,7 @@ export const CommentsPanel = () => {
       {!minimized && panelThread && (
         <>
           <EuiSpacer size="m" />
-          <PanelThread comment={panelThread} onBack={() => back(panelThread)} />
+          <PanelThread comment={panelThread} onBack={() => controller.showInPanel(null)} />
         </>
       )}
       {!minimized && !panelThread && (
