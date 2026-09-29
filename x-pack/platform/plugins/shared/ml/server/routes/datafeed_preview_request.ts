@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
 export interface DatafeedPreviewInput {
   datafeedId?: string;
   // Request schemas validate both classic and ES|QL inline configurations before this boundary.
@@ -14,28 +16,13 @@ export interface DatafeedPreviewInput {
   end?: string | number;
 }
 
-type DatafeedPreviewRequest =
-  | {
-      datafeed_id: string;
-      start?: string | number;
-      end?: string | number;
-    }
-  | {
-      body: {
-        job_config?: object;
-        datafeed_config?: object;
-      };
-      start?: string | number;
-      end?: string | number;
-    };
-
 export const createDatafeedPreviewRequest = ({
   datafeedId,
   job,
   datafeed,
   start,
   end,
-}: DatafeedPreviewInput): DatafeedPreviewRequest =>
+}: DatafeedPreviewInput): estypes.MlPreviewDatafeedRequest =>
   datafeedId !== undefined
     ? {
         datafeed_id: datafeedId,
@@ -45,8 +32,6 @@ export const createDatafeedPreviewRequest = ({
     : {
         ...(start !== undefined ? { start } : {}),
         ...(end !== undefined ? { end } : {}),
-        body: {
-          job_config: job,
-          datafeed_config: datafeed,
-        },
+        job_config: job,
+        datafeed_config: datafeed,
       };

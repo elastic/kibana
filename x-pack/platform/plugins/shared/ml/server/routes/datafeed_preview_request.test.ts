@@ -33,24 +33,36 @@ describe('createDatafeedPreviewRequest', () => {
     expect(request).toStrictEqual({
       start: 'now-15m',
       end: 'now',
-      body: {
-        job_config: {
-          job_id: 'preview-esql-job',
-          analysis_config: {
-            bucket_span: '1h',
-            detectors: [{ function: 'mean', field_name: 'avg_bytes' }],
-            influencers: [],
-          },
-          data_description: { time_field: 'bucket' },
+      job_config: {
+        job_id: 'preview-esql-job',
+        analysis_config: {
+          bucket_span: '1h',
+          detectors: [{ function: 'mean', field_name: 'avg_bytes' }],
+          influencers: [],
         },
-        datafeed_config: {
-          datafeed_id: 'preview-esql-datafeed',
-          job_id: 'preview-esql-job',
-          esql_query: 'FROM logs-* | STATS avg_bytes = AVG(bytes)',
-          source_time_field: '@timestamp',
-          grouping_interval: '1h',
-        },
+        data_description: { time_field: 'bucket' },
       },
+      datafeed_config: {
+        datafeed_id: 'preview-esql-datafeed',
+        job_id: 'preview-esql-job',
+        esql_query: 'FROM logs-* | STATS avg_bytes = AVG(bytes)',
+        source_time_field: '@timestamp',
+        grouping_interval: '1h',
+      },
+    });
+  });
+
+  it('builds a datafeed_id-based request when datafeedId is provided', () => {
+    const request = createDatafeedPreviewRequest({
+      datafeedId: 'existing-datafeed',
+      start: 'now-15m',
+      end: 'now',
+    });
+
+    expect(request).toStrictEqual({
+      datafeed_id: 'existing-datafeed',
+      start: 'now-15m',
+      end: 'now',
     });
   });
 });

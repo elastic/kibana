@@ -15,15 +15,6 @@ import type { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];
 
-export interface InlineDatafeedPreviewRequest {
-  start?: string | number;
-  end?: string | number;
-  body: {
-    job_config?: object;
-    datafeed_config?: object;
-  };
-}
-
 export interface AdaptiveAllocations {
   adaptive_allocations?: {
     enabled: boolean;
@@ -73,7 +64,7 @@ export interface MlClient
     options?: TransportRequestOptionsWithMeta
   ) => Promise<estypes.MlInferTrainedModelResponse>;
   previewDatafeed: <TDocument = unknown>(
-    payload?: estypes.MlPreviewDatafeedRequest | InlineDatafeedPreviewRequest,
+    payload?: estypes.MlPreviewDatafeedRequest,
     options?: TransportRequestOptions
   ) => Promise<estypes.MlPreviewDatafeedResponse<TDocument>>;
 }
