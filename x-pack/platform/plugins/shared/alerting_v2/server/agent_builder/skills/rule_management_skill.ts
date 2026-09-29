@@ -144,6 +144,8 @@ After calling ${
 <render_attachment id="<ruleAttachment.id>" version="<version>" />
 \`\`\`
 
+The \`version\` attribute is **always required**, even when the version is \`1\`. Omitting it breaks the attachment renderer.
+
 This displays the interactive rule card with Preview and Create/Update buttons.
 
 ## Persistence
