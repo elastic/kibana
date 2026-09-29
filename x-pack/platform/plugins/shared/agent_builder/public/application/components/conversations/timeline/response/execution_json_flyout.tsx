@@ -20,22 +20,30 @@ interface ExecutionJsonFlyoutProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
   /** The execution's steps, which the saved event omits because they are stored as separate events. */
   steps?: ConversationRoundStep[];
+  conversationId?: string;
+  agentId?: string;
   onClose: () => void;
 }
 
 export const ExecutionJsonFlyout: React.FC<ExecutionJsonFlyoutProps> = ({
   executionTerminatedEvent,
   steps,
+  conversationId,
+  agentId,
   onClose,
 }) => {
   const formattedJson = useMemo(() => {
     const { data } = executionTerminatedEvent;
     return JSON.stringify(
-      { ...executionTerminatedEvent, data: { ...data, steps: data.steps ?? steps } },
+      {
+        conversation_id: conversationId,
+        agent_id: agentId,
+        execution: { ...executionTerminatedEvent, data: { ...data, steps: data.steps ?? steps } },
+      },
       null,
       2
     );
-  }, [executionTerminatedEvent, steps]);
+  }, [executionTerminatedEvent, steps, conversationId, agentId]);
 
   return (
     <EuiFlyout

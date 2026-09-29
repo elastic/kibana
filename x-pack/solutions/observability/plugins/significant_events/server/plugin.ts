@@ -52,7 +52,7 @@ import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
 } from './lib/maintenance/maintenance_service';
-import { createMaintenanceSystemRequest } from './lib/maintenance/system_request';
+import { whenNightshiftTurnsOff } from './lib/maintenance/when_nightshift_turns_off';
 import {
   createManagedWorkflowsInstaller,
   type ManagedWorkflowsInstaller,
@@ -584,6 +584,19 @@ export class SignificantEventsPlugin
       })
     );
 
+    // Turning Nightshift off at runtime (once the value settles) pauses background activity.
+    // Turning it back on leaves the pause in place (the install above re-asserts it) until a
+    // user resumes.
+    this.subscriptions.push(
+      whenNightshiftTurnsOff(
+        core.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false)
+      ).subscribe(() => {
+        void this.maintenanceService?.pauseOnFlagOff().catch((error: unknown) => {
+          this.logFlagOffPauseError(error);
+        });
+      })
+    );
+
     // Editable discovery agents: installed via agents.ensure when significant events is
     // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
     // startup as well. Per-space installs also happen just-in-time from scheduled discovery
@@ -685,14 +698,20 @@ export class SignificantEventsPlugin
     }
     // Propagate failures: swallowing them lets install succeed while newly
     // installed workflows stay enabled during a paused deployment.
-    await this.maintenanceService.reassertPausedWorkflows({
-      request: createMaintenanceSystemRequest(),
-    });
+    await this.maintenanceService.reassertPause();
   }
 
   private logManagedResourceError(context: string, error: unknown): void {
     this.logger.error(
       `significantEvents: failed to install managed resources (${context}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  private logFlagOffPauseError(error: unknown): void {
+    this.logger.error(
+      `significantEvents: failed to pause after Nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

@@ -27,7 +27,6 @@ import { installInvestigationWorkflow } from './lib/managed_workflows/install_in
 import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
-import { installDeductiveInvestigationAgent } from './lib/install_deductive_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
@@ -38,12 +37,12 @@ import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerCortexTelemetryEvents } from './telemetry';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
-import { registerDeductiveInvestigationAgentType } from './agents/deductive_investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
@@ -56,6 +55,8 @@ import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_work
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+  nightshiftAutomationSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
@@ -113,6 +114,7 @@ export class NightshiftInvestigationsPlugin
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+      registerCortexTelemetryEvents(core.analytics);
     }
 
     // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
@@ -126,6 +128,7 @@ export class NightshiftInvestigationsPlugin
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
 
     registerInvestigationReconciliationTask({
       core,
@@ -148,10 +151,7 @@ export class NightshiftInvestigationsPlugin
     if (plugins.agentBuilder) {
       const config = this.ctx.config.get();
       const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
-      // The significant-events investigator keeps its own prompt and Elastic tools; only the
-      // deductive agent runs from the sandbox and talks to Cortex.
-      registerInvestigationAgentType(plugins.agentBuilder);
-      registerDeductiveInvestigationAgentType(plugins.agentBuilder, {
+      registerInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
@@ -246,6 +246,7 @@ export class NightshiftInvestigationsPlugin
           plugins.workflowsExtensions.registerStepDefinition(
             cortexHydrateStepDefinition({
               getSandboxStart: () => this.sandboxStart,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );
@@ -253,6 +254,7 @@ export class NightshiftInvestigationsPlugin
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );
@@ -281,6 +283,8 @@ export class NightshiftInvestigationsPlugin
           getTriggerEmitter,
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
+          getAutomationsSoClient: this.getAutomationsSoClient,
+          getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
@@ -357,21 +361,6 @@ export class NightshiftInvestigationsPlugin
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
       });
-
-      // Availability for a persisted agent is held in memory and only registered by `ensure`, so
-      // an agent that is merely persisted is listed with no gate at all. The deductive agent is
-      // otherwise only ensured once an investigation runs, which cannot happen while the feature
-      // is off — without this call it would stay visible after a restart with `nightshift.enabled`
-      // disabled.
-      void installDeductiveInvestigationAgent({
-        agentBuilder,
-        spaceId: DEFAULT_SPACE_ID,
-        availability: this.getInvestigationAvailability(),
-      }).catch((err) => {
-        this.logger.error(
-          `Failed to install deductive investigation agent in default space: ${err.message}`
-        );
-      });
     }
 
     if (plugins.workflowsExtensions) {
@@ -411,7 +400,7 @@ export class NightshiftInvestigationsPlugin
   }
 
   /**
-   * Created once and reused so every `agents.ensure` call for these agent ids registers the same
+   * Created once and reused so every `agents.ensure` call for the investigation agent registers the
    * gate. Dependencies are read lazily because the tool and the workflow step are registered at
    * setup, while availability is only evaluated once a request arrives.
    */
@@ -465,6 +454,18 @@ export class NightshiftInvestigationsPlugin
           workflowsManagement: this.workflowsManagement,
         }),
     });
+  };
+
+  private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {
+    if (!this.savedObjects) {
+      throw new Error('savedObjects is not available — plugin start() has not been called');
+    }
+    return this.savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE],
+      })
+      .asScopedToNamespace(spaceId);
   };
 
   private createInvestigationRepository = (

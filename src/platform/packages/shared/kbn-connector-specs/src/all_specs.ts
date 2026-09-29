@@ -87,3 +87,4 @@ export * from './specs/google_threat_intelligence/google_threat_intelligence';
 export * from './specs/gitlab/gitlab';
 export { ThreatQ } from './specs/threatq/threatq';
 export * from './specs/elasticsearch/elasticsearch';
+export * from './specs/azure_functions/azure_functions';
