@@ -163,7 +163,7 @@ Managed Worker definitions:
 - `system-security-floor-attack-discovery`
 - `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
-- `system-security-detection-rule-creation`
+- `system-security-detection-rule-coverage`
 - `system-security-forensics-endpoint-analysis`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
@@ -174,7 +174,9 @@ The prototype rule workflows remain static global installs and are not advertise
 
 - `system-security-rule-tuning-worker` — the tuning sweep; the Rule Tuning Worker dispatches it (`workflow.executeAsync`) on its schedule setting (default 2h) per enabled space, and it remains directly callable for manual runs
 - `system-security-rule-tuning-review` — launched per noisy rule by the tuning sweep, each run holding its own approval gate
-- `system-security-rule-creation` — implementation used by the Detection Rule Creation Worker
+- `system-security-coverage-worker` — the coverage sweep. The Rule Coverage Worker dispatches it (`workflow.execute`) on its schedule setting (default 1h) per enabled space with its lookback and max gaps settings
+- `system-security-coverage-review` — launched per pending coverage gap by the coverage sweep, each run holding its own approval gate
+- `system-security-rule-creation` — launched by a coverage review when nothing covers the gap
 - `system-security-rule-preview` — called by both of the above
 
 ### Managed definition `version` vs product “v1”

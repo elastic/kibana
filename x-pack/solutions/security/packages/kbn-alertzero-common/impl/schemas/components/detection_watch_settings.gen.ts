@@ -47,3 +47,28 @@ export const RuleTuningWorkerExtras = lazySchema(() =>
     .strict()
 );
 export type RuleTuningWorkerExtras = z.infer<typeof RuleTuningWorkerExtras>;
+
+/**
+ * How many days back the sweep looks for pending coverage gaps. Matches the coverage sweep's lookback_days input.
+ */
+export const LookbackDays = lazySchema(() => z.number().int().min(1).max(90));
+export type LookbackDays = z.infer<typeof LookbackDays>;
+
+/**
+ * How many coverage gap reviews one scheduled run starts. Matches the coverage sweep's batch_size input.
+ */
+export const MaxGapsPerRun = lazySchema(() => z.number().int().min(1).max(50));
+export type MaxGapsPerRun = z.infer<typeof MaxGapsPerRun>;
+
+/**
+ * Complete Worker-specific settings for the Rule Coverage Worker, owned by Detection Watch. Sent whole on write. A replacement missing a field is rejected.
+ */
+export const RuleCoverageWorkerExtras = lazySchema(() =>
+  z
+    .object({
+      lookbackDays: LookbackDays,
+      maxGapsPerRun: MaxGapsPerRun,
+    })
+    .strict()
+);
+export type RuleCoverageWorkerExtras = z.infer<typeof RuleCoverageWorkerExtras>;

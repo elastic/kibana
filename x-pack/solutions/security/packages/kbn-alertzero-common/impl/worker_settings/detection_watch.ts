@@ -13,11 +13,11 @@
  */
 
 import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   WATCH_AUTONOMY_REVIEW_GATED,
 } from '../../constants';
-import { RuleTuningWorkerExtras } from '../schemas';
+import { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
 
 /** Default and bounds for Rule Tuning's analysis window, matching the sweep's analysis_window_days. */
@@ -48,7 +48,22 @@ export const RULE_TUNING_SETTINGS: WorkerSettingsDeclaration<RuleTuningWorkerExt
   extras: { schema: RuleTuningWorkerExtras, defaultValue: RULE_TUNING_DEFAULT_EXTRAS },
 };
 
-export const RULE_CREATION_SETTINGS: WorkerSettingsDeclaration = {
-  workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+export const LOOKBACK_DAYS_DEFAULT = 7;
+export const LOOKBACK_DAYS_MIN = 1;
+export const LOOKBACK_DAYS_MAX = 90;
+
+export const MAX_GAPS_PER_RUN_DEFAULT = 5;
+export const MAX_GAPS_PER_RUN_MIN = 1;
+export const MAX_GAPS_PER_RUN_MAX = 50;
+
+export const RULE_COVERAGE_DEFAULT_EXTRAS: RuleCoverageWorkerExtras = {
+  lookbackDays: LOOKBACK_DAYS_DEFAULT,
+  maxGapsPerRun: MAX_GAPS_PER_RUN_DEFAULT,
+};
+
+export const RULE_COVERAGE_SETTINGS: WorkerSettingsDeclaration<RuleCoverageWorkerExtras> = {
+  workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   allowedAutonomyLevels: WATCH_AUTONOMY_REVIEW_GATED,
+  scheduleInterval: { defaultValue: '1h' },
+  extras: { schema: RuleCoverageWorkerExtras, defaultValue: RULE_COVERAGE_DEFAULT_EXTRAS },
 };
