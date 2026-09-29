@@ -1051,7 +1051,7 @@ export const PostBulkAgentRestartRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.string({ maxLength: 512 }), { maxSize: 10000 }),
-      schema.string(),
+      schema.string({ maxLength: 1_000_000 }),
     ]),
     batchSize: schema.maybe(schema.number({ min: 1 })),
     includeInactive: schema.boolean({ defaultValue: false }),

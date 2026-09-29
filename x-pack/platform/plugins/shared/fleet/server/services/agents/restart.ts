@@ -8,13 +8,14 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { AgentNotFoundError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
+import type { Agent } from '../../types';
 import type { GetAgentsOptions } from '.';
-import { getAgents, getAgentsByKuery, getAgentPolicyForAgent } from './crud';
-import { createAgentAction } from './actions';
+import { getAgentsById, getAgentsByKuery, getAgentPolicyForAgent } from './crud';
+import { createAgentAction, createErrorActionResults } from './actions';
 import { openPointInTime } from './crud';
 import { RestartActionRunner, restartBatch } from './restart_action_runner';
 
@@ -51,8 +52,19 @@ export async function bulkRestartAgents(
   const currentSpaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
-    const givenAgents = await getAgents(esClient, soClient, options);
-    return await restartBatch(esClient, soClient, givenAgents, { spaceId: currentSpaceId });
+    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+    const missingErrors: Record<Agent['id'], Error> = {};
+    const givenAgents: Agent[] = [];
+    for (const maybeAgent of maybeAgents) {
+      if ('notFound' in maybeAgent) {
+        missingErrors[maybeAgent.id] = new AgentNotFoundError(`Agent ${maybeAgent.id} not found`);
+      } else {
+        givenAgents.push(maybeAgent);
+      }
+    }
+    const result = await restartBatch(esClient, soClient, givenAgents, { spaceId: currentSpaceId });
+    await createErrorActionResults(esClient, result.actionId, missingErrors, 'agent not found');
+    return result;
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
