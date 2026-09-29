@@ -20,7 +20,8 @@ interface YamlStep {
   else?: YamlStep[];
   foreach?: string;
   condition?: string;
-  'on-failure'?: { continue?: boolean; fallback?: YamlStep[] };
+  if?: string;
+  'on-failure'?: { continue?: boolean; fallback?: YamlStep[]; retry?: { 'max-attempts'?: number } };
 }
 
 const parsed = parse(FLOOR_ALERT_TRIAGE_YAML) as {
@@ -207,6 +208,73 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
   it('renders the execution URL as a markdown link rather than a raw URL', () => {
     const comment = renderTriageStarted(3);
     expect(comment).toContain('[View execution](https://kibana.example.com/app/exec/1)');
+  });
+
+  it('claims every alert is attached when no chunk failed', () => {
+    const comment = renderString(triageInputTemplate, {
+      event: { rule: { name: 'My Rule' }, alerts: makeAlerts(3) },
+      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      execution: { url: 'https://kibana.example.com/app/exec/1' },
+      variables: { failed_attach_chunk_count: 0, total_attach_chunk_count: 1 },
+    });
+    expect(comment).toContain('Alerts attached above.');
+    expect(comment).not.toContain('failed to attach');
+  });
+
+  it('warns with the failure count instead of claiming full attachment when a chunk failed', () => {
+    const comment = renderString(triageInputTemplate, {
+      event: { rule: { name: 'My Rule' }, alerts: makeAlerts(45) },
+      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      execution: { url: 'https://kibana.example.com/app/exec/1' },
+      variables: { failed_attach_chunk_count: 1, total_attach_chunk_count: 3 },
+    });
+    expect(comment).toContain('1 of 3 alert chunk(s) failed to attach');
+    expect(comment).not.toContain('Alerts attached above.');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// attach_alerts — chunk-attachment failures are retried, then counted rather
+// than silently swallowed (a failed chunk never shows as evidence)
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage — attach_alerts', () => {
+  it('retries a failed chunk attach before continuing past it', () => {
+    const chunkStep = stepByName('attach_alert_chunk');
+    expect(chunkStep?.type).toBe('ai.attachment.add');
+    expect(chunkStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(chunkStep?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('initializes the failure counter and total before the loop runs', () => {
+    const init = stepByName('init_attach_chunk_tracking');
+    expect(init?.with?.failed_attach_chunk_count).toBe(0);
+
+    const topLevelNames = parsed.steps.map((step) => step.name);
+    expect(topLevelNames.indexOf('init_attach_chunk_tracking')).toBeLessThan(
+      topLevelNames.indexOf('attach_alerts')
+    );
+  });
+
+  it('increments the failure counter only when the chunk attach step recorded an error', () => {
+    const recordFailure = stepByName('record_attach_alert_chunk_failure');
+    expect(recordFailure?.type).toBe('data.set');
+    expect(recordFailure?.if).toBe('${{ steps.attach_alert_chunk.error != blank }}');
+
+    expect(
+      evalExpr(recordFailure!.if!, { steps: { attach_alert_chunk: { error: undefined } } })
+    ).toBe(false);
+    expect(
+      evalExpr(recordFailure!.if!, {
+        steps: { attach_alert_chunk: { error: { message: 'boom' } } },
+      })
+    ).toBe(true);
+
+    expect(
+      evalExpr(recordFailure!.with!.failed_attach_chunk_count as string, {
+        variables: { failed_attach_chunk_count: 2 },
+      })
+    ).toBe(3);
   });
 });
 

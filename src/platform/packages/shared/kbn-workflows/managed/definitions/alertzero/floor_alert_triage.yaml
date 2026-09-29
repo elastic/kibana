@@ -125,6 +125,12 @@ steps:
   #    batches into multiple chips. render_inline: true so chips show in the
   #    Investigation flyout without a separate attachment panel.
   # ---------------------------------------------------------------------------
+  - name: init_attach_chunk_tracking
+    type: data.set
+    with:
+      failed_attach_chunk_count: 0
+      total_attach_chunk_count: "${{ event.alerts | map: '_id' | chunk: 20 | size }}"
+
   - name: attach_alerts
     type: foreach
     foreach: "${{ event.alerts | map: '_id' | chunk: 20 | json }}"
@@ -132,6 +138,9 @@ steps:
       - name: attach_alert_chunk
         type: ai.attachment.add
         on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
           continue: true
         with:
           conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
@@ -140,6 +149,16 @@ steps:
           data:
             alertIds: "${{ foreach.item }}"
           description: "Alerts analysed in this triage run"
+
+      # Retries exhaust before continue: true takes over, so an error here means this
+      # chunk never attached — those alert ids have no evidence chip in the
+      # Investigation. Counted so post_comment_triage_started reports accurate
+      # coverage instead of unconditionally claiming every alert is attached.
+      - name: record_attach_alert_chunk_failure
+        type: data.set
+        if: "${{ steps.attach_alert_chunk.error != blank }}"
+        with:
+          failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
 
   - name: post_comment_triage_started
     type: kibana.request
@@ -156,7 +175,12 @@ steps:
         conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
         trigger_mode: "never"
         input: |-
-          Triage started for rule **{{ event.rule.name }}** ({{ event.alerts | size }} alert(s), attached above). Model routed via the `alertzero_reasoning` Model Management feature.
+          Triage started for rule **{{ event.rule.name }}** ({{ event.alerts | size }} alert(s)). Model routed via the `alertzero_reasoning` Model Management feature.
+          {% if variables.failed_attach_chunk_count > 0 %}
+          ⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach as evidence after retries; some alerts are not visible in this Investigation.
+          {% else %}
+          Alerts attached above.
+          {% endif %}
 
           [View execution]({{ execution.url }})
 
