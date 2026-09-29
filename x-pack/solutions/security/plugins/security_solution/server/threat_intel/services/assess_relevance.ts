@@ -130,6 +130,19 @@ export const assessRelevance = async (
     includeRaw: true,
   });
 
+  // withStructuredOutput casts the raw tool-call args to the schema's inferred
+  // type without validating them; re-parse so boundedText/link truncation
+  // actually runs instead of letting unbounded model output through.
+  const invokeRelevance = async (
+    text: string
+  ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: RelevanceOutput }> => {
+    const invoked = (await structured.invoke(buildRelevancePrompt(params, text))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: unknown;
+    };
+    return { raw: invoked.raw, parsed: relevanceOutputSchema.parse(invoked.parsed) };
+  };
+
   let context = fullArticleContext(params.text);
   let result: {
     raw: { response_metadata: Record<string, unknown> };
@@ -137,25 +150,16 @@ export const assessRelevance = async (
   };
   const startedAt = Date.now();
   try {
-    result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
-      raw: { response_metadata: Record<string, unknown> };
-      parsed: RelevanceOutput;
-    };
+    result = await invokeRelevance(context.text);
   } catch (error) {
     if (!isContextLengthExceededError(error as Error)) throw error;
     context = selectOverflowRetryArticleContext(params.text);
     try {
-      result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
-        raw: { response_metadata: Record<string, unknown> };
-        parsed: RelevanceOutput;
-      };
+      result = await invokeRelevance(context.text);
     } catch (retryError) {
       if (!isContextLengthExceededError(retryError as Error)) throw retryError;
       context = furtherShrinkOverflowArticleContext(context);
-      result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
-        raw: { response_metadata: Record<string, unknown> };
-        parsed: RelevanceOutput;
-      };
+      result = await invokeRelevance(context.text);
     }
   }
 

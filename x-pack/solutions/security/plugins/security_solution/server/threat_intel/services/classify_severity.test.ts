@@ -75,15 +75,13 @@ describe('classifySeverity', () => {
 
   it('throws when the model returns an invalid level', async () => {
     const { model } = buildModel({ level: 'urgent' } as unknown as ClassifySeverityLlmOutput);
-    await expect(classifySeverity(model, logger, { text: 'body' })).rejects.toThrow(
-      /invalid level/
-    );
+    await expect(classifySeverity(model, logger, { text: 'body' })).rejects.toThrow(/level/);
   });
 
   it('throws when the model returns no parsed output', async () => {
     const { model } = buildModel(undefined);
     await expect(classifySeverity(model, logger, { text: 'body' })).rejects.toThrow(
-      /invalid level/
+      /no parsed output/
     );
   });
 

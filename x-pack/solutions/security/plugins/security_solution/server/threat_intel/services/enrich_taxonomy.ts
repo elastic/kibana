@@ -104,33 +104,39 @@ export const enrichTaxonomy = async (
     includeRaw: true,
   });
 
+  // withStructuredOutput casts the raw tool-call args to the schema's inferred
+  // type without validating them; re-parse so the categories/regions closed
+  // sets actually run instead of letting unbounded model output through.
+  const invokeTaxonomy = async (
+    promptText: string
+  ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: TaxonomyOutput }> => {
+    const invoked = (await structured.invoke(
+      buildTaxonomyPrompt({ ...params, text: promptText })
+    )) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: unknown;
+    };
+    return { raw: invoked.raw, parsed: taxonomyOutputSchema.parse(invoked.parsed) };
+  };
+
   let text = params.text;
   let result: {
     raw: { response_metadata: Record<string, unknown> };
     parsed: TaxonomyOutput;
   };
   try {
-    result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
-      raw: { response_metadata: Record<string, unknown> };
-      parsed: TaxonomyOutput;
-    };
+    result = await invokeTaxonomy(text);
   } catch (error) {
     if (!isContextLengthExceededError(error as Error)) throw error;
     let context = selectOverflowRetryArticleContext(params.text);
     text = context.text;
     try {
-      result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
-        raw: { response_metadata: Record<string, unknown> };
-        parsed: TaxonomyOutput;
-      };
+      result = await invokeTaxonomy(text);
     } catch (retryError) {
       if (!isContextLengthExceededError(retryError as Error)) throw retryError;
       context = furtherShrinkOverflowArticleContext(context);
       text = context.text;
-      result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
-        raw: { response_metadata: Record<string, unknown> };
-        parsed: TaxonomyOutput;
-      };
+      result = await invokeTaxonomy(text);
     }
   }
 

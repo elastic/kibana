@@ -346,11 +346,17 @@ export const enrichReportCore = async (
 
   const coreStartedAt = Date.now();
   const coreCall = await invokeWithOverflowBounds({
-    invoke: (prompt) =>
-      coreStructured.invoke(prompt) as Promise<{
+    // withStructuredOutput casts the raw tool-call args to the schema's inferred
+    // type without validating them; re-parse so technique_id normalization,
+    // description/artifact truncation, and the categories/regions closed sets
+    // actually run, instead of letting unbounded model output reach persistence.
+    invoke: async (prompt) => {
+      const invoked = (await coreStructured.invoke(prompt)) as {
         raw: { response_metadata: Record<string, unknown> };
-        parsed: ReportCoreModelOutput;
-      }>,
+        parsed: unknown;
+      };
+      return { raw: invoked.raw, parsed: reportCoreModelOutputSchema.parse(invoked.parsed) };
+    },
     build: (text, candidates) => buildPrompt(params, text, candidates),
     articleText: params.text,
     prepared: withBatchPrepared(prepared, firstBatch),
@@ -375,11 +381,13 @@ export const enrichReportCore = async (
   for (const batch of pendingBatches.filter((entry) => entry.length > 0)) {
     const batchStartedAt = Date.now();
     const batchCall = await invokeAdjudicationBatch({
-      invoke: (prompt) =>
-        adjudicationStructured.invoke(prompt) as Promise<{
+      invoke: async (prompt) => {
+        const invoked = (await adjudicationStructured.invoke(prompt)) as {
           raw: { response_metadata: Record<string, unknown> };
-          parsed: z.infer<typeof iocAdjudicationOnlySchema>;
-        }>,
+          parsed: unknown;
+        };
+        return { raw: invoked.raw, parsed: iocAdjudicationOnlySchema.parse(invoked.parsed) };
+      },
       build: (candidates) => buildAdjudicationOnlyPrompt(params, candidates),
       prepared: withBatchPrepared(prepared, batch),
     });
