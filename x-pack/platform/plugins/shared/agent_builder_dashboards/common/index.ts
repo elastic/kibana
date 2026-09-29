@@ -6,3 +6,5 @@
  */
 
 export { dashboardTools } from './constants';
+export { DASHBOARD_UPDATED_UI_EVENT } from './ui_events';
+export type { DashboardUpdatedUiEventData } from './ui_events';
