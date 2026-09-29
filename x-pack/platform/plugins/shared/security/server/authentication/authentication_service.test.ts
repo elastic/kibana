@@ -46,6 +46,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';
+import { Authenticator } from './authenticator';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { KIBANA_AUTH_FULL_HEADER } from '../../common/constants';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -62,6 +63,8 @@ import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
+
+const MockedAuthenticator = Authenticator as unknown as Mock;
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -269,8 +272,7 @@ describe('AuthenticationService', () => {
         service.start(mockStartAuthenticationParams);
 
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
-        authenticate = (await vi.importMock('./authenticator')).Authenticator.mock.instances[0]
-          .authenticate;
+        authenticate = MockedAuthenticator.mock.instances[0].authenticate;
       });
 
       it('returns error if license is not available.', async () => {
@@ -487,8 +489,7 @@ describe('AuthenticationService', () => {
 
         unauthorizedErrorHandler =
           mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0][0];
-        reauthenticate = (await vi.importMock('./authenticator')).Authenticator.mock.instances[0]
-          .reauthenticate;
+        reauthenticate = MockedAuthenticator.mock.instances[0].reauthenticate;
       });
 
       describe('service-account-bound fake requests', () => {
@@ -929,8 +930,7 @@ describe('AuthenticationService', () => {
         service.setup(mockSetupAuthenticationParams);
         service.start(mockStartAuthenticationParams);
 
-        getServerBaseURL = (await vi.importMock('./authenticator')).Authenticator.mock.calls[0][0]
-          .getServerBaseURL;
+        getServerBaseURL = MockedAuthenticator.mock.calls[0][0].getServerBaseURL;
       });
 
       it('falls back to legacy server config if `public` config is not specified', async () => {
@@ -1002,7 +1002,7 @@ describe('AuthenticationService', () => {
 
       const onPreResponseHandler =
         mockSetupAuthenticationParams.http.registerOnPreResponse.mock.calls[0][0];
-      const [authenticator] = (await vi.importMock('./authenticator')).Authenticator.mock.instances;
+      const [authenticator] = MockedAuthenticator.mock.instances;
 
       return { authenticator, onPreResponseHandler };
     }

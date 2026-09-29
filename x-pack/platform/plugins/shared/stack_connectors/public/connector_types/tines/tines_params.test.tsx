@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type * as TriggersActionsUiPublic from '@kbn/triggers-actions-ui-plugin/public';
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
@@ -14,7 +15,6 @@ import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/
 import TinesParamsFields from './tines_params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 interface Result {
   isLoading: boolean;
   response: Record<string, unknown>;
@@ -37,8 +37,10 @@ const mockUseSubAction = vi.fn<Result, [UseSubActionParams<unknown>]>((params) =
 );
 
 const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
-vi.mock(triggersActionsPath, () => {
-  const original = require(triggersActionsPath);
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const original = await vi.importActual<typeof TriggersActionsUiPublic>(
+    '@kbn/triggers-actions-ui-plugin/public'
+  );
   return {
     ...original,
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),

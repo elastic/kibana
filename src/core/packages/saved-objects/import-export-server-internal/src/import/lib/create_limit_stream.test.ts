@@ -18,7 +18,7 @@ describe('createLimitStream()', () => {
   test('limit of 5 errors out when 6 items are through', async () => {
     await expect(
       createPromiseFromStreams([createListStream([1, 2, 3, 4, 5, 6]), createLimitStream(5)])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't import more than 5 objects"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Can't import more than 5 objects]`);
   });
 
   test('send the values on the output stream', async () => {

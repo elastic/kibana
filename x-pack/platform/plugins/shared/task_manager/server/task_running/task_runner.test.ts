@@ -1351,7 +1351,9 @@ describe('TaskManagerRunner', () => {
 
       expect(await runner.run()).toEqual({
         error: {
-          error: new Error('[foo]: expected value of type [string] but got [boolean]'),
+          error: expect.objectContaining({
+            message: '[foo]: expected value of type [string] but got [boolean]',
+          }),
           shouldValidate: false,
           state: { bar: 'test', baz: 'test', foo: true },
         },
@@ -1757,7 +1759,7 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.Success,
-                error: new Error(`test`),
+                error: createTaskRunError(new Error(`test`), TaskErrorSource.FRAMEWORK),
                 isExpired: false,
               })
             )
@@ -1805,7 +1807,7 @@ describe('TaskManagerRunner', () => {
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.Success,
                 isExpired: true,
-                error: new Error(`test`),
+                error: createTaskRunError(new Error(`test`), TaskErrorSource.FRAMEWORK),
               })
             )
           )

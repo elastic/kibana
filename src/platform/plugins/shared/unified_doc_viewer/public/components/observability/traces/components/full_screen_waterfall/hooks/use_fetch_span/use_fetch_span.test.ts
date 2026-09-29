@@ -82,7 +82,7 @@ describe('useFetchSpan', () => {
 
     const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
-    await waitFor(() => !result.current.loading);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.span).toBeUndefined();
@@ -92,7 +92,7 @@ describe('useFetchSpan', () => {
   it('should return undefined when spanId is empty', async () => {
     const { result } = renderHook(() => useFetchSpan({ spanId: '', traceId }));
 
-    await waitFor(() => !result.current.loading);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.span).toBeUndefined();
@@ -102,7 +102,7 @@ describe('useFetchSpan', () => {
   it('should return undefined when traceId is empty', async () => {
     const { result } = renderHook(() => useFetchSpan({ spanId, traceId: '' }));
 
-    await waitFor(() => !result.current.loading);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.span).toBeUndefined();

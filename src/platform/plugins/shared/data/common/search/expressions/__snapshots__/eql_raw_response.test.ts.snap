@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`eqlRawResponse converts events to table simple aggregation response 1`] = `
+exports[`eqlRawResponse > converts events to table > simple aggregation response 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -43,7 +43,7 @@ Object {
 }
 `;
 
-exports[`eqlRawResponse converts sequences to table simple docs response 1`] = `
+exports[`eqlRawResponse > converts sequences to table > simple docs response 1`] = `
 Object {
   "columns": Array [
     Object {

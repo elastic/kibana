@@ -89,7 +89,7 @@ describe('retryOnError', () => {
 
     await expect(
       retryOnError({ operation: operationMock, retries: 0, report, logger })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: fail]`);
     expect(logger.info).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
@@ -175,7 +175,7 @@ describe('retryOnError', () => {
     await Promise.resolve();
 
     vi.runAllTimersAsync().catch(() => {});
-    await expect(retryPromise).rejects.toThrowErrorMatchingInlineSnapshot(`"fail"`);
+    await expect(retryPromise).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: fail]`);
 
     // initial attempt + 3 retries
     expect(operationMock).toHaveBeenCalledTimes(4);

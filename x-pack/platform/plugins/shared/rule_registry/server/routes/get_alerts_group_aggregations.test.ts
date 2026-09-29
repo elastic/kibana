@@ -257,7 +257,7 @@ describe('getAlertsGroupAggregations', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'invalid keys \\"script\\"'"`
+        `[Error: Request was rejected with message: 'invalid keys "script"']`
       );
     });
 

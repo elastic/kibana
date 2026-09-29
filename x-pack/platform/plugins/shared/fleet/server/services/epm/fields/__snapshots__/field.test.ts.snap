@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`tests loading fields.yml: base.yml 1`] = `
+exports[`tests loading fields.yml > base.yml 1`] = `
 [
   {
     "name": "user",
@@ -64,7 +64,7 @@ exports[`tests loading fields.yml: base.yml 1`] = `
 ]
 `;
 
-exports[`tests loading fields.yml: cockroachdb_dynamic_templates.yml 1`] = `
+exports[`tests loading fields.yml > cockroachdb_dynamic_templates.yml 1`] = `
 [
   {
     "name": "cockroachdb",
@@ -122,7 +122,7 @@ exports[`tests loading fields.yml: cockroachdb_dynamic_templates.yml 1`] = `
 ]
 `;
 
-exports[`tests loading fields.yml: coredns.logs.yml 1`] = `
+exports[`tests loading fields.yml > coredns.logs.yml 1`] = `
 [
   {
     "name": "coredns",
@@ -193,7 +193,7 @@ exports[`tests loading fields.yml: coredns.logs.yml 1`] = `
 ]
 `;
 
-exports[`tests loading fields.yml: system.yml 1`] = `
+exports[`tests loading fields.yml > system.yml 1`] = `
 [
   {
     "name": "system",

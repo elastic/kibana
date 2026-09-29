@@ -8,6 +8,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
@@ -22,6 +23,7 @@ import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider
 import { internalStateActions } from '../../state_management/redux';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import type { DiscoverServices } from '../../../../build_services';
 import type { AppMenuExtension, AppMenuExtensionParams } from '../../../../context_awareness/types';
 import { useProfileAccessor } from '../../../../context_awareness/hooks/use_profile_accessor';
@@ -681,14 +683,14 @@ describe('useTopNavLinks', () => {
       return v2OnlyServices;
     };
 
-    beforeEach(async () => {
-      (await vi.importMock('@kbn/alerts-ui-shared')).useGetRuleTypesPermissions.mockReturnValue({
+    beforeEach(() => {
+      (useGetRuleTypesPermissions as Mock).mockReturnValue({
         authorizedRuleTypes: [],
       });
     });
 
-    afterEach(async () => {
-      (await vi.importMock('@kbn/alerts-ui-shared')).useGetRuleTypesPermissions.mockReturnValue({
+    afterEach(() => {
+      (useGetRuleTypesPermissions as Mock).mockReturnValue({
         authorizedRuleTypes: [
           {
             id: '.es-query',

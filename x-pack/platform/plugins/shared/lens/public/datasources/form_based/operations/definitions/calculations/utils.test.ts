@@ -7,13 +7,16 @@
 
 import { vi } from 'vitest';
 
+// Load the automocked definitions first: Vitest builds the automock from the real module inside
+// the same module graph (Jest used an isolated registry), so importing ./utils first would make
+// the operation definitions read its exports while it is still initializing.
+import { operationDefinitionMap } from '..';
 import {
   checkReferences,
   checkForDataLayerType,
   dateBasedOperationToExpression,
   getReferencedColumnLabel,
 } from './utils';
-import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';

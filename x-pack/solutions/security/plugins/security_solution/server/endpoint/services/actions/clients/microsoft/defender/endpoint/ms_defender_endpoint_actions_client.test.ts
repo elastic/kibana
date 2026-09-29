@@ -52,7 +52,9 @@ vi.mock('../../../../action_details_by_id', async () => {
 
 vi.mock('p-retry', () => {
   const originalPRetry = require('p-retry');
-  return vi.fn().mockImplementation((fn, options) => originalPRetry(fn, options));
+  return {
+    default: vi.fn().mockImplementation((fn, options) => originalPRetry(fn, options)),
+  };
 });
 
 const getActionDetailsByIdMock = _getActionDetailsById as Mock;

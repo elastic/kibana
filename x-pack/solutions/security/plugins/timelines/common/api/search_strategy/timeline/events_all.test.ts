@@ -60,16 +60,16 @@ describe('timelineEventsAllSchema', () => {
     expect(() => {
       timelineEventsAllSchema.parse(invalidEventsRequest);
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"expected\\": \\"boolean\\",
-          \\"code\\": \\"invalid_type\\",
-          \\"path\\": [
-            \\"excludeEcsData\\"
+          "expected": "boolean",
+          "code": "invalid_type",
+          "path": [
+            "excludeEcsData"
           ],
-          \\"message\\": \\"Invalid input: expected boolean, received string\\"
+          "message": "Invalid input: expected boolean, received string"
         }
-      ]"
+      ]]
     `);
   });
 });

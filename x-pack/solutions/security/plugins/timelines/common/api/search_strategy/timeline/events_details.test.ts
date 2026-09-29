@@ -39,16 +39,16 @@ describe('timelineEventsDetailsSchema', () => {
     expect(() => {
       timelineEventsDetailsSchema.parse(invalidEventsDetailsRequest);
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"expected\\": \\"string\\",
-          \\"code\\": \\"invalid_type\\",
-          \\"path\\": [
-            \\"indexName\\"
+          "expected": "string",
+          "code": "invalid_type",
+          "path": [
+            "indexName"
           ],
-          \\"message\\": \\"Invalid input: expected string, received number\\"
+          "message": "Invalid input: expected string, received number"
         }
-      ]"
+      ]]
     `);
   });
 });

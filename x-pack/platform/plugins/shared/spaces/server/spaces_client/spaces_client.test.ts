@@ -321,7 +321,9 @@ describe('#getAll', () => {
     );
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"unsupported space purpose: invalid_purpose"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `[Error: unsupported space purpose: invalid_purpose]`
+    );
   });
 });
 
@@ -764,7 +766,7 @@ describe('#create', () => {
     );
 
     await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`
+      `[Error: Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting]`
     );
 
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
@@ -804,7 +806,7 @@ describe('#create', () => {
     await expect(
       client.create({ ...spaceToCreate, solution: undefined })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to create Space, solution property is forbidden in serverless"`
+      `[Error: Unable to create Space, solution property is forbidden in serverless]`
     );
 
     await expect(
@@ -941,7 +943,7 @@ describe('#create', () => {
       await expect(
         client.create({ ...spaceToCreate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+        `[Error: Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled]`
       );
 
       expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
@@ -983,7 +985,7 @@ describe('#create', () => {
       await expect(
         client.create({ ...spaceToCreate, solution: 'es' })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to create Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled"`
+        `[Error: Unable to create Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled]`
       );
 
       expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
@@ -1191,7 +1193,7 @@ describe('#update', () => {
     await expect(
       client.update(id, { ...spaceToUpdate, solution: undefined })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to update Space, solution property is forbidden in serverless"`
+      `[Error: Unable to update Space, solution property is forbidden in serverless]`
     );
 
     await expect(
@@ -1225,7 +1227,7 @@ describe('#update', () => {
     await expect(
       client.update(id, { ...spaceToUpdate, solution: undefined })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to update Space, solution property cannot be empty"`
+      `[Error: Unable to update Space, solution property cannot be empty]`
     );
 
     expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
@@ -1491,7 +1493,7 @@ describe('#update', () => {
       await expect(
         client.update(id, { ...spaceToUpdate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+        `[Error: Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled]`
       );
 
       expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
@@ -1525,7 +1527,7 @@ describe('#update', () => {
       await expect(
         client.update(id, { ...spaceToUpdate, solution: 'es' })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled"`
+        `[Error: Unable to update Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled]`
       );
 
       expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
@@ -1577,7 +1579,7 @@ describe('#delete', () => {
     );
 
     await expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The foo space cannot be deleted because it is reserved."`
+      `[Error: The foo space cannot be deleted because it is reserved.]`
     );
 
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
@@ -1808,7 +1810,7 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to create Space, projectRouting property is only allowed when CPS is enabled"`
+        `[Error: Unable to create Space, projectRouting property is only allowed when CPS is enabled]`
       );
     });
 
@@ -1838,7 +1840,7 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to create Space, user is not authorized to update projectRouting"`
+        `[Error: Unable to create Space, user is not authorized to update projectRouting]`
       );
     });
 
@@ -1866,7 +1868,7 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to create Space, projectRouting property is only allowed when CPS is enabled"`
+        `[Error: Unable to create Space, projectRouting property is only allowed when CPS is enabled]`
       );
     });
 
@@ -2022,7 +2024,7 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.update('foo', spaceToUpdate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, projectRouting property is only allowed when CPS is enabled"`
+        `[Error: Unable to update Space, projectRouting property is only allowed when CPS is enabled]`
       );
     });
 
@@ -2049,7 +2051,7 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.update('foo', spaceToUpdate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, projectRouting property is only allowed when CPS is enabled"`
+        `[Error: Unable to update Space, projectRouting property is only allowed when CPS is enabled]`
       );
     });
   });

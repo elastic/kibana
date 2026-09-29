@@ -82,9 +82,11 @@ describe('InlineEditableTableLogic', () => {
 
   describe('actions', () => {
     describe('deleteItem', () => {
-      const logic = mountLogic();
-      logic.actions.deleteItem();
-      expect(logicValuesWithoutSelectors(logic)).toEqual(DEFAULT_VALUES);
+      it('keeps state at the default values', () => {
+        const logic = mountLogic();
+        logic.actions.deleteItem();
+        expect(logicValuesWithoutSelectors(logic)).toEqual(DEFAULT_VALUES);
+      });
     });
 
     describe('doneEditing', () => {

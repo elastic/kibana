@@ -116,7 +116,9 @@ describe('update_objects_spaces', () => {
 
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
-      ).toThrowErrorMatchingInlineSnapshot(`"[spacesToAdd]: duplicate space ids are not allowed"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: [spacesToAdd]: duplicate space ids are not allowed]`
+      );
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
       ).toThrowErrorMatchingInlineSnapshot(
@@ -133,7 +135,7 @@ describe('update_objects_spaces', () => {
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[spacesToAdd.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""`
+        `[Error: [spacesToAdd.1]: lower case, a-z, 0-9, "_", and "-" are allowed, OR "*"]`
       );
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)

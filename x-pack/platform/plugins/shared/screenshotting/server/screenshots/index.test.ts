@@ -28,10 +28,10 @@ import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 
-vi.mock('../layouts/create_layout', async (importOriginal) => ({
-  ...(await importOriginal<typeof Layouts>()),
-  createLayout: vi.fn(),
-}));
+vi.mock('../layouts/create_layout', async (importOriginal) => {
+  const actual = await importOriginal<typeof Layouts>();
+  return { ...actual, createLayout: vi.fn(actual.createLayout) };
+});
 
 /*
  * Tests
@@ -57,6 +57,8 @@ describe('Screenshot Observable Pipeline', () => {
     driver = createMockBrowserDriver();
     driverFactory = createMockBrowserDriverFactory(driver);
     http = httpServiceMock.createSetupContract();
+    // Restore the real createLayout (the vi.fn impl) so createMockLayout builds a fresh layout.
+    vi.mocked(Layouts.createLayout).mockReset();
     layout = createMockLayout();
     logger = loggingSystemMock.createLogger();
 

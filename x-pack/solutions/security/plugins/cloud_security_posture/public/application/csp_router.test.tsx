@@ -17,6 +17,20 @@ import { createMemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
 import type { QueryClientProviderProps } from '@kbn/react-query';
 
+const mockCloudPosturePages = vi.hoisted(() => ({
+  current: undefined as Record<CspPage, CspPageNavigationItem> | undefined,
+}));
+
+vi.mock('../common/navigation/constants', async (importOriginal) => {
+  const actual = await importOriginal<typeof constants>();
+  return {
+    ...actual,
+    get cloudPosturePages() {
+      return mockCloudPosturePages.current ?? actual.cloudPosturePages;
+    },
+  };
+});
+
 vi.mock('../pages', () => {
   const mocked = {
     Findings: () => <div data-test-subj="Findings">Findings</div>,
@@ -39,9 +53,6 @@ vi.mock('@kbn/react-query', () => {
 });
 
 describe('CspRouter', () => {
-  const originalCloudPosturePages = { ...constants.cloudPosturePages };
-  const mockConstants = constants as { cloudPosturePages: Record<CspPage, CspPageNavigationItem> };
-
   const securityContext: CspSecuritySolutionContext = {
     getFiltersGlobalComponent: vi.fn(),
     getSpyRouteComponent: () => () => <div data-test-subj="mockedSpyRoute" />,
@@ -57,7 +68,7 @@ describe('CspRouter', () => {
     );
 
   beforeEach(() => {
-    mockConstants.cloudPosturePages = originalCloudPosturePages;
+    mockCloudPosturePages.current = undefined;
     vi.clearAllMocks();
     history = createMemoryHistory();
   });
@@ -131,7 +142,7 @@ describe('CspRouter', () => {
 
   describe('CspRoute', () => {
     it('should not render disabled path', () => {
-      mockConstants.cloudPosturePages = {
+      mockCloudPosturePages.current = {
         ...constants.cloudPosturePages,
         benchmarks: {
           ...constants.cloudPosturePages.benchmarks,

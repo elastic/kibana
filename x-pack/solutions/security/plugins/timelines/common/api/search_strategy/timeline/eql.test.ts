@@ -93,16 +93,16 @@ describe('timelineEqlRequestOptionsSchema', () => {
     expect(() => {
       timelineEqlRequestOptionsSchema.parse(invalidEqlRequest);
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"expected\\": \\"array\\",
-          \\"code\\": \\"invalid_type\\",
-          \\"path\\": [
-            \\"fieldRequested\\"
+          "expected": "array",
+          "code": "invalid_type",
+          "path": [
+            "fieldRequested"
           ],
-          \\"message\\": \\"Invalid input: expected array, received number\\"
+          "message": "Invalid input: expected array, received number"
         }
-      ]"
+      ]]
     `);
   });
 });

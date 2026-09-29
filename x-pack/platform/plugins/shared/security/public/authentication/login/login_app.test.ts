@@ -13,6 +13,7 @@ import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { loginApp } from './login_app';
+import { renderLoginPage } from './login_page';
 
 describe('loginApp', () => {
   it('properly registers application', () => {
@@ -59,7 +60,7 @@ describe('loginApp', () => {
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = (await vi.importMock('./login_page')).renderLoginPage;
+    const mockRenderApp = renderLoginPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

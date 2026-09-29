@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildUserDetailsQuery build query from options correctly 1`] = `
+exports[`buildUserDetailsQuery > build query from options correctly 1`] = `
 Object {
   "aggregations": Object {
     "host_ip": Object {
@@ -145,7 +145,7 @@ Object {
 }
 `;
 
-exports[`buildUserDetailsQuery includes user.name filter when filterQuery is undefined 1`] = `
+exports[`buildUserDetailsQuery > includes user.name filter when filterQuery is undefined 1`] = `
 Object {
   "bool": Object {
     "filter": Array [

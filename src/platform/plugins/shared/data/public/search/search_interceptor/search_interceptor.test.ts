@@ -2188,18 +2188,17 @@ describe('SearchInterceptor', () => {
         await timeTravel(50); // Run until abort
 
         expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
-        expect(mockCoreSetup.http.post.mock.calls[1]).toMatchInlineSnapshot(`
-          Array [
-            "/internal/search/ese/1",
-            Object {
-              "asResponse": true,
-              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"returnIntermediateResults\\":true,\\"stream\\":true}",
-              "context": undefined,
-              "signal": AbortSignal {},
-              "version": "1",
-            },
-          ]
-        `);
+        // Node's AbortSignal (Vitest's jsdom env) serializes its internal symbols, so match its type.
+        expect(mockCoreSetup.http.post.mock.calls[1]).toStrictEqual([
+          '/internal/search/ese/1',
+          {
+            asResponse: true,
+            body: '{"id":"1","params":{},"returnIntermediateResults":true,"stream":true}',
+            context: undefined,
+            signal: expect.any(AbortSignal),
+            version: '1',
+          },
+        ]);
         expect(error).toHaveBeenCalled();
       });
 
@@ -2304,18 +2303,17 @@ describe('SearchInterceptor', () => {
         await timeTravel(50); // Run until abort
 
         expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
-        expect(mockCoreSetup.http.post.mock.calls[1]).toMatchInlineSnapshot(`
-          Array [
-            "/internal/search/ese/1",
-            Object {
-              "asResponse": true,
-              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"returnIntermediateResults\\":true,\\"stream\\":true}",
-              "context": undefined,
-              "signal": AbortSignal {},
-              "version": "1",
-            },
-          ]
-        `);
+        // Node's AbortSignal (Vitest's jsdom env) serializes its internal symbols, so match its type.
+        expect(mockCoreSetup.http.post.mock.calls[1]).toStrictEqual([
+          '/internal/search/ese/1',
+          {
+            asResponse: true,
+            body: '{"id":"1","params":{},"returnIntermediateResults":true,"stream":true}',
+            context: undefined,
+            signal: expect.any(AbortSignal),
+            version: '1',
+          },
+        ]);
         expect(error).not.toHaveBeenCalled();
       });
 

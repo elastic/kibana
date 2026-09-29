@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ManageSpacesButton doesn't render if user profile forbids managing spaces 1`] = `""`;
+exports[`ManageSpacesButton > doesn't render if user profile forbids managing spaces 1`] = `""`;
 
-exports[`ManageSpacesButton renders as expected 1`] = `
+exports[`ManageSpacesButton > renders as expected 1`] = `
 <EuiButtonEmpty
   data-test-subj="manageSpaces"
   onClick={[Function]}

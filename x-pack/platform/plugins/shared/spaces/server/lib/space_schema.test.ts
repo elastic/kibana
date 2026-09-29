@@ -24,7 +24,7 @@ describe('#id', () => {
         id: undefined,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [string] but got [undefined]"`
+      `[Error: [id]: expected value of type [string] but got [undefined]]`
     );
   });
 
@@ -44,7 +44,7 @@ describe('#id', () => {
         id: 'Foo',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: must be lower case, a-z, 0-9, '_', and '-' are allowed"`
+      `[Error: [id]: must be lower case, a-z, 0-9, '_', and '-' are allowed]`
     );
   });
 
@@ -55,7 +55,7 @@ describe('#id', () => {
         id: '',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: must be lower case, a-z, 0-9, '_', and '-' are allowed"`
+      `[Error: [id]: must be lower case, a-z, 0-9, '_', and '-' are allowed]`
     );
   });
 
@@ -98,7 +98,7 @@ describe('#disabledFeatures', () => {
         disabledFeatures: 'foo',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[disabledFeatures]: could not parse array value from json input"`
+      `[Error: [disabledFeatures]: could not parse array value from json input]`
     );
   });
 
@@ -118,7 +118,7 @@ describe('#disabledFeatures', () => {
         disabledFeatures: ['foo', true],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[disabledFeatures.1]: expected value of type [string] but got [boolean]"`
+      `[Error: [disabledFeatures.1]: expected value of type [string] but got [boolean]]`
     );
   });
 });
@@ -140,7 +140,7 @@ describe('#color', () => {
         color: '',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
+      `[Error: [color]: must be a 6 digit hex color, starting with a #]`
     );
   });
 
@@ -178,7 +178,7 @@ describe('#color', () => {
         color: '123456',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
+      `[Error: [color]: must be a 6 digit hex color, starting with a #]`
     );
   });
 
@@ -189,7 +189,7 @@ describe('#color', () => {
         color: '1234567',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
+      `[Error: [color]: must be a 6 digit hex color, starting with a #]`
     );
   });
 
@@ -200,7 +200,7 @@ describe('#color', () => {
         color: '12345',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
+      `[Error: [color]: must be a 6 digit hex color, starting with a #]`
     );
   });
 });
@@ -221,7 +221,7 @@ describe('#imageUrl', () => {
         ...defaultProperties,
         imageUrl: 'notValid',
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[imageUrl]: must start with 'data:image'"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: [imageUrl]: must start with 'data:image']`);
   });
 
   test(`checking that a valid image is accepted as imageUrl`, () => {
@@ -281,7 +281,7 @@ describe('#projectRouting', () => {
     expect(() =>
       spaceBaseSchema.validate({ ...defaultProperties, projectRouting: 123 })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[projectRouting]: expected value of type [string] but got [number]"`
+      `[Error: [projectRouting]: expected value of type [string] but got [number]]`
     );
   });
 

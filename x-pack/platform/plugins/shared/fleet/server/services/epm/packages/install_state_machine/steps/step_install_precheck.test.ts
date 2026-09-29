@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+// Evaluate the module under test before anything else loads the mocked default_settings module:
+// when the default_settings mock factory's importActual reaches this module first, Vitest binds it
+// to the real default_settings (circular import of a mock being built), so its exports aren't mocked.
+import './step_install_precheck';
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 

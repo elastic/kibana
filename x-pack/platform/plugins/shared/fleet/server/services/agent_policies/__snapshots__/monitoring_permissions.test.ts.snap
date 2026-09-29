@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getMonitoringPermissions With elastic agent package installed should return default logs permissions if only logs are enabled 1`] = `
+exports[`getMonitoringPermissions > With elastic agent package installed > should return default logs permissions if only logs are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -27,7 +27,7 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions With elastic agent package installed should return default logs, metrics, traces permissions if all are enabled 1`] = `
+exports[`getMonitoringPermissions > With elastic agent package installed > should return default logs, metrics, traces permissions if all are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -72,7 +72,7 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions With elastic agent package installed should return default metrics permissions if only metrics are enabled 1`] = `
+exports[`getMonitoringPermissions > With elastic agent package installed > should return default metrics permissions if only metrics are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -99,7 +99,7 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions With elastic agent package installed should return default traces permissions if only traces are enabled 1`] = `
+exports[`getMonitoringPermissions > With elastic agent package installed > should return default traces permissions if only traces are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [],
@@ -107,7 +107,7 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions Without elastic agent package installed should return default logs permissions if only logs are enabled 1`] = `
+exports[`getMonitoringPermissions > Without elastic agent package installed > should return default logs permissions if only logs are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -141,7 +141,7 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions Without elastic agent package installed should return default logs, metrics, traces permissions if all are enabled 1`] = `
+exports[`getMonitoringPermissions > Without elastic agent package installed > should return default logs, metrics, traces permissions if all are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -209,7 +209,7 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions Without elastic agent package installed should return default metrics permissions if only metrics are enabled 1`] = `
+exports[`getMonitoringPermissions > Without elastic agent package installed > should return default metrics permissions if only metrics are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -243,7 +243,7 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions Without elastic agent package installed should return default traces permissions if only traces are enabled 1`] = `
+exports[`getMonitoringPermissions > Without elastic agent package installed > should return default traces permissions if only traces are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [

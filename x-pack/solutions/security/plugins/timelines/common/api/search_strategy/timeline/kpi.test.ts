@@ -35,18 +35,18 @@ describe('timelineKpiRequestOptionsSchema', () => {
     expect(() => {
       timelineKpiRequestOptionsSchema.parse(invalidKpiRequest);
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"code\\": \\"invalid_value\\",
-          \\"values\\": [
-            \\"eventsKpi\\"
+          "code": "invalid_value",
+          "values": [
+            "eventsKpi"
           ],
-          \\"path\\": [
-            \\"factoryQueryType\\"
+          "path": [
+            "factoryQueryType"
           ],
-          \\"message\\": \\"Invalid input: expected \\\\\\"eventsKpi\\\\\\"\\"
+          "message": "Invalid input: expected \\"eventsKpi\\""
         }
-      ]"
+      ]]
     `);
   });
 });

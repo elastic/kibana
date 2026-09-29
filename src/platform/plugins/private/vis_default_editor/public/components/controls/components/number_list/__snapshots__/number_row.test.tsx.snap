@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`NumberRow should be rendered with default set of props 1`] = `
+exports[`NumberRow > should be rendered with default set of props 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"

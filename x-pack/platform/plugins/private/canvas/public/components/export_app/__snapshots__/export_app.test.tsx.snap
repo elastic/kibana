@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<ExportApp /> renders as expected 1`] = `
+exports[`<ExportApp /> > renders as expected 1`] = `
 <div>
   <div
     class="canvasExport"
@@ -29,7 +29,7 @@ exports[`<ExportApp /> renders as expected 1`] = `
 </div>
 `;
 
-exports[`<ExportApp /> renders as expected 2`] = `
+exports[`<ExportApp /> > renders as expected 2`] = `
 <div>
   <div
     class="canvasExport"

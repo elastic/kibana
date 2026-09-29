@@ -21,6 +21,9 @@ const { execFileSync } = require('child_process');
 const Fs = require('fs');
 const Vm = require('vm');
 
+// The last commit before the migration (snapshots still Jest-keyed), e.g. COMPARE_BASE=<sha>.
+const BASE_REF = process.env.COMPARE_BASE ?? 'HEAD';
+
 const load = (source) => {
   const exports = {};
   Vm.runInNewContext(source, { exports });
@@ -38,7 +41,7 @@ const normalizeValue = (value) => {
 let identical = 0;
 let differing = 0;
 for (const file of process.argv.slice(2)) {
-  const before = load(execFileSync('git', ['show', `HEAD:${file}`], { encoding: 'utf8' }));
+  const before = load(execFileSync('git', ['show', `${BASE_REF}:${file}`], { encoding: 'utf8' }));
   if (!Fs.existsSync(file)) {
     process.stdout.write(`MISSING ${file}\n`);
     differing++;

@@ -158,7 +158,7 @@ describe('SpacesService', () => {
       await expect(
         spacesServiceStart.getActiveSpace(request)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Saved object [space/unknown-space] not found"`
+        `[Error: Saved object [space/unknown-space] not found]`
       );
     });
   });

@@ -7,7 +7,7 @@
 
 import { vi } from 'vitest';
 
-vi.mock('./kibana_services', () => {});
+vi.mock('./kibana_services', () => ({}));
 import { checkIndexPatternValid } from './validate_index_name';
 
 describe('checkIndexPatternValid', () => {

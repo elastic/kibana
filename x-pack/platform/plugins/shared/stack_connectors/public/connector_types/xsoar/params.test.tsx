@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type * as TriggersActionsUiPublic from '@kbn/triggers-actions-ui-plugin/public';
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -25,7 +26,6 @@ interface Result {
   error: null | Error;
 }
 
-const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 
 const response = {
   playbooks: [
@@ -155,8 +155,10 @@ const mockUseSubActionPlaybooks = vi.fn().mockImplementation(() => ({
 const mockUseSubAction = vi.fn<Result, [UseSubActionParams<unknown>]>(mockUseSubActionPlaybooks);
 
 const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
-vi.mock(triggersActionsPath, () => {
-  const original = require(triggersActionsPath);
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const original = await vi.importActual<typeof TriggersActionsUiPublic>(
+    '@kbn/triggers-actions-ui-plugin/public'
+  );
   return {
     ...original,
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),

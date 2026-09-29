@@ -10,17 +10,15 @@ import { vi } from 'vitest';
 import type { z } from '@kbn/zod';
 import { deleteSyntheticsMonitorBulkRoute } from './delete_monitor_bulk';
 
-vi.mock('../services/delete_monitor_api', () => {
-  const mocked = {
-    DeleteMonitorAPI: vi.fn(),
-  };
-  return { ...mocked, default: mocked };
-});
+const mockDeleteMonitorApi = vi.hoisted(() => ({ DeleteMonitorAPI: vi.fn() }));
+vi.mock('../services/delete_monitor_api', () => ({
+  ...mockDeleteMonitorApi,
+  default: mockDeleteMonitorApi,
+}));
 
-const installExecuteResult = async (executeResult: any) => {
-  const { DeleteMonitorAPI } = await vi.importMock('../services/delete_monitor_api');
+const installExecuteResult = (executeResult: any) => {
   const execute = vi.fn().mockResolvedValue(executeResult);
-  DeleteMonitorAPI.mockImplementation(() => ({ execute }));
+  mockDeleteMonitorApi.DeleteMonitorAPI.mockImplementation(() => ({ execute }));
   return { execute };
 };
 

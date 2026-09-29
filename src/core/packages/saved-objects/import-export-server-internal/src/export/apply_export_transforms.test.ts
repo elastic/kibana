@@ -234,7 +234,7 @@ describe('applyExportTransforms', () => {
         }),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid transform performed on objects to export"`
+      `[Error: Invalid transform performed on objects to export]`
     );
   });
 
@@ -258,7 +258,7 @@ describe('applyExportTransforms', () => {
         }),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid transform performed on objects to export"`
+      `[Error: Invalid transform performed on objects to export]`
     );
   });
 
@@ -282,7 +282,7 @@ describe('applyExportTransforms', () => {
         }),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid transform performed on objects to export"`
+      `[Error: Invalid transform performed on objects to export]`
     );
   });
 
@@ -301,6 +301,6 @@ describe('applyExportTransforms', () => {
           foo: fooTransform,
         }),
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error transforming objects to export"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Error transforming objects to export]`);
   });
 });

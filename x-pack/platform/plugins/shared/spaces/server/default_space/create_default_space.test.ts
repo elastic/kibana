@@ -134,7 +134,7 @@ test(`it throws all other errors from the saved objects client when checking for
   });
 
   await expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"unit test: unexpected exception condition"`
+    `[Error: unit test: unexpected exception condition]`
   );
 });
 
@@ -159,7 +159,7 @@ test(`it throws other errors if there is an error creating the default space`, a
   });
 
   await expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"unit test: some other unexpected error"`
+    `[Error: unit test: some other unexpected error]`
   );
 });
 

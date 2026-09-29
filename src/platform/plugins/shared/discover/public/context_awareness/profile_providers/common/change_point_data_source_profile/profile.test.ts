@@ -234,7 +234,8 @@ describe('createChangePointDataSourceProfileProvider', () => {
       const result = getColumns();
       expect(result).toHaveProperty('existing');
       expect(result).toHaveProperty(SOURCE_COLUMN);
-      expect(result).not.toHaveProperty('');
+      // Vitest's toHaveProperty('') resolves the empty path to the object itself
+      expect(Object.keys(result)).not.toContain('');
     });
   });
 
@@ -271,7 +272,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       });
       expect(renderers.some_col).toBe(existingRenderer);
       expect(renderers[SOURCE_COLUMN]).toBeInstanceOf(Function);
-      expect(renderers).not.toHaveProperty('');
+      expect(Object.keys(renderers)).not.toContain('');
     });
   });
 

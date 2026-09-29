@@ -238,7 +238,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
       expect(convertToOtherParentPipelineAggColumns(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertToOtherParentPipelineAggColumns(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertToOtherParentPipelineAggColumns(...input)).toEqual(
@@ -458,7 +458,7 @@ describe('convertToCumulativeSumAggColumn', () => {
       expect(convertToCumulativeSumAggColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertToCumulativeSumAggColumn(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertToCumulativeSumAggColumn(...input)).toEqual(expect.objectContaining(expected));

@@ -19,6 +19,8 @@ import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 
 import { GcpCredentialsFormAgentless } from './gcp_credentials_form_agentless';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import { getTemplateUrlFromPackageInfo, updatePolicyWithInputs } from '../utils';
 
 // Mock the hooks and utilities
 vi.mock('../hooks/use_cloud_setup_context');
@@ -134,14 +136,10 @@ vi.mock('@kbn/fleet-plugin/public', async () => {
   return { ...mocked, default: mocked };
 });
 
-// Get mocked functions from jest modules
-const { useCloudSetup: mockUseCloudSetup } = await vi.importMock(
-  '../hooks/use_cloud_setup_context'
-);
-const {
-  getTemplateUrlFromPackageInfo: mockGetTemplateUrlFromPackageInfo,
-  updatePolicyWithInputs: mockUpdatePolicyWithInputs,
-} = await vi.importMock('../utils');
+// Get mocked functions from mocked modules
+const mockUseCloudSetup = vi.mocked(useCloudSetup);
+const mockGetTemplateUrlFromPackageInfo = vi.mocked(getTemplateUrlFromPackageInfo);
+const mockUpdatePolicyWithInputs = vi.mocked(updatePolicyWithInputs);
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);

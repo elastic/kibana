@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
@@ -17,6 +18,7 @@ import { sleep } from '../test_utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import { summarizeMonitoringStats as summarizeMonitoringStatsImport } from '../monitoring';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { TaskManagerConfig } from '../config';
 import { configSchema } from '../config';
@@ -37,7 +39,7 @@ vi.mock('../lib/log_health_metrics', () => {
   return { ...mocked, default: mocked };
 });
 
-const { summarizeMonitoringStats } = await vi.importMock('../monitoring');
+const summarizeMonitoringStats = summarizeMonitoringStatsImport as unknown as Mock;
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');

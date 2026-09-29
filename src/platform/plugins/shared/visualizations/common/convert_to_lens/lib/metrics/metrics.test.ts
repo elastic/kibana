@@ -772,7 +772,7 @@ describe('convertMetricToColumns valid cases', () => {
       mockConvertToColumnInPercentageMode,
     ],
   ])('should return %s', (_, input, expected, mock) => {
-    expect(convertMetricToColumns(...input)).toEqual(expected.map(expect.objectContaining));
+    expect(convertMetricToColumns(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     if (mock) {
       expect(mock).toHaveBeenCalledTimes(1);
     }

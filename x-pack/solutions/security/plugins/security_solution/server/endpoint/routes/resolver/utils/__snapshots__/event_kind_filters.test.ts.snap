@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`event_kind_filters createEventKindFilter query structure snapshots should generate expected query structure with multiple modules 1`] = `
+exports[`event_kind_filters > createEventKindFilter > query structure snapshots > should generate expected query structure with multiple modules 1`] = `
 Object {
   "bool": Object {
     "minimum_should_match": 1,
@@ -34,7 +34,7 @@ Object {
 }
 `;
 
-exports[`event_kind_filters createEventKindFilter query structure snapshots should handle empty modules list 1`] = `
+exports[`event_kind_filters > createEventKindFilter > query structure snapshots > should handle empty modules list 1`] = `
 Object {
   "bool": Object {
     "minimum_should_match": 1,
@@ -65,7 +65,7 @@ Object {
 }
 `;
 
-exports[`event_kind_filters createEventKindFilter query structure snapshots should handle single module 1`] = `
+exports[`event_kind_filters > createEventKindFilter > query structure snapshots > should handle single module 1`] = `
 Object {
   "bool": Object {
     "minimum_should_match": 1,

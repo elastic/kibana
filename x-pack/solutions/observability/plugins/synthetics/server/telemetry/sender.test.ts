@@ -24,9 +24,10 @@ import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Observable } from 'rxjs';
 
 vi.mock('axios', () => {
-  return {
+  const mocked = {
     post: vi.fn(),
   };
+  return { ...mocked, default: mocked };
 });
 
 const licenseMock: LicenseGetResponse = {

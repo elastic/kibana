@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`userDetails search strategy parse should parse data correctly 1`] = `
+exports[`userDetails search strategy > parse > should parse data correctly 1`] = `
 Object {
   "inspect": Object {
     "dsl": Array [

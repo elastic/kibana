@@ -688,7 +688,7 @@ describe('TaskPollingLifecycle', () => {
       expect(pollingCycleEvent!.event.tag).toEqual('err');
       expect(pollingCycleEvent!.event).toEqual({
         tag: 'err',
-        error: new Error(`Failed to poll for work: booo`),
+        error: expect.objectContaining({ message: `Failed to poll for work: booo` }),
       });
     });
 
@@ -731,7 +731,9 @@ describe('TaskPollingLifecycle', () => {
 
       expect(pollingCycleEvent!.event).toEqual({
         tag: 'err',
-        error: new Error(`Partially failed to poll for work: some tasks could not be claimed.`),
+        error: expect.objectContaining({
+          message: `Partially failed to poll for work: some tasks could not be claimed.`,
+        }),
       });
     });
   });

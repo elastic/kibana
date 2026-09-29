@@ -20,7 +20,7 @@ import { useAddToTimeline } from './use_add_to_timeline';
 describe('useInvestigateInTimeline()', () => {
   let hookResult: RenderHookResult<UseAddToTimelineValue, unknown>;
 
-  xit('should return empty object if Indicator is incorrect', () => {
+  it.skip('should return empty object if Indicator is incorrect', () => {
     const indicator: Indicator = generateMockIndicator();
     indicator.fields['threat.indicator.name'] = ['wrong'];
     const field = 'threat.indicator.name';
@@ -41,7 +41,7 @@ describe('useInvestigateInTimeline()', () => {
     expect(hookResult.result.current).toEqual({});
   });
 
-  xit('should return empty object if field is incorrect', () => {
+  it.skip('should return empty object if field is incorrect', () => {
     const indicator: Indicator = generateMockIndicator();
     const field = 'abc';
 
@@ -51,7 +51,7 @@ describe('useInvestigateInTimeline()', () => {
     expect(hookResult.result.current).toEqual({});
   });
 
-  xit('should return addToTimelineProps', () => {
+  it.skip('should return addToTimelineProps', () => {
     const indicator: Indicator = generateMockUrlIndicator();
     const field = 'threat.indicator.ip';
 

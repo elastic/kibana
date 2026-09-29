@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
-vi.mock('../routes');
-vi.mock('../usage');
+jest.mock('../routes');
+jest.mock('../usage');
 
 import { BehaviorSubject } from 'rxjs';
 
@@ -47,18 +45,18 @@ export const createMockPluginSetup = (
   return {
     actions: {
       ...actionsMock.createSetup(),
-      getActionsConfigurationUtilities: vi.fn().mockReturnValue({
-        validateEmailAddresses: vi.fn(),
+      getActionsConfigurationUtilities: jest.fn().mockReturnValue({
+        validateEmailAddresses: jest.fn(),
       }),
     },
     encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     features: featuresPluginMock.createSetup(),
     router: {
-      get: vi.fn(),
-      patch: vi.fn(),
-      post: vi.fn(),
-      put: vi.fn(),
-      delete: vi.fn(),
+      get: jest.fn(),
+      patch: jest.fn(),
+      post: jest.fn(),
+      put: jest.fn(),
+      delete: jest.fn(),
     },
     licensing: licensingMock.createSetup(),
     security: securityMock.createSetup(),
@@ -91,19 +89,19 @@ export const createMockPluginStart = async (
     analytics: coreSetupMock.analytics,
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: {
-      getScopedClient: vi.fn().mockReturnValue(savedObjectsClient),
-      createInternalRepository: vi.fn().mockReturnValue(savedObjectsClient),
+      getScopedClient: jest.fn().mockReturnValue(savedObjectsClient),
+      createInternalRepository: jest.fn().mockReturnValue(savedObjectsClient),
     },
-    uiSettings: { asScopedToClient: () => ({ get: vi.fn() }) },
+    uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     fieldFormats: () => Promise.resolve(fieldFormatsMock),
     store: await createMockReportingStore(config),
     notifications: notificationsMock.createStart(),
     taskManager: {
-      schedule: vi.fn().mockImplementation(() => ({ id: 'taskId' })),
-      ensureScheduled: vi.fn(),
-      bulkGet: vi.fn(),
+      schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
+      ensureScheduled: jest.fn(),
+      bulkGet: jest.fn(),
     },
     licensing: {
       ...licensingMock.createStart(),

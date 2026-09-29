@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SystemGenericFileDetails rendering it renders the default SystemGenericDetails 1`] = `
+exports[`SystemGenericFileDetails > rendering > it renders the default SystemGenericDetails 1`] = `
 <Details>
   <SystemGenericFileLine
     contextId="[contextid-123]"

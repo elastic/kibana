@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { HashedItemStore } from './hashed_item_store';
 
@@ -21,7 +20,7 @@ import { HashedItemStore } from './hashed_item_store';
  */
 export const mockStorage = new StubBrowserStorage();
 const mockHashedItemStore = new HashedItemStore(mockStorage);
-vi.mock('.', () => ({
+jest.mock('.', () => ({
   HashedItemStore,
   hashedItemStore: mockHashedItemStore,
 }));

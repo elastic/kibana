@@ -123,7 +123,8 @@ describe('workflowExecutionLoop', () => {
     const abortController = new AbortController();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { flushState } = await import('./persistence_loop');
-    const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
+    const loopParams = { ...params, signal: abortController.signal };
+    const loopPromise = workflowExecutionLoop(loopParams as any);
     abortController.abort(new WorkflowTaskManagerAbortError());
     await loopPromise;
 
@@ -135,8 +136,8 @@ describe('workflowExecutionLoop', () => {
         cancelledBy: 'system',
       })
     );
-    expect(flushState).toHaveBeenCalledWith(params, {
-      workflowLogFlushSignal: params.signal,
+    expect(flushState).toHaveBeenCalledWith(loopParams, {
+      workflowLogFlushSignal: abortController.signal,
     });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();

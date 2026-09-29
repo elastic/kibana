@@ -71,7 +71,9 @@ describe('Configure routes', () => {
       );
       expect(() =>
         bodySchema.validate({ host: 'localhost:9200' })
-      ).toThrowErrorMatchingInlineSnapshot(`[Error: [host]: expected URI with scheme [http|https].]`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: [host]: expected URI with scheme [http|https].]`
+      );
       expect(bodySchema.validate({ host: 'http://localhost:9200' })).toMatchInlineSnapshot(`
         Object {
           "host": "http://localhost:9200",
@@ -89,7 +91,9 @@ describe('Configure routes', () => {
       );
       expect(() =>
         bodySchema.validate({ host: 'http://localhost:9200', password: 'password' })
-      ).toThrowErrorMatchingInlineSnapshot(`[Error: [password]: a value wasn't expected to be present]`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: [password]: a value wasn't expected to be present]`
+      );
       expect(
         bodySchema.validate({
           host: 'http://localhost:9200',

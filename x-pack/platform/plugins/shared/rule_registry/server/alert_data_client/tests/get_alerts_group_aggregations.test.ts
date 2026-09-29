@@ -200,7 +200,7 @@ describe('getGroupAggregations()', () => {
         pageSize: 5000,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The number of documents is too high. Paginating through more than 10000 documents is not possible."`
+      `[Error: The number of documents is too high. Paginating through more than 10000 documents is not possible.]`
     );
   });
 });

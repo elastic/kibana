@@ -94,7 +94,7 @@ describe('kibana cli', function () {
       await expect(
         extractArchive(path.resolve(repliesPath, 'corrupt.zip'))
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"End of central directory record signature not found. Either not a zip file, or file is truncated."`
+        `[Error: End of central directory record signature not found. Either not a zip file, or file is truncated.]`
       );
     });
   });

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`esdsl correctly handles filter, query and timerange on context 1`] = `
+exports[`esdsl > correctly handles filter, query and timerange on context 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -39,7 +39,7 @@ Object {
 }
 `;
 
-exports[`esdsl correctly handles input adds filters 1`] = `
+exports[`esdsl > correctly handles input > adds filters 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -65,7 +65,7 @@ Object {
 }
 `;
 
-exports[`esdsl correctly handles input adds filters to query with filters 1`] = `
+exports[`esdsl > correctly handles input > adds filters to query with filters 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -98,7 +98,7 @@ Object {
 }
 `;
 
-exports[`esdsl correctly handles input adds query 1`] = `
+exports[`esdsl > correctly handles input > adds query 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -125,7 +125,7 @@ Object {
 }
 `;
 
-exports[`esdsl correctly handles input adds query to a query with filters 1`] = `
+exports[`esdsl > correctly handles input > adds query to a query with filters 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -158,7 +158,7 @@ Object {
 }
 `;
 
-exports[`esdsl correctly handles input ignores timerange 1`] = `
+exports[`esdsl > correctly handles input > ignores timerange 1`] = `
 Object {
   "body": Object {
     "params": Object {

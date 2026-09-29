@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getAgentUploads should return right list of files 1`] = `
+exports[`getAgentUploads > should return right list of files 1`] = `
 Array [
   Object {
     "actionId": "current-in-progress-action",

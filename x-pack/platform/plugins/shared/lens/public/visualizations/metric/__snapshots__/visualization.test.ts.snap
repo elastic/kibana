@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`metric visualization dimension groups configuration primary layer generates configuration 1`] = `
+exports[`metric visualization > dimension groups configuration > primary layer > generates configuration 1`] = `
 Object {
   "groups": Array [
     Object {
@@ -85,7 +85,7 @@ Object {
 }
 `;
 
-exports[`metric visualization dimension groups configuration primary layer operation filtering breakdownBy supports correct operations 1`] = `
+exports[`metric visualization > dimension groups configuration > primary layer > operation filtering > breakdownBy supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
@@ -98,7 +98,7 @@ Array [
 ]
 `;
 
-exports[`metric visualization dimension groups configuration primary layer operation filtering max supports correct operations 1`] = `
+exports[`metric visualization > dimension groups configuration > primary layer > operation filtering > max supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
@@ -111,7 +111,7 @@ Array [
 ]
 `;
 
-exports[`metric visualization dimension groups configuration primary layer operation filtering metric supports correct operations 1`] = `
+exports[`metric visualization > dimension groups configuration > primary layer > operation filtering > metric supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
@@ -124,7 +124,7 @@ Array [
 ]
 `;
 
-exports[`metric visualization dimension groups configuration primary layer operation filtering secondaryMetric supports correct operations 1`] = `
+exports[`metric visualization > dimension groups configuration > primary layer > operation filtering > secondaryMetric supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
@@ -137,7 +137,7 @@ Array [
 ]
 `;
 
-exports[`metric visualization dimension groups configuration trendline layer generates configuration 1`] = `
+exports[`metric visualization > dimension groups configuration > trendline layer > generates configuration 1`] = `
 Object {
   "groups": Array [
     Object {

@@ -24,9 +24,10 @@ import { UpdateEventType } from '../services/upgrade_sender';
 import { TelemetryEventsSender } from './sender';
 
 vi.mock('axios', () => {
-  return {
+  const mocked = {
     post: vi.fn(),
   };
+  return { ...mocked, default: mocked };
 });
 
 describe('TelemetryEventsSender', () => {

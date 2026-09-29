@@ -45,7 +45,7 @@ describe('SpacesClientService', () => {
 
       expect(() =>
         setup.setClientRepositoryFactory(repositoryFactory)
-      ).toThrowErrorMatchingInlineSnapshot(`"Repository factory has already been set"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Repository factory has already been set]`);
     });
 
     it('allows a single client wrapper to be set', () => {
@@ -56,7 +56,7 @@ describe('SpacesClientService', () => {
       setup.registerClientWrapper(clientWrapper);
 
       expect(() => setup.registerClientWrapper(clientWrapper)).toThrowErrorMatchingInlineSnapshot(
-        `"Client wrapper has already been set"`
+        `[Error: Client wrapper has already been set]`
       );
     });
   });
@@ -71,7 +71,7 @@ describe('SpacesClientService', () => {
       const request = httpServerMock.createKibanaRequest();
 
       expect(() => start.createSpacesClient(request)).toThrowErrorMatchingInlineSnapshot(
-        `"Initialization error: spaces config is not available"`
+        `[Error: Initialization error: spaces config is not available]`
       );
     });
 

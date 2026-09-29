@@ -120,7 +120,7 @@ describe('Spaces Public API', () => {
     expect(() =>
       (routeValidation.params as ObjectType).validate({})
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [string] but got [undefined]"`
+      `[Error: [id]: expected value of type [string] but got [undefined]]`
     );
   });
 

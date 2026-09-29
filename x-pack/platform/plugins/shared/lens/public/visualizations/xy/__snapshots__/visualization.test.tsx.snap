@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`xy_visualization #appendLayer adding an annotation layer adds a by-reference annotation layer 1`] = `
+exports[`xy_visualization > #appendLayer > adding an annotation layer > adds a by-reference annotation layer 1`] = `
 Object {
   "__lastSaved": Object {
     "annotations": Array [
@@ -41,7 +41,7 @@ Object {
 }
 `;
 
-exports[`xy_visualization #appendLayer adding an annotation layer adds a by-value annotation layer 1`] = `
+exports[`xy_visualization > #appendLayer > adding an annotation layer > adds a by-value annotation layer 1`] = `
 Object {
   "annotations": Array [],
   "ignoreGlobalFilters": true,
@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`xy_visualization #initialize should hydrate by-reference annotation groups 1`] = `
+exports[`xy_visualization > #initialize > should hydrate by-reference annotation groups 1`] = `
 Array [
   Object {
     "__lastSaved": Object {

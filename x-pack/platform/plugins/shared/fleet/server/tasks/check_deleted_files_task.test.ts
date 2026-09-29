@@ -84,7 +84,6 @@ describe('check deleted files task', () => {
 
   describe('task logic', () => {
     let esClient: ElasticsearchClientMock;
-    const abortController = new AbortController();
 
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
@@ -207,7 +206,7 @@ describe('check deleted files task', () => {
             source: "ctx._source.file.Status = 'DELETED'",
           },
         },
-        { signal: abortController.signal }
+        { signal: expect.any(AbortSignal) }
       );
     });
 

@@ -1,13 +1,13 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#get appId of "" throws error 1`] = `"appId is required and must be a string"`;
+exports[`#get > appId of "" throws error 1`] = `[Error: appId is required and must be a string]`;
 
-exports[`#get appId of {} throws error 1`] = `"appId is required and must be a string"`;
+exports[`#get > appId of {} throws error 1`] = `[Error: appId is required and must be a string]`;
 
-exports[`#get appId of 1 throws error 1`] = `"appId is required and must be a string"`;
+exports[`#get > appId of 1 throws error 1`] = `[Error: appId is required and must be a string]`;
 
-exports[`#get appId of null throws error 1`] = `"appId is required and must be a string"`;
+exports[`#get > appId of null throws error 1`] = `[Error: appId is required and must be a string]`;
 
-exports[`#get appId of true throws error 1`] = `"appId is required and must be a string"`;
+exports[`#get > appId of true throws error 1`] = `[Error: appId is required and must be a string]`;
 
-exports[`#get appId of undefined throws error 1`] = `"appId is required and must be a string"`;
+exports[`#get > appId of undefined throws error 1`] = `[Error: appId is required and must be a string]`;

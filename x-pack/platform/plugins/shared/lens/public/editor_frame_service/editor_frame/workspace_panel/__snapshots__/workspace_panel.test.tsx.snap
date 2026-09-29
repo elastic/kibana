@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workspace_panel enzyme tests should show an error message if the expression fails to parse 1`] = `
+exports[`workspace_panel > enzyme tests > should show an error message if the expression fails to parse 1`] = `
 Array [
   Array [
     Object {

@@ -1022,41 +1022,40 @@ describe('last_value', () => {
       };
       expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()))
         .toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "displayLocations": Array [
-              Object {
-                "id": "toolbar",
-              },
-              Object {
-                "dimensionId": "col1",
-                "id": "dimensionButton",
-              },
-              Object {
-                "id": "embeddableBadge",
-              },
-            ],
-            "message": <Memo(MemoizedFormattedMessage)
-              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
-              id="xpack.lens.indexPattern.fieldsNotFound"
-              values={
+          Array [
+            Object {
+              "displayLocations": Array [
                 Object {
-                  "count": 1,
-                  "missingFields": <React.Fragment>
-                    <React.Fragment>
-                      <strong>
-                        notExisting
-                      </strong>
-                      
-                    </React.Fragment>
-                  </React.Fragment>,
+                  "id": "toolbar",
+                },
+                Object {
+                  "dimensionId": "col1",
+                  "id": "dimensionButton",
+                },
+                Object {
+                  "id": "embeddableBadge",
+                },
+              ],
+              "message": <Memo(MemoizedFormattedMessage)
+                defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+                id="xpack.lens.indexPattern.fieldsNotFound"
+                values={
+                  Object {
+                    "count": 1,
+                    "missingFields": <React.Fragment>
+                      <React.Fragment>
+                        <strong>
+                          notExisting
+                        </strong>
+                      </React.Fragment>
+                    </React.Fragment>,
+                  }
                 }
-              }
-            />,
-            "uniqueId": "field_not_found",
-          },
-        ]
-      `);
+              />,
+              "uniqueId": "field_not_found",
+            },
+          ]
+        `);
     });
 
     it('shows error message if the sortField does not exist in index pattern', () => {

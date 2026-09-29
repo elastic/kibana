@@ -12,6 +12,7 @@ import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { loggedOutApp } from './logged_out_app';
+import { renderLoggedOutPage } from './logged_out_page';
 
 describe('loggedOutApp', () => {
   it('properly registers application', () => {
@@ -52,7 +53,7 @@ describe('loggedOutApp', () => {
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = (await vi.importMock('./logged_out_page')).renderLoggedOutPage;
+    const mockRenderApp = renderLoggedOutPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

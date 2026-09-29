@@ -32,7 +32,9 @@ const mockDataView = {
   },
 } as any;
 
-vi.mock('react-use/lib/useSessionStorage', () => vi.fn().mockReturnValue([false, vi.fn()]));
+vi.mock('react-use/lib/useSessionStorage', () => ({
+  default: vi.fn().mockReturnValue([false, vi.fn()]),
+}));
 
 const renderFieldsTable = (props: Partial<FieldsSelectorTableProps> = {}) => {
   const defaultProps: FieldsSelectorTableProps = {

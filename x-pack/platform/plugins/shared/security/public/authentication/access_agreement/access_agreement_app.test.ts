@@ -13,6 +13,7 @@ import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { accessAgreementApp } from './access_agreement_app';
+import { renderAccessAgreementPage } from './access_agreement_page';
 
 describe('accessAgreementApp', () => {
   it('properly registers application', () => {
@@ -56,8 +57,7 @@ describe('accessAgreementApp', () => {
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = (await vi.importMock('./access_agreement_page'))
-      .renderAccessAgreementPage;
+    const mockRenderApp = renderAccessAgreementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

@@ -25,9 +25,11 @@ import type { OptInStatusMetadata, ReferenceDataSavedObject } from './types';
 
 vi.mock('p-retry', () => {
   const originalPRetry = require('p-retry');
-  return vi.fn().mockImplementation((fn, options) => {
-    return originalPRetry(fn, options);
-  });
+  return {
+    default: vi.fn().mockImplementation((fn, options) => {
+      return originalPRetry(fn, options);
+    }),
+  };
 });
 
 const pRetryMock = vi.mocked(pRetry);

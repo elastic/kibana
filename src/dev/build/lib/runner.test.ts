@@ -24,7 +24,8 @@ log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
-const STACK_TRACE = /(\│\s+)at .+ \(.+\)$/;
+// frames look like `at fn (location)`, or `at location` for anonymous functions
+const STACK_TRACE = /(\│\s+)at (?:.+ \(.+\)|\S+:\d+:\d+)$/;
 const isStackTrace = (x: any) => typeof x === 'string' && STACK_TRACE.test(x);
 
 expect.addSnapshotSerializer(

@@ -488,7 +488,7 @@ describe('features', () => {
     const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     expect(() => privileges.get()).toThrowErrorMatchingInlineSnapshot(
-      `"Topological ordering of privileges did not complete, these feature privileges have cyclic dependencies: [\\"feature-a.all\\",\\"feature-a.read\\",\\"feature-a.minimal_all\\",\\"feature-a.minimal_read\\",\\"feature-b.all\\",\\"feature-b.read\\",\\"feature-b.minimal_all\\",\\"feature-b.minimal_read\\",\\"feature-c.all\\",\\"feature-c.read\\",\\"feature-c.minimal_all\\",\\"feature-c.minimal_read\\"]"`
+      `[Error: Topological ordering of privileges did not complete, these feature privileges have cyclic dependencies: ["feature-a.all","feature-a.read","feature-a.minimal_all","feature-a.minimal_read","feature-b.all","feature-b.read","feature-b.minimal_all","feature-b.minimal_read","feature-c.all","feature-c.read","feature-c.minimal_all","feature-c.minimal_read"]]`
     );
   });
 
@@ -924,7 +924,7 @@ describe('features', () => {
     const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     expect(() => privileges.get()).toThrowErrorMatchingInlineSnapshot(
-      `"Topological ordering of privileges did not complete, these feature privileges have cyclic dependencies: [\\"alpha.all\\",\\"alpha.read\\",\\"alpha.minimal_all\\",\\"alpha.minimal_read\\",\\"beta.all\\",\\"beta.read\\",\\"beta.minimal_all\\",\\"beta.minimal_read\\",\\"gamma.all\\",\\"gamma.read\\",\\"gamma.minimal_all\\",\\"gamma.minimal_read\\"]"`
+      `[Error: Topological ordering of privileges did not complete, these feature privileges have cyclic dependencies: ["alpha.all","alpha.read","alpha.minimal_all","alpha.minimal_read","beta.all","beta.read","beta.minimal_all","beta.minimal_read","gamma.all","gamma.read","gamma.minimal_all","gamma.minimal_read"]]`
     );
   });
 

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Fleet - getTemplateInputs should filter inputs when provided a filtering condition 1`] = `
+exports[`Fleet - getTemplateInputs > should filter inputs when provided a filtering condition 1`] = `
 Object {
   "inputs": Array [
     Object {
@@ -15,7 +15,7 @@ Object {
 }
 `;
 
-exports[`Fleet - getTemplateInputs should work for input package 1`] = `
+exports[`Fleet - getTemplateInputs > should work for input package 1`] = `
 "inputs:
   # Custom log file: Collect your custom log files.
   - id: logs-logfile
@@ -40,7 +40,7 @@ exports[`Fleet - getTemplateInputs should work for input package 1`] = `
 "
 `;
 
-exports[`Fleet - getTemplateInputs should work for integration package 1`] = `
+exports[`Fleet - getTemplateInputs > should work for integration package 1`] = `
 "inputs:
   # Collect Redis application logs: Collecting application logs from Redis instances
   - id: redis-logfile
@@ -78,7 +78,7 @@ exports[`Fleet - getTemplateInputs should work for integration package 1`] = `
 "
 `;
 
-exports[`Fleet - getTemplateInputs should work for package with dynamic ids 1`] = `
+exports[`Fleet - getTemplateInputs > should work for package with dynamic ids 1`] = `
 "inputs:
   # Collect Docker container logs: Collecting docker container logs
   - id: docker-filestream

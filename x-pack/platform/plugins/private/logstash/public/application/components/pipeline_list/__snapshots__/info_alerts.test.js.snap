@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`InfoAlerts component renders AddRoleAlert and EnableMonitoringAlert if both flags are true 1`] = `
 <AlertCallOut>

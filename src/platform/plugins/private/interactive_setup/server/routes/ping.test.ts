@@ -64,7 +64,9 @@ describe('Configure routes', () => {
       );
       expect(() =>
         bodySchema.validate({ host: 'localhost:9200' })
-      ).toThrowErrorMatchingInlineSnapshot(`[Error: [host]: expected URI with scheme [http|https].]`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: [host]: expected URI with scheme [http|https].]`
+      );
       expect(() => bodySchema.validate({ host: 'http://localhost:9200' })).not.toThrow();
     });
 

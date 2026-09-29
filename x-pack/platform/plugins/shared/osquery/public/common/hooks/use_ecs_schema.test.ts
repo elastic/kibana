@@ -19,22 +19,24 @@ vi.mock('../lib/kibana');
 
 // Mock the fallback JSON so tests are deterministic and don't read from disk.
 // Path must match `v${FALLBACK_ECS_VERSION}.json` from common/constants.
-vi.mock('../../../common/schemas/ecs/v9.2.0.json', () => [
-  {
-    field: '@timestamp',
-    type: 'date',
-    normalization: 'set',
-    example: '2015-01-01T00:00:00.000Z',
-    description: 'Date/time when the event originated.',
-  },
-  {
-    field: 'host.name',
-    type: 'keyword',
-    normalization: 'set',
-    example: 'beatbox',
-    description: 'Name of the host.',
-  },
-]);
+vi.mock('../../../common/schemas/ecs/v9.2.0.json', () => ({
+  default: [
+    {
+      field: '@timestamp',
+      type: 'date',
+      normalization: 'set',
+      example: '2015-01-01T00:00:00.000Z',
+      description: 'Date/time when the event originated.',
+    },
+    {
+      field: 'host.name',
+      type: 'keyword',
+      normalization: 'set',
+      example: 'beatbox',
+      description: 'Name of the host.',
+    },
+  ],
+}));
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 

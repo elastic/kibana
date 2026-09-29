@@ -500,7 +500,12 @@ describe('translateLegacyStateToDescriptors', () => {
 // ---------------------------------------------------------------------------
 
 describe('useLegacyFlyoutUrlInterop', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     (useFlyoutApi as Mock).mockReturnValue(mockFlyoutApi);
     (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);

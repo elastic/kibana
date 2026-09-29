@@ -1722,6 +1722,10 @@ describe('ManifestManager', () => {
 
       const yieldToEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
       const failedBuild = manifestManager.buildNewManifest();
+      // Attach the rejection assertion now so the rejection is never reported as unhandled
+      const failedBuildAssertion = expect(failedBuild).rejects.toBeInstanceOf(
+        YaraEngineUnavailableError
+      );
 
       // Hold trusted apps until YARA has exhausted retries. With Promise.all + finally,
       // rejection clears the cache while this fetch is still gated; releasing afterward
@@ -1742,7 +1746,7 @@ describe('ManifestManager', () => {
       // Allow getCachedExceptions to .set() after the awaited list fetch returns.
       await yieldToEventLoop();
 
-      await expect(failedBuild).rejects.toBeInstanceOf(YaraEngineUnavailableError);
+      await failedBuildAssertion;
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
       mockValidateYaraRule.mockResolvedValue({
@@ -2152,7 +2156,7 @@ describe('ManifestManager', () => {
       ).resolves.toStrictEqual([
         new EndpointError(
           `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`,
-          ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_APPS_MACOS]
+          incompleteArtifact
         ),
         error,
       ]);
@@ -2193,7 +2197,7 @@ describe('ManifestManager', () => {
       ).resolves.toStrictEqual([
         new EndpointError(
           `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_DEVICES_MACOS}`,
-          ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_DEVICES_MACOS]
+          incompleteArtifact
         ),
         error,
       ]);
@@ -2251,13 +2255,13 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
-        createPackagePolicyWithConfigMock({ id: TEST_POLICY_ID_1 }),
-      ]);
+      const policy = createPackagePolicyWithConfigMock({ id: TEST_POLICY_ID_1 });
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
         new EndpointError(
-          `Policy [${TEST_POLICY_ID_1}][endpoint-1] in space(s) [default] has no 'inputs[0].config'!`
+          `Policy [${TEST_POLICY_ID_1}][endpoint-1] in space(s) [default] has no 'inputs[0].config'!`,
+          policy
         ),
       ]);
 
@@ -2547,7 +2551,7 @@ describe('ManifestManager', () => {
       });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
-        new EndpointError(`Update of policy [${policy1.id}][endpoint-1] failed with: foo`),
+        new EndpointError(`Update of policy [${policy1.id}][endpoint-1] failed with: foo`, error),
       ]);
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);

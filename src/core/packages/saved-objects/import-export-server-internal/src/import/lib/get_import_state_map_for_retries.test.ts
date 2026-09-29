@@ -29,7 +29,7 @@ describe('#getImportStateMapForRetries', () => {
     const params = { objects, retries, createNewCopies: false };
 
     expect(() => getImportStateMapForRetries(params)).toThrowErrorMatchingInlineSnapshot(
-      `"Retry was expected for \\"type-2:id-2\\" but not found"`
+      `[Error: Retry was expected for "type-2:id-2" but not found]`
     );
   });
 

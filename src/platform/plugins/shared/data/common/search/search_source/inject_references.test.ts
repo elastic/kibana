@@ -70,7 +70,7 @@ describe('injectSearchSourceReferences', () => {
   test('throws an error if there is a broken reference', () => {
     searchSourceJSON.indexRefName = 'oops';
     expect(() => injectReferences(searchSourceJSON, references)).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find reference for oops"`
+      `[Error: Could not find reference for oops]`
     );
   });
 
@@ -104,7 +104,7 @@ describe('injectSearchSourceReferences', () => {
     // @ts-expect-error
     searchSourceJSON.filter = [{ meta: { indexRefName: 'oops' } }];
     expect(() => injectReferences(searchSourceJSON, references)).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find reference for oops"`
+      `[Error: Could not find reference for oops]`
     );
   });
 });

@@ -47,11 +47,11 @@ vi.mock('react-use/lib/useDebounce', () => ({ default: (fn: () => void) => fn() 
 
 vi.mock('lodash', () => {
   const original = require('lodash');
-
-  return {
+  const mocked = {
     ...original,
     debounce: (fn: unknown) => fn,
   };
+  return { ...mocked, default: mocked };
 });
 
 const dataPluginMockValue = dataPluginMock.createStartContract();

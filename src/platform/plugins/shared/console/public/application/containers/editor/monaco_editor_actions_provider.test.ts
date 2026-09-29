@@ -430,7 +430,7 @@ describe('Editor actions provider', () => {
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
       editor.getModel.mockReturnValue(createModel(['']));
 
-      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBe(vi);
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 
@@ -444,7 +444,7 @@ describe('Editor actions provider', () => {
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
       model.dispose();
 
-      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBe(vi);
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 
@@ -465,7 +465,7 @@ describe('Editor actions provider', () => {
       model.dispose();
       resolveRequests!([]);
 
-      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBe(vi);
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 
@@ -539,7 +539,7 @@ describe('Editor actions provider', () => {
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
       onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
 
-      await expect(vi.runAllTimersAsync()).resolves.toBeUndefined();
+      await expect(vi.runAllTimersAsync()).resolves.toBe(vi);
       expect(editor.trigger).not.toHaveBeenCalled();
     });
 

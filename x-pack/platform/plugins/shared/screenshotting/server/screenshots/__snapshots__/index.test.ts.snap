@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Screenshot Observable Pipeline error handling recovers if waitForSelector fails 1`] = `
+exports[`Screenshot Observable Pipeline > error handling > recovers if waitForSelector fails 1`] = `
 Array [
   Object {
     "elementsPositionAndAttributes": Array [
@@ -91,7 +91,7 @@ Array [
 ]
 `;
 
-exports[`Screenshot Observable Pipeline error handling uses defaults for element positions and size when Kibana page is not ready 1`] = `
+exports[`Screenshot Observable Pipeline > error handling > uses defaults for element positions and size when Kibana page is not ready 1`] = `
 Array [
   Object {
     "elementsPositionAndAttributes": Array [
@@ -139,7 +139,7 @@ Array [
 ]
 `;
 
-exports[`Screenshot Observable Pipeline pipelines a single url into screenshot and timeRange 1`] = `
+exports[`Screenshot Observable Pipeline > pipelines a single url into screenshot and timeRange 1`] = `
 Array [
   Object {
     "elementsPositionAndAttributes": Array [
@@ -190,7 +190,7 @@ Array [
 ]
 `;
 
-exports[`Screenshot Observable Pipeline pipelines multiple urls into 1`] = `
+exports[`Screenshot Observable Pipeline > pipelines multiple urls into 1`] = `
 Array [
   Object {
     "elementsPositionAndAttributes": Array [

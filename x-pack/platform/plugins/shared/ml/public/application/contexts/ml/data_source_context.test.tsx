@@ -13,6 +13,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DataSourceContextProvider } from './data_source_context';
 import { useMlKibana } from '../kibana';
+import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 
 vi.mock('../kibana', () => {
   const mocked = {
@@ -153,8 +154,7 @@ describe('DataSourceContextProvider', () => {
   });
 
   it('renders children when savedSearchId URL param is present', async () => {
-    const { getDataViewAndSavedSearchCallback } = await vi.importMock('../../util/index_utils');
-    getDataViewAndSavedSearchCallback.mockReturnValue(async (id: string) => ({
+    (getDataViewAndSavedSearchCallback as Mock).mockReturnValue(async (id: string) => ({
       dataView: { id: 'dv-from-saved-search', title: 'From Saved Search' },
       savedSearch: { id },
     }));

@@ -112,7 +112,7 @@ describe('EmailNotificationService', () => {
           spaceId: 'space1',
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Email notification service is not available"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Email notification service is not available]`);
 
     expect(notifications.getEmailService().sendAttachmentEmail).not.toHaveBeenCalled();
   });

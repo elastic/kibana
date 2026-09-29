@@ -190,7 +190,9 @@ describe('copy to space', () => {
 
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
-      ).toThrowErrorMatchingInlineSnapshot(`"[spaces]: duplicate space ids are not allowed"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: [spaces]: duplicate space ids are not allowed]`
+      );
     });
 
     it(`requires well-formed space IDS`, async () => {
@@ -204,7 +206,7 @@ describe('copy to space', () => {
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[spaces.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed"`
+        `[Error: [spaces.1]: lower case, a-z, 0-9, "_", and "-" are allowed]`
       );
     });
 
@@ -220,7 +222,9 @@ describe('copy to space', () => {
 
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
-      ).toThrowErrorMatchingInlineSnapshot(`"cannot use [overwrite] with [createNewCopies]"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: cannot use [overwrite] with [createNewCopies]]`
+      );
     });
 
     it(`does not allow "compatibilityMode" to be used with "createNewCopies"`, async () => {
@@ -236,7 +240,7 @@ describe('copy to space', () => {
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [compatibilityMode] with [createNewCopies]"`
+        `[Error: cannot use [compatibilityMode] with [createNewCopies]]`
       );
     });
 
@@ -253,7 +257,7 @@ describe('copy to space', () => {
 
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
-      ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [objects]: duplicate objects are not allowed]`);
     });
 
     it('copies to multiple spaces', async () => {
@@ -415,7 +419,7 @@ describe('copy to space', () => {
 
       expect(() =>
         (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
-      ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [objects]: duplicate objects are not allowed]`);
     });
 
     it(`requires well-formed space ids`, async () => {
@@ -437,7 +441,7 @@ describe('copy to space', () => {
       expect(() =>
         (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[retries.key(\\"invalid-space-id!@#$%^&*()\\")]: Invalid space id: invalid-space-id!@#$%^&*()"`
+        `[Error: [retries.key("invalid-space-id!@#$%^&*()")]: Invalid space id: invalid-space-id!@#$%^&*()]`
       );
     });
 
@@ -462,7 +466,7 @@ describe('copy to space', () => {
       expect(() =>
         (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [createNewCopies] with [compatibilityMode]"`
+        `[Error: cannot use [createNewCopies] with [compatibilityMode]]`
       );
       expect(savedObjectsImporter.resolveImportErrors).not.toHaveBeenCalled();
     });

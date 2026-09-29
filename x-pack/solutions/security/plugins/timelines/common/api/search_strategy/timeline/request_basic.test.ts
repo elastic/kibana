@@ -34,19 +34,19 @@ describe('timelineRequestBasicOptionsSchema', () => {
     expect(() => {
       timelineRequestBasicOptionsSchema.parse(invalidBaseTimelineRequest);
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"code\\": \\"invalid_value\\",
-          \\"values\\": [
-            \\"events\\",
-            \\"sessions\\"
+          "code": "invalid_value",
+          "values": [
+            "events",
+            "sessions"
           ],
-          \\"path\\": [
-            \\"entityType\\"
+          "path": [
+            "entityType"
           ],
-          \\"message\\": \\"Invalid option: expected one of \\\\\\"events\\\\\\"|\\\\\\"sessions\\\\\\"\\"
+          "message": "Invalid option: expected one of \\"events\\"|\\"sessions\\""
         }
-      ]"
+      ]]
     `);
   });
 });

@@ -187,12 +187,13 @@ describe('Lens Field Item', () => {
   it('should display displayName of a field', async () => {
     renderFieldItem();
     const [fieldNode] = await screen.findAllByTestId('lnsFieldListPanelField');
-    expect(fieldNode).toHaveTextContent('bytes');
+    // FieldItemButton is React.lazy; Vitest resolves the dynamic import after the outer node renders
+    await waitFor(() => expect(fieldNode).toHaveTextContent('bytes'));
   });
 
   it('should show gauge icon for gauge fields', async () => {
     renderFieldItem({ field: { ...defaultProps.field, timeSeriesMetric: 'gauge' } });
-    expect(screen.getByText('Gauge metric')).toBeInTheDocument();
+    expect(await screen.findByText('Gauge metric')).toBeInTheDocument();
   });
 
   it('should render edit field button if callback is set', async () => {
@@ -232,7 +233,7 @@ describe('Lens Field Item', () => {
     };
     renderFieldItem({ field });
     await clickField('test');
-    await userEvent.click(screen.getByRole('button', { name: 'Filter for test: ""abc""' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Filter for test: ""abc""' }));
 
     expect(mockedServices.data.query.filterManager.addFilters).toHaveBeenCalledWith([
       expect.objectContaining({ query: { match_phrase: { test: 'abc' } } }),
@@ -257,6 +258,7 @@ describe('Lens Field Item', () => {
 
     await clickField('bytes');
 
+    await waitFor(() => expect(loadFieldStats).toHaveBeenCalled());
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
@@ -273,7 +275,7 @@ describe('Lens Field Item', () => {
       toDate: 'now',
       field: dataViewField,
     });
-    expect(queryFieldStats()).toBeInTheDocument();
+    expect(await screen.findByTestId('unifiedFieldStats-buttonGroup')).toBeInTheDocument();
     // closing the popover by clicking the button again
     await clickField('bytes');
 
@@ -298,7 +300,7 @@ describe('Lens Field Item', () => {
     rerender(<InnerFieldItem {...defaultProps} {...newContextProps} />);
     await clickField('bytes');
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(loadFieldStats).toHaveBeenCalledTimes(2));
     expect(loadFieldStats).toHaveBeenLastCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },

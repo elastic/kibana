@@ -147,21 +147,21 @@ describe('kibana cli', function () {
       it('throw an error if there is no kibana plugin', async () => {
         await copyReplyFile('test_plugin_no_kibana.zip');
         await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"No kibana plugins found in archive"`
+          `[Error: No kibana plugins found in archive]`
         );
       });
 
       it('throw an error with a corrupt zip', async () => {
         await copyReplyFile('corrupt.zip');
         await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Error retrieving metadata from plugin archive"`
+          `[Error: Error retrieving metadata from plugin archive]`
         );
       });
 
       it('throw an error if there an invalid plugin name', async () => {
         await copyReplyFile('invalid_name.zip');
         await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid plugin name [invalid name] in kibana.json, expected it to be valid camelCase"`
+          `[Error: Invalid plugin name [invalid name] in kibana.json, expected it to be valid camelCase]`
         );
       });
     });

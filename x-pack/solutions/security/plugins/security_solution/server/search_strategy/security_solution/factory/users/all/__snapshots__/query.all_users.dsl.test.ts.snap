@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildUsersQuery build query from options correctly 1`] = `
+exports[`buildUsersQuery > build query from options correctly 1`] = `
 Object {
   "_source": false,
   "aggregations": Object {

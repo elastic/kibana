@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { randomBytes } from 'crypto';
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 vi.mock('crypto', () => {
   const mocked = {
@@ -1998,7 +2000,7 @@ describe('config schema', () => {
 
 describe('createConfig()', () => {
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
-    const mockRandomBytes = (await vi.importMock('crypto')).randomBytes;
+    const mockRandomBytes = randomBytes as unknown as Mock;
     mockRandomBytes.mockReturnValue('ab'.repeat(32));
 
     const logger = loggingSystemMock.create().get();

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildHostDetailsQuery includes host.name filter when filterQuery is undefined 1`] = `
+exports[`buildHostDetailsQuery > includes host.name filter when filterQuery is undefined 1`] = `
 Object {
   "bool": Object {
     "filter": Array [

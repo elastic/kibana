@@ -18,6 +18,7 @@ import {
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
+import { toolToLangchain as mockedToolToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
 
 // Mock dependencies
 vi.mock('@kbn/agent-builder-genai-utils/langchain', () => {
@@ -270,11 +271,7 @@ describe('ToolManager', () => {
 
   describe('setEventEmitter', () => {
     it('passes the event emitter to toolToLangchain when set', async () => {
-      const { toolToLangchain } = vi.mocked(
-        await import('@kbn/agent-builder-genai-utils/langchain')
-      ) as {
-        toolToLangchain: Mock;
-      };
+      const toolToLangchain = vi.mocked(mockedToolToLangchain) as unknown as Mock;
 
       const tool = createMockExecutableTool('tool-1');
       const eventEmitter = vi.fn();
@@ -295,11 +292,7 @@ describe('ToolManager', () => {
     });
 
     it('uses the event emitter for tools added in subsequent addTools calls', async () => {
-      const { toolToLangchain } = vi.mocked(
-        await import('@kbn/agent-builder-genai-utils/langchain')
-      ) as {
-        toolToLangchain: Mock;
-      };
+      const toolToLangchain = vi.mocked(mockedToolToLangchain) as unknown as Mock;
       toolToLangchain.mockClear();
 
       const eventEmitter = vi.fn();
@@ -335,11 +328,7 @@ describe('ToolManager', () => {
     });
 
     it('does not pass event emitter when not set', async () => {
-      const { toolToLangchain } = vi.mocked(
-        await import('@kbn/agent-builder-genai-utils/langchain')
-      ) as {
-        toolToLangchain: Mock;
-      };
+      const toolToLangchain = vi.mocked(mockedToolToLangchain) as unknown as Mock;
 
       const tool = createMockExecutableTool('tool-1');
 
@@ -896,12 +885,8 @@ describe('ToolManager', () => {
       { tool_result_id: 'r-1', type: 'other', data: { text: 'x'.repeat(100_000) } },
     ];
 
-    const getBuildContent = async () => {
-      const { toolToLangchain } = vi.mocked(
-        await import('@kbn/agent-builder-genai-utils/langchain')
-      ) as {
-        toolToLangchain: Mock;
-      };
+    const getBuildContent = () => {
+      const toolToLangchain = vi.mocked(mockedToolToLangchain) as unknown as Mock;
       const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];
       return lastCall.buildContent as (params: {
         results: unknown[];

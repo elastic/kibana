@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`eql correctly handles filter, query and timerange on context 1`] = `
+exports[`eql > correctly handles filter, query and timerange on context 1`] = `
 Object {
   "body": Object {
     "fields": Array [],
@@ -33,7 +33,7 @@ Object {
 }
 `;
 
-exports[`eql correctly handles input adds filters 1`] = `
+exports[`eql > correctly handles input > adds filters 1`] = `
 Object {
   "body": Object {
     "fields": Array [],
@@ -59,7 +59,7 @@ Object {
 }
 `;
 
-exports[`eql correctly handles input adds filters to query with filters 1`] = `
+exports[`eql > correctly handles input > adds filters to query with filters 1`] = `
 Object {
   "body": Object {
     "fields": Array [],
@@ -85,7 +85,7 @@ Object {
 }
 `;
 
-exports[`eql correctly handles input adds query 1`] = `
+exports[`eql > correctly handles input > adds query 1`] = `
 Object {
   "body": Object {
     "fields": Array [],
@@ -112,7 +112,7 @@ Object {
 }
 `;
 
-exports[`eql correctly handles input adds query to a query with filters 1`] = `
+exports[`eql > correctly handles input > adds query to a query with filters 1`] = `
 Object {
   "body": Object {
     "fields": Array [],
@@ -139,7 +139,7 @@ Object {
 }
 `;
 
-exports[`eql correctly handles input ignores timerange 1`] = `
+exports[`eql > correctly handles input > ignores timerange 1`] = `
 Object {
   "body": Object {
     "fields": Array [],

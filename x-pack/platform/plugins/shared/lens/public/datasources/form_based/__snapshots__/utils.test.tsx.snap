@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`indexpattern_datasource utils cloneLayer should clone layer with renewing ids 1`] = `
+exports[`indexpattern_datasource utils > cloneLayer > should clone layer with renewing ids 1`] = `
 Object {
   "a": Object {
     "columnOrder": Array [
@@ -53,7 +53,7 @@ Object {
 }
 `;
 
-exports[`indexpattern_datasource utils getPrecisionErrorWarningMessages if has precision error and sorting is by count ascending, show fix action and switch to rare terms 1`] = `
+exports[`indexpattern_datasource utils > getPrecisionErrorWarningMessages > if has precision error and sorting is by count ascending, show fix action and switch to rare terms 1`] = `
 Object {
   "displayLocations": Array [
     Object {
@@ -72,7 +72,7 @@ Object {
 }
 `;
 
-exports[`indexpattern_datasource utils getPrecisionErrorWarningMessages precision error warning with accuracy mode should other suggestions if accuracy mode already enabled 1`] = `
+exports[`indexpattern_datasource utils > getPrecisionErrorWarningMessages > precision error warning with accuracy mode > should other suggestions if accuracy mode already enabled 1`] = `
 Object {
   "displayLocations": Array [
     Object {
@@ -91,7 +91,7 @@ Object {
 }
 `;
 
-exports[`indexpattern_datasource utils getPrecisionErrorWarningMessages precision error warning with accuracy mode should show accuracy mode prompt if currently disabled 1`] = `
+exports[`indexpattern_datasource utils > getPrecisionErrorWarningMessages > precision error warning with accuracy mode > should show accuracy mode prompt if currently disabled 1`] = `
 Object {
   "displayLocations": Array [
     Object {

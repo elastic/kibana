@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SearchSource #setField() / #flatten computed fields handling includes queries in the "filter" clause by default 1`] = `
+exports[`SearchSource > #setField() / #flatten > computed fields handling > includes queries in the "filter" clause by default 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -24,7 +24,7 @@ Object {
 }
 `;
 
-exports[`SearchSource #setField() / #flatten computed fields handling includes queries in the "must" clause if sorting by _score 1`] = `
+exports[`SearchSource > #setField() / #flatten > computed fields handling > includes queries in the "must" clause if sorting by _score 1`] = `
 Object {
   "bool": Object {
     "filter": Array [],
@@ -48,7 +48,7 @@ Object {
 }
 `;
 
-exports[`SearchSource getSerializedFields should return serialized fields 1`] = `
+exports[`SearchSource > getSerializedFields > should return serialized fields 1`] = `
 Object {
   "filter": Array [
     Object {

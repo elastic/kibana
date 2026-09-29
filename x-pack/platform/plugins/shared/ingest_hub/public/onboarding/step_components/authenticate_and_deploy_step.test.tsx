@@ -102,6 +102,7 @@ import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/manag
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
+import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
@@ -780,9 +781,8 @@ describe('AuthenticateAndDeployStep', () => {
   // orphaned policies still awaited cleanup. The user could then switch to agent-based, causing
   // hasStaleMiPolicies to be gated out (!isAgentBased) and old MI policies to be left behind.
   describe('deployment method lock', () => {
-    async function getMockDeploymentMethodCard(): Mock {
-      return vi.mocked(await import('./authenticate_and_deploy_step/deployment_method_card'))
-        .DeploymentMethodCard;
+    function getMockDeploymentMethodCard(): Mock {
+      return vi.mocked(DeploymentMethodCard) as unknown as Mock;
     }
 
     it('remains locked when policyIdsByInstance is empty but pendingCleanupPolicyIds is not', () => {

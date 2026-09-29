@@ -13,6 +13,7 @@ import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { overwrittenSessionApp } from './overwritten_session_app';
+import { renderOverwrittenSessionPage } from './overwritten_session_page';
 import { securityMock } from '../../mocks';
 
 describe('overwrittenSessionApp', () => {
@@ -60,8 +61,7 @@ describe('overwrittenSessionApp', () => {
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = (await vi.importMock('./overwritten_session_page'))
-      .renderOverwrittenSessionPage;
+    const mockRenderApp = renderOverwrittenSessionPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

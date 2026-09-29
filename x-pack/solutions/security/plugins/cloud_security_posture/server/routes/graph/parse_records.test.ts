@@ -6,7 +6,7 @@
  */
 
 import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   ApiMessageCode,
@@ -16,6 +16,9 @@ import {
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { parseRecords } from './parse_records';
 import type { EventEdge, RelationshipEdge } from './types';
+
+// Spy on the uuid module so the unknown target tests can return predictable UUIDs
+vi.mock('uuid', { spy: true });
 
 const mockLogger = {
   trace: vi.fn(),
@@ -681,17 +684,7 @@ describe('parseRecords', () => {
 
   // Test for unknown target processing
   describe('unknown target processing', () => {
-    // Mock uuid module for unknown target tests
-    vi.doMock('uuid', () => {
-      const mocked = {
-        v4: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { v4: uuidv4 } = require('uuid');
-    const mockUuidv4 = uuidv4 as MockedFunction<typeof uuidv4>;
+    const mockUuidv4 = vi.mocked(uuidv4);
 
     beforeEach(() => {
       // Set up a sequence of predictable UUIDs
@@ -700,6 +693,10 @@ describe('parseRecords', () => {
         counter += 1;
         return `uuid-${counter}`;
       }) as any);
+    });
+
+    afterEach(() => {
+      mockUuidv4.mockReset();
     });
 
     it('properly processes unknown targets with processUnknownTargetGroup', () => {

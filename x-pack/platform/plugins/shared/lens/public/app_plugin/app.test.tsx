@@ -46,6 +46,8 @@ import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
+import type * as AppHeaderModule from '@kbn/app-header';
+import type { AppMenuProps } from '@kbn/core-chrome-app-menu';
 
 vi.mock('lodash', () => {
   const mocked = {
@@ -76,12 +78,10 @@ vi.mock('@elastic/eui', async () => {
 
 // AppMenu only registers with chrome and returns null.
 // Render AppHeader inline in unit tests so menu item test subjects remain assertable.
-vi.mock('@kbn/core-chrome-app-menu', () => {
+vi.mock('@kbn/core-chrome-app-menu', async () => {
+  const { AppHeader } = await vi.importActual<typeof AppHeaderModule>('@kbn/app-header');
   const mocked = {
-    AppMenu: async ({ config }: { config?: unknown }) => {
-      const { AppHeader } = await vi.importActual('@kbn/app-header');
-      return <AppHeader title="lens" menu={config} />;
-    },
+    AppMenu: ({ config }: Pick<AppMenuProps, 'config'>) => <AppHeader title="lens" menu={config} />,
   };
   return { ...mocked, default: mocked };
 });

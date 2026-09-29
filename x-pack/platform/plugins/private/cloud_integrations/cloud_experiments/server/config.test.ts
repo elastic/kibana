@@ -70,7 +70,7 @@ describe('cloudExperiments config', () => {
         expect(() =>
           config.schema.validate({ enabled: true }, ctx)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"[launch_darkly.sdk_key]: expected value of type [string] but got [undefined]"`
+          `[Error: [launch_darkly.sdk_key]: expected value of type [string] but got [undefined]]`
         );
       });
     });

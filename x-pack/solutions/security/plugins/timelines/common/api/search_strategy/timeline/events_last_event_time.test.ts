@@ -46,23 +46,23 @@ describe('timelineEventsLastEventTimeRequestSchema', () => {
     expect(() => {
       timelineEventsLastEventTimeRequestSchema.parse(invalidEventsDetailsRequest);
     }).toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"code\\": \\"invalid_value\\",
-          \\"values\\": [
-            \\"hostDetails\\",
-            \\"hosts\\",
-            \\"users\\",
-            \\"userDetails\\",
-            \\"ipDetails\\",
-            \\"network\\"
+          "code": "invalid_value",
+          "values": [
+            "hostDetails",
+            "hosts",
+            "users",
+            "userDetails",
+            "ipDetails",
+            "network"
           ],
-          \\"path\\": [
-            \\"indexKey\\"
+          "path": [
+            "indexKey"
           ],
-          \\"message\\": \\"Invalid option: expected one of \\\\\\"hostDetails\\\\\\"|\\\\\\"hosts\\\\\\"|\\\\\\"users\\\\\\"|\\\\\\"userDetails\\\\\\"|\\\\\\"ipDetails\\\\\\"|\\\\\\"network\\\\\\"\\"
+          "message": "Invalid option: expected one of \\"hostDetails\\"|\\"hosts\\"|\\"users\\"|\\"userDetails\\"|\\"ipDetails\\"|\\"network\\""
         }
-      ]"
+      ]]
     `);
   });
 });

@@ -453,7 +453,9 @@ const createNormalizedExternalConnectorClientMock = (
     loggingSystemMock.createLogger()
   );
 
-  jest.spyOn(normalizedClient, 'execute');
+  // Explicit pass-through so `getMockImplementation()` returns it (Vitest spies have none by default)
+  const originalExecute = normalizedClient.execute;
+  jest.spyOn(normalizedClient, 'execute').mockImplementation(originalExecute);
   jest.spyOn(normalizedClient, 'setup');
 
   return normalizedClient as NormalizedExternalConnectorClientMock;

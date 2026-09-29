@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getSystemPrompt - ECH | Observability Deployment | KB ready | ProductDoc available matches snapshot 1`] = `
+exports[`getSystemPrompt - ECH | Observability Deployment | KB ready | ProductDoc available > matches snapshot 1`] = `
 "# System Prompt: Elastic Observability Assistant
 
 <RoleAndGoal>

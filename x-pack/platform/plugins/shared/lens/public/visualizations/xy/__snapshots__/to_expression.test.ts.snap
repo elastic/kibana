@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#toExpression should map to a valid AST 1`] = `
+exports[`#toExpression > should map to a valid AST 1`] = `
 Object {
   "chain": Array [
     Object {

@@ -72,7 +72,7 @@ describe('pollSearch', () => {
 
   test('Throws AbortError and cancels on abort', async () => {
     const searchFn = getMockedSearch$(20);
-    const cancelFn = vi.fn();
+    const cancelFn = vi.fn().mockResolvedValue(undefined);
     const abortController = new AbortController();
     const poll = pollSearch(searchFn, cancelFn, {
       abortSignal: abortController.signal,
@@ -95,7 +95,7 @@ describe('pollSearch', () => {
       isPartial: false,
       rawResponse: {},
     });
-    const cancelFn = vi.fn();
+    const cancelFn = vi.fn().mockResolvedValue(undefined);
 
     const abortController = new AbortController();
     setTimeout(() => abortController.abort(AbortReason.CANCELED), 100);
@@ -146,7 +146,7 @@ describe('pollSearch', () => {
 
   test('Calls cancel even when consumer unsubscribes', async () => {
     const searchFn = getMockedSearch$(20);
-    const cancelFn = vi.fn();
+    const cancelFn = vi.fn().mockResolvedValue(undefined);
     const abortController = new AbortController();
     const subscription = pollSearch(searchFn, cancelFn, {
       abortSignal: abortController.signal,

@@ -22,9 +22,11 @@ import { ProcessorsEditorWithDeps } from './processors_editor';
 type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
 vi.mock(
   'react-virtualized/dist/commonjs/AutoSizer',
-  () =>
-    ({ children }: { children: AutoSizerChildren }) =>
+  () => ({
+    default: ({ children }: { children: AutoSizerChildren }) => (
       <div>{children({ height: 500, width: 500 })}</div>
+    ),
+  })
 );
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;

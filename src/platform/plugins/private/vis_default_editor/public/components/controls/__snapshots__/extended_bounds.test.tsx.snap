@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ExtendedBoundsParamEditor should be rendered with default set of props 1`] = `
+exports[`ExtendedBoundsParamEditor > should be rendered with default set of props 1`] = `
 <EuiFormRow
   error="Min should be less than or equal to Max."
   fullWidth={true}

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getFullAgentPolicy should return the right outputs and permissions when package policies use their own outputs (with default output) 1`] = `
+exports[`getFullAgentPolicy > should return the right outputs and permissions when package policies use their own outputs (with default output) 1`] = `
 Object {
   "agent": Object {
     "download": Object {
@@ -159,7 +159,7 @@ Object {
 }
 `;
 
-exports[`getFullAgentPolicy should return the right outputs and permissions when package policies use their own outputs 1`] = `
+exports[`getFullAgentPolicy > should return the right outputs and permissions when package policies use their own outputs 1`] = `
 Object {
   "agent": Object {
     "download": Object {
@@ -321,7 +321,7 @@ Object {
 }
 `;
 
-exports[`getFullAgentPolicy should support a different data output 1`] = `
+exports[`getFullAgentPolicy > should support a different data output 1`] = `
 Object {
   "agent": Object {
     "download": Object {
@@ -389,7 +389,7 @@ Object {
 }
 `;
 
-exports[`getFullAgentPolicy should support a different monitoring output 1`] = `
+exports[`getFullAgentPolicy > should support a different monitoring output 1`] = `
 Object {
   "agent": Object {
     "download": Object {
@@ -471,7 +471,7 @@ Object {
 }
 `;
 
-exports[`getFullAgentPolicy should support both different outputs for data and monitoring  1`] = `
+exports[`getFullAgentPolicy > should support both different outputs for data and monitoring  1`] = `
 Object {
   "agent": Object {
     "download": Object {

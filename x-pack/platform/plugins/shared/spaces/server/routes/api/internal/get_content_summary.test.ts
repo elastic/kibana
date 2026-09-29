@@ -124,7 +124,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     expect(config.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
     expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: expected value of type [string] but got [undefined]"`
+      `[Error: [spaceId]: expected value of type [string] but got [undefined]]`
     );
     expect(() => paramsSchema.validate({ spaceId: '' })).toThrowErrorMatchingInlineSnapshot(
       `"[spaceId]: value has length [0] but it must have a minimum length of [1]."`

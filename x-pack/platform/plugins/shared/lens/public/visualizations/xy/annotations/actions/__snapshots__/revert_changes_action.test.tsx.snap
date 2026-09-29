@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`revert changes routine reverts changes 2`] = `
+exports[`revert changes routine > reverts changes 2`] = `
 Object {
   "layers": Array [
     Object {

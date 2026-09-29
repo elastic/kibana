@@ -171,6 +171,9 @@ const createMockAttachment = (id: string, origin?: string) => {
 };
 
 const flushAsyncServices = async () => {
+  // The dashboard integration loads './async_services' via dynamic import(), which is truly
+  // asynchronous in Vitest; wait for it (and the microtasks it schedules) to settle.
+  await vi.dynamicImportSettled();
   await Promise.resolve();
   await Promise.resolve();
 };

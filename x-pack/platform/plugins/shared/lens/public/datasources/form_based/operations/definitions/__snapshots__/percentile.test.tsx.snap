@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`percentile optimizeEsAggs should collapse percentile dimensions with matching parameters 1`] = `
+exports[`percentile > optimizeEsAggs > should collapse percentile dimensions with matching parameters 1`] = `
 Array [
   Object {
     "findFunction": [Function],

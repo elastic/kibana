@@ -13,6 +13,9 @@ import * as formContext from 'react-hook-form';
 import { Disclaimer } from './disclaimer';
 import type { ServiceLocations } from '../types';
 
+// ESM namespaces are not spy-able; spy-mocking the module lets `vi.spyOn` below reuse its spies.
+vi.mock('react-hook-form', { spy: true });
+
 export const mockLocation = {
   label: 'US Central',
   id: 'us_central',

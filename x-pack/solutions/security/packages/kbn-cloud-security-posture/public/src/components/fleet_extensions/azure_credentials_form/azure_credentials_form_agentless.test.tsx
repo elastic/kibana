@@ -18,6 +18,13 @@ import type {
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 import { AzureCredentialsFormAgentless } from './azure_credentials_form_agentless';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import {
+  getAgentlessCredentialsType,
+  getAzureAgentlessCredentialFormOptions,
+  getAzureCloudConnectorsCredentialsFormOptions,
+  getInputVarsFields,
+} from './get_azure_credentials_form_options';
 
 // Mock functions
 const mockCloudConnectorSetup = vi.fn(() => (
@@ -143,16 +150,16 @@ vi.mock('./azure_credential_type_selector', () => {
   return { ...mocked, default: mocked };
 });
 
-// Get mocked functions from jest modules
-const { useCloudSetup: mockUseCloudSetup } = await vi.importMock(
-  '../hooks/use_cloud_setup_context'
+// Get mocked functions from mocked modules
+const mockUseCloudSetup = vi.mocked(useCloudSetup);
+const mockGetAgentlessCredentialsType = vi.mocked(getAgentlessCredentialsType);
+const mockGetAzureAgentlessCredentialFormOptions = vi.mocked(
+  getAzureAgentlessCredentialFormOptions
 );
-const {
-  getAgentlessCredentialsType: mockGetAgentlessCredentialsType,
-  getAzureAgentlessCredentialFormOptions: mockGetAzureAgentlessCredentialFormOptions,
-  getAzureCloudConnectorsCredentialsFormOptions: mockGetAzureCloudConnectorsCredentialsFormOptions,
-  getInputVarsFields: mockGetInputVarsFields,
-} = await vi.importMock('./get_azure_credentials_form_options');
+const mockGetAzureCloudConnectorsCredentialsFormOptions = vi.mocked(
+  getAzureCloudConnectorsCredentialsFormOptions
+);
+const mockGetInputVarsFields = vi.mocked(getInputVarsFields);
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);

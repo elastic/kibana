@@ -86,11 +86,11 @@ vi.mock('@elastic/eui', async () => {
 // Need to mock the debounce call to test some FieldInput behaviour
 vi.mock('lodash', () => {
   const original = require('lodash');
-
-  return {
+  const mocked = {
     ...original,
     debounce: (fn: unknown) => fn,
   };
+  return { ...mocked, default: mocked };
 });
 
 const uiSettingsMock = {} as IUiSettingsClient;
@@ -2816,7 +2816,6 @@ describe('terms', () => {
                       <strong>
                         notExisting
                       </strong>
-                      
                     </React.Fragment>
                   </React.Fragment>,
                 }

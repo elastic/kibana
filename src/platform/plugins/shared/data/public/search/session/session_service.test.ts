@@ -411,7 +411,7 @@ describe('Session service', () => {
     sessionService.start();
     await expect(() =>
       sessionService.save({ entryPoint: 'test' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"No info provider for current session"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No info provider for current session]`);
 
     expect(sessionService.isSessionStorageReady()).toBe(false);
 
@@ -426,7 +426,7 @@ describe('Session service', () => {
 
     expect(sessionService.isSessionStorageReady()).toBe(true);
 
-    await expect(() => sessionService.save({ entryPoint: 'test' })).resolves;
+    await sessionService.save({ entryPoint: 'test' });
 
     sessionService.clear();
     expect(sessionService.isSessionStorageReady()).toBe(false);
@@ -584,7 +584,7 @@ describe('Session service', () => {
       sessionService.start();
       await expect(() =>
         sessionService.save({ entryPoint: 'test' })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"No access to search sessions"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No access to search sessions]`);
     });
   });
 

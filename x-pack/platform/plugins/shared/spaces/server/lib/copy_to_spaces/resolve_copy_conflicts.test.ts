@@ -328,7 +328,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         createNewCopies: false,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Something went wrong while reading this stream"`
+      `[Error: Something went wrong while reading this stream]`
     );
   });
 });

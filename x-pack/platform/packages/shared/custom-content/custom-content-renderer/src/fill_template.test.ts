@@ -114,9 +114,12 @@ describe('fillTemplate', () => {
 
     const { fillTemplate: fillWithMockedEngine } = await import('./fill_template');
 
-    await expect(fillWithMockedEngine('<p>hi</p>', [], [])).rejects.toThrow('chunk load failed');
+    // Vitest wraps errors thrown by a mock factory; the original load failure is the `cause`.
+    await expect(fillWithMockedEngine('<p>hi</p>', [], [])).rejects.toThrow(
+      expect.objectContaining({ cause: expect.objectContaining({ message: 'chunk load failed' }) })
+    );
     await expect(fillWithMockedEngine('<p>hi</p>', [], [])).resolves.toBe('<p>hi</p>');
 
-    vi.dontMock('liquidjs');
+    vi.doUnmock('liquidjs');
   });
 });

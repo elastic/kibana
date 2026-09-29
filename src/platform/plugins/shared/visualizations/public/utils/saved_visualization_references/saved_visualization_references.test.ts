@@ -178,7 +178,7 @@ describe('injectReferences', () => {
       title: 'test',
     } as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find saved search reference \\"search_0\\""`
+      `[Error: Could not find saved search reference "search_0"]`
     );
   });
 
@@ -199,7 +199,7 @@ describe('injectReferences', () => {
       } as unknown as SavedVisState,
     } as unknown as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find index pattern reference \\"control_0_index_pattern\\""`
+      `[Error: Could not find index pattern reference "control_0_index_pattern"]`
     );
   });
 });

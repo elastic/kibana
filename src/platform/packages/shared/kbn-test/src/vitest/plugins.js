@@ -195,8 +195,14 @@ const kbnSwcPlugin = () => ({
     });
 
     const map = prepared.map ? remapping([result.map, prepared.map], () => null) : result.map;
-    // Same fix-up as the Jest transformer so emotion class hashes (and snapshots) match.
-    return { code: makeEmotionLabelsSafe(result.code), map };
+    // makeEmotionLabelsSafe: same fix-up as the Jest transformer so emotion class hashes match.
+    // Shared mock helpers also run under the Jest integration tests, so they keep `jest.mock()`;
+    // rename it to vi.mock() so Vitest hoists it like Jest did (padded: columns don't move).
+    const transformed = makeEmotionLabelsSafe(result.code).replace(
+      /\bjest\.(mock|doMock|unmock|doUnmock)\(/g,
+      (_, api) => `  vi.${api}(`
+    );
+    return { code: transformed, map };
   },
 });
 

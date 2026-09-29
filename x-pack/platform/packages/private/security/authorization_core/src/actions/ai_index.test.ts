@@ -17,7 +17,7 @@ describe('#read', () => {
     it(`throws when kiType is ${JSON.stringify(kiType)}`, () => {
       const actions = new AiIndexActions();
       expect(() => actions.read(kiType as unknown as string)).toThrowErrorMatchingInlineSnapshot(
-        `"kiType is required and must be a string"`
+        `[Error: kiType is required and must be a string]`
       );
     });
   });

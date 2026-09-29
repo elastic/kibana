@@ -361,7 +361,7 @@ describe('7.14.0 -> 8.0.0', () => {
     expect(() =>
       migration(mockSessionSavedObject, {} as SavedObjectMigrationContext)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"No migration found for search session URL generator my_url_generator_id"`
+      `[Error: No migration found for search session URL generator my_url_generator_id]`
     );
   });
 });

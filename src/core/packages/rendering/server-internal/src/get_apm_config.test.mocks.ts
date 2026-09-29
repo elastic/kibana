@@ -20,4 +20,4 @@ vi.doMock('@kbn/apm-config-loader', () => {
 });
 
 export const agentMock = {} as Record<string, any>;
-vi.doMock('elastic-apm-node', () => agentMock);
+vi.doMock('elastic-apm-node', () => ({ default: agentMock }));

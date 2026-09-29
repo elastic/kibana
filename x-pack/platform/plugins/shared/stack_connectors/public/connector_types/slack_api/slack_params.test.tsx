@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type * as TriggersActionsUiPublic from '@kbn/triggers-actions-ui-plugin/public';
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
@@ -14,12 +15,13 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
 
-const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 
 const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
 
-vi.mock(triggersActionsPath, () => {
-  const original = require(triggersActionsPath);
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const original = await vi.importActual<typeof TriggersActionsUiPublic>(
+    '@kbn/triggers-actions-ui-plugin/public'
+  );
   return {
     ...original,
     useKibana: () => ({

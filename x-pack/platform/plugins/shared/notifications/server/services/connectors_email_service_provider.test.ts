@@ -139,7 +139,9 @@ describe('ConnectorsEmailServiceProvider', () => {
         expect(start.isEmailServiceAvailable()).toEqual(false);
         expect(() => {
           start.getEmailService();
-        }).toThrowErrorMatchingInlineSnapshot(`[Error: Email Service Error: setup() has not been run]`);
+        }).toThrowErrorMatchingInlineSnapshot(
+          `[Error: Email Service Error: setup() has not been run]`
+        );
       });
     });
 

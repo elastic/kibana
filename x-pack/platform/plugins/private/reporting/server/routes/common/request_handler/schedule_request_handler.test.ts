@@ -440,7 +440,7 @@ describe('Handle request to schedule', () => {
           jobParams: mockJobParams,
           schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"SO create error"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: SO create error]`);
     });
   });
 

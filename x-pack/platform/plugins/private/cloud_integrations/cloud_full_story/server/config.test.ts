@@ -15,12 +15,12 @@ describe('xpack.cloud config', () => {
 
     it('rejects undefined or empty org_id when enabled: true', () => {
       expect(() => config.schema.validate({ enabled: true })).toThrowErrorMatchingInlineSnapshot(
-        `"[org_id]: expected value of type [string] but got [undefined]"`
+        `[Error: [org_id]: expected value of type [string] but got [undefined]]`
       );
       expect(() =>
         config.schema.validate({ enabled: true, org_id: '' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[org_id]: value has length [0] but it must have a minimum length of [1]."`
+        `[Error: [org_id]: value has length [0] but it must have a minimum length of [1].]`
       );
     });
 

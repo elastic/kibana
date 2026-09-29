@@ -47,10 +47,9 @@ const loadSharedSchema = async (
     throw new Error(`Unsupported schema reference "${ref}"`);
   }
 
-  const imported: unknown = await import(
+  const { default: schema }: { default?: unknown } = await import(
     `@elastic/schemas/${jsonDirByTarget[target]}/json/${file}`
   );
-  const schema = isRecord(imported) ? imported.default : undefined;
   if (!isRecord(schema)) {
     throw new Error(`Schema reference "${ref}" is not a JSON Schema document`);
   }

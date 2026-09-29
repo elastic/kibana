@@ -76,7 +76,7 @@ describe('kibana cli', function () {
       expect(function () {
         list(pluginDir, logger);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read kibana.json file for plugin empty-plugin"`
+        `[Error: Unable to read kibana.json file for plugin empty-plugin]`
       );
     });
 
@@ -89,7 +89,7 @@ describe('kibana cli', function () {
       expect(function () {
         list(pluginDir, logger);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read kibana.json file for plugin invalid-plugin"`
+        `[Error: Unable to read kibana.json file for plugin invalid-plugin]`
       );
     });
 

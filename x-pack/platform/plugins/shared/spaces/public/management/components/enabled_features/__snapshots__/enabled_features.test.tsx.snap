@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EnabledFeatures renders as expected 1`] = `
+exports[`EnabledFeatures > renders as expected 1`] = `
 <SectionPanel
   dataTestSubj="enabled-features-panel"
 >

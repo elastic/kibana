@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`UnauthorizedPrompt renders as expected 1`] = `
+exports[`UnauthorizedPrompt > renders as expected 1`] = `
 <EuiEmptyPrompt
   body={
     <p

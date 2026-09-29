@@ -12,6 +12,18 @@ import { vi } from 'vitest';
 import { join } from 'path';
 import fs from 'fs';
 
+// `kibana.js` imports `statSync` by name; forward it to the default export so stubs on `fs.statSync` apply
+vi.mock('fs', async (importOriginal) => {
+  const { default: fs } = await importOriginal();
+  return {
+    ...fs,
+    default: fs,
+    get statSync() {
+      return fs.statSync;
+    },
+  };
+});
+
 import sinon from 'sinon';
 import del from 'del';
 
@@ -75,7 +87,7 @@ describe('kibana cli', function () {
 
         it('should throw an error if plugin is missing a kibana version.', function () {
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin kibana.json is missing both a version property (required) and a kibanaVersion property (optional)."`
+            `[Error: Plugin kibana.json is missing both a version property (required) and a kibanaVersion property (optional).]`
           );
         });
 
@@ -83,7 +95,7 @@ describe('kibana cli', function () {
           settings.plugins[0].kibanaVersion = '1.2.3.4';
 
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin foo [1.2.3] is incompatible with Kibana [1.0.0]"`
+            `[Error: Plugin foo [1.2.3] is incompatible with Kibana [1.0.0]]`
           );
         });
 
@@ -103,7 +115,7 @@ describe('kibana cli', function () {
           settings.plugins[0].kibanaVersion = '2.0.0-foo-bar-version-1.2.3';
 
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin foo [2.0.0] is incompatible with Kibana [1.0.0]"`
+            `[Error: Plugin foo [2.0.0] is incompatible with Kibana [1.0.0]]`
           );
         });
       });

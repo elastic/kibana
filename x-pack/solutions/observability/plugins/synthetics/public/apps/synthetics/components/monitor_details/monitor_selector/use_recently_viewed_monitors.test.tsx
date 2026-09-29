@@ -21,6 +21,9 @@ import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 import { WrappedHelper } from '../../../utils/testing';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 
+// The npm module namespace is not spy-able; spy-mocking its exports lets `vi.spyOn` below reuse them.
+vi.mock('react-use/lib/useLocalStorage', { spy: true });
+
 vi.mock('../../../state', async () => {
   const mocked = {
     ...(await vi.importActual('../../../state')),

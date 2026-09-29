@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getSystemPrompt - Serverless | Generic Deployment | KB ready | No ProductDoc matches snapshot 1`] = `
+exports[`getSystemPrompt - Serverless | Generic Deployment | KB ready | No ProductDoc > matches snapshot 1`] = `
 "# System Prompt: Elastic Assistant
 
 <RoleAndGoal>

@@ -25,16 +25,16 @@ describe('Minimal privileges', () => {
     expect(getMinimalPrivilegeId('minimal_read')).toBe('minimal_read');
 
     expect(() => getMinimalPrivilegeId('none')).toThrowErrorMatchingInlineSnapshot(
-      `"Minimal privileges are only available for \\"read\\" and \\"all\\" privileges, but \\"none\\" was provided."`
+      `[Error: Minimal privileges are only available for "read" and "all" privileges, but "none" was provided.]`
     );
     expect(() => getMinimalPrivilegeId('custom')).toThrowErrorMatchingInlineSnapshot(
-      `"Minimal privileges are only available for \\"read\\" and \\"all\\" privileges, but \\"custom\\" was provided."`
+      `[Error: Minimal privileges are only available for "read" and "all" privileges, but "custom" was provided.]`
     );
     expect(() => getMinimalPrivilegeId('minimal_none')).toThrowErrorMatchingInlineSnapshot(
-      `"Minimal privileges are only available for \\"read\\" and \\"all\\" privileges, but \\"minimal_none\\" was provided."`
+      `[Error: Minimal privileges are only available for "read" and "all" privileges, but "minimal_none" was provided.]`
     );
     expect(() => getMinimalPrivilegeId('minimal_custom')).toThrowErrorMatchingInlineSnapshot(
-      `"Minimal privileges are only available for \\"read\\" and \\"all\\" privileges, but \\"minimal_custom\\" was provided."`
+      `[Error: Minimal privileges are only available for "read" and "all" privileges, but "minimal_custom" was provided.]`
     );
   });
 });

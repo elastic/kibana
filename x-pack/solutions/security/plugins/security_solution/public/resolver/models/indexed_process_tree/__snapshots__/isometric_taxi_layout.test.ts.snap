@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`resolver graph layout when rendering no nodes renders right 1`] = `
+exports[`resolver graph layout > when rendering no nodes > renders right 1`] = `
 Object {
   "ariaLevels": Map {},
   "edgeLineSegments": Array [],
@@ -8,7 +8,7 @@ Object {
 }
 `;
 
-exports[`resolver graph layout when rendering one node renders right 1`] = `
+exports[`resolver graph layout > when rendering one node > renders right 1`] = `
 Object {
   "ariaLevels": Map {
     Object {
@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`resolver graph layout when rendering two forks, and one fork has an extra long tine renders right 1`] = `
+exports[`resolver graph layout > when rendering two forks, and one fork has an extra long tine > renders right 1`] = `
 Object {
   "ariaLevels": Map {
     Object {
@@ -601,7 +601,7 @@ Object {
 }
 `;
 
-exports[`resolver graph layout when rendering two nodes, one being the parent of the other renders right 1`] = `
+exports[`resolver graph layout > when rendering two nodes, one being the parent of the other > renders right 1`] = `
 Object {
   "ariaLevels": Map {
     Object {

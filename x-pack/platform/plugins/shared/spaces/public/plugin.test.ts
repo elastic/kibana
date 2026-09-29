@@ -282,7 +282,7 @@ describe('Spaces plugin', () => {
         coreMock.createPluginInitializerContext({ allowSolutionVisibility: undefined })
       );
       expect(() => plugin.setup(coreSetup, {})).toThrowErrorMatchingInlineSnapshot(
-        `"allowSolutionVisibility has not been set in the Spaces plugin config."`
+        `[Error: allowSolutionVisibility has not been set in the Spaces plugin config.]`
       );
     });
   });

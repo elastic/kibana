@@ -6,11 +6,14 @@
  */
 
 import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { OtelTelemetryCollectionPlugin } from './plugin';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { OtelTelemetryService } from './lib/services/otel_telemetry';
+
+const OtelTelemetryServiceMock = OtelTelemetryService as unknown as Mock;
 
 vi.mock('./lib/services/otel_telemetry');
 vi.mock('./lib/services/configuration');
@@ -38,8 +41,7 @@ describe('OtelTelemetryCollectionPlugin', () => {
 
       plugin.setup(coreSetup, { taskManager });
 
-      const { OtelTelemetryService } = await vi.importMock('./lib/services/otel_telemetry');
-      const serviceInstance = OtelTelemetryService.mock.instances[0];
+      const serviceInstance = OtelTelemetryServiceMock.mock.instances[0];
       expect(serviceInstance.setup).toHaveBeenCalledWith(taskManager);
     });
 
@@ -49,8 +51,7 @@ describe('OtelTelemetryCollectionPlugin', () => {
 
       plugin.setup(coreSetup, { taskManager });
 
-      const { OtelTelemetryService } = await vi.importMock('./lib/services/otel_telemetry');
-      const serviceInstance = OtelTelemetryService.mock.instances[0];
+      const serviceInstance = OtelTelemetryServiceMock.mock.instances[0];
       expect(serviceInstance.setup).not.toHaveBeenCalled();
     });
   });

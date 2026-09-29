@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`annotation group save action save routine saving an existing group as new 1`] = `
+exports[`annotation group save action > save routine > saving an existing group as new 1`] = `
 Array [
   Array [
     Object {
@@ -53,7 +53,7 @@ Array [
 ]
 `;
 
-exports[`annotation group save action save routine successful initial save 1`] = `
+exports[`annotation group save action > save routine > successful initial save 1`] = `
 Array [
   Array [
     Object {
@@ -106,7 +106,7 @@ Array [
 ]
 `;
 
-exports[`annotation group save action save routine successful initial save with ad-hoc data view 1`] = `
+exports[`annotation group save action > save routine > successful initial save with ad-hoc data view 1`] = `
 Array [
   Array [
     Object {
@@ -161,7 +161,7 @@ Array [
 ]
 `;
 
-exports[`annotation group save action save routine updating an existing group 1`] = `
+exports[`annotation group save action > save routine > updating an existing group 1`] = `
 Array [
   Array [
     Object {

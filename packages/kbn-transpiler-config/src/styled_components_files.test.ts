@@ -32,9 +32,9 @@ describe('USES_STYLED_COMPONENTS', () => {
     ).toBe(false);
   });
 
-  it('is reference-equal to babel-preset styled_components_files export', async () => {
+  it('is reference-equal to babel-preset styled_components_files export', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const babelPresetExport = await import('@kbn/babel-preset/styled_components_files');
+    const babelPresetExport = require('@kbn/babel-preset/styled_components_files');
     expect(USES_STYLED_COMPONENTS).toBe(babelPresetExport.USES_STYLED_COMPONENTS);
   });
 });

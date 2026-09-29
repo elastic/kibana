@@ -9,7 +9,17 @@
 
 import { vi } from 'vitest';
 
-vi.useFakeTimers({ legacyFakeTimers: true });
+// Jest's legacy fake timers left Date untouched; sinon fakes Date in `calculateBounds` below.
+vi.useFakeTimers({
+  toFake: [
+    'setTimeout',
+    'clearTimeout',
+    'setInterval',
+    'clearInterval',
+    'setImmediate',
+    'clearImmediate',
+  ],
+});
 
 import sinon from 'sinon';
 import moment from 'moment';

@@ -37,30 +37,35 @@ vi.mock('../telemetry/monitor_upgrade_sender', () => {
 // Only used by editSyntheticsMonitorRoute (not syncEditedMonitor, tested below),
 // mocked here to reach the route's space-authorization check without exercising
 // the full monitor/location validation and normalization pipeline.
-vi.mock('./monitor_locations_utils', () => {
-  const mocked = {
-    assertCanPerformMonitorBulkActionInAllSpaces: vi.fn(),
-    validateMonitorPrivateLocationSpaces: vi.fn().mockReturnValue(null),
-  };
-  return { ...mocked, default: mocked };
-});
+const mockMonitorLocationsUtils = vi.hoisted(() => ({
+  assertCanPerformMonitorBulkActionInAllSpaces: vi.fn(),
+  validateMonitorPrivateLocationSpaces: vi.fn().mockReturnValue(null),
+}));
+vi.mock('./monitor_locations_utils', () => ({
+  ...mockMonitorLocationsUtils,
+  default: mockMonitorLocationsUtils,
+}));
 
+const mockMonitorValidation = vi.hoisted(() => ({
+  validateMonitor: vi.fn(),
+  normalizeAPIConfig: vi.fn(),
+}));
 vi.mock('./monitor_validation', async () => {
   const actual = await vi.importActual('./monitor_validation');
   return {
     ...actual,
-    validateMonitor: vi.fn(),
-    normalizeAPIConfig: vi.fn(),
+    ...mockMonitorValidation,
   };
 });
 
-vi.mock('./formatters/saved_object_to_monitor', () => {
-  const mocked = {
-    mergeSourceMonitor: vi.fn(),
-    mapSavedObjectToMonitor: vi.fn(),
-  };
-  return { ...mocked, default: mocked };
-});
+const mockSavedObjectToMonitor = vi.hoisted(() => ({
+  mergeSourceMonitor: vi.fn(),
+  mapSavedObjectToMonitor: vi.fn(),
+}));
+vi.mock('./formatters/saved_object_to_monitor', () => ({
+  ...mockSavedObjectToMonitor,
+  default: mockSavedObjectToMonitor,
+}));
 
 describe('syncEditedMonitor', () => {
   const editedMonitor = {
@@ -196,10 +201,10 @@ describe('syncEditedMonitor', () => {
 describe('editSyntheticsMonitorRoute', () => {
   const monitorId = '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d';
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
 
-    const { validateMonitor, normalizeAPIConfig } = await vi.importMock('./monitor_validation');
+    const { validateMonitor, normalizeAPIConfig } = mockMonitorValidation;
     normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => ({ formattedConfig: m }));
     validateMonitor.mockImplementation((m: Record<string, unknown>) => ({
       valid: true,
@@ -212,7 +217,7 @@ describe('editSyntheticsMonitorRoute', () => {
     // Drop the previous monitor's `locations` from the merge so the edit is
     // treated as a private-only, location-unchanged update - keeping this test
     // focused on space authorization instead of the location-parsing paths.
-    const { mergeSourceMonitor } = await vi.importMock('./formatters/saved_object_to_monitor');
+    const { mergeSourceMonitor } = mockSavedObjectToMonitor;
     mergeSourceMonitor.mockImplementation(
       (prevAttrs: Record<string, unknown>, patch: Record<string, unknown>) => {
         const { locations, ...restPrev } = prevAttrs;
@@ -222,9 +227,7 @@ describe('editSyntheticsMonitorRoute', () => {
   });
 
   it("authorizes the union of the monitor's previous and newly-submitted spaces, not just the new ones", async () => {
-    const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
-      './monitor_locations_utils'
-    );
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = mockMonitorLocationsUtils;
     const forbidden = { status: 403 };
     assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
 

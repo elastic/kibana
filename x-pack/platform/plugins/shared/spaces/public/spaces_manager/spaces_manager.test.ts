@@ -41,14 +41,14 @@ describe('SpacesManager', () => {
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
     });
 
-    it('throws if on an anonymous path', () => {
+    it('throws if on an anonymous path', async () => {
       const coreStart = coreMock.createStart();
       coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
       const spacesManager = new SpacesManager(coreStart.http);
       expect(coreStart.http.get).not.toHaveBeenCalled();
 
-      expect(() => spacesManager.getActiveSpace()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot retrieve the active space for anonymous paths"`
+      await expect(() => spacesManager.getActiveSpace()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[Error: Cannot retrieve the active space for anonymous paths]`
       );
     });
 
@@ -94,7 +94,7 @@ describe('SpacesManager', () => {
       await expect(() =>
         spacesManager.getActiveSpace({ forceRefresh: true })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot retrieve the active space for anonymous paths"`
+        `[Error: Cannot retrieve the active space for anonymous paths]`
       );
     });
   });
@@ -144,7 +144,7 @@ describe('SpacesManager', () => {
 
       await expect(
         spacesManager.getShareSavedObjectPermissions('foo')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Get out of here!"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Get out of here!]`);
 
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.http.get).toHaveBeenLastCalledWith(

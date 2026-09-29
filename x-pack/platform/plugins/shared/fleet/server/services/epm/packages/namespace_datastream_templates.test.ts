@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+// Evaluate the module under test before anything else loads the mocked template module: when the
+// template mock factory's importActual reaches this module first, Vitest binds it to the real
+// template module (circular import of a mock being built), so updateCurrentWriteIndices isn't mocked.
+import './namespace_datastream_templates';
+
 import { vi } from 'vitest';
 import type { Mock, Mocked, MockedFunction } from 'vitest';
 
