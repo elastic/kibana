@@ -18,7 +18,9 @@ export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
 const boundedId = z.string().trim().min(1).max(256);
 
 export const packageReportInputSchema = z.object({
-  spaceId: boundedId.describe('Space the Investigation lives in (S1; must match the workflow space).'),
+  spaceId: boundedId.describe(
+    'Space the Investigation lives in (S1; must match the workflow space).'
+  ),
   reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
   investigationConversationId: boundedId.describe(
     'Investigation conversation id; must equal uuidv5(hunt:report:{reportId}).'
@@ -50,13 +52,7 @@ export const packageReportMintPayloadSchema = z.object({
   hostName: z.string().optional(),
   /** Reason an otherwise-needed mint omitted actionWorkflowId. */
   actionlessReason: z
-    .enum([
-      'catalog_error',
-      'catalog_empty',
-      'no_fillable_action',
-      'hostless',
-      'unenrolled',
-    ])
+    .enum(['catalog_error', 'catalog_empty', 'no_fillable_action', 'hostless', 'unenrolled'])
     .optional(),
 });
 
@@ -103,8 +99,9 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
       defaultMessage:
         'Reads current-run SSE state from the Investigation, owns the mint-versus-dismiss decision table, ' +
         'writes pending security.coverage KIs (no-reset), resolves every fillable category:respond catalog ' +
-        'action, commits hunt.expectedProposalCount, and returns mint payloads for the packaging child to ' +
-        'dispatch as gate executions. Does not close the Investigation; dismiss is a boolean the child applies.',
+        'action, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
+        'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
+        'Does not close the Investigation; dismiss is a boolean the child applies.',
     }),
     examples: [
       `## Package a hunt run

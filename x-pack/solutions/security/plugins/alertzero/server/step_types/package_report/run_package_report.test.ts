@@ -112,7 +112,6 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
     written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
     skipped: [],
   }),
-  patchExpectedProposalCount: async () => undefined,
   resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1' }),
   rehydrateProcessSelectors: async () => [],
   ...overrides,
@@ -148,14 +147,13 @@ describe('runPackageReport', () => {
   });
 
   it('packages a clean run: dismiss, coverage written, no proposals', async () => {
-    const patchExpectedProposalCount = jest.fn();
     const result = await runPackageReport({
       spaceId: 'default',
       reportId,
       investigationConversationId: conversationId,
       runId,
       attachments: [sseAttachment({ hit: false })],
-      deps: deps({ patchExpectedProposalCount }),
+      deps: deps(),
     });
     expect(result.status).toBe('packaged');
     if (result.status !== 'packaged') {
@@ -165,18 +163,16 @@ describe('runPackageReport', () => {
     expect(result.proposals).toEqual([]);
     expect(result.expectedProposalCount).toBe(0);
     expect(result.coverage.written.length).toBeGreaterThan(0);
-    expect(patchExpectedProposalCount).not.toHaveBeenCalled();
   });
 
   it('packages a hit: mints proposals, commits expected count, writes coverage', async () => {
-    const patchExpectedProposalCount = jest.fn();
     const result = await runPackageReport({
       spaceId: 'default',
       reportId,
       investigationConversationId: conversationId,
       runId,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
-      deps: deps({ patchExpectedProposalCount }),
+      deps: deps(),
     });
     expect(result.status).toBe('packaged');
     if (result.status !== 'packaged') {
@@ -186,11 +182,6 @@ describe('runPackageReport', () => {
     expect(result.proposals.length).toBe(1);
     expect(result.proposals[0].actionWorkflowId).toBe(isolateHost.workflowId);
     expect(result.expectedProposalCount).toBe(1);
-    expect(patchExpectedProposalCount).toHaveBeenCalledWith({
-      conversationId,
-      expectedProposalCount: 1,
-      runId,
-    });
   });
 });
 

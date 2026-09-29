@@ -27,22 +27,13 @@ export class PackageReportIdentityError extends Error {
 
 export type ListRespondActions = (
   spaceId: string
-) => Promise<
-  { ok: true; actions: ActionCatalogEntry[] } | { ok: false; reason: 'catalog_error' }
->;
+) => Promise<{ ok: true; actions: ActionCatalogEntry[] } | { ok: false; reason: 'catalog_error' }>;
 
 export type WriteCoverageKis = (subjects: CoverageSubject[]) => Promise<CoverageWriteResult>;
-
-export type PatchExpectedProposalCount = (args: {
-  conversationId: string;
-  expectedProposalCount: number;
-  runId: string;
-}) => Promise<void>;
 
 export interface RunPackageReportDeps {
   listRespondActions: ListRespondActions;
   writeCoverageKis: WriteCoverageKis;
-  patchExpectedProposalCount: PatchExpectedProposalCount;
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
 }
@@ -103,14 +94,12 @@ export const runPackageReport = async ({
   });
   const coverage = await deps.writeCoverageKis(subjects);
 
+  // Threaded through to the packaging workflow's per-Proposal gate fan-out as a plain
+  // workflow input (`hunt_package_report.yaml`'s `dispatch_gate` step) — the settlement
+  // barrier each gate checks before closing the Investigation. Never persisted to
+  // conversation metadata: the platform `investigation` template's schema has no room for
+  // it, and nothing ever read the metadata copy back (dead write, removed).
   const expectedProposalCount = decided.proposals.length;
-  if (expectedProposalCount > 0) {
-    await deps.patchExpectedProposalCount({
-      conversationId: investigationConversationId,
-      expectedProposalCount,
-      runId,
-    });
-  }
 
   return {
     status: 'packaged',

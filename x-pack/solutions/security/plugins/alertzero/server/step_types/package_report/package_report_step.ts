@@ -211,14 +211,6 @@ export const getPackageReportStepDefinition = ({
           isContextEngineEnabled,
         });
 
-        const patchExpectedProposalCount: RunPackageReportDeps['patchExpectedProposalCount'] =
-          async ({ conversationId, expectedProposalCount, runId }) => {
-            await client.patchMetadata(conversationId, {
-              'hunt.expectedProposalCount': expectedProposalCount,
-              'hunt.expectedProposalCountRunId': runId,
-            });
-          };
-
         const output = await runPackageReport({
           spaceId,
           reportId: input.reportId,
@@ -228,7 +220,6 @@ export const getPackageReportStepDefinition = ({
           deps: {
             listRespondActions,
             writeCoverageKis,
-            patchExpectedProposalCount,
             resolveHostEnrollment: getResolveHostEnrollment(),
             rehydrateProcessSelectors: defaultRehydrateProcessSelectors,
           },

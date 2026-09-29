@@ -10,12 +10,12 @@ import {
   agentBuilderDefaultAgentId,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
+import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import {
   buildHuntInvestigationConversationId,
   buildHuntTriggerAttachmentId,
 } from '../../services/watches/hunt/common/hunt_investigation_id';
 import type { ReportHuntContext } from '../../services/watches/hunt/common/load_report_context';
-import { HUNT_INVESTIGATION_TEMPLATE_ID } from '../../conversation_templates/hunt_investigation';
 import type {
   FindOrCreateInvestigationOutput,
   FindOrCreateInvestigationReportSummary,
@@ -97,7 +97,7 @@ export const runFindOrCreateInvestigation = async (
       id: investigationConversationId,
       agentId: agentBuilderDefaultAgentId,
       title: report?.title ?? reportId,
-      templateId: HUNT_INVESTIGATION_TEMPLATE_ID,
+      templateId: TEMPLATE_ID_INVESTIGATION,
     });
   } catch (error) {
     if (!isConversationAlreadyExistsError(error)) {

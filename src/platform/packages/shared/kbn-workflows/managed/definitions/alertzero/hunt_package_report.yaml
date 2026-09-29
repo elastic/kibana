@@ -6,8 +6,10 @@ description: >
   kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml).
   Wraps the native hunt.packageReport step, which owns the mint-versus-dismiss
   decision table, writes pending coverage KIs, resolves every fillable
-  category:respond catalog action, and commits the hunt.expectedProposalCount
-  barrier. This child fans the returned mint payloads out to per-Proposal gate
+  category:respond catalog action, and returns expectedProposalCount, the
+  settlement barrier below threads into each gate as a plain input (never
+  persisted to conversation metadata). This child fans the returned mint
+  payloads out to per-Proposal gate
   children (workflow.executeAsync, fire-and-forget: it does not join them),
   then closes the Investigation benignly when the run was clean. Never throws
   past its own on-failure fallback; a partial run (including a partial gate

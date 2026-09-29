@@ -7,11 +7,11 @@
 
 import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import {
   buildHuntInvestigationConversationId,
   buildHuntTriggerAttachmentId,
 } from '../../services/watches/hunt/common/hunt_investigation_id';
-import { HUNT_INVESTIGATION_TEMPLATE_ID } from '../../conversation_templates/hunt_investigation';
 import { runFindOrCreateInvestigation } from './run_find_or_create_investigation';
 import type { FindOrCreateConversationClient } from './run_find_or_create_investigation';
 
@@ -59,7 +59,7 @@ describe('runFindOrCreateInvestigation', () => {
       expect.objectContaining({
         id: conversationId,
         title: reportId,
-        templateId: HUNT_INVESTIGATION_TEMPLATE_ID,
+        templateId: TEMPLATE_ID_INVESTIGATION,
       })
     );
     expect(conversationClient.get).not.toHaveBeenCalled();

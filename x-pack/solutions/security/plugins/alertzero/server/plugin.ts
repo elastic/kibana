@@ -48,7 +48,6 @@ import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerStepDefinitions } from './step_types';
-import { registerHuntInvestigationTemplate } from './conversation_templates/hunt_investigation';
 import { makeResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 
 export class AlertZeroPlugin
@@ -109,7 +108,6 @@ export class AlertZeroPlugin
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
     registerAttachments(agentBuilder);
-    registerHuntInvestigationTemplate(agentBuilder);
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
     // Steps register during setup but only run after start; deps resolve lazily.
     registerStepDefinitions({
