@@ -14,8 +14,8 @@ import type { Unmount } from '@kbn/management-plugin/public/types';
 import { serviceAccountsManagementApp } from './service_accounts_management_app';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
-jest.mock('./service_accounts_page', () => ({
-  ServiceAccountsPage: () => 'Service Accounts Page',
+jest.mock('./service_accounts_app', () => ({
+  ServiceAccountsApp: () => 'Service Accounts Page',
 }));
 
 const element = document.body.appendChild(document.createElement('div'));
@@ -32,7 +32,7 @@ describe('serviceAccountsManagementApp', () => {
     let unmount: Unmount = noop;
     await act(async () => {
       unmount = await serviceAccountsManagementApp
-        .create({ getStartServices, serviceAccountsAPIClient })
+        .create({ buildFlavor: 'traditional', getStartServices, serviceAccountsAPIClient })
         .mount({
           basePath: '/',
           element,
@@ -53,6 +53,7 @@ describe('serviceAccountsManagementApp', () => {
   it('registers under id "service_accounts" with order 35', () => {
     const { getStartServices } = coreMock.createSetup();
     const app = serviceAccountsManagementApp.create({
+      buildFlavor: 'traditional',
       getStartServices,
       serviceAccountsAPIClient,
     });

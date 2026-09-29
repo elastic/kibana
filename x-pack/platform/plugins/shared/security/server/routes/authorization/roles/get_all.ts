@@ -74,6 +74,14 @@ export function defineGetAllRolesRoutes({
           request: {
             query: schema.maybe(
               schema.object({
+                includeReservedRoles: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'If true, include built-in roles on serverless. By default, serverless returns only custom roles. Other deployments always include built-in roles.',
+                    },
+                  })
+                ),
                 replaceDeprecatedPrivileges: schema.maybe(
                   schema.boolean({
                     meta: {
@@ -95,7 +103,8 @@ export function defineGetAllRolesRoutes({
       },
       createLicensedRouteHandler(async (context, request, response) => {
         try {
-          const hideReservedRoles = buildFlavor === 'serverless';
+          const hideReservedRoles =
+            buildFlavor === 'serverless' && !request.query?.includeReservedRoles;
           const esClient = (await context.core).elasticsearch.client;
           const [features, elasticsearchRoles] = await Promise.all([
             getFeatures(),

@@ -98,6 +98,7 @@ export class ManagementService {
     if (this.serviceAccountsEnabled) {
       this.securitySection.registerApp(
         serviceAccountsManagementApp.create({
+          buildFlavor,
           getStartServices,
           serviceAccountsAPIClient,
         })
