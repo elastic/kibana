@@ -11,21 +11,20 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './forensics_run_endpoint_analysis.yaml';
+import ALERTZERO_CREATE_PROPOSAL_YAML from './create_proposal.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
-  'system-security-forensics-run-endpoint-analysis';
+export const ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID = 'system-create-alertzero-proposal';
 
 /**
- * The forensic pass itself, installed once globally and dispatched per indicator by
- * the per-space Endpoint analysis worker, which is the only scheduler authority.
+ * Child-only bridge to `system-create-proposal` that stamps `origin: alertzero`.
+ * Every AlertZero workflow raises proposals through this rather than the gate.
  */
-export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW = {
+export const ALERTZERO_CREATE_PROPOSAL_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+  id: ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
-  yaml: FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
+  version: 1,
+  yaml: ALERTZERO_CREATE_PROPOSAL_YAML,
 } as const satisfies ManagedWorkflowDefinition;
