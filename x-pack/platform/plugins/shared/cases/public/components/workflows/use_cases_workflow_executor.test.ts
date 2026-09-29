@@ -8,7 +8,11 @@
 import { renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
-import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
+import {
+  CASE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+} from '../../../common/types/domain/user_action/workflow/constants';
+import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
 import * as api from './api';
 
@@ -19,9 +23,11 @@ jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
   useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
 }));
 
-// Mock the EBT hook — analytics behaviour is tested in its own suite
+// The event payload is tested in the EBT hook's own suite; here we only assert when and with
+// what the executor reports.
+const mockReportWorkflowRunTriggered = jest.fn();
 jest.mock('../../analytics/use_workflow_run_ebt', () => ({
-  useWorkflowRunTriggeredEBT: () => jest.fn(),
+  useWorkflowRunTriggeredEBT: () => mockReportWorkflowRunTriggered,
   getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
     .getWorkflowRunOriginType,
 }));
@@ -45,13 +51,10 @@ describe('useCasesWorkflowExecutor', () => {
     useKibana.mockReturnValue({ services: { rendering: {} } });
   });
 
-  const renderExecutorHook = () =>
-    renderHook(() =>
-      useCasesWorkflowExecutor({
-        caseId: 'case-1',
-        origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' },
-      })
-    );
+  const caseOrigin: CaseWorkflowRunOrigin = { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' };
+
+  const renderExecutorHook = (origin: CaseWorkflowRunOrigin = caseOrigin) =>
+    renderHook(() => useCasesWorkflowExecutor({ caseId: 'case-1', origin }));
 
   it('calls runCaseWorkflow with caseIds array, no top-level caseId', async () => {
     mockRunCaseWorkflow.mockResolvedValueOnce({
@@ -143,5 +146,49 @@ describe('useCasesWorkflowExecutor', () => {
       'network error'
     );
     expect(mockRefreshCaseViewPage).not.toHaveBeenCalled();
+  });
+
+  describe('workflow run telemetry', () => {
+    it.each<[string, CaseWorkflowRunOrigin]>([
+      [CASE_WORKFLOW_ORIGIN_TYPE, caseOrigin],
+      [
+        OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+        { type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1', observableId: 'obs-1' },
+      ],
+    ])('reports a %s run over one case once the run starts', async (originType, origin) => {
+      mockRunCaseWorkflow.mockResolvedValueOnce({
+        workflowExecutionId: 'exec-ok',
+        activityStatus: 'succeeded',
+      });
+
+      const { result } = renderExecutorHook(origin);
+      await result.current({ workflowId: 'wf-1', inputs: {} });
+
+      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledTimes(1);
+      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledWith({ originType, caseCount: 1 });
+    });
+
+    it('still reports the run when only the activity write failed', async () => {
+      mockRunCaseWorkflow.mockResolvedValueOnce({
+        workflowExecutionId: 'exec-act-fail',
+        activityStatus: 'failed',
+      });
+
+      const { result } = renderExecutorHook();
+      await result.current({ workflowId: 'wf-1', inputs: {} });
+
+      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report when the run request is rejected', async () => {
+      mockRunCaseWorkflow.mockRejectedValueOnce(new Error('network error'));
+
+      const { result } = renderExecutorHook();
+      await expect(result.current({ workflowId: 'wf-1', inputs: {} })).rejects.toThrow(
+        'network error'
+      );
+
+      expect(mockReportWorkflowRunTriggered).not.toHaveBeenCalled();
+    });
   });
 });
