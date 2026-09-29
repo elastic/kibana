@@ -105,7 +105,6 @@ describe('StoreActionsStep', () => {
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         {
-          '@timestamp': mockDate.toISOString(),
           group_hash: 'hash-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
           actor: 'system',
@@ -150,7 +149,6 @@ describe('StoreActionsStep', () => {
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         {
-          '@timestamp': mockDate.toISOString(),
           group_hash: 'hash-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
           actor: 'system',
@@ -194,7 +192,6 @@ describe('StoreActionsStep', () => {
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
     expect(callArgs.docs).toHaveLength(2);
     expect(callArgs.docs[0]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-1',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
       actor: 'system',
@@ -205,7 +202,6 @@ describe('StoreActionsStep', () => {
       space_id: 'default',
     });
     expect(callArgs.docs[1]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       actor: 'system',
       action_type: 'notified',
       rule_id: 'rule-1',
@@ -366,7 +362,6 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs).toHaveLength(4);
 
     expect(callArgs.docs[0]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-suppressed',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
       actor: 'system',
@@ -378,7 +373,6 @@ describe('StoreActionsStep', () => {
     });
 
     expect(callArgs.docs[1]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-throttled',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
       actor: 'system',
@@ -390,7 +384,6 @@ describe('StoreActionsStep', () => {
     });
 
     expect(callArgs.docs[2]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-dispatch',
       last_series_event_timestamp: '2026-01-22T07:20:00.000Z',
       actor: 'system',
@@ -441,7 +434,6 @@ describe('StoreActionsStep', () => {
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         {
-          '@timestamp': mockDate.toISOString(),
           group_hash: 'hash-unmatched',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
           actor: 'system',
@@ -553,7 +545,6 @@ describe('StoreActionsStep', () => {
     );
     expect(noActionDocs).toHaveLength(1);
     expect(noActionDocs[0]).toEqual({
-      '@timestamp': mockDate.toISOString(),
       group_hash: 'hash-unmatched',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
       actor: 'system',

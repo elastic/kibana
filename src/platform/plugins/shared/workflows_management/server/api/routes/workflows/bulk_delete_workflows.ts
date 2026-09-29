@@ -40,6 +40,12 @@ export function registerBulkDeleteWorkflowsRoute(deps: RouteDependencies) {
         validate: {
           request: {
             query: schema.object({
+              acknowledgeAclLoss: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description: 'Confirm that permanent deletion removes workflow access controls.',
+                },
+              }),
               force: schema.boolean({
                 defaultValue: false,
                 meta: {
@@ -61,11 +67,14 @@ export function registerBulkDeleteWorkflowsRoute(deps: RouteDependencies) {
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
-        const { force } = request.query;
+        const { force, acknowledgeAclLoss } = request.query;
         try {
           const { ids } = request.body;
           const spaceId = spaces.getSpaceId(request);
-          const result = await api.deleteWorkflows(ids, spaceId, request, { force });
+          const result = await api.deleteWorkflows(ids, spaceId, request, {
+            force,
+            acknowledgeAclLoss,
+          });
           const { successfulIds = [], ...responseBody } = result;
           audit.logBulkWorkflowDeleteResults(request, {
             successfulIds,
