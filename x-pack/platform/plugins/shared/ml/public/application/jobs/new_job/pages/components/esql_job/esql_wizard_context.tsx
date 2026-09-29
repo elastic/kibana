@@ -13,27 +13,57 @@ import React, {
   useState,
   type PropsWithChildren,
 } from 'react';
-import type { EsqlQueryStepState } from './esql_query_step';
+import type { EsqlQueryStepState } from './esql_query_step_state';
 import { GOLD_ESQL_DATAFEED_QUERY } from './gold_query';
+
+export interface EsqlHistogramPoint {
+  time: number;
+  value: number;
+}
+
+export type EsqlHistogramStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export interface EsqlWizardState extends EsqlQueryStepState {
   jobId: string;
+  jobDescription: string;
+  jobGroups: string[];
   queryProbeState: 'idle' | 'loading' | 'error' | 'success';
+  /** Elasticsearch error reason surfaced from the last failed columns probe. */
+  columnsErrorMessage?: string;
   wizardStart: string;
   wizardEnd: string;
+  /** Row-count-per-bucket histogram for the Query & time range step (LEAD DECISION, g2sz.10). */
+  histogramStatus: EsqlHistogramStatus;
+  histogramTotalRows: number;
+  histogramErrorMessage?: string;
+  histogramSeries: EsqlHistogramPoint[];
 }
 
 export interface EsqlWizardContextValue {
   state: EsqlWizardState;
   setJobId: (jobId: string) => void;
+  setJobDescription: (jobDescription: string) => void;
+  setJobGroups: (jobGroups: string[]) => void;
   setQueryState: (next: Partial<EsqlQueryStepState>) => void;
   setQueryProbeState: (queryProbeState: EsqlWizardState['queryProbeState']) => void;
+  setColumnsErrorMessage: (columnsErrorMessage: string | undefined) => void;
   setTimeRange: (range: { start: string; end: string }) => void;
+  setHistogramState: (
+    next: Partial<
+      Pick<
+        EsqlWizardState,
+        'histogramStatus' | 'histogramTotalRows' | 'histogramErrorMessage' | 'histogramSeries'
+      >
+    >
+  ) => void;
 }
 
 const initialState: EsqlWizardState = {
   jobId: '',
+  jobDescription: '',
+  jobGroups: [],
   queryProbeState: 'idle',
+  columnsErrorMessage: undefined,
   query: GOLD_ESQL_DATAFEED_QUERY,
   sourceTimeField: '@timestamp',
   bucketSpan: '1h',
@@ -45,6 +75,10 @@ const initialState: EsqlWizardState = {
   delayedDataCheckEnabled: false,
   wizardStart: 'now-15m',
   wizardEnd: 'now',
+  histogramStatus: 'idle',
+  histogramTotalRows: 0,
+  histogramErrorMessage: undefined,
+  histogramSeries: [],
 };
 
 const EsqlWizardContext = createContext<EsqlWizardContextValue | undefined>(undefined);
@@ -57,17 +91,59 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
   const setJobId = useCallback((jobId: string) => {
     setState((current) => ({ ...current, jobId }));
   }, []);
+  const setJobDescription = useCallback((jobDescription: string) => {
+    setState((current) => ({ ...current, jobDescription }));
+  }, []);
+  const setJobGroups = useCallback((jobGroups: string[]) => {
+    setState((current) => ({ ...current, jobGroups }));
+  }, []);
   const setQueryProbeState = useCallback((queryProbeState: EsqlWizardState['queryProbeState']) => {
     setState((current) => ({ ...current, queryProbeState }));
+  }, []);
+  const setColumnsErrorMessage = useCallback((columnsErrorMessage: string | undefined) => {
+    setState((current) => ({ ...current, columnsErrorMessage }));
   }, []);
   const setTimeRange = useCallback(({ start, end }: { start: string; end: string }) => {
     if ([start, end].some((value) => value === '' || value === '0' || value === 'MAX')) return;
 
     setState((current) => ({ ...current, wizardStart: start, wizardEnd: end }));
   }, []);
+  const setHistogramState = useCallback(
+    (
+      next: Partial<
+        Pick<
+          EsqlWizardState,
+          'histogramStatus' | 'histogramTotalRows' | 'histogramErrorMessage' | 'histogramSeries'
+        >
+      >
+    ) => {
+      setState((current) => ({ ...current, ...next }));
+    },
+    []
+  );
   const value = useMemo(
-    () => ({ state, setJobId, setQueryState, setQueryProbeState, setTimeRange }),
-    [setJobId, setQueryProbeState, setQueryState, setTimeRange, state]
+    () => ({
+      state,
+      setJobId,
+      setJobDescription,
+      setJobGroups,
+      setQueryState,
+      setQueryProbeState,
+      setColumnsErrorMessage,
+      setTimeRange,
+      setHistogramState,
+    }),
+    [
+      setColumnsErrorMessage,
+      setHistogramState,
+      setJobDescription,
+      setJobGroups,
+      setJobId,
+      setQueryProbeState,
+      setQueryState,
+      setTimeRange,
+      state,
+    ]
   );
 
   return <EsqlWizardContext.Provider value={value}>{children}</EsqlWizardContext.Provider>;
