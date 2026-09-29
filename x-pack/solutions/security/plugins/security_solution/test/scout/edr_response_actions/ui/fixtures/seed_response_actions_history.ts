@@ -373,19 +373,27 @@ export const seedAlertFlyoutResponseAction = async ({
     }
     cleanupStarted = true;
 
+    const failures: unknown[] = [];
+    // Stop the rule before deleting its alerts. The query matches every
+    // document, so a run that overlaps teardown can write a new alert.
+    if (ruleCreated) {
+      try {
+        await detectionRule.deleteAll();
+      } catch (error) {
+        failures.push(error);
+      }
+    }
+
     const deletions: Array<Promise<unknown>> = [];
     if (host) {
       deletions.push(deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, host));
-    }
-    if (ruleCreated) {
-      deletions.push(detectionRule.deleteAll());
     }
     deletions.push(detectionAlerts.deleteAll());
     deletions.push(esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true }));
 
     const results = await Promise.allSettled(deletions);
-    const failures = results.flatMap((result) =>
-      result.status === 'rejected' ? [result.reason] : []
+    failures.push(
+      ...results.flatMap((result) => (result.status === 'rejected' ? [result.reason] : []))
     );
 
     try {

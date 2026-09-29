@@ -19,7 +19,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
-import { createToolingLogger, wrapErrorAndRejectPromise } from './utils';
+import { createToolingLogger, EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
@@ -236,6 +236,13 @@ export const deleteIndexedFleetAgents = async (
       }
 
       await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+
+    const versionConflicts = deleted?.version_conflicts ?? 0;
+    if (versionConflicts > 0) {
+      throw new EndpointDataLoadingError(
+        `Failed to delete Fleet agents after 5 attempts: ${versionConflicts} document version conflict(s) left the agents in place`
+      );
     }
 
     response.agents = deleted;
