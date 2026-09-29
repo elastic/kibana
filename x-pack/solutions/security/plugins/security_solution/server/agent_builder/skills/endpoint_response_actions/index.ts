@@ -27,8 +27,8 @@ const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 ## When to Use This Skill
 
 Use when the analyst wants to list enrolled endpoints, check the status of a
-host (online/offline, isolated or not), or look up a previously dispatched
-response action by its action ID.
+host (status, e.g. online/offline; unknown when not yet reported — isolated
+or not), or look up a previously dispatched response action by its action ID.
 
 This skill is **read-only**. It cannot isolate, release, scan, or otherwise
 change the state of an endpoint. If the analyst asks for a state-changing
@@ -69,7 +69,7 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Read endpoint response action context from chat conversations: list enrolled endpoints, check a host status (online/offline and isolation state), and look up a previously dispatched response action by ID. Resolves hostnames to endpoint identities via the Elastic Defend Response Actions service. Read-only — it does not isolate, release, or scan endpoints.',
+      'Read endpoint response action context from chat conversations: list enrolled endpoints, check a host status (e.g. online/offline; unknown when not yet reported) and isolation state, and look up a previously dispatched response action by ID. Resolves hostnames to endpoint identities via the Elastic Defend Response Actions service. Read-only — it does not isolate, release, or scan endpoints.',
     content: SYSTEM_INSTRUCTIONS,
     referencedContent: [
       {

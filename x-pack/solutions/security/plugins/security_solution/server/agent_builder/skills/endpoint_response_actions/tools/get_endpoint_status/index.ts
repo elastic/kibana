@@ -76,7 +76,7 @@ export const getEndpointStatusTool = (
   return {
     id: GET_ENDPOINT_STATUS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the current status of a host by its hostname or agent ID, including whether it is isolated, its last seen time, and online/offline status. When several endpoints share the hostname, pass the endpoint's agent ID to select one, or pass the agent ID alone to look a host up by ID.`,
+    description: `Retrieves the current status of a host by its hostname or agent ID, including whether it is isolated, its last seen time, and its status (e.g. online/offline; unknown when not yet reported). When several endpoints share the hostname, pass the endpoint's agent ID to select one, or pass the agent ID alone to look a host up by ID.`,
     schema: getEndpointStatusSchema,
     handler: async (params, { logger, request, spaceId }) => {
       try {

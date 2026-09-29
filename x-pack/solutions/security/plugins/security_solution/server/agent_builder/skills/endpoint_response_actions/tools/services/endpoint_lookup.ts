@@ -423,6 +423,14 @@ export function createEndpointLookupService(
       // `packages`, needed for `agentType`) and only add metadata candidates
       // Fleet doesn't already know about, so a host isn't double-counted.
       const fleetIds = new Set(fleet.candidates.map((c) => c.agentId));
+      // Accepted legacy ambiguity: a legacy metadata doc without
+      // `elastic.agent.id` falls back to the endpoint's own `agent.id`,
+      // which differs from Fleet's id, so one physical host can surface here
+      // as two candidates and trip `ambiguous_hostname` even though it's a
+      // single machine. Accepted because the failure mode is safe (the
+      // analyst disambiguates; no wrong-host read, no leak), legacy docs are
+      // transient, and joining on hostname instead would risk merging two
+      // genuinely different hosts that happen to share a name.
       const merged = [
         ...fleet.candidates,
         ...metadata.candidates.filter((c) => !fleetIds.has(c.agentId)),
