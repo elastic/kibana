@@ -223,7 +223,7 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).toHaveBeenCalledWith('B');
   });
 
-  it('switches to the default when an admin sets a default for the first time', () => {
+  it('does not override the user selection when the default resolves for the first time', () => {
     const connectors = [mkConnector('A'), mkConnector('saved')];
     const { selectConnector, updateContext } = setup({
       connectors,
@@ -234,7 +234,22 @@ describe('ConnectorSelector sync effect', () => {
 
     updateContext({ defaultConnectorId: 'A' });
 
-    expect(selectConnector).toHaveBeenCalledWith('A');
+    expect(selectConnector).not.toHaveBeenCalled();
+  });
+
+  it('does not revert to default when settings resolve after connectors load from cache', () => {
+    const connectors = [mkConnector('A'), mkConnector('B')];
+    const { selectConnector, updateContext } = setup({
+      connectors,
+      isLoading: false,
+      selectedConnector: 'B',
+      defaultConnectorId: undefined,
+    });
+    expect(selectConnector).not.toHaveBeenCalled();
+
+    updateContext({ defaultConnectorId: 'A' });
+
+    expect(selectConnector).not.toHaveBeenCalled();
   });
 
   it('keeps the current pick when the admin unsets the default', () => {
