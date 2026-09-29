@@ -47,7 +47,24 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
   // With the leading bleed, the start fade fits in the gutter, so slid text stays fully
   // visible from the text's normal start position.
   const fadeStartWidth = gutter;
-  const fadeEndWidth = euiTheme.size.base;
+  const fadeEndWidth = euiTheme.size.l;
+  // An eased end fade makes the text dissolve instead of looking cut at the row edge or
+  // next to a badge. Each stop is [distance from the end as a share of the fade, opacity].
+  const fadeEndStops = (
+    [
+      [1, 1],
+      [0.8, 0.92],
+      [0.6, 0.7],
+      [0.4, 0.42],
+      [0.2, 0.15],
+      [0, 0],
+    ] as const
+  )
+    .map(
+      ([distance, alpha]) =>
+        `rgb(0 0 0 / ${alpha}) calc(100% - var(--label-fade-end) * ${distance})`
+    )
+    .join(', ');
   const fadeDuration = euiTheme.animation.normal;
 
   // Each edge fades only while text is hidden past it: the start fade comes in as the
@@ -95,8 +112,7 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
         to right,
         transparent,
         black var(--label-fade-start),
-        black calc(100% - var(--label-fade-end)),
-        transparent
+        ${fadeEndStops}
       );
 
       // With reduced motion the label stays still and faded; the tooltip shows the full text.
