@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { EsqlCreateFlow } from './esql_create_flow';
-import type { EsqlQueryStepState } from './esql_query_step';
+import type { EsqlQueryStepState } from './esql_query_step_state';
 import { EsqlWizardProvider, useEsqlWizardContext } from './esql_wizard_context';
 
 const mockAddJob = jest.fn();
@@ -32,15 +32,18 @@ jest.mock('../../../../../contexts/kibana/use_create_url', () => ({
 }));
 
 const ValidWizardState = ({
+  jobId = 'esql-job-1',
   queryProbeState = 'success',
   queryState,
 }: {
+  jobId?: string;
   queryProbeState?: 'idle' | 'loading' | 'error' | 'success';
   queryState?: Partial<EsqlQueryStepState>;
 }) => {
-  const { setQueryProbeState, setQueryState } = useEsqlWizardContext();
+  const { setJobId, setQueryProbeState, setQueryState, setHistogramState } = useEsqlWizardContext();
 
   useEffect(() => {
+    setJobId(jobId);
     setQueryProbeState(queryProbeState);
     setQueryState({
       columns: [
@@ -51,9 +54,13 @@ const ValidWizardState = ({
       emittedTimeField: 'bucket',
       detectors: [{ function: 'mean', field: 'avg_bytes' }],
       influencers: ['host'],
+      sourceTimeField: '@timestamp',
+      bucketSpan: '1h',
       ...queryState,
     });
-  }, [queryProbeState, queryState, setQueryProbeState, setQueryState]);
+    setHistogramState({ histogramStatus: 'success', histogramTotalRows: 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobId, queryProbeState, queryState]);
 
   return null;
 };
@@ -76,7 +83,6 @@ describe('EsqlCreateFlow', () => {
   it('creates, opens, and starts an ES|QL datafeed with the wizard range', async () => {
     renderCreateFlow();
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
     const createButton = screen.getByTestId('mlEsqlCreateJobButton');
     await waitFor(() => expect(createButton).toBeEnabled());
     fireEvent.click(createButton);
@@ -123,11 +129,9 @@ describe('EsqlCreateFlow', () => {
     expect(mockNavigateToManagement).toHaveBeenCalledWith('', { jobId: 'esql-job-1' });
   });
 
-  it('does not call the API until a valid job ID is provided', () => {
-    renderCreateFlow();
+  it('does not call the API without a valid job ID', () => {
+    renderCreateFlow({ jobId: '_invalid' });
 
-    expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: '_invalid' } });
     expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
     expect(mockAddJob).not.toHaveBeenCalled();
   });
@@ -139,7 +143,6 @@ describe('EsqlCreateFlow', () => {
   ])('disables create with %s and makes no API calls', (_description, queryState) => {
     renderCreateFlow({ queryState });
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
     expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
     expect(mockAddJob).not.toHaveBeenCalled();
   });
@@ -149,7 +152,6 @@ describe('EsqlCreateFlow', () => {
     (queryProbeState) => {
       renderCreateFlow({ queryProbeState });
 
-      fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
       expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
       expect(mockAddJob).not.toHaveBeenCalled();
     }
@@ -164,7 +166,6 @@ describe('EsqlCreateFlow', () => {
         })
     );
     renderCreateFlow();
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
     const createButton = screen.getByTestId('mlEsqlCreateJobButton');
     await waitFor(() => expect(createButton).toBeEnabled());
     fireEvent.click(createButton);
@@ -181,7 +182,6 @@ describe('EsqlCreateFlow', () => {
       queryState: { summaryCountFieldName: 'doc_count', delayedDataCheckEnabled: true },
     });
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
     const createButton = screen.getByTestId('mlEsqlCreateJobButton');
     await waitFor(() => expect(createButton).toBeEnabled());
     fireEvent.click(createButton);
@@ -204,7 +204,6 @@ describe('EsqlCreateFlow', () => {
   it('sets delayed_data_check_config.enabled to false and omits the summary count field when none is chosen', async () => {
     renderCreateFlow();
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
     const createButton = screen.getByTestId('mlEsqlCreateJobButton');
     await waitFor(() => expect(createButton).toBeEnabled());
     fireEvent.click(createButton);
@@ -238,7 +237,6 @@ describe('EsqlCreateFlow', () => {
     });
     renderCreateFlow();
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
     const createButton = screen.getByTestId('mlEsqlCreateJobButton');
     await waitFor(() => expect(createButton).toBeEnabled());
     fireEvent.click(createButton);
@@ -267,7 +265,6 @@ describe('EsqlCreateFlow', () => {
     async (phase, failingCall, reason, laterCalls) => {
       failingCall.mockRejectedValue(new Error(reason));
       renderCreateFlow();
-      fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
       const createButton = screen.getByTestId('mlEsqlCreateJobButton');
       await waitFor(() => expect(createButton).toBeEnabled());
       fireEvent.click(createButton);
@@ -301,7 +298,6 @@ describe('EsqlCreateFlow', () => {
       },
     });
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
     const createButton = screen.getByTestId('mlEsqlCreateJobButton');
     await waitFor(() => expect(createButton).toBeEnabled());
     fireEvent.click(createButton);
@@ -332,8 +328,6 @@ describe('EsqlCreateFlow', () => {
       },
     });
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
-
     expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
   });
 
@@ -344,8 +338,41 @@ describe('EsqlCreateFlow', () => {
       },
     });
 
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
-
     await waitFor(() => expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeEnabled());
+  });
+
+  it('includes description and groups from the job details step', async () => {
+    const WithJobDetails = () => {
+      const { setJobDescription, setJobGroups } = useEsqlWizardContext();
+
+      useEffect(() => {
+        setJobDescription('my esql job');
+        setJobGroups(['team-a', 'team-b']);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      return null;
+    };
+
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <ValidWizardState />
+        <WithJobDetails />
+        <EsqlCreateFlow />
+      </EsqlWizardProvider>
+    );
+
+    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+    await waitFor(() => expect(createButton).toBeEnabled());
+    fireEvent.click(createButton);
+
+    await waitFor(() => expect(mockAddJob).toHaveBeenCalledTimes(1));
+    expect(mockAddJob).toHaveBeenCalledWith({
+      jobId: 'esql-job-1',
+      job: expect.objectContaining({
+        description: 'my esql job',
+        groups: ['team-a', 'team-b'],
+      }),
+    });
   });
 });

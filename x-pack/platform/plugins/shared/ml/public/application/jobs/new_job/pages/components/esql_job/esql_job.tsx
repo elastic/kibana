@@ -6,14 +6,83 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../../components/ml_app_header';
-import { EsqlQueryStep } from './esql_query_step';
-import { EsqlTimeRangeStep } from './esql_time_range_step';
-import { EsqlPreviewPanel } from './esql_preview_panel';
-import { EsqlCreateFlow } from './esql_create_flow';
-import { EsqlWizardProvider } from './esql_wizard_context';
+import { EsqlWizardProvider, useEsqlWizardContext } from './esql_wizard_context';
+import { ESQL_WIZARD_STEPS } from './esql_wizard_steps';
+import { EsqlWizardHorizontalSteps } from './esql_wizard_horizontal_steps';
+import { WizardNav } from '../wizard_nav';
+import { computeEsqlStepGating } from './esql_step_gating';
+import { EsqlQueryTimeRangeStep } from './esql_query_time_range_step';
+import { EsqlPickFieldsStep } from './esql_pick_fields_step';
+import { EsqlJobDetailsStep } from './esql_job_details_step';
+import { EsqlSummaryStep } from './esql_summary_step';
+import { useEsqlColumnsResolver } from './esql_columns_resolver';
+import { useEsqlHistogramExecutor } from './esql_histogram_executor';
+
+const stepComponents: Record<ESQL_WIZARD_STEPS, FC> = {
+  [ESQL_WIZARD_STEPS.QUERY_TIME_RANGE]: EsqlQueryTimeRangeStep,
+  [ESQL_WIZARD_STEPS.PICK_FIELDS]: EsqlPickFieldsStep,
+  [ESQL_WIZARD_STEPS.JOB_DETAILS]: EsqlJobDetailsStep,
+  [ESQL_WIZARD_STEPS.SUMMARY]: EsqlSummaryStep,
+};
+
+/**
+ * The staged ES|QL wizard (LEAD DECISION 2026-09-29, g2sz.10): a thin,
+ * ES|QL-only stepper (shell option (b) from pass 2) — its own step enum +
+ * `WizardNav` + `EuiStepsHorizontal`, rather than extending the shared
+ * `WIZARD_STEPS` used by the classic DataView-backed wizards.
+ */
+export const EsqlWizard = () => {
+  const { state } = useEsqlWizardContext();
+  useEsqlColumnsResolver();
+  useEsqlHistogramExecutor();
+
+  const [currentStep, setCurrentStep] = useState(ESQL_WIZARD_STEPS.QUERY_TIME_RANGE);
+  const [highestStep, setHighestStep] = useState(ESQL_WIZARD_STEPS.QUERY_TIME_RANGE);
+
+  const gating = computeEsqlStepGating(state);
+  const isLastStep = currentStep === ESQL_WIZARD_STEPS.SUMMARY;
+  const nextActive = !isLastStep && gating[currentStep];
+
+  const goToStep = (step: ESQL_WIZARD_STEPS) => {
+    setCurrentStep(step);
+    setHighestStep((current) => Math.max(current, step) as ESQL_WIZARD_STEPS);
+  };
+
+  const next = () => {
+    if (!nextActive) return;
+
+    goToStep((currentStep + 1) as ESQL_WIZARD_STEPS);
+  };
+
+  const previous = () => {
+    if (currentStep === ESQL_WIZARD_STEPS.QUERY_TIME_RANGE) return;
+
+    setCurrentStep((currentStep - 1) as ESQL_WIZARD_STEPS);
+  };
+
+  const StepComponent = stepComponents[currentStep];
+
+  return (
+    <>
+      <EsqlWizardHorizontalSteps
+        currentStep={currentStep}
+        highestStep={highestStep}
+        setCurrentStep={goToStep}
+      />
+      <EuiSpacer size="l" />
+      <StepComponent />
+      <WizardNav
+        previous={currentStep === ESQL_WIZARD_STEPS.QUERY_TIME_RANGE ? undefined : previous}
+        next={isLastStep ? undefined : next}
+        nextActive={nextActive}
+      />
+    </>
+  );
+};
 
 export const Page: FC = () => {
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
@@ -27,10 +96,7 @@ export const Page: FC = () => {
         back={anomalyDetectionJobsBack}
       />
       <EsqlWizardProvider>
-        <EsqlQueryStep />
-        <EsqlTimeRangeStep />
-        <EsqlPreviewPanel />
-        <EsqlCreateFlow />
+        <EsqlWizard />
       </EsqlWizardProvider>
     </div>
   );

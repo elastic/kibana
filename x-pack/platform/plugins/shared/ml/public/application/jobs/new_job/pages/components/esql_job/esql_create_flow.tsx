@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiFieldText, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
-import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { isJobIdValid, createDatafeedId } from '../../../../../../../common/util/job_utils';
+import { createDatafeedId } from '../../../../../../../common/util/job_utils';
 import { useNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
 import { buildEsqlJobPayload, createDetectors } from '../../../common/job_creator/esql_job_creator';
 import { extractEsqlErrorReason } from './esql_error_reason';
 import { useEsqlWizardContext } from './esql_wizard_context';
-import { NUMERIC_ESQL_TYPES } from './esql_numeric_types';
-import { detectorFieldRequirement } from './esql_detector_functions';
-import { isDetectorPartitioningValid } from './esql_detector_partitioning';
+import {
+  isJobDetailsStepValid,
+  isPickFieldsStepValid,
+  isQueryTimeRangeStepValid,
+} from './esql_step_gating';
 
 type CreatePhase =
   | 'idle'
@@ -29,9 +30,6 @@ type CreatePhase =
   | 'startingDatafeed'
   | 'success'
   | 'error';
-
-const isValidRange = (start: string, end: string) =>
-  ![start, end].some((value) => value === '' || value === '0' || value === 'MAX');
 
 const phaseLabel: Record<Exclude<CreatePhase, 'idle' | 'success' | 'error'>, string> = {
   creatingJob: i18n.translate('xpack.ml.esqlJob.create.creatingJob', {
@@ -48,45 +46,25 @@ const phaseLabel: Record<Exclude<CreatePhase, 'idle' | 'success' | 'error'>, str
   }),
 };
 
+/**
+ * Final (Summary) step action: validate, create the job, create the
+ * datafeed, open the job, and start the datafeed in real time. Job
+ * ID/description/groups are now collected by the Job details step
+ * (LEAD DECISION 2026-09-29, g2sz.10) — this component only owns the
+ * create/start sequence and its status reporting.
+ */
 export const EsqlCreateFlow = () => {
   const mlApi = useMlApi();
   const navigateToManagement = useNavigateToManagementMlLink('anomaly_detection');
-  const { state, setJobId } = useEsqlWizardContext();
+  const { state } = useEsqlWizardContext();
   const [phase, setPhase] = useState<CreatePhase>('idle');
   const [error, setError] = useState<string>();
 
   const datafeedId = createDatafeedId(state.jobId);
-  const jobIdInvalid = state.jobId !== '' && !isJobIdValid(state.jobId);
-  const detectorsAreValid = state.detectors.every((detector) => {
-    const requirement = detectorFieldRequirement(detector.function);
-
-    if (!isDetectorPartitioningValid(detector, state.columns, state.emittedTimeField)) {
-      return false;
-    }
-
-    if (requirement === 'none') return true;
-    if (!detector.field) return false;
-
-    return state.columns.some(
-      ({ name, type }) =>
-        name === detector.field && (requirement === 'any' || NUMERIC_ESQL_TYPES.has(type))
-    );
-  });
-  const emittedTimeFieldExists = state.columns.some(({ name }) => name === state.emittedTimeField);
-  const isValid = useMemo(
-    () =>
-      isJobIdValid(state.jobId) &&
-      state.jobId.length <= JOB_ID_MAX_LENGTH &&
-      state.queryProbeState === 'success' &&
-      state.sourceTimeField.trim() !== '' &&
-      state.bucketSpan.trim() !== '' &&
-      state.bucketSpan !== '0' &&
-      isValidRange(state.wizardStart, state.wizardEnd) &&
-      emittedTimeFieldExists &&
-      state.detectors.length > 0 &&
-      detectorsAreValid,
-    [detectorsAreValid, emittedTimeFieldExists, state]
-  );
+  const isValid =
+    isQueryTimeRangeStepValid(state) &&
+    isPickFieldsStepValid(state) &&
+    isJobDetailsStepValid(state);
   const isSubmitting = !['idle', 'error'].includes(phase);
 
   const create = useCallback(async () => {
@@ -106,6 +84,8 @@ export const EsqlCreateFlow = () => {
       summaryCountFieldName:
         state.summaryCountFieldName === '' ? undefined : state.summaryCountFieldName,
       delayedDataCheckEnabled: state.delayedDataCheckEnabled,
+      description: state.jobDescription === '' ? undefined : state.jobDescription,
+      groups: state.jobGroups,
     });
 
     let currentPhase: Exclude<CreatePhase, 'idle' | 'success' | 'error'> = 'creatingJob';
@@ -152,30 +132,6 @@ export const EsqlCreateFlow = () => {
   return (
     <section data-test-subj="mlEsqlCreateFlow">
       <EuiSpacer size="l" />
-      <EuiFormRow
-        label={i18n.translate('xpack.ml.esqlJob.create.jobIdLabel', {
-          defaultMessage: 'Job ID',
-        })}
-        isInvalid={jobIdInvalid}
-        error={i18n.translate('xpack.ml.esqlJob.create.invalidJobId', {
-          defaultMessage:
-            'Use lowercase letters, numbers, hyphens, and underscores; begin and end with a letter or number.',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          aria-label={i18n.translate('xpack.ml.esqlJob.create.jobIdLabel', {
-            defaultMessage: 'Job ID',
-          })}
-          value={state.jobId}
-          onChange={(event) => setJobId(event.target.value)}
-          maxLength={JOB_ID_MAX_LENGTH}
-          isInvalid={jobIdInvalid}
-          data-test-subj="mlEsqlJobId"
-          fullWidth
-          disabled={isSubmitting}
-        />
-      </EuiFormRow>
       <EuiText size="s" color="subdued">
         <p data-test-subj="mlEsqlDatafeedId">
           {i18n.translate('xpack.ml.esqlJob.create.datafeedId', {
