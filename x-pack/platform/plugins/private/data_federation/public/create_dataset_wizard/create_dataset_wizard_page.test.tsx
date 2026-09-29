@@ -114,15 +114,8 @@ describe('CreateDatasetWizardPage', () => {
   };
 
   it('walks through dataset, advanced, and confirm steps then saves', async () => {
-    const {
-      getByTestId,
-      getByText,
-      queryByTestId,
-      findByTestId,
-      history,
-      add,
-      loadDataSets,
-    } = renderWizard();
+    const { getByTestId, getByText, queryByTestId, findByTestId, history, add, loadDataSets } =
+      renderWizard();
 
     expect(getByTestId('appHeaderTitle')).toHaveTextContent(createDatasetWizardStrings.pageTitle);
     expect(getByTestId('appHeaderBack')).toHaveAttribute(
