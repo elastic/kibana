@@ -600,7 +600,10 @@ export function getDataStateContainer({
             );
           }
 
-          fetchAllTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+          fetchAllTracker.reportEvent({
+            requestAdapter: inspectorAdapters.requests,
+            approximation: dataSubjects.documents$.getValue().approximationApplied,
+          });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done

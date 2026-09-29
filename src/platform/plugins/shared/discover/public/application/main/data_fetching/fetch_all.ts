@@ -140,7 +140,10 @@ export function fetchAll(
           esqlHeaderWarning,
           approximationApplied,
         }) => {
-          fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+          fetchAllRequestsOnlyTracker.reportEvent({
+            requestAdapter: inspectorAdapters.requests,
+            approximation: approximationApplied,
+          });
 
           if (isEsqlQuery) {
             const fetchStatus =
