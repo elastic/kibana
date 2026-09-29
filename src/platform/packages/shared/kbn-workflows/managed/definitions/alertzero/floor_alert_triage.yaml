@@ -825,8 +825,14 @@ steps:
               body:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
+                # Does not assert every candidate remains open: this outcome can follow
+                # action_close_alerts_false_positive's fail_incomplete_close, which fires after
+                # a partial SetAlertsStatus update (conflicts: proceed lets some alerts close
+                # before the count mismatch throws). Whether that happened is not observable
+                # here — the gate's own output carries no per-alert result — so this reports
+                # the ambiguity instead of a specific (possibly wrong) closed/open count.
                 input: >-
-                  ⚠️ The closure proposal ended with status "{{ steps.create_fp_proposal.output.status }}". {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive; this Investigation stays open for review.
+                  ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert(s) may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
 
   # ---------------------------------------------------------------------------
   # 10. No-FP branch: close the Investigation immediately.

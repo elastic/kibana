@@ -714,6 +714,22 @@ describe('floor_alert_triage — proposal outcomes', () => {
     ).toBe(false);
   });
 
+  it('post_comment_outcome_unknown reports ambiguity instead of claiming every candidate remains open', () => {
+    // action_close_alerts_false_positive's fail_incomplete_close can fire after some alerts
+    // already closed (conflicts: proceed), so this outcome must not assert a specific
+    // closed/open count it cannot actually observe.
+    const comment = stepByName('post_comment_outcome_unknown');
+    const template = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    const rendered = renderString(template, {
+      steps: { create_fp_proposal: { output: { status: 'failed' } } },
+      variables: { fp_candidate_count: 2 },
+    });
+
+    expect(rendered).not.toContain('2 alert(s) remain open');
+    expect(rendered).toContain('may already be closed');
+    expect(rendered).toContain('check each alert');
+  });
+
   it.each([
     ['close_investigation_after_approval', 'false_positive'],
     ['close_investigation_after_dismissal', 'other'],
