@@ -15,7 +15,7 @@ import { useSplitQueryValidation } from './use_split_query_validation';
 type EditorMountHandler = (editor: monaco.editor.IStandaloneCodeEditor) => void;
 
 interface UseSandboxEditorMountsParams {
-  /** Base query that precedes the alert/recovery fragments (empty for standalone). */
+  /** Base query that precedes the alert/recovery fragments. */
   baseQuery: string;
   services: RuleFormServices;
 }

@@ -51,6 +51,8 @@ interface WorkerSettingsPanelProps {
   settingsLocked: boolean;
   /** A Watch save is in flight; controls are locked so edits cannot slip into a draft about to be cleared. */
   isSaving: boolean;
+  /** False for read-only AlertZero roles; settings stay visible but cannot be changed. */
+  canWrite: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
   /** Raised when this Worker's trigger control holds an amount that cannot be committed. */
@@ -74,6 +76,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   error,
   settingsLocked,
   isSaving,
+  canWrite,
   onEnabledChange,
   onSettingsChange,
   onTriggerValidityChange,
@@ -90,7 +93,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
     settings.scheduleInterval != null
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
-  const controlsDisabled = settingsLocked || isSaving;
+  const controlsDisabled = settingsLocked || isSaving || !canWrite;
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
