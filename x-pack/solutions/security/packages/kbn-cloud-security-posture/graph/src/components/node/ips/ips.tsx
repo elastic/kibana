@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { RoundedBadge } from '../styles';
 import {
   useNodeDetailsPopover,
   type UseNodeDetailsPopoverReturn,
@@ -75,7 +76,72 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
 
   if (ips.length === 0) return null;
 
-  const visibleIps = (
+  const isMultiple = ips.length > 1;
+
+  // When there is only one IP, render its value (clickable or plain text).
+  const ipValue = isMultiple ? null : onIpClick ? (
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      data-test-subj={GRAPH_IPS_BUTTON_ID}
+      onClick={onIpClick}
+      aria-label={popoverTipAriaLabel}
+      flush="both"
+      css={css`
+        font-weight: medium;
+        ${xsFontSize};
+      `}
+    >
+      {ips[0]}
+    </EuiButtonEmpty>
+  ) : (
+    <EuiText
+      data-test-subj={GRAPH_IPS_VALUE_ID}
+      size="xs"
+      color="subdued"
+      css={css`
+        font-weight: medium;
+        ${xsFontSize};
+      `}
+    >
+      {ips[0]}
+    </EuiText>
+  );
+
+  // When there are multiple IPs, render a +N badge with the total count.
+  const counter = isMultiple ? (
+    <RoundedBadge data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}>
+      {onIpClick ? (
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
+          onClick={onIpClick}
+          aria-label={popoverTipAriaLabel}
+          flush="both"
+          css={css`
+            font-weight: medium;
+          `}
+        >
+          {`+${ips.length}`}
+        </EuiButtonEmpty>
+      ) : (
+        <EuiText
+          size="xs"
+          color="subdued"
+          aria-label={popoverTipAriaLabel}
+          css={css`
+            font-weight: medium;
+            ${xsFontSize};
+          `}
+        >
+          {`+${ips.length}`}
+        </EuiText>
+      )}
+    </RoundedBadge>
+  ) : null;
+
+  return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
       <EuiFlexItem grow={false}>
         <EuiText
@@ -90,75 +156,7 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
           {'IP address: '}
         </EuiText>
       </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        {ips.length === 1 && onIpClick ? (
-          <EuiButtonEmpty
-            size="xs"
-            color="text"
-            data-test-subj={GRAPH_IPS_BUTTON_ID}
-            onClick={onIpClick}
-            aria-label={popoverTipAriaLabel}
-            flush="both"
-            css={css`
-              font-weight: medium;
-              ${xsFontSize};
-            `}
-          >
-            {ips[0]}
-          </EuiButtonEmpty>
-        ) : (
-          <EuiText
-            data-test-subj={GRAPH_IPS_VALUE_ID}
-            size="xs"
-            color="subdued"
-            css={css`
-              font-weight: medium;
-              ${xsFontSize};
-            `}
-          >
-            {ips.slice(0, VISIBLE_IPS_LIMIT).join(', ')}
-          </EuiText>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const counter =
-    ips.length > VISIBLE_IPS_LIMIT ? (
-      onIpClick ? (
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
-          data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
-          onClick={onIpClick}
-          aria-label={popoverTipAriaLabel}
-          flush="both"
-          css={css`
-            font-weight: medium;
-          `}
-        >
-          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-        </EuiButtonEmpty>
-      ) : (
-        <EuiText
-          size="xs"
-          color="subdued"
-          aria-label={popoverTipAriaLabel}
-          data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
-          css={css`
-            font-weight: medium;
-            ${xsFontSize};
-          `}
-        >
-          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-        </EuiText>
-      )
-    ) : null;
-
-  return (
-    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
-      <EuiFlexItem grow={false}>{visibleIps}</EuiFlexItem>
+      {ipValue && <EuiFlexItem grow={false}>{ipValue}</EuiFlexItem>}
       {counter && <EuiFlexItem grow={false}>{counter}</EuiFlexItem>}
     </EuiFlexGroup>
   );

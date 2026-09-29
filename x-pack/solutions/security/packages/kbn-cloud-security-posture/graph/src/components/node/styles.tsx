@@ -451,7 +451,7 @@ const ThemedRoundedBadge = styled.div<{
   background-color: ${({ euiTheme, bgColor }) => bgColor || euiTheme.colors.backgroundBasePlain};
   border: ${({ euiTheme }) =>
     `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
-  border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
+  border-radius: 9999px;
 
   font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
 `;

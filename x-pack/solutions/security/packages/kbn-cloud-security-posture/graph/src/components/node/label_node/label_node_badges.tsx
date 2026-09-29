@@ -108,9 +108,9 @@ const AlertCountBadge: React.FC<{
   onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }> = ({ count, inverted, onEventClick }) => {
   const { euiTheme } = useEuiTheme();
-  const bgColor = inverted ? euiTheme.colors.danger : undefined;
-  const iconColor = inverted ? euiTheme.colors.backgroundBasePlain : 'danger';
-  const textColor = inverted ? euiTheme.colors.textInverse : euiTheme.colors.textHeading;
+  const bgColor = inverted ? euiTheme.colors.backgroundLightDanger : undefined;
+  const iconColor = 'danger';
+  const textColor = inverted ? euiTheme.colors.textDanger : euiTheme.colors.textHeading;
 
   return (
     <RoundedBadge bgColor={bgColor}>
