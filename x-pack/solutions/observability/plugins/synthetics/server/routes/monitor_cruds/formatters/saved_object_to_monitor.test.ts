@@ -6,7 +6,8 @@
  */
 
 import { mapSavedObjectToMonitor, mergeSourceMonitor } from './saved_object_to_monitor';
-import type { EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitor, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 describe('mergeSourceMonitor', () => {
   it('should merge keys', function () {
@@ -69,7 +70,7 @@ describe('mergeSourceMonitor', () => {
   it('should deep-merge partial NTLM updates without wiping sibling fields', () => {
     const previous = {
       ...testMonitor,
-      ntlm: {
+      [ConfigKey.NTLM]: {
         enabled: true,
         username: 'svc-monitor',
         password: 'old-password',
@@ -79,10 +80,10 @@ describe('mergeSourceMonitor', () => {
     } as EncryptedSyntheticsMonitor;
 
     const result = mergeSourceMonitor(previous, {
-      ntlm: { password: 'new-password' },
-    } as any);
+      [ConfigKey.NTLM]: { password: 'new-password' },
+    } as unknown as EncryptedSyntheticsMonitor) as MonitorFields;
 
-    expect(result.ntlm).toEqual({
+    expect(result[ConfigKey.NTLM]).toEqual({
       enabled: true,
       username: 'svc-monitor',
       password: 'new-password',
@@ -94,7 +95,7 @@ describe('mergeSourceMonitor', () => {
   it('should deep-merge partial Kerberos updates without wiping sibling fields', () => {
     const previous = {
       ...testMonitor,
-      kerberos: {
+      [ConfigKey.KERBEROS]: {
         enabled: true,
         auth_type: 'password',
         username: 'svc',
@@ -109,10 +110,10 @@ describe('mergeSourceMonitor', () => {
     } as EncryptedSyntheticsMonitor;
 
     const result = mergeSourceMonitor(previous, {
-      kerberos: { password: 'new-secret' },
-    } as any);
+      [ConfigKey.KERBEROS]: { password: 'new-secret' },
+    } as unknown as EncryptedSyntheticsMonitor) as MonitorFields;
 
-    expect(result.kerberos).toEqual({
+    expect(result[ConfigKey.KERBEROS]).toEqual({
       enabled: true,
       auth_type: 'password',
       username: 'svc',

@@ -30,10 +30,11 @@ export const mergeHttpAuthDefaults = <T extends HttpAuthFields>(fields: T): T =>
   const kerberosDefaults = DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS];
   const ntlmDefaults = DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM];
 
+  // Defaults supply every required key; Partial overlay keeps the full shape.
   const kerberos = {
     ...kerberosDefaults,
     ...(fields[ConfigKey.KERBEROS] ?? {}),
-  };
+  } as KerberosConfig;
 
   return {
     ...fields,

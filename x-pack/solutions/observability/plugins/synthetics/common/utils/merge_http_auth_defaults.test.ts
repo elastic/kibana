@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_HTTP_ADVANCED_FIELDS } from '../constants/monitor_defaults';
-import { ConfigKey } from '../runtime_types';
+import { ConfigKey, KerberosAuthType } from '../runtime_types';
 import { mergeHttpAuthDefaults } from './merge_http_auth_defaults';
 
 describe('mergeHttpAuthDefaults', () => {
@@ -51,7 +51,7 @@ describe('mergeHttpAuthDefaults', () => {
     const merged = mergeHttpAuthDefaults({
       [ConfigKey.KERBEROS]: {
         enabled: true,
-        auth_type: 'keytab',
+        auth_type: KerberosAuthType.KEYTAB,
         username: 'svc',
         password: 'stale-password',
         keytab: '/etc/krb5.keytab',
@@ -60,7 +60,7 @@ describe('mergeHttpAuthDefaults', () => {
     });
 
     expect(merged[ConfigKey.KERBEROS]).toMatchObject({
-      auth_type: 'keytab',
+      auth_type: KerberosAuthType.KEYTAB,
       username: 'svc',
       password: '',
       keytab: '/etc/krb5.keytab',
@@ -71,7 +71,7 @@ describe('mergeHttpAuthDefaults', () => {
     const merged = mergeHttpAuthDefaults({
       [ConfigKey.KERBEROS]: {
         enabled: true,
-        auth_type: 'password',
+        auth_type: KerberosAuthType.PASSWORD,
         username: 'svc',
         password: 'secret',
         keytab: '/etc/stale.keytab',
@@ -80,7 +80,7 @@ describe('mergeHttpAuthDefaults', () => {
     });
 
     expect(merged[ConfigKey.KERBEROS]).toMatchObject({
-      auth_type: 'password',
+      auth_type: KerberosAuthType.PASSWORD,
       password: 'secret',
       keytab: '',
     });
