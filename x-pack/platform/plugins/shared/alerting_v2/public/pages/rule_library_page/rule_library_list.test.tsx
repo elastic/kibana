@@ -109,7 +109,11 @@ describe('RuleLibraryList', () => {
     mockInstallIsLoading = false;
     mockInstallVariables = undefined;
     mockFindItems.mockResolvedValue({ items: [], total: 0 });
-    mockUseFetchRuleTemplateTags.mockReturnValue({ data: ['nginx'], isLoading: false });
+    mockUseFetchRuleTemplateTags.mockReturnValue({
+      data: ['nginx'],
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('renders the empty-state placeholder when there are no templates', async () => {
@@ -158,6 +162,21 @@ describe('RuleLibraryList', () => {
     expect(within(options).queryByText('prod')).not.toBeInTheDocument();
   });
 
+  it('shows an error when tags cannot be loaded', async () => {
+    mockUseFetchRuleTemplateTags.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
+    resolveTemplateList();
+    renderList();
+    await screen.findByText('CPU usage');
+
+    fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter'));
+
+    expect(await screen.findByText('Unable to load tags')).toBeInTheDocument();
+  });
+
   it('applies and clears a selected tag filter', async () => {
     resolveTemplateList();
     renderList();
@@ -187,6 +206,7 @@ describe('RuleLibraryList', () => {
     mockUseFetchRuleTemplateTags.mockImplementation(({ search }: { search?: string }) => ({
       data: search === 'kube' ? ['kubernetes'] : ['nginx'],
       isLoading: false,
+      isError: false,
     }));
     resolveTemplateList();
     renderList();

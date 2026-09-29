@@ -21,13 +21,20 @@ const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.tagsFilter.label', {
 const TAG_SEARCH_LABEL = i18n.translate('xpack.alertingV2.tagsFilter.searchPlaceholder', {
   defaultMessage: 'Search tags',
 });
+const TAGS_FETCH_ERROR_MESSAGE = i18n.translate('xpack.alertingV2.tagsFilter.fetchError', {
+  defaultMessage: 'Unable to load tags',
+});
 
 /** Creates a content-list tag filter backed by the supplied tag query hook. */
 export const createTagsFilter = ({
   useFetchTags,
   testSubjectPrefix,
 }: {
-  useFetchTags: (params: { search?: string }) => { data?: string[]; isLoading: boolean };
+  useFetchTags: (params: { search?: string }) => {
+    data?: string[];
+    isLoading: boolean;
+    isError: boolean;
+  };
   testSubjectPrefix: string;
 }) => {
   const TagsFilterComponent = ({
@@ -44,7 +51,11 @@ export const createTagsFilter = ({
       query,
       onChange,
     });
-    const { data: tagNames = [], isLoading } = useFetchTags({
+    const {
+      data: tagNames = [],
+      isLoading,
+      isError,
+    } = useFetchTags({
       search: debouncedTagSearch || undefined,
     });
 
@@ -66,6 +77,7 @@ export const createTagsFilter = ({
         onChange={onChange}
         options={options}
         isLoading={isLoading}
+        emptyMessage={isError ? TAGS_FETCH_ERROR_MESSAGE : undefined}
         hideSearch
         headerContent={
           <EuiFieldSearch
