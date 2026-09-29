@@ -22,7 +22,6 @@ xml-formatter
 dompurify
 magic-bytes.js
 @opentelemetry/exporter-trace-otlp-grpc
-@ai-sdk/langchain
 ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
@@ -62,8 +61,14 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+@swc/jest
 mongodb
 mongodb-connection-string-url
 @swc/plugin-emotion
+@ampproject/remapping
+magic-string
 graphql
 @cfworker/json-schema
+oxlint-tsgolint
+bump-cli
+@oxlint/plugins

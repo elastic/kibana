@@ -74,13 +74,6 @@ interface ArtifactListPageBaseProps {
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
   /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
   labels: ArtifactListPageLabels;
-  /**
-   * Define a callback to handle the submission of the form data instead of the internal one in
-   * `ArtifactListPage` being used.
-   * @param item
-   * @param mode
-   */
-  onFormSubmit?: Required<ArtifactFlyoutProps>['submitHandler'];
   /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
@@ -137,7 +130,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     labels: _labels = {},
     secondaryPageInfo,
     callout,
-    onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
     allowCardEditAction = true,
@@ -454,8 +446,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             FormComponent={ArtifactFormComponent}
             labels={labels}
             size={flyoutSize}
-            submitHandler={onFormSubmit}
             data-test-subj={getTestId('flyout')}
+            canCreateArtifactAsDisabled={showEnabledColumn}
           />
         )}
 

@@ -58,6 +58,7 @@ import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags
 import { serviceAccountsServiceMock } from '../service_accounts/service_accounts_service.mock';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
+import { uiamServiceMock } from '../uiam/uiam_service.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 
 describe('AuthenticationService', () => {
@@ -208,6 +209,52 @@ describe('AuthenticationService', () => {
   describe('#start()', () => {
     beforeEach(() => {
       service.setup(mockSetupAuthenticationParams);
+    });
+
+    describe('system identity', () => {
+      const startWithUiamConfig = (uiam?: Record<string, unknown>) =>
+        service.start({
+          ...mockStartAuthenticationParams,
+          config: createConfig(
+            ConfigSchema.validate(
+              { encryptionKey: 'ab'.repeat(16), ...(uiam ? { uiam } : {}) },
+              { serverless: true }
+            ),
+            loggingSystemMock.create().get(),
+            { isTLSEnabled: false }
+          ),
+          uiam: uiam?.enabled ? uiamServiceMock.create() : undefined,
+        });
+
+      it('is exposed when UIAM is configured with a client certificate', () => {
+        const { systemIdentity } = startWithUiamConfig({
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+        });
+
+        expect(systemIdentity).toBeDefined();
+      });
+
+      it('is not exposed when UIAM is configured without a client certificate', () => {
+        const { systemIdentity } = startWithUiamConfig({
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+        });
+
+        expect(systemIdentity).toBeUndefined();
+        expect(loggingSystemMock.collect(logger).debug).toEqual([
+          [
+            'UIAM is enabled without a client certificate (`xpack.security.uiam.ssl.certificate` and `.key`), so Kibana cannot mint tokens for its own identity.',
+          ],
+        ]);
+      });
+
+      it('is not exposed when UIAM is not enabled', () => {
+        expect(startWithUiamConfig().systemIdentity).toBeUndefined();
+      });
     });
 
     describe('authentication handler', () => {

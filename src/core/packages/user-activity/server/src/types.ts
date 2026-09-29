@@ -78,9 +78,9 @@ export interface UserActivityError {
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
   action: UserActivityActionId;
-  /** Event type {@link UserActivityEventType}. */
-  type: UserActivityEventType;
-  /** ECS event outcome; use with {@link UserActivityEventOutcome}. */
+  /** Event types {@link UserActivityEventType}. ECS defines `event.type` as an array. */
+  type: readonly UserActivityEventType[];
+  /** ECS event outcome; use with {@link UserActivityEventOutcome}. Defaults to `'unknown'` when omitted. */
   outcome?: UserActivityEventOutcome;
   /** ISO8601 timestamp of the event start time. */
   start?: string;
@@ -96,6 +96,16 @@ export interface UserActivityEvent {
  */
 export type UserActivityMetadata = Record<string, unknown>;
 
+/**
+ * Caller-provided metadata buckets logged under the entry's `kibana.*` fields, one per producer.
+ * New buckets must be declared here, just so we have a record of what fields we can have.
+ * @public
+ */
+export interface UserActivityKibanaMetadata {
+  dashboard?: UserActivityMetadata;
+  security?: UserActivityMetadata;
+}
+
 /** @public */
 export interface TrackUserActionParams {
   /** Custom log message. If omitted, a default message is generated. */
@@ -106,8 +116,8 @@ export interface TrackUserActionParams {
   object: UserActivityObject;
   /** ECS error fields written at the top level of the log entry when provided. */
   error?: UserActivityError;
-  /** Additional bucket of non-standard metadata. */
-  metadata?: UserActivityMetadata;
+  /** Metadata buckets merged into the log entry's `kibana.*` fields; see {@link UserActivityKibanaMetadata}. */
+  kibana?: UserActivityKibanaMetadata;
 }
 
 /**
@@ -117,7 +127,7 @@ export interface TrackUserActionParams {
  * @example
  * ```ts
  * core.userActivity.trackUserAction({
- *   event: { action: 'edit_dashboard', type: 'change' },
+ *   event: { action: 'edit_dashboard', type: ['change'] },
  *   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: [] },
  * });
  * ```

@@ -17,7 +17,7 @@ import {
   type ThreatReportSummary,
 } from '../../../common/threat_intel';
 import { truncate } from './report_content';
-import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
+import { HIDDEN_INDEX_PIT_OPTIONS } from '../lib/es_options';
 import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
 import { decodeCursor, encodeCursor, InvalidCursorError } from '../lib/report_cursor';
@@ -169,7 +169,14 @@ const mapHitToSummary = (hit: estypes.SearchHit<ReportSourceDoc>): ThreatReportS
     .map((ioc) => ({ type: ioc.type, value: ioc.value }));
 
   const diamond = source.extracted?.diamond;
-  const summary: ThreatReportSummary = {
+  const summary: {
+    reportId: string;
+    iocs: typeof iocs;
+    title?: string;
+    bodyText?: string;
+    severity?: { level: string; score?: number };
+    diamond?: { signalCount?: number; suitable?: boolean };
+  } = {
     reportId: hit._id ?? '',
     iocs,
   };
@@ -266,11 +273,7 @@ export const findThreatReports = async (
         index: THREAT_REPORTS_INDEX_PATTERN,
         keep_alive: PIT_KEEP_ALIVE,
         // Reports live in a hidden index, which a wildcard skips by default.
-        // Only PIT-valid fields go here: `allow_no_indices` (from
-        // HIDDEN_INDEX_SEARCH_OPTIONS) is a search-only parameter ES rejects
-        // on PIT open with x_content_parse_exception.
-        expand_wildcards: HIDDEN_INDEX_SEARCH_OPTIONS.expand_wildcards,
-        ignore_unavailable: HIDDEN_INDEX_SEARCH_OPTIONS.ignore_unavailable,
+        ...HIDDEN_INDEX_PIT_OPTIONS,
       });
       pitId = pit.id;
       openedPit = true;

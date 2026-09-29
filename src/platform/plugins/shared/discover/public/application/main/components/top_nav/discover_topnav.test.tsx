@@ -12,8 +12,9 @@ import React, { useContext, useEffect } from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
+import { DataSourceType } from '../../../../../common/data_sources';
 import { DiscoverTopNav } from './discover_topnav';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import {
@@ -40,6 +41,7 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
     dataViewPickerOverride,
     onQuerySubmit,
     disableSubmitAction,
+    showDatePicker,
   } = props;
 
   return (
@@ -48,6 +50,9 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
       data-has-data-view-picker-component-props={String(Boolean(dataViewPickerComponentProps))}
       data-has-data-view-picker-override={String(Boolean(dataViewPickerOverride))}
       data-disable-submit-action={String(Boolean(disableSubmitAction))}
+      data-date-picker-disabled={
+        typeof showDatePicker === 'object' ? String(showDatePicker.disabled) : 'false'
+      }
     >
       {dataViewPickerOverride}
       <button
@@ -116,11 +121,17 @@ async function setup(
   });
 
   await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+  const tabId = toolkit.getCurrentTab().id;
+
+  // Skip the initial fetch so tests fully own data$.main$ and no async emission races their explicit `.next()`.
+  toolkit.internalState.dispatch(
+    internalStateActions.setSkipInitialFetch({ tabId, skipInitialFetch: true })
+  );
+  await toolkit.initializeSingleTab({ tabId, skipWaitForDataFetching: true });
 
   toolkit.internalState.dispatch(
     internalStateActions.setDataView({
-      tabId: toolkit.getCurrentTab().id,
+      tabId,
       dataView: dataViewMock,
     })
   );
@@ -314,6 +325,62 @@ describe('Discover topnav component', () => {
         'data-disable-submit-action',
         'false'
       );
+    });
+  });
+
+  describe('date picker', () => {
+    it('disables the date picker for an ES|QL view without a time field', async () => {
+      const { toolkit, props } = await setup();
+      const tabId = toolkit.getCurrentTab().id;
+      const esqlViewNoTimeField = buildDataViewMock({ name: 'esql-view', type: 'esql' });
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setDataView({ tabId, dataView: esqlViewNoTimeField })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { esql: 'FROM test' }, dataSource: { type: DataSourceType.Esql } },
+        })
+      );
+
+      renderTestComponent({ toolkit, props });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+          'data-date-picker-disabled',
+          'true'
+        );
+      });
+    });
+
+    it('enables the date picker for an ES|QL view with a time field', async () => {
+      const { toolkit, props } = await setup();
+      const tabId = toolkit.getCurrentTab().id;
+      const esqlViewWithTimeField = buildDataViewMock({
+        name: 'esql-view',
+        type: 'esql',
+        timeFieldName: '@timestamp',
+      });
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setDataView({ tabId, dataView: esqlViewWithTimeField })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { esql: 'FROM test' }, dataSource: { type: DataSourceType.Esql } },
+        })
+      );
+
+      renderTestComponent({ toolkit, props });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+          'data-date-picker-disabled',
+          'false'
+        );
+      });
     });
   });
 

@@ -20,7 +20,7 @@ import {
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,
-} from '../../common/ecf_template_version';
+} from '../../common/providers/aws/ecf_template_version';
 import type {
   ServiceInstance,
   ServiceVars,

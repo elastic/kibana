@@ -110,10 +110,33 @@ describe('getDeleteKiStepDefinition', () => {
       {
         index: 'ai-index-idx-my-ai-index',
         id: 'ki-1',
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );
+  });
+
+  it('waits for the refresh when refresh is true', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', refresh: true },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.delete).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }), {
+      signal: context.abortSignal,
+    });
   });
 
   it('appends a revision with lifecycle status deleted on a data stream', async () => {
@@ -151,10 +174,32 @@ describe('getDeleteKiStepDefinition', () => {
           },
         },
         op_type: 'create',
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );
+  });
+
+  it('resolves the AI index with the workflow space id', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+      spaceId: 'marketing',
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(service.get).toHaveBeenCalledWith('my-ai-index', 'marketing');
   });
 
   it('throws NotFoundError when the data stream KI is already deleted', async () => {

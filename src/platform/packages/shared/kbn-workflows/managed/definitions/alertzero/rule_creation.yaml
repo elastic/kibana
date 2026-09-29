@@ -32,11 +32,18 @@ triggers:
 outputs:
   - name: created
     type: boolean
+  - name: reviewed
+    type: boolean
   - name: rule_name
     type: string
 steps:
   - name: draft_creation
     type: ai.agent
+    # Keep in sync with ALERTZERO_REASONING_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_reasoning
+    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_rule_creation
+    aggregate-by: alertzero_parent
     timeout: "10m"
     create-conversation: true
     with:
@@ -193,4 +200,5 @@ steps:
     status: completed
     with:
       created: "${{ steps.create_rule.error == null and steps.create_rule.output.id != null }}"
+      reviewed: "${{ steps.review_creation.output.response.approved == true or steps.review_creation.output.response.approved == false }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"

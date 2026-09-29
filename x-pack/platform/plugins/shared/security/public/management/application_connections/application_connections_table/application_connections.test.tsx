@@ -10,6 +10,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
@@ -1059,15 +1060,26 @@ describe('ApplicationConnections', () => {
     });
   });
 
-  it('opens the client details flyout when the client name is clicked in the list view', async () => {
-    const mcpServerUrl = 'https://cluster.example.com/api/agent_builder/mcp';
+  it.each([
+    {
+      resource: 'https://cluster.example.com/api/agent_builder/mcp',
+      spaceId: 'default',
+      mcpServerUrl: 'https://cluster.example.com/api/agent_builder/mcp',
+    },
+    {
+      resource: 'https://cluster.example.com',
+      spaceId: 'engineering',
+      mcpServerUrl: 'https://cluster.example.com/s/engineering/api/agent_builder/mcp',
+    },
+  ])('opens the client details flyout in $spaceId', async ({ resource, spaceId, mcpServerUrl }) => {
+    coreStart.http = { ...coreStart.http, spaceId: asSpaceId(spaceId) };
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
           {
             id: 'client-a',
             client_name: 'My MCP app',
-            resource: mcpServerUrl,
+            resource,
           },
         ],
       },
@@ -1077,7 +1089,7 @@ describe('ApplicationConnections', () => {
             id: 'conn-1',
             client_id: 'client-a',
             name: 'Laptop session',
-            resource: mcpServerUrl,
+            resource,
           },
         ],
       },

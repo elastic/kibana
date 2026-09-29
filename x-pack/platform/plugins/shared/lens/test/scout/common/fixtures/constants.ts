@@ -85,6 +85,12 @@ export const KBN_ARCHIVE_PATHS = {
    * {@link LENS_BASIC_TITLES}.
    */
   LENS_BASIC: `${LENS_KBN_ARCHIVES_DIR}/lens_basic.json`,
+  /**
+   * Ships a `logstash-*` data view, the `library annotation group` event-annotation-group,
+   * the `first visualization` XY chart whose annotation layer links to that group, and the
+   * `annotation sync test dashboard` holding that chart by reference plus a by-value clone.
+   */
+  ANNOTATION_LIBRARY: `${LENS_KBN_ARCHIVES_DIR}/annotation_library.json`,
   OPEN_IN_LENS: {
     TSVB: {
       METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/metric.json`,
