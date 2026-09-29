@@ -51,9 +51,9 @@ describe('getInventoryRuleSchema', () => {
     expect(getInventoryRuleSchema('host', 'ecs')).toBe('ecs');
   });
 
-  it('leaves the host schema unset when nothing is stored', () => {
-    expect(getInventoryRuleSchema('host', undefined)).toBeUndefined();
-    expect(getInventoryRuleSchema('host', null)).toBeUndefined();
+  it('falls back to the default schema for a host rule that has none', () => {
+    expect(getInventoryRuleSchema('host', undefined)).toBe('semconv');
+    expect(getInventoryRuleSchema('host', null)).toBe('semconv');
   });
 });
 

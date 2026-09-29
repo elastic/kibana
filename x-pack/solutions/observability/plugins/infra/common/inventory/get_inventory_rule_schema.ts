@@ -11,6 +11,7 @@ import {
   type DataSchemaFormat,
   type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../constants';
 
 /**
  * Schema an Inventory Threshold rule evaluates, and the flyout preview requests.
@@ -26,7 +27,7 @@ export const getInventoryRuleSchema = (
     return storedSchema ?? 'ecs';
   }
 
-  return schema ?? undefined;
+  return schema ?? DEFAULT_SCHEMA;
 };
 
 /**

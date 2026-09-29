@@ -21,7 +21,7 @@ import { defaultExpression, ExpressionRow, Expressions, type ExpressionsProps } 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { useIsPodSchemaSelectorEnabled } from '../../../hooks/use_is_pod_schema_selector_enabled';
 import type { ResolvedDataView } from '../../../utils/data_view';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { DEFAULT_SCHEMA, TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 
 const mockDataView = {
@@ -227,6 +227,11 @@ describe('Expression', () => {
   const hasSchemaControl = (ruleParams: Partial<ExpressionsProps['ruleParams']>) =>
     renderShallow(ruleParams).wrapper.exists('[data-test-subj="schemaExpressionSelect"]');
 
+  const selectedSchema = (ruleParams: Partial<ExpressionsProps['ruleParams']>) =>
+    renderShallow(ruleParams)
+      .wrapper.find('[data-test-subj="schemaExpressionSelect"]')
+      .prop('value');
+
   it('previews a pod rule as ecs without rewriting a stored semconv schema', () => {
     const preview = previewSchema({ nodeType: 'pod', schema: 'semconv' });
 
@@ -238,8 +243,8 @@ describe('Expression', () => {
     expect(previewSchema({ nodeType: 'host', schema: 'semconv' }).schema).toBe('semconv');
   });
 
-  it('does not invent a schema for a host rule that has none', () => {
-    expect(previewSchema({ nodeType: 'host' }).schema).toBeUndefined();
+  it('falls back to the default schema for a host rule that has none', () => {
+    expect(previewSchema({ nodeType: 'host' }).schema).toBe('semconv');
   });
 
   describe('Schema control', () => {
@@ -272,6 +277,25 @@ describe('Expression', () => {
 
       expect(previewSchema({ nodeType: 'pod', schema: 'semconv' }).schema).toBe('semconv');
       expect(previewSchema({ nodeType: 'pod', schema: 'ecs' }).schema).toBe('ecs');
+    });
+
+    it('shows the schema a pod rule without a stored schema actually evaluates', () => {
+      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+
+      expect(selectedSchema({ nodeType: 'pod' })).toBe('ecs');
+      expect(previewSchema({ nodeType: 'pod' }).schema).toBe('ecs');
+    });
+
+    it('shows the stored schema of a pod rule', () => {
+      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+
+      expect(selectedSchema({ nodeType: 'pod', schema: 'semconv' })).toBe('semconv');
+      expect(selectedSchema({ nodeType: 'pod', schema: 'ecs' })).toBe('ecs');
+    });
+
+    it('falls back to the default schema for a host rule that has none', () => {
+      expect(selectedSchema({ nodeType: 'host' })).toBe(DEFAULT_SCHEMA);
+      expect(selectedSchema({ nodeType: 'host', schema: 'ecs' })).toBe('ecs');
     });
 
     it('prefills a pod schema from the waffle once the pod flag is on', async () => {

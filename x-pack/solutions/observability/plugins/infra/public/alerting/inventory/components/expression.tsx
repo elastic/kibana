@@ -47,7 +47,6 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
-import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { getInventoryRuleSchema } from '../../../../common/inventory/get_inventory_rule_schema';
 import { useIsPodSchemaSelectorEnabled } from '../../../hooks/use_is_pod_schema_selector_enabled';
 import { isSchemaSelectableForInventoryRule } from '../is_schema_selectable_for_inventory_rule';
@@ -304,7 +303,8 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     nodeType,
     isPodSchemaSelectorEnabled
   );
-  const previewSchema = getInventoryRuleSchema(
+
+  const effectiveSchema = getInventoryRuleSchema(
     nodeType,
     ruleParams.schema,
     isPodSchemaSelectorEnabled
@@ -358,7 +358,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
             <div css={NonCollapsibleExpressionCss}>
               <ExpressionDropDown
                 options={schemaOptions}
-                value={ruleParams.schema ?? DEFAULT_SCHEMA}
+                value={effectiveSchema}
                 onChange={updateSchema}
                 description={i18n.translate(
                   'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
@@ -407,7 +407,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
-                schema={previewSchema}
+                schema={effectiveSchema}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>
