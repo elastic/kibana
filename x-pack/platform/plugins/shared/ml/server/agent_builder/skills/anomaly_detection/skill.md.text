@@ -405,7 +405,7 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
    - **Anomaly detection alert** — checks job results for anomalies matching defined conditions (score threshold, result type) and fires when found. Rule type: `xpack.ml.anomaly_detection_alert`.
    - **Anomaly detection jobs health** — monitors operational status (datafeed stopped, memory limit errors) and fires on issues. Rule type: `xpack.ml.anomaly_detection_jobs_health`.
 
-   Once the user chooses, load the rule management skill via `filestore.read` (path: `skills/platform/alerting/rule-management/SKILL.md`) and delegate rule creation to it. Pass the following context:
+   Once the user chooses, call describe_api for `alerting.post-alerting-rule-id` and pass the follow information to execute_api:
    - The realtime job ID(s) created in step 1 above
    - The chosen rule type (`xpack.ml.anomaly_detection_alert` or `xpack.ml.anomaly_detection_jobs_health`)
    - For anomaly detection alert: default severity threshold of 75 (ask user if they want to adjust), result type `bucket`
