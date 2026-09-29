@@ -422,16 +422,32 @@ describe('WorkflowGraphNode — edit mode', () => {
   it('shows the incomplete warning at the top-right for flagged nodes and never tints the border', () => {
     const { unmount } = renderNode({}, false, {
       edit: makeEdit(),
-      incompleteNodeIds: new Set(['node-1']),
+      nodeConfigWarnings: new Map([['node-1', 'incomplete']]),
     });
     const warning = screen.getByTestId('workflowGraphNodeIncomplete');
     expect(warning).toHaveAttribute('aria-label', 'Incomplete — required fields are missing');
-    expect(getComputedStyle(warning).position).toBe('absolute');
+    // Corner placement lives on the EuiToolTip anchor so the tooltip caret
+    // tracks the badge, not a collapsed in-flow wrapper.
+    expect(getComputedStyle(warning.parentElement!).position).toBe('absolute');
     expect(getComputedStyle(screen.getByRole('button', { name: /Test Step/ })).borderStyle).toBe(
       'solid'
     );
     unmount();
-    renderNode({}, false, { edit: makeEdit(), incompleteNodeIds: new Set(['other']) });
+    renderNode({}, false, {
+      edit: makeEdit(),
+      nodeConfigWarnings: new Map([['other', 'incomplete']]),
+    });
     expect(screen.queryByTestId('workflowGraphNodeIncomplete')).not.toBeInTheDocument();
+  });
+
+  it('uses misconfigured tooltip copy when the applied state is invalid', () => {
+    renderNode({}, false, {
+      edit: makeEdit(),
+      nodeConfigWarnings: new Map([['node-1', 'misconfigured']]),
+    });
+    expect(screen.getByTestId('workflowGraphNodeIncomplete')).toHaveAttribute(
+      'aria-label',
+      'Misconfigured — some fields have invalid values'
+    );
   });
 });

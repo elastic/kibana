@@ -355,9 +355,20 @@ function transformInternal(
 
       // Rule 1 — one labeled edge per case (label = match value).
       cases.forEach((caseItem, idx) => {
+        const matchLabel = String(caseItem.match ?? '');
         if (!Array.isArray(caseItem.steps) || caseItem.steps.length === 0) {
-          // Defensive: empty case in loose/partial schema — fall through the gate.
-          branchExits.push(id);
+          // Empty case — synthesize a bypass lane so the branch is visible
+          // while the author is still filling in steps on the canvas.
+          const bypassId = ids.allocate(`${step.name}-case-${idx}-bypass`);
+          bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
+          edges.push({
+            id: `${id}:${bypassId}-case-${idx}`,
+            source: id,
+            target: bypassId,
+            branchType: 'switch',
+            label: matchLabel,
+          });
+          branchExits.push(bypassId);
           return;
         }
         const inner = transformInternal([], caseItem.steps as Step[], ids);
@@ -373,7 +384,7 @@ function transformInternal(
             source: id,
             target: firstId,
             branchType: 'switch',
-            label: String(caseItem.match),
+            label: matchLabel,
           });
         }
         branchExits.push(...inner.leafIds);

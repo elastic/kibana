@@ -8,9 +8,11 @@
  */
 
 import {
+  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFocusTrap,
   EuiLoadingSpinner,
+  EuiText,
   useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
@@ -40,17 +42,31 @@ import {
   WORKFLOWS_SURFACE_RADIUS,
 } from '@kbn/workflows-ui';
 import {
+  CANVAS_CONFIG_PANEL_MARGIN,
   CanvasConfigPanelShell,
   DEFAULT_CONFIG_PANEL_WIDTH,
   FIELD_EDITOR_EXPANDED_PANEL_WIDTH,
   MIN_CONFIG_PANEL_WIDTH,
   MIN_VISIBLE_CANVAS_PX,
-  CANVAS_CONFIG_PANEL_MARGIN,
 } from './canvas_config_panel_shell';
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
 import { WorkflowCreationPanel } from './workflow_creation_panel';
+import {
+  WorkflowSettingsBPanel,
+  type WorkflowSettingsBPanelKind,
+} from './workflow_settings_b_panel';
+import { WorkflowSettingsCSurface } from './workflow_settings_c_surface';
+import { WorkflowSettingsSurfaceSwitcher } from './workflow_settings_surface_switcher';
+import {
+  getWorkflowSettingsBNodeLayout,
+  getWorkflowSettingsSurfaceVariant,
+  setWorkflowSettingsSurfaceVariant,
+  subscribeWorkflowSettingsSurfaceVariant,
+  type WorkflowSettingsBNodeLayout,
+  type WorkflowSettingsSurfaceVariant,
+} from './workflow_settings_surface_variant';
 import { type FlyoutTarget, WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 import { PLUGIN_ID } from '../../../../common';
 import { getAllConnectorsWithDynamic } from '../../../../common/schema';
@@ -72,12 +88,16 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  parseConstsToFields,
+  parseOutputsToFields,
+} from '../../../pages/workflow_detail/ui/workflow_settings_fields_model';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../widgets/workflow_yaml_editor/lib/snippets/generate_trigger_snippet';
 import { type ActionOptionData, ActionsMenuPopover } from '../../actions_menu_popover';
 import { collectStepsByName } from '../lib/collect_steps';
-import { buildDefaultStep, isStepIncomplete } from '../lib/step_form_schema';
+import { buildDefaultStep, getStepConfigWarningReason } from '../lib/step_form_schema';
 import {
   appendTrigger,
   collectStepNames,
@@ -214,6 +234,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const { colorMode, euiTheme } = useEuiTheme();
   const floatingShadow = useEuiShadow('m');
   const { notifications, application } = useKibana().services;
+  // Persisted preferred width from manual resize only — not the temporary
+  // bump used while the advanced field editor is open.
   const [storedPanelWidth = DEFAULT_CONFIG_PANEL_WIDTH, setStoredPanelWidth] = useLocalStorage(
     CONFIG_PANEL_WIDTH_STORAGE_KEY,
     DEFAULT_CONFIG_PANEL_WIDTH
@@ -226,18 +248,18 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     MIN_CONFIG_PANEL_WIDTH,
     canvasWidth - MIN_VISIBLE_CANVAS_PX - PANEL_MARGIN * 2
   );
-  const panelWidth = Math.min(
+  const preferredPanelWidth = Math.min(
     Math.max(storedPanelWidth, MIN_CONFIG_PANEL_WIDTH),
     maxPanelWidth
   );
-
-  // Opening the expanded field editor bumps a narrow panel wide enough for
-  // the catalog tree + value pane; user resize (incl. while expanded) wins after.
-  useEffect(() => {
-    if (!fieldEditorExpanded) return;
-    if (storedPanelWidth >= FIELD_EDITOR_EXPANDED_PANEL_WIDTH) return;
-    setStoredPanelWidth(Math.min(maxPanelWidth, FIELD_EDITOR_EXPANDED_PANEL_WIDTH));
-  }, [fieldEditorExpanded, maxPanelWidth, setStoredPanelWidth, storedPanelWidth]);
+  // Advanced editor needs room for the catalog + value pane; that width is
+  // display-only so switching steps / closing the editor restores preferred.
+  const panelWidth = fieldEditorExpanded
+    ? Math.min(
+        maxPanelWidth,
+        Math.max(preferredPanelWidth, FIELD_EDITOR_EXPANDED_PANEL_WIDTH)
+      )
+    : preferredPanelWidth;
 
   const definition = useSelector(selectEditorWorkflowDefinition);
   const stepExecutions = useSelector(selectStepExecutions);
@@ -272,6 +294,47 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const [panel, setPanel] = useState<PanelState | null>(null);
   const [flashNodeId, setFlashNodeId] = useState<string | undefined>(undefined);
   const [pendingInsert, setPendingInsert] = useState<PendingInsertVisual | null>(null);
+  const [settingsSurfaceVariant, setSettingsSurfaceVariantState] =
+    useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
+  const [settingsBNodeLayout, setSettingsBNodeLayoutState] = useState<WorkflowSettingsBNodeLayout>(
+    () => getWorkflowSettingsBNodeLayout()
+  );
+  const [settingsBKind, setSettingsBKind] = useState<WorkflowSettingsBPanelKind | null>(null);
+  const [canvasHeight, setCanvasHeight] = useState(0);
+  const [configPanelDirty, setConfigPanelDirty] = useState(false);
+  /** When set, a discard confirm is open before navigating to this step id (null = deselect). */
+  const [pendingStepSelection, setPendingStepSelection] = useState<string | null | undefined>(
+    undefined
+  );
+
+  useEffect(
+    () =>
+      subscribeWorkflowSettingsSurfaceVariant(() => {
+        setSettingsSurfaceVariantState(getWorkflowSettingsSurfaceVariant());
+        setSettingsBNodeLayoutState(getWorkflowSettingsBNodeLayout());
+      }),
+    []
+  );
+
+  const handleSettingsSurfaceVariantChange = useCallback((next: WorkflowSettingsSurfaceVariant) => {
+    setWorkflowSettingsSurfaceVariant(next);
+    setSettingsSurfaceVariantState(next);
+    setSettingsBKind(null);
+  }, []);
+
+  const openSettingsBPanel = useCallback(
+    (kind: WorkflowSettingsBPanelKind) => {
+      setPanel(null);
+      setPendingInsert(null);
+      setSelectedStep(null);
+      setSettingsBKind(kind);
+    },
+    [setSelectedStep]
+  );
+
+  const closeSettingsBPanel = useCallback(() => {
+    setSettingsBKind(null);
+  }, []);
 
   // POC pattern: cache the last valid WorkflowYaml so the canvas can stay
   // up while the user fixes a YAML syntax error.
@@ -294,12 +357,15 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     }
   }, [selectedStepId]);
 
-  // Track canvas region width so the config panel can enforce min-visible-canvas
+  // Track canvas region width/height so floating panels stay canvas-bounded
   // (including when the push-type execution flyout shrinks this wrapper).
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
-    const update = () => setCanvasWidth(el.clientWidth);
+    const update = () => {
+      setCanvasWidth(el.clientWidth);
+      setCanvasHeight(el.clientHeight);
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(el);
@@ -318,6 +384,47 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const workflow = definition ?? lastValidRef.current;
 
+  const settingsCounts = useMemo(() => {
+    try {
+      const doc = parseDocument(editorYaml);
+      const js = doc.toJS() as Record<string, unknown> | null;
+      return {
+        constants: parseConstsToFields(js?.consts ?? workflow?.consts).length,
+        outputs: parseOutputsToFields(js?.outputs ?? workflow?.outputs).length,
+      };
+    } catch {
+      return {
+        constants: parseConstsToFields(workflow?.consts).length,
+        outputs: parseOutputsToFields(workflow?.outputs).length,
+      };
+    }
+  }, [editorYaml, workflow?.consts, workflow?.outputs]);
+
+  const floatingPanelOpen = panel != null || settingsBKind != null;
+
+  const settingsNodesProp = useMemo(
+    () =>
+      canEdit && settingsSurfaceVariant === 'b'
+        ? {
+            workflowName: workflowName ?? workflow?.name ?? '',
+            constantsCount: settingsCounts.constants,
+            outputsCount: settingsCounts.outputs,
+            selectedKind: settingsBKind ?? undefined,
+            cardLayout: settingsBNodeLayout,
+          }
+        : undefined,
+    [
+      canEdit,
+      settingsSurfaceVariant,
+      workflowName,
+      workflow?.name,
+      settingsCounts.constants,
+      settingsCounts.outputs,
+      settingsBKind,
+      settingsBNodeLayout,
+    ]
+  );
+
   const disabledTriggerIds = useMemo(() => {
     const hasManual = workflow?.triggers?.some((t) => t.type === 'manual');
     return hasManual ? (['manual'] as const) : undefined;
@@ -327,17 +434,17 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const stepsByName = useMemo(() => collectStepsByName(workflow), [workflow]);
 
-  const incompleteNodeIds = useMemo(() => {
+  const nodeConfigWarnings = useMemo(() => {
     if (!canEdit) return undefined;
-    return new Set(
-      Object.entries(transformed.nodeRefs)
-        .filter(([, ref]) => {
-          if (ref.kind !== 'step') return false;
-          const step = stepsByName.get(ref.stepName);
-          return step !== undefined && isStepIncomplete(step, connectors);
-        })
-        .map(([nodeId]) => nodeId)
-    );
+    const warnings = new Map<string, NonNullable<ReturnType<typeof getStepConfigWarningReason>>>();
+    Object.entries(transformed.nodeRefs).forEach(([nodeId, ref]) => {
+      if (ref.kind !== 'step') return;
+      const step = stepsByName.get(ref.stepName);
+      if (!step) return;
+      const reason = getStepConfigWarningReason(step, connectors);
+      if (reason) warnings.set(nodeId, reason);
+    });
+    return warnings;
   }, [canEdit, transformed.nodeRefs, stepsByName, connectors]);
 
   const stepNameOf = useCallback(
@@ -372,12 +479,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (context.mode === 'trigger') {
         result = appendTrigger(editorYaml, fragment);
       } else if (context.mode === 'step') {
-        result = insertStepAtPath(
-          editorYaml,
-          fragment,
-          context.path ?? [],
-          context.index
-        );
+        result = insertStepAtPath(editorYaml, fragment, context.path ?? [], context.index);
       } else {
         const target = stepNameOf(context.stepId);
         result = target
@@ -470,9 +572,54 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const handlePanelCancel = useCallback(() => {
     setPanel(null);
+    setSettingsBKind(null);
     setPendingInsert(null);
+    setConfigPanelDirty(false);
+    setPendingStepSelection(undefined);
     setSelectedStep(null);
   }, [setSelectedStep]);
+
+  const isConfigPanelOpen =
+    panel?.mode === 'edit' ||
+    panel?.mode === 'insert' ||
+    panel?.mode === 'edit-trigger' ||
+    panel?.mode === 'insert-trigger';
+
+  const requestStepSelect = useCallback(
+    (id: string | undefined) => {
+      const next = id ?? null;
+      if (
+        configPanelDirty &&
+        isConfigPanelOpen &&
+        next !== selectedStepId &&
+        (panel?.mode === 'edit' || panel?.mode === 'insert')
+      ) {
+        setPendingStepSelection(next);
+        return;
+      }
+      setSettingsBKind(null);
+      setSelectedStep(next);
+    },
+    [configPanelDirty, isConfigPanelOpen, panel?.mode, selectedStepId, setSelectedStep]
+  );
+
+  const handleKeepEditingStep = useCallback(() => {
+    setPendingStepSelection(undefined);
+  }, []);
+
+  const handleDiscardAndSelectStep = useCallback(() => {
+    const next = pendingStepSelection;
+    setPendingStepSelection(undefined);
+    setConfigPanelDirty(false);
+    setPendingInsert(null);
+    setSettingsBKind(null);
+    if (next == null) {
+      setPanel(null);
+      setSelectedStep(null);
+      return;
+    }
+    setSelectedStep(next);
+  }, [pendingStepSelection, setSelectedStep]);
 
   const panelIsFallbackStep = useMemo(() => {
     if (!panel) return false;
@@ -498,6 +645,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (!stepType) return;
       setInsertion(null);
       setPendingInsert(null);
+      setSettingsBKind(null);
       setPanel((current) => {
         // Don't clobber an in-progress insert panel; skip no-op re-opens.
         if (current?.mode === 'insert' || current?.mode === 'insert-trigger') return current;
@@ -519,6 +667,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       const triggerLabel = TRIGGER_LABEL[triggerType] ?? triggerType;
       setInsertion(null);
       setPendingInsert(null);
+      setSettingsBKind(null);
       setPanel((current) => {
         if (current?.mode === 'insert' || current?.mode === 'insert-trigger') return current;
         if (
@@ -573,13 +722,14 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     return {
       onInsert: (context, anchor) => {
         setPanel(null);
+        setSettingsBKind(null);
         setSelectedStep(null);
         setInsertion({ context, anchor });
         const pendingContext = toPendingContext(context);
         setPendingInsert(pendingContext ? { phase: 'choosing', context: pendingContext } : null);
       },
       onEditStep: (nodeId) => {
-        setSelectedStep(nodeId);
+        requestStepSelect(nodeId);
       },
       onDeleteNode: (nodeId) => {
         const ref = transformed.nodeRefs[nodeId];
@@ -639,6 +789,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     };
   }, [
     canEdit,
+    requestStepSelect,
     setSelectedStep,
     editorYaml,
     applyMutation,
@@ -704,9 +855,20 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const handleStepSelect = useCallback(
     (id: string | undefined) => {
-      setSelectedStep(id ?? null);
+      requestStepSelect(id);
     },
-    [setSelectedStep]
+    [requestStepSelect]
+  );
+
+  const handleSettingsNodeSelect = useCallback(
+    (kind: WorkflowSettingsBPanelKind | undefined) => {
+      if (kind == null) {
+        setSettingsBKind(null);
+        return;
+      }
+      openSettingsBPanel(kind);
+    },
+    [openSettingsBPanel]
   );
 
   const handleStepRun = useCallback(
@@ -731,18 +893,14 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setPendingInsert((current) => (current?.phase === 'choosing' ? null : current));
   }, []);
 
-
-  const handleCreationPickTrigger = useCallback(
-    (triggerType: 'manual' | 'alert' | 'scheduled') => {
-      setPanel({
-        mode: 'insert-trigger',
-        triggerType,
-        triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
-        fragment: triggerFragmentFor(triggerType),
-      });
-    },
-    []
-  );
+  const handleCreationPickTrigger = useCallback((triggerType: 'manual' | 'alert' | 'scheduled') => {
+    setPanel({
+      mode: 'insert-trigger',
+      triggerType,
+      triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
+      fragment: triggerFragmentFor(triggerType),
+    });
+  }, []);
 
   const handleCreationPickAction = useCallback((anchor: DOMRect) => {
     const context = { mode: 'step' as const, index: 0 };
@@ -826,7 +984,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         stepExecutions={stepExecutions}
         isYamlValid={isYamlValid}
         selectedStepId={selectedStepId}
-        selectedNodePanelInset={panel ? panelWidth + PANEL_MARGIN : undefined}
+        selectedNodePanelInset={floatingPanelOpen ? panelWidth + PANEL_MARGIN : undefined}
         onStepSelect={handleStepSelect}
         colorMode={toColorMode(colorMode)}
         direction={direction}
@@ -837,12 +995,29 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         onViewportChange={onViewportChange}
         showZoomControls
         edit={editActions}
-        incompleteNodeIds={incompleteNodeIds}
+        nodeConfigWarnings={nodeConfigWarnings}
         flashNodeId={flashNodeId}
         emptyState={creationEmptyState}
         pendingInsert={pendingInsert ?? undefined}
-        suppressInsertionControls={panel != null}
+        suppressInsertionControls={floatingPanelOpen}
+        settingsNodes={settingsNodesProp}
+        onSettingsNodeSelect={
+          canEdit && settingsSurfaceVariant === 'b' ? handleSettingsNodeSelect : undefined
+        }
       />
+      {canEdit ? (
+        <WorkflowSettingsSurfaceSwitcher
+          value={settingsSurfaceVariant}
+          onChange={handleSettingsSurfaceVariantChange}
+        />
+      ) : null}
+      {canEdit && settingsSurfaceVariant === 'c' ? (
+        <WorkflowSettingsCSurface
+          workflowId={workflowId}
+          readOnly={!canEdit}
+          canvasHeight={canvasHeight || 600}
+        />
+      ) : null}
       {insertion && (
         <ActionsMenuPopover
           isOpen
@@ -878,9 +1053,35 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             onSave={handlePanelSave}
             isFallbackStep={panelIsFallbackStep}
             onExpandedChange={setFieldEditorExpanded}
+            onDraftDirtyChange={setConfigPanelDirty}
           />
         </CanvasConfigPanelShell>
       )}
+      {pendingStepSelection !== undefined ? (
+        <EuiConfirmModal
+          title={i18n.translate('workflows.stepConfigPanel.discardTitle', {
+            defaultMessage: 'Discard changes to this step?',
+          })}
+          onCancel={handleKeepEditingStep}
+          onConfirm={handleDiscardAndSelectStep}
+          cancelButtonText={i18n.translate('workflows.stepConfigPanel.keepEditing', {
+            defaultMessage: 'Keep editing',
+          })}
+          confirmButtonText={i18n.translate('workflows.stepConfigPanel.discard', {
+            defaultMessage: 'Discard',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="workflowStepConfigPanelLeaveStepModal"
+        >
+          <EuiText size="s">
+            {i18n.translate('workflows.visualEditor.discardOnStepSwitchBody', {
+              defaultMessage:
+                "These edits haven't been applied to the step yet. Leaving this step will discard them.",
+            })}
+          </EuiText>
+        </EuiConfirmModal>
+      ) : null}
       {panel && (panel.mode === 'edit-trigger' || panel.mode === 'insert-trigger') && (
         <CanvasConfigPanelShell
           width={panelWidth}
@@ -903,7 +1104,22 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           />
         </CanvasConfigPanelShell>
       )}
-      {flyoutTarget && !panel && (
+      {settingsBKind && settingsSurfaceVariant === 'b' && (
+        <CanvasConfigPanelShell
+          width={panelWidth}
+          onWidthChange={setStoredPanelWidth}
+          canvasWidth={canvasWidth}
+          data-test-subj="workflowSettingsBPanelContainer"
+        >
+          <WorkflowSettingsBPanel
+            key={settingsBKind}
+            kind={settingsBKind}
+            readOnly={!canEdit}
+            onClose={closeSettingsBPanel}
+          />
+        </CanvasConfigPanelShell>
+      )}
+      {flyoutTarget && !panel && !settingsBKind && (
         <EuiFocusTrap returnFocus>
           <div
             ref={flyoutPanelRef}

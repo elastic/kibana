@@ -285,6 +285,7 @@ export function TriggerConfigPanel({
         flexDirection: 'column',
         height: '100%',
         minHeight: 0,
+        position: 'relative',
         background: euiTheme.colors.backgroundBasePlain,
       }}
     >
@@ -300,7 +301,9 @@ export function TriggerConfigPanel({
             display: 'flex',
             alignItems: 'center',
             gap: euiTheme.size.m,
-            padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s}`,
+            // Leave room on the right for the absolutely positioned ✕.
+            // No bottom padding — tabs sit flush under the title row.
+            padding: `${euiTheme.size.base} ${euiTheme.size.xl} 0 ${euiTheme.size.base}`,
           }}
         >
           <div
@@ -363,16 +366,22 @@ export function TriggerConfigPanel({
               </h2>
             </EuiTitle>
           </div>
-          <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              aria-label={closeLabel}
-              onClick={onCancel}
-              data-test-subj="workflowTriggerConfigPanelClose"
-            />
-          </EuiToolTip>
         </div>
+        <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="cross"
+            color="text"
+            aria-label={closeLabel}
+            onClick={onCancel}
+            data-test-subj="workflowTriggerConfigPanelClose"
+            css={{
+              position: 'absolute',
+              top: euiTheme.size.s,
+              right: euiTheme.size.s,
+              zIndex: 1,
+            }}
+          />
+        </EuiToolTip>
         <EuiTabs
           size="s"
           bottomBorder={false}
@@ -380,7 +389,10 @@ export function TriggerConfigPanel({
           aria-label={i18n.translate('workflows.triggerConfigPanel.editorModeLegend', {
             defaultMessage: 'Trigger editor mode',
           })}
-          css={{ paddingInline: euiTheme.size.base }}
+          css={{
+            paddingInline: euiTheme.size.base,
+            marginBlockStart: 0,
+          }}
         >
           {editorModeOptions.map((option) => (
             <EuiTab

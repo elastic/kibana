@@ -15,6 +15,10 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowDetailHeader, type WorkflowDetailHeaderProps } from './workflow_detail_header';
+import {
+  resetWorkflowSettingsSurfaceVariantForTests,
+  setWorkflowSettingsSurfaceVariant,
+} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
@@ -153,6 +157,7 @@ describe('WorkflowDetailHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    resetWorkflowSettingsSurfaceVariantForTests();
     mockNavigateToApp = jest.fn();
     mockUseKibana.mockReturnValue({
       services: {
@@ -245,6 +250,15 @@ describe('WorkflowDetailHeader', () => {
     fireEvent.click(getByTestId('workflowSettingsButton'));
     expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
   });
+
+  it.each(['b', 'c'] as const)(
+    'hides the header gear for canvas settings surface %s',
+    (variant) => {
+      setWorkflowSettingsSurfaceVariant(variant);
+      const { queryByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+      expect(queryByTestId('workflowSettingsButton')).not.toBeInTheDocument();
+    }
+  );
 
   it('links to connector management from the overflow menu', async () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);

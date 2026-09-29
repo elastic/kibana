@@ -84,4 +84,14 @@ export interface ChromeControls {
      */
     set(content?: ReactNode): void;
   };
+  /**
+   * Content rendered after the user menu on the far right of the global header.
+   */
+  appendRight: {
+    /**
+     * Set trailing header content (after the profile / user menu).
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
 }

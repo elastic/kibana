@@ -8,41 +8,23 @@
  */
 
 import {
-  EuiAccordion,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiConfirmModal,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
   EuiEmptyPrompt,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiText,
-  euiDragDropReorder,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  type DropResult,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
-import {
-  SchemaPropertyList,
-  SCHEMA_PROPERTY_TYPE_OPTIONS,
-  SchemaListDragClone,
-  validateSchemaPropertyName,
-  type SchemaPropertyField,
-  type SchemaPropertyType,
-} from '../../../shared/ui/schema_property_builder';
 import { buildDataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
-import { ReferenceCapableField } from '../../../features/workflow_visual_editor/ui/reference_capable_field';
+import {
+  SettingsEntryListHost,
+  SettingsEntryRow,
+} from './settings_entry_row';
+import type { SettingsEditorAddControls } from './workflow_constants_editor';
 import { createEmptyOutput, type OutputField } from './workflow_settings_fields_model';
 
 export interface WorkflowOutputsEditorProps {
@@ -52,324 +34,19 @@ export interface WorkflowOutputsEditorProps {
   readonly connectors: readonly ConnectorContractUnion[];
   readonly findReferencingSteps?: (name: string) => string[];
   readonly readOnly?: boolean;
+  /**
+   * When this value changes, any uncommitted draft row is discarded silently
+   * (e.g. Option C popover collapse).
+   */
+  readonly discardDraftSignal?: number;
+  /**
+   * Hide the in-content Add CTA (and empty-state action). Use with
+   * {@link onAddControlsChange} to place Add on an accordion header row.
+   */
+  readonly hideInlineAddButton?: boolean;
+  /** Publishes Add controls for an external CTA (accordion `extraAction`). */
+  readonly onAddControlsChange?: (controls: SettingsEditorAddControls | null) => void;
 }
-
-const OutputCard = ({
-  field,
-  siblings,
-  catalog,
-  onUpdate,
-  onRequestDelete,
-  dragHandleProps,
-  readOnly,
-}: {
-  readonly field: OutputField;
-  readonly siblings: readonly OutputField[];
-  readonly catalog: ReturnType<typeof buildDataReferenceCatalog>;
-  readonly onUpdate: (next: OutputField) => void;
-  readonly onRequestDelete: () => void;
-  readonly dragHandleProps?: object;
-  readonly readOnly?: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const accordionId = useGeneratedHtmlId({ prefix: 'workflowOutputAcc' });
-  const nameError = validateSchemaPropertyName(
-    field.name,
-    siblings as unknown as SchemaPropertyField[],
-    field.id
-  );
-  const displayName = field.name.trim() || '—';
-  const typeOptions = SCHEMA_PROPERTY_TYPE_OPTIONS;
-
-  return (
-    <EuiPanel hasBorder paddingSize="none" css={{ marginBottom: euiTheme.size.s }}>
-      <EuiAccordion
-        id={accordionId}
-        initialIsOpen
-        paddingSize="m"
-        buttonContent={
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <span
-                {...dragHandleProps}
-                data-drag-grip
-                css={{
-                  cursor: 'grab',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  width: 0,
-                  minWidth: 0,
-                  opacity: 0,
-                  overflow: 'hidden',
-                  marginInlineEnd: 0,
-                  transition: 'width 140ms ease, opacity 140ms ease, margin 140ms ease',
-                  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-                }}
-              >
-                <EuiIcon type="drag" color="subdued" size="s" />
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <code>{displayName}</code>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                · {field.type}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          readOnly ? undefined : (
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={i18n.translate('workflows.workflowSettingsFlyout.removeOutput', {
-                defaultMessage: 'Remove output',
-              })}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                onRequestDelete();
-              }}
-              data-test-subj={`workflowSettingsOutputRemove-${field.id}`}
-            />
-          )
-        }
-        css={{
-          '.euiAccordion__triggerWrapper': {
-            alignItems: 'center',
-            paddingInline: euiTheme.size.m,
-            '&:hover [data-drag-grip], &:focus-within [data-drag-grip]': {
-              width: 16,
-              minWidth: 16,
-              opacity: 1,
-              marginInlineEnd: 6,
-            },
-          },
-          '.euiAccordion__button': {
-            paddingInline: 0,
-            paddingBlock: euiTheme.size.s,
-          },
-        }}
-        data-test-subj={`workflowSettingsOutputRow-${field.id}`}
-      >
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="flexStart">
-          <EuiFlexItem grow={2}>
-            <EuiFormRow
-              label={i18n.translate('workflows.workflowSettingsFlyout.outputName', {
-                defaultMessage: 'Name',
-              })}
-              helpText={
-                field.name.trim()
-                  ? i18n.translate('workflows.workflowSettingsFlyout.outputNameHelp', {
-                      defaultMessage: 'Caller-facing key: outputs.{name}',
-                      values: { name: field.name.trim() },
-                    })
-                  : undefined
-              }
-              isInvalid={nameError != null && field.name.length > 0}
-              error={
-                nameError === 'duplicate'
-                  ? i18n.translate('workflows.schemaPropertyBuilder.nameDuplicate', {
-                      defaultMessage: 'Name must be unique among siblings.',
-                    })
-                  : nameError === 'invalid'
-                    ? i18n.translate('workflows.schemaPropertyBuilder.nameInvalid', {
-                        defaultMessage:
-                          'Use letters, digits, or underscore; cannot start with a digit.',
-                      })
-                    : nameError === 'empty'
-                      ? i18n.translate('workflows.schemaPropertyBuilder.nameEmpty', {
-                          defaultMessage: 'Name is required.',
-                        })
-                      : undefined
-              }
-              fullWidth
-              compressed
-            >
-              <EuiFieldText
-                compressed
-                fullWidth
-                value={field.name}
-                disabled={readOnly}
-                onChange={(e) => onUpdate({ ...field, name: e.target.value })}
-                data-test-subj={`workflowSettingsOutputName-${field.id}`}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiFormRow
-              label={i18n.translate('workflows.workflowSettingsFlyout.outputType', {
-                defaultMessage: 'Type',
-              })}
-              fullWidth
-              compressed
-            >
-              <EuiSelect
-                compressed
-                fullWidth
-                options={typeOptions}
-                value={field.type}
-                disabled={readOnly}
-                onChange={(e) => {
-                  const type = e.target.value as SchemaPropertyType;
-                  onUpdate({
-                    ...field,
-                    type,
-                    properties: type === 'object' ? field.properties ?? [] : undefined,
-                    itemType: type === 'array' ? field.itemType ?? 'string' : undefined,
-                    itemProperties:
-                      type === 'array' && (field.itemType ?? 'string') === 'object'
-                        ? field.itemProperties ?? []
-                        : undefined,
-                  });
-                }}
-                data-test-subj={`workflowSettingsOutputType-${field.id}`}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('workflows.workflowSettingsFlyout.outputValue', {
-            defaultMessage: 'Value',
-          })}
-          helpText={i18n.translate('workflows.workflowSettingsFlyout.outputValueHelp', {
-            defaultMessage: 'Expression evaluated when the workflow finishes.',
-          })}
-          fullWidth
-          compressed
-        >
-          <ReferenceCapableField
-            catalog={catalog}
-            value={field.value}
-            onChange={(next) => onUpdate({ ...field, value: next })}
-            data-test-subj={`workflowSettingsOutputValueRef-${field.id}`}
-          >
-            {(bind) => (
-              <EuiFieldText
-                compressed
-                fullWidth
-                value={bind.value}
-                disabled={readOnly}
-                placeholder={bind.teachingPlaceholder}
-                inputRef={bind.attachInputRef}
-                append={bind.appendControls}
-                onChange={(e) => {
-                  const el = e.target;
-                  bind.reportChange(el.value, el.selectionStart ?? el.value.length);
-                }}
-                data-test-subj={`workflowSettingsOutputValue-${field.id}`}
-              />
-            )}
-          </ReferenceCapableField>
-        </EuiFormRow>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('workflows.workflowSettingsFlyout.outputFallback', {
-            defaultMessage: 'Fallback',
-          })}
-          helpText={i18n.translate('workflows.workflowSettingsFlyout.outputFallbackHelp', {
-            defaultMessage:
-              'Used when the expression resolves to nothing — for example a branch that did not run. Keeps the declared contract intact for callers.',
-          })}
-          fullWidth
-          compressed
-        >
-          <EuiFieldText
-            compressed
-            fullWidth
-            value={field.fallback}
-            disabled={readOnly}
-            onChange={(e) => onUpdate({ ...field, fallback: e.target.value })}
-            data-test-subj={`workflowSettingsOutputFallback-${field.id}`}
-          />
-        </EuiFormRow>
-
-        {field.type === 'object' ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiPanel color="subdued" paddingSize="m" hasBorder={false}>
-              <SchemaPropertyList
-                properties={field.properties ?? []}
-                onChange={(properties) => onUpdate({ ...field, properties })}
-                depth={1}
-                dataTestSubjPrefix={`workflowSettingsOutputProps-${field.id}`}
-                emptyTitle={i18n.translate('workflows.workflowSettingsFlyout.noOutputPropsTitle', {
-                  defaultMessage: 'No properties yet',
-                })}
-                emptyBody={i18n.translate('workflows.workflowSettingsFlyout.noOutputPropsBody', {
-                  defaultMessage: 'Add fields that belong on this output object.',
-                })}
-                addButtonLabel={i18n.translate(
-                  'workflows.workflowSettingsFlyout.addOutputProperty',
-                  { defaultMessage: 'Add property' }
-                )}
-              />
-            </EuiPanel>
-          </>
-        ) : null}
-
-        {field.type === 'array' ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              label={i18n.translate('workflows.workflowSettingsFlyout.outputItemType', {
-                defaultMessage: 'Item type',
-              })}
-              fullWidth
-              compressed
-            >
-              <EuiSelect
-                compressed
-                fullWidth
-                options={SCHEMA_PROPERTY_TYPE_OPTIONS.filter((o) => o.value !== 'array')}
-                value={field.itemType ?? 'string'}
-                disabled={readOnly}
-                onChange={(e) => {
-                  const itemType = e.target.value as SchemaPropertyType;
-                  onUpdate({
-                    ...field,
-                    itemType,
-                    itemProperties: itemType === 'object' ? field.itemProperties ?? [] : undefined,
-                  });
-                }}
-                data-test-subj={`workflowSettingsOutputItemType-${field.id}`}
-              />
-            </EuiFormRow>
-            {field.itemType === 'object' ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiPanel color="subdued" paddingSize="m" hasBorder={false}>
-                  <SchemaPropertyList
-                    properties={field.itemProperties ?? []}
-                    onChange={(itemProperties) => onUpdate({ ...field, itemProperties })}
-                    depth={1}
-                    dataTestSubjPrefix={`workflowSettingsOutputItemProps-${field.id}`}
-                    emptyTitle={i18n.translate(
-                      'workflows.workflowSettingsFlyout.noOutputItemPropsTitle',
-                      { defaultMessage: 'No item properties yet' }
-                    )}
-                    emptyBody={i18n.translate(
-                      'workflows.workflowSettingsFlyout.noOutputItemPropsBody',
-                      { defaultMessage: 'Define the shape of each array item.' }
-                    )}
-                    addButtonLabel={i18n.translate(
-                      'workflows.workflowSettingsFlyout.addOutputItemProperty',
-                      { defaultMessage: 'Add property' }
-                    )}
-                  />
-                </EuiPanel>
-              </>
-            ) : null}
-          </>
-        ) : null}
-      </EuiAccordion>
-    </EuiPanel>
-  );
-};
 
 export function WorkflowOutputsEditor({
   fields,
@@ -378,8 +55,16 @@ export function WorkflowOutputsEditor({
   connectors,
   findReferencingSteps,
   readOnly = false,
+  discardDraftSignal,
+  hideInlineAddButton = false,
+  onAddControlsChange,
 }: WorkflowOutputsEditorProps) {
-  const droppableId = useGeneratedHtmlId({ prefix: 'workflowOutputsDrop' });
+  const [draftField, setDraftField] = useState<OutputField | null>(null);
+
+  useEffect(() => {
+    if (discardDraftSignal === undefined) return;
+    setDraftField(null);
+  }, [discardDraftSignal]);
   const [pendingDelete, setPendingDelete] = useState<{
     field: OutputField;
     steps: string[];
@@ -402,17 +87,18 @@ export function WorkflowOutputsEditor({
   );
 
   const handleAdd = useCallback(() => {
+    if (draftField || readOnly) return;
     const nextIndex = fields.length + 1;
-    onChange([...fields, createEmptyOutput({ name: `output_${nextIndex}` })]);
-  }, [fields, onChange]);
+    setDraftField(createEmptyOutput({ name: `output_${nextIndex}` }));
+  }, [draftField, fields.length, readOnly]);
 
-  const onDragEnd = useCallback(
-    ({ source, destination }: DropResult) => {
-      if (!source || !destination || source.index === destination.index) return;
-      onChange(euiDragDropReorder([...fields], source.index, destination.index));
-    },
-    [fields, onChange]
-  );
+  useEffect(() => {
+    if (!onAddControlsChange) return undefined;
+    onAddControlsChange(
+      readOnly ? null : { onAdd: handleAdd, disabled: draftField != null }
+    );
+    return () => onAddControlsChange(null);
+  }, [onAddControlsChange, readOnly, handleAdd, draftField]);
 
   const commitDelete = useCallback(
     (field: OutputField) => {
@@ -444,7 +130,6 @@ export function WorkflowOutputsEditor({
         prev.name.trim() !== next.name.trim()
       ) {
         const steps = findReferencingSteps?.(prev.name.trim()) ?? [];
-        // Always warn on rename — external callers may depend on the key.
         setPendingRename({ field: next, nextName: next.name, steps });
         onChange(fields.map((f) => (f.id === next.id ? { ...next, name: prev.name } : f)));
         return;
@@ -454,7 +139,36 @@ export function WorkflowOutputsEditor({
     [fields, findReferencingSteps, onChange]
   );
 
-  if (fields.length === 0) {
+  const commitDraft = useCallback(
+    (next: OutputField) => {
+      onChange([...fields, next]);
+      setDraftField(null);
+    },
+    [fields, onChange]
+  );
+
+  const addButton =
+    readOnly || hideInlineAddButton ? null : (
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            flush="both"
+            color="primary"
+            iconType="plusCircle"
+            onClick={handleAdd}
+            isDisabled={draftField != null}
+            data-test-subj="workflowSettingsOutputAdd"
+          >
+            {i18n.translate('workflows.workflowSettingsFlyout.addOutput', {
+              defaultMessage: 'Add output',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+
+  if (fields.length === 0 && !draftField) {
     return (
       <EuiEmptyPrompt
         title={
@@ -474,7 +188,7 @@ export function WorkflowOutputsEditor({
           </p>
         }
         actions={
-          readOnly ? undefined : (
+          readOnly || hideInlineAddButton ? undefined : (
             <EuiButtonEmpty
               size="s"
               iconType="plusCircle"
@@ -499,65 +213,37 @@ export function WorkflowOutputsEditor({
 
   return (
     <>
-      {!readOnly ? (
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              flush="both"
-              color="primary"
-              iconType="plusCircle"
-              onClick={handleAdd}
-              data-test-subj="workflowSettingsOutputAdd"
-            >
-              {i18n.translate('workflows.workflowSettingsFlyout.addOutput', {
-                defaultMessage: 'Add output',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
-      <EuiSpacer size="s" />
-      <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable
-          droppableId={droppableId}
-          spacing="none"
-          renderClone={(provided, _snapshot, rubric) => {
-            const field = fields[rubric.source.index];
-            return (
-              <SchemaListDragClone
-                name={field?.name ?? ''}
-                typeLabel={field?.type ?? 'string'}
-                provided={provided}
-              />
-            );
-          }}
-        >
-          {fields.map((field, index) => (
-            <EuiDraggable
-              key={field.id}
-              index={index}
-              draggableId={field.id}
-              spacing="none"
-              customDragHandle
-              hasInteractiveChildren
-              isDragDisabled={readOnly}
-            >
-              {(provided) => (
-                <OutputCard
-                  field={field}
-                  siblings={fields}
-                  catalog={catalog}
-                  onUpdate={handleUpdate}
-                  onRequestDelete={() => requestDelete(field)}
-                  dragHandleProps={provided.dragHandleProps ?? undefined}
-                  readOnly={readOnly}
-                />
-              )}
-            </EuiDraggable>
-          ))}
-        </EuiDroppable>
-      </EuiDragDropContext>
+      {addButton}
+      {addButton ? <EuiSpacer size="s" /> : null}
+      <SettingsEntryListHost
+        fields={fields}
+        draftRow={
+          draftField ? (
+            <SettingsEntryRow
+              kind="output"
+              mode="draft"
+              field={draftField}
+              siblings={fields}
+              catalog={catalog}
+              readOnly={readOnly}
+              onCommit={commitDraft}
+              onDiscard={() => setDraftField(null)}
+            />
+          ) : null
+        }
+        renderRow={(field) => (
+          <SettingsEntryRow
+            kind="output"
+            mode="committed"
+            field={field}
+            siblings={fields}
+            catalog={catalog}
+            readOnly={readOnly}
+            onChange={handleUpdate}
+            onRequestDelete={() => requestDelete(field)}
+          />
+        )}
+      />
 
       {pendingDelete ? (
         <EuiConfirmModal

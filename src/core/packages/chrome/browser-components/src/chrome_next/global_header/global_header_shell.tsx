@@ -33,11 +33,12 @@ export interface ChromeNextGlobalHeaderShellProps {
   help?: ReactNode;
   actions?: ReactNode;
   userMenu?: ReactNode;
+  appendRight?: ReactNode;
 }
 
 export type GlobalHeaderRightGroupProps = Pick<
   ChromeNextGlobalHeaderShellProps,
-  'search' | 'help' | 'actions' | 'userMenu'
+  'search' | 'help' | 'actions' | 'userMenu' | 'appendRight'
 >;
 
 const useGlobalHeaderStyles = () => {
@@ -108,6 +109,11 @@ const useGlobalHeaderStyles = () => {
       align-items: center;
     `;
 
+    const appendRightSlot = css`
+      display: flex;
+      align-items: center;
+    `;
+
     const separator = css`
       width: 1px;
       height: 24px;
@@ -126,13 +132,14 @@ const useGlobalHeaderStyles = () => {
       actionsSlot,
       helpSlot,
       userMenuSlot,
+      appendRightSlot,
       separator,
     };
   }, [euiTheme]);
 };
 
 export const GlobalHeaderRightGroup = React.memo<GlobalHeaderRightGroupProps>(
-  ({ search, help, actions, userMenu }) => {
+  ({ search, help, actions, userMenu, appendRight }) => {
     const styles = useGlobalHeaderStyles();
 
     return (
@@ -157,6 +164,11 @@ export const GlobalHeaderRightGroup = React.memo<GlobalHeaderRightGroupProps>(
             {userMenu}
           </div>
         )}
+        {appendRight && (
+          <div css={styles.appendRightSlot} data-test-subj="chromeNextGlobalHeaderAppendRight">
+            {appendRight}
+          </div>
+        )}
       </div>
     );
   }
@@ -165,7 +177,7 @@ export const GlobalHeaderRightGroup = React.memo<GlobalHeaderRightGroupProps>(
 GlobalHeaderRightGroup.displayName = 'GlobalHeaderRightGroup';
 
 export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShellProps>(
-  ({ logo, switcher, projectPicker, search, help, actions, userMenu }) => {
+  ({ logo, switcher, projectPicker, search, help, actions, userMenu, appendRight }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useGlobalHeaderStyles();
     const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -192,7 +204,13 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
           </div>
         )}
         <div css={styles.spacer} />
-        <GlobalHeaderRightGroup search={search} help={help} actions={actions} userMenu={userMenu} />
+        <GlobalHeaderRightGroup
+          search={search}
+          help={help}
+          actions={actions}
+          userMenu={userMenu}
+          appendRight={appendRight}
+        />
       </header>
     );
   }
