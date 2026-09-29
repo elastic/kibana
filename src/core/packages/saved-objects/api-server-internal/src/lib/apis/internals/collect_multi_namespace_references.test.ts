@@ -33,6 +33,7 @@ import {
   enforceError,
   setupAuthorizeAndRedactMultiNamespaceReferenencesFailure,
   setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
+  errorWithMessage,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 import type { WithAuditName } from '@kbn/core-saved-objects-server';
@@ -320,7 +321,7 @@ describe('collectMultiNamespaceReferences', () => {
       )
     );
     await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
-      createEsUnavailableNotFoundError()
+      errorWithMessage(createEsUnavailableNotFoundError())
     );
   });
 

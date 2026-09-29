@@ -13,6 +13,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
+import type * as ConnectorSpecs from '@kbn/connector-specs';
 import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -46,6 +47,8 @@ vi.mock('@kbn/connector-specs', async () => {
 import { connectorTypeIsDual, getConnectorSpec } from '@kbn/connector-specs';
 
 const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
+
+const actualConnectorSpecs = await vi.importActual<typeof ConnectorSpecs>('@kbn/connector-specs');
 
 describe('ingestInboundEvent', () => {
   const logger = loggingSystemMock.createLogger();
@@ -123,8 +126,8 @@ describe('ingestInboundEvent', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
-      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
+    (connectorTypeIsDual as Mock).mockImplementation((actionTypeId: string) =>
+      actualConnectorSpecs.connectorTypeIsDual(actionTypeId)
     );
     emitConnectorEvents.mockResolvedValue({ ok: true });
     getDecryptedConnectorAttributes.mockResolvedValue({

@@ -520,7 +520,7 @@ describe('#getQueryParams', () => {
               mappings,
             })
           ).toThrowErrorMatchingInlineSnapshot(
-            `"rootSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
+            `[Error: rootSearchFields entry "bar.baz" is invalid: cannot contain "." character]`
           );
         });
 

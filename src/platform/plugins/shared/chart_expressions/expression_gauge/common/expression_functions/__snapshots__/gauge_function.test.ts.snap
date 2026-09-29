@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`interpreter/functions#gauge logs correct datatable to inspector 1`] = `
+exports[`interpreter/functions#gauge > logs correct datatable to inspector 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -29,7 +29,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the arc if centralMajor and centralMajorMode are passed 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the arc if centralMajor and centralMajorMode are passed 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -83,7 +83,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the arc shape 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the arc shape 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -137,7 +137,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the auto labelMajorMode 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the auto labelMajorMode 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -191,7 +191,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the auto ticksPosition 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the auto ticksPosition 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -245,7 +245,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the bands ticksPosition 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the bands ticksPosition 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -299,7 +299,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the circle if centralMajor and centralMajorMode are passed 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the circle if centralMajor and centralMajorMode are passed 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -353,7 +353,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the circle shape 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the circle shape 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -407,7 +407,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the custom labelMajorMode 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the custom labelMajorMode 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -461,7 +461,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the hidden ticksPosition 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the hidden ticksPosition 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -515,7 +515,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the horizontalBullet shape 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the horizontalBullet shape 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -569,7 +569,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the none colorMode 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the none colorMode 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -623,7 +623,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the none labelMajorMode 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the none labelMajorMode 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -677,7 +677,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the palette colorMode 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the palette colorMode 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -731,7 +731,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the semiCircle shape 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the semiCircle shape 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -785,7 +785,7 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#gauge returns an object with the correct structure for the verticalBullet shape 1`] = `
+exports[`interpreter/functions#gauge > returns an object with the correct structure for the verticalBullet shape 1`] = `
 Object {
   "as": "gauge",
   "type": "render",

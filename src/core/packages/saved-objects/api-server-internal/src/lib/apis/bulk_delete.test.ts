@@ -55,6 +55,7 @@ import {
   getMockEsBulkDeleteResponse,
   bulkDeleteSuccess,
   createBulkDeleteSuccessStatus,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 
 interface ExpectedErrorResult {
@@ -467,7 +468,9 @@ describe('#bulkDelete', () => {
         await expect(
           repository.bulkDelete([obj1], { namespace: ALL_NAMESPACES_STRING })
         ).rejects.toThrow(
-          SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"')
+          errorWithMessage(
+            SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"')
+          )
         );
       });
 

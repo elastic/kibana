@@ -16,6 +16,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
+import { AlertsClient } from './alerts_client';
 
 vi.mock('./alerts_client');
 
@@ -52,7 +53,7 @@ describe('AlertsClientFactory', () => {
     });
     await factory.create(request);
 
-    expect((await vi.importMock('./alerts_client')).AlertsClient).toHaveBeenCalledWith({
+    expect(AlertsClient).toHaveBeenCalledWith({
       authorization: alertingAuthMock,
       logger: alertsClientFactoryParams.logger,
       auditLogger,

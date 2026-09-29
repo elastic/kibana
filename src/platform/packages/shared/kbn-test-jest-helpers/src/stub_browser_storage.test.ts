@@ -76,7 +76,7 @@ describe('StubBrowserStorage', () => {
       expect(() => {
         store.setItem('ghi', 'jkl');
       }).toThrowErrorMatchingInlineSnapshot(
-        `"something about quota exceeded, browsers are not consistent here"`
+        `[Error: something about quota exceeded, browsers are not consistent here]`
       );
     });
 

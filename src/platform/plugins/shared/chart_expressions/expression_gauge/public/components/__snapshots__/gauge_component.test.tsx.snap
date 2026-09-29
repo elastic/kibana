@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`GaugeComponent renders the chart 1`] = `
+exports[`GaugeComponent > renders the chart 1`] = `
 <Chart
   renderer="canvas"
 >

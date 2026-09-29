@@ -127,7 +127,7 @@ describe('validators', () => {
           ] as CustomFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: \\"first label\\""`
+        `[Error: The following custom fields have the wrong type in the request: "first label"]`
       );
     });
 
@@ -174,7 +174,7 @@ describe('validators', () => {
           ] as CustomFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: \\"first label\\", \\"second label\\", \\"third label\\""`
+        `[Error: The following custom fields have the wrong type in the request: "first label", "second label", "third label"]`
       );
     });
 
@@ -208,7 +208,7 @@ describe('validators', () => {
           ] as CustomFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: \\"Unknown\\""`
+        `[Error: The following custom fields have the wrong type in the request: "Unknown"]`
       );
     });
 
@@ -223,7 +223,7 @@ describe('validators', () => {
             },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: No custom fields configured.]`);
     });
   });
 
@@ -309,7 +309,7 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid custom field keys: invalid_key]`);
     });
 
     it('throws if configuration is missing and request has custom fields', () => {
@@ -323,7 +323,7 @@ describe('validators', () => {
             },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: No custom fields configured.]`);
     });
   });
 
@@ -457,7 +457,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Missing required custom fields without default value configured: \\"missing field 1\\""`
+        `[Error: Missing required custom fields without default value configured: "missing field 1"]`
       );
     });
 
@@ -484,7 +484,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 2\\""`
+        `[Error: Invalid value "null" supplied for the following required custom fields: "missing field 2"]`
       );
     });
 
@@ -510,7 +510,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 2\\""`
+        `[Error: Invalid value "null" supplied for the following required custom fields: "missing field 2"]`
       );
     });
 
@@ -526,7 +526,7 @@ describe('validators', () => {
         validateRequiredCustomFields({
           requestCustomFields,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: No custom fields configured.]`);
     });
 
     it('throws if all missing required custom fields do not have default values', () => {
@@ -550,7 +550,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Missing required custom fields without default value configured: \\"missing field 1\\", \\"foo\\""`
+        `[Error: Missing required custom fields without default value configured: "missing field 1", "foo"]`
       );
     });
 
@@ -575,7 +575,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Missing required custom fields without default value configured: \\"foo\\""`
+        `[Error: Missing required custom fields without default value configured: "foo"]`
       );
     });
   });
@@ -658,7 +658,7 @@ describe('validators', () => {
           customFieldsConfiguration: [],
           customFields,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: No custom fields configured.]`);
     });
 
     it('throws error when custom fields key does not match with configuration', () => {
@@ -667,7 +667,7 @@ describe('validators', () => {
           customFieldsConfiguration,
           customFields: { random_key: [true] },
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field key: random_key."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid custom field key: random_key.]`);
     });
 
     it('throws error when custom field is not filterable', () => {
@@ -677,7 +677,7 @@ describe('validators', () => {
           customFields: { first_key: ['hello'] },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Filtering by custom field of type text is not allowed."`
+        `[Error: Filtering by custom field of type text is not allowed.]`
       );
     });
 
@@ -688,7 +688,7 @@ describe('validators', () => {
           customFields: { second_key: ['foobar', true, 1234] },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported filtering value for custom field of type toggle."`
+        `[Error: Unsupported filtering value for custom field of type toggle.]`
       );
     });
 
@@ -704,7 +704,7 @@ describe('validators', () => {
           customFieldsConfiguration,
           customFields: customFieldsMax,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Maximum 10 customFields are allowed."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Maximum 10 customFields are allowed.]`);
     });
   });
 

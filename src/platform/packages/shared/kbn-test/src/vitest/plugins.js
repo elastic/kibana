@@ -161,7 +161,8 @@ const kbnResolvePlugin = () => {
 // fsModuleCache does not see plugin code; hash everything that affects transform output.
 const TRANSFORM_CACHE_KEY = Crypto.createHash('sha256')
   .update(Fs.readFileSync(__filename))
-  .update(Fs.readFileSync(require.resolve('../jest/transforms/swc')))
+  // Path.resolve (not require.resolve) keeps this correct when Vite bundles a config importing it
+  .update(Fs.readFileSync(Path.resolve(__dirname, '../jest/transforms/swc/index.js')))
   .update(Fs.readFileSync(require.resolve('@kbn/swc-config/jest')))
   .update(require('@swc/core/package.json').version)
   .update(require('@swc/plugin-emotion/package.json').version)

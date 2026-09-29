@@ -9,7 +9,9 @@
 
 vi.mock('fs/promises');
 vi.mock('crypto');
+import { X509Certificate } from 'crypto';
 import { constants } from 'fs';
+import { access, readFile, writeFile } from 'fs/promises';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
@@ -17,23 +19,23 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { KibanaConfigWriter } from './kibana_config_writer';
 
+const mockX509Certificate = X509Certificate as unknown as Mock;
+
 describe('KibanaConfigWriter', () => {
   let mockFsAccess: Mock;
   let mockWriteFile: Mock;
   let mockReadFile: Mock;
   let kibanaConfigWriter: KibanaConfigWriter;
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.spyOn(Date, 'now').mockReturnValue(1234);
 
-    const fsMocks = await vi.importMock('fs/promises');
-    mockFsAccess = fsMocks.access;
-    mockWriteFile = fsMocks.writeFile;
-    mockReadFile = fsMocks.readFile;
+    mockFsAccess = access as unknown as Mock;
+    mockWriteFile = writeFile as unknown as Mock;
+    mockReadFile = readFile as unknown as Mock;
 
     mockReadFile.mockResolvedValue('');
 
-    const mockCrypto = await vi.importMock('crypto');
-    mockCrypto.X509Certificate = function (cert: string) {
+    mockX509Certificate.mockImplementation(function (cert: string) {
       if (cert === 'invalid-cert') {
         throw new Error('Invalid certificate');
       }
@@ -41,7 +43,7 @@ describe('KibanaConfigWriter', () => {
         fingerprint256:
           'D4:86:CE:00:AC:71:E4:1D:2B:70:D0:87:A5:55:FA:5D:D1:93:6C:DB:45:80:79:53:7B:A3:AC:13:3E:48:34:D6',
       };
-    };
+    });
 
     kibanaConfigWriter = new KibanaConfigWriter(
       '/some/path/kibana.yml',

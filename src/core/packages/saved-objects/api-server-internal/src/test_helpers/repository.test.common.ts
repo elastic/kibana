@@ -85,6 +85,10 @@ export const createUnsupportedTypeErrorPayload = (type: string) =>
   SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output
     .payload as unknown as ErrorPayload;
 
+/** Matches a thrown error by its message only, the way Jest's `toThrow(errorOrPayload)` compared them. */
+export const errorWithMessage = ({ message }: { message: string }) =>
+  expect.objectContaining({ message });
+
 export const expectError = ({ type, id }: { type: string; id: string }) => ({
   type,
   id,

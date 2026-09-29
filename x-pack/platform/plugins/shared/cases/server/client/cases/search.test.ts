@@ -235,7 +235,7 @@ describe('search', () => {
         // @ts-expect-error foo is an invalid field
         search({ ...searchRequest, foo: 'bar' }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"cases.title\\",\\"cases.description\\",\\"cases.incremental_id.text\\",\\"cases-comments.comment\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+        `[CaseError: Failed to find cases: {"search":"sample_text","searchFields":["cases.title","cases.description","cases.incremental_id.text","cases-comments.comment"],"severity":"low","assignees":[],"reporters":[],"status":"open","tags":[],"owner":[],"sortField":"createdAt","sortOrder":"desc","customFields":{},"foo":"bar"}: Error: invalid keys "foo"]`
       );
     });
 

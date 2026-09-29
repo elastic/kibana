@@ -167,6 +167,9 @@ vi.mock('./alerts_data_grid', () => {
   return { ...mocked, default: mocked };
 });
 const mockAlertsDataGrid = vi.mocked(AlertsDataGrid);
+const { AlertsDataGrid: ActualAlertsDataGrid } = await vi.importActual<
+  typeof import('./alerts_data_grid')
+>('./alerts_data_grid');
 
 const applicationMock = applicationServiceMock.createStartContract();
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
@@ -243,8 +246,7 @@ describe('AlertsTable', () => {
   let refresh: RenderContext<AdditionalContext>['refresh'];
   let refreshSpy: MockInstance<(...args: []) => void>;
 
-  const realAlertsDataGridMockImplementation = async (props: AlertsDataGridProps) => {
-    const { AlertsDataGrid: ActualAlertsDataGrid } = await vi.importActual('./alerts_data_grid');
+  const realAlertsDataGridMockImplementation = (props: AlertsDataGridProps) => {
     onPageIndexChange = props.renderContext.onPageIndexChange;
     onToggleColumn = props.onToggleColumn;
     onResetColumns = props.onResetColumns;

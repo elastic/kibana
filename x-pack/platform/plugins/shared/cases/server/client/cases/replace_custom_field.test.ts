@@ -191,7 +191,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
+      `[CaseError: Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value "undefined" supplied to "value"]`
     );
   });
 
@@ -210,7 +210,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:random-version : Error: This case mock-id-1 has been updated. Please refresh before saving additional updates."`
+      `[CaseError: Failed to replace customField, id: first_key of case: mock-id-1 version:random-version : Error: This case mock-id-1 has been updated. Please refresh before saving additional updates.]`
     );
   });
 
@@ -229,7 +229,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined."`
+      `[CaseError: Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined.]`
     );
   });
 
@@ -248,7 +248,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"            \\" supplied to \\"value\\",The value field cannot be an empty string."`
+      `[CaseError: Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value "            " supplied to "value",The value field cannot be an empty string.]`
     );
   });
 
@@ -268,7 +268,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
+      `[CaseError: Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value "undefined" supplied to "value"]`
     );
   });
 
@@ -289,7 +289,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: missing_key of case: mock-id-1 version:WzAsMV0= : Error: cannot find custom field"`
+      `[CaseError: Failed to replace customField, id: missing_key of case: mock-id-1 version:WzAsMV0= : Error: cannot find custom field]`
     );
   });
 
@@ -308,7 +308,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"foobar\\" supplied to \\"value\\""`
+      `[CaseError: Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value "foobar" supplied to "value"]`
     );
   });
 
@@ -335,7 +335,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Cannot find updated custom field."`
+      `[CaseError: Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Cannot find updated custom field.]`
     );
   });
 

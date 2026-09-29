@@ -22,7 +22,7 @@ describe('encoding', () => {
   });
   it('throws if it received undefined', () => {
     expect(() => Rison.encode(undefined)).toThrowErrorMatchingInlineSnapshot(
-      `"unable to encode value into rison, expected a primitive value array or object"`
+      `[Error: unable to encode value into rison, expected a primitive value array or object]`
     );
   });
   it('encodes a complex object', () => {

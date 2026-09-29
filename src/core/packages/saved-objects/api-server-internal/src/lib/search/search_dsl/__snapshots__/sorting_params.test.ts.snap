@@ -1,9 +1,17 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`searchDsl/getSortParams sort with direction sortField is non-root multi-field with multiple types returns correct params 1`] = `"Unable to sort multiple types by field title.raw, not a root property"`;
+exports[
+  `searchDsl/getSortParams > sort with direction > sortField is non-root multi-field with multiple types > returns correct params 1`
+] = `[Error: Unable to sort multiple types by field title.raw, not a root property]`;
 
-exports[`searchDsl/getSortParams sort with direction sortFields is non-root simple property with multiple types returns correct params 1`] = `"Unable to sort multiple types by field title, not a root property"`;
+exports[
+  `searchDsl/getSortParams > sort with direction > sortFields is non-root simple property with multiple types > returns correct params 1`
+] = `[Error: Unable to sort multiple types by field title, not a root property]`;
 
-exports[`searchDsl/getSortParams sortField no direction sortField is not-root multi-field with multiple types returns correct params 1`] = `"Unable to sort multiple types by field title.raw, not a root property"`;
+exports[
+  `searchDsl/getSortParams > sortField no direction > sortField is not-root multi-field with multiple types > returns correct params 1`
+] = `[Error: Unable to sort multiple types by field title.raw, not a root property]`;
 
-exports[`searchDsl/getSortParams sortField no direction sortField is simple non-root property with multiple types returns correct params 1`] = `"Unable to sort multiple types by field title, not a root property"`;
+exports[
+  `searchDsl/getSortParams > sortField no direction > sortField is simple non-root property with multiple types > returns correct params 1`
+] = `[Error: Unable to sort multiple types by field title, not a root property]`;

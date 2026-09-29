@@ -174,11 +174,12 @@ describe('ContentManagementPlugin', () => {
 
         expect(error).toEqual({
           body: {
-            message: new Error('Houston we got a problem.'),
+            message: expect.any(Error),
           },
           headers: {},
           statusCode: 500,
         });
+        expect(error.body.message.message).toBe('Houston we got a problem.');
       });
     });
   });

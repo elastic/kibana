@@ -105,7 +105,7 @@ test(`throws error when more than one scoped saved objects client factory is set
   expect(() => {
     clientProvider.setClientFactory(clientFactory);
   }).toThrowErrorMatchingInlineSnapshot(
-    `"custom client factory is already set, unable to replace the current one"`
+    `[Error: custom client factory is already set, unable to replace the current one]`
   );
 });
 

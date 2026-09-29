@@ -27,7 +27,6 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
 );
 
 describe('useGetCaseMetrics', () => {
-  const abortCtrl = new AbortController();
   const features: SingleCaseMetricsFeature[] = [CaseMetricsFeature.ALERTS_COUNT];
 
   beforeEach(() => {
@@ -42,7 +41,7 @@ describe('useGetCaseMetrics', () => {
     });
 
     await waitFor(() =>
-      expect(spyOnGetCaseMetrics).toHaveBeenCalledWith(basicCase.id, features, abortCtrl.signal)
+      expect(spyOnGetCaseMetrics).toHaveBeenCalledWith(basicCase.id, features, expect.any(AbortSignal))
     );
   });
 

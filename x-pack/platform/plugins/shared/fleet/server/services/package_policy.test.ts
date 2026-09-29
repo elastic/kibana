@@ -15085,7 +15085,7 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         packagePolicyUpdate: newPackagePolicy,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy dataset cannot be modified, please create a new package policy."`
+      `[Error: Package policy dataset cannot be modified, please create a new package policy.]`
     );
   });
 
@@ -15104,7 +15104,7 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         packagePolicyUpdate: newPackagePolicy,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy dataset cannot be modified, please create a new package policy."`
+      `[Error: Package policy dataset cannot be modified, please create a new package policy.]`
     );
   });
 
@@ -15164,7 +15164,7 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         packagePolicyUpdate: makePolicyWithType('metrics'),
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy data stream type cannot be modified, please create a new package policy."`
+      `[Error: Package policy data stream type cannot be modified, please create a new package policy.]`
     );
   });
 
@@ -15213,7 +15213,7 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot change the package of an existing integration policy. Create a new policy with the desired package."`
+      `[Error: Cannot change the package of an existing integration policy. Create a new policy with the desired package.]`
     );
   });
 

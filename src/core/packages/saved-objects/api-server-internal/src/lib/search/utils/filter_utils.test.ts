@@ -246,7 +246,7 @@ describe('Filter Utils', () => {
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'foo.attributes.id' does NOT exist in foo saved object index patterns: Bad Request"`
+        `[Error: This key 'foo.attributes.id' does NOT exist in foo saved object index patterns: Bad Request]`
       );
     });
 
@@ -258,7 +258,7 @@ describe('Filter Utils', () => {
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'foo._id' does NOT exist in foo saved object index patterns: Bad Request"`
+        `[Error: This key 'foo._id' does NOT exist in foo saved object index patterns: Bad Request]`
       );
     });
 
@@ -270,14 +270,16 @@ describe('Filter Utils', () => {
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'updated_at' need to be wrapped by a saved object type like foo,bar: Bad Request"`
+        `[Error: This key 'updated_at' need to be wrapped by a saved object type like foo,bar: Bad Request]`
       );
     });
 
     test('Lets make sure that we are throwing an exception if we are using hiddentype with types', () => {
       expect(() => {
         validateConvertFilterToKueryNode([], 'hiddentype.title: "title"', mockMappings);
-      }).toThrowErrorMatchingInlineSnapshot(`"This type hiddentype is not allowed: Bad Request"`);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `[Error: This type hiddentype is not allowed: Bad Request]`
+      );
     });
   });
 

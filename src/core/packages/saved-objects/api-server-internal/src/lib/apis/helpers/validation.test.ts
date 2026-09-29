@@ -92,7 +92,9 @@ describe('Saved Objects type validation helper', () => {
         "[attributes.count]: Additional properties are not allowed ('count' was unexpected): Bad Request"
       );
       const data = createMockObject(typeC, { attributes: { foo: 'hi', count: 1 } });
-      expect(() => helper.validateObjectForCreate(typeC, data)).toThrow(validationError);
+      expect(() => helper.validateObjectForCreate(typeC, data)).toThrow(
+        expect.objectContaining({ message: validationError.message })
+      );
     });
   });
 });

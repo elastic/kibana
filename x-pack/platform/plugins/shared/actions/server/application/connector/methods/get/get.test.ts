@@ -27,6 +27,7 @@ import type { InMemoryConnector } from '../../../../types';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import type * as ConnectorSpecs from '@kbn/connector-specs';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 vi.mock('@kbn/connector-specs', async () => {
@@ -105,16 +106,18 @@ const mockContext: ActionsClientContext = {
   getAxiosInstanceWithAuth,
 };
 
+const actualConnectorSpecs = await vi.importActual<typeof ConnectorSpecs>('@kbn/connector-specs');
+
 describe('get()', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     (actionTypeRegistry.isDeprecated as Mock).mockReturnValue(false);
-    (connectorTypeHasInboundEvents as Mock).mockImplementation(async (actionTypeId: string) =>
-      (await vi.importActual('@kbn/connector-specs')).connectorTypeHasInboundEvents(actionTypeId)
+    (connectorTypeHasInboundEvents as Mock).mockImplementation((actionTypeId: string) =>
+      actualConnectorSpecs.connectorTypeHasInboundEvents(actionTypeId)
     );
-    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
-      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
+    (connectorTypeIsDual as Mock).mockImplementation((actionTypeId: string) =>
+      actualConnectorSpecs.connectorTypeIsDual(actionTypeId)
     );
   });
 

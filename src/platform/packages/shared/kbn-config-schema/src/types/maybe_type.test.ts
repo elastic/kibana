@@ -34,7 +34,7 @@ test('validates contained type', () => {
   const type = schema.maybe(schema.string({ maxLength: 1 }));
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [3] but it must have a maximum length of [1]."`
+    `[Error: value has length [3] but it must have a maximum length of [1].]`
   );
 });
 
@@ -42,21 +42,21 @@ test('validates basic type', () => {
   const type = schema.maybe(schema.string());
 
   expect(() => type.validate(666)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
+    `[Error: expected value of type [string] but got [number]]`
   );
 });
 
 test('fails if null', () => {
   const type = schema.maybe(schema.string());
   expect(() => type.validate(null)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [null]"`
+    `[Error: expected value of type [string] but got [null]]`
   );
 });
 
 test('includes namespace in failure', () => {
   const type = schema.maybe(schema.string());
   expect(() => type.validate(null, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [string] but got [null]"`
+    `[Error: [foo-namespace]: expected value of type [string] but got [null]]`
   );
 });
 
@@ -124,7 +124,7 @@ describe('#extendsDeep', () => {
     expect(() =>
       forbidSchema.validate({ foo: 'test', bar: 'test' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+      `[Error: [bar]: Additional properties are not allowed ('bar' was unexpected)]`
     );
   });
 });

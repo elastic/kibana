@@ -12,7 +12,12 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/types/models/epm';
 
-import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
+import {
+  deletePackageKnowledgeBase,
+  saveKnowledgeBaseContentToIndex,
+} from '../../knowledge_base_index';
+import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
+import { licenseService } from '../../../../license';
 import type { InstallContext } from '../_state_machine_package_install';
 
 import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
@@ -433,9 +438,6 @@ describe('stepSaveKnowledgeBase', () => {
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
       // The es asset references must still be ensured so installed_es stays consistent even when
       // the indexed content survived a saved-object reset (e.g. an install rollback).
-      const { optimisticallyAddEsAssetReferences } = await vi.importMock(
-        '../../es_assets_reference'
-      );
       expect(optimisticallyAddEsAssetReferences).toHaveBeenCalledWith(
         savedObjectsClient,
         'test-package',
@@ -534,10 +536,7 @@ describe('stepSaveKnowledgeBase', () => {
 
   describe('ES Asset References', () => {
     it('should update ES asset references with knowledge base assets', async () => {
-      const { optimisticallyAddEsAssetReferences } = await vi.importMock(
-        '../../es_assets_reference'
-      );
-      optimisticallyAddEsAssetReferences.mockResolvedValueOnce([
+      (optimisticallyAddEsAssetReferences as Mock).mockResolvedValueOnce([
         { id: 'test-package-guide.md', type: 'knowledge_base' },
         { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
       ]);
@@ -575,10 +574,6 @@ describe('stepSaveKnowledgeBase', () => {
     });
 
     it('should not update ES asset references when no knowledge base files exist', async () => {
-      const { optimisticallyAddEsAssetReferences } = await vi.importMock(
-        '../../es_assets_reference'
-      );
-
       const entries: ArchiveEntry[] = [
         {
           path: 'test-package-1.0.0/manifest.yml',
@@ -693,8 +688,7 @@ describe('stepSaveKnowledgeBase', () => {
   describe('Gating Validation', () => {
     it('should skip knowledge base processing when Enterprise license is not available', async () => {
       // Mock license service to return false for Enterprise license
-      const { licenseService } = await vi.importMock('../../../../license');
-      licenseService.isEnterprise.mockReturnValue(false);
+      vi.mocked(licenseService.isEnterprise).mockReturnValue(false);
 
       const entries: ArchiveEntry[] = [
         {
@@ -712,19 +706,15 @@ describe('stepSaveKnowledgeBase', () => {
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
 
       // Verify that optimisticallyAddEsAssetReferences was NOT called
-      const { optimisticallyAddEsAssetReferences } = await vi.importMock(
-        '../../es_assets_reference'
-      );
       expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
 
       // Reset the mock back to true for other tests
-      licenseService.isEnterprise.mockReturnValue(true);
+      vi.mocked(licenseService.isEnterprise).mockReturnValue(true);
     });
 
     it('should process knowledge base when Enterprise license is available', async () => {
       // Ensure license service returns true for Enterprise license
-      const { licenseService } = await vi.importMock('../../../../license');
-      licenseService.isEnterprise.mockReturnValue(true);
+      vi.mocked(licenseService.isEnterprise).mockReturnValue(true);
 
       const entries: ArchiveEntry[] = [
         {
@@ -752,9 +742,6 @@ describe('stepSaveKnowledgeBase', () => {
       });
 
       // Verify that optimisticallyAddEsAssetReferences WAS called
-      const { optimisticallyAddEsAssetReferences } = await vi.importMock(
-        '../../es_assets_reference'
-      );
       expect(optimisticallyAddEsAssetReferences).toHaveBeenCalled();
     });
 
@@ -777,9 +764,6 @@ describe('stepSaveKnowledgeBase', () => {
       expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
 
       // Verify that optimisticallyAddEsAssetReferences was NOT called
-      const { optimisticallyAddEsAssetReferences } = await vi.importMock(
-        '../../es_assets_reference'
-      );
       expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
     });
 
@@ -810,9 +794,6 @@ describe('stepSaveKnowledgeBase', () => {
       });
 
       // Verify that optimisticallyAddEsAssetReferences WAS called
-      const { optimisticallyAddEsAssetReferences } = await vi.importMock(
-        '../../es_assets_reference'
-      );
       expect(optimisticallyAddEsAssetReferences).toHaveBeenCalled();
     });
   });
@@ -856,7 +837,6 @@ describe('cleanupKnowledgeBaseStep', () => {
     } as InstallContext);
 
   it('should delete knowledge base content during retry from SAVE_KNOWLEDGE_BASE state', async () => {
-    const { deletePackageKnowledgeBase } = await vi.importMock('../../knowledge_base_index');
     const context = createCleanupContext(true, false, 'save_knowledge_base');
 
     await cleanupKnowledgeBaseStep(context);
@@ -868,7 +848,6 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when force is true', async () => {
-    const { deletePackageKnowledgeBase } = await vi.importMock('../../knowledge_base_index');
     const context = createCleanupContext(true, true, 'save_knowledge_base');
 
     await cleanupKnowledgeBaseStep(context);
@@ -877,7 +856,6 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when not retrying from last state', async () => {
-    const { deletePackageKnowledgeBase } = await vi.importMock('../../knowledge_base_index');
     const context = createCleanupContext(false, false, 'save_knowledge_base');
 
     await cleanupKnowledgeBaseStep(context);
@@ -886,7 +864,6 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when initial state is not SAVE_KNOWLEDGE_BASE', async () => {
-    const { deletePackageKnowledgeBase } = await vi.importMock('../../knowledge_base_index');
     const context = createCleanupContext(true, false, 'install_kibana_assets');
 
     await cleanupKnowledgeBaseStep(context);
@@ -895,7 +872,6 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when esClient is missing', async () => {
-    const { deletePackageKnowledgeBase } = await vi.importMock('../../knowledge_base_index');
     const context = createCleanupContext(true, false, 'save_knowledge_base');
     context.esClient = undefined as any;
 
@@ -905,7 +881,6 @@ describe('cleanupKnowledgeBaseStep', () => {
   });
 
   it('should not clean up when installedPkg is missing', async () => {
-    const { deletePackageKnowledgeBase } = await vi.importMock('../../knowledge_base_index');
     const context = createCleanupContext(true, false, 'save_knowledge_base');
     context.installedPkg = undefined;
 

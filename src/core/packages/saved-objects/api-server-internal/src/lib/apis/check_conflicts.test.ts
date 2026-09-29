@@ -41,6 +41,7 @@ import {
   createBadRequestErrorPayload,
   createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 
 describe('#checkConflicts', () => {
@@ -152,7 +153,9 @@ describe('#checkConflicts', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.checkConflicts([obj1], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
     });
 

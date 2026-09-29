@@ -1,4 +1,22 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DetailPanelCopy component > When DetailPanelCopy is mounted > renders DetailPanelCopy correctly 1`] = `
+<div>
+  <div
+    class="euiText emotion-euiText-s"
+    data-test-subj="sessionView:detail-panel-list-item"
+  >
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
+    >
+      <span>
+        copy component test
+      </span>
+    </span>
+  </div>
+</div>
+`;
 
 exports[`DetailPanelCopy component When DetailPanelCopy is mounted renders DetailPanelCopy correctly 1`] = `
 <div>

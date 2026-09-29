@@ -6,13 +6,15 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { renderHook, act } from '@testing-library/react';
 import * as useLocalStorage from 'react-use/lib/useLocalStorage';
+import { createKbnUrlStateStorage as createKbnUrlStateStorageImport } from '@kbn/kibana-utils-plugin/public';
 import { useRulesListFilterStore } from './use_rules_list_filter_store';
 
 vi.mock('@kbn/kibana-utils-plugin/public');
-const { createKbnUrlStateStorage } = await vi.importMock('@kbn/kibana-utils-plugin/public');
+const createKbnUrlStateStorage = createKbnUrlStateStorageImport as unknown as Mock;
 
 const useUrlStateStorageGetMock = vi.fn();
 const useUrlStateStorageSetMock = vi.fn();

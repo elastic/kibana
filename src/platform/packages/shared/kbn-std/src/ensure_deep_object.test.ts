@@ -156,7 +156,7 @@ describe('forbidden patterns', () => {
       };
 
       expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"Forbidden path detected: foo.bar.__proto__"`
+        `[Error: Forbidden path detected: foo.bar.__proto__]`
       );
     });
 
@@ -171,7 +171,7 @@ describe('forbidden patterns', () => {
       };
 
       expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"Forbidden path detected: array.1.bar.__proto__"`
+        `[Error: Forbidden path detected: array.1.bar.__proto__]`
       );
     });
   });
@@ -186,7 +186,7 @@ describe('forbidden patterns', () => {
       };
 
       expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"Forbidden path detected: foo.bar.constructor.prototype"`
+        `[Error: Forbidden path detected: foo.bar.constructor.prototype]`
       );
     });
 
@@ -202,7 +202,7 @@ describe('forbidden patterns', () => {
       };
 
       expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"Forbidden path detected: foo.bar.constructor.prototype"`
+        `[Error: Forbidden path detected: foo.bar.constructor.prototype]`
       );
     });
 
@@ -217,7 +217,7 @@ describe('forbidden patterns', () => {
       };
 
       expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"Forbidden path detected: array.1.bar.constructor.prototype"`
+        `[Error: Forbidden path detected: array.1.bar.constructor.prototype]`
       );
     });
   });

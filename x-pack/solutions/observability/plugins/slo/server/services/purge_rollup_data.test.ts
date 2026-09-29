@@ -124,7 +124,7 @@ describe('purge rollup data', () => {
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(3, DurationUnit.Day) },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy."`
+        `[Error: The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy.]`
       );
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
@@ -142,7 +142,7 @@ describe('purge rollup data', () => {
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy."`
+        `[Error: The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy.]`
       );
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
@@ -160,7 +160,7 @@ describe('purge rollup data', () => {
           purgePolicy: { purgeType: 'fixed_time', timestamp: new Date() },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy."`
+        `[Error: The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy.]`
       );
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);

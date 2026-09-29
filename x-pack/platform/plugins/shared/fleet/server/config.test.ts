@@ -56,7 +56,7 @@ describe('Config schema', () => {
         ],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"xpack.fleet.agents.elasticsearch.hosts should not be used when defining default outputs in xpack.fleet.outputs, please remove it."`
+      `[Error: xpack.fleet.agents.elasticsearch.hosts should not be used when defining default outputs in xpack.fleet.outputs, please remove it.]`
     );
   });
 

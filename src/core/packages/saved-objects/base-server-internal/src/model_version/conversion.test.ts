@@ -30,13 +30,13 @@ describe('isVirtualModelVersion', () => {
 
   it('throws when the version is not a valid semver', () => {
     expect(() => isVirtualModelVersion('9.-2.0')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid semver: 9.-2.0"`
+      `[Error: Invalid semver: 9.-2.0]`
     );
     expect(() => isVirtualModelVersion('12.3.5.6.7')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid semver: 12.3.5.6.7"`
+      `[Error: Invalid semver: 12.3.5.6.7]`
     );
     expect(() => isVirtualModelVersion('dolly')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid semver: dolly"`
+      `[Error: Invalid semver: dolly]`
     );
   });
 });
@@ -50,25 +50,25 @@ describe('virtualVersionToModelVersion', () => {
 
   it('throws when the version is not a virtual model version', () => {
     expect(() => virtualVersionToModelVersion('9.2.0')).toThrowErrorMatchingInlineSnapshot(
-      `"Version is not a virtual model version"`
+      `[Error: Version is not a virtual model version]`
     );
     expect(() => virtualVersionToModelVersion('11.3.0')).toThrowErrorMatchingInlineSnapshot(
-      `"Version is not a virtual model version"`
+      `[Error: Version is not a virtual model version]`
     );
     expect(() => virtualVersionToModelVersion('10.3.42')).toThrowErrorMatchingInlineSnapshot(
-      `"Version is not a virtual model version"`
+      `[Error: Version is not a virtual model version]`
     );
   });
 
   it('throws when the version is not a valid semver', () => {
     expect(() => virtualVersionToModelVersion('9.-2.0')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid semver: 9.-2.0"`
+      `[Error: Invalid semver: 9.-2.0]`
     );
     expect(() => virtualVersionToModelVersion('12.3.5.6.7')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid semver: 12.3.5.6.7"`
+      `[Error: Invalid semver: 12.3.5.6.7]`
     );
     expect(() => virtualVersionToModelVersion('dolly')).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid semver: dolly"`
+      `[Error: Invalid semver: dolly]`
     );
   });
 });
@@ -84,19 +84,19 @@ describe('modelVersionToVirtualVersion', () => {
 describe('assertValidModelVersion', () => {
   it('throws if the provided value is not an integer', () => {
     expect(() => assertValidModelVersion(9.4)).toThrowErrorMatchingInlineSnapshot(
-      `"Model version must be an integer"`
+      `[Error: Model version must be an integer]`
     );
     expect(() => assertValidModelVersion('7.6')).toThrowErrorMatchingInlineSnapshot(
-      `"Model version must be an integer"`
+      `[Error: Model version must be an integer]`
     );
   });
 
   it('throws if the provided value is a negative integer', () => {
     expect(() => assertValidModelVersion(-4)).toThrowErrorMatchingInlineSnapshot(
-      `"Model version cannot be negative"`
+      `[Error: Model version cannot be negative]`
     );
     expect(() => assertValidModelVersion('-3')).toThrowErrorMatchingInlineSnapshot(
-      `"Model version cannot be negative"`
+      `[Error: Model version cannot be negative]`
     );
   });
 
@@ -109,10 +109,10 @@ describe('assertValidModelVersion', () => {
 describe('assertValidVirtualVersion', () => {
   it('throws if the provided value is not a valid semver', () => {
     expect(() => assertValidVirtualVersion('foooo')).toThrowErrorMatchingInlineSnapshot(
-      `"Virtual versions must be valid semver versions"`
+      `[Error: Virtual versions must be valid semver versions]`
     );
     expect(() => assertValidVirtualVersion('1.2.3.4.5.6.7')).toThrowErrorMatchingInlineSnapshot(
-      `"Virtual versions must be valid semver versions"`
+      `[Error: Virtual versions must be valid semver versions]`
     );
   });
 

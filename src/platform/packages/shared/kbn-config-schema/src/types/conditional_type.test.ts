@@ -24,7 +24,7 @@ test('required by default', () => {
       context_value_1: 0,
       context_value_2: 0,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"expected value of type [string] but got [undefined]"`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: expected value of type [string] but got [undefined]]`);
 });
 
 test('returns default', () => {
@@ -83,7 +83,7 @@ test('properly validates types according chosen schema', () => {
       context_value_2: 0,
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [1] but it must have a minimum length of [2]."`
+    `[Error: value has length [1] but it must have a minimum length of [2].]`
   );
 
   expect(
@@ -99,7 +99,7 @@ test('properly validates types according chosen schema', () => {
       context_value_2: 1,
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [2] but it must have a maximum length of [1]."`
+    `[Error: value has length [2] but it must have a maximum length of [1].]`
   );
 
   expect(
@@ -123,7 +123,7 @@ test('properly validates when compares with Schema', () => {
       context_value_1: 0,
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [1] but it must have a minimum length of [2]."`
+    `[Error: value has length [1] but it must have a minimum length of [2].]`
   );
 
   expect(
@@ -137,7 +137,7 @@ test('properly validates when compares with Schema', () => {
       context_value_1: 'b',
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [2] but it must have a minimum length of [3]."`
+    `[Error: value has length [2] but it must have a minimum length of [3].]`
   );
 
   expect(
@@ -160,7 +160,7 @@ test('properly validates when compares with "null" literal Schema', () => {
       context_value_1: null,
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [1] but it must have a minimum length of [2]."`
+    `[Error: value has length [1] but it must have a minimum length of [2].]`
   );
 
   expect(
@@ -174,7 +174,7 @@ test('properly validates when compares with "null" literal Schema', () => {
       context_value_1: 'b',
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [2] but it must have a minimum length of [3]."`
+    `[Error: value has length [2] but it must have a minimum length of [3].]`
   );
 
   expect(
@@ -197,7 +197,7 @@ test('properly handles schemas with incompatible types', () => {
       context_value_1: 0,
       context_value_2: 0,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"expected value of type [string] but got [boolean]"`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: expected value of type [string] but got [boolean]]`);
 
   expect(
     type.validate('a', {
@@ -211,7 +211,7 @@ test('properly handles schemas with incompatible types', () => {
       context_value_1: 0,
       context_value_2: 1,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"expected value of type [boolean] but got [string]"`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: expected value of type [boolean] but got [string]]`);
 
   expect(
     type.validate(true, {
@@ -228,7 +228,7 @@ test('properly handles conditionals within objects', () => {
   });
 
   expect(() => type.validate({ key: 'string', value: 1 })).toThrowErrorMatchingInlineSnapshot(
-    `"[value]: expected value of type [string] but got [number]"`
+    `[Error: [value]: expected value of type [string] but got [number]]`
   );
 
   expect(type.validate({ key: 'string', value: 'a' })).toEqual({
@@ -237,7 +237,7 @@ test('properly handles conditionals within objects', () => {
   });
 
   expect(() => type.validate({ key: 'number', value: 'a' })).toThrowErrorMatchingInlineSnapshot(
-    `"[value]: expected value of type [number] but got [string]"`
+    `[Error: [value]: expected value of type [number] but got [string]]`
   );
 
   expect(type.validate({ key: 'number', value: 1 })).toEqual({
@@ -278,7 +278,7 @@ test('works with both context and sibling references', () => {
   expect(() =>
     type.validate({ key: 'string', value: 1 }, { context_key: 'number' })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[value]: expected value of type [string] but got [number]"`
+    `[Error: [value]: expected value of type [string] but got [number]]`
   );
 
   expect(type.validate({ key: 'string', value: 'a' }, { context_key: 'number' })).toEqual({
@@ -289,7 +289,7 @@ test('works with both context and sibling references', () => {
   expect(() =>
     type.validate({ key: 'number', value: 'a' }, { context_key: 'number' })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[value]: expected value of type [number] but got [string]"`
+    `[Error: [value]: expected value of type [number] but got [string]]`
   );
 
   expect(type.validate({ key: 'number', value: 1 }, { context_key: 'number' })).toEqual({
@@ -307,13 +307,13 @@ test('includes namespace into failures', () => {
   expect(() =>
     type.validate({ key: 'string', value: 1 }, {}, 'mega-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[mega-namespace.value]: expected value of type [string] but got [number]"`
+    `[Error: [mega-namespace.value]: expected value of type [string] but got [number]]`
   );
 
   expect(() =>
     type.validate({ key: 'number', value: 'a' }, {}, 'mega-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[mega-namespace.value]: expected value of type [number] but got [string]"`
+    `[Error: [mega-namespace.value]: expected value of type [number] but got [string]]`
   );
 });
 
@@ -328,7 +328,7 @@ test('correctly handles missing references', () => {
   });
 
   expect(() => type.validate({ value: 1 })).toThrowErrorMatchingInlineSnapshot(
-    `"[value]: expected value of type [string] but got [number]"`
+    `[Error: [value]: expected value of type [string] but got [number]]`
   );
 
   expect(type.validate({ value: 'a' })).toEqual({ value: 'a' });
@@ -351,14 +351,14 @@ test('works within `oneOf`', () => {
   expect(type.validate(['a', 'b'], { type: 'array' })).toEqual(['a', 'b']);
 
   expect(() => type.validate(1, { type: 'string' })).toThrowErrorMatchingInlineSnapshot(`
-    "types that failed validation:
+    [Error: types that failed validation:
     - [0]: expected value of type [string] but got [number]
-    - [1]: expected value of type [array] but got [number]"
+    - [1]: expected value of type [array] but got [number]]
   `);
   expect(() => type.validate(true, { type: 'string' })).toThrowErrorMatchingInlineSnapshot(`
-    "types that failed validation:
+    [Error: types that failed validation:
     - [0]: expected value of type [string] but got [boolean]
-    - [1]: expected value of type [array] but got [boolean]"
+    - [1]: expected value of type [array] but got [boolean]]
   `);
 });
 
@@ -438,7 +438,7 @@ describe('#extendsDeep', () => {
           .extendsDeep({ unknowns: 'forbid' })
           .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[test.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+        `[Error: [test.baz]: Additional properties are not allowed ('baz' was unexpected)]`
       );
     });
   });
@@ -478,7 +478,7 @@ describe('#extendsDeep', () => {
       expect(() =>
         forbidSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[test.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+        `[Error: [test.baz]: Additional properties are not allowed ('baz' was unexpected)]`
       );
     });
   });

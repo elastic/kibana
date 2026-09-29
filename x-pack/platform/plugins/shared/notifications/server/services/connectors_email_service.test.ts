@@ -440,7 +440,7 @@ describe('sendAttachmentEmail()', () => {
       };
 
       await expect(email.sendAttachmentEmail(payload)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"There was an error sending the email."`
+        `[Error: There was an error sending the email.]`
       );
     });
   });

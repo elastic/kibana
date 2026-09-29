@@ -362,5 +362,3 @@ describe('collapseInternalToolCalls', () => {
     });
   });
 });
-
-describe('convertMessagesForInference', () => {});

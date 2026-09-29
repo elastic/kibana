@@ -15,6 +15,10 @@ import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 import 'jest-canvas-mock';
 
+// FilterItem is a React.lazy wrapper around this large module; loading it up front keeps the
+// first render from racing the module's transform against the findBy timeout.
+import '@kbn/unified-search-plugin/public/ui_module';
+
 vi.setConfig({ testTimeout: 30 * 1000 });
 
 describe('FilterLabel', function () {

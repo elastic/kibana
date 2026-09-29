@@ -38,13 +38,13 @@ describe('validateOptions', () => {
       expect(() =>
         // @ts-expect-error
         validateOptions({ ...options, dtstart: null })
-      ).toThrowErrorMatchingInlineSnapshot(`"dtstart is required"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: dtstart is required]`);
     });
 
     it('throws an error when dtstart is not a valid date', () => {
       expect(() =>
         validateOptions({ ...options, dtstart: new Date('invalid') })
-      ).toThrowErrorMatchingInlineSnapshot(`"dtstart is an invalid date"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: dtstart is an invalid date]`);
     });
   });
 
@@ -52,14 +52,14 @@ describe('validateOptions', () => {
     it('throws an error when tzid is missing', () => {
       // @ts-expect-error
       expect(() => validateOptions({ ...options, tzid: null })).toThrowErrorMatchingInlineSnapshot(
-        `"tzid is required"`
+        `[Error: tzid is required]`
       );
     });
 
     it('throws an error when tzid is invalid', () => {
       expect(() =>
         validateOptions({ ...options, tzid: 'invalid' })
-      ).toThrowErrorMatchingInlineSnapshot(`"tzid is an invalid timezone"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: tzid is an invalid timezone]`);
     });
   });
 
@@ -68,18 +68,18 @@ describe('validateOptions', () => {
       expect(() =>
         // @ts-expect-error
         validateOptions({ ...options, interval: 'invalid' })
-      ).toThrowErrorMatchingInlineSnapshot(`"interval must be an integer greater than 0"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: interval must be an integer greater than 0]`);
     });
 
     it('throws an error when interval is not an integer', () => {
       expect(() =>
         validateOptions({ ...options, interval: 1.5 })
-      ).toThrowErrorMatchingInlineSnapshot(`"interval must be an integer greater than 0"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: interval must be an integer greater than 0]`);
     });
 
     it('throws an error when interval is <= 0', () => {
       expect(() => validateOptions({ ...options, interval: 0 })).toThrowErrorMatchingInlineSnapshot(
-        `"interval must be an integer greater than 0"`
+        `[Error: interval must be an integer greater than 0]`
       );
     });
   });
@@ -91,7 +91,7 @@ describe('validateOptions', () => {
           ...options,
           until: new Date('invalid'),
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"until is an invalid date"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: until is an invalid date]`);
     });
   });
 
@@ -100,18 +100,18 @@ describe('validateOptions', () => {
       expect(() =>
         // @ts-expect-error
         validateOptions({ ...options, count: 'invalid' })
-      ).toThrowErrorMatchingInlineSnapshot(`"count must be an integer greater than 0"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: count must be an integer greater than 0]`);
     });
 
     it('throws an error when count is not an integer', () => {
       expect(() => validateOptions({ ...options, count: 1.5 })).toThrowErrorMatchingInlineSnapshot(
-        `"count must be an integer greater than 0"`
+        `[Error: count must be an integer greater than 0]`
       );
     });
 
     it('throws an error when count is <= 0', () => {
       expect(() => validateOptions({ ...options, count: 0 })).toThrowErrorMatchingInlineSnapshot(
-        `"count must be an integer greater than 0"`
+        `[Error: count must be an integer greater than 0]`
       );
     });
   });
@@ -121,7 +121,7 @@ describe('validateOptions', () => {
       expect(() =>
         validateOptions({ ...options, bymonth: [0, 6, 13] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"bymonth must be an array of numbers between 1 and 12"`
+        `[Error: bymonth must be an array of numbers between 1 and 12]`
       );
     });
 
@@ -130,13 +130,13 @@ describe('validateOptions', () => {
         // @ts-expect-error
         validateOptions({ ...options, bymonth: ['invalid'] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"bymonth must be an array of numbers between 1 and 12"`
+        `[Error: bymonth must be an array of numbers between 1 and 12]`
       );
     });
 
     it('throws an error when is empty', () => {
       expect(() => validateOptions({ ...options, bymonth: [] })).toThrowErrorMatchingInlineSnapshot(
-        `"bymonth must be an array of numbers between 1 and 12"`
+        `[Error: bymonth must be an array of numbers between 1 and 12]`
       );
     });
   });
@@ -146,7 +146,7 @@ describe('validateOptions', () => {
       expect(() =>
         validateOptions({ ...options, bymonthday: [0, 15, 32] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"bymonthday must be an array of numbers between 1 and 31, or between -31 and -1"`
+        `[Error: bymonthday must be an array of numbers between 1 and 31, or between -31 and -1]`
       );
     });
 
@@ -154,7 +154,7 @@ describe('validateOptions', () => {
       expect(() =>
         validateOptions({ ...options, bymonthday: [-32] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"bymonthday must be an array of numbers between 1 and 31, or between -31 and -1"`
+        `[Error: bymonthday must be an array of numbers between 1 and 31, or between -31 and -1]`
       );
     });
 
@@ -168,7 +168,7 @@ describe('validateOptions', () => {
         // @ts-expect-error
         validateOptions({ ...options, bymonthday: ['invalid'] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"bymonthday must be an array of numbers between 1 and 31, or between -31 and -1"`
+        `[Error: bymonthday must be an array of numbers between 1 and 31, or between -31 and -1]`
       );
     });
 
@@ -176,7 +176,7 @@ describe('validateOptions', () => {
       expect(() =>
         validateOptions({ ...options, bymonthday: [] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"bymonthday must be an array of numbers between 1 and 31, or between -31 and -1"`
+        `[Error: bymonthday must be an array of numbers between 1 and 31, or between -31 and -1]`
       );
     });
   });
@@ -185,20 +185,20 @@ describe('validateOptions', () => {
     it('throws an error with out of range values when it contains only numbers', () => {
       expect(() =>
         validateOptions({ ...options, byweekday: [0, 4, 8] })
-      ).toThrowErrorMatchingInlineSnapshot(`"byweekday numbers must been between 1 and 7"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: byweekday numbers must been between 1 and 7]`);
     });
 
     it('throws an error with invalid values when it contains only string', () => {
       expect(() =>
         validateOptions({ ...options, byweekday: ['+1MO', 'FOO', '+3WE', 'BAR', '-4FR'] })
-      ).toThrowErrorMatchingInlineSnapshot(`"byweekday strings must be valid weekday strings"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: byweekday strings must be valid weekday strings]`);
     });
 
     it('throws an error when is empty', () => {
       expect(() =>
         validateOptions({ ...options, byweekday: [] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"byweekday must be an array of at least one string or number"`
+        `[Error: byweekday must be an array of at least one string or number]`
       );
     });
 
@@ -206,7 +206,7 @@ describe('validateOptions', () => {
       expect(() =>
         validateOptions({ ...options, byweekday: [2, 'MO'] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"byweekday values can be either numbers or strings, not both"`
+        `[Error: byweekday values can be either numbers or strings, not both]`
       );
     });
 

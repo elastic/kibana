@@ -18,7 +18,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 
-vi.mock('react-use/lib/useLocalStorage', () => vi.fn());
+vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn() }));
 
 const mockSettingsGet = vi.fn();
 

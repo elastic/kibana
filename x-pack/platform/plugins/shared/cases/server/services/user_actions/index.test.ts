@@ -1885,7 +1885,7 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
             await expect(service.getAll('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-              `"Invalid value \\"undefined\\" supplied to \\"payload\\""`
+              `[Error: Invalid value "undefined" supplied to "payload"]`
             );
           });
 

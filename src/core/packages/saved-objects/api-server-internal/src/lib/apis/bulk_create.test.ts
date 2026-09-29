@@ -62,6 +62,7 @@ import {
   createBadRequestErrorPayload,
   expectCreateResult,
   mockTimestampFieldsWithCreated,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
@@ -683,7 +684,9 @@ describe('#bulkCreate', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkCreate([obj3], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
 
       it(`returns error when initialNamespaces is used with a space-agnostic object`, async () => {
@@ -819,8 +822,10 @@ describe('#bulkCreate', () => {
         expect(result.saved_objects).toEqual([
           expect.objectContaining(obj3),
           expect.objectContaining({
-            error: new Error(
-              '[attributes.title]: expected value of type [string] but got [number]: Bad Request'
+            error: errorWithMessage(
+              new Error(
+                '[attributes.title]: expected value of type [string] but got [number]: Bad Request'
+              )
             ),
             id: 'three-again',
             type: 'dashboard',

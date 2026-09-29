@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`createRegisteredAttachmentUserActionBuilder builds the buttons correctly 1`] = `
+exports[`createRegisteredAttachmentUserActionBuilder > builds the buttons correctly 1`] = `
 Array [
   Object {
     "actions": <Memo(UserActionContentToolbar)
@@ -118,7 +118,7 @@ Array [
 ]
 `;
 
-exports[`createRegisteredAttachmentUserActionBuilder builds the buttons correctly when hideDefaultActions=true 1`] = `
+exports[`createRegisteredAttachmentUserActionBuilder > builds the buttons correctly when hideDefaultActions=true 1`] = `
 Array [
   Object {
     "actions": <Memo(UserActionContentToolbar)
@@ -236,7 +236,7 @@ Array [
 ]
 `;
 
-exports[`createRegisteredAttachmentUserActionBuilder builds the user action correctly 1`] = `
+exports[`createRegisteredAttachmentUserActionBuilder > builds the user action correctly 1`] = `
 Array [
   Object {
     "actions": <Memo(UserActionContentToolbar)
@@ -340,7 +340,7 @@ Array [
 ]
 `;
 
-exports[`createRegisteredAttachmentUserActionBuilder returns an unknown user action if the attachment type is not registered 1`] = `
+exports[`createRegisteredAttachmentUserActionBuilder > returns an unknown user action if the attachment type is not registered 1`] = `
 Array [
   Object {
     "children": <Memo(AttachmentErrorCallout)

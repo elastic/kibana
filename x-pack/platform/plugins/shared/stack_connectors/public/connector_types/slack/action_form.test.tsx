@@ -6,7 +6,7 @@
  */
 
 import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -20,6 +20,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getConnectorType as getSlackConnectorType } from './slack';
 import { getSlackApiConnectorType } from '../slack_api';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { loadAllActions as loadAllActionsImport } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors';
+import { loadActionTypes as loadActionTypesImport } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
@@ -54,12 +56,8 @@ vi.mock(
     return { ...mocked, default: mocked };
   }
 );
-const { loadAllActions } = await vi.importMock(
-  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors'
-);
-const { loadActionTypes } = await vi.importMock(
-  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'
-);
+const loadAllActions = loadAllActionsImport as unknown as Mock;
+const loadActionTypes = loadActionTypesImport as unknown as Mock;
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const queryClient = new QueryClient({
   defaultOptions: {

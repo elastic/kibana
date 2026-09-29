@@ -14,9 +14,11 @@ import esResponse from './es_response';
 import loadFunctions from '../../lib/load_functions';
 import tlConfigFn from '../../handlers/lib/tl_config';
 
-export default function () {
-  const functions = loadFunctions('series_functions');
+// Loaded once at import time: requiring every series function (and their server-side
+// dependencies) is slow, and would otherwise count against each test's timeout.
+const functions = loadFunctions('series_functions');
 
+export default function () {
   const tlConfig = tlConfigFn({
     getFunction: (name) => {
       if (!functions[name]) throw new Error('No such function: ' + name);

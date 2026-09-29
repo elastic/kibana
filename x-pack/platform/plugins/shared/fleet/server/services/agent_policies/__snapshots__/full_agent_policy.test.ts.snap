@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`getFullAgentPolicy should return the right outputs and permissions when package policies use their own outputs (with default output) 1`] = `
 Object {

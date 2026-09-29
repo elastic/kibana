@@ -163,7 +163,7 @@ test('should error if content is not registered', async () => {
         text: 'foo',
       }
     )
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"Content [foo-fake] is not registered."`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Content [foo-fake] is not registered.]`);
 });
 
 test('should error if content is registered, but no mSearch support', async () => {
@@ -187,7 +187,9 @@ test('should error if content is registered, but no mSearch support', async () =
         text: 'foo',
       }
     )
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"Content type foo2 does not support mSearch"`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `[Error: Content type foo2 does not support mSearch]`
+  );
 });
 
 test('should paginate using cursor', async () => {
@@ -281,6 +283,6 @@ test('should error if outside of pagination limit', async () => {
       }
     )
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Requested page 11 with 10 items per page exceeds the maximum allowed limit of ${SEARCH_LISTING_LIMIT} items"`
+    `[Error: Requested page 11 with 10 items per page exceeds the maximum allowed limit of ${SEARCH_LISTING_LIMIT} items]`
   );
 });

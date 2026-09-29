@@ -82,7 +82,7 @@ describe('useImagePasteUpload', () => {
     });
 
     afterEach(() => {
-      vi.dontMock('@kbn/shared-ux-file-upload/src/upload_state');
+      vi.doUnmock('@kbn/shared-ux-file-upload/src/upload_state');
     });
 
     const setup = () => {

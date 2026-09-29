@@ -34,7 +34,15 @@ const nodeRequire = createRequire(import.meta.url);
 // swc-register also installs source-map-support, which replaces Error.prepareStackTrace; keep
 // Vitest's own mapping, which inline snapshots and error locations rely on.
 const vitestPrepareStackTrace = Error.prepareStackTrace;
-nodeRequire('@kbn/swc-register').install();
+// lmdb (swc-register's transform cache) locates its native addon from `document.baseURI` when a
+// `document` exists, which under jsdom is http://localhost/; hide it while the cache loads.
+const jsdomDocument = global.document;
+global.document = undefined;
+try {
+  nodeRequire('@kbn/swc-register').install();
+} finally {
+  global.document = jsdomDocument;
+}
 Error.prepareStackTrace = vitestPrepareStackTrace;
 
 // Jest's jsdom sandbox had no fetch, so polyfills.jsdom.js installed whatwg-fetch (XHR based,

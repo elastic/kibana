@@ -67,7 +67,7 @@ describe('Saved Objects type validator', () => {
     it('should throw an error when given invalid values', () => {
       const data = createMockObject({ attributes: { foo: false } });
       expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes.foo]: expected value of type [string] but got [boolean]"`
+        `[Error: [attributes.foo]: expected value of type [string] but got [boolean]]`
       );
     });
 
@@ -76,7 +76,7 @@ describe('Saved Objects type validator', () => {
       // @ts-expect-error Intentionally malformed object
       data.updated_at = false;
       expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[updated_at]: expected value of type [string] but got [boolean]"`
+        `[Error: [updated_at]: expected value of type [string] but got [boolean]]`
       );
     });
 
@@ -102,7 +102,7 @@ describe('Saved Objects type validator', () => {
       });
       const data = createMockObject({ attributes: undefined });
       expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes]: expected value of type [object] but got [undefined]"`
+        `[Error: [attributes]: expected value of type [object] but got [undefined]]`
       );
     });
 
@@ -117,7 +117,7 @@ describe('Saved Objects type validator', () => {
       // @ts-expect-error Intentionally malformed object
       data.updated_at = false;
       expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[updated_at]: expected value of type [string] but got [boolean]"`
+        `[Error: [updated_at]: expected value of type [string] but got [boolean]]`
       );
     });
   });

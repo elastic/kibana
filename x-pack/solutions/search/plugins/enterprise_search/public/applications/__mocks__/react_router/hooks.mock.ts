@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockHistory, mockLocation } from './state.mock';
+
+import type { generatePath } from 'react-router-dom';
+
+import { vi } from 'vitest';
 
 export const mockUseHistory = vi.fn(() => mockHistory);
 export const mockUseLocation = vi.fn(() => mockLocation);
@@ -15,7 +17,7 @@ export const mockUseParams = vi.fn(() => ({}));
 export const mockUseRouteMatch = vi.fn(() => true);
 
 vi.mock('react-router-dom', async (importOriginal) => {
-  const originalModule = await importOriginal<typeof import('react-router-dom')>();
+  const originalModule = await importOriginal<{ generatePath: typeof generatePath }>();
   return {
     ...originalModule,
     useHistory: mockUseHistory,

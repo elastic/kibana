@@ -27,7 +27,11 @@ describe('AnimatedSearchBarContainer', () => {
     // the viewport instead of wrapping inside the chip (see security-team#17288).
     const { getByTestId } = renderContainer();
 
-    expect(getByTestId('container')).toHaveStyleRule('grid-template-columns', 'minmax(0, 1fr)');
+    // The emotion compiler may strip the space after the comma, depending on the transform.
+    expect(getByTestId('container')).toHaveStyleRule(
+      'grid-template-columns',
+      /^minmax\(0,\s?1fr\)$/
+    );
   });
 
   it('keeps a single grid row so the toggle-search collapse/expand animation is preserved', () => {

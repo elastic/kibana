@@ -294,7 +294,9 @@ describe('#rawToSavedObject', () => {
           type: 'foo',
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"_primary_term from elasticsearch must be an integer"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[TypeError: _primary_term from elasticsearch must be an integer]`
+    );
   });
 
   test(`if only _primary_term is throws`, () => {
@@ -306,7 +308,9 @@ describe('#rawToSavedObject', () => {
           type: 'foo',
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"_seq_no from elasticsearch must be an integer"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[TypeError: _seq_no from elasticsearch must be an integer]`
+    );
   });
 
   test('if specified it copies the _source.updated_at property to updated_at', () => {
@@ -658,7 +662,7 @@ describe('#rawToSavedObject', () => {
     });
   });
 
-  describe('throws if provided invalid type', () => {
+  test('throws if provided invalid type', () => {
     expect(() =>
       singleNamespaceSerializer.rawToSavedObject({
         _id: 'foo:bar',
@@ -669,7 +673,7 @@ describe('#rawToSavedObject', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Expected saved object type to be a string but given [String] with [foo] value."`
+      `[TypeError: Expected saved object type to be a string but given [String] with [foo] value.]`
     );
 
     expect(() =>
@@ -685,11 +689,11 @@ describe('#rawToSavedObject', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Expected saved object type to be a string but given [Object] with [foo] value."`
+      `[TypeError: Expected saved object type to be a string but given [Object] with [foo] value.]`
     );
   });
 
-  describe('throws if provided invalid id', () => {
+  test('throws if provided invalid id', () => {
     expect(() =>
       singleNamespaceSerializer.rawToSavedObject({
         // @ts-expect-error expects a string
@@ -700,7 +704,7 @@ describe('#rawToSavedObject', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Expected document id to be a string but given [String] with [foo:bar] value."`
+      `[TypeError: Expected document id to be a string but given [String] with [foo:bar] value.]`
     );
   });
 
@@ -929,7 +933,7 @@ describe('#savedObjectToRaw', () => {
         attributes: {},
         version: 'foo',
       } as any)
-    ).toThrowErrorMatchingInlineSnapshot(`"Invalid version [foo]"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid version [foo]]`);
   });
 
   test('it copies attributes to _source[type]', () => {

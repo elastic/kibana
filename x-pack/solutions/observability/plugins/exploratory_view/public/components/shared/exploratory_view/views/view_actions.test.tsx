@@ -16,13 +16,15 @@ import type { AllSeries } from '../hooks/use_series_storage';
 import { reportTypeKey } from '../hooks/use_series_storage';
 import { ReportTypes } from '../../../..';
 
+const actualHooks = { ...hooks };
+
 describe('ViewActions', () => {
   const applyChanges = vi.fn();
 
-  const mockSeriesStorage = async (allSeries: AllSeries, urlAllSeries: AllSeries) => {
+  const mockSeriesStorage = (allSeries: AllSeries, urlAllSeries: AllSeries) => {
     vi.clearAllMocks();
     vi.spyOn(hooks, 'useSeriesStorage').mockReturnValue({
-      ...(await vi.importActual('../hooks/use_series_storage')),
+      ...actualHooks,
       allSeries,
       applyChanges,
       storage: {

@@ -13,7 +13,7 @@ import { schema } from '../..';
 
 test('is required by default', () => {
   expect(() => schema.uri().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [undefined]."`
+    `[Error: expected value of type [string] but got [undefined].]`
   );
 });
 
@@ -49,21 +49,21 @@ test('returns error when value is not a URI', () => {
   const uriSchema = schema.uri();
 
   expect(() => uriSchema.validate('3domain.local')).toThrowErrorMatchingInlineSnapshot(
-    `"value must be a valid URI (see RFC 3986)."`
+    `[Error: value must be a valid URI (see RFC 3986).]`
   );
   expect(() =>
     uriSchema.validate('http://8010:0:0:0:9:500:300C:200A')
-  ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid URI (see RFC 3986)."`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: value must be a valid URI (see RFC 3986).]`);
   expect(() => uriSchema.validate('-')).toThrowErrorMatchingInlineSnapshot(
-    `"value must be a valid URI (see RFC 3986)."`
+    `[Error: value must be a valid URI (see RFC 3986).]`
   );
   expect(() =>
     uriSchema.validate('https://example.com?baz[]=foo&baz[]=bar')
-  ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid URI (see RFC 3986)."`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: value must be a valid URI (see RFC 3986).]`);
 
   const tooLongUri = `http://${'a'.repeat(256)}`;
   expect(() => uriSchema.validate(tooLongUri)).toThrowErrorMatchingInlineSnapshot(
-    `"value must be a valid URI (see RFC 3986)."`
+    `[Error: value must be a valid URI (see RFC 3986).]`
   );
 });
 
@@ -79,10 +79,10 @@ describe('#scheme', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
     expect(() => uriSchema.validate('ftp://elastic.co')).toThrowErrorMatchingInlineSnapshot(
-      `"expected URI with scheme [http|https]."`
+      `[Error: expected URI with scheme [http|https].]`
     );
     expect(() => uriSchema.validate('file:///kibana.log')).toThrowErrorMatchingInlineSnapshot(
-      `"expected URI with scheme [http|https]."`
+      `[Error: expected URI with scheme [http|https].]`
     );
   });
 });
@@ -135,20 +135,20 @@ describe('#validate', () => {
 
     expect(() =>
       schema.uri({ validate }).validate('http://kibana.local')
-    ).toThrowErrorMatchingInlineSnapshot(`"validator failure"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: validator failure]`);
   });
 });
 
 test('returns error when not string', () => {
   expect(() => schema.uri().validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]."`
+    `[Error: expected value of type [string] but got [number].]`
   );
 
   expect(() => schema.uri().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [Array]."`
+    `[Error: expected value of type [string] but got [Array].]`
   );
 
   expect(() => schema.uri().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [RegExp]."`
+    `[Error: expected value of type [string] but got [RegExp].]`
   );
 });

@@ -104,7 +104,7 @@ describe('getCasesConnectorType', () => {
 
     it('throws if the owner is undefined', () => {
       expect(() => caseConnectorType.getKibanaPrivileges?.()).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot authorize cases. Owner is not defined in the subActionParams."`
+        `[Error: Cannot authorize cases. Owner is not defined in the subActionParams.]`
       );
     });
   });

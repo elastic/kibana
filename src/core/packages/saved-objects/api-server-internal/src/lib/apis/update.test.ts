@@ -52,6 +52,7 @@ import {
   mockTimestampFieldsWithCreated,
   ACCESS_CONTROL_TYPE,
   MULTI_NAMESPACE_TYPE,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
@@ -509,7 +510,7 @@ describe('#update', () => {
         await expect(
           repository.update(type, id, attributes, { retryOnConflict: 3 })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Saved object [index-pattern/logstash-*] conflict"`
+          `[Error: Saved object [index-pattern/logstash-*] conflict]`
         );
 
         expect(client.get).toHaveBeenCalledTimes(4);
@@ -528,7 +529,7 @@ describe('#update', () => {
             version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Saved object [index-pattern/logstash-*] conflict"`
+          `[Error: Saved object [index-pattern/logstash-*] conflict]`
         );
 
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -611,13 +612,15 @@ describe('#update', () => {
       const expectNotFoundError = async (type: string, id: string) => {
         await expect(
           repository.update(type, id, {}, { migrationVersionCompatibility: 'raw' })
-        ).rejects.toThrow(createGenericNotFoundErrorPayload(type, id));
+        ).rejects.toThrow(errorWithMessage(createGenericNotFoundErrorPayload(type, id)));
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
 
       it(`throws when type is invalid`, async () => {
@@ -632,7 +635,7 @@ describe('#update', () => {
 
       it(`throws when id is empty`, async () => {
         await expect(repository.update(type, '', attributes)).rejects.toThrow(
-          createBadRequestErrorPayload('id cannot be empty')
+          errorWithMessage(createBadRequestErrorPayload('id cannot be empty'))
         );
         expect(client.index).not.toHaveBeenCalled();
       });
@@ -692,7 +695,9 @@ describe('#update', () => {
               },
             }
           )
-        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(
+          errorWithMessage(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id))
+        );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.index).not.toHaveBeenCalled();

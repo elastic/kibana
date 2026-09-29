@@ -23,7 +23,7 @@ import { userProfiles, userProfilesMap } from '../../containers/user_profiles/ap
 
 vi.mock('../../common/lib/kibana');
 vi.mock('../../common/navigation/hooks');
-vi.mock('copy-to-clipboard', () => vi.fn());
+vi.mock('copy-to-clipboard', () => ({ default: vi.fn() }));
 
 describe('createCommonUpdateUserActionBuilder ', () => {
   const label = <>{'A label'}</>;

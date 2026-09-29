@@ -13,7 +13,7 @@ import React from 'react';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { CasesMetrics } from './cases_metrics';
 
-vi.mock('pretty-ms', () => vi.fn().mockReturnValue('2ms'));
+vi.mock('pretty-ms', () => ({ default: vi.fn().mockReturnValue('2ms') }));
 
 describe('Cases metrics', () => {
   const props = {

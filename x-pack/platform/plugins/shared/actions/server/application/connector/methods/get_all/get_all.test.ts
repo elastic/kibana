@@ -33,6 +33,7 @@ import { createMockInMemoryConnector } from '../../mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import type * as ConnectorSpecs from '@kbn/connector-specs';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 vi.mock('@kbn/connector-specs', async () => {
@@ -99,14 +100,16 @@ let actionsClient: ActionsClient;
 const actionTypeRegistry: ActionTypeRegistry = vi.fn() as unknown as ActionTypeRegistry;
 const authTypeRegistry: AuthTypeRegistry =
   authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
+const actualConnectorSpecs = await vi.importActual<typeof ConnectorSpecs>('@kbn/connector-specs');
+
 describe('getAll()', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    (connectorTypeHasInboundEvents as Mock).mockImplementation(async (actionTypeId: string) =>
-      (await vi.importActual('@kbn/connector-specs')).connectorTypeHasInboundEvents(actionTypeId)
+    (connectorTypeHasInboundEvents as Mock).mockImplementation((actionTypeId: string) =>
+      actualConnectorSpecs.connectorTypeHasInboundEvents(actionTypeId)
     );
-    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
-      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
+    (connectorTypeIsDual as Mock).mockImplementation((actionTypeId: string) =>
+      actualConnectorSpecs.connectorTypeIsDual(actionTypeId)
     );
     actionTypeRegistry.isDeprecated = vi.fn().mockReturnValue(false);
     actionsClient = new ActionsClient({

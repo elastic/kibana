@@ -465,7 +465,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: invalid keys \\"foo\\""`
+        `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: invalid keys "foo"]`
       );
     });
 
@@ -2190,7 +2190,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field customFields is too long. Array must be of length <= 10.]`
       );
     });
 
@@ -2221,7 +2221,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid duplicated customFields keys in request: duplicated_key"`
+        `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: Invalid duplicated customFields keys in request: duplicated_key]`
       );
     });
 
@@ -2252,7 +2252,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid custom field keys: missing_key"`
+        `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: Invalid custom field keys: missing_key]`
       );
     });
 
@@ -2305,7 +2305,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
+        `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: Invalid value "null" supplied for the following required custom fields: "missing field 1", "missing field 2"]`
       );
     });
 
@@ -2345,7 +2345,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: All update fields are identical to current version."`
+        `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: All update fields are identical to current version.]`
       );
     });
 
@@ -2376,7 +2376,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The following custom fields have the wrong type in the request: \\"missing field 1\\", \\"foo\\""`
+        `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The following custom fields have the wrong type in the request: "missing field 1", "foo"]`
       );
     });
   });
@@ -2774,7 +2774,7 @@ describe('update', () => {
             casesClientMock
           )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized"`
+          `[CaseError: Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: Unauthorized]`
         );
       });
     });

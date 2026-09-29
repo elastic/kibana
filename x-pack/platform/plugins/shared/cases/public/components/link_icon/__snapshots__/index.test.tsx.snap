@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LinkIcon it renders 1`] = `
+exports[`LinkIcon > it renders 1`] = `
 <EuiLink
   aria-label="Test link"
   className="casesLinkIcon"

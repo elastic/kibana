@@ -68,7 +68,7 @@ describe('register()', () => {
     expect(() =>
       ruleTypeRegistry.register(getTestRuleType('my-test-alert-type-1'))
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Object type \\"my-test-alert-type-1\\" is already registered."`
+      `[Error: Object type "my-test-alert-type-1" is already registered.]`
     );
   });
 });
@@ -102,7 +102,7 @@ describe('get()', () => {
     expect(() =>
       actionTypeRegistry.get('not-exist-action-type')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Object type \\"not-exist-action-type\\" is not registered."`
+      `[Error: Object type "not-exist-action-type" is not registered.]`
     );
   });
 });

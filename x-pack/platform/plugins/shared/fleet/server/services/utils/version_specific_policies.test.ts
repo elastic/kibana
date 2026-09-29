@@ -60,6 +60,7 @@ vi.mock('../agent_policy', () => {
 });
 
 import * as AgentService from '../agents';
+import { agentPolicyService } from '../agent_policy';
 
 import {
   buildVariantAgentsKuery,
@@ -256,10 +257,7 @@ describe('getVersionSpecificPolicies', () => {
   });
 
   it('uses the rebuilt policy secret_references when the policy is rebuilt for the agent version', async () => {
-    const { agentPolicyService: mockedAgentPolicyService } = (await vi.importMock(
-      '../agent_policy'
-    )) as any;
-    mockedAgentPolicyService.getFullAgentPolicy.mockImplementation(
+    (agentPolicyService.getFullAgentPolicy as Mock).mockImplementation(
       async (_: any, id: string, { agentVersion }: { agentVersion: string }) => ({
         id,
         inputs: agentVersion.startsWith('9.')

@@ -1,13 +1,15 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-01-31T18:33:22.011-05:00][INFO ][some-context] You know, just for your info."`;
+exports[
+  `appends records via multiple appenders. > console logs 1`
+] = `"[2012-01-31T18:33:22.011-05:00][INFO ][some-context] You know, just for your info."`;
 
-exports[`appends records via multiple appenders.: file logs 1`] = `
+exports[`appends records via multiple appenders. > file logs 1`] = `
 "[2012-01-31T13:33:22.011-05:00][WARN ][tests] Config is not ready!
 "
 `;
 
-exports[`appends records via multiple appenders.: file logs 2`] = `
+exports[`appends records via multiple appenders. > file logs 2`] = `
 "[2012-01-31T08:33:22.011-05:00][ERROR][tests.child] Too bad that config is not ready :/
 "
 `;
@@ -67,7 +69,9 @@ Object {
 }
 `;
 
-exports[`flushes memory buffer logger and switches to real logger once config is provided: buffered messages 1`] = `
+exports[
+  `flushes memory buffer logger and switches to real logger once config is provided > buffered messages 1`
+] = `
 Object {
   "@timestamp": "2012-02-01T09:33:22.011-05:00",
   "ecs": Object {
@@ -86,7 +90,9 @@ Object {
 }
 `;
 
-exports[`flushes memory buffer logger and switches to real logger once config is provided: new messages 1`] = `
+exports[
+  `flushes memory buffer logger and switches to real logger once config is provided > new messages 1`
+] = `
 Object {
   "@timestamp": "2012-01-31T23:33:22.011-05:00",
   "ecs": Object {

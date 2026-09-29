@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
@@ -19,6 +20,8 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CsvExportButton } from './csv_export_button';
 import { testQueryClientConfig } from '../utils/test';
+import { useAlertsTableContext as mockedUseAlertsTableContext } from '../contexts/alerts_table_context';
+import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 
 vi.mock('../contexts/alerts_table_context', async () => {
   const actual = await vi.importActual('../contexts/alerts_table_context');
@@ -28,7 +31,7 @@ vi.mock('../contexts/alerts_table_context', async () => {
   };
 });
 
-const { useAlertsTableContext } = await vi.importMock('../contexts/alerts_table_context');
+const useAlertsTableContext = mockedUseAlertsTableContext as Mock;
 
 vi.mock('@kbn/alerts-ui-shared', () => {
   const mocked = {
@@ -142,7 +145,6 @@ describe('CsvExportButton', () => {
   });
 
   it('fetches alert index names via the query hook', async () => {
-    const { useFetchAlertsIndexNamesQuery } = await vi.importMock('@kbn/alerts-ui-shared');
     render(<CsvExportButton />, { wrapper });
 
     expect(useFetchAlertsIndexNamesQuery).toHaveBeenCalledWith({

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`CsvGenerator PIT strategy keeps order of the columns during the scroll 1`] = `
 "\\"_id\\",\\"_index\\",\\"_score\\",a,b

@@ -25,6 +25,7 @@ import {
   changeAgentPrivilegeLevel,
 } from './change_privilege_level';
 import { getAgents } from './crud';
+import * as crud from './crud';
 import * as changePrivilegeRunner from './change_privilege_runner';
 
 vi.mock('../package_policy');
@@ -282,11 +283,9 @@ describe('bulkChangeAgentsPrivilegeLevel kuery path — cheap count and sync/asy
   let mockBulkChangePrivilegeAgentsBatch: MockInstance;
   let mockChangePrivilegeActionRunner: MockInstance;
 
-  beforeEach(async () => {
-    mockGetAgentsByKuery = vi.spyOn(await vi.importMock('./crud'), 'getAgentsByKuery');
-    mockOpenPointInTime = vi
-      .spyOn(await vi.importMock('./crud'), 'openPointInTime')
-      .mockResolvedValue('pit-id');
+  beforeEach(() => {
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery');
+    mockOpenPointInTime = vi.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
     mockBulkChangePrivilegeAgentsBatch = vi
       .spyOn(changePrivilegeRunner, 'bulkChangePrivilegeAgentsBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });

@@ -32,7 +32,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following labels: \\"label 1\\", \\"label 2\\""`
+        `[Error: Invalid custom field types in request for the following labels: "label 1", "label 2"]`
       );
     });
 
@@ -50,7 +50,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following labels: \\"label 1\\""`
+        `[Error: Invalid custom field types in request for the following labels: "label 1"]`
       );
     });
 
@@ -197,7 +197,7 @@ describe('validators', () => {
             },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: No custom fields configured.]`);
     });
 
     it('throws if configuration has custom fields and template has no custom fields', () => {
@@ -226,7 +226,7 @@ describe('validators', () => {
             },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields added to template."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: No custom fields added to template.]`);
     });
 
     it('throws for a single invalid type', () => {
@@ -269,7 +269,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: \\"first label\\""`
+        `[Error: The following custom fields have the wrong type in the request: "first label"]`
       );
     });
 
@@ -325,7 +325,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: \\"first label\\", \\"second label\\", \\"third label\\""`
+        `[Error: The following custom fields have the wrong type in the request: "first label", "second label", "third label"]`
       );
     });
 
@@ -357,7 +357,7 @@ describe('validators', () => {
             },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid custom field keys: invalid_key]`);
     });
 
     it('throws if template has duplicated custom field keys', () => {
@@ -401,7 +401,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid duplicated templates[0]'s customFields keys in request: first_key"`
+        `[Error: Invalid duplicated templates[0]'s customFields keys in request: first_key]`
       );
     });
   });

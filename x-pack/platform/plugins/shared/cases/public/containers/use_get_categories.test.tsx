@@ -21,7 +21,6 @@ vi.mock('../common/lib/kibana');
 
 // Failing: See https://github.com/elastic/kibana/issues/207999
 describe('useGetCategories', () => {
-  const abortCtrl = new AbortController();
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -36,7 +35,7 @@ describe('useGetCategories', () => {
 
     await waitFor(() =>
       expect(spyOnGetCategories).toHaveBeenCalledWith({
-        signal: abortCtrl.signal,
+        signal: expect.any(AbortSignal),
         owner: [SECURITY_SOLUTION_OWNER],
       })
     );

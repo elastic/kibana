@@ -6,12 +6,17 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 
 import { reviewUpgrade, updatePackage } from './update';
+import {
+  getInstallationObject as getInstallationObjectImpl,
+  getPackageInfo as getPackageInfoImpl,
+} from './get';
 
 vi.mock('./get', () => {
   const mocked = {
@@ -27,7 +32,8 @@ vi.mock('../../audit_logging', () => {
   return { ...mocked, default: mocked };
 });
 
-const { getInstallationObject, getPackageInfo } = await vi.importMock('./get');
+const getInstallationObject = getInstallationObjectImpl as Mock;
+const getPackageInfo = getPackageInfoImpl as Mock;
 
 const pendingReview = {
   target_version: '2.0.0',

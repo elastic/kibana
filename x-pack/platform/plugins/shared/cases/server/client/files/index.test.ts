@@ -21,7 +21,7 @@ describe('server files', () => {
 
       expect(() =>
         createFileEntities([{ fileKind: 'abc', id: '1' }])
-      ).toThrowErrorMatchingInlineSnapshot(`"File id 1 has invalid file kind abc"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: File id 1 has invalid file kind abc]`);
     });
 
     it('throws an error when one of the file entities does not have a valid file kind', () => {
@@ -32,7 +32,7 @@ describe('server files', () => {
           { fileKind: constructFileKindIdByOwner(SECURITY_SOLUTION_OWNER), id: '1' },
           { fileKind: 'abc', id: '2' },
         ])
-      ).toThrowErrorMatchingInlineSnapshot(`"File id 2 has invalid file kind abc"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: File id 2 has invalid file kind abc]`);
     });
 
     it('returns an array of entities when the file kind is valid', () => {

@@ -47,7 +47,7 @@ describe('SavedObjectTypeRegistry', () => {
       registry.registerType(createType({ name: 'typeB' }));
       expect(() => {
         registry.registerType(createType({ name: 'typeA' }));
-      }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: Type 'typeA' is already registered]`);
     });
 
     it('throws when trying to register a removed type: %', () => {
@@ -73,7 +73,7 @@ describe('SavedObjectTypeRegistry', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'"`
+        `[Error: Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement']`
       );
 
       expect(() => {
@@ -86,7 +86,7 @@ describe('SavedObjectTypeRegistry', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'"`
+        `[Error: Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement']`
       );
 
       expect(() => {
@@ -100,7 +100,7 @@ describe('SavedObjectTypeRegistry', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'"`
+        `[Error: Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement']`
       );
       expect(() => {
         registry.registerType(
@@ -126,7 +126,7 @@ describe('SavedObjectTypeRegistry', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+        `[Error: Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport']`
       );
       expect(() => {
         registry.registerType(
@@ -139,7 +139,7 @@ describe('SavedObjectTypeRegistry', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+        `[Error: Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport']`
       );
       expect(() => {
         registry.registerType(
@@ -164,7 +164,7 @@ describe('SavedObjectTypeRegistry', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeHiddenA: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'"`
+        `[Error: Type typeHiddenA: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true']`
       );
 
       expect(() => {
@@ -259,7 +259,7 @@ describe('SavedObjectTypeRegistry', () => {
             })
           );
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Type typeAC: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'."`
+          `[Error: Type typeAC: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'.]`
         );
       });
 

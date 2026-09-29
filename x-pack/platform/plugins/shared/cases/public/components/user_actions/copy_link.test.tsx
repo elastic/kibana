@@ -20,7 +20,7 @@ import { UserActionCopyLink } from './copy_link';
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 vi.mock('../../common/navigation/hooks');
-vi.mock('copy-to-clipboard', () => vi.fn());
+vi.mock('copy-to-clipboard', () => ({ default: vi.fn() }));
 vi.mock('../../common/lib/kibana');
 
 const mockGetUrlForApp = vi.fn(

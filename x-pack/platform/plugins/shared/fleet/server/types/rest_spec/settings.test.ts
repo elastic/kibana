@@ -19,6 +19,8 @@ describe('PutSpaceSettingsRequestSchema', () => {
       PutSpaceSettingsRequestSchema.body.validate({
         allowed_namespace_prefixes: ['test', 'test-'],
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[allowed_namespace_prefixes.1]: Must not contain -"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: [allowed_namespace_prefixes.1]: Must not contain -]`
+    );
   });
 });

@@ -22,6 +22,7 @@ import type { ObservabilityPublicPluginsStart } from '../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { RulesPage } from './rules';
+import { useGetRuleTypesPermissions as useGetRuleTypesPermissionsImport } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
@@ -101,9 +102,7 @@ vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 }));
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks');
-const { useGetRuleTypesPermissions } = await vi.importMock(
-  '@kbn/alerts-ui-shared/src/common/hooks'
-);
+const useGetRuleTypesPermissions = useGetRuleTypesPermissionsImport as unknown as Mock;
 
 describe('RulesPage with all capabilities', () => {
   beforeEach(() => {

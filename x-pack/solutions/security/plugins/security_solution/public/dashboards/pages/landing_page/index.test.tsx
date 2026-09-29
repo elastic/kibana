@@ -121,8 +121,8 @@ describe('Dashboards landing', () => {
     it('should render items', async () => {
       await renderDashboardLanding();
 
-      expect(screen.queryByText(OVERVIEW_ITEM_LABEL)).toBeInTheDocument();
-      expect(screen.queryByText(DETECTION_RESPONSE_ITEM_LABEL)).toBeInTheDocument();
+      expect(await screen.findByText(OVERVIEW_ITEM_LABEL)).toBeInTheDocument();
+      expect(await screen.findByText(DETECTION_RESPONSE_ITEM_LABEL)).toBeInTheDocument();
     });
 
     it('should render items in the same order as defined', async () => {
@@ -131,10 +131,10 @@ describe('Dashboards landing', () => {
       });
       await renderDashboardLanding();
 
-      const overviewItem = screen.queryByTestId(
+      const overviewItem = await screen.findByTestId(
         `LandingImageCard-item-${SecurityPageName.overview}`
       );
-      const detectionItem = screen.queryByTestId(
+      const detectionItem = await screen.findByTestId(
         `LandingImageCard-item-${SecurityPageName.detectionAndResponse}`
       );
 

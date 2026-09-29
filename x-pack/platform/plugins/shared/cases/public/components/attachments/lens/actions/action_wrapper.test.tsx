@@ -17,9 +17,9 @@ import { ActionWrapper } from './action_wrapper';
 import { getMockServices } from './mocks';
 import type { CasesActionContextProps } from './types';
 
-vi.mock('../../../cases_context', () =>
-  vi.fn().mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>)
-);
+vi.mock('../../../cases_context', () => ({
+  default: vi.fn().mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>),
+}));
 
 vi.mock('../../../../client/helpers/can_use_cases', async () => {
   const actual = await vi.importActual('../../../../client/helpers/can_use_cases');

@@ -52,6 +52,7 @@ import {
   createBadRequestErrorPayload,
   createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 
 describe('#incrementCounter', () => {
@@ -301,7 +302,7 @@ describe('#incrementCounter', () => {
         field: Array<string | SavedObjectsIncrementCounterField>
       ) => {
         await expect(repository.incrementCounter(type, id, field)).rejects.toThrow(
-          createUnsupportedTypeErrorPayload(type)
+          errorWithMessage(createUnsupportedTypeErrorPayload(type))
         );
       };
 
@@ -310,7 +311,9 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(type, id, counterFields, {
             namespace: ALL_NAMESPACES_STRING,
           })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
 
       it(`throws when type is not a string`, async () => {
@@ -330,7 +333,7 @@ describe('#incrementCounter', () => {
 
       it(`throws when id is empty`, async () => {
         await expect(repository.incrementCounter(type, '', counterFields)).rejects.toThrow(
-          createBadRequestErrorPayload('id cannot be empty')
+          errorWithMessage(createBadRequestErrorPayload('id cannot be empty'))
         );
         expect(client.update).not.toHaveBeenCalled();
       });
@@ -377,7 +380,9 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(MULTI_NAMESPACE_ISOLATED_TYPE, id, counterFields, {
             namespace,
           })
-        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(
+          errorWithMessage(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id))
+        );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.update).not.toHaveBeenCalled();
@@ -396,7 +401,9 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(MULTI_NAMESPACE_ISOLATED_TYPE, id, counterFields, {
             namespace,
           })
-        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(
+          errorWithMessage(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id))
+        );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.update).not.toHaveBeenCalled();

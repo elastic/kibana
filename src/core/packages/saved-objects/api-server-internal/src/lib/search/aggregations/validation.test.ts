@@ -297,7 +297,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() =>
       validateAndConvertAggregations(['alert'], aggregations, mockMappings)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[average.avg.field] Invalid attribute path: alert.actions.group"`
+      `[Error: [average.avg.field] Invalid attribute path: alert.actions.group]`
     );
   });
 
@@ -313,7 +313,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() =>
       validateAndConvertAggregations(['alert'], aggregations, mockMappings)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[average.avg.field] Invalid attribute path: alert.attributes.actions.non_existing"`
+      `[Error: [average.avg.field] Invalid attribute path: alert.attributes.actions.non_existing]`
     );
   });
 
@@ -329,7 +329,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() =>
       validateAndConvertAggregations(['alert'], aggregations, mockMappings)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[average.avg.field] Invalid attribute path: alert.bad_root"`
+      `[Error: [average.avg.field] Invalid attribute path: alert.bad_root]`
     );
   });
 
@@ -394,7 +394,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() => {
       validateAndConvertAggregations(['alert'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[myFilter.max.field] Invalid attribute path: foo.attributes.bytes"`
+      `[Error: [myFilter.max.field] Invalid attribute path: foo.attributes.bytes]`
     );
   });
 
@@ -410,7 +410,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.auto_date_histogram] auto_date_histogram aggregation is not valid (or not registered yet)"`
+      `[Error: [someAgg.auto_date_histogram] auto_date_histogram aggregation is not valid (or not registered yet)]`
     );
   });
 
@@ -433,7 +433,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.aggs.unknownAgg.cumulative_cardinality] cumulative_cardinality aggregation is not valid (or not registered yet)"`
+      `[Error: [someAgg.aggs.unknownAgg.cumulative_cardinality] cumulative_cardinality aggregation is not valid (or not registered yet)]`
     );
   });
 
@@ -450,7 +450,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.max.script]: Additional properties are not allowed ('script' was unexpected)"`
+      `[Error: [someAgg.max.script]: Additional properties are not allowed ('script' was unexpected)]`
     );
   });
 
@@ -474,7 +474,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.aggs.nested.max.script]: Additional properties are not allowed ('script' was unexpected)"`
+      `[Error: [someAgg.aggs.nested.max.script]: Additional properties are not allowed ('script' was unexpected)]`
     );
   });
 
@@ -497,7 +497,7 @@ describe('validateAndConvertAggregations', () => {
         mockMappings
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      '"[aggName.cardinality.field] Invalid attribute path: alert.alert.attributes.actions.group"'
+      `[Error: [aggName.cardinality.field] Invalid attribute path: alert.alert.attributes.actions.group]`
     );
   });
 
@@ -520,7 +520,7 @@ describe('validateAndConvertAggregations', () => {
         mockMappings
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      '"[aggName.cardinality.field] Invalid attribute path: alert.alert.actions.group"'
+      `[Error: [aggName.cardinality.field] Invalid attribute path: alert.alert.actions.group]`
     );
   });
 

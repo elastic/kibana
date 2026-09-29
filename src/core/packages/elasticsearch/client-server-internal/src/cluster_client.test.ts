@@ -1479,7 +1479,7 @@ describe('ClusterClient', () => {
       expect(() => {
         client = scopedClusterClient.asSecondaryAuthUser;
       }).toThrowErrorMatchingInlineSnapshot(
-        `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
+        `[Error: asSecondaryAuthUser called from a client scoped to a request without 'authorization' header.]`
       );
     });
 
@@ -1663,7 +1663,7 @@ describe('ClusterClient', () => {
         // trigger client instantiation via getter
         client = scopedClusterClient.asSecondaryAuthUser;
       }).toThrowErrorMatchingInlineSnapshot(
-        `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
+        `[Error: asSecondaryAuthUser called from a client scoped to a request without 'authorization' header.]`
       );
     });
 
@@ -1989,7 +1989,7 @@ describe('ClusterClient', () => {
       internalClient.close.mockRejectedValue(new Error('error closing client'));
 
       await expect(clusterClient.close()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"error closing client"`
+        `[Error: error closing client]`
       );
     });
 

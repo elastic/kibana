@@ -115,7 +115,7 @@ describe('Fetch', () => {
           { headers: { hello: 'mars' } }
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch arguments, must either be (string, object) or (object, undefined), received (object, object)"`
+        `[Error: Invalid fetch arguments, must either be (string, object) or (object, undefined), received (object, object)]`
       );
     });
 
@@ -176,7 +176,7 @@ describe('Fetch', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+        `[Error: Invalid fetch headers, headers beginning with "kbn-" are not allowed: [kbn-version]]`
       );
     });
     it('should not allow overwriting of kbn-build-number header', async () => {
@@ -189,7 +189,7 @@ describe('Fetch', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-build-number]"`
+        `[Error: Invalid fetch headers, headers beginning with "kbn-" are not allowed: [kbn-build-number]]`
       );
     });
 
@@ -203,7 +203,7 @@ describe('Fetch', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"x-elastic-internal-\\" are not allowed: [x-elastic-internal-origin]"`
+        `[Error: Invalid fetch headers, headers beginning with "x-elastic-internal-" are not allowed: [x-elastic-internal-origin]]`
       );
     });
 
@@ -247,7 +247,7 @@ describe('Fetch', () => {
           asSystemRequest: true,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+        `[Error: Invalid fetch headers, headers beginning with "kbn-" are not allowed: [kbn-system-request]]`
       );
     });
 
@@ -259,7 +259,7 @@ describe('Fetch', () => {
           asSystemRequest: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+        `[Error: Invalid fetch headers, headers beginning with "kbn-" are not allowed: [kbn-system-request]]`
       );
     });
 

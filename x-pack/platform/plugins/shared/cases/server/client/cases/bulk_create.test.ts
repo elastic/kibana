@@ -711,7 +711,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ foo: 'bar' }) }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: invalid keys \\"foo\\""`
+        `[CaseError: Failed to bulk create cases: Error: invalid keys "foo"]`
       );
     });
 
@@ -1353,7 +1353,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
+        `[CaseError: Failed to bulk create cases: Error: Invalid value "null" supplied for the following required custom fields: "missing field 1", "missing field 2"]`
       );
     });
 
@@ -1378,7 +1378,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases() }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Missing required custom fields without default value configured: \\"label 1\\", \\"label 2\\""`
+        `[CaseError: Failed to bulk create cases: Error: Missing required custom fields without default value configured: "label 1", "label 2"]`
       );
     });
 
@@ -1394,7 +1394,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `[CaseError: Failed to bulk create cases: Error: The length of the field customFields is too long. Array must be of length <= 10.]`
       );
     });
 
@@ -1421,7 +1421,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Invalid duplicated customFields keys in request: duplicated_key"`
+        `[CaseError: Failed to bulk create cases: Error: Invalid duplicated customFields keys in request: duplicated_key]`
       );
     });
 
@@ -1443,7 +1443,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Invalid custom field keys: missing_key"`
+        `[CaseError: Failed to bulk create cases: Error: Invalid custom field keys: missing_key]`
       );
     });
 
@@ -1470,7 +1470,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: The following custom fields have the wrong type in the request: \\"label 1\\", \\"label 2\\""`
+        `[CaseError: Failed to bulk create cases: Error: The following custom fields have the wrong type in the request: "label 1", "label 2"]`
       );
     });
 
@@ -1513,7 +1513,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: casesWithDifferentOwners }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Missing required custom fields without default value configured: \\"stack cases custom field\\""`
+        `[CaseError: Failed to bulk create cases: Error: Missing required custom fields without default value configured: "stack cases custom field"]`
       );
     });
 

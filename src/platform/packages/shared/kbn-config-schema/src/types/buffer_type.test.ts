@@ -16,7 +16,7 @@ test('returns value by default', () => {
 
 test('is required by default', () => {
   expect(() => schema.buffer().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Buffer] but got [undefined]"`
+    `[Error: expected value of type [Buffer] but got [undefined]]`
   );
 });
 
@@ -24,7 +24,7 @@ test('includes namespace in failure', () => {
   expect(() =>
     schema.buffer().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [Buffer] but got [undefined]"`
+    `[Error: [foo-namespace]: expected value of type [Buffer] but got [undefined]]`
   );
 });
 
@@ -48,10 +48,10 @@ describe('#defaultValue', () => {
 
 test('returns error when not a buffer', () => {
   expect(() => schema.buffer().validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Buffer] but got [number]"`
+    `[Error: expected value of type [Buffer] but got [number]]`
   );
 
   expect(() => schema.buffer().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Buffer] but got [Array]"`
+    `[Error: expected value of type [Buffer] but got [Array]]`
   );
 });

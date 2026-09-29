@@ -36,14 +36,14 @@ describe('#string()', () => {
 
   it('throws for non-string flags', () => {
     expect(() => basic.string('bool')).toThrowErrorMatchingInlineSnapshot(
-      `"expected --bool to be a string"`
+      `[Error: expected --bool to be a string]`
     );
   });
 
   describe('required version', () => {
     it('throws when flag is missing', () => {
       expect(() => basic.requiredString('missing')).toThrowErrorMatchingInlineSnapshot(
-        `"missing required flag --missing"`
+        `[Error: missing required flag --missing]`
       );
     });
   });
@@ -70,14 +70,14 @@ describe('#arrayOfStrings()', () => {
 
   it('throws for non-string flags', () => {
     expect(() => basic.arrayOfStrings('bool')).toThrowErrorMatchingInlineSnapshot(
-      `"expected --bool to be a string"`
+      `[Error: expected --bool to be a string]`
     );
   });
 
   describe('required version', () => {
     it('throws when flag is missing', () => {
       expect(() => basic.requiredArrayOfStrings('missing')).toThrowErrorMatchingInlineSnapshot(
-        `"missing required flag --missing"`
+        `[Error: missing required flag --missing]`
       );
     });
   });
@@ -88,7 +88,7 @@ describe('#enum()', () => {
     expect(basic.enum('string', ['a', 'string', 'b'])).toMatchInlineSnapshot(`"string"`);
     expect(basic.enum('missing', ['a', 'b'])).toMatchInlineSnapshot(`undefined`);
     expect(() => basic.enum('string', ['a', 'b'])).toThrowErrorMatchingInlineSnapshot(
-      `"invalid --string, expected one of \\"a\\", \\"b\\""`
+      `[Error: invalid --string, expected one of "a", "b"]`
     );
   });
 });
@@ -102,7 +102,7 @@ describe('#path()', () => {
   describe('required version', () => {
     it('throws if the flag is missing', () => {
       expect(() => basic.requiredPath('missing')).toThrowErrorMatchingInlineSnapshot(
-        `"missing required flag --missing"`
+        `[Error: missing required flag --missing]`
       );
     });
   });
@@ -120,7 +120,7 @@ describe('#path()', () => {
     describe('required version', () => {
       it('throws if the flag is missing', () => {
         expect(() => basic.requiredArrayOfPaths('missing')).toThrowErrorMatchingInlineSnapshot(
-          `"missing required flag --missing"`
+          `[Error: missing required flag --missing]`
         );
       });
     });
@@ -132,20 +132,20 @@ describe('#number()', () => {
     expect(basic.number('num')).toMatchInlineSnapshot(`1234`);
     expect(basic.number('missing')).toMatchInlineSnapshot(`undefined`);
     expect(() => basic.number('bool')).toThrowErrorMatchingInlineSnapshot(
-      `"expected --bool to be a string"`
+      `[Error: expected --bool to be a string]`
     );
     expect(() => basic.number('string')).toThrowErrorMatchingInlineSnapshot(
-      `"unable to parse --string value [string] as a number"`
+      `[Error: unable to parse --string value [string] as a number]`
     );
     expect(() => basic.number('astring')).toThrowErrorMatchingInlineSnapshot(
-      `"unable to parse --astring value [bar] as a number"`
+      `[Error: unable to parse --astring value [bar] as a number]`
     );
   });
 
   describe('required version', () => {
     it('throws if the flag is missing', () => {
       expect(() => basic.requiredNumber('missing')).toThrowErrorMatchingInlineSnapshot(
-        `"missing required flag --missing"`
+        `[Error: missing required flag --missing]`
       );
     });
   });
@@ -155,13 +155,13 @@ describe('#boolean()', () => {
   it('ensures flag is boolean, requires value', () => {
     expect(basic.boolean('bool')).toMatchInlineSnapshot(`true`);
     expect(() => basic.boolean('missing')).toThrowErrorMatchingInlineSnapshot(
-      `"expected --missing to be a boolean"`
+      `[Error: expected --missing to be a boolean]`
     );
     expect(() => basic.boolean('string')).toThrowErrorMatchingInlineSnapshot(
-      `"expected --string to be a boolean"`
+      `[Error: expected --string to be a boolean]`
     );
     expect(() => basic.boolean('astring')).toThrowErrorMatchingInlineSnapshot(
-      `"expected --astring to be a boolean"`
+      `[Error: expected --astring to be a boolean]`
     );
   });
 });

@@ -461,7 +461,7 @@ describe('CasesConnector', () => {
         templateVersion,
         autoPushCase,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Server error]`);
 
     expect(logger.error.mock.calls[0][0]).toBe(
       '[CasesConnector][run] Execution of case connector failed. Message: Server error. Status code: 500'

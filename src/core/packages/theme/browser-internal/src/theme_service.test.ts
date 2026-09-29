@@ -259,7 +259,7 @@ describe('ThemeService', () => {
     it('throws if called before `#setup`', () => {
       expect(() => {
         themeService.start();
-      }).toThrowErrorMatchingInlineSnapshot(`"setup must be called before start"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: setup must be called before start]`);
     });
 
     it('exposes a `theme$` observable with the values provided by the injected metadata', async () => {

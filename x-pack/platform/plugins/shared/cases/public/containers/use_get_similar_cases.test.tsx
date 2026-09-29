@@ -19,7 +19,6 @@ vi.mock('./api');
 vi.mock('../common/lib/kibana/hooks');
 
 describe('useGetSimilarCases', () => {
-  const abortCtrl = new AbortController();
   const addSuccess = vi.fn();
   (useToasts as Mock).mockReturnValue({ addSuccess, addError: vi.fn() });
 
@@ -42,7 +41,7 @@ describe('useGetSimilarCases', () => {
 
     expect(spyOnGetCases).toHaveBeenCalledWith({
       caseId: mockCase.id,
-      signal: abortCtrl.signal,
+      signal: expect.any(AbortSignal),
       page: 0,
       perPage: 10,
     });

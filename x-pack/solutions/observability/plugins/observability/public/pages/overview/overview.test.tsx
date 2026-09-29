@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -21,6 +22,10 @@ import { createObservabilityRuleTypeRegistryMock } from '../../rules/observabili
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { OverviewPage } from './overview';
+import { usePluginContext as usePluginContextImport } from '../../hooks/use_plugin_context';
+import { useHasData as useHasDataImport } from '../../hooks/use_has_data';
+import { useDatePickerContext as useDatePickerContextImport } from '../../hooks/use_date_picker_context';
+import { useTimeBuckets as useTimeBucketsImport } from '../../hooks/use_time_buckets';
 import type { HasDataMap } from '../../context/has_data_context/has_data_context';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
@@ -87,10 +92,10 @@ vi.mock('./components/observability_onboarding_callout', () => {
   return { ...mocked, default: mocked };
 });
 
-const { usePluginContext } = await vi.importMock('../../hooks/use_plugin_context');
-const { useHasData } = await vi.importMock('../../hooks/use_has_data');
-const { useDatePickerContext } = await vi.importMock('../../hooks/use_date_picker_context');
-const { useTimeBuckets } = await vi.importMock('../../hooks/use_time_buckets');
+const usePluginContext = usePluginContextImport as unknown as Mock;
+const useHasData = useHasDataImport as unknown as Mock;
+const useDatePickerContext = useDatePickerContextImport as unknown as Mock;
+const useTimeBuckets = useTimeBucketsImport as unknown as Mock;
 
 function completeHasDataMap(overrides: Partial<HasDataMap> = {}): HasDataMap {
   const loaded = { hasData: false, status: FETCH_STATUS.SUCCESS };

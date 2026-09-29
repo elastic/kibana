@@ -239,7 +239,7 @@ describe('SavedObjectsService', () => {
         expect(() => {
           setup.setClientFactoryProvider(secondFactory);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"custom client factory is already set, and can only be set once"`
+          `[Error: custom client factory is already set, and can only be set once]`
         );
       });
     });
@@ -459,7 +459,7 @@ describe('SavedObjectsService', () => {
           expect(() => {
             setup.setAccessControlTransforms(accessControlTransforms);
           }).toThrowErrorMatchingInlineSnapshot(
-            `"access control tranforms have already been set, and can only be set once"`
+            `[Error: access control tranforms have already been set, and can only be set once]`
           );
         });
       });
@@ -646,7 +646,7 @@ describe('SavedObjectsService', () => {
         expect(() => {
           setup.setClientFactoryProvider(vi.fn());
         }).toThrowErrorMatchingInlineSnapshot(
-          `"cannot call \`setClientFactoryProvider\` after service startup."`
+          `[Error: cannot call \`setClientFactoryProvider\` after service startup.]`
         );
 
         expect(() => {
@@ -657,7 +657,7 @@ describe('SavedObjectsService', () => {
             mappings: { properties: {} },
           });
         }).toThrowErrorMatchingInlineSnapshot(
-          `"cannot call \`registerType\` after service startup."`
+          `[Error: cannot call \`registerType\` after service startup.]`
         );
       });
 

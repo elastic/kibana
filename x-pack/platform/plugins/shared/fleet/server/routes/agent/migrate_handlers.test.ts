@@ -20,6 +20,7 @@ import type {
 } from '@kbn/core/server';
 
 import * as AgentService from '../../services/agents';
+import { licenseService } from '../../services';
 
 import { AgentNotFoundError, FleetUnauthorizedError } from '../../errors';
 
@@ -58,9 +59,9 @@ vi.mock('../../services/app_context', async () => {
 describe('Migrate handlers', () => {
   let mockLicenseService: any;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     // Get the mocked license service
-    mockLicenseService = (await vi.importMock('../../services')).licenseService;
+    mockLicenseService = licenseService;
     // Default to having the required license
     mockLicenseService.hasAtLeast.mockReturnValue(true);
   });

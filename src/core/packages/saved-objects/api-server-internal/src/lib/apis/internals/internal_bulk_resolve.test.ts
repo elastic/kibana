@@ -38,6 +38,7 @@ import {
   enforceError,
   setupAuthorizeAndRedactInternalBulkResolveFailure,
   setupAuthorizeAndRedactInternalBulkResolveSuccess,
+  errorWithMessage,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 import { apiContextMock, type ApiExecutionContextMock } from '../../../mocks';
@@ -241,7 +242,7 @@ describe('internalBulkResolve', () => {
       mockIsNotFoundFromUnsupportedServer.mockReturnValue(true);
 
       await expect(() => internalBulkResolve(params, apiContext)).rejects.toThrow(
-        SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
+        errorWithMessage(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError())
       );
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(client.mget).toHaveBeenCalledTimes(1);

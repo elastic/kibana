@@ -7,6 +7,10 @@
 
 import { vi } from 'vitest';
 
+// Must be imported first: it registers its own `vi.mock` calls when evaluated, so it has to
+// load before any module that depends on the mocked modules (e.g. `AlertsDataGrid`).
+import { mockDataGridProps } from '../components/alerts_data_grid.test';
+
 import React, { useMemo, useReducer } from 'react';
 import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,7 +27,6 @@ import type {
   TestAlertsDataGridProps,
   BaseAlertsDataGridProps,
 } from '../components/alerts_data_grid.test';
-import { mockDataGridProps } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';

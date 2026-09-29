@@ -1,4 +1,483 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), no optio… 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+    ],
+    "must_not": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "range": Object {
+                    "http.response.status_code": Object {
+                      "lt": "500",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
+      },
+    },
+  },
+}
+`;
+
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with opt… 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "host.name": "admin-console.prod.001",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+    ],
+    "must_not": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "range": Object {
+                    "http.response.status_code": Object {
+                      "lt": "500",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
+      },
+    },
+  },
+}
+`;
+
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with opt… 2`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "match_phrase": Object {
+                "host.name": "admin-console.prod.001",
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+    ],
+    "must_not": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "range": Object {
+                    "http.response.status_code": Object {
+                      "lt": "500",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
+      },
+    },
+  },
+}
+`;
+
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with opt… 3`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "http.response.status_code",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "host.name": "admin-console.prod.001",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+    ],
+    "must_not": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "range": Object {
+                    "http.response.status_code": Object {
+                      "lt": "500",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
+      },
+    },
+  },
+}
+`;
+
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with opt… 4`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "http.response.status_code",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "host.name": "admin-console.prod.001",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "match_phrase": Object {
+                "not_nested_1": "authentication",
+              },
+            },
+            Object {
+              "match_phrase": Object {
+                "not_nested_2": "blast-mail.co",
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+    ],
+    "must_not": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "range": Object {
+                    "http.response.status_code": Object {
+                      "lt": "500",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
+      },
+    },
+  },
+}
+`;
+
+exports[`buildEsQuery > should generate correct es query for rule with good query (as filter), no op… 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+    ],
+    "must_not": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "http.response.status_code": Object {
+                "lt": "500",
+              },
+            },
+          },
+        ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
+      },
+    },
+  },
+}
+`;
+
+exports[`buildEsQuery > should generate correct es query for rule with good query (as filter), with … 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "http.response.status_code",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "match_phrase": Object {
+                "host.name": "admin-console.prod.001",
+              },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
+        },
+      },
+    ],
+    "must_not": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "http.response.status_code": Object {
+                "lt": "500",
+              },
+            },
+          },
+        ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
+      },
+    },
+  },
+}
+`;
 
 exports[`buildEsQuery should generate correct es query for rule with good query (as KQL), no optional filter and no total 1`] = `
 Object {

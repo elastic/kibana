@@ -54,8 +54,8 @@ vi.mock('@elastic/eui', async () => {
   };
 });
 
-vi.doMock(MONACO_MODULE, () => {
-  const original = require(MONACO_MODULE);
+vi.doMock(MONACO_MODULE, async () => {
+  const original = await vi.importActual(MONACO_MODULE);
   const originalMonaco = original.monaco;
 
   return {

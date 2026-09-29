@@ -16,7 +16,7 @@ describe('getDocLinks', () => {
     expect(() => {
       (links as unknown as Record<string, unknown>).settings = 'override';
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot assign to read only property 'settings' of object '#<Object>'"`
+      `[TypeError: Cannot assign to read only property 'settings' of object '#<Object>']`
     );
   });
 });

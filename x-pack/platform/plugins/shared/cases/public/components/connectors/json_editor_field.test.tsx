@@ -25,14 +25,19 @@ vi.mock('@kbn/code-editor', async () => {
   };
 });
 
-const setXJson = vi.fn();
-const XJson = {
-  useXJsonMode: (value: unknown) => ({
-    convertToJson: (toJson: unknown) => toJson,
-    setXJson,
-    xJson: value,
-  }),
-};
+const { setXJson, XJson } = vi.hoisted(() => {
+  const setXJsonMock = vi.fn();
+  return {
+    setXJson: setXJsonMock,
+    XJson: {
+      useXJsonMode: (value: unknown) => ({
+        convertToJson: (toJson: unknown) => toJson,
+        setXJson: setXJsonMock,
+        xJson: value,
+      }),
+    },
+  };
+});
 
 vi.mock('@kbn/es-ui-shared-plugin/public', async () => {
   const original = await vi.importActual('@kbn/es-ui-shared-plugin/public');

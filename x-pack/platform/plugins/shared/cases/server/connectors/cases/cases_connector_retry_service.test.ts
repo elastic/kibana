@@ -38,7 +38,7 @@ describe('CasesConnectorRetryService', () => {
     cb.mockRejectedValue(new Error('My error'));
 
     await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"My error"`
+      `[Error: My error]`
     );
 
     expect(cb).toHaveBeenCalledTimes(1);
@@ -49,7 +49,7 @@ describe('CasesConnectorRetryService', () => {
     cb.mockRejectedValue(new CasesConnectorError('My case connector error', 500));
 
     await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"My case connector error"`
+      `[Error: My case connector error]`
     );
 
     expect(cb).toHaveBeenCalledTimes(1);
@@ -63,7 +63,7 @@ describe('CasesConnectorRetryService', () => {
     cb.mockRejectedValue(new CasesConnectorError('My transient error', 409));
 
     await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"My transient error"`
+      `[Error: My transient error]`
     );
 
     expect(cb).toHaveBeenCalledTimes(maxAttempts + 1);
@@ -108,7 +108,7 @@ describe('CasesConnectorRetryService', () => {
       cb.mockRejectedValue(new CasesConnectorError('My transient error', 409));
 
       await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"My transient error"`
+        `[Error: My transient error]`
       );
 
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);
@@ -127,7 +127,7 @@ describe('CasesConnectorRetryService', () => {
       cb.mockRejectedValue(new Error('My error'));
 
       await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"My error"`
+        `[Error: My error]`
       );
 
       expect(mockLogger.warn).not.toHaveBeenCalled();

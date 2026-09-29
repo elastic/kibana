@@ -36,6 +36,7 @@ import {
   createSpySerializer,
   createConflictErrorPayload,
   createType,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 import { performRemoveReferencesTo } from './remove_references_to';
 
@@ -214,7 +215,7 @@ describe('SavedObjectsRepository', () => {
         });
 
         await expect(repository.removeReferencesTo(type, id, defaultOptions)).rejects.toThrow(
-          createConflictErrorPayload(type, id)
+          errorWithMessage(createConflictErrorPayload(type, id))
         );
       });
     });

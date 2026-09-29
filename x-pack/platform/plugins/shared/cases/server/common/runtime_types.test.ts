@@ -33,7 +33,7 @@ describe('runtime_types', () => {
       });
 
       expect(() => decodeWithExcessOrThrow(schemaRt)({})).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"undefined\\" supplied to \\"a\\""`
+        `[Error: Invalid value "undefined" supplied to "a"]`
       );
     });
 
@@ -43,7 +43,7 @@ describe('runtime_types', () => {
       });
 
       expect(() => decodeWithExcessOrThrow(schemaRt)({})).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"undefined\\" supplied to \\"a\\""`
+        `[Error: Invalid value "undefined" supplied to "a"]`
       );
     });
 
@@ -54,7 +54,7 @@ describe('runtime_types', () => {
 
       expect(() =>
         decodeWithExcessOrThrow(schemaRt)({ a: 'hi', b: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"b\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: invalid keys "b"]`);
     });
 
     it('does not throw when an excess field exists for rt.type', () => {
@@ -74,7 +74,7 @@ describe('runtime_types', () => {
 
       expect(() =>
         decodeWithExcessOrThrow(schemaRt)({ a: { b: 'hi', c: 1 } })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"c\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: invalid keys "c"]`);
     });
 
     it('does not throw when a nested excess field exists for rt.type', () => {

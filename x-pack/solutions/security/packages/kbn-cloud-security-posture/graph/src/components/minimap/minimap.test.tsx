@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ReactFlow } from '@xyflow/react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
@@ -26,6 +28,13 @@ import {
 import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
 import type { NodeViewModel } from '../types';
 import { graphSample } from '../mock/graph_sample';
+
+// Turn off the optimization that hides elements that are not visible in the viewport: jsdom has no
+// layout, so which graph nodes count as visible depends on fitView timing.
+vi.mock('../constants', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
 
 describe('Minimap', () => {
   it('should render empty', () => {

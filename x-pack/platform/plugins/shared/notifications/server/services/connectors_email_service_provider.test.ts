@@ -139,7 +139,7 @@ describe('ConnectorsEmailServiceProvider', () => {
         expect(start.isEmailServiceAvailable()).toEqual(false);
         expect(() => {
           start.getEmailService();
-        }).toThrowErrorMatchingInlineSnapshot(`"Email Service Error: setup() has not been run"`);
+        }).toThrowErrorMatchingInlineSnapshot(`[Error: Email Service Error: setup() has not been run]`);
       });
     });
 
@@ -158,7 +158,7 @@ describe('ConnectorsEmailServiceProvider', () => {
         expect(() => {
           start.getEmailService();
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Email Service Error: Unexisting email connector 'someUnexistingConnectorId' specified."`
+          `[Error: Email Service Error: Unexisting email connector 'someUnexistingConnectorId' specified.]`
         );
       });
     });
@@ -200,7 +200,7 @@ describe('ConnectorsEmailServiceProvider', () => {
           expect(() => {
             start.getEmailService();
           }).toThrowErrorMatchingInlineSnapshot(
-            `"Email Service Error: Something went terribly wrong."`
+            `[Error: Email Service Error: Something went terribly wrong.]`
           );
         });
       });

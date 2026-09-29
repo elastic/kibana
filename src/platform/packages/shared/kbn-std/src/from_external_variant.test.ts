@@ -32,7 +32,7 @@ describe('fromExternalVariant', () => {
   it('throws when the record has more than one key', () => {
     expect(() =>
       fromExternalVariant({ a: 1, b: 2 } as unknown as { a: number; b: number })
-    ).toThrowErrorMatchingInlineSnapshot(`"Expected one (1) key in object, found: 2"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Expected one (1) key in object, found: 2]`);
   });
 
   it('produces a distributed-union type', () => {

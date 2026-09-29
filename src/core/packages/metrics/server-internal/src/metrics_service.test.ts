@@ -117,7 +117,7 @@ describe('MetricsService', () => {
 
     it('throws when called before setup', async () => {
       await expect(metricsService.start()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"#setup() needs to be run first"`
+        `[Error: #setup() needs to be run first]`
       );
     });
 

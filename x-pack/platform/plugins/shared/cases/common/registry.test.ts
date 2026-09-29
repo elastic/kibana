@@ -48,7 +48,7 @@ describe('AttachmentTypeRegistry', () => {
       registry.register(getItem('test'));
 
       expect(() => registry.register(getItem('test'))).toThrowErrorMatchingInlineSnapshot(
-        `"Item \\"test\\" is already registered on registry TestRegistry"`
+        `[Error: Item "test" is already registered on registry TestRegistry]`
       );
     });
   });
@@ -67,7 +67,7 @@ describe('AttachmentTypeRegistry', () => {
     it(`throw error when action type doesn't exist`, () => {
       const registry = new AttachmentTypeRegistry('TestRegistry');
       expect(() => registry.get('not-exist-item')).toThrowErrorMatchingInlineSnapshot(
-        `"Item \\"not-exist-item\\" is not registered on registry TestRegistry"`
+        `[Error: Item "not-exist-item" is not registered on registry TestRegistry]`
       );
     });
   });

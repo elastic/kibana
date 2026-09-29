@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`authorization ensureAuthorized with operation arrays handles multiple operations successfully when authorized 1`] = `
+exports[`authorization > ensureAuthorized with operation arrays > handles multiple operations successfully when authorized 1`] = `
 Array [
   Array [
     Object {
@@ -47,7 +47,7 @@ Array [
 ]
 `;
 
-exports[`authorization ensureAuthorized with operation arrays logs each operation separately 1`] = `
+exports[`authorization > ensureAuthorized with operation arrays > logs each operation separately 1`] = `
 Array [
   Array [
     Object {
@@ -94,7 +94,7 @@ Array [
 ]
 `;
 
-exports[`authorization ensureAuthorized with operation arrays throws on first unauthorized operation in array 1`] = `
+exports[`authorization > ensureAuthorized with operation arrays > throws on first unauthorized operation in array 1`] = `
 Array [
   Array [
     Object {

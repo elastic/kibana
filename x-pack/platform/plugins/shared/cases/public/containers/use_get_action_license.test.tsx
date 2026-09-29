@@ -18,7 +18,6 @@ vi.mock('./api');
 vi.mock('../common/lib/kibana');
 
 describe('useGetActionLicense', () => {
-  const abortCtrl = new AbortController();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -30,7 +29,7 @@ describe('useGetActionLicense', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => expect(spyOnGetActionLicense).toHaveBeenCalledWith(abortCtrl.signal));
+    await waitFor(() => expect(spyOnGetActionLicense).toHaveBeenCalledWith(expect.any(AbortSignal)));
   });
 
   it('unhappy path', async () => {

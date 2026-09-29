@@ -54,7 +54,7 @@ test('fails if string input cannot be parsed', () => {
     name: schema.string(),
   });
   expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from json input"`
+    `[Error: could not parse object value from json input]`
   );
 });
 
@@ -63,7 +63,7 @@ test('fails with correct type if parsed input is not an object', () => {
     name: schema.string(),
   });
   expect(() => type.validate('[1,2,3]')).toThrowErrorMatchingInlineSnapshot(
-    `"expected a plain object value, but found [Array] instead."`
+    `[Error: expected a plain object value, but found [Array] instead.]`
   );
 });
 
@@ -74,7 +74,7 @@ test('fails if missing required value', () => {
   const value = {};
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
-    `"[name]: expected value of type [string] but got [undefined]"`
+    `[Error: [name]: expected value of type [string] but got [undefined]]`
   );
 });
 
@@ -97,7 +97,7 @@ test('fails if key does not exist in schema', () => {
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
-    `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+    `[Error: [bar]: Additional properties are not allowed ('bar' was unexpected)]`
   );
 });
 
@@ -150,10 +150,10 @@ test('object within object with key without defaultValue', () => {
   const value = { foo: {} };
 
   expect(() => type.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"[foo.bar]: expected value of type [string] but got [undefined]"`
+    `[Error: [foo.bar]: expected value of type [string] but got [undefined]]`
   );
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
-    `"[foo.bar]: expected value of type [string] but got [undefined]"`
+    `[Error: [foo.bar]: expected value of type [string] but got [undefined]]`
   );
 });
 
@@ -235,10 +235,10 @@ test('called with wrong type', () => {
   const type = schema.object({});
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from json input"`
+    `[Error: could not parse object value from json input]`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected a plain object value, but found [number] instead."`
+    `[Error: expected a plain object value, but found [number] instead.]`
   );
 });
 
@@ -249,9 +249,9 @@ test('handles oneOf', () => {
 
   expect(type.validate({ key: 'foo' })).toEqual({ key: 'foo' });
   expect(() => type.validate({ key: 123 })).toThrowErrorMatchingInlineSnapshot(`
-    "[key]: types that failed validation:
+    [Error: [key]: types that failed validation:
     - [key.0]: expected value of type [string] but got [number]
-    - [key.1]: expected value of type [array] but got [number]"
+    - [key.1]: expected value of type [array] but got [number]]
   `);
 });
 
@@ -302,7 +302,7 @@ test('includes namespace in failure when wrong top-level type', () => {
   });
 
   expect(() => type.validate([], {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected a plain object value, but found [Array] instead."`
+    `[Error: [foo-namespace]: expected a plain object value, but found [Array] instead.]`
   );
 });
 
@@ -315,7 +315,7 @@ test('includes namespace in failure when wrong value type', () => {
   };
 
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace.foo]: expected value of type [string] but got [number]"`
+    `[Error: [foo-namespace.foo]: expected value of type [string] but got [number]]`
   );
 });
 
@@ -327,7 +327,7 @@ test('individual keys can validated', () => {
   const value = false;
   expect(() => type.validateKey('foo', value)).not.toThrow();
   expect(() => type.validateKey('bar', '')).toThrowErrorMatchingInlineSnapshot(
-    `"bar is not a valid part of this schema"`
+    `[Error: bar is not a valid part of this schema]`
   );
 });
 
@@ -361,7 +361,7 @@ test('unknowns = `allow` affects only own keys', () => {
       },
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+    `[Error: [foo.baz]: Additional properties are not allowed ('baz' was unexpected)]`
   );
 });
 
@@ -375,7 +375,7 @@ test('does not allow unknown keys when unknowns = `forbid`', () => {
       bar: 'baz',
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+    `[Error: [bar]: Additional properties are not allowed ('bar' was unexpected)]`
   );
 });
 
@@ -428,7 +428,7 @@ test('unknowns = `ignore` respects local preferences in sub-keys', () => {
       },
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+    `[Error: [foo.baz]: Additional properties are not allowed ('baz' was unexpected)]`
   );
 });
 
@@ -467,7 +467,7 @@ describe('nested unknowns', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[myObj.foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+      `[Error: [myObj.foo.baz]: Additional properties are not allowed ('baz' was unexpected)]`
     );
   });
 
@@ -485,7 +485,7 @@ describe('nested unknowns', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[myObj.bar]: Additional properties are not allowed ('bar' was unexpected)"`
+      `[Error: [myObj.bar]: Additional properties are not allowed ('bar' was unexpected)]`
     );
   });
 
@@ -553,7 +553,7 @@ describe('nested unknowns', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[myObj.foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+      `[Error: [myObj.foo.baz]: Additional properties are not allowed ('baz' was unexpected)]`
     );
   });
 
@@ -780,7 +780,7 @@ describe('#extends', () => {
     expect(() => {
       extended.validate({ initial: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[added]: expected value of type [number] but got [undefined]"`
+      `[Error: [added]: expected value of type [number] but got [undefined]]`
     );
 
     expect(() => {
@@ -804,7 +804,7 @@ describe('#extends', () => {
     expect(() => {
       extended.validate({ string: 'foo', number: 12 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[number]: Additional properties are not allowed ('number' was unexpected)"`
+      `[Error: [number]: Additional properties are not allowed ('number' was unexpected)]`
     );
 
     expect(() => {
@@ -829,7 +829,7 @@ describe('#extends', () => {
     expect(() => {
       extended.validate({ string: 'foo', mutated: 12 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[mutated]: expected value of type [string] but got [number]"`
+      `[Error: [mutated]: expected value of type [string] but got [number]]`
     );
 
     expect(() => {
@@ -857,12 +857,12 @@ describe('#extends', () => {
     expect(() => {
       extended.validate({ original: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[mutated]: expected value of type [string] but got [undefined]"`
+      `[Error: [mutated]: expected value of type [string] but got [undefined]]`
     );
     expect(() => {
       extended.validate({ original: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[mutated]: expected value of type [string] but got [undefined]"`
+      `[Error: [mutated]: expected value of type [string] but got [undefined]]`
     );
     expect(() => {
       extended.validate({ original: 'foo', mutated: 'bar' });
@@ -998,7 +998,7 @@ describe('#extendsDeep', () => {
     expect(() =>
       forbidSchema.validate({ test: { foo: 'test', bar: 'test' } })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[test.bar]: Additional properties are not allowed ('bar' was unexpected)"`
+      `[Error: [test.bar]: Additional properties are not allowed ('bar' was unexpected)]`
     );
   });
 });

@@ -109,7 +109,7 @@ describe('case types', () => {
 
     it('throws an error when owner is not present', () => {
       expect(() => decodeOrThrow(OwnerRt)({})).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"undefined\\" supplied to \\"owner\\""`
+        `[Error: Invalid value "undefined" supplied to "owner"]`
       );
     });
   });

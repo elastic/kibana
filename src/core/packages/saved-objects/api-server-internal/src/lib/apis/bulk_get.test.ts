@@ -51,6 +51,7 @@ import {
   expectErrorNotFound,
   expectError,
   createBadRequestErrorPayload,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 
 interface ExpectedErrorResult {
@@ -242,7 +243,9 @@ describe('#bulkGet', () => {
         const obj = { type: 'dashboard', id: 'three' };
         await expect(
           repository.bulkGet([obj], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
 
       it(`returns error when namespaces is used with a space-agnostic object`, async () => {

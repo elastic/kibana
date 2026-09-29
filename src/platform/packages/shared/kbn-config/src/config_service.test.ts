@@ -404,7 +404,7 @@ test('throws if reading "enabled" when it is not present in the schema', async (
   await expect(
     async () => await configService.isEnabledAtPath('foo')
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[foo]: enabled status cannot be changed. Please, remove [foo.enabled] from the configuration file."`
+    `[Error: [foo]: enabled status cannot be changed. Please, remove [foo.enabled] from the configuration file.]`
   );
 });
 
@@ -420,7 +420,7 @@ test('throws if reading "enabled" when no schema exists', async () => {
 
   await expect(
     async () => await configService.isEnabledAtPath('foo')
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No validation schema has been defined for [foo]]`);
 });
 
 test('throws if reading any config value when no schema exists', async () => {
@@ -435,7 +435,7 @@ test('throws if reading any config value when no schema exists', async () => {
 
   await expect(
     async () => await configService.isEnabledAtPath('foo')
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No validation schema has been defined for [foo]]`);
 });
 
 test('allows plugins to specify "enabled" flag via validation schema', async () => {
@@ -484,7 +484,7 @@ test('throws during validation if any schema is invalid', async () => {
   await configService.setSchema('numberKey', schema.number());
 
   await expect(configService.validate()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[config validation of [stringKey]]: expected value of type [string] but got [number]"`
+    `[Error: [config validation of [stringKey]]: expected value of type [string] but got [number]]`
   );
 });
 
@@ -640,7 +640,7 @@ describe('atPathSync', () => {
     await configService.setSchema('key', stringSchema);
 
     expect(() => configService.atPathSync('key')).toThrowErrorMatchingInlineSnapshot(
-      `"\`atPathSync\` called before config was validated"`
+      `[Error: \`atPathSync\` called before config was validated]`
     );
   });
 
@@ -742,7 +742,7 @@ describe('Dynamic Overrides', () => {
   test('throws validation error when attempted to set an override that has not been registered as dynamic', () => {
     expect(() =>
       configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' })
-    ).toThrowErrorMatchingInlineSnapshot(`"[namespace1.key]: not a valid dynamic option"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: [namespace1.key]: not a valid dynamic option]`);
   });
 
   test('throws validation error when a registered as dynamic option is invalid', () => {
@@ -750,7 +750,7 @@ describe('Dynamic Overrides', () => {
     expect(() =>
       configService.setDynamicConfigOverrides({ 'namespace1.key': 1 })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[config validation of [namespace1].key]: expected value of type [string] but got [number]"`
+      `[Error: [config validation of [namespace1].key]: expected value of type [string] but got [number]]`
     );
   });
 

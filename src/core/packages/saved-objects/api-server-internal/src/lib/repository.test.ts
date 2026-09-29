@@ -67,7 +67,7 @@ describe('SavedObjectsRepository', () => {
 
     it('throws if `*` namespace argument is provided', async () => {
       expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
-        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+        `[Error: "options.namespace" cannot be "*": Bad Request]`
       );
     });
 

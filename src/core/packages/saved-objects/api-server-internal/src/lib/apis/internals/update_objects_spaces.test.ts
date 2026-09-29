@@ -34,6 +34,7 @@ import {
   setupRedactPassthrough,
   authMap,
   setupAuthorizeFunc,
+  errorWithMessage,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
@@ -271,7 +272,7 @@ describe('#updateObjectsSpaces', () => {
       mockMgetResultsNotFound();
 
       await expect(() => updateObjectsSpaces(params)).rejects.toThrow(
-        SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
+        errorWithMessage(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError())
       );
     });
   });

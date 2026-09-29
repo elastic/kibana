@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import type { ComponentProps } from 'react';
 import React from 'react';
@@ -24,12 +25,11 @@ import { createPartialObjectMock } from '../utils/test';
 import type { CellComponentProps } from '../types';
 import { mockRenderContext } from '../mocks/context.mock';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
+import { useGetRuleTypesPermissions as mockedUseGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
-const { useGetRuleTypesPermissions } = await vi.importMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+const useGetRuleTypesPermissions = mockedUseGetRuleTypesPermissions as Mock;
 
 const props = createPartialObjectMock<CellComponentProps>({
   ...mockRenderContext,

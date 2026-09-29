@@ -62,7 +62,7 @@ describe('LensClient', () => {
           },
           []
         )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Missing visualization type"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Missing visualization type]`);
     });
   });
 

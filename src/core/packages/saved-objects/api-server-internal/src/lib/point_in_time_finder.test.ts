@@ -127,7 +127,7 @@ describe('createPointInTimeFinder()', () => {
     await expect(async () => {
       await finder.find().next();
     }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Point In Time has already been opened for this finder instance. Please call \`close()\` before calling \`find()\` again."`
+      `[Error: Point In Time has already been opened for this finder instance. Please call \`close()\` before calling \`find()\` again.]`
     );
     expect(repository.find).toHaveBeenCalledTimes(1);
   });

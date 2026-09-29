@@ -39,7 +39,7 @@ describe('Saved Objects type validation schema', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: false });
     expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-      `"[attributes.foo]: expected value of type [string] but got [boolean]"`
+      `[Error: [attributes.foo]: expected value of type [string] but got [boolean]]`
     );
   });
 
@@ -48,7 +48,7 @@ describe('Saved Objects type validation schema', () => {
     const data = createMockObject({ foo: 'bar' });
     data.id = '';
     expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: value has length [0] but it must have a minimum length of [1]."`
+      `[Error: [id]: value has length [0] but it must have a minimum length of [1].]`
     );
   });
 
@@ -89,7 +89,7 @@ describe('Saved Objects type validation schema', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'heya' });
     expect(() => objectSchema.validate({ ...data, id: false })).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [string] but got [boolean]"`
+      `[Error: [id]: expected value of type [string] but got [boolean]]`
     );
   });
 
@@ -106,7 +106,7 @@ describe('Saved Objects type validation schema', () => {
       const data = createMockObject(undefined);
 
       expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes]: expected value of type [object] but got [undefined]"`
+        `[Error: [attributes]: expected value of type [object] but got [undefined]]`
       );
     });
 
@@ -115,7 +115,7 @@ describe('Saved Objects type validation schema', () => {
       const data = createMockObject(42);
 
       expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes]: expected value of type [object] but got [number]"`
+        `[Error: [attributes]: expected value of type [object] but got [number]]`
       );
     });
 

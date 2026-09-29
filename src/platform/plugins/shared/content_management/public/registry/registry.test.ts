@@ -43,7 +43,7 @@ test('registering already registered content type throws', () => {
 
   expect(() =>
     registry.register({ id: 'test', version: versionInfo })
-  ).toThrowErrorMatchingInlineSnapshot(`"Content type with id \\"test\\" already registered."`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: Content type with id "test" already registered.]`);
 });
 
 test('registering string number version converts it to number', () => {

@@ -654,6 +654,7 @@ describe('Create case', () => {
 
       await waitForFormToRender();
       await fillFormReactTestingLib({ user });
+      expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
       await user.click(screen.getByTestId('create-case-submit'));
 

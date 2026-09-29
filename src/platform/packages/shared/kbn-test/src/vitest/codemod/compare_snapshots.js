@@ -29,8 +29,10 @@ const load = (source) => {
 
 const normalizeKey = (key) => key.replace(/ > /g, ' ').replace(/: (\S)/, ' $1');
 const normalizeValue = (value) => {
-  const match = /^\[(?:\w*Error): ([\s\S]*)\]$/.exec(value);
-  return match ? JSON.stringify(match[1]) : value;
+  // multi-line values are stored with surrounding newlines
+  const trimmed = value.trim();
+  const match = /^\[(?:\w*Error): ([\s\S]*)\]$/.exec(trimmed);
+  return match ? JSON.stringify(match[1]) : trimmed;
 };
 
 let identical = 0;

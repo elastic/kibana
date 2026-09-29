@@ -44,6 +44,7 @@ import {
   getSuccess,
   createBadRequestErrorPayload,
   createGenericNotFoundErrorPayload,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 
 describe('#get', () => {
@@ -174,14 +175,16 @@ describe('#get', () => {
         options?: SavedObjectsBaseOptions
       ) => {
         await expect(repository.get(type, id, options)).rejects.toThrow(
-          createGenericNotFoundErrorPayload(type, id)
+          errorWithMessage(createGenericNotFoundErrorPayload(type, id))
         );
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.get(type, id, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
 
       it(`throws when type is invalid`, async () => {

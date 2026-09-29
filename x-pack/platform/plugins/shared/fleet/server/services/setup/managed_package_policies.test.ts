@@ -12,6 +12,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { packagePolicyService } from '../package_policy';
 import { getInstallation, getInstallations, getPackageInfo } from '../epm/packages';
+import { hasNewDeprecations } from '../epm/packages/deprecation_helpers';
 
 import {
   upgradeManagedPackagePolicies,
@@ -219,9 +220,7 @@ describe('upgradeManagedPackagePolicies', () => {
   });
 });
 
-describe('setupUpgradeManagedPackagePolicies', async () => {
-  const { hasNewDeprecations } = await vi.importMock('../epm/packages/deprecation_helpers');
-
+describe('setupUpgradeManagedPackagePolicies', () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -258,7 +257,7 @@ describe('setupUpgradeManagedPackagePolicies', async () => {
       Promise.resolve({ name: 'custom_package', version: pkgVersion })
     );
 
-    hasNewDeprecations.mockReturnValue(true);
+    vi.mocked(hasNewDeprecations).mockReturnValue(true);
 
     await setupUpgradeManagedPackagePolicies(soClient);
 

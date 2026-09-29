@@ -87,7 +87,7 @@ describe('RpcService', () => {
 
       await expect(() => {
         return rpc.call(context, 'foo', input);
-      }).rejects.toEqual(new Error('[foo]: expected value of type [string] but got [undefined]'));
+      }).rejects.toThrow('[foo]: expected value of type [string] but got [undefined]');
     });
 
     test('should validate the output if schema is provided', async () => {
@@ -103,7 +103,7 @@ describe('RpcService', () => {
       const context = {};
       await expect(() => {
         return rpc.call(context, 'foo');
-      }).rejects.toEqual(new Error('[foo]: expected value of type [string] but got [undefined]'));
+      }).rejects.toThrow('[foo]: expected value of type [string] but got [undefined]');
     });
   });
 });

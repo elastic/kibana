@@ -370,7 +370,7 @@ describe('ApmConfiguration', () => {
       expect(() =>
         new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false"`
+        `[Error: APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false]`
       );
     });
 

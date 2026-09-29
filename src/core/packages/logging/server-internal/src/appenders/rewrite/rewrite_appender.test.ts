@@ -135,7 +135,7 @@ describe('RewriteAppender', () => {
       expect(() => {
         appender.append(createLogRecord());
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Rewrite Appender could not find appender key \\"oops\\". Be sure \`appender.addAppender()\` was called before \`appender.append()\`."`
+        `[Error: Rewrite Appender could not find appender key "oops". Be sure \`appender.addAppender()\` was called before \`appender.append()\`.]`
       );
     });
   });

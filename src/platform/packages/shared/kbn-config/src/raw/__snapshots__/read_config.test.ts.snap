@@ -22,28 +22,6 @@ Object {
 }
 `;
 
-exports[`different cwd() resolves relative files based on the cwd 1`] = `
-Object {
-  "abc": Object {
-    "def": "test",
-    "qwe": 1,
-    "zyx": Object {
-      "val": 1,
-    },
-  },
-  "bar": true,
-  "empty_arr": Array [],
-  "foo": 1,
-  "pom": Object {
-    "bom": 3,
-  },
-  "xyz": Array [
-    "1",
-    "2",
-  ],
-}
-`;
-
 exports[`merging two configs 1`] = `
 Object {
   "arr1": Array [
@@ -164,4 +142,4 @@ Object {
 }
 `;
 
-exports[`should throw an exception when referenced environment variable in a config value does not exist 1`] = `"Unknown environment variable referenced in config : KBN_ENV_VAR1"`;
+exports[`should throw an exception when referenced environment variable in a config value does not exist 1`] = `[Error: Unknown environment variable referenced in config : KBN_ENV_VAR1]`;

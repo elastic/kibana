@@ -16,16 +16,19 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { ClusterConfigurationForm } from './cluster_configuration_form';
 import { Providers } from './plugin';
 
-vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  const mocked = {
-    htmlIdGenerator: () => () => `id-${Math.random()}`,
-    useGeneratedHtmlId: () => `id-${Math.random()}`,
-  };
-  return { ...mocked, default: mocked };
-});
+// EUI is loaded natively (not through Vitest's module graph), so `vi.mock` cannot replace the id
+// generator its components use. Spy on the shared CommonJS exports instead to get unique ids.
+const htmlIdGenerator = require('@elastic/eui/test-env/services/accessibility/html_id_generator');
 
 describe('ClusterConfigurationForm', () => {
   vi.setConfig({ testTimeout: 20_000 });
+
+  beforeAll(() => {
+    vi.spyOn(htmlIdGenerator, 'htmlIdGenerator').mockImplementation(
+      () => () => `id-${Math.random()}`
+    );
+    vi.spyOn(htmlIdGenerator, 'useGeneratedHtmlId').mockImplementation(() => `id-${Math.random()}`);
+  });
 
   it('calls enrollment API for https addresses when submitting form', async () => {
     const coreStart = coreMock.createStart();

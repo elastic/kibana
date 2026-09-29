@@ -1354,7 +1354,7 @@ describe('RRule', () => {
           tzid: 'UTC',
         });
       expect(testFn).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot create RRule: dtstart is an invalid date"`
+        `[Error: Cannot create RRule: dtstart is an invalid date]`
       );
     });
     it('throws an error on an invalid until', () => {
@@ -1367,7 +1367,7 @@ describe('RRule', () => {
           tzid: 'UTC',
         });
       expect(testFn).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot create RRule: until is an invalid date"`
+        `[Error: Cannot create RRule: until is an invalid date]`
       );
     });
 
@@ -1380,7 +1380,7 @@ describe('RRule', () => {
           tzid: 'UTC',
         });
       expect(testFn).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot create RRule: interval must be greater than 0"`
+        `[Error: Cannot create RRule: interval must be greater than 0]`
       );
     });
 
@@ -1396,7 +1396,7 @@ describe('RRule', () => {
         rule.all(100001);
       };
 
-      expect(testFn).toThrowErrorMatchingInlineSnapshot(`"RRule iteration limit exceeded"`);
+      expect(testFn).toThrowErrorMatchingInlineSnapshot(`[Error: RRule iteration limit exceeded]`);
     });
   });
 });

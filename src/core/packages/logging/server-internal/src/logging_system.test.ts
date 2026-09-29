@@ -233,7 +233,7 @@ test('throws if a circular appender reference is detected', async () => {
       })
     );
   }).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Circular appender reference detected: [b -> c -> a -> b]"`
+    `[Error: Circular appender reference detected: [b -> c -> a -> b]]`
   );
 
   expect(mockConsoleLog).toHaveBeenCalledTimes(0);

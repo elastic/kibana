@@ -104,7 +104,7 @@ describe('addObservable', () => {
         mockCasesClient
       )
     ).rejects.toThrow(
-      Boom.forbidden(
+      Boom.badRequest(
         'Failed to add observable: Error: Observable value "not an ip" is not valid for selected observable type observable-type-ipv4.'
       )
     );
@@ -349,7 +349,7 @@ describe('updateObservable', () => {
         mockCasesClient
       )
     ).rejects.toThrow(
-      Boom.forbidden(
+      Boom.badRequest(
         'Failed to update observable: Error: Observable value "not an ip" is not valid for selected observable type observable-type-ipv4.'
       )
     );

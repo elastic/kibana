@@ -55,6 +55,7 @@ import {
   createBadRequestErrorPayload,
   expectUpdateResult,
   MULTI_NAMESPACE_TYPE,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
@@ -532,7 +533,9 @@ describe('#bulkUpdate', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkUpdate([obj], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
 
       it(`returns error when type is invalid`, async () => {

@@ -281,7 +281,7 @@ describe('create', () => {
         // @ts-expect-error foo is an invalid field
         create({ ...theCase, foo: 'bar' }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: invalid keys \\"foo\\""`
+        `[CaseError: Failed to create case: Error: invalid keys "foo"]`
       );
     });
   });
@@ -634,7 +634,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
+        `[CaseError: Failed to create case: Error: Invalid value "null" supplied for the following required custom fields: "missing field 1", "missing field 2"]`
       );
     });
 
@@ -660,7 +660,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields without default value configured: \\"missing field 1\\", \\"missing field 2\\""`
+        `[CaseError: Failed to create case: Error: Missing required custom fields without default value configured: "missing field 1", "missing field 2"]`
       );
     });
 
@@ -675,7 +675,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `[CaseError: Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 10.]`
       );
     });
 
@@ -701,7 +701,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Invalid duplicated customFields keys in request: duplicated_key"`
+        `[CaseError: Failed to create case: Error: Invalid duplicated customFields keys in request: duplicated_key]`
       );
     });
 
@@ -722,7 +722,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Invalid custom field keys: missing_key"`
+        `[CaseError: Failed to create case: Error: Invalid custom field keys: missing_key]`
       );
     });
 
@@ -748,7 +748,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: The following custom fields have the wrong type in the request: \\"label 1\\", \\"label 2\\""`
+        `[CaseError: Failed to create case: Error: The following custom fields have the wrong type in the request: "label 1", "label 2"]`
       );
     });
   });

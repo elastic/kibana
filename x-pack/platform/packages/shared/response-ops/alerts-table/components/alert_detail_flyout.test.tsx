@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -20,12 +21,11 @@ import type { AdditionalContext, RenderContext } from '../types';
 import { createPartialObjectMock } from '../utils/test';
 import AlertDetailFlyout from './alert_detail_flyout';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
-(
-  await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions')
-).useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
+(useGetRuleTypesPermissions as Mock).mockReturnValue({ authorizedToReadRuleType: () => true });
 
 const mockColumns = [
   {

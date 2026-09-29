@@ -63,13 +63,13 @@ test('should throw an exception when referenced environment variable in a config
 test('throws parsing a config with forbidden paths', () => {
   expect(() =>
     getConfigFromFiles([fixtureFile('forbidden_1.yml')])
-  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.aaa['__proto__.hello']"`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: Forbidden path detected: test.aaa['__proto__.hello']]`);
 });
 
 test('throws parsing another config with forbidden paths', () => {
   expect(() =>
     getConfigFromFiles([fixtureFile('forbidden_2.yml')])
-  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.hello.__proto__.dolly"`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: Forbidden path detected: test.hello.__proto__.dolly]`);
 });
 
 test('merging two configs', () => {

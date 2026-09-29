@@ -372,7 +372,7 @@ describe('AttachmentService getter', () => {
         await expect(
           attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1', owner: 'securitySolution' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\""`
+          `[Error: Invalid value "undefined" supplied to "alertId",Invalid value "alert" supplied to "type",Invalid value "undefined" supplied to "eventId",Invalid value "undefined" supplied to "attachmentId"]`
         );
       });
     });
@@ -528,7 +528,7 @@ describe('AttachmentService getter', () => {
 
       await expect(
         attachmentGetterWithFlagOn.get({ savedObjectId: '1' })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES timeout"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: ES timeout]`);
 
       expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
@@ -612,7 +612,7 @@ describe('AttachmentService getter', () => {
         await expect(
           attachmentGetter.getFileAttachments({ caseId: '1', fileIds: ['1'] })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"externalReference\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"savedObject\\" supplied to \\"externalReferenceStorage,type\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `[Error: Invalid value "undefined" supplied to "comment",Invalid value "externalReference" supplied to "type",Invalid value "undefined" supplied to "alertId",Invalid value "undefined" supplied to "index",Invalid value "undefined" supplied to "rule",Invalid value "undefined" supplied to "eventId",Invalid value "undefined" supplied to "actions",Invalid value "undefined" supplied to "externalReferenceAttachmentTypeId",Invalid value "savedObject" supplied to "externalReferenceStorage,type",Invalid value "undefined" supplied to "persistableStateAttachmentTypeId",Invalid value "undefined" supplied to "persistableStateAttachmentState"]`
         );
       });
     });

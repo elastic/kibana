@@ -53,6 +53,16 @@ const setResponse = (data: RunQuotasResponse) => {
 };
 
 describe('RunLimitsBanner', () => {
+  // EuiCallOut's live announcer schedules an uncancelled 50ms timer on mount; keep it on fake
+  // timers so it cannot fire after the jsdom environment is torn down.
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('shows only finite reached limits while enforcement is enabled', () => {
     setResponse(response());
 

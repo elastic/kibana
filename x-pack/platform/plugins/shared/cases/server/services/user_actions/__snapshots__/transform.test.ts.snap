@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`transform legacyTransformFindResponseToExternalModel external references populates the external references attributes 1`] = `
+exports[`transform > legacyTransformFindResponseToExternalModel > external references > populates the external references attributes 1`] = `
 Object {
   "page": 1,
   "per_page": 1,
@@ -59,7 +59,7 @@ Object {
 }
 `;
 
-exports[`transform legacyTransformFindResponseToExternalModel persistable state attachments passes the persistable state through unchanged 1`] = `
+exports[`transform > legacyTransformFindResponseToExternalModel > persistable state attachments > passes the persistable state through unchanged 1`] = `
 Object {
   "page": 1,
   "per_page": 1,
@@ -115,7 +115,7 @@ Object {
 }
 `;
 
-exports[`transform legacyTransformFindResponseToExternalModel preserves the saved object fields and attributes when inject the ids 1`] = `
+exports[`transform > legacyTransformFindResponseToExternalModel > preserves the saved object fields and attributes when inject the ids 1`] = `
 Object {
   "page": 1,
   "per_page": 1,
@@ -168,7 +168,7 @@ Object {
 }
 `;
 
-exports[`transform transformFindResponseToExternalModel external references populates the external references attributes 1`] = `
+exports[`transform > transformFindResponseToExternalModel > external references > populates the external references attributes 1`] = `
 Object {
   "page": 1,
   "per_page": 1,
@@ -225,7 +225,7 @@ Object {
 }
 `;
 
-exports[`transform transformFindResponseToExternalModel persistable state attachments passes the persistable state through unchanged 1`] = `
+exports[`transform > transformFindResponseToExternalModel > persistable state attachments > passes the persistable state through unchanged 1`] = `
 Object {
   "page": 1,
   "per_page": 1,
@@ -279,7 +279,7 @@ Object {
 }
 `;
 
-exports[`transform transformFindResponseToExternalModel preserves the saved object fields and attributes when inject the ids 1`] = `
+exports[`transform > transformFindResponseToExternalModel > preserves the saved object fields and attributes when inject the ids 1`] = `
 Object {
   "page": 1,
   "per_page": 1,

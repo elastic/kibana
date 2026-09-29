@@ -16,6 +16,7 @@ import type { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as capabilities from '../../../lib/capabilities';
+import { useGetRuleTypesPermissions as useGetRuleTypesPermissionsImport } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 vi.mock('./rule_actions', () => {
   const mocked = {
@@ -46,9 +47,7 @@ vi.mock('../../../lib/capabilities', () => {
 vi.mock('../../../../common/lib/kibana');
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks');
-const { useGetRuleTypesPermissions } = await vi.importMock(
-  '@kbn/alerts-ui-shared/src/common/hooks'
-);
+const useGetRuleTypesPermissions = useGetRuleTypesPermissionsImport as unknown as Mock;
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({

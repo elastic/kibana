@@ -394,7 +394,7 @@ describe('#rawDocExistsInNamespaces', () => {
 describe('#normalizeNamespace', () => {
   it('throws an error for * (All namespaces string)', () => {
     expect(() => normalizeNamespace(ALL_NAMESPACES_STRING)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+      `[Error: "options.namespace" cannot be "*": Bad Request]`
     );
   });
 

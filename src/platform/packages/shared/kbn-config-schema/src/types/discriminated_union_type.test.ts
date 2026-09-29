@@ -51,7 +51,7 @@ describe('DiscriminatedUnionType', () => {
   describe('error validation', () => {
     it('should handle missing discriminator', () => {
       expect(() => exampleType.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"\\"type\\" property is required"`
+        `[Error: "type" property is required]`
       );
     });
 
@@ -59,7 +59,7 @@ describe('DiscriminatedUnionType', () => {
       expect(() =>
         exampleType.validate({ type: 1, string: 'foo' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"expected \\"type\\" to be a string of [\\"str\\", \\"num\\", \\"bool\\"] but got [number]"`
+        `[Error: expected "type" to be a string of ["str", "num", "bool"] but got [number]]`
       );
     });
 
@@ -67,7 +67,7 @@ describe('DiscriminatedUnionType', () => {
       expect(() =>
         exampleType.validate({ type: 'invalid', string: 'foo' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]"`
+        `[Error: expected "type" to be one of ["str", "num", "bool"] but got ["invalid"]]`
       );
     });
 
@@ -79,7 +79,7 @@ describe('DiscriminatedUnionType', () => {
       expect(() =>
         type.validate({ test: 'test', nested: { type: 'invalid', string: 'foo' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[nested]: expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]"`
+        `[Error: [nested]: expected "type" to be one of ["str", "num", "bool"] but got ["invalid"]]`
       );
     });
 
@@ -87,7 +87,7 @@ describe('DiscriminatedUnionType', () => {
       expect(() =>
         exampleType.validate({ type: 'str', string: 123 })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[string]: expected value of type [string] but got [number]"`
+        `[Error: [string]: expected value of type [string] but got [number]]`
       );
     });
   });
@@ -101,7 +101,7 @@ describe('DiscriminatedUnionType', () => {
           schema.object({ type: schema.literal('num'), num: schema.number() }),
         ]);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Discriminator for schema at index 2 must be a unique, num is already used"`
+        `[Error: Discriminator for schema at index 2 must be a unique, num is already used]`
       );
     });
 
@@ -113,7 +113,7 @@ describe('DiscriminatedUnionType', () => {
           schema.object({ type: schema.string(), string: schema.string() }),
           schema.object({ type: schema.string(), number: schema.number() }),
         ]);
-      }).toThrowErrorMatchingInlineSnapshot(`"Only one fallback schema is allowed"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: Only one fallback schema is allowed]`);
     });
   });
 
@@ -157,7 +157,7 @@ describe('DiscriminatedUnionType', () => {
       expect(() => {
         catchAllType.validate(input);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"[type]: expected value of type [string] but got [number]"`
+        `[Error: [type]: expected value of type [string] but got [number]]`
       );
     });
   });
@@ -181,7 +181,7 @@ describe('DiscriminatedUnionType', () => {
       expect(() =>
         forbidSchema.validate({ ...input, unknown: 'thing' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[unknown]: Additional properties are not allowed ('unknown' was unexpected)"`
+        `[Error: [unknown]: Additional properties are not allowed ('unknown' was unexpected)]`
       );
     });
   });

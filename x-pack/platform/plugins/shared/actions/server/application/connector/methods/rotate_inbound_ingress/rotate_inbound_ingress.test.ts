@@ -30,6 +30,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { computeIngestTokenHash } from '../../../../inbound/compute_ingest_token_hash';
 import { parseIngestToken } from '../../../../inbound/ingress_credential';
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
+import type * as ConnectorSpecs from '@kbn/connector-specs';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 vi.mock('@kbn/connector-specs', async () => {
@@ -108,14 +109,16 @@ const decryptedInbound = {
   version: '1',
 };
 
+const actualConnectorSpecs = await vi.importActual<typeof ConnectorSpecs>('@kbn/connector-specs');
+
 describe('rotateInboundIngress', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (connectorTypeHasInboundEvents as Mock).mockImplementation(async (actionTypeId: string) =>
-      (await vi.importActual('@kbn/connector-specs')).connectorTypeHasInboundEvents(actionTypeId)
+    (connectorTypeHasInboundEvents as Mock).mockImplementation((actionTypeId: string) =>
+      actualConnectorSpecs.connectorTypeHasInboundEvents(actionTypeId)
     );
-    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
-      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
+    (connectorTypeIsDual as Mock).mockImplementation((actionTypeId: string) =>
+      actualConnectorSpecs.connectorTypeIsDual(actionTypeId)
     );
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     connectorTokenClient.deleteConnectorTokens.mockResolvedValue(undefined);

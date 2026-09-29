@@ -34,39 +34,39 @@ describe('literal', () => {
 
   test('returns error when not correct', () => {
     expect(() => literal('test').validate('foo')).toThrowErrorMatchingInlineSnapshot(
-      `"expected value to equal [test]"`
+      `[Error: expected value to equal [test]]`
     );
 
     expect(() => literal(true).validate(false)).toThrowErrorMatchingInlineSnapshot(
-      `"expected value to equal [true]"`
+      `[Error: expected value to equal [true]]`
     );
 
     expect(() => literal('test').validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-      `"expected value to equal [test]"`
+      `[Error: expected value to equal [test]]`
     );
 
     expect(() => literal(123).validate('abc')).toThrowErrorMatchingInlineSnapshot(
-      `"expected value to equal [123]"`
+      `[Error: expected value to equal [123]]`
     );
 
     expect(() => literal(null).validate(42)).toThrowErrorMatchingInlineSnapshot(
-      `"expected value to equal [null]"`
+      `[Error: expected value to equal [null]]`
     );
 
     expect(() => literal(1).validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-      `"expected value to equal [1]"`
+      `[Error: expected value to equal [1]]`
     );
   });
 
   test('should validate undefined value with correct error message', () => {
     expect(() => literal(1).validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-      `"expected value to equal [1]"`
+      `[Error: expected value to equal [1]]`
     );
   });
 
   test('includes namespace in failure', () => {
     expect(() =>
       literal('test').validate('foo', {}, 'foo-namespace')
-    ).toThrowErrorMatchingInlineSnapshot(`"[foo-namespace]: expected value to equal [test]"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: [foo-namespace]: expected value to equal [test]]`);
   });
 });

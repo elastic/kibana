@@ -90,7 +90,7 @@ describe('ConnectorsForm ', () => {
   it('sets the fields for the selected connector correctly', async () => {
     renderWithTestingProviders(<ConnectorsForm {...props} />);
 
-    expect(screen.getByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
+    expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
     const severitySelect = screen.getByTestId('severitySelect');
     const urgencySelect = screen.getByTestId('urgencySelect');
@@ -121,7 +121,7 @@ describe('ConnectorsForm ', () => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
+    expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
 
     const incidentTypeComboBox = screen.getByTestId('incidentTypeComboBox');
     const severitySelect = screen.getByTestId('severitySelect');

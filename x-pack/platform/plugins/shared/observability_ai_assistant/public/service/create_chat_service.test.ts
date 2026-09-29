@@ -198,13 +198,11 @@ describe('createChatService', () => {
 
       const response$ = chat();
 
-      const matcher = await expect(async () => {
-        await getConcatenatedMessage(response$);
-      }).rejects;
+      const concatenated = getConcatenatedMessage(response$);
 
-      matcher.toEqual(expect.any(ChatCompletionError));
+      await expect(concatenated).rejects.toEqual(expect.any(ChatCompletionError));
 
-      matcher.toHaveProperty(
+      await expect(concatenated).rejects.toHaveProperty(
         'message',
         'The server had an error while processing your request. Sorry about that!'
       );

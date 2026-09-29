@@ -100,6 +100,7 @@ describe('CPSManager', () => {
 
   describe('fetchProjects', () => {
     it('should fetch and store projects successfully', async () => {
+      await cpsManager.whenReady();
       // fetches all projects to get the total project count
       expect(mockHttp.post).toHaveBeenCalledWith('/internal/cps/projects_tags', {
         body: JSON.stringify({ project_routing: '_alias:*' }),
@@ -354,6 +355,7 @@ describe('CPSManager', () => {
     });
 
     it('resets projectRouting$ to default when access changes to DISABLED', async () => {
+      await cpsManager.whenReady();
       cpsManager.setProjectRouting('_alias:_origin');
       expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
 

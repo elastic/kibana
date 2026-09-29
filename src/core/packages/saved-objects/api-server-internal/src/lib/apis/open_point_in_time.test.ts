@@ -37,6 +37,7 @@ import {
   createDocumentMigrator,
   createSpySerializer,
   createGenericNotFoundErrorPayload,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 import { PointInTimeFinder } from '../point_in_time_finder';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -133,7 +134,7 @@ describe('SavedObjectsRepository', () => {
     describe('errors', () => {
       const expectNotFoundError = async (types: string | string[]) => {
         await expect(repository.openPointInTimeForType(types)).rejects.toThrow(
-          createGenericNotFoundErrorPayload()
+          errorWithMessage(createGenericNotFoundErrorPayload())
         );
       };
 

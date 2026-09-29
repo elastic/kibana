@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -17,6 +18,8 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AnnotationsPage } from './annotations';
+import { usePluginContext as usePluginContextImport } from '../../hooks/use_plugin_context';
+import { useAnnotationsPrivileges as useAnnotationsPrivilegesImport } from './annotations_privileges';
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const onboardingHref = '/app/observabilityOnboarding';
 const onboardingLocator = sharePluginMock.createLocator();
@@ -47,8 +50,8 @@ vi.mock('./annotations_list', () => {
   return { ...mocked, default: mocked };
 });
 
-const { usePluginContext } = await vi.importMock('../../hooks/use_plugin_context');
-const { useAnnotationsPrivileges } = await vi.importMock('./annotations_privileges');
+const usePluginContext = usePluginContextImport as unknown as Mock;
+const useAnnotationsPrivileges = useAnnotationsPrivilegesImport as unknown as Mock;
 
 function ObservabilityPageTemplate({
   children,

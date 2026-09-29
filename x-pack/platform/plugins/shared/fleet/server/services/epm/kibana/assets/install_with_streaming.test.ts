@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -15,6 +16,7 @@ import { appContextService } from '../../../app_context';
 import { createAppContextStartContractMock } from '../../../../mocks';
 
 import { installKibanaAssetsWithStreaming } from './install_with_streaming';
+import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
 vi.mock('./saved_objects', () => {
   const mocked = {
@@ -39,8 +41,6 @@ vi.mock('../../packages/install', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { getSpaceAwareSaveobjectsClients } = await vi.importMock('./saved_objects');
-
 const makeArchiveBuffer = (id: string, soType: string) =>
   Buffer.from(JSON.stringify({ id, type: soType, attributes: { title: id } }));
 
@@ -53,7 +53,7 @@ describe('installKibanaAssetsWithStreaming', () => {
     soClientWithSpace = savedObjectsClientMock.create();
     soClientWithSpace.bulkCreate.mockResolvedValue({ saved_objects: [] });
 
-    getSpaceAwareSaveobjectsClients.mockReturnValue({
+    (getSpaceAwareSaveobjectsClients as Mock).mockReturnValue({
       savedObjectClientWithSpace: soClientWithSpace,
       savedObjectsImporter: { import: vi.fn().mockResolvedValue({ errors: [] }) },
       savedObjectTagAssignmentService: vi.fn(),

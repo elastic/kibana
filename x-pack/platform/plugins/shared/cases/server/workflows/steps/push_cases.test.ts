@@ -15,7 +15,9 @@ import { createStepHandlerContext } from './test_utils';
 import type { CasesClient } from '../../client';
 
 // Avoid real retry delays in tests; the onFailedAttempt callback is tested separately below.
-vi.mock('p-retry', () => vi.fn().mockImplementation((fn: () => Promise<unknown>) => fn()));
+vi.mock('p-retry', () => ({
+  default: vi.fn().mockImplementation((fn: () => Promise<unknown>) => fn()),
+}));
 
 const caseWithConnector = {
   ...createCaseResponseFixture,

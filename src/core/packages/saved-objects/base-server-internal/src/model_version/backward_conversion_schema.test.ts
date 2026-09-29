@@ -71,7 +71,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
       const doc = createDoc({});
       const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
 
-      expect(() => converted(doc)).toThrowErrorMatchingInlineSnapshot(`"dang"`);
+      expect(() => converted(doc)).toThrowErrorMatchingInlineSnapshot(`[Error: dang]`);
     });
   });
 
@@ -128,7 +128,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
       const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
 
       expect(() => converted(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"[hello]: Additional properties are not allowed ('hello' was unexpected)"`
+        `[Error: [hello]: Additional properties are not allowed ('hello' was unexpected)]`
       );
     });
 

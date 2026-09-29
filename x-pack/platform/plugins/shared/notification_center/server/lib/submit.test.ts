@@ -93,14 +93,15 @@ describe('buildForType', () => {
   it('submits immediately without evaluating a flag when the type declares none', async () => {
     // Isolate a module graph where the type carries no flag, instead of mutating the
     // shared registry-derived flag map (which would leak across tests).
-    await jest.isolateModulesAsync(async () => {
-      vi.doMock('../../common/feature_flags', () => {
-        const mocked = {
-          NOTIFICATION_TYPE_FLAGS: {},
-          NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
-        };
-        return { ...mocked, default: mocked };
-      });
+    vi.resetModules();
+    vi.doMock('../../common/feature_flags', () => {
+      const mocked = {
+        NOTIFICATION_TYPE_FLAGS: {},
+        NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
+      };
+      return { ...mocked, default: mocked };
+    });
+    try {
       const { buildForType: buildIsolated } = await import('./submit');
       const { core, create, getBooleanValue$ } = createCoreMock();
 
@@ -109,7 +110,10 @@ describe('buildForType', () => {
       expect(getBooleanValue$).not.toHaveBeenCalled();
       expect(create).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ status: 'submitted' });
-    });
+    } finally {
+      vi.doUnmock('../../common/feature_flags');
+      vi.resetModules();
+    }
   });
 
   it('rejects invalid content with a typed error and writes nothing', async () => {

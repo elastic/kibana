@@ -38,7 +38,7 @@ describe('getUnsplittableKey', () => {
 describe('replaceEnvVarRefs', () => {
   it('throws an error if the variable is not defined', () => {
     expect(() => replaceEnvVarRefs('${VAR_1}', {})).toThrowErrorMatchingInlineSnapshot(
-      `"Unknown environment variable referenced in config : VAR_1"`
+      `[Error: Unknown environment variable referenced in config : VAR_1]`
     );
   });
   it('replaces the environment variable with its value', () => {

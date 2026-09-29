@@ -69,9 +69,9 @@ test('handles object with wrong type', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() }), schema.string()]);
 
   expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(`
-    "types that failed validation:
+    [Error: types that failed validation:
     - [0.age]: expected value of type [number] but got [string]
-    - [1]: expected value of type [string] but got [Object]"
+    - [1]: expected value of type [string] but got [Object]]
   `);
 });
 
@@ -79,7 +79,7 @@ test('use shorter error messages when defining only one type', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
   expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(
-    `"[age]: expected value of type [number] but got [string]"`
+    `[Error: [age]: expected value of type [number] but got [string]]`
   );
 });
 
@@ -88,10 +88,10 @@ test('includes namespace in failure', () => {
 
   expect(() => type.validate({ age: 'foo' }, {}, 'foo-namespace'))
     .toThrowErrorMatchingInlineSnapshot(`
-    "[foo-namespace]: types that failed validation:
-    - [foo-namespace.0.age]: expected value of type [number] but got [string]
-    - [foo-namespace.1]: expected value of type [string] but got [Object]"
-  `);
+      [Error: [foo-namespace]: types that failed validation:
+      - [foo-namespace.0.age]: expected value of type [number] but got [string]
+      - [foo-namespace.1]: expected value of type [string] but got [Object]]
+    `);
 });
 
 test('includes namespace in failure in shorthand mode', () => {
@@ -100,7 +100,7 @@ test('includes namespace in failure in shorthand mode', () => {
   expect(() =>
     type.validate({ age: 'foo' }, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace.age]: expected value of type [number] but got [string]"`
+    `[Error: [foo-namespace.age]: expected value of type [number] but got [string]]`
   );
 });
 
@@ -157,10 +157,10 @@ test('fails if not matching type', () => {
   const type = schema.oneOf([schema.string()]);
 
   expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [boolean]"`
+    `[Error: expected value of type [string] but got [boolean]]`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
+    `[Error: expected value of type [string] but got [number]]`
   );
 });
 
@@ -168,9 +168,9 @@ test('fails if not matching multiple types', () => {
   const type = schema.oneOf([schema.string(), schema.number()]);
 
   expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(`
-    "types that failed validation:
+    [Error: types that failed validation:
     - [0]: expected value of type [string] but got [boolean]
-    - [1]: expected value of type [number] but got [boolean]"
+    - [1]: expected value of type [number] but got [boolean]]
   `);
 });
 
@@ -178,9 +178,9 @@ test('fails if not matching literal', () => {
   const type = schema.oneOf([schema.literal('foo'), schema.literal('dolly')]);
 
   expect(() => type.validate('bar')).toThrowErrorMatchingInlineSnapshot(`
-    "types that failed validation:
+    [Error: types that failed validation:
     - [0]: expected value to equal [foo]
-    - [1]: expected value to equal [dolly]"
+    - [1]: expected value to equal [dolly]]
   `);
 });
 
@@ -191,11 +191,11 @@ test('fails if nested union type fail', () => {
   ]);
 
   expect(() => type.validate('aaa')).toThrowErrorMatchingInlineSnapshot(`
-    "types that failed validation:
+    [Error: types that failed validation:
     - [0]: expected value of type [boolean] but got [string]
     - [1]: types that failed validation:
      - [0]: could not parse object value from json input
-     - [1]: expected value of type [number] but got [string]"
+     - [1]: expected value of type [number] but got [string]]
   `);
 });
 
@@ -219,7 +219,7 @@ describe('#extendsDeep', () => {
     expect(() =>
       forbidSchema.validate({ foo: 'test', bar: 'test' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+      `[Error: [bar]: Additional properties are not allowed ('bar' was unexpected)]`
     );
   });
 });

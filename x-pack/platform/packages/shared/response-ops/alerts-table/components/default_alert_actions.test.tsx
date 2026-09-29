@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React from 'react';
 import { DefaultAlertActions } from './default_alert_actions';
@@ -18,6 +19,7 @@ import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { useGetRuleTypesPermissions as mockedUseGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
@@ -80,9 +82,7 @@ vi.mock('../contexts/individual_tags_action_context', async () => {
   };
 });
 
-const { useGetRuleTypesPermissions } = await vi.importMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+const useGetRuleTypesPermissions = mockedUseGetRuleTypesPermissions as Mock;
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();

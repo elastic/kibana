@@ -47,6 +47,7 @@ import {
   deleteSuccess,
   createBadRequestErrorPayload,
   createGenericNotFoundErrorPayload,
+  errorWithMessage,
 } from '../../test_helpers/repository.test.common';
 
 describe('#delete', () => {
@@ -281,14 +282,16 @@ describe('#delete', () => {
         options?: SavedObjectsDeleteOptions
       ) => {
         await expect(repository.delete(type, id, options)).rejects.toThrow(
-          createGenericNotFoundErrorPayload(type, id)
+          errorWithMessage(createGenericNotFoundErrorPayload(type, id))
         );
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.delete(type, id, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          errorWithMessage(createBadRequestErrorPayload('"options.namespace" cannot be "*"'))
+        );
       });
 
       it(`throws when type is invalid`, async () => {

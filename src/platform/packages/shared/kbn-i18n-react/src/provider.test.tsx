@@ -29,7 +29,7 @@ describe('I18nProvider', () => {
         </UninitializedI18nProvider>
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"kbn-i18n must be initialized before using <I18nProvider />"`
+      `[Error: kbn-i18n must be initialized before using <I18nProvider />]`
     );
   });
 

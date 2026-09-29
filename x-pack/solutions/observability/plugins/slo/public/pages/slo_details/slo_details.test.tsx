@@ -43,6 +43,7 @@ vi.mock('react-router-dom', () => {
   const mocked = {
     ...require('react-router-dom'),
     useParams: vi.fn(),
+    useLocation: vi.fn(),
   };
   return { ...mocked, default: mocked };
 });

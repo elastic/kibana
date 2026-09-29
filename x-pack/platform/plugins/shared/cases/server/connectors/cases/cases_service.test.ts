@@ -115,7 +115,7 @@ describe('CasesService', () => {
       expect(() =>
         // @ts-expect-error: ruleId and grouping are omitted for testing
         service.getCaseId({ spaceId, owner, counter })
-      ).toThrowErrorMatchingInlineSnapshot(`"ruleID or grouping is required"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: ruleID or grouping is required]`);
     });
 
     it.each(['ruleId', 'spaceId', 'owner'])(

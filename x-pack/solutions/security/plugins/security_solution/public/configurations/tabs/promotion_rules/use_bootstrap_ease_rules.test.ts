@@ -9,6 +9,7 @@ import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
 import { renderHook } from '@testing-library/react';
+import { useIsMutating } from '@kbn/react-query';
 import { useSecuritySolutionInitialization } from '../../../common/components/initialization/use_security_solution_initialization';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -150,8 +151,7 @@ describe('useBootstrapEaseRules', () => {
 
 describe('useIsBootstrappingEaseRules', () => {
   it('returns false when no mutation is in flight', async () => {
-    const { useIsMutating } = await vi.importMock('@kbn/react-query');
-    useIsMutating.mockReturnValue(0);
+    (useIsMutating as Mock).mockReturnValue(0);
 
     const { result } = renderHook(() => useIsBootstrappingEaseRules());
 
@@ -159,8 +159,7 @@ describe('useIsBootstrappingEaseRules', () => {
   });
 
   it('returns true when a mutation is in flight', async () => {
-    const { useIsMutating } = await vi.importMock('@kbn/react-query');
-    useIsMutating.mockReturnValue(1);
+    (useIsMutating as Mock).mockReturnValue(1);
 
     const { result } = renderHook(() => useIsBootstrappingEaseRules());
 

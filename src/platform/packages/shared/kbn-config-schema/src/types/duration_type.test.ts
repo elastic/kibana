@@ -43,7 +43,7 @@ test('it supports years as Y and y', () => {
 
 test('is required by default', () => {
   expect(() => duration().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [moment.Duration] but got [undefined]"`
+    `[Error: expected value of type [moment.Duration] but got [undefined]]`
   );
 });
 
@@ -51,7 +51,7 @@ test('includes namespace in failure', () => {
   expect(() =>
     duration().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [moment.Duration] but got [undefined]"`
+    `[Error: [foo-namespace]: expected value of type [moment.Duration] but got [undefined]]`
   );
 });
 
@@ -159,7 +159,7 @@ describe('#min', () => {
   });
   it('throws error when value is smaller', () => {
     expect(() => duration({ min: '5m' }).validate('3m')).toThrowErrorMatchingInlineSnapshot(
-      `"Value must be equal to or greater than [PT5M]"`
+      `[Error: Value must be equal to or greater than [PT5M]]`
     );
   });
 });
@@ -170,41 +170,41 @@ describe('#max', () => {
   });
   it('throws error when value is greater', () => {
     expect(() => duration({ max: '10h' }).validate('17h')).toThrowErrorMatchingInlineSnapshot(
-      `"Value must be equal to or less than [PT10H]"`
+      `[Error: Value must be equal to or less than [PT10H]]`
     );
   });
 });
 
 test('returns error when not valid string or non-safe positive integer', () => {
   expect(() => duration().validate(-123)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `[Error: Value in milliseconds is expected to be a safe positive integer.]`
   );
 
   expect(() => duration().validate(NaN)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `[Error: Value in milliseconds is expected to be a safe positive integer.]`
   );
 
   expect(() => duration().validate(Infinity)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `[Error: Value in milliseconds is expected to be a safe positive integer.]`
   );
 
   expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `[Error: Value in milliseconds is expected to be a safe positive integer.]`
   );
 
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [moment.Duration] but got [Array]"`
+    `[Error: expected value of type [moment.Duration] but got [Array]]`
   );
 
   expect(() => duration().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [moment.Duration] but got [RegExp]"`
+    `[Error: expected value of type [moment.Duration] but got [RegExp]]`
   );
 
   expect(() => duration().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer."`
+    `[Error: Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer.]`
   );
 
   expect(() => duration().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer."`
+    `[Error: Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer.]`
   );
 });

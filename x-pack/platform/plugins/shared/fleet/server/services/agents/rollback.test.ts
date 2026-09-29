@@ -21,6 +21,7 @@ import {
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { licenseService } from '../license';
 
 import {
   getValidRollbacks,
@@ -110,7 +111,7 @@ describe('rollback', () => {
   let soClient: Mocked<SavedObjectsClientContract>;
   let mockLicenseService: { hasAtLeast: Mock };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
 
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -120,7 +121,7 @@ describe('rollback', () => {
     mockAgentsKueryNamespaceFilter.mockResolvedValue(undefined);
 
     // Get the mocked license service and default to having the required license
-    mockLicenseService = (await vi.importMock('../license')).licenseService;
+    mockLicenseService = licenseService as unknown as { hasAtLeast: Mock };
     mockLicenseService.hasAtLeast.mockReturnValue(true);
   });
 

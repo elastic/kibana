@@ -2745,7 +2745,7 @@ fields: []
           await expect(() =>
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Conflict: getting records: mockBulkGetRecords error"`
+            `[Error: Conflict: getting records: mockBulkGetRecords error]`
           );
 
           expect(mockBulkCreateRecords).not.toHaveBeenCalled();
@@ -2772,7 +2772,7 @@ fields: []
           await expect(() =>
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Bad request: creating records: mockBulkCreateRecords error"`
+            `[Error: Bad request: creating records: mockBulkCreateRecords error]`
           );
 
           expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
@@ -2801,7 +2801,7 @@ fields: []
           await expect(() =>
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Bad request: timeWindow: bulkUpdateRecord error"`
+            `[Error: Bad request: timeWindow: bulkUpdateRecord error]`
           );
 
           expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
@@ -2828,7 +2828,7 @@ fields: []
 
           await expect(() =>
             connectorExecutor.execute(params)
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden: getting cases: bulkGet error"`);
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Forbidden: getting cases: bulkGet error]`);
 
           expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
         });
@@ -2853,7 +2853,7 @@ fields: []
           await expect(() =>
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"creating non found cases: bulkCreate error"`
+            `[CaseError: creating non found cases: bulkCreate error]`
           );
 
           expect(casesClientMock.attachments.bulkCreate).not.toHaveBeenCalled();
@@ -2875,7 +2875,7 @@ fields: []
               reopenClosedCases: true,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"reopening closed cases: bulkUpdate error"`
+            `[CaseError: reopening closed cases: bulkUpdate error]`
           );
 
           expect(casesClientMock.attachments.bulkCreate).not.toHaveBeenCalled();
@@ -2910,7 +2910,7 @@ fields: []
               reopenClosedCases: false,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Bad request: creating new cases for closed cases: bulkUpdateRecord error"`
+            `[Error: Bad request: creating new cases for closed cases: bulkUpdateRecord error]`
           );
 
           expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
@@ -2934,7 +2934,7 @@ fields: []
               reopenClosedCases: false,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"creating non found cases: bulkCreate error"`
+            `[CaseError: creating non found cases: bulkCreate error]`
           );
 
           expect(casesClientMock.attachments.bulkCreate).not.toHaveBeenCalled();
@@ -2947,7 +2947,7 @@ fields: []
 
           await expect(() =>
             connectorExecutor.execute(params)
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: attaching alerts: bulkCreate error]`);
         });
 
         it('throws an error if there is an error when fetching configurations', async () => {
@@ -2969,7 +2969,7 @@ fields: []
 
           await expect(() =>
             connectorExecutor.execute(params)
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"get configuration error"`);
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: get configuration error]`);
         });
       });
 
@@ -3235,7 +3235,7 @@ fields: []
       await expect(() =>
         connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Conflict: getting records: mockBulkGetRecords error"`
+        `[Error: Conflict: getting records: mockBulkGetRecords error]`
       );
 
       resetCounters();
@@ -3262,7 +3262,7 @@ fields: []
       await expect(() =>
         connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Conflict: creating records: bulkCreateRecord error"`
+        `[Error: Conflict: creating records: bulkCreateRecord error]`
       );
 
       resetCounters();
@@ -3292,7 +3292,7 @@ fields: []
       await expect(() =>
         connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Conflict: creating records: bulkCreateRecord error"`
+        `[Error: Conflict: creating records: bulkCreateRecord error]`
       );
 
       resetCounters();
@@ -3323,7 +3323,7 @@ fields: []
       await expect(() =>
         connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Conflict: updating records: mockBulkUpdateRecord error"`
+        `[Error: Conflict: updating records: mockBulkUpdateRecord error]`
       );
 
       resetCounters();
@@ -3389,7 +3389,7 @@ fields: []
       await expect(() =>
         connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Conflict: updating records: mockBulkUpdateRecord error"`
+        `[Error: Conflict: updating records: mockBulkUpdateRecord error]`
       );
 
       resetCounters();
@@ -3503,7 +3503,7 @@ fields: []
 
       await expect(() =>
         connectorExecutor.execute(params)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"creating non found cases: bulkCreate error"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: creating non found cases: bulkCreate error]`);
 
       resetCounters();
 
@@ -3538,7 +3538,7 @@ fields: []
           ...params,
           reopenClosedCases: true,
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"reopening closed cases: bulkUpdate error"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: reopening closed cases: bulkUpdate error]`);
 
       resetCounters();
 
@@ -3621,7 +3621,7 @@ fields: []
           reopenClosedCases: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Conflict: updating records: mockBulkUpdateRecord error"`
+        `[Error: Conflict: updating records: mockBulkUpdateRecord error]`
       );
 
       resetCounters();
@@ -3701,7 +3701,7 @@ fields: []
           reopenClosedCases: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"creating new case for closed case: bulkCreate error"`
+        `[CaseError: creating new case for closed case: bulkCreate error]`
       );
 
       resetCounters();
@@ -3764,7 +3764,7 @@ fields: []
           ...params,
           reopenClosedCases: false,
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: attaching alerts: bulkCreate error]`);
 
       resetCounters();
 

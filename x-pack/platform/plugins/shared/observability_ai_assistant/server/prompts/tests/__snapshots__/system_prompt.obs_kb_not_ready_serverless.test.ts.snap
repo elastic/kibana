@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`getSystemPrompt - Serverless | Observability Deployment | KB NOT ready | No ProductDoc matches snapshot 1`] = `
 "# System Prompt: Elastic Observability Assistant

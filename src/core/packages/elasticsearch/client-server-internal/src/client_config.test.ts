@@ -534,7 +534,7 @@ describe('parseClientOptions', () => {
               false,
               kibanaVersion
             ).tls
-        ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: unknown"`);
+        ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown ssl verificationMode: unknown]`);
       });
       it('throws for undefined values', () => {
         expect(
@@ -548,7 +548,7 @@ describe('parseClientOptions', () => {
               false,
               kibanaVersion
             ).tls
-        ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: undefined"`);
+        ).toThrowErrorMatchingInlineSnapshot(`[Error: Unknown ssl verificationMode: undefined]`);
       });
     });
 

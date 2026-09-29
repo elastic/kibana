@@ -32,7 +32,7 @@ test('Passthrough is valid', () => {
 
 test('is required by default', () => {
   expect(() => schema.buffer().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Buffer] but got [undefined]"`
+    `[Error: expected value of type [Buffer] but got [undefined]]`
   );
 });
 
@@ -40,7 +40,7 @@ test('includes namespace in failure', () => {
   expect(() =>
     schema.stream().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [Stream] but got [undefined]"`
+    `[Error: [foo-namespace]: expected value of type [Stream] but got [undefined]]`
   );
 });
 
@@ -58,14 +58,14 @@ describe('#defaultValue', () => {
 
 test('returns error when not a stream', () => {
   expect(() => schema.stream().validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Stream] but got [number]"`
+    `[Error: expected value of type [Stream] but got [number]]`
   );
 
   expect(() => schema.stream().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Stream] but got [Array]"`
+    `[Error: expected value of type [Stream] but got [Array]]`
   );
 
   expect(() => schema.stream().validate('abc')).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Stream] but got [string]"`
+    `[Error: expected value of type [Stream] but got [string]]`
   );
 });

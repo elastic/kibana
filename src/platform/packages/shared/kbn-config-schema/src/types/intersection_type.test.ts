@@ -27,7 +27,7 @@ describe('schema.allOf', () => {
     ]);
 
     expect(() => type.validate({ foo: 'something' })).toThrowErrorMatchingInlineSnapshot(
-      `"[bar]: expected value of type [string] but got [undefined]"`
+      `[Error: [bar]: expected value of type [string] but got [undefined]]`
     );
   });
 
@@ -46,7 +46,7 @@ describe('schema.allOf', () => {
         schema.object({ foo: schema.string() }),
         schema.object({ foo: schema.literal('bar') }),
       ])
-    ).toThrowErrorMatchingInlineSnapshot(`"Duplicate key found in intersection: 'foo'"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Duplicate key found in intersection: 'foo']`);
   });
 
   it('has the right type inference', () => {

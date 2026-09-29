@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React from 'react';
 import type { PropsWithChildren } from 'react';
@@ -17,6 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { useAlertsTableContext as mockedUseAlertsTableContext } from '../../contexts/alerts_table_context';
 
 vi.mock('../../contexts/alerts_table_context', async () => {
   const actual = await vi.importActual('../../contexts/alerts_table_context');
@@ -26,7 +28,7 @@ vi.mock('../../contexts/alerts_table_context', async () => {
   };
 });
 
-const { useAlertsTableContext } = await vi.importMock('../../contexts/alerts_table_context');
+const useAlertsTableContext = mockedUseAlertsTableContext as Mock;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 

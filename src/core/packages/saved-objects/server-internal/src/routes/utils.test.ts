@@ -272,12 +272,12 @@ describe('throwOnHttpHiddenTypes', () => {
     expect(() => {
       throwOnHttpHiddenTypes(['not-allowed-type']);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Unsupported saved object type(s): not-allowed-type: Bad Request"`
+      `[Error: Unsupported saved object type(s): not-allowed-type: Bad Request]`
     );
     expect(() => {
       throwOnHttpHiddenTypes(['index-pattern', 'not-allowed-type', 'not-allowed-type-2']);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Unsupported saved object type(s): index-pattern, not-allowed-type, not-allowed-type-2: Bad Request"`
+      `[Error: Unsupported saved object type(s): index-pattern, not-allowed-type, not-allowed-type-2: Bad Request]`
     );
   });
   it("returns if there aren't any types provided to check", () => {
@@ -294,7 +294,7 @@ describe('throwOnGloballyHiddenTypes', () => {
     expect(() => {
       throwOnGloballyHiddenTypes(httpVisibleTypes, ['not-allowed-type']);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Unsupported saved object type(s): not-allowed-type: Bad Request"`
+      `[Error: Unsupported saved object type(s): not-allowed-type: Bad Request]`
     );
   });
 
@@ -321,7 +321,7 @@ describe('throwIfTypeNotVisibleByAPI', () => {
     expect(() =>
       throwIfTypeNotVisibleByAPI('hiddenFromHttpApis', registry)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Unsupported saved object type: 'hiddenFromHttpApis': Bad Request"`
+      `[Error: Unsupported saved object type: 'hiddenFromHttpApis': Bad Request]`
     );
   });
 
@@ -350,7 +350,7 @@ describe('throwIfAnyTypeNotVisibleByAPI', () => {
     expect(() =>
       throwIfAnyTypeNotVisibleByAPI(['hiddenFromHttpApis'], registry)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Unsupported saved object type(s): hiddenFromHttpApis: Bad Request"`
+      `[Error: Unsupported saved object type(s): hiddenFromHttpApis: Bad Request]`
     );
   });
 

@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
@@ -28,6 +29,8 @@ import {
   RULE_TAGS_FILTER_LABEL,
   RULE_TYPES_FILTER_LABEL,
 } from '../translations';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
+import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -37,9 +40,7 @@ const TAG_2 = 'tag2';
 const TAG_3 = 'tag3';
 
 vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
-const { useGetRuleTagsQuery: mockUseGetRuleTagsQuery } = await vi.importMock(
-  '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'
-);
+const mockUseGetRuleTagsQuery = useGetRuleTagsQuery as Mock;
 mockUseGetRuleTagsQuery.mockReturnValue({
   tags: [TAG_1, TAG_2, TAG_3],
   isLoading: false,
@@ -50,9 +51,7 @@ mockUseGetRuleTagsQuery.mockReturnValue({
 });
 
 vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
-const { useGetInternalRuleTypesQuery: mockUseGetInternalRuleTypesQuery } = await vi.importMock(
-  '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query'
-);
+const mockUseGetInternalRuleTypesQuery = useGetInternalRuleTypesQuery as Mock;
 mockUseGetInternalRuleTypesQuery.mockReturnValue({
   data: [{ id: 'testType', name: 'Test Type', solution: 'stack' }],
   isLoading: false,

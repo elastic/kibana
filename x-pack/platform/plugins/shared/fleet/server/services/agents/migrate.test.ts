@@ -15,6 +15,7 @@ import type { AgentPolicy, Agent } from '../../types';
 
 import { FleetError, FleetUnauthorizedError } from '../../errors';
 import { sendActionTelemetryEvents } from '../action_sender';
+import { appContextService, licenseService } from '..';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -108,15 +109,15 @@ describe('Agent migration', () => {
     getCurrentNamespace: vi.fn(),
   } as any;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     // Reset mocks before each test
     vi.resetAllMocks();
     esClientMock = elasticsearchServiceMock.createInternalClient();
 
-    mockLicenseService = (await vi.importMock('..')).licenseService;
+    mockLicenseService = licenseService;
     mockLicenseService.hasAtLeast.mockReturnValue(true);
 
-    mockAppContextService = (await vi.importMock('..')).appContextService;
+    mockAppContextService = appContextService;
     mockAppContextService.getLogger.mockReturnValue({ debug: vi.fn() });
     mockAppContextService.getTelemetryEventsSender.mockReturnValue({
       queueTelemetryEvents: vi.fn(),
@@ -677,12 +678,15 @@ describe('bulkMigrateAgents kuery path — cheap count and sync/async branching'
   let mockBulkMigrateAgentsBatch: MockInstance;
   let mockMigrateActionRunner: MockInstance;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     esClient2 = elasticsearchServiceMock.createInternalClient();
-    const mockLicenseService = (await vi.importMock('..')).licenseService;
+    const mockLicenseService = licenseService as unknown as { hasAtLeast: Mock };
     mockLicenseService.hasAtLeast.mockReturnValue(true);
-    const mockAppContextService = (await vi.importMock('..')).appContextService;
+    const mockAppContextService = appContextService as unknown as Record<
+      'getLogger' | 'getTelemetryEventsSender' | 'getCloud',
+      Mock
+    >;
     mockAppContextService.getLogger.mockReturnValue({ debug: vi.fn() });
     mockAppContextService.getTelemetryEventsSender.mockReturnValue({
       queueTelemetryEvents: vi.fn(),

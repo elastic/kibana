@@ -7,8 +7,10 @@
 
 import { vi } from 'vitest';
 
-import path, { join, resolve } from 'path';
+import { join, resolve } from 'path';
 import { getTemplateFilePath } from './utils';
+
+vi.mock('path', { spy: true });
 
 describe('getTemplateFilePath', () => {
   beforeEach(() => {
@@ -16,7 +18,7 @@ describe('getTemplateFilePath', () => {
   });
 
   it('resolves path correctly', async () => {
-    const resolveSpy = vi.spyOn(path, 'resolve').mockReturnValueOnce('../fake_path');
+    const resolveSpy = vi.mocked(resolve).mockReturnValueOnce('../fake_path');
     const dataPath = getTemplateFilePath('', 'foo.js');
 
     expect(dataPath).toEqual('../fake_path');
@@ -37,7 +39,7 @@ describe('getTemplateFilePath', () => {
     });
 
     expect(() => getTemplateFilePathMock('../sample', 'foo.js')).toThrowErrorMatchingInlineSnapshot(
-      '"Error finding the file!"'
+      `[Error: Error finding the file!]`
     );
   });
 });

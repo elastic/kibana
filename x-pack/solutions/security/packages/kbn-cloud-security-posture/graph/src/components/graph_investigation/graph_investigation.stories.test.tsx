@@ -39,6 +39,9 @@ import {
 } from '../mock/constants';
 import type { UseFetchGraphDataParams } from '../../hooks/use_fetch_graph_data';
 import { mockDataView } from '../mock/data_view.mock';
+// SearchBar is React.lazy over `import('../ui_module')`; load that module graph up front so the lazy
+// import resolves within the tests (a native dynamic import of it is far slower than Jest's require).
+import '@kbn/unified-search-plugin/public/ui_module';
 
 setProjectAnnotations(previewAnnotations);
 
