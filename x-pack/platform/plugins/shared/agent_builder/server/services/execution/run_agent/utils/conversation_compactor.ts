@@ -13,7 +13,13 @@ import type {
   CompactionStructuredData,
   CompactionToolCallSummary,
 } from '@kbn/agent-builder-common';
-import { ChatEventType, isTimelineEvent, isToolCallStep } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  TimelineEventType,
+  isPreExecutionWorkflowStep,
+  isTimelineEvent,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -33,7 +39,7 @@ import {
   isLegacySummary,
   takeRoundsWithinBudget,
 } from './compaction_coverage';
-import { estimateMessagesTokens } from './estimate_conversation_tokens';
+import { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { prepareMessages } from './to_langchain_messages';
 import { serializeCompactionSummary } from './compaction_serialize';
@@ -55,12 +61,11 @@ export interface CompactConversationOptions {
   contextBudget: ContextBudget;
   /**
    * Per-round token counts for the rounds of `processedConversation.timeline`, in round order.
-   * Computed once upstream so the trigger, reporting and hard truncation share one estimate.
+   * Includes model context so the trigger, reporting and hard truncation reflect the agent prompt.
    */
   perRoundTokenCounts: number[];
   /**
-   * Transformer applied to tool results when rendering rounds for the summariser. Must be the
-   * instance `perRoundTokenCounts` were estimated with, so chunk sizing matches what is sent.
+   * Transformer applied to tool results when rendering rounds for the summariser.
    */
   resultTransformer: ToolCallResultTransformer;
   /**
@@ -88,6 +93,18 @@ export interface CompactedConversation {
 }
 
 type Round = TimelineRound<ProcessedTimelineEvent>;
+
+// Pre-execution model context is transient round input and must not become durable summary content.
+// The step's non-model workflow context is forwarded independently to post-execution workflows.
+const withoutPreExecutionContextForSummary = (
+  events: ProcessedTimelineEvent[]
+): ProcessedTimelineEvent[] =>
+  events.filter(
+    (event) =>
+      !isTimelineEvent(event) ||
+      event.type !== TimelineEventType.executionStep ||
+      !isPreExecutionWorkflowStep(event.data.step)
+  );
 
 // ---------------------------------------------------------------------------
 // Programmatic extraction helpers
@@ -258,7 +275,6 @@ export const compactConversation = async ({
     rounds,
     roundsToSummarize,
     covered,
-    tokensByRoundId,
     resultTransformer,
     chatModel,
     budget: contextBudget,
@@ -363,7 +379,6 @@ const summarizeOlderRounds = async ({
   rounds,
   roundsToSummarize,
   covered,
-  tokensByRoundId,
   resultTransformer,
   chatModel,
   budget,
@@ -377,7 +392,6 @@ const summarizeOlderRounds = async ({
   /** The prefix of `rounds` to summarise (never empty). */
   roundsToSummarize: Round[];
   covered: ReadonlySet<string>;
-  tokensByRoundId: ReadonlyMap<string, number>;
   resultTransformer: ToolCallResultTransformer;
   chatModel: InferenceChatModel;
   budget: ContextBudget;
@@ -391,10 +405,17 @@ const summarizeOlderRounds = async ({
   const programmatic = extractProgrammaticSummary(coveredRounds);
 
   try {
+    const summarizerTokenCounts = await estimatePerRoundTokens(
+      withoutPreExecutionContextForSummary(rawRounds.flatMap((round) => round.events)),
+      resultTransformer
+    );
+    const summarizerTokensByRoundId = new Map(
+      rawRounds.map((round, index) => [round.id, summarizerTokenCounts[index] ?? 0] as const)
+    );
     const llmOutput = await generateLlmSummary({
       conversation,
       rawRounds,
-      tokensByRoundId,
+      summarizerTokensByRoundId,
       resultTransformer,
       programmatic,
       chatModel,
@@ -441,7 +462,7 @@ const summarizeOlderRounds = async ({
 const generateLlmSummary = async ({
   conversation,
   rawRounds,
-  tokensByRoundId,
+  summarizerTokensByRoundId,
   resultTransformer,
   programmatic,
   chatModel,
@@ -452,7 +473,7 @@ const generateLlmSummary = async ({
 }: {
   conversation: ProcessedConversation;
   rawRounds: Round[];
-  tokensByRoundId: ReadonlyMap<string, number>;
+  summarizerTokensByRoundId: ReadonlyMap<string, number>;
   resultTransformer: ToolCallResultTransformer;
   programmatic: { tool_calls_summary: CompactionToolCallSummary[]; agent_actions: string[] };
   chatModel: InferenceChatModel;
@@ -464,7 +485,6 @@ const generateLlmSummary = async ({
   const structuredModel = chatModel.withStructuredOutput(llmCompactionSchema, {
     name: 'compact_conversation',
   });
-
   const toolLines = programmatic.tool_calls_summary
     .map((tc) => `- ${tc.tool_id}(${tc.params_summary})`)
     .join('\n');
@@ -480,7 +500,12 @@ const generateLlmSummary = async ({
     prior?: CompactionSummary
   ): Promise<BaseMessage[]> => {
     const history = await prepareMessages({
-      conversation: { ...conversation, timeline: chunk.flatMap((round) => round.events) },
+      conversation: {
+        ...conversation,
+        // Workflow model context is replayed verbatim with uncompacted rounds, but must not be
+        // folded into the persisted summary after those original messages are removed.
+        timeline: withoutPreExecutionContextForSummary(chunk.flatMap((round) => round.events)),
+      },
       compactionSummary: prior,
       resultTransformer,
     });
@@ -495,7 +520,7 @@ const generateLlmSummary = async ({
     const fixedTokens = estimateMessagesTokens(await renderRequest([], prior));
     let chunk = takeRoundsWithinBudget(
       remaining,
-      tokensByRoundId,
+      summarizerTokensByRoundId,
       budget.historyBudget - fixedTokens
     );
     let messages = await renderRequest(chunk, prior);
