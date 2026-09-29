@@ -78,7 +78,10 @@ export async function bulkRestartAgents(
         givenAgents.push(maybeAgent);
       }
     }
-    const result = await restartBatch(esClient, soClient, givenAgents, { spaceId: currentSpaceId });
+    const result = await restartBatch(esClient, soClient, givenAgents, {
+      spaceId: currentSpaceId,
+      total: options.agentIds.length,
+    });
     await createErrorActionResults(esClient, result.actionId, missingErrors, 'agent not found');
     return result;
   }

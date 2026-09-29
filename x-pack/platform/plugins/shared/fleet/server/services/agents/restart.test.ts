@@ -147,6 +147,7 @@ describe('restart', () => {
       expect(result).toEqual({ actionId: 'bulk-action-1' });
       expect(mockRestartBatch).toHaveBeenCalledWith(esClient, soClient, agents, {
         spaceId: 'default',
+        total: 2,
       });
       expect(mockCreateErrorActionResults).toHaveBeenCalledWith(
         esClient,
@@ -168,6 +169,7 @@ describe('restart', () => {
 
       expect(mockRestartBatch).toHaveBeenCalledWith(esClient, soClient, [{ id: 'agent-1' }], {
         spaceId: 'default',
+        total: 2,
       });
       expect(mockCreateErrorActionResults).toHaveBeenCalledWith(
         esClient,
