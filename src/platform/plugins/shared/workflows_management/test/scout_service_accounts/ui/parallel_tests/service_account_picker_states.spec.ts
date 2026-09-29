@@ -116,7 +116,7 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     const draft = await editor.getYamlEditorValue();
     await editor.openCreateServiceAccount();
     await editor.openServiceAccountRoles();
-    await expect(page.getByRole('link', { name: /Create new role/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Create new role/ })).toBeInViewport();
     expect(
       (
         await page.checkA11y({
