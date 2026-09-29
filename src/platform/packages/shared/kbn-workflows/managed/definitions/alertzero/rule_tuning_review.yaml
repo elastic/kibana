@@ -688,6 +688,55 @@ steps:
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
+
+  # Maps severity strings to ordinal ranks so the ESQL query below can count
+  # alerts at or above a given severity without a Liquid rank table in the query.
+  # Only computed for risk_score proposals; a skipped step returns nil for all fields.
+  - name: compute_severity_ranks
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}"
+    with:
+      current_rank: >-
+        ${{ steps.fetch_rule.output.severity == 'critical' ? 4
+          : steps.fetch_rule.output.severity == 'high' ? 3
+          : steps.fetch_rule.output.severity == 'medium' ? 2
+          : 1 }}
+      proposed_rank: >-
+        ${{ steps.diagnose_rule.output.structured_output.proposed_severity == 'critical' ? 4
+          : steps.diagnose_rule.output.structured_output.proposed_severity == 'high' ? 3
+          : steps.diagnose_rule.output.structured_output.proposed_severity == 'medium' ? 2
+          : 1 }}
+
+  # Counts alerts in the analysis window at or above the current vs proposed severity,
+  # giving the analyst a sense of how many alerts the change would re-triage.
+  # on-failure: continue so a query error degrades gracefully to the plain before/after text.
+  - name: fetch_severity_counts
+    type: elasticsearch.esql.query
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}"
+    with:
+      allow_partial_results: false
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.alert.rule.uuid: "{{ inputs.rule_uuid }}"
+            - range:
+                "@timestamp":
+                  gte: "now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }}
+        | EVAL sev_rank = CASE(
+            `kibana.alert.severity` == "critical", 4,
+            `kibana.alert.severity` == "high", 3,
+            `kibana.alert.severity` == "medium", 2,
+            1
+          )
+        | STATS
+            at_or_above_current  = COUNT(*) WHERE sev_rank >= {{ steps.compute_severity_ranks.output.current_rank }},
+            at_or_above_proposed = COUNT(*) WHERE sev_rank >= {{ steps.compute_severity_ranks.output.proposed_rank }}
+    on-failure:
+      continue: true
+
   - name: compose_proposal
     type: data.set
     with:
@@ -740,10 +789,12 @@ steps:
         {% endfor %}
         Approving adds the exception to the rule's own exception list, expiring automatically on {{ steps.compute_exception_expire_time.output.expire_time }}. It can be removed or extended in the Detection Rules UI.
         {% when "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }}
-        Current severity: {{ steps.fetch_rule.output.severity }}
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
-        Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
+        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
+        {% if steps.fetch_severity_counts.error == null %}
+        Alerts at or above current severity ({{ steps.fetch_rule.output.severity }}) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days: {{ steps.fetch_severity_counts.output.values | first | first }}.
+        Alerts that would remain at or above proposed severity ({{ steps.diagnose_rule.output.structured_output.proposed_severity }}): {{ steps.fetch_severity_counts.output.values | first | last }}.
+        {% endif %}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
         {% when "threshold" %}
         Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
