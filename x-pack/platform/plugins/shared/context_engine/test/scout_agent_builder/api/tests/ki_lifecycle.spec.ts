@@ -147,6 +147,7 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
       'revised',
       'single',
       'single',
+      'tied',
       'unexpired',
     ]);
   });
@@ -208,7 +209,7 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
     );
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.response).toContain('Knowledge item types\n"index_metadata": 2\n');
+    expect(response.body.response).toContain('Knowledge item types\n"index_metadata": 3\n');
   });
 
   apiTest('reads an unregistered index as-is', async ({ apiClient }) => {
