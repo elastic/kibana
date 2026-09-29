@@ -10,6 +10,8 @@ import { schema } from '@kbn/config-schema';
 const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 const optionalShortString = schema.maybe(schema.string({ maxLength: 256 }));
 
+const VALID_DELIMITER_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
+
 /**
  * Request body for `PUT .../data_sets/{id}`: {@link Dataset} (no top-level `name`;
  * the path supplies the id).
@@ -73,7 +75,17 @@ export const datasetSchema = schema.object({
       partition_path: optionalString,
       hive_partitioning: schema.maybe(schema.boolean()),
       // CSV/TSV commonly changed
-      delimiter: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
+      delimiter: schema.maybe(
+        schema.string({
+          maxLength: 2,
+          minLength: 1,
+          validate: (value) => {
+            if (value.length === 1) return;
+            if (VALID_DELIMITER_SEQUENCES.includes(value)) return;
+            return 'Must be a single character, \\t or \\\\.';
+          },
+        })
+      ),
       mode: schema.maybe(
         schema.oneOf([schema.literal('quoted'), schema.literal('escaped'), schema.literal('plain')])
       ),

@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
+import { isValidDelimiter } from '../../../create_dataset_form_state';
 import {
   EuiComboBoxWithCustomOption,
   type ComboBoxPresetOption,
@@ -76,9 +77,7 @@ export function DelimiterSelect({
       presetOptions={presetOptions}
       getCustomLabel={toDisplayLabel}
       // Don't trim: allow whitespace delimiters (e.g. a single space).
-      isValidCustomOption={(searchValue: string) =>
-        Boolean(searchValue) && searchValue.length === 1
-      }
+      isValidCustomOption={isValidDelimiter}
       placeholder={createDatasetWizardStrings.settingsDelimiterPlaceholder}
       data-test-subj="createDatasetSettingsDelimiter"
       fullWidth

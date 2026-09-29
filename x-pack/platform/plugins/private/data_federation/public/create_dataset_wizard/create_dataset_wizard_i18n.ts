@@ -623,9 +623,9 @@ export const createDatasetWizardStrings = {
   ),
 
   settingsDelimiterInvalid: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsDelimiterInvalid',
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterInvalidCharacterOrSequence',
     {
-      defaultMessage: 'Must be a single character.',
+      defaultMessage: 'Must be a single character, \\t, or \\\\.',
     }
   ),
 

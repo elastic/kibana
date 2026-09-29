@@ -6,7 +6,11 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { DatasetSettings, DatasetSettingsFile, DatasetFormat } from '../../common/dataset_types';
+import type {
+  DatasetSettings,
+  DatasetSettingsFile,
+  DatasetFormat,
+} from '../../common/dataset_types';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from './mapping_step/mapping_editor';
@@ -184,9 +188,15 @@ const parseSkipRows = (value: string): number | undefined => {
   return parsed;
 };
 
+const VALID_DELIMITER_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
+
+/** Whether `value` is a single character or one of the supported delimiter escape sequences. */
+export const isValidDelimiter = (value: string): boolean =>
+  value.length === 1 || VALID_DELIMITER_SEQUENCES.includes(value);
+
 export const validateDelimiter = (value: string): true | string => {
   if (!value) return true;
-  if (value.length !== 1) return createDatasetWizardStrings.settingsDelimiterInvalid;
+  if (!isValidDelimiter(value)) return createDatasetWizardStrings.settingsDelimiterInvalid;
   return true;
 };
 

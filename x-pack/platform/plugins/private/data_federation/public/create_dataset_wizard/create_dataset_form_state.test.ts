@@ -10,6 +10,7 @@ import { emptyDatasetFormValues } from './dataset_form_initial_values';
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
+  validateDelimiter,
   validateEscapeCharacter,
   validateQuoteCharacter,
   validateMaxErrors,
@@ -72,6 +73,23 @@ describe('create_dataset_form_state', () => {
       expect(validateMaxErrors('-1')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
       expect(validateMaxErrors('1.5')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
       expect(validateMaxErrors('abc')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
+    });
+  });
+
+  describe('validateDelimiter', () => {
+    it('accepts empty and a single character', () => {
+      expect(validateDelimiter('')).toBe(true);
+      expect(validateDelimiter(',')).toBe(true);
+      expect(validateDelimiter(' ')).toBe(true);
+      expect(validateDelimiter('\t')).toBe(true);
+    });
+
+    it.each(['\\t', '\\n', '\\r', '\\\\'])('accepts the %s escape sequence', (value) => {
+      expect(validateDelimiter(value)).toBe(true);
+    });
+
+    it.each(['ab', '\\a', '\\0', '::', '\\tt'])('rejects %s', (value) => {
+      expect(validateDelimiter(value)).toBe(createDatasetWizardStrings.settingsDelimiterInvalid);
     });
   });
 

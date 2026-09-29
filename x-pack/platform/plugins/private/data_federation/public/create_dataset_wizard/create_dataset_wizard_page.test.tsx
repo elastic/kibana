@@ -801,4 +801,102 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardAdditionalStep')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsEscape')).toHaveAttribute('aria-invalid', 'true');
   });
+
+  it('allows navigation once an invalid additional setting is fixed', async () => {
+    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+    fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+
+    fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\a' } });
+    await clickNext(getByTestId);
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+
+    fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '/' } });
+    await waitFor(() =>
+      expect(getByTestId('createDatasetSettingsEscape')).not.toHaveAttribute('aria-invalid', 'true')
+    );
+    await clickNext(getByTestId);
+
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+  });
+
+  it('disables Next while an additional setting has a validation error', async () => {
+    const { getByTestId, findByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+    fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+
+    fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\a' } });
+    await clickNext(getByTestId);
+
+    expect(getByTestId('nextButton')).toBeDisabled();
+  });
+
+  it('blocks navigation when an edited dataset has an invalid delimiter', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
+    const { getByTestId, getByText, queryByTestId } = render(
+      <EuiProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add: jest.fn(), delete: jest.fn() },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={['logs-dataset']}
+                  loadDataSets={jest.fn().mockResolvedValue(undefined)}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={{
+                    name: 'logs-dataset',
+                    data_source: 'source-1',
+                    resource: 's3://bucket/*',
+                    settings: { format: 'csv', delimiter: 'ab' },
+                  }}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    await clickNext(getByTestId);
+
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(getByTestId('createDatasetWizardAdditionalStep')).toBeInTheDocument();
+    expect(getByText(createDatasetWizardStrings.settingsDelimiterInvalid)).toBeInTheDocument();
+  });
 });

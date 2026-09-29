@@ -57,4 +57,24 @@ describe('DelimiterSelect', () => {
 
     expect(getByTestId('delimiterValue')).toHaveTextContent(';');
   });
+
+  it.each([
+    ['accepts', '\\t', '\\t'],
+    ['accepts', '|', '|'],
+    ['rejects', '\\a', ''],
+    ['rejects', 'ab', ''],
+  ])('%s the custom delimiter %s', async (_outcome, typed, expected) => {
+    const { getByTestId } = renderComponent();
+
+    const combo = getByTestId('createDatasetSettingsDelimiter');
+    const input = combo.querySelector('input') as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(input, { target: { value: typed } });
+    });
+    await act(async () => {
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    });
+
+    expect(getByTestId('delimiterValue').textContent).toBe(expected);
+  });
 });
