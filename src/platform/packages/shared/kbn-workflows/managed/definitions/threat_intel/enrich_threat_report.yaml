@@ -298,9 +298,6 @@ steps:
           doc:
             extracted:
               iocs: "${{ steps.enrich_report_core.output.iocs }}"
-              # Promotion set after semantic review. Deferred URL/domain candidates
-              # keep heuristic tiers in `iocs` but stay out of the live IM index.
-              anchor_iocs: "${{ steps.enrich_report_core.output.anchor_iocs }}"
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
               categories: "${{ steps.enrich_report_core.output.categories }}"
               behaviors: "${{ steps.enrich_report_core.output.behaviors }}"

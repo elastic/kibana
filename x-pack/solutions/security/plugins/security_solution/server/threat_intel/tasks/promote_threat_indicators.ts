@@ -122,13 +122,13 @@ interface ReportHit {
     content?: { title?: string };
     severity?: { level?: string };
     extracted?: {
-      iocs?: Array<{ type?: string; value?: string; reference?: string; tier?: string }>;
-      /**
-       * Adjudicated promotion set. When present (including empty), deferred
-       * URL/domain candidates are already excluded. Older reports omit this
-       * field and fall back to `iocs`.
-       */
-      anchor_iocs?: Array<{ type?: string; value?: string; reference?: string; tier?: string }>;
+      iocs?: Array<{
+        type?: string;
+        value?: string;
+        reference?: string;
+        tier?: string;
+        deferred_unreviewed?: boolean;
+      }>;
     };
     lineage?: { extracted_at?: string };
   };
@@ -387,13 +387,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     // the indicator _id below so a value cited in two spaces never collapses into
     // one cross-space doc.
     const spaceId = report._source?.space_id ?? GLOBAL_SPACE_ID;
-    // Prefer anchor_iocs when the enrichment pass wrote them: deferred URL/domain
-    // candidates keep heuristic tiers in `iocs` for debugging, but must not reach
-    // the live Indicator Match index until a model reviews them.
-    const iocs =
-      report._source?.extracted?.anchor_iocs !== undefined
-        ? report._source.extracted.anchor_iocs
-        : report._source?.extracted?.iocs ?? [];
+    const iocs = report._source?.extracted?.iocs ?? [];
     const provider = report._source?.source?.name ?? 'unknown';
     const reportUrl = normalizeProvenanceUrl(report._source?.source?.url);
     const severity = report._source?.severity?.level;
@@ -403,14 +397,17 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     // Two filters. The type/value check is defensive on the indexer boundary so
     // a single malformed row never poisons the bulk write. The tier check is the
     // vetting gate: only IOCs the extractor did not already classify as noise
-    // become live Indicator Match rows.
+    // become live Indicator Match rows. `deferred_unreviewed` is the semantic
+    // review gate: URL/domain candidates past the batch budget keep a heuristic
+    // tier for debugging but must not reach the live index until reviewed.
     const usableIocs = iocs.filter(
       (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
         typeof ioc.value === 'string' &&
         ioc.value.length > 0 &&
         isIocType(ioc.type) &&
         isWellFormedForType(ioc.type, ioc.value) &&
-        isPromotableTier(ioc.tier)
+        isPromotableTier(ioc.tier) &&
+        ioc.deferred_unreviewed !== true
     );
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
@@ -676,7 +673,6 @@ export const registerPromoteThreatIndicatorsTask = ({
                       'content.title',
                       'severity.level',
                       'extracted.iocs',
-                      'extracted.anchor_iocs',
                       'lineage.extracted_at',
                     ],
                     query: {

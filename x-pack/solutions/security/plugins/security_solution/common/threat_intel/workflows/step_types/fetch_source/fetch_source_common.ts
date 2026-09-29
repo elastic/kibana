@@ -47,6 +47,7 @@ export const iocEntrySchema = z.object({
   port: z.number().optional(),
   reference: z.string().optional(),
   block_index: z.number().optional(),
+  deferred_unreviewed: z.boolean().optional(),
 });
 
 export type IocEntry = z.infer<typeof iocEntrySchema>;

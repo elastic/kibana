@@ -98,18 +98,6 @@ const fullyMigratedReportMappings = () => ({
           },
         },
         artifacts: {},
-        anchor_iocs: {
-          properties: {
-            tier: {},
-            tier_heuristic: {},
-            tier_basis: {},
-            port: {},
-            reference: { ignore_above: 2048 },
-            block_index: {},
-            value: { ignore_above: 2048 },
-            defanged: { ignore_above: 2048 },
-          },
-        },
         vulnerability: {},
         iocs: {
           properties: {
@@ -119,6 +107,7 @@ const fullyMigratedReportMappings = () => ({
             port: {},
             reference: { ignore_above: 2048 },
             block_index: {},
+            deferred_unreviewed: {},
             // v26 bounds these by value, not just existence.
             value: { ignore_above: 2048 },
             defanged: { ignore_above: 2048 },

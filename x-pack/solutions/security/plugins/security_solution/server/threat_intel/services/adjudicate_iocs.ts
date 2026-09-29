@@ -124,9 +124,9 @@ const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\
 const isUrlBoundary = (char: string | undefined): boolean =>
   char === undefined || /[\s"'<>)\]},.;]/.test(char);
 
-/** After a bare host match, reject hostname continuations like `.other` or `-cdn`. */
-const isBareHostBoundary = (char: string | undefined): boolean =>
-  char === undefined || !/[A-Za-z0-9._-]/.test(char);
+/** After a bare host match, only true URL terminators (not `/` path or `:port`). */
+const isOmittedRootSlashBoundary = (char: string | undefined): boolean =>
+  char === undefined || /[\s"'<>)\]},;]/.test(char);
 
 /**
  * `new URL('https://evil.example').toString()` normalizes to a trailing `/`.
@@ -161,7 +161,9 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
       for (const pathPart of pathCandidates) {
         const after = hostEnd + pathPart.length;
         const boundaryOk =
-          pathPart === '' ? isBareHostBoundary(source[after]) : isUrlBoundary(source[after]);
+          pathPart === ''
+            ? isOmittedRootSlashBoundary(source[after])
+            : isUrlBoundary(source[after]);
         if (source.slice(hostEnd, after) === pathPart && boundaryOk) {
           matchedPath = pathPart;
           break;
@@ -211,7 +213,7 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
         if (index < 0) break;
         const after = index + exactValue.length;
         const boundaryOk = bareHost
-          ? isBareHostBoundary(source[after])
+          ? isOmittedRootSlashBoundary(source[after])
           : isUrlBoundary(source[after]);
         from = index + Math.max(exactValue.length, 1);
         if (boundaryOk) {
@@ -578,7 +580,17 @@ export const reconcileIocAdjudication = (
   }
 
   // Deferred URL/domain candidates keep heuristic tiers in `iocs`, but stay out
-  // of anchors until a model pass reviews them. Correlation hash is separate.
+  // of anchors / promotion until a model pass reviews them. Correlation hash is separate.
+  for (let index = 0; index < output.length; index++) {
+    const ioc = output[index];
+    if (
+      (ioc.type === 'url' || ioc.type === 'domain') &&
+      PROMOTABLE_TIERS.has(ioc.tier) &&
+      !reviewedIndexes.has(index)
+    ) {
+      output[index] = { ...ioc, deferred_unreviewed: true };
+    }
+  }
   const anchorIocs = output.filter((ioc, index) => {
     if (!PROMOTABLE_TIERS.has(ioc.tier)) return false;
     if ((ioc.type === 'url' || ioc.type === 'domain') && !reviewedIndexes.has(index)) {

@@ -58,6 +58,7 @@ export const extractedIocSchema = schema.object({
   tier_heuristic: oneOfLiterals(IOC_TIERS),
   tier_basis: schema.string({ minLength: 1, maxLength: MAX_IOC_TIER_BASIS_LENGTH }),
   port: schema.maybe(schema.number()),
+  deferred_unreviewed: schema.maybe(schema.boolean()),
 });
 
 export const extractIocsResponseSchema = schema.object({

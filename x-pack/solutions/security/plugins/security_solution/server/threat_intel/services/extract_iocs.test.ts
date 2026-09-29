@@ -1807,6 +1807,7 @@ describe('extract_iocs — mapping coverage guard', () => {
     'port',
     'reference',
     'block_index',
+    'deferred_unreviewed',
   ]);
 
   test('all ExtractedIoc fields are declared in the extracted.iocs mapping', () => {
@@ -1819,6 +1820,7 @@ describe('extract_iocs — mapping coverage guard', () => {
       tier_heuristic: 'discriminating' as IocTier,
       tier_basis: 'ioc_section',
       port: 443,
+      deferred_unreviewed: true,
     };
 
     for (const key of Object.keys(fullIoc)) {

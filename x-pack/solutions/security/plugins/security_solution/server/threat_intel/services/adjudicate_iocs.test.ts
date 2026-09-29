@@ -304,6 +304,17 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).toBe('');
   });
 
+  it('does not reuse path or port evidence for a bare-host candidate', () => {
+    const prepared = prepareIocAdjudication({
+      text:
+        'The attacker staged https://evil.example/payload.bin during access. ' +
+        'Later the panel listened on https://evil.example:8443.',
+      iocs: [candidate('https://evil.example/')],
+    });
+
+    expect(prepared.reviewable[0].context).toBe('');
+  });
+
   it('does not treat a different port as the same origin citation', () => {
     const prepared = prepareIocAdjudication({
       text: 'Payload mirrored at https://blog.example:8443/payload',
@@ -446,6 +457,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
 
     expect(prepared.deferredUnreviewed).toBe(5);
     expect(result.iocs[capacity].tier).toBe('discriminating');
+    expect(result.iocs[capacity].deferred_unreviewed).toBe(true);
     expect(result.anchor_iocs.some((ioc) => ioc.value === iocs[capacity].value)).toBe(false);
     expect(result.anchor_iocs.some((ioc) => ioc.type === 'hash')).toBe(true);
     expect(result.promotable_count).toBe(capacity + 1);

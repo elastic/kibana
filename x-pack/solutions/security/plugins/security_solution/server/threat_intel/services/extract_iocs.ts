@@ -28,6 +28,12 @@ export interface ExtractedIoc {
   tier_heuristic: IocTier;
   tier_basis: string;
   port?: number;
+  /**
+   * URL/domain kept at a heuristic promotable tier because semantic review did
+   * not run (batch budget / overflow). Promote must skip these; they are not a
+   * model rejection.
+   */
+  deferred_unreviewed?: boolean;
 }
 
 type WorkingIoc = ExtractedIoc & { _offset?: number; _sectionKind?: SectionKind };
