@@ -12,6 +12,17 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings']);
 
+  // Migration recommendation: MIGRATE TO SCOUT
+  // Tests the field format editor preview for fields stored in _source and keyword fields not
+  // directly stored in _source. No existing Scout coverage found. The test creates its own
+  // lightweight ES index (data-view-edit-field) via the ES client in before/after hooks, making
+  // it self-contained and independent of shared ES archives — this pattern translates well to Scout.
+  // Both sub-tests exercise a real UI workflow (navigate → open field editor → assert preview value).
+  // Serverless sibling: x-pack/platform/test/serverless/functional/test_suites/management/data_views/_edit_field.ts
+  // runs the same two tests but uses a different navigation path (navigateToApp('management') +
+  // clicking the app-card-dataViews tile instead of PageObjects.settings.navigateTo()). The Scout
+  // migration should handle this via deployment-aware navigation helpers rather than duplicating the
+  // test logic.
   describe('edit field', function () {
     before(async () => {
       const es = getService('es');
