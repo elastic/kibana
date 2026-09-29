@@ -15,6 +15,7 @@ import { RuleLibraryList } from './rule_library_list';
 
 const mockFindItems = jest.fn();
 const mockInstallMutate = jest.fn();
+const mockUseFetchRuleTemplateTags = jest.fn();
 let mockCanWriteRules = true;
 let mockInstallIsLoading = false;
 let mockInstallVariables: { id: string } | undefined;
@@ -52,7 +53,7 @@ jest.mock('./rule_templates_data_source', () => ({
 }));
 
 jest.mock('../../hooks/use_fetch_rule_template_tags', () => ({
-  useFetchRuleTemplateTags: () => ({ data: ['nginx'], isLoading: false }),
+  useFetchRuleTemplateTags: (params: { search?: string }) => mockUseFetchRuleTemplateTags(params),
 }));
 
 jest.mock('../../hooks/use_install_rule_template', () => ({
@@ -87,6 +88,19 @@ const renderList = () =>
     </ListPageTestProviders>
   );
 
+const lastFindItemsArgs = () => {
+  const { calls } = mockFindItems.mock;
+  return calls[calls.length - 1][0];
+};
+
+const resolveTemplateList = () => {
+  const template = createTemplate();
+  mockFindItems.mockResolvedValue({
+    items: [{ id: template.id, title: template.rule.metadata.name, template }],
+    total: 1,
+  });
+};
+
 describe('RuleLibraryList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -94,6 +108,7 @@ describe('RuleLibraryList', () => {
     mockInstallIsLoading = false;
     mockInstallVariables = undefined;
     mockFindItems.mockResolvedValue({ items: [], total: 0 });
+    mockUseFetchRuleTemplateTags.mockReturnValue({ data: ['nginx'], isLoading: false });
   });
 
   it('renders the empty-state placeholder when there are no templates', async () => {
@@ -140,6 +155,49 @@ describe('RuleLibraryList', () => {
     const options = await screen.findByTestId('ruleLibraryTagsFilter-list');
     expect(within(options).getByText('nginx')).toBeInTheDocument();
     expect(within(options).queryByText('prod')).not.toBeInTheDocument();
+  });
+
+  it('applies and clears a selected tag filter', async () => {
+    resolveTemplateList();
+    renderList();
+    await screen.findByText('CPU usage');
+
+    fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter'));
+    const options = await screen.findByTestId('ruleLibraryTagsFilter-list');
+    fireEvent.click(within(options).getByText('nginx'));
+
+    await waitFor(() => {
+      expect(lastFindItemsArgs().filters.tag).toMatchObject({ include: ['nginx'] });
+    });
+
+    fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter-clear'));
+
+    await waitFor(() => {
+      expect(lastFindItemsArgs().filters.tag).toBeUndefined();
+    });
+  });
+
+  it('keeps selected tags available while searching for other options', async () => {
+    mockUseFetchRuleTemplateTags.mockImplementation(({ search }: { search?: string }) => ({
+      data: search === 'kube' ? ['kubernetes'] : ['nginx'],
+      isLoading: false,
+    }));
+    resolveTemplateList();
+    renderList();
+    await screen.findByText('CPU usage');
+
+    fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter'));
+    const options = await screen.findByTestId('ruleLibraryTagsFilter-list');
+    fireEvent.click(within(options).getByText('nginx'));
+    fireEvent.change(screen.getByTestId('ruleLibraryTagsFilterSearch'), {
+      target: { value: 'kube' },
+    });
+
+    await waitFor(() => {
+      expect(mockUseFetchRuleTemplateTags).toHaveBeenCalledWith({ search: 'kube' });
+    });
+    expect(within(options).getByText('nginx')).toBeInTheDocument();
+    expect(within(options).getByText('kubernetes')).toBeInTheDocument();
   });
 
   it('installs a template from the row action', async () => {
