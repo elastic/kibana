@@ -249,7 +249,7 @@ export class AgentBuilderPlugin
     const openConversationDetails = async ({
       conversationId,
       onClose,
-      menuActions,
+      trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
       const { openConversationDetailsFlyout } = await import(
         './flyout/open_conversation_details_flyout'
@@ -260,7 +260,7 @@ export class AgentBuilderPlugin
         conversationTemplatesService,
         conversationId,
         onClose,
-        menuActions,
+        trailingActions,
       });
     };
 

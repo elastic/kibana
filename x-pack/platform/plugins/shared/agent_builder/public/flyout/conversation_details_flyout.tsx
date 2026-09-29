@@ -275,7 +275,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
     const definition = conversationTemplatesService.getTemplateUIDefinition(
       conversation.template_id
     );
-    return definition?.detailsFlyout?.menuActions?.({ conversation });
+    return definition?.detailsFlyout?.trailingActions?.({ conversation });
   }, [conversation, conversationTemplatesService]);
 
   return (

@@ -24,15 +24,15 @@ describe('openConversationDetailsFlyout', () => {
 
     const open = ({
       onClose,
-      menuActions,
-    }: { onClose?: () => void; menuActions?: EuiFlyoutMenuAction[] } = {}) =>
+      trailingActions,
+    }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
         conversationTemplatesService: new ConversationTemplatesService(),
         conversationId: 'conversation',
         onClose,
-        menuActions,
+        trailingActions,
       });
 
     return { core, close, open, closeFlyout: () => resolveClosed() };
@@ -62,7 +62,7 @@ describe('openConversationDetailsFlyout', () => {
       onClick: jest.fn(),
     };
 
-    await open({ menuActions: [copyLink] });
+    await open({ trailingActions: [copyLink] });
 
     expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),

@@ -286,8 +286,8 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
 });
 
 describe('ConversationDetailsFlyout', () => {
-  it('renders the template menu actions in the menu bar', () => {
-    const menuActions = jest.fn(() => [
+  it('renders the template trailing actions in the menu bar', () => {
+    const trailingActions = jest.fn(() => [
       { iconType: 'link', 'aria-label': 'Copy link', onClick: jest.fn() },
     ]);
     const conversationTemplatesService = new ConversationTemplatesService();
@@ -305,7 +305,7 @@ describe('ConversationDetailsFlyout', () => {
     }).registerTemplateUIDefinition('test', () => ({
       name: 'Test',
       tabs: [],
-      detailsFlyout: { menuActions },
+      detailsFlyout: { trailingActions },
     }));
     const conversation = createConversation();
     jest.mocked(useConversation).mockReturnValue({
@@ -320,7 +320,7 @@ describe('ConversationDetailsFlyout', () => {
 
     // EUI's test-env EuiFlyout doesn't render the menu, so assert on the props it receives.
     const [{ flyoutMenuProps }] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
-    expect(menuActions).toHaveBeenCalledWith({ conversation });
-    expect(flyoutMenuProps?.trailingActions).toEqual(menuActions.mock.results[0].value);
+    expect(trailingActions).toHaveBeenCalledWith({ conversation });
+    expect(flyoutMenuProps?.trailingActions).toEqual(trailingActions.mock.results[0].value);
   });
 });

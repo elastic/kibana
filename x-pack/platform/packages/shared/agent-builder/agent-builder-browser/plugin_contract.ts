@@ -164,7 +164,7 @@ export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
-  menuActions?: EuiFlyoutMenuAction[];
+  trailingActions?: EuiFlyoutMenuAction[];
 }
 
 /**

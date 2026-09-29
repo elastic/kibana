@@ -1102,15 +1102,15 @@ is an `EuiFlyoutMenuAction` (`iconType`, `aria-label`, and `onClick` or `href`, 
 `toolTipContent`, `isDisabled` and `isLoading`). Each flyout takes them from a different place:
 
 - The in-chat flyout (opened from the chat's "Chat info" button) uses the template's
-  `detailsFlyout.menuActions`, re-evaluated when the conversation updates.
-- Flyouts opened with `openConversationDetails` use only its `menuActions` option, fixed when the
-  flyout opens. They don't read the template's `menuActions`, because the template isn't known
-  until the conversation has loaded.
+  `detailsFlyout.trailingActions`, re-evaluated when the conversation updates.
+- Flyouts opened with `openConversationDetails` use only its `trailingActions` option, fixed when
+  the flyout opens. They don't read the template's `trailingActions`, because the template isn't
+  known until the conversation has loaded.
 
 Define the actions once and pass the same function to both:
 
 ```tsx
-const getMenuActions = (conversationId: string): EuiFlyoutMenuAction[] => [
+const getTrailingActions = (conversationId: string): EuiFlyoutMenuAction[] => [
   {
     iconType: 'link',
     'aria-label': copyLinkLabel,
@@ -1123,13 +1123,13 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
   name: investigationTemplateName,
   tabs: ['investigation.details'],
   detailsFlyout: {
-    menuActions: ({ conversation }) => getMenuActions(conversation.id),
+    trailingActions: ({ conversation }) => getTrailingActions(conversation.id),
   },
 }));
 
 agentBuilder.openConversationDetails({
   conversationId,
-  menuActions: getMenuActions(conversationId),
+  trailingActions: getTrailingActions(conversationId),
 });
 ```
 

@@ -24,7 +24,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
-  menuActions?: EuiFlyoutMenuAction[];
+  trailingActions?: EuiFlyoutMenuAction[];
 }
 
 export const openConversationDetailsFlyout = async ({
@@ -33,7 +33,7 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
-  menuActions,
+  trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
@@ -53,7 +53,7 @@ export const openConversationDetailsFlyout = async ({
       title: FLYOUT_TITLE,
       size: 's',
       flyoutMenuDisplayMode: 'always',
-      flyoutMenuProps: { trailingActions: menuActions },
+      flyoutMenuProps: { trailingActions },
       type: 'push',
       paddingSize: 'm',
       css: flyoutMenuRowStyles,

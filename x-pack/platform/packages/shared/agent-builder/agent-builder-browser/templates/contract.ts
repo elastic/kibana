@@ -86,9 +86,9 @@ export interface ConversationTemplateUIDefinition {
     footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
     /**
      * Icon buttons rendered in the in-chat flyout's menu bar, before the close button. Flyouts opened
-     * with `openConversationDetails` take their actions from its `menuActions` option instead.
+     * with `openConversationDetails` take their actions from its `trailingActions` option instead.
      */
-    menuActions?: (
+    trailingActions?: (
       props: Pick<ConversationTemplateDetailsFlyoutRenderProps, 'conversation'>
     ) => EuiFlyoutMenuAction[];
   };
