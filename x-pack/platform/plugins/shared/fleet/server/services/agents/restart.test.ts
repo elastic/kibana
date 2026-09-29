@@ -12,12 +12,7 @@ import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { restartAgent, bulkRestartAgents } from './restart';
-import {
-  getAgentsById,
-  getAgentsByKuery,
-  getAgentPolicyForAgent,
-  openPointInTime,
-} from './crud';
+import { getAgentsById, getAgentsByKuery, getAgentPolicyForAgent, openPointInTime } from './crud';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { RestartActionRunner, restartBatch } from './restart_action_runner';
 
