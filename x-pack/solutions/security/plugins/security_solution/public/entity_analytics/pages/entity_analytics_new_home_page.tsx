@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';
@@ -24,6 +25,7 @@ import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entit
 import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useTimeRangeParam } from '../components/home/use_time_range_param';
 import {
   useEntityFiltersParam,
@@ -38,7 +40,11 @@ import {
   useNewlyHighCriticalCount,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
-import type { ActiveFilter, SignalCardData } from '../components/home/needs_attention_tiles/data';
+import {
+  EMPTY_ENTITY_IDS,
+  type ActiveFilter,
+  type SignalCardData,
+} from '../components/home/needs_attention_tiles/data';
 import {
   DataViewContext,
   useEntityURLState,
@@ -80,6 +86,9 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   pageIndex: 0,
 });
 
+/** ES `terms` queries fail above 65,536 values; keep the table well under that. */
+const MAX_CARD_FILTER_ENTITY_IDS = 1000;
+
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const spaceId = useSpaceId();
   const {
@@ -107,6 +116,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     return map;
   }, [watchlistsData]);
 
+  const { addWarning } = useAppToasts();
   const [timeRange, setTimeRange] = useTimeRangeParam();
   const [viewBy] = useState<'resolved' | 'raw'>('resolved');
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
@@ -119,7 +129,16 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   const resolvedSpaceId = spaceId ?? 'default';
-  const skipUntilSpaceKnown = !spaceId;
+  const { data: entityStoreStatusData, isLoading: entityStoreStatusLoading } =
+    useEntityStoreStatus();
+  const entityStoreDisabled =
+    entityStoreStatusData?.status === 'not_installed' ||
+    entityStoreStatusData?.status === 'stopped';
+  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
+  // Hooks must run before the disabled-prompt return. Skip ES|QL until the store
+  // is known to be running so we do not query a missing entities-latest alias.
+  const skipTileQueries =
+    !spaceId || entityStoreStatusLoading || entityStoreDisabled || entityStoreInstalling;
 
   const {
     alertsCount,
@@ -131,7 +150,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipUntilSpaceKnown,
+    skip: skipTileQueries,
   });
   const {
     count: anomaliesCount,
@@ -141,7 +160,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipUntilSpaceKnown,
+    skip: skipTileQueries,
   });
   const {
     count: newEntityCount,
@@ -151,7 +170,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipUntilSpaceKnown,
+    skip: skipTileQueries,
   });
   const {
     count: riskMoversCount,
@@ -162,7 +181,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipUntilSpaceKnown,
+    skip: skipTileQueries,
   });
   const {
     count: newlyHCCount,
@@ -173,7 +192,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipUntilSpaceKnown,
+    skip: skipTileQueries,
   });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
@@ -182,34 +201,26 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     );
   }, []);
 
-  const cardFilter = useMemo((): QueryDslQueryContainer | null => {
-    if (!activeFilter || activeFilter.type !== 'card') return null;
-    // Always return a terms filter when a card is active — an empty array matches nothing,
-    // keeping the table consistent with the tile (0 shown) rather than falling back to all entities.
-    let ids: string[];
+  const selectedEntityIds = useMemo(() => {
+    if (!activeFilter || activeFilter.type !== 'card') {
+      return EMPTY_ENTITY_IDS;
+    }
     switch (activeFilter.cardId) {
       case 'entitiesWithAlerts':
-        ids = alertsEntityIds;
-        break;
+        return alertsEntityIds;
       case 'entitiesWithAnomalies':
-        ids = anomaliesEntityIds;
-        break;
+        return anomaliesEntityIds;
       case 'riskMovers':
-        ids = riskMoversEntityIds;
-        break;
+        return riskMoversEntityIds;
       case 'newlyHighCritical':
-        ids = newlyHCEntityIds;
-        break;
+        return newlyHCEntityIds;
       case 'watchlisted':
-        ids = watchlistedEntityIds;
-        break;
+        return watchlistedEntityIds;
       case 'newEntity':
-        ids = newEntityEntityIds;
-        break;
+        return newEntityEntityIds;
       default:
-        return null;
+        return EMPTY_ENTITY_IDS;
     }
-    return { terms: { 'entity.id': ids } };
   }, [
     activeFilter,
     alertsEntityIds,
@@ -219,6 +230,40 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedEntityIds,
     newEntityEntityIds,
   ]);
+
+  const cardFilter = useMemo((): QueryDslQueryContainer | null => {
+    if (!activeFilter || activeFilter.type !== 'card') return null;
+    // Always return a terms filter when a card is active — an empty array matches nothing,
+    // keeping the table consistent with the tile (0 shown) rather than falling back to all entities.
+    const ids =
+      selectedEntityIds.length > MAX_CARD_FILTER_ENTITY_IDS
+        ? selectedEntityIds.slice(0, MAX_CARD_FILTER_ENTITY_IDS)
+        : selectedEntityIds;
+    return { terms: { 'entity.id': ids } };
+  }, [activeFilter, selectedEntityIds]);
+
+  useUpdateEffect(() => {
+    if (!activeFilter || selectedEntityIds.length <= MAX_CARD_FILTER_ENTITY_IDS) {
+      return;
+    }
+    addWarning({
+      title: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitTitle',
+        {
+          defaultMessage: 'Table shows {limit} of {count} entities',
+          values: { limit: MAX_CARD_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
+        }
+      ),
+      text: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitDescription',
+        {
+          defaultMessage:
+            'The table is limited to {limit} entities from this tile. Narrow the time range or filters to see a smaller set.',
+          values: { limit: MAX_CARD_FILTER_ENTITY_IDS },
+        }
+      ),
+    });
+  }, [activeFilter, selectedEntityIds.length, addWarning]);
 
   const signalCards = useMemo(
     (): SignalCardData[] => [
@@ -438,13 +483,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [dataView, isDataViewLoading]
   );
 
-  const { data: entityStoreStatusData } = useEntityStoreStatus();
-  const entityStoreDisabled =
-    entityStoreStatusData?.status === 'not_installed' ||
-    entityStoreStatusData?.status === 'stopped';
-  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
-
-  if (isDataViewLoading || entityStoreInstalling) return <EuiLoadingSpinner size="l" />;
+  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling) {
+    return <EuiLoadingSpinner size="l" />;
+  }
   if (isDataViewError) return <DataViewErrorComponent />;
   if (entityStoreDisabled) return <EntityStoreDisabledEmptyPrompt />;
 
@@ -520,13 +561,9 @@ const EntityAnalyticsEntitiesTableContent = ({
   });
 
   const { onChangePage } = urlState;
-  const prevCardFilterRef = useRef(cardFilter);
-  useEffect(() => {
-    if (prevCardFilterRef.current !== cardFilter) {
-      prevCardFilterRef.current = cardFilter;
-      onChangePage(0);
-    }
-  }, [cardFilter, onChangePage]);
+  useUpdateEffect(() => {
+    onChangePage(0);
+  }, [baseFilter, cardFilter, onChangePage]);
 
   const state = useMemo(() => {
     const extraFilters = (

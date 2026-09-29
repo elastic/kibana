@@ -16,6 +16,7 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import type { TimeRange } from '../../use_time_range_param';
 import {
@@ -114,7 +115,7 @@ export const useEntitiesWithAnomaliesCount = ({
 
   return {
     count: queryResult?.count ?? 0,
-    entityIds: queryResult?.entityIds ?? [],
+    entityIds: queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isJobsLoading || isIndexLoading || isLoading,
     error: filteredError,
   };

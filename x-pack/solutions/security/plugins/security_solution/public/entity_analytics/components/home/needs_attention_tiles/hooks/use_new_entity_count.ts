@@ -13,6 +13,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { EMPTY_ENTITY_IDS } from '../data';
 import { getEntitiesAlias, ENTITY_LATEST } from '../../constants';
 import type { TimeRange } from '../../use_time_range_param';
 import {
@@ -104,7 +105,7 @@ export const useNewEntityCount = ({
 
   return {
     count: result?.count ?? 0,
-    entityIds: result?.entityIds ?? [],
+    entityIds: result?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isLoading || isFetching,
     error,
   };

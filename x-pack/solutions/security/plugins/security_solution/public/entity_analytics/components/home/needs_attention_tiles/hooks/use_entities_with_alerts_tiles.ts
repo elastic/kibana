@@ -17,6 +17,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
 import type { TimeRange } from '../../use_time_range_param';
+import { EMPTY_ENTITY_IDS } from '../data';
 import {
   getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
@@ -134,9 +135,9 @@ export const useAlertBasedTiles = ({
 
   return {
     alertsCount: queryResult?.alertsCount ?? 0,
-    alertsEntityIds: queryResult?.alertsEntityIds ?? [],
+    alertsEntityIds: queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS,
     watchlistedCount: queryResult?.watchlistedCount ?? 0,
-    watchlistedEntityIds: queryResult?.watchlistedEntityIds ?? [],
+    watchlistedEntityIds: queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading,
     error: filteredError,
   };

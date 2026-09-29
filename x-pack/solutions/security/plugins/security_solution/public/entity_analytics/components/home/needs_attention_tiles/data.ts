@@ -13,6 +13,9 @@ export type SignalCardId =
   | 'watchlisted'
   | 'newEntity';
 
+/** Shared empty list so hooks do not allocate a new `[]` on every render. */
+export const EMPTY_ENTITY_IDS: string[] = [];
+
 export interface SignalCardData {
   id: SignalCardId;
   title: string;

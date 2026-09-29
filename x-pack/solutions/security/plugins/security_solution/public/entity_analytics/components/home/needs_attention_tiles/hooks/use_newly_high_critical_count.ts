@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
 import type { TimeRange } from '../../use_time_range_param';
 import {
@@ -98,7 +99,7 @@ export const useNewlyHighCriticalCount = ({
 
   return {
     count: queryResult?.count ?? 0,
-    entityIds: queryResult?.entityIds ?? [],
+    entityIds: queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading,
     isMissingIndex,
     error: filteredError,
