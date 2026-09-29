@@ -57,30 +57,30 @@ describe('applyUserActivityOtelFieldMap', () => {
       'event.type': ['access'],
       'kibana.space.id': 'default',
       'user.roles': ['admin', 'editor'],
-      'metadata.panel_count': 5,
-      'metadata.errors': panelErrors,
+      'kibana.dashboard.panel_count': 5,
+      'kibana.dashboard.errors': panelErrors,
     });
 
     expect(result['event.action']).toBe('dashboard_refresh');
     expect(result['event.type']).toEqual(['access']);
     expect(result['kibana.space.id']).toBe('default');
     expect(result['user.roles']).toEqual(['admin', 'editor']);
-    expect(result['metadata.panel_count']).toBe(5);
-    expect(result['metadata.errors']).toBe(panelErrors);
+    expect(result['kibana.dashboard.panel_count']).toBe(5);
+    expect(result['kibana.dashboard.errors']).toBe(panelErrors);
   });
 
   it('does not mutate the input attributes', () => {
     const input: Attributes = {
       message: 'User jesuswr viewed dashboard',
       'service.version': '9.4.0',
-      'metadata.errors': panelErrors,
+      'kibana.dashboard.errors': panelErrors,
     };
     applyUserActivityOtelFieldMap(input);
 
     expect(input).toEqual({
       message: 'User jesuswr viewed dashboard',
       'service.version': '9.4.0',
-      'metadata.errors': panelErrors,
+      'kibana.dashboard.errors': panelErrors,
     });
   });
 
@@ -94,7 +94,7 @@ describe('applyUserActivityOtelFieldMap', () => {
       'kibana.space.id': 'default',
       'kibana.object.id': 'dash-1',
       'user.name': 'sgates',
-      'metadata.errors': panelErrors,
+      'kibana.dashboard.errors': panelErrors,
       'service.id': '5b2de169-2785-441b-ae8c-186a1936b17d',
       'service.node.roles': ['ui'],
       'service.state': 'green',
@@ -111,7 +111,7 @@ describe('applyUserActivityOtelFieldMap', () => {
       'kibana.space.id': 'default',
       'kibana.object.id': 'dash-1',
       'user.name': 'sgates',
-      'metadata.errors': panelErrors,
+      'kibana.dashboard.errors': panelErrors,
     });
   });
 });

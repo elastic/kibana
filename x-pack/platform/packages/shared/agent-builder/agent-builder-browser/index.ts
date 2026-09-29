@@ -48,7 +48,11 @@ export type {
   ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './templates';
-export { TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
+export {
+  TIMELINE_TAB_ID,
+  BUILTIN_TAB_IDS,
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+} from './templates';
 export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
