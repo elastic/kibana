@@ -215,6 +215,21 @@ describe('useCloudConnectorTemplate', () => {
       });
     });
 
+    it('keeps the quick-create params the package URL carries on the rendered artifact', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: `${IAC_TEMPLATE_URL}&stackName=Elastic-Cloud-Connector`,
+        })
+      );
+      await launch(result);
+
+      const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+      expect(params.get('templateURL')).toBe(ARTIFACT_URL);
+      expect(params.get('stackName')).toBe('Elastic-Cloud-Connector');
+      expect(params.getAll('param_ElasticResourceId')).toEqual(['kibana-component-id']);
+    });
+
     it('passes the workload identity stack params even when the package URL has no tokens', async () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({

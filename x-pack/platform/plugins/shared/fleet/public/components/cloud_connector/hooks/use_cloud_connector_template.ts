@@ -243,6 +243,7 @@ export const useCloudConnectorTemplate = ({
         templateSha,
         deploymentId,
         stackParams,
+        staticUrl: staticTemplate.url,
       });
 
       switch (result.status) {

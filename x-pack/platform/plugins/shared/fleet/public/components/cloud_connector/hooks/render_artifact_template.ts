@@ -45,6 +45,8 @@ export interface RenderArtifactTemplateParams {
   /** Existing stack to update; makes the launch URL a stack-update deep link. */
   deploymentId?: string;
   stackParams?: Readonly<Record<string, string>>;
+  /** Package's static quick-create URL; the launch URL keeps its console host and query params. */
+  staticUrl?: string;
 }
 
 export type ArtifactRenderResult =
@@ -69,6 +71,7 @@ export const renderArtifactTemplate = async ({
   templateSha,
   deploymentId,
   stackParams,
+  staticUrl,
 }: RenderArtifactTemplateParams): Promise<ArtifactRenderResult> => {
   const { data, error } = await sendRenderIacTemplate({
     provider,
@@ -94,6 +97,7 @@ export const renderArtifactTemplate = async ({
     artifactUrl: data.artifactUrl,
     deploymentId,
     stackParams,
+    staticUrl,
   });
   return launchUrl
     ? { status: 'rendered', launchUrl, templateSha: data.templateSha, blueprint: data.blueprint }

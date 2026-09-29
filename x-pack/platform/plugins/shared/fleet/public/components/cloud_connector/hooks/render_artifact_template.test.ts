@@ -105,6 +105,28 @@ describe('renderArtifactTemplate', () => {
     });
   });
 
+  it('builds the quick-create launch URL on the static URL when one is given', async () => {
+    respond({
+      render: true,
+      artifactUrl: ARTIFACT_URL,
+      templateSha: TEMPLATE_SHA,
+      blueprint: BLUEPRINT,
+    });
+
+    const result = await renderArtifactTemplate({
+      ...PARAMS,
+      staticUrl:
+        'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&stackName=Elastic-Cloud-Connector',
+    });
+
+    expect(result).toMatchObject({
+      status: 'rendered',
+      launchUrl: `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT_URL
+      )}&stackName=Elastic-Cloud-Connector`,
+    });
+  });
+
   it('returns the stack-update launch URL when a deployment id is known', async () => {
     respond({
       render: true,

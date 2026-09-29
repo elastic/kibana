@@ -1305,6 +1305,20 @@ describe('Workload Identity template URLs', () => {
       expect(params).not.toHaveProperty('ElasticOrganizationId');
       expect(params.ElasticResourceId).toBe(KIBANA_COMPONENT_ID);
     });
+
+    it('returns no parameters without a cloud context', () => {
+      expect(getWorkloadIdentityFederationStackParams(undefined)).toEqual({});
+    });
+
+    it('returns no parameters outside Elastic Cloud', () => {
+      expect(
+        getWorkloadIdentityFederationStackParams({
+          ...echQaCloud,
+          isCloudEnabled: false,
+          isServerlessEnabled: false,
+        } as CloudSetup)
+      ).toEqual({});
+    });
   });
 
   describe('getElasticCloudTemplateContext', () => {
@@ -1485,6 +1499,61 @@ describe('IaC launch URL helpers', () => {
       `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
         ARTIFACT
       )}&param_ElasticOrganizationId=org%20id%26x&param_ElasticResourceType=project`
+    );
+  });
+
+  it('getArtifactLaunchUrl swaps the artifact into the static URL, keeping its host and params', () => {
+    const staticUrl =
+      'https://console.amazonaws-us-gov.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&stackName=Elastic-Cloud-Connector&param_X=1';
+
+    expect(getArtifactLaunchUrl({ provider: 'aws', artifactUrl: ARTIFACT, staticUrl })).toBe(
+      `https://console.amazonaws-us-gov.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&stackName=Elastic-Cloud-Connector&param_X=1`
+    );
+  });
+
+  it('getArtifactLaunchUrl sets stack params on the static URL, replacing any it already carries', () => {
+    const url = getArtifactLaunchUrl({
+      provider: 'aws',
+      artifactUrl: ARTIFACT,
+      staticUrl: `${STATIC_URL}&stackName=Elastic-Cloud-Connector`,
+      stackParams: { X: 'replaced', ElasticOrganizationId: '2070044029' },
+    });
+
+    expect(url).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_X=replaced&stackName=Elastic-Cloud-Connector&param_ElasticOrganizationId=2070044029`
+    );
+  });
+
+  it('getArtifactLaunchUrl builds the quick-create link when the static URL has no templateURL param', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        staticUrl: 'https://static.example/t.yml',
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}`
+    );
+  });
+
+  it('getArtifactLaunchUrl ignores the static URL for the stack-update deep link', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: STACK_ARN,
+        staticUrl: STATIC_URL,
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
     );
   });
 

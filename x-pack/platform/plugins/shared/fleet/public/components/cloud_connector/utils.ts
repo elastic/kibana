@@ -24,6 +24,8 @@ import {
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
 
+import type { AccountType } from '../../types';
+
 import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
@@ -33,7 +35,6 @@ import type {
   CloudSetupForCloudConnector,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
-import type { AccountType } from '../../types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
@@ -344,11 +345,15 @@ const WORKLOAD_IDENTITY_FEDERATION_STACK_PARAM_TOKENS = {
 
 /**
  * Stack parameters of the IaCP `workload_identity_federation` template that Kibana fills.
- * Unresolved values are omitted so the user can still enter them in the console.
+ * Unresolved values are omitted so the user can still enter them in the console; outside
+ * Elastic Cloud none are known, so the defaults are not sent.
  */
 export const getWorkloadIdentityFederationStackParams = (
   cloud: CloudSetupForCloudConnector | undefined
 ): Record<string, string> => {
+  if (!cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) {
+    return {};
+  }
   const values = getTemplateTokenValues(cloud, undefined);
 
   return Object.entries(WORKLOAD_IDENTITY_FEDERATION_STACK_PARAM_TOKENS).reduce<
@@ -758,7 +763,25 @@ export interface ArtifactLaunchUrlParams {
   deploymentId?: string;
   /** Stack parameters set on the quick-create link. */
   stackParams?: StackParams;
+  /**
+   * Static quick-create URL from the package manifest (token-substituted). When it carries a
+   * `templateURL=`, the quick-create link keeps its console host and other query params.
+   */
+  staticUrl?: string;
 }
+
+const TEMPLATE_URL_PARAM_REGEX = /([?&])templateURL=[^&]*/;
+
+const getQuickCreateUrl = (artifactUrl: string, staticUrl: string | undefined): string => {
+  const templateUrlParam = `templateURL=${encodeURIComponent(artifactUrl)}`;
+  if (staticUrl && TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
+    return staticUrl.replace(
+      TEMPLATE_URL_PARAM_REGEX,
+      (_match, separator: string) => `${separator}${templateUrlParam}`
+    );
+  }
+  return `${AWS_QUICK_CREATE_URL}?${templateUrlParam}`;
+};
 
 const setQuickCreateStackParams = (url: string, stackParams: StackParams): string =>
   Object.entries(stackParams).reduce((acc, [name, value]) => {
@@ -852,14 +875,15 @@ export const getStaticTemplate = ({
 
 /**
  * Console launch URL for an IaCP-rendered artifact: a stack update when a stack ARN is known,
- * otherwise a quick-create with the stack parameters set. Only AWS is implemented: IaCP has no
- * Azure/GCP blueprints yet.
+ * otherwise a quick-create (on the package's static URL when it has one) with the stack
+ * parameters set. Only AWS is implemented: IaCP has no Azure/GCP blueprints yet.
  */
 export const getArtifactLaunchUrl = ({
   provider,
   artifactUrl,
   deploymentId,
   stackParams = {},
+  staticUrl,
 }: ArtifactLaunchUrlParams): string | undefined => {
   if (provider !== AWS_PROVIDER) {
     return undefined;
@@ -868,10 +892,7 @@ export const getArtifactLaunchUrl = ({
   if (deploymentId) {
     return getAwsStackUpdateUrl(deploymentId, artifactUrl);
   }
-  return setQuickCreateStackParams(
-    `${AWS_QUICK_CREATE_URL}?templateURL=${encodeURIComponent(artifactUrl)}`,
-    stackParams
-  );
+  return setQuickCreateStackParams(getQuickCreateUrl(artifactUrl, staticUrl), stackParams);
 };
 
 /** Stack ARN field copy shared by the wizard's connector form and the AWS onboarding setup. */
