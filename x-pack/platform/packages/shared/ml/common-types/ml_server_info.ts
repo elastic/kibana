@@ -14,6 +14,7 @@ export interface CloudInfo {
   deploymentId: string | null;
   cloudUrl: string | null;
   isMlAutoscalingEnabled: boolean;
+  isMlCpsEnabled: boolean;
 }
 
 export interface MlServerDefaults {
@@ -42,6 +43,12 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
+  isCloudTrial?: boolean;
+  cloudUrl?: string;
+  isMlAutoscalingEnabled: boolean;
+  isMlCpsEnabled: boolean;
+  showNodeInfo: boolean;
+  showLicenseInfo: boolean;
 }
 
 export interface MlNodeCount {

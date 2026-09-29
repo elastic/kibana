@@ -8,15 +8,21 @@
 import type { AppHeaderTab } from '@kbn/app-header';
 import * as i18n from '../translations';
 
-export type EpisodeDetailsMainPanel = 'overview' | 'metadata' | 'timeline';
+export type EpisodeDetailsMainPanel =
+  | 'overview'
+  | 'metadata'
+  | 'timeline'
+  | 'action_policy_history';
 
 export const getEpisodeHeaderTabs = ({
   actualMainPanel,
   showRuleDependentUi,
+  showActionPolicyHistory,
   onSelect,
 }: {
   actualMainPanel: EpisodeDetailsMainPanel;
   showRuleDependentUi: boolean;
+  showActionPolicyHistory: boolean;
   onSelect: (panel: EpisodeDetailsMainPanel) => void;
 }): AppHeaderTab[] => [
   {
@@ -44,4 +50,15 @@ export const getEpisodeHeaderTabs = ({
     isSelected: actualMainPanel === 'timeline',
     onClick: () => onSelect('timeline'),
   },
+  ...(showActionPolicyHistory
+    ? [
+        {
+          id: 'action_policy_history',
+          'data-test-subj': 'alertingV2EpisodeDetailsMainTabActionPolicyHistory',
+          label: i18n.ACTION_POLICY_HISTORY_TAB_TITLE,
+          isSelected: actualMainPanel === 'action_policy_history',
+          onClick: () => onSelect('action_policy_history'),
+        },
+      ]
+    : []),
 ];

@@ -6,11 +6,11 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
+import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 
 export interface AgentBuilderVisualizationsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
-  agentContextLayer: AgentContextLayerPluginSetup;
+  agentBuilderSml: AgentBuilderSmlPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

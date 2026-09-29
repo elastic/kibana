@@ -10,16 +10,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConversationsPopoverView } from './conversations_popover_view';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentId } from '../../../hooks/use_conversation';
 
 jest.mock('../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
-}));
-
-jest.mock('../../../context/streaming/streaming_context', () => ({
-  useStreamingContext: jest.fn(),
 }));
 
 jest.mock('../../../hooks/agents/use_agents', () => ({
@@ -58,7 +53,6 @@ jest.mock('../../common/agent_avatar', () => ({
 }));
 
 const mockUseConversationContext = jest.mocked(useConversationContext);
-const mockUseStreamingContext = jest.mocked(useStreamingContext);
 const mockUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
 const mockUseAgentId = jest.mocked(useAgentId);
 
@@ -77,12 +71,10 @@ const renderView = (onClose = jest.fn()) =>
 describe('ConversationsPopoverView — New chat button', () => {
   let setConversationId: jest.Mock;
   let resetAttachments: jest.Mock;
-  let removeAllErrors: jest.Mock;
 
   beforeEach(() => {
     setConversationId = jest.fn();
     resetAttachments = jest.fn();
-    removeAllErrors = jest.fn();
 
     mockUseConversationContext.mockReturnValue({
       setConversationId,
@@ -90,10 +82,6 @@ describe('ConversationsPopoverView — New chat button', () => {
       conversationActions: {} as never,
       isEmbeddedContext: true,
     });
-
-    mockUseStreamingContext.mockReturnValue({
-      removeAllErrors,
-    } as unknown as ReturnType<typeof useStreamingContext>);
 
     mockUseAgentBuilderAgents.mockReturnValue({
       agents: [],

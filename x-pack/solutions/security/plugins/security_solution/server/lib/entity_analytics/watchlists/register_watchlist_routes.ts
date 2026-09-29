@@ -33,7 +33,7 @@ export const registerWatchlistRoutes = ({
   deleteWatchlistRoute(router, logger, getStartServices, hasEncryptionKey);
   getWatchlistRoute(router, logger);
   watchlistsPrivilegesRoute(router, logger, getStartServices);
-  listWatchlistsRoute(router, logger);
+  listWatchlistsRoute(router, logger, getStartServices, hasEncryptionKey);
   searchWatchlistIndicesRoute(router, logger);
   updateWatchlistRoute(router, logger, telemetrySender);
   registerEntitySourceRoutes(router, logger, getStartServices, hasEncryptionKey);

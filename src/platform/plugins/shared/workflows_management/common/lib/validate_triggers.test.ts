@@ -76,6 +76,25 @@ describe('validateTriggerConditionsForWorkflow', () => {
     expect(result.errors[0].message).toContain('event.unknown');
   });
 
+  it('allows nested KQL under an unknown inbound payload body', () => {
+    const inboundEventSchema = z.object({
+      body: z.unknown(),
+      connectorId: z.string(),
+    });
+    const workflow = minimalWorkflow([
+      {
+        type: 'inboundWebhook.received',
+        on: { condition: 'event.body.team_id: "T0AA78U71FZ"' },
+      },
+    ]);
+
+    const result = validateTriggerConditionsForWorkflow(workflow, (triggerType) =>
+      triggerType === 'inboundWebhook.received' ? { eventSchema: inboundEventSchema } : undefined
+    );
+
+    expect(result).toEqual({ valid: true, errors: [] });
+  });
+
   it('built-in triggers are skipped', () => {
     const workflow: WorkflowYaml = {
       version: '1',

@@ -14,9 +14,13 @@ import { SyntheticsRefreshContext } from '../../contexts';
 /**
  * Global distinct-cert counts per quick-filter value (independent of the active
  * selection, so sibling counts don't disappear). `remoteNames` scopes the
- * remote branch only; local certs are always counted.
+ * remote branch only; local certs are always counted. `showFromAllSpaces`
+ * matches the list query so facet counts stay in the same space scope.
  */
-export const useCertFacets = (remoteNames?: string[]): CertFacets | undefined => {
+export const useCertFacets = (
+  remoteNames?: string[],
+  showFromAllSpaces?: boolean
+): CertFacets | undefined => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
   // Stable reference: re-run only when the selection actually changes.
@@ -26,7 +30,10 @@ export const useCertFacets = (remoteNames?: string[]): CertFacets | undefined =>
     [remoteNamesKey]
   );
 
-  const fetchFacets = useCallback(() => getCertFacets(stableRemoteNames), [stableRemoteNames]);
+  const fetchFacets = useCallback(
+    () => getCertFacets({ remoteNames: stableRemoteNames, showFromAllSpaces }),
+    [stableRemoteNames, showFromAllSpaces]
+  );
 
   const { data } = useFetcher(fetchFacets, [fetchFacets, lastRefresh]);
 

@@ -5,48 +5,48 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 
 const baseProps = {
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...serializedTimeRangeSchema.getPropSchemas(),
-  show_distributions: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Whether to show the distribution mini-charts in the table.' },
+  ...serializedTitlesSchema.shape,
+  ...serializedTimeRangeSchema.shape,
+  show_distributions: z.boolean().default(false).meta({
+    description: 'Whether to show the distribution mini-charts in the table.',
   }),
 };
 
-const fieldStatsDataViewSchema = schema.object({
-  ...baseProps,
-  view_type: schema.literal('dataview'),
-  data_view_id: schema.string({
-    minLength: 1,
-    maxLength: 1000,
-    meta: { description: 'Data view ID (stored as a panel reference).' },
-  }),
-});
+const fieldStatsDataViewSchema = z
+  .object({
+    ...baseProps,
+    view_type: z.literal('dataview'),
+    data_view_id: z
+      .string()
+      .min(1)
+      .max(1000)
+      .meta({ description: 'Data view ID (stored as a panel reference).' }),
+  })
+  .strict();
 
-const fieldStatsEsqlSchema = schema.object({
-  ...baseProps,
-  view_type: schema.literal('esql'),
-  query: schema.object(
-    { esql: schema.string({ maxLength: 1000, meta: { description: 'The ES|QL query string.' } }) },
-    { meta: { description: 'ES|QL query.' } }
-  ),
-});
+const fieldStatsEsqlSchema = z
+  .object({
+    ...baseProps,
+    view_type: z.literal('esql'),
+    query: z
+      .object({ esql: z.string().max(1000).meta({ description: 'The ES|QL query string.' }) })
+      .strict()
+      .meta({ description: 'ES|QL query.' }),
+  })
+  .strict();
 
-export const fieldStatsTableEmbeddableSchema = schema.oneOf(
-  [fieldStatsDataViewSchema, fieldStatsEsqlSchema],
-  {
-    meta: {
-      id: 'data_visualizer_field_stats',
-      description: 'Field statistics table embeddable schema',
-    },
-  }
-);
+export const fieldStatsTableEmbeddableSchema = z
+  .discriminatedUnion('view_type', [fieldStatsDataViewSchema, fieldStatsEsqlSchema])
+  .meta({
+    id: 'data_visualizer_field_stats',
+    description: 'Field statistics table embeddable schema',
+  });
 
-export type FieldStatsTableEmbeddableState = TypeOf<typeof fieldStatsTableEmbeddableSchema>;
+export type FieldStatsTableEmbeddableState = z.output<typeof fieldStatsTableEmbeddableSchema>;

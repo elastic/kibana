@@ -12,9 +12,37 @@ import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { CodeEditorField } from '@kbn/code-editor';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { useCanvasTextAreaCodeStyles } from '../../../public/lib/use_canvas_text_area_code_styles';
 import { DataSourceStrings, SQL_URL } from '../../../i18n';
 
 const { Essql: strings } = DataSourceStrings;
+
+const EssqlCodeEditor = ({ value, onChange, editorDidMount }) => {
+  const textAreaCodeStyles = useCanvasTextAreaCodeStyles();
+
+  return (
+    <CodeEditorField
+      languageId={SQLLang.ID}
+      value={value}
+      onChange={onChange}
+      className="canvasTextArea__code"
+      css={textAreaCodeStyles}
+      options={{
+        fontSize: 14,
+        scrollBeyondLastLine: false,
+        quickSuggestions: true,
+        minimap: { enabled: false },
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        lineNumbers: 'off',
+        glyphMargin: false,
+        folding: false,
+      }}
+      height="350px"
+      editorDidMount={editorDidMount}
+    />
+  );
+};
 
 class EssqlDatasource extends PureComponent {
   componentDidMount() {
@@ -77,23 +105,9 @@ class EssqlDatasource extends PureComponent {
           </EuiText>
         }
       >
-        <CodeEditorField
-          languageId={SQLLang.ID}
+        <EssqlCodeEditor
           value={this.getQuery()}
           onChange={this.onChange}
-          className="canvasTextArea__code"
-          options={{
-            fontSize: 14,
-            scrollBeyondLastLine: false,
-            quickSuggestions: true,
-            minimap: { enabled: false },
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            lineNumbers: 'off',
-            glyphMargin: false,
-            folding: false,
-          }}
-          height="350px"
           editorDidMount={this.editorDidMount}
         />
       </EuiFormRow>

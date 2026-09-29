@@ -109,6 +109,18 @@ describe('DlmPhasesSelector', () => {
     );
   });
 
+  it('shows phase-boundary help text on frozen and delete fields when both are enabled', () => {
+    const { getByText } = renderSelector({
+      defaultValue: {
+        frozen: { enabled: true, value: '30', unit: 'd' },
+        delete: { enabled: true, value: '60', unit: 'd' },
+      },
+    });
+
+    expect(getByText('Must occur before the delete phase (60d).')).toBeInTheDocument();
+    expect(getByText('Must occur after the frozen phase (30d).')).toBeInTheDocument();
+  });
+
   it('disables frozen phase when Enterprise license is unavailable', () => {
     const { getByLabelText, getByRole, getByText, queryByText, queryByTestId } = renderSelector({
       hasEnterpriseLicense: false,

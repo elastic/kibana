@@ -15,7 +15,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
 import {
@@ -32,10 +31,6 @@ import {
 import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
 import { SavedObjectsEncryptionExtension, setupSavedObjects } from './saved_objects';
-
-export interface PluginsSetup {
-  security?: SecurityPluginSetup;
-}
 
 export interface EncryptedSavedObjectsPluginSetup {
   /**
@@ -63,8 +58,7 @@ export interface EncryptedSavedObjectsPluginStart {
  * Represents EncryptedSavedObjects Plugin instance that will be managed by the Kibana plugin system.
  */
 export class EncryptedSavedObjectsPlugin
-  implements
-    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup>
+  implements Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart>
 {
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
@@ -74,7 +68,7 @@ export class EncryptedSavedObjectsPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, _deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
+  public setup(core: CoreSetup): EncryptedSavedObjectsPluginSetup {
     const config = this.initializerContext.config.get<ConfigType>();
     const canEncrypt = config.encryptionKey !== undefined;
     if (!canEncrypt) {

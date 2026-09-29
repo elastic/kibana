@@ -23,8 +23,9 @@ const createMockBucket = (
     max_timestamp: { value: 1710936100000, value_as_string: '2024-03-20T12:01:40.000Z' },
     agent_count: { value: 3 },
     total_rows: { value: 15 },
-    success_count: { doc_count: 2 },
-    error_count: { doc_count: 1 },
+    // `doc_count` differs from `agents` so a regression to it cannot pass.
+    success_count: { doc_count: 5, agents: { value: 2 } },
+    error_count: { doc_count: 3, agents: { value: 1 } },
     ...overrides,
   } as ScheduledExecutionBucket);
 
@@ -132,6 +133,58 @@ describe('process_scheduled_history', () => {
       expect(result[0].packName).toBe('Test Pack');
     });
 
+    it('prefers agent cardinality over document counts for success and error', () => {
+      // Many documents from few agents: the badges must report agents, not docs.
+      const bucket = createMockBucket({
+        agent_count: { value: 2 },
+        success_count: { doc_count: 21, agents: { value: 2 } },
+        error_count: { doc_count: 4, agents: { value: 1 } },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].successCount).toBe(2);
+      expect(result[0].errorCount).toBe(1);
+    });
+
+    it('reports zero rather than doc counts when cardinality sub-aggregations are absent', () => {
+      // A `doc_count` fallback would report documents as agents.
+      const bucket = createMockBucket({
+        success_count: { doc_count: 7 },
+        error_count: { doc_count: 3 },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].successCount).toBe(0);
+      expect(result[0].errorCount).toBe(0);
+    });
+
+    it('keeps a zero agent cardinality instead of falling through to doc_count', () => {
+      // `??` must not treat a legitimate 0 as missing, the way `||` would.
+      const bucket = createMockBucket({
+        success_count: { doc_count: 12, agents: { value: 0 } },
+        error_count: { doc_count: 5, agents: { value: 0 } },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].successCount).toBe(0);
+      expect(result[0].errorCount).toBe(0);
+    });
+
     it('returns empty array when no buckets', () => {
       const result = processScheduledHistory({
         scheduledBuckets: [],
@@ -140,6 +193,55 @@ describe('process_scheduled_history', () => {
       });
 
       expect(result).toHaveLength(0);
+    });
+
+    it('falls back to response doc labels when the pack is not in this space', () => {
+      const bucket = createMockBucket({
+        pack_id: { buckets: [{ key: 'remote-pack-1', doc_count: 5 }] },
+        pack_name: { buckets: [{ key: 'Remote Pack', doc_count: 5 }] },
+        query_name: { buckets: [{ key: 'remote_uptime', doc_count: 5 }] },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [],
+        spaceId: 'default',
+      });
+
+      expect(result[0].packId).toBe('remote-pack-1');
+      expect(result[0].packName).toBe('Remote Pack');
+      expect(result[0].queryName).toBe('remote_uptime');
+      expect(result[0].queryText).toBe('');
+    });
+
+    it('prefers the pack saved object over response doc labels', () => {
+      const bucket = createMockBucket({
+        pack_id: { buckets: [{ key: 'remote-pack-1', doc_count: 5 }] },
+        pack_name: { buckets: [{ key: 'Remote Pack', doc_count: 5 }] },
+        query_name: { buckets: [{ key: 'remote_uptime', doc_count: 5 }] },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].packName).toBe('Test Pack');
+      expect(result[0].queryName).toBe('uptime');
+      expect(result[0].queryText).toBe('SELECT * FROM uptime');
+    });
+
+    it('leaves labels undefined when neither source has them', () => {
+      const result = processScheduledHistory({
+        scheduledBuckets: [createMockBucket()],
+        packSOs: [],
+        spaceId: 'default',
+      });
+
+      expect(result[0].packName).toBeUndefined();
+      expect(result[0].queryName).toBeUndefined();
+      expect(result[0].queryText).toBe('');
     });
 
     it('resolves names even without pack_id in response docs', () => {

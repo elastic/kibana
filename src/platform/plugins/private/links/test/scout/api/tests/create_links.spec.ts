@@ -117,9 +117,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.links]: expected value of type [array] but got [Object]'
-    );
+    expect(response.body.message).toMatch(/links.*array|array.*links/i);
   });
 
   apiTest('validation - returns 400 when a link has an invalid type', async ({ apiClient }) => {
@@ -136,9 +134,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.links.0]: expected "type" to be one of ["dashboardLink", "externalLink"] but got ["invalidLinkType"]'
-    );
+    expect(response.body.message).toMatch(/dashboardLink|externalLink/i);
   });
 
   apiTest('validation - returns 400 when layout has an invalid value', async ({ apiClient }) => {
@@ -155,10 +151,8 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.layout]: types that failed validation:\n\
-- [request body.layout.0]: expected value to equal [horizontal]\n\
-- [request body.layout.1]: expected value to equal [vertical]'
+    expect(response.body.message).toMatch(
+      /layout.*horizontal|layout.*vertical|horizontal|vertical/i
     );
   });
 

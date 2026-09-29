@@ -612,8 +612,8 @@ export const getAgentHostNamesWithIds = async ({
   }
 
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
-  const agentFound = await fleetServices.agent
-    .getByIds(agentIds, { ignoreMissing: true })
+  const agentFound = await fleetServices
+    .fetchAgentsById(agentIds, { ignoreMissing: true })
     .catch(catchAndWrapError);
   const agentDocById = keyBy(agentFound, 'id');
 

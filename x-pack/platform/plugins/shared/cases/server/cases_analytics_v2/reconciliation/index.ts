@@ -96,7 +96,7 @@ export function registerReconciliationTask({
       // twice. With `maxAttempts: 1`, recovery happens cleanly on the
       // next interval-driven run.
       maxAttempts: 1,
-      createTaskRunner: ({ taskInstance }) => ({
+      createTaskRunner: ({ taskInstance, signal }) => ({
         run: async () => {
           const previousState = (taskInstance.state ?? {}) as ReconciliationTaskState;
           const casesLastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
@@ -121,66 +121,94 @@ export function registerReconciliationTask({
 
           const deps = await getRunnerDeps();
 
+          // Cooperative cancellation. Task Manager aborts this signal
+          // on timeout or shutdown; it never reads the signal itself, so
+          // it's on us to observe it. The three surface walks are
+          // independent and each pins its own cursor when it doesn't
+          // complete, so the surface boundary is the natural bail-out
+          // point: once aborted we skip the remaining walks and persist
+          // whatever progress the completed surfaces made. A cancelled
+          // surface leaves its cursor pinned, so the next tick re-walks
+          // its window naturally.
+
           // Cases first (the dimension table). A `LOOKUP JOIN .cases
-          // ON cases.id` from any post-fact-table walk consumer then
+          // ON case.id` from any post-fact-table walk consumer then
           // always sees the joined case row at least as up-to-date as
           // the activity / attachment row that referenced it.
           let casesError: unknown;
-          try {
-            const result = await runReconciliation({
-              savedObjectsClient: deps.savedObjectsClient,
-              writer: deps.writer,
-              logger,
-              lastRunAt: casesLastRunAt,
-            });
-            nextState.cases_last_run_at = result.newLastRunAt;
-          } catch (err) {
-            casesError = err;
-            logger.error(
-              `cases-analyticsV2: cases reconciliation tick failed: ${
-                err instanceof Error ? err.message : String(err)
-              }. Cursor pinned; activity + attachments surfaces still attempted.`,
-              { error: err }
-            );
+          if (!signal.aborted) {
+            try {
+              const result = await runReconciliation({
+                savedObjectsClient: deps.savedObjectsClient,
+                writer: deps.writer,
+                logger,
+                lastRunAt: casesLastRunAt,
+                signal,
+              });
+              nextState.cases_last_run_at = result.newLastRunAt;
+            } catch (err) {
+              casesError = err;
+              logger.error(
+                `cases-analyticsV2: cases reconciliation tick failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }. Cursor pinned; activity + attachments surfaces still attempted.`,
+                { error: err }
+              );
+            }
           }
 
           // Activity second. Independent of cases.
           let activityError: unknown;
-          try {
-            const result = await runActivityReconciliation({
-              savedObjectsClient: deps.savedObjectsClient,
-              activityWriter: deps.activityWriter,
-              logger,
-              lastRunAt: activityLastRunAt,
-            });
-            nextState.activity_last_run_at = result.newLastRunAt;
-          } catch (err) {
-            activityError = err;
-            logger.error(
-              `cases-analyticsV2: activity reconciliation tick failed: ${
-                err instanceof Error ? err.message : String(err)
-              }. Activity cursor pinned; attachments surface still attempted.`,
-              { error: err }
-            );
+          if (!signal.aborted) {
+            try {
+              const result = await runActivityReconciliation({
+                savedObjectsClient: deps.savedObjectsClient,
+                activityWriter: deps.activityWriter,
+                logger,
+                lastRunAt: activityLastRunAt,
+                signal,
+              });
+              nextState.activity_last_run_at = result.newLastRunAt;
+            } catch (err) {
+              activityError = err;
+              logger.error(
+                `cases-analyticsV2: activity reconciliation tick failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }. Activity cursor pinned; attachments surface still attempted.`,
+                { error: err }
+              );
+            }
           }
 
           // Attachments third. Independent of cases + activity.
           let attachmentsError: unknown;
-          try {
-            const result = await runAttachmentsReconciliation({
-              savedObjectsClient: deps.savedObjectsClient,
-              attachmentsWriter: deps.attachmentsWriter,
-              logger,
-              lastRunAt: attachmentsLastRunAt,
-            });
-            nextState.attachments_last_run_at = result.newLastRunAt;
-          } catch (err) {
-            attachmentsError = err;
-            logger.error(
-              `cases-analyticsV2: attachments reconciliation tick failed: ${
-                err instanceof Error ? err.message : String(err)
-              }. Attachments cursor pinned.`,
-              { error: err }
+          if (!signal.aborted) {
+            try {
+              const result = await runAttachmentsReconciliation({
+                savedObjectsClient: deps.savedObjectsClient,
+                attachmentsWriter: deps.attachmentsWriter,
+                logger,
+                lastRunAt: attachmentsLastRunAt,
+                signal,
+              });
+              nextState.attachments_last_run_at = result.newLastRunAt;
+            } catch (err) {
+              attachmentsError = err;
+              logger.error(
+                `cases-analyticsV2: attachments reconciliation tick failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }. Attachments cursor pinned.`,
+                { error: err }
+              );
+            }
+          }
+
+          // If the tick was cancelled mid-flight, log it once so the
+          // skipped surfaces are visible in the task log rather than
+          // looking like a silent no-op.
+          if (signal.aborted) {
+            logger.info(
+              'cases-analyticsV2: reconciliation tick cancelled; skipped remaining surface walks. Pinned cursors will be re-walked on the next tick.'
             );
           }
 
@@ -207,12 +235,11 @@ export function registerReconciliationTask({
 
           return { state: nextState };
         },
-        cancel: async () => {
-          // The runners are SO walks plus writer dispatches — no
-          // long-lived resources to release. A cancel just stops the
-          // next page fetch; in-flight writer dispatches finish on
-          // their own retry budget.
-        },
+        // No `cancel()` needed: there are no long-lived resources to
+        // release beyond the abort signal Task Manager already trips
+        // (checked between surfaces and at each runner's page boundary,
+        // which stops the next page fetch). In-flight writer dispatches
+        // finish on their own retry budget.
       }),
     },
   });
@@ -331,8 +358,12 @@ export async function resetReconciliationTask({
   intervalMinutes,
   initialState = {},
 }: ResetReconciliationTaskArgs): Promise<void> {
-  await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
+  // Keep both steps inside the try as a self-contained "never throws" guard. Today
+  // `scheduleReconciliationTask` already swallows its own errors, so in practice this catch only
+  // fires on the `bulkUpdateState` path — scoping the schedule call in too is defensive
+  // future-proofing so a later change that lets it throw can't break this contract.
   try {
+    await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
     await taskManager.bulkUpdateState([RECONCILIATION_TASK_ID], () => initialState);
   } catch (err) {
     logger.warn(

@@ -217,3 +217,10 @@ export const GAP_AUTO_FILL_STATUS_NO_GAPS_TOOLTIP = i18n.translate(
     defaultMessage: "Gaps in rule executions don't currently exist.",
   }
 );
+
+export const GAP_AUTO_FILL_LOGS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.tableCaption',
+  {
+    defaultMessage: 'Gap auto fill logs',
+  }
+);

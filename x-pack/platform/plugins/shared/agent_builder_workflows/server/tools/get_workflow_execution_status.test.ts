@@ -11,6 +11,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows'),
   getExecutionState: jest.fn(),
 }));
 
@@ -64,6 +65,9 @@ describe('getWorkflowExecutionStatusTool', () => {
     const result = await tool.handler({ executionId: 'exec-1' }, mockContext as any);
 
     expect(result).toEqual({ results: [{ type: 'other', data: { execution } }] });
+    expect(getExecutionState).toHaveBeenCalledWith(
+      expect.objectContaining({ executionId: 'exec-1', request: mockContext.request })
+    );
   });
 
   it('should not read the execution and return not-found when the caller lacks readExecution', async () => {

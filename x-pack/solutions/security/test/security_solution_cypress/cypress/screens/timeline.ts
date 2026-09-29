@@ -25,6 +25,11 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
+// Link rendered by the `security.timeline` case attachment (unified attachments flow).
+export const TIMELINE_CASE_ATTACHMENT_LINK = (timelineId: string) => {
+  return `[data-test-subj="timeline-attachment-link-${timelineId}"]`;
+};
+
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
@@ -130,14 +135,15 @@ export const TIMELINE_EVENT = '[data-test-subj="event"]';
 export const TIMELINE_DISCOVER_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="dataView-add-field_btn"]';
 
-export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
+export const TIMELINE_FILTER_FIELD =
+  '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 
 export const TIMELINE_TITLE_BY_ID = (id: string) => `[data-test-subj="timeline-title-${id}"]`;
 
-export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
+export const TIMELINE_FILTER_OPERATOR =
+  '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';
 
-export const TIMELINE_FILTER_VALUE =
-  '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
+export const TIMELINE_FILTER_VALUE = '[data-test-subj="filterParams"] input';
 
 export const TIMELINE_FLYOUT = '[data-test-subj="timeline-container"]';
 

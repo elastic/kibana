@@ -27,7 +27,7 @@ export async function cleanupOrphanSummaries(
   params: RunParams,
   dependencies: Dependencies
 ): Promise<SummaryCleanupRunResult> {
-  const { esClient, logger, abortController } = dependencies;
+  const { esClient, logger, signal } = dependencies;
   const chunkSize = params.chunkSize ?? DEFAULT_CHUNK_SIZE;
   const maxRuns = params.maxRuns ?? DEFAULT_MAX_RUNS;
   let searchAfter = params.searchAfter;
@@ -35,7 +35,7 @@ export async function cleanupOrphanSummaries(
 
   try {
     do {
-      abortController.signal.throwIfAborted();
+      signal.throwIfAborted();
       currentRun++;
 
       const { list, nextSearchAfter } = await fetchUniqueSloFromSummary(
@@ -50,7 +50,7 @@ export async function cleanupOrphanSummaries(
         return { aborted: false, completed: true };
       }
 
-      abortController.signal.throwIfAborted();
+      signal.throwIfAborted();
       const definitionMap = await findSloDefinitionMap(
         list.map(({ id }) => id),
         dependencies
@@ -91,7 +91,7 @@ export async function cleanupOrphanSummaries(
               },
             },
           },
-          { signal: abortController.signal }
+          { signal }
         );
       }
 
@@ -107,7 +107,7 @@ export async function cleanupOrphanSummaries(
       }
     } while (searchAfter);
   } catch (error) {
-    if (isAbortError(error, abortController)) {
+    if (isAbortError(error, signal)) {
       logger.debug(`Task aborted during execution`);
 
       return {
@@ -125,7 +125,7 @@ export async function cleanupOrphanSummaries(
 async function fetchUniqueSloFromSummary(
   searchAfter: AggregationsCompositeAggregateKey | undefined,
   chunkSize: number,
-  { logger, esClient, abortController }: Dependencies
+  { logger, esClient, signal }: Dependencies
 ): Promise<{
   nextSearchAfter: AggregationsCompositeAggregateKey | undefined;
   list: Array<SLO>;
@@ -178,7 +178,7 @@ async function fetchUniqueSloFromSummary(
         },
       },
     },
-    { signal: abortController.signal }
+    { signal }
   );
 
   const buckets = result.aggregations?.id_revision.buckets ?? [];

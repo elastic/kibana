@@ -49,7 +49,6 @@ const makeDeps = (overrides?: {
   const core = coreMock.createStart();
   core.userStorage.peek.mockReturnValue(overrides?.userStorageValue);
   core.userStorage.get$.mockReturnValue(userStorage$);
-  core.userStorage.get.mockReturnValue(overrides?.userStorageValue);
   // The per-load event is gated on this resolving (so EBT stamps context.userId).
   (core.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({ username: 'test-user' });
 
@@ -279,7 +278,7 @@ describe('NavigationCustomizationService', () => {
       (openCustomizeNavigationModalModule as jest.Mock).mockClear();
 
       const { core, chrome } = makeDeps();
-      (core.userStorage.get as jest.Mock).mockReturnValue(savedCustomization);
+      (core.userStorage.peek as jest.Mock).mockReturnValue(savedCustomization);
 
       const service = new NavigationCustomizationService();
       service.start({ core, chrome, isUnauthenticated: false });

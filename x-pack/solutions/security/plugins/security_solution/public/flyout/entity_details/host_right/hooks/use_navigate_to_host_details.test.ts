@@ -15,6 +15,8 @@ import {
 import { HostDetailsPanelKey } from '../../host_details_left';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { HostPanelKey } from '../../shared/constants';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
+import { EntityType } from '../../../../../common/search_strategy';
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -66,8 +68,14 @@ describe('useNavigateToHostDetails', () => {
   it('returns callback that opens details panel when not in preview mode', () => {
     const { result } = renderHook(() => useNavigateToHostDetails(mockProps));
 
+    expect(mockedTelemetry.reportEvent).not.toHaveBeenCalled();
+
     result.current({ tab, subTab });
 
+    expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
+      EntityEventTypes.RiskInputsExpandedFlyoutOpened,
+      { entity: EntityType.host }
+    );
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: HostDetailsPanelKey,
       params: {

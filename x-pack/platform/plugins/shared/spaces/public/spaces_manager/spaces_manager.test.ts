@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SpacesManager } from './spaces_manager';
@@ -34,7 +35,7 @@ describe('SpacesManager', () => {
 
       const activeSpace = await spacesManager.getActiveSpace();
       expect(activeSpace).toEqual({
-        id: 'my-space',
+        id: asSpaceId('my-space'),
         name: 'my space',
       });
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
@@ -67,14 +68,14 @@ describe('SpacesManager', () => {
 
       const activeSpace = await spacesManager.getActiveSpace();
       expect(activeSpace).toEqual({
-        id: 'my-space',
+        id: asSpaceId('my-space'),
         name: 'my space',
       });
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
 
       const newActiveSpace = await spacesManager.getActiveSpace({ forceRefresh: true });
       expect(newActiveSpace).toEqual({
-        id: 'my-other-space',
+        id: asSpaceId('my-other-space'),
         name: 'my other space',
       });
       expect(coreStart.http.get).toHaveBeenCalledTimes(2);
@@ -84,7 +85,7 @@ describe('SpacesManager', () => {
       const coreStart = coreMock.createStart();
       coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
       coreStart.http.get.mockResolvedValueOnce({
-        id: 'my-space',
+        id: asSpaceId('my-space'),
         name: 'my space',
       });
 
@@ -196,6 +197,15 @@ describe('SpacesManager', () => {
       expect(coreStart.http.get).toHaveBeenLastCalledWith('/internal/security/roles/foo');
       expect(result).toEqual(rolesForSpace);
     });
+
+    it('encodes the space id', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.get.mockResolvedValue([]);
+      const spacesManager = new SpacesManager(coreStart.http);
+
+      await spacesManager.getRolesForSpace('foo/bar');
+      expect(coreStart.http.get).toHaveBeenLastCalledWith('/internal/security/roles/foo%2Fbar');
+    });
   });
 
   describe('#getContentForSpace', () => {
@@ -209,6 +219,17 @@ describe('SpacesManager', () => {
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.http.get).toHaveBeenLastCalledWith('/internal/spaces/foo/content_summary');
       expect(result).toEqual({ summary: spaceContent, total: spaceContent.length });
+    });
+
+    it('encodes the space id', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.get.mockResolvedValue({ summary: [], total: 0 });
+      const spacesManager = new SpacesManager(coreStart.http);
+
+      await spacesManager.getContentForSpace('foo/bar');
+      expect(coreStart.http.get).toHaveBeenLastCalledWith(
+        '/internal/spaces/foo%2Fbar/content_summary'
+      );
     });
   });
 });

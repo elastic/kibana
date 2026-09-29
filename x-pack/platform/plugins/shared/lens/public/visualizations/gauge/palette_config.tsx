@@ -6,11 +6,12 @@
  */
 
 import type { RequiredPaletteParamTypes, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { LENS_GAUGE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const DEFAULT_PALETTE_NAME = 'status';
-export const DEFAULT_COLOR_STEPS = 4;
+export const DEFAULT_COLOR_STEPS = LENS_GAUGE_DEFAULT_COLOR_STEPS;
 export const DEFAULT_MIN_STOP = 0;
 export const DEFAULT_MAX_STOP = 100;
 

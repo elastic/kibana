@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkAction, ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkAction, ThunkDispatch } from 'redux-thunk-v2';
 import type { ApiStatus } from '../../../../common/types';
 import * as t from '../action_types';
 import { API_STATUS } from '../../constants';

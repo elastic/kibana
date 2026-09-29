@@ -45,4 +45,17 @@ describe('getAlertUrl', () => {
       'http://test.com/s/fake-space/app/security/attack_discovery?id=attack-4'
     );
   });
+
+  it('should return URL with timestamp encoded if `timestamp` is passed', async () => {
+    const detailsUrl = getAlertUrl({
+      alertDocId: 'attack-5',
+      basePath: 'http://test.com',
+      spaceId: 'fake-space',
+      timestamp: '2023-10-12T10:00:00.000Z',
+    });
+
+    expect(detailsUrl).toEqual(
+      'http://test.com/s/fake-space/app/security/attack_discovery?id=attack-5&timestamp=2023-10-12T10%3A00%3A00.000Z'
+    );
+  });
 });

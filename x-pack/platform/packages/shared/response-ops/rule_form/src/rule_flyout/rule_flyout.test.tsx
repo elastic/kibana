@@ -100,6 +100,8 @@ describe('ruleFlyout', () => {
     expect(screen.getByText(RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT)).toBeInTheDocument();
     expect(screen.getByText(RULE_FORM_PAGE_RULE_ACTIONS_TITLE)).toBeInTheDocument();
     expect(screen.getByText(RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT)).toBeInTheDocument();
+    expect(screen.getByTestId('ruleFlyoutCreateSteps')).toBeInTheDocument();
+    expect(screen.getByLabelText('Create rule steps')).toBeInTheDocument();
 
     expect(screen.getByTestId('ruleFlyoutFooterCancelButton')).toBeInTheDocument();
     expect(screen.getByTestId('ruleFlyoutFooterNextStepButton')).toBeInTheDocument();

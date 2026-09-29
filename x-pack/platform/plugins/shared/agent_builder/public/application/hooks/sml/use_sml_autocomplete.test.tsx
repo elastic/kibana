@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { SmlSearchFilterType } from '@kbn/agent-context-layer-plugin/public';
+import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { useSmlAutocomplete } from './use_sml_autocomplete';
 
@@ -68,6 +68,39 @@ describe('useSmlAutocomplete', () => {
       query: 'git',
       size: SML_SEARCH_DEFAULT_SIZE,
       constraints,
+    });
+  });
+
+  it('keeps showing the previous results while a newer query is still loading', async () => {
+    const firstResults = [{ id: 'wd-1', type: 'connector', title: 'workday' }];
+    const secondResults = [{ id: 'wd-2', type: 'connector', title: 'workday_2' }];
+    let resolveSecond: (value: { results: typeof secondResults }) => void = () => {};
+    const secondPromise = new Promise<{ results: typeof secondResults }>((resolve) => {
+      resolveSecond = resolve;
+    });
+
+    mockAutocomplete
+      .mockResolvedValueOnce({ results: firstResults })
+      .mockImplementationOnce(() => secondPromise);
+
+    const { result, rerender } = renderHook(({ query }) => useSmlAutocomplete(query), {
+      wrapper: createWrapper(),
+      initialProps: { query: 'workda' },
+    });
+
+    await waitFor(() => {
+      expect(result.current.results).toEqual(firstResults);
+    });
+
+    rerender({ query: 'workday' });
+
+    // Second query still in flight; results must not flash to `[]`.
+    expect(result.current.results).toEqual(firstResults);
+
+    resolveSecond({ results: secondResults });
+
+    await waitFor(() => {
+      expect(result.current.results).toEqual(secondResults);
     });
   });
 

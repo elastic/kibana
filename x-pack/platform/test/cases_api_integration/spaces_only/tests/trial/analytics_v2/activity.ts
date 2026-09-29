@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const docs = await waitForActivityForCase(es, created.id, 1);
       const createDoc = docs.find((d) => d.action.type === 'create_case');
       expect(createDoc).to.be.an('object');
-      expect(createDoc!.cases.id).to.eql(created.id);
+      expect(createDoc!.case.id).to.eql(created.id);
       expect(createDoc!.action.verb).to.eql('create');
       // `getAuthWithSuperUser()` defaults to `space1` → the case (and its
       // user actions) live in space1, so the real-time activity write

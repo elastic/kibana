@@ -6,6 +6,7 @@
  */
 import type {
   AssistantMessage,
+  ChatCompletionTokenCount,
   Message,
   PromptOptions,
   ToolCall,
@@ -19,8 +20,12 @@ import type {
   UnboundPromptOptions,
 } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common';
-import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
-import { trace } from '@opentelemetry/api';
+import {
+  withActiveInferenceSpan,
+  withExecuteToolSpan,
+  markToolSpanAsError,
+} from '@kbn/inference-tracing';
+
 import { omit, partition } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import {
@@ -33,10 +38,35 @@ import { BEGIN_INTERNAL_REASONING_MARKER, END_INTERNAL_REASONING_MARKER } from '
 import type { PlanningToolCall, PlanningToolMessage } from './planning_tools';
 import { PLANNING_TOOLS, isPlanningToolName, removeSystemToolCalls } from './planning_tools';
 import type {
+  ReasoningPromptDiagnostics,
   ReasoningPromptOptions,
   ReasoningPromptResponse,
   ReasoningPromptResponseOf,
 } from './types';
+
+/**
+ * The reasoning loop issues one LLM call per step, so the caller's token
+ * accounting has to be the sum over every step, not just the final one.
+ */
+function addTokens(
+  accumulated: ChatCompletionTokenCount | undefined,
+  added: ChatCompletionTokenCount | undefined
+): ChatCompletionTokenCount | undefined {
+  if (!accumulated || !added) {
+    return accumulated ?? added;
+  }
+
+  const thinking = (accumulated.thinking ?? 0) + (added.thinking ?? 0);
+  const cached = (accumulated.cached ?? 0) + (added.cached ?? 0);
+
+  return {
+    prompt: accumulated.prompt + added.prompt,
+    completion: accumulated.completion + added.completion,
+    total: accumulated.total + added.total,
+    ...(accumulated.thinking !== undefined || added.thinking !== undefined ? { thinking } : {}),
+    ...(accumulated.cached !== undefined || added.cached !== undefined ? { cached } : {}),
+  };
+}
 
 export function executeAsReasoningAgent<
   TPrompt extends Prompt,
@@ -98,6 +128,10 @@ export async function executeAsReasoningAgent(
   } = options;
   const startTime = Date.now();
 
+  const diagnostics: ReasoningPromptDiagnostics = {
+    externalContentToolContinuations: 0,
+  };
+
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
       toolCalls.map(async (toolCall): Promise<ToolMessage> => {
@@ -124,13 +158,16 @@ export async function executeAsReasoningAgent(
               toolCallId: toolCall.toolCallId,
             },
           },
-          () => callback(toolCall)
-        ).catch((error): ToolCallbackResult => {
-          trace.getActiveSpan()?.recordException(error);
-          return {
-            response: { error, data: undefined },
-          };
-        });
+          (span) =>
+            callback(toolCall).catch((error): ToolCallbackResult => {
+              if (span) {
+                markToolSpanAsError(span, { error });
+              }
+              return {
+                response: { error, data: undefined },
+              };
+            })
+        );
 
         return {
           response: response.response,
@@ -147,10 +184,12 @@ export async function executeAsReasoningAgent(
     messages: givenMessages,
     stepsLeft,
     temperature,
+    tokensSoFar,
   }: {
     messages: Message[];
     stepsLeft: number;
     temperature?: number;
+    tokensSoFar?: ChatCompletionTokenCount;
   }): Promise<ReasoningPromptResponse> {
     if (abortSignal?.aborted) {
       throw new Error('Request was aborted');
@@ -264,6 +303,8 @@ export async function executeAsReasoningAgent(
       stopSequences: [END_INTERNAL_REASONING_MARKER],
     });
 
+    const tokens = addTokens(tokensSoFar, response.tokens);
+
     let content = response.content;
 
     /**
@@ -277,6 +318,11 @@ export async function executeAsReasoningAgent(
       !content.includes(END_INTERNAL_REASONING_MARKER) &&
       !response.toolCalls.length;
 
+    const [systemToolCalls, nonSystemToolCalls] = partition(
+      response.toolCalls,
+      (toolCall): toolCall is PlanningToolCall => isPlanningToolName(toolCall.function.name)
+    );
+
     /**
      * Remove content after <<<END_INTERNAL>>>. This means that the LLM has combined final output
      * with internal reasoning, and it usually leads the LLM into a loop where it repeats itself.
@@ -287,9 +333,12 @@ export async function executeAsReasoningAgent(
     const externalContent = externalContentParts.join(END_INTERNAL_REASONING_MARKER).trim();
 
     // use some kind of buffer to allow small artifacts around the markers, like markdown.
-    if (externalContent.length && externalContent.length > 25) {
+    const hasExternalContent = externalContent.length > 25;
+    const shouldContinueAfterExternalContent = hasExternalContent && nonSystemToolCalls.length > 0;
+
+    if (hasExternalContent) {
       content = internalContent + END_INTERNAL_REASONING_MARKER;
-      completeNextTurn = true;
+      completeNextTurn = !shouldContinueAfterExternalContent;
     }
 
     const assistantMessage: AssistantMessage = {
@@ -297,11 +346,6 @@ export async function executeAsReasoningAgent(
       content,
       toolCalls: response.toolCalls,
     };
-
-    const [systemToolCalls, nonSystemToolCalls] = partition(
-      response.toolCalls,
-      (toolCall): toolCall is PlanningToolCall => isPlanningToolName(toolCall.function.name)
-    );
 
     if (systemToolCalls.length && response.toolCalls.length > 1) {
       throw new Error(`When using system tools, only a single tool call is allowed`);
@@ -321,12 +365,17 @@ export async function executeAsReasoningAgent(
       // completing
       return {
         content: response.content,
-        tokens: response.tokens,
+        tokens,
         toolCalls: response.toolCalls.filter(
           (toolCall) => toolCall.function.name === finalToolCallName
         ),
         input: removeSystemToolCalls(prevMessages),
+        diagnostics,
       };
+    }
+
+    if (shouldContinueAfterExternalContent) {
+      diagnostics.externalContentToolContinuations += 1;
     }
 
     const toolMessagesForNonSystemToolCalls = nonSystemToolCalls.length
@@ -356,6 +405,7 @@ export async function executeAsReasoningAgent(
       return innerCallPromptUntil({
         messages: prevMessages.concat(assistantMessage, ...allToolMessages),
         stepsLeft: 0,
+        tokensSoFar: tokens,
       });
     }
 
@@ -366,6 +416,7 @@ export async function executeAsReasoningAgent(
         ...(nonSystemToolCalls.length ? createReasonToolCall() : [])
       ),
       stepsLeft: stepsLeft - 1,
+      tokensSoFar: tokens,
     });
   }
 

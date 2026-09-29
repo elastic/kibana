@@ -9,8 +9,8 @@ import type { PropsWithChildren, ReactElement } from 'react';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { Provider } from 'react-redux';
-import type { PreloadedState } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux-v7';
+import type { PreloadedState } from 'redux-toolkit-v1';
 import type { RenderOptions } from '@testing-library/react';
 import type {
   LensAppState,

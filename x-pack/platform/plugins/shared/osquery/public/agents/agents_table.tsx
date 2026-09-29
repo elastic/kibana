@@ -227,7 +227,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
               <EuiHighlight search={searchVal}>{label}</EuiHighlight>
               {availability === 'degraded' && (
                 <span style={DEGRADED_ICON_STYLE}>
-                  <EuiIcon type="warning" size="s" color="warning" />
+                  <EuiIcon type="warning" size="s" color="warning" aria-hidden={true} />
                 </span>
               )}
             </span>
@@ -318,6 +318,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       return (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             iconType="warning"

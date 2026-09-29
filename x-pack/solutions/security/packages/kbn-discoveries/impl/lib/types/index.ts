@@ -10,10 +10,10 @@ export type {
   AttackDiscoveryGraphMetadata,
   AttackDiscoveryGraphState,
   BaseGraphState,
+  DefendInsightsGraphMetadata,
+  DefendInsightsGraphState,
   GetAttackDiscoveryGraph,
+  GetDefendInsightsGraph,
   GraphInsightTypes,
 } from './graph_types';
 export type { GraphInvocationResult, InvokeGraphParams } from './invoke_graph';
-
-// Note: DefendInsightsGraphMetadata, DefendInsightsGraphState, GetDefendInsightsGraph
-// are exported in a later PR alongside their source files.

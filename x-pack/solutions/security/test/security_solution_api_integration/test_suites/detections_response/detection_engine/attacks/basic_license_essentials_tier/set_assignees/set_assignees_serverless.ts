@@ -29,8 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     assignees: { add: ['user1'], remove: [] },
   };
 
-  // @skipInServerlessMKI publicAttacksApiEnabled experimental flag is not applied in MKI serverless
-  describe('@serverless @skipInServerlessMKI Set Attacks Assignees - Serverless', () => {
+  describe('@serverless Set Attacks Assignees - Serverless', () => {
     describe('Happy path for predefined users', () => {
       const roles = [
         'editor',

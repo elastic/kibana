@@ -61,6 +61,13 @@ Use this tool when the user asks to discover or enumerate watchlists, for exampl
 Do NOT use this tool to find out which watchlists a specific entity belongs to — that information is already available on a single entity's profile via \`security.get_entity\` (\`entity.attributes.watchlists\`).`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'List Watchlists',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

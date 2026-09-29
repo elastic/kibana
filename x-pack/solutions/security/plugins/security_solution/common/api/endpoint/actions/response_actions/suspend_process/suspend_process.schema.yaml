@@ -91,3 +91,4 @@ components:
                       description: "The entity ID of the process to suspend."
                       example: "abc123"
                       minLength: 1
+                      maxLength: 256

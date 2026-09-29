@@ -7,7 +7,7 @@
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
 import type { CreateDataSourceAuthenticationMode } from './create_data_source_flyout_authentication';
-import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormValues } from './types';
 
 export const emptyDataSourceFlyoutFormValues = (): CreateDataSourceFlyoutFormValues => ({
   name: '',

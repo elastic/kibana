@@ -134,7 +134,7 @@ const OriginalStory = () => {
           title="Files"
           description="Manage files stored in Kibana."
           actions={
-            <EuiButtonEmpty iconType="visTable" size="s">
+            <EuiButtonEmpty iconType="table" size="s">
               Statistics
             </EuiButtonEmpty>
           }
@@ -204,7 +204,7 @@ const ProposalStory = () => {
           title="Files"
           description="Manage files stored in Kibana."
           actions={
-            <EuiButtonEmpty iconType="visTable" size="s">
+            <EuiButtonEmpty iconType="table" size="s">
               Statistics
             </EuiButtonEmpty>
           }

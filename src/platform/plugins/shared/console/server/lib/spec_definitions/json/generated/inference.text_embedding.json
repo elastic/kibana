@@ -11,6 +11,11 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "input": "",
+      "input_type": "",
+      "task_settings": ""
+    },
     "methods": [
       "POST"
     ],

@@ -15,23 +15,26 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
-import { createEpisodeActions } from './create_episode_actions';
+import { createEpisodeActions, READ_SAFE_EPISODE_ACTION_IDS } from './create_episode_actions';
+
+const buildActions = () =>
+  createEpisodeActions({
+    http: httpServiceMock.createStartContract(),
+    overlays: overlayServiceMock.createStartContract(),
+    notifications: notificationServiceMock.createStartContract(),
+    rendering: renderingServiceMock.create(),
+    application: applicationServiceMock.createStartContract(),
+    userProfile: userProfileServiceMock.createStart(),
+    docLinks: docLinksServiceMock.createStartContract(),
+    expressions: expressionsPluginMock.createStartContract(),
+    spaces: spacesPluginMock.createStartContract(),
+    queryClient: new QueryClient(),
+    getDiscoverHref: async () => 'https://discover/foo',
+  });
 
 describe('createEpisodeActions', () => {
   it('returns all 9 actions sorted by order asc', () => {
-    const actions = createEpisodeActions({
-      http: httpServiceMock.createStartContract(),
-      overlays: overlayServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-      rendering: renderingServiceMock.create(),
-      application: applicationServiceMock.createStartContract(),
-      userProfile: userProfileServiceMock.createStart(),
-      docLinks: docLinksServiceMock.createStartContract(),
-      expressions: expressionsPluginMock.createStartContract(),
-      spaces: spacesPluginMock.createStartContract(),
-      queryClient: new QueryClient(),
-      getDiscoverHref: async () => 'https://discover/foo',
-    });
+    const actions = buildActions();
     expect(actions.map((a) => a.id)).toEqual([
       'ALERTING_V2_ACK_EPISODE',
       'ALERTING_V2_UNACK_EPISODE',
@@ -43,5 +46,18 @@ describe('createEpisodeActions', () => {
       'ALERTING_V2_EDIT_EPISODE_ASSIGNEE',
       'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
     ]);
+  });
+});
+
+describe('READ_SAFE_EPISODE_ACTION_IDS', () => {
+  it('contains exactly the non-mutating (navigation-only) episode actions', () => {
+    expect([...READ_SAFE_EPISODE_ACTION_IDS]).toEqual(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']);
+  });
+
+  it('is a subset of the ids produced by createEpisodeActions', () => {
+    const allIds = new Set(buildActions().map((action) => action.id));
+    for (const id of READ_SAFE_EPISODE_ACTION_IDS) {
+      expect(allIds.has(id)).toBe(true);
+    }
   });
 });

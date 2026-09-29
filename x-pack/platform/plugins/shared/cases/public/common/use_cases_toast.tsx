@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields, ToastOptions } from '@kbn/core/public';
 import { useMemo } from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
 import { AttachmentType } from '../../common/types/domain';
@@ -23,21 +24,23 @@ import {
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
+import { hasLegacyAlertId, isAlertAttachmentType } from '../../common/utils/attachments';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
-  let alertsCount = 0;
-  for (const attachment of attachments) {
-    if (attachment.type === AttachmentType.alert && `alertId` in attachment) {
-      // alertId might be an array
-      if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
-        alertsCount += attachment.alertId.length;
-      } else {
-        // or might be a single string
-        alertsCount++;
-      }
+  return attachments.reduce((alertsCount, attachment) => {
+    if (!isAlertAttachmentType(attachment.type)) {
+      return alertsCount;
     }
-  }
-  return alertsCount;
+    if (hasLegacyAlertId(attachment)) {
+      return alertsCount + (Array.isArray(attachment.alertId) ? attachment.alertId.length : 1);
+    }
+    if ('attachmentId' in attachment) {
+      return (
+        alertsCount + (Array.isArray(attachment.attachmentId) ? attachment.attachmentId.length : 1)
+      );
+    }
+    return alertsCount;
+  }, 0);
 }
 
 function getToastTitle({
@@ -77,7 +80,7 @@ function getToastContent({
   let toastContent;
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === AttachmentType.alert) {
+      if (attachment.type === AttachmentType.alert || isAlertAttachmentType(attachment.type)) {
         if (theCase.settings.syncAlerts && theCase.settings.extractObservables) {
           toastContent = CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT;
         } else if (theCase.settings.syncAlerts) {
@@ -113,8 +116,8 @@ const getErrorMessage = (error: Error | ServerError): string => {
 
 export const useCasesToast = () => {
   const { appId } = useApplication();
-  const { application } = useKibana().services;
-  const { getUrlForApp, navigateToUrl } = application;
+  const services = useKibana().services;
+  const { getUrlForApp, navigateToUrl } = services.application;
 
   const toasts = useToasts();
 
@@ -181,17 +184,31 @@ export const useCasesToast = () => {
       ) => {
         toasts.addSuccess({ title, text, actionProps, className: 'eui-textBreakWord' });
       },
-      showDangerToast: (title: string, text?: string) => {
-        toasts.addDanger({ title, text, className: 'eui-textBreakWord' });
+      showDangerToast: (title: string, text?: React.ReactNode) => {
+        // Rich (non-string) content must be rendered via a mount point.
+        const mountedText =
+          text != null && typeof text !== 'string'
+            ? toMountPoint(text, services.rendering)
+            : text ?? undefined;
+        toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
-      showInfoToast: (title: string, text?: string) => {
-        toasts.addInfo({
-          title,
-          text,
-          className: 'eui-textBreakWord',
-        });
+      showInfoToast: (
+        title: string,
+        text?: string,
+        actionProps?: ToastInputFields['actionProps'],
+        options?: ToastOptions
+      ) => {
+        return toasts.addInfo(
+          {
+            title,
+            text,
+            actionProps,
+            className: 'eui-textBreakWord',
+          },
+          options
+        );
       },
     }),
-    [appId, getUrlForApp, navigateToUrl, toasts]
+    [appId, getUrlForApp, navigateToUrl, toasts, services.rendering]
   );
 };

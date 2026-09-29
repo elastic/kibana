@@ -23,8 +23,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import type { SplitButtonProps } from '@kbn/split-button';
-import { SplitButton } from '@kbn/split-button';
 import type { TopNavMenuData } from './top_nav_menu_data';
 
 /**
@@ -87,15 +85,6 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     }
   }
 
-  function handleSecondaryButtonClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
-    if (props.splitButtonProps?.isSecondaryButtonDisabled) return;
-
-    props.splitButtonProps?.run?.(event.currentTarget);
-    if (props.isMobileMenu) {
-      props.closePopover();
-    }
-  }
-
   const routerLinkProps = props.href
     ? getRouterLinkProps({ href: props.href, onClick: handleClick })
     : { onClick: handleClick };
@@ -121,52 +110,43 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
 
   const showFragment = props.disableButton || props.tooltip;
 
-  const btn = props.splitButtonProps ? (
-    <SplitButton
-      {...commonButtonProps}
-      fill={props.emphasize}
-      {...(omit(props.splitButtonProps, 'run') as SplitButtonProps)}
-      onSecondaryButtonClick={handleSecondaryButtonClick}
-      size="s"
-    >
-      <ButtonContainer />
-    </SplitButton>
-  ) : props.iconOnly && props.iconType && !props.isMobileMenu ? (
-    // icon only buttons are not supported by EuiHeaderLink
-    React.createElement(
-      showFragment ? React.Fragment : EuiToolTip,
-      // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
-      {
-        ...(showFragment
-          ? { key: props.label || props.id! }
-          : {
-              content: upperFirst(props.label || props.id!),
-              position: 'bottom',
-            }),
-      },
-      <EuiButtonIcon
+  const btn =
+    props.iconOnly && props.iconType && !props.isMobileMenu ? (
+      // icon only buttons are not supported by EuiHeaderLink
+      React.createElement(
+        showFragment ? React.Fragment : EuiToolTip,
+        // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
+        {
+          ...(showFragment
+            ? { key: props.label || props.id! }
+            : {
+                content: upperFirst(props.label || props.id!),
+                position: 'bottom',
+              }),
+        },
+        <EuiButtonIcon
+          size="s"
+          {...omit(commonButtonProps, 'iconSide')}
+          iconType={props.iconType}
+          display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
+          aria-label={upperFirst(props.label || props.id!)}
+        />
+      )
+    ) : props.emphasize ? (
+      // fill is not compatible with EuiHeaderLink
+      <EuiButton
         size="s"
-        {...omit(commonButtonProps, 'iconSide')}
-        iconType={props.iconType}
-        display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
-        aria-label={upperFirst(props.label || props.id!)}
-      />
-    )
-  ) : props.emphasize ? (
-    // fill is not compatible with EuiHeaderLink
-    <EuiButton
-      size="s"
-      fullWidth={props.isMobileMenu}
-      {...commonButtonProps}
-      fill={props.fill ?? true}
-    >
-      <ButtonContainer />
-    </EuiButton>
-  ) : (
-    <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
-      <ButtonContainer />
-    </EuiHeaderLink>
-  );
+        fullWidth={props.isMobileMenu}
+        {...commonButtonProps}
+        fill={props.fill ?? true}
+      >
+        <ButtonContainer />
+      </EuiButton>
+    ) : (
+      <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
+        <ButtonContainer />
+      </EuiHeaderLink>
+    );
 
   const tooltip = getTooltip();
   if (tooltip) {

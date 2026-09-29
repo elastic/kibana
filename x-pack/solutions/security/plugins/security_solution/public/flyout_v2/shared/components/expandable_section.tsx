@@ -57,6 +57,12 @@ export interface ExpandableSectionProps {
    * Optional content rendered in the accordion header row
    */
   extraAction?: ReactNode;
+  /**
+   * HTML heading level for the section title. Defaults to 'h4'.
+   * Pass 'h3' for sections that sit at a higher nesting level in the page
+   * outline (e.g. entity-analytics flyout sections).
+   */
+  headingLevel?: 'h3' | 'h4';
 }
 
 /**
@@ -74,6 +80,7 @@ export const ExpandableSection = memo(
     sectionId,
     title,
     extraAction,
+    headingLevel = 'h4',
   }: ExpandableSectionProps) => {
     const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
     const { renderContent, state, toggle } = useAccordionState(expanded);
@@ -81,9 +88,10 @@ export const ExpandableSection = memo(
     const headerDataTestSub = dataTestSub + HEADER_TEST_ID;
     const contentDataTestSub = dataTestSub + CONTENT_TEST_ID;
 
+    const HeadingTag = headingLevel;
     const header = (
       <EuiTitle size="xs" data-test-subj={headerDataTestSub}>
-        <h4>{title}</h4>
+        <HeadingTag>{title}</HeadingTag>
       </EuiTitle>
     );
 

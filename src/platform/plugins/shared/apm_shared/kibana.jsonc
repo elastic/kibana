@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/apm-shared",
+  "owner": ["@elastic/obs-signals-traces-team"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Provides pre-configured APM UI components with core and API dependencies pre-bound.",
+  "plugin": {
+    "id": "apmShared",
+    "browser": true,
+    "server": false,
+    "optionalPlugins": ["cps"],
+    "requiredBundles": []
+  }
+}

@@ -10,10 +10,11 @@
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
-import type { DashboardState, Warnings } from '../../types';
+import type { Warnings } from '../../types';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
 import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
@@ -24,8 +25,7 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
-  useGASchemas?: boolean
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
@@ -53,15 +53,13 @@ export function transformDashboardOut(
     panelsJSON,
     sections,
     references,
-    isDashboardAppRequest,
-    useGASchemas
+    isDashboardAppRequest
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
-    references,
-    useGASchemas
+    references
   );
 
   const timeRange =
@@ -107,11 +105,12 @@ export function transformDashboardOut(
     time_range: timeRange,
     title: title ?? '',
   };
+  const schemaShape = strictValidationSchema.shape;
   (Object.keys(validatedState) as Array<keyof typeof validatedState>).forEach((key) => {
     try {
       validatedState = {
         ...validatedState,
-        [key]: strictValidationSchema.validateKey(key, validatedState[key]),
+        [key]: schemaShape[key as keyof typeof schemaShape].parse(validatedState[key]),
       };
     } catch (error) {
       const warningMessage = `Unexpected error transforming ${key}. Error: ${error.message}`;

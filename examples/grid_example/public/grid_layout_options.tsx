@@ -32,7 +32,7 @@ export const GridLayoutOptions = ({
     <EuiPopover
       button={
         <EuiButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsSettingsPopoverOpen(!isSettingsPopoverOpen)}
         >

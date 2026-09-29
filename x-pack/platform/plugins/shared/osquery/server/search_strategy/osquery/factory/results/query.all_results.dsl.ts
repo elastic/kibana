@@ -6,11 +6,12 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
-import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
+import { buildIndexNamesWithNamespaces } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
@@ -31,21 +32,22 @@ export const buildResultsQuery = ({
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
-  let baseFilter: string;
-  if (scheduleId != null && executionCount != null) {
-    const scheduleQuery = `schedule_id: ${scheduleId} AND osquery_meta.schedule_execution_count: ${executionCount}`;
-    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    baseFilter = scheduleQuery + agentQuery;
-  } else {
-    const actionIdQuery = `action_id: ${actionId}`;
-    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    baseFilter = actionIdQuery + agentQuery;
-  }
+  const identifierFilters: estypes.QueryDslQueryContainer[] =
+    scheduleId != null && executionCount != null
+      ? [
+          { term: { schedule_id: scheduleId } },
+          { term: { 'osquery_meta.schedule_execution_count': executionCount } },
+        ]
+      : [{ term: { action_id: actionId } }];
+  const agentIdFilter: estypes.QueryDslQueryContainer[] = agentId
+    ? [{ term: { 'agent.id': agentId } }]
+    : [];
+  const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
-  if (!isEmpty(kuery)) {
-    baseFilter = baseFilter + ` AND ${kuery}`;
-  }
-
+  // Window on `event.ingested` (Fleet's ingest-time stamp) rather than
+  // `@timestamp` (osquery's collection time): agents can backfill results whose
+  // `@timestamp` predates the action, so an ingest-time window is what reliably
+  // captures a live query's responses.
   const timeRangeFilter =
     startDate && !isEmpty(startDate)
       ? [
@@ -60,8 +62,6 @@ export const buildResultsQuery = ({
         ]
       : [];
 
-  const kqlFilterClause = getQueryFilter({ filter: baseFilter });
-
   const parsedEsFilters: Filter[] = esFilters ? (JSON.parse(esFilters) as Filter[]) : [];
 
   const { filter: esFilterClauses, must_not: esFilterMustNotClauses } =
@@ -70,19 +70,18 @@ export const buildResultsQuery = ({
       : { filter: [], must_not: [] };
 
   // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
-  const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
+  const filterQuery = [
+    ...timeRangeFilter,
+    ...identifierFilters,
+    ...agentIdFilter,
+    ...kueryFilter,
+    ...esFilterClauses,
+  ];
 
-  let index: string;
-
-  if (integrationNamespaces && integrationNamespaces.length > 0) {
-    index = integrationNamespaces
-      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
-      .join(',');
-  } else {
-    index = baseIndex;
-  }
-
-  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
+  const index = prefixIndexPatternsWithCcs(
+    buildIndexNamesWithNamespaces(baseIndex, integrationNamespaces),
+    ccsEnabled ?? false
+  );
 
   return {
     allow_no_indices: true,

@@ -10,6 +10,7 @@
 import type YAML from 'yaml';
 import { isMap, isPair, isScalar, parseDocument } from 'yaml';
 import {
+  getTriggerConnectorIdBlockIndex,
   isInScheduledTriggerWithBlock,
   isInStepsContext,
   isInTriggersContext,
@@ -81,6 +82,19 @@ describe('triggers_utils', () => {
 
     it('should return false when triggers is not the first element', () => {
       expect(isInTriggersContext(['steps', 0, 'triggers'])).toBe(false);
+    });
+  });
+
+  describe('getTriggerConnectorIdBlockIndex', () => {
+    it('returns the trigger index for triggers[i].connector-id', () => {
+      expect(getTriggerConnectorIdBlockIndex(['triggers', 0, 'connector-id'])).toBe(0);
+      expect(getTriggerConnectorIdBlockIndex(['triggers', 2, 'connector-id'])).toBe(2);
+    });
+
+    it('returns null for other trigger paths', () => {
+      expect(getTriggerConnectorIdBlockIndex(['triggers', 0, 'type'])).toBeNull();
+      expect(getTriggerConnectorIdBlockIndex(['triggers', 0, 'on', 'condition'])).toBeNull();
+      expect(getTriggerConnectorIdBlockIndex(['steps', 0, 'connector-id'])).toBeNull();
     });
   });
 

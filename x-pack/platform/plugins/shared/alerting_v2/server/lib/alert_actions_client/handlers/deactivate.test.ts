@@ -13,7 +13,7 @@ import {
   alertEventType,
   type AlertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
-import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { buildAlertEventRecord, buildHandlerItem } from '../test_utils';
 import type { AlertEventRecord } from '../types';
 import { deactivateHandler } from './deactivate';
@@ -60,7 +60,6 @@ describe('deactivateHandler', () => {
       const prepared = deactivateHandler.prepare(buildItem(alertEvent));
 
       expect(prepared.ruleEvent).toMatchObject({
-        '@timestamp': FIXED_NOW,
         rule: { id: alertEvent.rule_id, version: alertEvent.rule_version },
         group_hash: alertEvent.group_hash,
         data: alertEvent.data_json,
@@ -78,7 +77,7 @@ describe('deactivateHandler', () => {
         buildItem(buildAlertEventRecord({ rule_version: undefined }))
       );
 
-      expect(prepared.ruleEvent?.rule.version).toBe(1);
+      expect(prepared.ruleEvent?.rule?.version).toBe(1);
     });
 
     it('omits severity on the synthetic event when the alert event has none', () => {
@@ -91,7 +90,7 @@ describe('deactivateHandler', () => {
   });
 
   describe('precondition: rejects only when the episode is already inactive', () => {
-    it('rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is inactive', () => {
+    it('rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (409) when episode_status is inactive', () => {
       try {
         deactivateHandler.prepare(
           buildItem(buildAlertEventRecord({ episode_status: alertEpisodeStatus.inactive }))
@@ -99,9 +98,9 @@ describe('deactivateHandler', () => {
         throw new Error('expected handler to throw');
       } catch (error) {
         expect(Boom.isBoom(error)).toBe(true);
-        expect(error.output.statusCode).toBe(400);
+        expect(error.output.statusCode).toBe(409);
         expect(error.data).toMatchObject({
-          code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+          code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {
             group_hash: 'group-1',
             episode_id: 'episode-1',

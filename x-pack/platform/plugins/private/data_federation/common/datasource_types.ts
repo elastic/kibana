@@ -73,11 +73,11 @@ export const DATA_SOURCE_TYPES_TO_ICONS: Record<DataSourceType, string> = {
 } as const;
 
 export const DATA_SOURCE_TYPES_TO_HELP_TEXT: Partial<Record<DataSourceType, string>> = {
-  // TODO
   // URI, glob pattern, table name, or SQL query that identifies the data (e.g. s3://logs-bucket/access/**/*.parquet).
   s3: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
-  gcs: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
-  azure: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
+  gcs: 'URI with path and glob pattern(e.g. gs://logs-bucket/access/**/*.parquet)',
+  azure:
+    'URI with path and glob pattern(e.g. https://account.blob.core.windows.net/logs-bucket/access/**/*.parquet)',
 } as const;
 
 export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;

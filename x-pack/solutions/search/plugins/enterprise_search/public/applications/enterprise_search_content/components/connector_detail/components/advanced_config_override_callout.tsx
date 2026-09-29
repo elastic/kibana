@@ -7,40 +7,41 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { KbnWarningCallout } from '@kbn/ui-callout';
+
 import { docLinks } from '../../../../shared/doc_links';
 
 export const AdvancedConfigOverrideCallout: React.FC = () => (
-  <EuiCallOut
+  <KbnWarningCallout
     title={i18n.translate(
       'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
       { defaultMessage: 'Configuration warning' }
     )}
-    iconType="info"
-    color="warning"
-  >
-    <FormattedMessage
-      id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
-      defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
-      values={{
-        advancedSyncRulesDocs: (
-          <EuiLink
-            data-test-subj="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
-            data-telemetry-id="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
-            href={docLinks.syncRules}
-            target="_blank"
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
-              { defaultMessage: 'Advanced Sync Rules' }
-            )}
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiCallOut>
+    text={
+      <FormattedMessage
+        id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+        defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
+        values={{
+          advancedSyncRulesDocs: (
+            <EuiLink
+              data-test-subj="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+              data-telemetry-id="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+              href={docLinks.syncRules}
+              target="_blank"
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                { defaultMessage: 'Advanced Sync Rules' }
+              )}
+            </EuiLink>
+          ),
+        }}
+      />
+    }
+  />
 );

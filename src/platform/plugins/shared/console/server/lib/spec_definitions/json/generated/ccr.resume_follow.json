@@ -11,6 +11,18 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "max_outstanding_read_requests": "",
+      "max_outstanding_write_requests": "",
+      "max_read_request_operation_count": "",
+      "max_read_request_size": "",
+      "max_retry_delay": "",
+      "max_write_buffer_count": "",
+      "max_write_buffer_size": "",
+      "max_write_request_operation_count": "",
+      "max_write_request_size": "",
+      "read_poll_timeout": ""
+    },
     "methods": [
       "POST"
     ],

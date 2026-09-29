@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-import { environmentRt } from '@kbn/apm-types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { environmentSchema } from '@kbn/apm-types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
-export const dependencyChartQueryRt = t.intersection([
-  t.type({
-    dependencyName: t.string,
-    spanName: t.string,
-    searchServiceDestinationMetrics: toBooleanRt,
-  }),
-  rangeRt,
-  kueryRt,
-  environmentRt,
-  offsetRt,
-]);
+export const dependencyChartQuerySchema = z
+  .object({
+    dependencyName: z.string(),
+    spanName: z.string(),
+    searchServiceDestinationMetrics: BooleanFromString.default(false),
+  })
+  .merge(rangeSchema)
+  .merge(kuerySchema)
+  .merge(environmentSchema)
+  .merge(offsetSchema);

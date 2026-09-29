@@ -62,13 +62,13 @@ packages/kbn-lint-*
 packages/kbn-managed-vscode-*
 packages/kbn-manifest
 packages/kbn-mock-idp-plugin
-packages/kbn-optimizer
 packages/kbn-peggy-loader
 packages/kbn-performance-testing-dataset-extractor
 packages/kbn-picomatcher
 packages/kbn-plugin-*
 packages/kbn-relocate
 packages/kbn-repo-*
+packages/kbn-rspack-optimizer
 packages/kbn-set-map
 packages/kbn-sort-package-json
 packages/kbn-styled-components-mapping-cli
@@ -120,6 +120,7 @@ src/platform/test
 typings
 x-pack/examples
 x-pack/packages/ai-infra/product-doc-artifact-builder
+x-pack/packages/ai-infra/security-labs-artifact-builder
 x-pack/packages/kbn-synthetics-private-location
 x-pack/platform/packages/shared/kbn-ai-tools-cli
 x-pack/platform/packages/shared/kbn-data-forge

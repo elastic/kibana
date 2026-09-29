@@ -15,6 +15,10 @@ import { RuleKindBadge } from './rule_summary_header';
 const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('RuleKindBadge', () => {
+  // Fake timers keep the EuiToolTip display delay off the wall clock, so the hover assertion can't tip the test past its budget under CI load.
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
   it.each<RuleKind>(['alert', 'signal'])('renders the %s kind badge', async (kind) => {
     wrap(<RuleKindBadge kind={kind} />);
 

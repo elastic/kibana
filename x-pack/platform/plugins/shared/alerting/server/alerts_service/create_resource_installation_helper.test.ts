@@ -19,6 +19,7 @@ import {
   successResult,
   calculateDelay,
   getShouldRetry,
+  MAX_CONCURRENT_RESOURCE_INSTALLATIONS,
 } from './create_resource_installation_helper';
 import { retryUntil } from './test_utils';
 
@@ -315,6 +316,39 @@ describe('createResourceInstallationHelper', () => {
       result: false,
       error: 'second error',
     });
+  });
+
+  test(`should bound the number of concurrently running init functions`, async () => {
+    const numContexts = 3 * MAX_CONCURRENT_RESOURCE_INSTALLATIONS;
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const slowInitFn = jest.fn(async () => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((r) => setTimeout(r, 10));
+      inFlight--;
+    });
+
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, 10),
+      slowInitFn
+    );
+
+    const contexts = range(numContexts).map((i) => ({
+      context: `test${i}`,
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    }));
+    contexts.forEach((context) => helper.add(context));
+
+    const results = await Promise.all(
+      contexts.map(({ context }) => helper.getInitializedContext(context, DEFAULT_NAMESPACE_STRING))
+    );
+
+    expect(slowInitFn).toHaveBeenCalledTimes(numContexts);
+    expect(results.every(({ result }) => result)).toBe(true);
+    expect(maxInFlight).toBeGreaterThan(0);
+    expect(maxInFlight).toBeLessThanOrEqual(MAX_CONCURRENT_RESOURCE_INSTALLATIONS);
   });
 });
 

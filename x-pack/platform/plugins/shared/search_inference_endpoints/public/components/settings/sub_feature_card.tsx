@@ -125,7 +125,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
 
   const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
-  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+  const { icon: globalDefaultIcon = 'processor', label: globalDefaultLabel = globalDefaultId } =
     endpointDisplayMap.get(globalDefaultId) ?? {};
   const globalDefaultDeprecationInfo =
     !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL
@@ -319,7 +319,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                           hasInteractiveChildren
                         >
                           {(provided) => {
-                            const { icon = 'compute', label = endpointId } =
+                            const { icon = 'processor', label = endpointId } =
                               endpointDisplayMap.get(endpointId) ?? {};
                             const isInvalid = invalidEndpointIds.has(endpointId);
                             const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
@@ -342,7 +342,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                           )}
                                         >
                                           <EuiIcon
-                                            type="grab"
+                                            type="dragVertical"
                                             size="s"
                                             color="subdued"
                                             aria-hidden
@@ -454,7 +454,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   {hasOverflow && !isExpanded && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         size="s"
                         onClick={() => setIsExpanded(true)}
                         data-test-subj={`show-more-${featureId}`}
@@ -633,7 +633,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
         />
       )}
       {endpointIds.map((endpointId, index) => {
-        const { icon = 'compute', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
+        const { icon = 'processor', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
         const isInvalid = invalidEndpointIds.has(endpointId);
         const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
         return (

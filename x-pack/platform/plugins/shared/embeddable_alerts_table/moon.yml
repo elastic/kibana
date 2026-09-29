@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core'
+  - '@kbn/scout'
   - '@kbn/presentation-publishing'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-plugin'
@@ -52,6 +53,7 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

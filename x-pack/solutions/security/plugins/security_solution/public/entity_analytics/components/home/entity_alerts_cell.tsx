@@ -22,6 +22,7 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { ENTITY_ANALYTICS_ALERTS_FROM, ENTITY_ANALYTICS_ALERTS_TO } from './constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
@@ -47,13 +48,10 @@ import { getFormattedAlertStats } from '../../../flyout_v2/document/main/compone
 
 const QUERY_KEY_ENTITY_ALERTS_BY_STATUS = 'entity-analytics-alerts-by-status';
 
-// The Entity Analytics home page hides the global date picker (see `hideDatePicker`
-// in entity_analytics_home_page.tsx), so we can't rely on the global time range — it
-// carries whatever the user last set on another page. Pin the alerts column to a
-// fixed "last 30 days" window instead. ES resolves the date-math expressions at
-// query time, so clicking the global refresh button always returns up-to-date counts.
-const ALERTS_CELL_FROM_STR = 'now-30d';
-const ALERTS_CELL_TO_STR = 'now';
+// Local aliases — the source of truth lives in ./constants and is shared with the
+// entity flyout insights section to keep both time windows in sync.
+const ALERTS_CELL_FROM_STR = ENTITY_ANALYTICS_ALERTS_FROM;
+const ALERTS_CELL_TO_STR = ENTITY_ANALYTICS_ALERTS_TO;
 
 const ENTITY_FILTER_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.alertsColumn.entityFilterTitle',

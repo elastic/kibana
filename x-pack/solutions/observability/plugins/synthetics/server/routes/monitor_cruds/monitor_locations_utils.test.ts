@@ -6,11 +6,13 @@
  */
 
 import {
+  assertCanPerformMonitorBulkActionInAllSpaces,
   privateLocationCoversAllMonitorSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
 import { ConfigKey } from '../../../common/runtime_types';
 import type { MonitorFields, SyntheticsPrivateLocations } from '../../../common/runtime_types';
+import type { RouteContext } from '../types';
 
 describe('privateLocationCoversAllMonitorSpaces', () => {
   it('returns false when locationSpaces is undefined', () => {
@@ -202,5 +204,72 @@ describe('validateMonitorPrivateLocationSpaces', () => {
       { id: 'private-loc-1', label: 'Private Location 1', spaces: ['space-a'] },
     ]);
     expect(validateMonitorPrivateLocationSpaces(monitor, privateLocations)).toBeNull();
+  });
+});
+
+describe('assertCanPerformMonitorBulkActionInAllSpaces', () => {
+  const createRouteContext = (hasAllRequested: boolean) => {
+    const checkSavedObjectsPrivileges = jest.fn().mockResolvedValue({ hasAllRequested });
+    const forbidden = jest.fn(({ body }) => ({ status: 403, body }));
+
+    return {
+      routeContext: {
+        request: {},
+        response: { forbidden },
+        spaceId: 'default',
+        server: {
+          security: {
+            authz: {
+              checkSavedObjectsPrivilegesWithRequest: jest
+                .fn()
+                .mockReturnValue(checkSavedObjectsPrivileges),
+            },
+          },
+        },
+      } as unknown as RouteContext,
+      checkSavedObjectsPrivileges,
+    };
+  };
+
+  it('checks bulk_update privileges by default', async () => {
+    const { routeContext, checkSavedObjectsPrivileges } = createRouteContext(true);
+
+    await assertCanPerformMonitorBulkActionInAllSpaces(routeContext, ['default', 'other-space']);
+
+    expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      'saved_object:synthetics-monitor-multi-space/bulk_update',
+      ['default', 'other-space']
+    );
+  });
+
+  it('checks bulk_delete privileges and returns delete-specific copy', async () => {
+    const { routeContext, checkSavedObjectsPrivileges } = createRouteContext(false);
+
+    const result = await assertCanPerformMonitorBulkActionInAllSpaces(
+      routeContext,
+      ['default', 'other-space'],
+      'synthetics-monitor',
+      'bulk_delete'
+    );
+
+    expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      'saved_object:synthetics-monitor/bulk_delete',
+      ['default', 'other-space']
+    );
+    expect(result).toEqual({
+      status: 403,
+      body: {
+        message:
+          'This monitor is shared to spaces where you do not have delete permissions. To delete it, request access to those spaces.',
+      },
+    });
+  });
+
+  it('does not check privileges when no spaces are provided', async () => {
+    const { routeContext, checkSavedObjectsPrivileges } = createRouteContext(true);
+
+    await assertCanPerformMonitorBulkActionInAllSpaces(routeContext, []);
+
+    expect(checkSavedObjectsPrivileges).not.toHaveBeenCalled();
   });
 });

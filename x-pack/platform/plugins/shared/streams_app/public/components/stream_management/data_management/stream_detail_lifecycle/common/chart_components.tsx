@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
@@ -359,13 +360,13 @@ export function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-      <EuiText>
+      <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('xpack.streams.streamDetailLifecycle.dataTiers', {
             defaultMessage: 'Data Tiers',
           })}
         </h5>
-      </EuiText>
+      </EuiTitle>
       <EuiSpacer size="s" />
       {availablePhases.map((phase) => (
         <React.Fragment key={phase.name}>
@@ -386,7 +387,9 @@ export function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
               )}
             </EuiFlexItem>
 
-            <EuiFlexItem grow={2}>{capitalize(phase.name)}</EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <EuiText size="xs">{capitalize(phase.name)}</EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </React.Fragment>

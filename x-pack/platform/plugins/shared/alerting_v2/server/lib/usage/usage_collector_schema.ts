@@ -95,6 +95,42 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },
   },
+  count_by_recovery_strategy: {
+    no_breach: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+    },
+    condition: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy condition.' },
+    },
+    query: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy query.' },
+    },
+    manual: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy manual.' },
+    },
+  },
+  count_by_no_data_strategy: {
+    ignore: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy ignore.' },
+    },
+    keep_last: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy keep_last.' },
+    },
+    resolve: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy resolve.' },
+    },
+    alert: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy alert.' },
+    },
+  },
 
   executions_count_24hr: {
     type: 'long',
@@ -148,13 +184,6 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
   action_policies_count_with_matcher: {
     type: 'long',
     _meta: { description: 'Number of action policies with a matcher.' },
-  },
-  action_policies_count_agent_builder_assisted: {
-    type: 'long',
-    _meta: {
-      description:
-        'Number of action policies currently tagged as created/edited via Agent Builder.',
-    },
   },
   action_policies_count_with_group_by: {
     type: 'long',

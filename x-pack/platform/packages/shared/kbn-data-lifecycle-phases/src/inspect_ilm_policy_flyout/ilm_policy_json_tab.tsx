@@ -47,7 +47,7 @@ export const IlmPolicyJsonTab = ({ policyName, policy }: IlmPolicyJsonTabProps) 
           transparentBackground
           paddingSize="l"
           fontSize="s"
-          whiteSpace="pre"
+          whiteSpace="pre-wrap"
           overflowHeight={containerHeight > 0 ? containerHeight : undefined}
           copyAriaLabel={strings.copyRequestAriaLabel}
           data-test-subj="ilmPolicyJsonTabCodeBlock"

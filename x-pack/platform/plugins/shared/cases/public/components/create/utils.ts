@@ -11,6 +11,10 @@ import { GENERAL_CASES_OWNER } from '../../../common';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { ActionConnector } from '../../../common/types/domain';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
+import {
+  getCaseSettings,
+  isObservablesExtractionBlocked,
+} from '../../../common/utils/case_settings';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import type { CasesConfigurationUI } from '../../containers/types';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
@@ -21,6 +25,23 @@ import {
   getConnectorById,
   getConnectorsFormSerializer,
 } from '../utils';
+
+/** Returns the space-level extractObservables value from the configuration. */
+export const getSpaceExtractObservables = (configuration: CasesConfigurationUI): boolean =>
+  configuration.extractObservables ?? false;
+
+export const getInitialCreateCaseSettings = (
+  owner: string,
+  configuration: CasesConfigurationUI
+): { syncAlerts: boolean; extractObservables: boolean } => {
+  const { syncAlerts } = getCaseSettings(owner);
+  return {
+    syncAlerts,
+    extractObservables: isObservablesExtractionBlocked(owner)
+      ? false
+      : getSpaceExtractObservables(configuration),
+  };
+};
 
 export const trimUserFormData = (
   userFormData: Omit<
@@ -73,15 +94,25 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
   };
 };
 
+export interface CreateFormSerializerOptions {
+  /**
+   * When false (templates v2 on + legacy switch off), omit legacy custom fields from the
+   * POST payload even if stale values remain in form state.
+   */
+  includeLegacyCustomFields?: boolean;
+}
+
 export const createFormSerializer = (
   connectors: ActionConnector[],
   currentConfiguration: CasesConfigurationUI,
-  data: CaseFormFieldsSchemaProps
+  data: CaseFormFieldsSchemaProps,
+  { includeLegacyCustomFields = true }: CreateFormSerializerOptions = {}
 ): CasePostRequest => {
   if (data == null || isEmpty(data)) {
     return getInitialCaseValue({
       owner: currentConfiguration.owner,
       connector: currentConfiguration.connector,
+      settings: getInitialCreateCaseSettings(currentConfiguration.owner, currentConfiguration),
     });
   }
 
@@ -103,17 +134,23 @@ export const createFormSerializer = (
     ? normalizeActionConnector(caseConnector, serializedConnectorFields.fields)
     : getNoneConnector();
 
-  const transformedCustomFields = customFieldsFormSerializer(
-    customFields,
-    currentConfiguration.customFields
-  );
+  // When legacy inputs are gated off, do not submit config-backed custom fields — requirements
+  // and values live in the migrated Field Library / extended fields path instead.
+  const transformedCustomFields = includeLegacyCustomFields
+    ? customFieldsFormSerializer(customFields, currentConfiguration.customFields)
+    : [];
 
   const trimmedData = trimUserFormData(restData);
 
   return {
     ...trimmedData,
     connector: connectorToUpdate,
-    settings: { syncAlerts: syncAlerts ?? false, extractObservables: extractObservables ?? false },
+    settings: {
+      syncAlerts: syncAlerts ?? false,
+      extractObservables: isObservablesExtractionBlocked(currentConfiguration.owner)
+        ? false
+        : extractObservables ?? getSpaceExtractObservables(currentConfiguration),
+    },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,
     ...(extendedFields != null ? { [CASE_EXTENDED_FIELDS]: extendedFields } : {}),

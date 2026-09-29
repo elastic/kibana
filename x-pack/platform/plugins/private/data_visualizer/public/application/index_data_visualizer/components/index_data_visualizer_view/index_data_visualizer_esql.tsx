@@ -29,8 +29,8 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
@@ -67,7 +67,7 @@ const maxInlineSizeStyles = css`
 
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { data, http } = services;
+  const { data, http, cps } = services;
   const { euiTheme } = useEuiTheme();
 
   // Query that has been typed, but has not submitted with cmd + enter
@@ -253,13 +253,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 css={{ padding: 0, marginRight: 0 }}
               >
                 <EuiFlexItem grow={true}>
-                  <EuiCallOut
-                    announceOnMount
-                    size="s"
-                    iconType="warning"
-                    color="warning"
-                    title={unsupportedReasonForQuery}
-                  />
+                  <KbnWarningCallout announceOnMount size="s" title={unsupportedReasonForQuery} />
                 </EuiFlexItem>
               </EuiFlexGroup>
               {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
@@ -279,6 +273,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                   setFrozenDataPreference={() => {}}
                   dataView={currentDataView}
                   query={undefined}
+                  projectRouting={cps?.cpsManager?.getProjectRouting()}
                   disabled={false}
                   timefilter={timefilter}
                 />

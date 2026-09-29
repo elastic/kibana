@@ -2,15 +2,33 @@
 
 exports[`StatusMessage should render normally 1`] = `
 <div
-  class="euiPanel euiPanel--primary euiPanel--paddingSmall euiCallOut euiCallOut--primary emotion-euiPanel-none-s-primary-euiCallOut"
+  class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+  data-size="s"
   data-test-subj="createIndexPatternStatusMessage"
+  style="--euiCallOutTypeColor: #0B64DD;"
 >
-  <p
-    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-primary"
+  <div
+    class="css-1slkmya-wrapper"
   >
-    <span>
-      Your index pattern can match 2 sources.
-    </span>
-  </p>
+    <div
+      class="css-wlziyu-body"
+    >
+      <span
+        class="css-1qkppnb-icon"
+        data-euiicon-type="infoFill"
+      />
+      <div
+        class="css-ak2bmi-content"
+      >
+        <p
+          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader"
+        >
+          <span>
+            Your index pattern can match 2 sources.
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
 `;

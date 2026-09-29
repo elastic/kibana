@@ -405,14 +405,14 @@ describe('every legacy AttachmentType has at least one fixture', () => {
 
 // ----- Cases.id denormalization sanity -----
 
-describe('cases.id is denormalized from references[case]', () => {
+describe('case.id is denormalized from references[case]', () => {
   it.each(Object.entries(FIXTURES))(
-    'fixture=%s carries cases.id from the SO reference',
+    'fixture=%s carries case.id from the SO reference',
     (_label, so) => {
       const doc = buildAttachmentDoc(
         so as SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
       );
-      expect(doc.cases.id).toBe('case-1');
+      expect(doc.case.id).toBe('case-1');
     }
   );
 });

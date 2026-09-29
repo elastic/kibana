@@ -58,6 +58,12 @@ export const ReconfigurationWithPartitionedWarnings = {
             reasons: [{ type: 'singleCategory' }],
           },
         ]}
+        projectScope={{
+          isCpsEnabled: false,
+          isCpsManagerReady: false,
+          projectRouting: '',
+          onOpenProjectScope: () => {},
+        }}
       />
     );
   },
@@ -90,6 +96,12 @@ export const ReconfigurationWithUnpartitionedWarnings = {
             availableDatasets: ['first', 'second', 'third'],
           },
         ]}
+        projectScope={{
+          isCpsEnabled: false,
+          isCpsManagerReady: false,
+          projectRouting: '',
+          onOpenProjectScope: () => {},
+        }}
       />
     );
   },

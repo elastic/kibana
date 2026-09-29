@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { TimeRange } from '@kbn/agent-builder-common';
@@ -42,12 +42,14 @@ export const createRelevanceSearchTool = ({
   events,
   logger,
   topSnippetsConfig,
+  includeFrozen = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
   logger: Logger;
   topSnippetsConfig?: TopSnippetsConfig;
+  includeFrozen?: boolean;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -64,6 +66,7 @@ export const createRelevanceSearchTool = ({
             esClient,
             logger,
             topSnippetsConfig,
+            includeFrozen,
           });
           const resources = rawResults.map(convertMatchResult);
 
@@ -106,6 +109,7 @@ export const createNaturalLanguageSearchTool = ({
   customInstructions,
   timeRange,
   includeDatasets = false,
+  includeFrozen = false,
 }: {
   modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
@@ -115,13 +119,14 @@ export const createNaturalLanguageSearchTool = ({
   customInstructions?: string;
   timeRange: TimeRange;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }) => {
   return toTool(
     async ({ query, index }) => {
       return withExecuteToolSpan(
         naturalLanguageSearchToolName,
         { tool: { input: { query, index } } },
-        async () => {
+        async (span) => {
           events?.reportProgress(progressMessages.performingNlSearch({ query }));
           const response = await naturalLanguageSearch({
             nlQuery: query,
@@ -134,6 +139,7 @@ export const createNaturalLanguageSearchTool = ({
             customInstructions,
             timeRange,
             includeDatasets,
+            includeFrozen,
           });
 
           const results: ToolResult[] = response.esqlData
@@ -157,14 +163,18 @@ export const createNaturalLanguageSearchTool = ({
                   },
                 },
               ]
-            : [
-                createErrorResult({
+            : (() => {
+                const errorResult = createErrorResult({
                   message: response.error ?? 'Query was not executed',
                   metadata: {
                     query: response.generatedQuery,
                   },
-                }),
-              ];
+                });
+                if (span) {
+                  markToolSpanAsError(span, { result: [errorResult] });
+                }
+                return [errorResult];
+              })();
 
           const content = JSON.stringify(results);
           const artifact = { results };

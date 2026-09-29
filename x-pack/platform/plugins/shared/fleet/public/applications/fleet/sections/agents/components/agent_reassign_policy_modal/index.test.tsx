@@ -102,6 +102,15 @@ describe('AgentReassignAgentPolicyModal', () => {
       ).toBeInTheDocument();
     });
 
+    it('shows the singular agent count in the title and confirm button', () => {
+      const { utils } = render({ agents: singleAgent, agentCount: 1 });
+
+      expect(utils.getByText('Assign new policy to agent')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+        'Assign policy to agent'
+      );
+    });
+
     it('calls sendPostAgentReassign when a different policy is selected', async () => {
       mockSendPostAgentReassign.mockResolvedValue({});
       const { utils } = render({ agents: singleAgent });
@@ -207,6 +216,15 @@ describe('AgentReassignAgentPolicyModal', () => {
       ).toBeInTheDocument();
     });
 
+    it('shows the agent count in the title and confirm button', () => {
+      const { utils } = render({ agents: bulkAgents, agentCount: bulkAgents.length });
+
+      expect(utils.getByText('Assign new policy to 2 agents')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+        'Assign policy to 2 agents'
+      );
+    });
+
     it('shows "in progress" success toast for bulk agent array', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
       const { utils } = render({ agents: bulkAgents, agentCount: bulkAgents.length });
@@ -248,6 +266,15 @@ describe('AgentReassignAgentPolicyModal', () => {
       expect(
         utils.getByText('Choose a new agent policy to assign the selected 5 agents to.')
       ).toBeInTheDocument();
+    });
+
+    it('shows the query-based agent count in the title and confirm button', () => {
+      const { utils } = render({ agents: kuery, agentCount: 5 });
+
+      expect(utils.getByText('Assign new policy to 5 agents')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+        'Assign policy to 5 agents'
+      );
     });
 
     it('shows "in progress" success toast for kuery-based bulk reassignment', async () => {

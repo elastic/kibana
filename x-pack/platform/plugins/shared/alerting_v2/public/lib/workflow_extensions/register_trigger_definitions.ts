@@ -62,4 +62,14 @@ export function registerTriggerDefinitions(
   workflowsExtensions.registerTriggerDefinition(() =>
     import('./triggers/rule_disabled').then((m) => m.ruleDisabledTriggerPublicDefinition)
   );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_events_generated').then(
+      (m) => m.ruleEventsGeneratedTriggerPublicDefinition
+    )
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_execution_failed').then(
+      (m) => m.ruleExecutionFailedTriggerPublicDefinition
+    )
+  );
 }

@@ -27,6 +27,7 @@ import type {
 } from '../../components/shared/exploratory_view/types';
 import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
 import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
+import { alertsFieldFormats } from '../../components/shared/exploratory_view/configurations/alerts/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,
@@ -36,7 +37,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   uptime: syntheticsFieldFormats,
   synthetics: syntheticsFieldFormats,
   mobile: apmFieldFormats,
-  alerts: null,
+  alerts: alertsFieldFormats,
 };
 
 const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: RuntimeField }> | null> = {

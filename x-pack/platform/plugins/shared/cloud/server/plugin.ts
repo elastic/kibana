@@ -10,7 +10,6 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/serv
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
-import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
 
 import camelcaseKeys from 'camelcase-keys';
@@ -29,6 +28,7 @@ import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
 import type { CloudRequestHandlerContext } from './routes/types';
+import { cloudOnboardingQuerySchema } from './routes/onboarding_query_schema';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE, setupSavedObjects } from './saved_objects';
 import { persistTokenCloudData } from './cloud_data';
 
@@ -280,56 +280,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       {
         path: '/app/cloud/onboarding',
         validate: {
-          query: schema.maybe(
-            schema.object(
-              {
-                next: schema.maybe(schema.string()),
-                onboarding_token: schema.maybe(schema.string()),
-                security: schema.maybe(
-                  schema.object({
-                    use_case: schema.oneOf([
-                      schema.literal('siem'),
-                      schema.literal('cloud'),
-                      schema.literal('edr'),
-                      schema.literal('other'),
-                    ]),
-                    migration: schema.maybe(
-                      schema.object({
-                        value: schema.boolean(),
-                        type: schema.maybe(
-                          schema.oneOf([schema.literal('splunk'), schema.literal('other')])
-                        ),
-                      })
-                    ),
-                  })
-                ),
-                resource_data: schema.maybe(
-                  schema.object({
-                    project: schema.maybe(
-                      schema.object({
-                        search: schema.maybe(
-                          schema.object({
-                            type: schema.oneOf([
-                              schema.literal('general'),
-                              schema.literal('vector'),
-                              schema.literal('timeseries'),
-                            ]),
-                          })
-                        ),
-                      })
-                    ),
-                    deployment: schema.maybe(
-                      schema.object({
-                        id: schema.maybe(schema.string()),
-                        name: schema.maybe(schema.string()),
-                      })
-                    ),
-                  })
-                ),
-              },
-              { unknowns: 'ignore' }
-            )
-          ),
+          query: cloudOnboardingQuerySchema,
         },
         security: {
           authz: {

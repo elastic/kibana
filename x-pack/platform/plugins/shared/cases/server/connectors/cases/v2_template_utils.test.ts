@@ -7,11 +7,13 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SavedObject, Logger } from '@kbn/core/server';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/v1';
 import {
   buildExtendedFieldsFromTemplate,
   parseTemplateDefinition,
   resolveV2Template,
+  resolveV2TemplateForLegacyKey,
 } from './v2_template_utils';
 import type { CasesClient } from '../../client';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
@@ -63,8 +65,9 @@ describe('parseTemplateDefinition', () => {
     expect(result).toBeNull();
   });
 
-  it('returns null when schema validation fails (missing required name)', () => {
-    const result = parseTemplateDefinition('description: "no name"\nfields: []');
+  it('returns null when schema validation fails (missing required fields block)', () => {
+    // Case defaults (incl. name) are optional; the structural `fields` block is the one required key.
+    const result = parseTemplateDefinition('name: "Only a title"');
     expect(result).toBeNull();
   });
 
@@ -163,6 +166,157 @@ describe('resolveV2Template', () => {
   });
 });
 
+describe('resolveV2TemplateForLegacyKey', () => {
+  const makeClientWithTemplates = (
+    templates: Array<Partial<Template> & { definition: string }>
+  ): CasesClient =>
+    ({
+      templates: {
+        getAllTemplates: jest.fn().mockResolvedValue({
+          templates: templates.map((t) => ({
+            templateId: 'tmpl-id',
+            name: 'Test template',
+            owner: 'securitySolution',
+            templateVersion: 1,
+            fieldSearchMatches: false,
+            ...t,
+          })),
+          page: 1,
+          perPage: 10000,
+          total: templates.length,
+        }),
+      },
+    } as unknown as CasesClient);
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('resolves by legacyKey (exact v1 lineage) and returns id + version', async () => {
+    const client = makeClientWithTemplates([
+      {
+        templateId: 'v2-id',
+        name: 'TestTemplateOne',
+        legacyKey: 'v1-key-1',
+        templateVersion: 3,
+        definition: childYaml,
+      },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-1',
+      'TestTemplateOne',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.templateId).toBe('v2-id');
+    expect(result?.templateVersion).toBe(3);
+    expect(result?.definition.name).toBe('Child Template');
+  });
+
+  it('prefers legacyKey over name to disambiguate v1 templates that shared a name', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id-a', name: 'Shared Name', legacyKey: 'v1-key-a', definition: childYaml },
+      { templateId: 'v2-id-b', name: 'Shared Name', legacyKey: 'v1-key-b', definition: childYaml },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-b',
+      'Shared Name',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result?.templateId).toBe('v2-id-b');
+  });
+
+  it('falls back to a normalized name match when no legacyKey is recorded', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id', name: 'TestTemplateOne', templateVersion: 2, definition: childYaml },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-unknown',
+      '  testtemplateone  ',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result?.templateId).toBe('v2-id');
+    expect(result?.templateVersion).toBe(2);
+  });
+
+  it('returns null and logs when neither the key nor the name matches', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id', name: 'Some Other Template', definition: childYaml },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-1',
+      'TestTemplateOne',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).toBeNull();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('No migrated v2 template found'),
+      expect.any(Object)
+    );
+  });
+
+  it('returns null and logs when the matched template has an invalid definition', async () => {
+    const client = makeClientWithTemplates([
+      {
+        templateId: 'v2-id',
+        name: 'TestTemplateOne',
+        legacyKey: 'v1-key-1',
+        definition: ': invalid yaml [',
+      },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-1',
+      'TestTemplateOne',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).toBeNull();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('invalid definition'),
+      expect.any(Object)
+    );
+  });
+
+  it('does not match a template with the same legacyKey but a different owner', async () => {
+    const client = makeClientWithTemplates([
+      {
+        templateId: 'v2-id',
+        name: 'TestTemplateOne',
+        legacyKey: 'v1-key-1',
+        owner: 'observability',
+        definition: childYaml,
+      },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-1',
+      'TestTemplateOne',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).toBeNull();
+  });
+});
+
 describe('buildExtendedFieldsFromTemplate', () => {
   const makeClientWithDefs = (defs: FieldDefinition[]): CasesClient =>
     ({
@@ -179,7 +333,8 @@ describe('buildExtendedFieldsFromTemplate', () => {
       { name: 'T', fields: [] },
       'securitySolution'
     );
-    expect(result).toEqual({});
+    expect(result.extendedFields).toEqual({});
+    expect(result.legacyKeysWithV2Values.size).toBe(0);
   });
 
   it('coerces an inline numeric default to a string key', async () => {
@@ -199,7 +354,7 @@ describe('buildExtendedFieldsFromTemplate', () => {
       },
       'securitySolution'
     );
-    expect(result).toEqual({ count_as_long: '42' });
+    expect(result.extendedFields).toEqual({ count_as_long: '42' });
   });
 
   it('resolves a $ref field from the library and includes its default', async () => {
@@ -216,7 +371,7 @@ describe('buildExtendedFieldsFromTemplate', () => {
       { name: 'T', fields: [{ $ref: 'lib_field' }] },
       'securitySolution'
     );
-    expect(result).toEqual({ lib_field_as_keyword: 'from-library' });
+    expect(result.extendedFields).toEqual({ lib_field_as_keyword: 'from-library' });
   });
 
   it('skips a $ref field that has no matching library definition', async () => {
@@ -225,6 +380,214 @@ describe('buildExtendedFieldsFromTemplate', () => {
       { name: 'T', fields: [{ $ref: 'missing_field' }] },
       'securitySolution'
     );
-    expect(result).toEqual({});
+    expect(result.extendedFields).toEqual({});
+  });
+
+  it('omits template fields that have no default instead of sending empty strings', async () => {
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'no_default',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'No default',
+            validation: { required: true },
+          },
+          {
+            name: 'with_default',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'With default',
+            metadata: { default: 'value' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result.extendedFields).toEqual({ with_default_as_keyword: 'value' });
+  });
+
+  it('merges global field defaults the template does not reference', async () => {
+    const globalDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-global',
+      name: 'global_field',
+      owner: 'securitySolution',
+      isGlobal: true,
+      definition:
+        'name: global_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Global\nmetadata:\n  default: "from-global"',
+    };
+
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([globalDef]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'template_field',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'Template',
+            metadata: { default: 'from-template' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result.extendedFields).toEqual({
+      template_field_as_keyword: 'from-template',
+      global_field_as_keyword: 'from-global',
+    });
+  });
+
+  it('resolves a storage-key collision to the global default (create.ts precedence)', async () => {
+    const globalDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-global',
+      name: 'shared_field',
+      owner: 'securitySolution',
+      isGlobal: true,
+      definition:
+        'name: shared_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Shared\nmetadata:\n  default: "from-global"',
+    };
+
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([globalDef]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'shared_field',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'Shared',
+            metadata: { default: 'from-template' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result.extendedFields).toEqual({ shared_field_as_keyword: 'from-global' });
+  });
+
+  it('does not let a global definition without a default clobber a template default', async () => {
+    const globalDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-global',
+      name: 'shared_field',
+      owner: 'securitySolution',
+      isGlobal: true,
+      definition: 'name: shared_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Shared',
+    };
+
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([globalDef]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'shared_field',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'Shared',
+            metadata: { default: 'from-template' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result.extendedFields).toEqual({ shared_field_as_keyword: 'from-template' });
+  });
+
+  describe('legacyKeysWithV2Values (link provenance)', () => {
+    const linkedGlobalDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-priority',
+      name: 'priority',
+      owner: 'securitySolution',
+      isGlobal: true,
+      legacyKey: 'priority_key',
+      definition:
+        'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\nmetadata:\n  default: "field-library"',
+    };
+    const legacyPriorityConfig = {
+      key: 'priority_key',
+      type: CustomFieldTypes.TEXT as const,
+      label: 'Priority',
+      required: true,
+      defaultValue: 'legacy',
+    };
+
+    it('reports the legacy key when its linked definition received a generated v2 value', async () => {
+      const result = await buildExtendedFieldsFromTemplate(
+        makeClientWithDefs([linkedGlobalDef]),
+        { name: 'T', fields: [] },
+        'securitySolution',
+        [legacyPriorityConfig]
+      );
+
+      expect(result.extendedFields).toEqual({ priority_as_keyword: 'field-library' });
+      expect(result.legacyKeysWithV2Values).toEqual(new Set(['priority_key']));
+    });
+
+    it('does not report a linked legacy key when the definition produced no v2 value', async () => {
+      const linkedDefWithoutDefault: FieldDefinition = {
+        ...linkedGlobalDef,
+        definition: 'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority',
+      };
+
+      const result = await buildExtendedFieldsFromTemplate(
+        makeClientWithDefs([linkedDefWithoutDefault]),
+        { name: 'T', fields: [] },
+        'securitySolution',
+        [legacyPriorityConfig]
+      );
+
+      // No generated v2 value — the legacy fallback must stay in customFields, so the key is
+      // not reported.
+      expect(result.extendedFields).toEqual({});
+      expect(result.legacyKeysWithV2Values.size).toBe(0);
+    });
+
+    it('does not report an unlinked legacy key even when an unrelated field has a value', async () => {
+      const unlinkedGlobalDef: FieldDefinition = {
+        fieldDefinitionId: 'fd-other',
+        name: 'other_field',
+        owner: 'securitySolution',
+        isGlobal: true,
+        definition:
+          'name: other_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Other\nmetadata:\n  default: "x"',
+      };
+
+      const result = await buildExtendedFieldsFromTemplate(
+        makeClientWithDefs([unlinkedGlobalDef]),
+        { name: 'T', fields: [] },
+        'securitySolution',
+        [legacyPriorityConfig]
+      );
+
+      expect(result.extendedFields).toEqual({ other_field_as_keyword: 'x' });
+      expect(result.legacyKeysWithV2Values.size).toBe(0);
+    });
+
+    it('does not report a legacy key whose linkage is malformed (fail-closed preserved)', async () => {
+      // Type mismatch: the v1 field is NUMBER but the linked definition stores keyword.
+      // Link resolution treats this as malformed — no active link, so no provenance report; the
+      // legacy value stays in the request and the write path keeps its structured 400.
+      const mismatchedDef: FieldDefinition = {
+        ...linkedGlobalDef,
+        definition:
+          'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\nmetadata:\n  default: "field-library"',
+      };
+
+      const result = await buildExtendedFieldsFromTemplate(
+        makeClientWithDefs([mismatchedDef]),
+        { name: 'T', fields: [] },
+        'securitySolution',
+        [{ ...legacyPriorityConfig, type: CustomFieldTypes.NUMBER as const, defaultValue: 1 }]
+      );
+
+      expect(result.extendedFields).toEqual({ priority_as_keyword: 'field-library' });
+      expect(result.legacyKeysWithV2Values.size).toBe(0);
+    });
   });
 });

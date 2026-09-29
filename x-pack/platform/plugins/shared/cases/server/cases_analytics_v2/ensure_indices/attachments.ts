@@ -27,7 +27,7 @@ import { ATTACHMENTS_INDEX_MAPPING } from '../mappings/attachments';
  *     creation with `validation_exception` before the feature can start.
  *
  * No `index.mode: lookup`: `.cases-attachments` is a fact table joined
- * to `.cases` via ES|QL `LOOKUP JOIN cases ON cases.id`; the
+ * to `.cases` via ES|QL `LOOKUP JOIN cases ON case.id`; the
  * lookup-mode index is on the `.cases` side.
  *
  * Failure policy: throws on unexpected errors so callers can decide how

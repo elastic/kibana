@@ -11,9 +11,15 @@ export const eisEndpointsMockData = [
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: { model_id: 'anthropic-claude-3.7-sonnet' },
+    task_settings: { reasoning: { effort: 'high' } },
     metadata: {
       heuristics: { properties: ['multilingual', 'multimodal'], status: 'ga' },
       display: { name: 'Anthropic Claude Sonnet 3.7', model_creator: 'Anthropic' },
+      // us and apac regions — aws::us-east-1 is shared with ELSER (deduplication test)
+      regions: [
+        { csp: 'aws', region: 'us-east-1', geo: 'us' },
+        { csp: 'aws', region: 'ap-southeast-1', geo: 'apac' },
+      ],
     },
   },
   {
@@ -84,6 +90,11 @@ export const eisEndpointsMockData = [
     metadata: {
       heuristics: { properties: ['multilingual'], status: 'ga' },
       display: { name: 'Elastic ELSER v2', model_creator: 'Elastic' },
+      // eu and us regions — aws::us-east-1 is also on Claude Sonnet (deduplication)
+      regions: [
+        { csp: 'aws', region: 'eu-west-1', geo: 'eu' },
+        { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      ],
     },
   },
   {
@@ -112,6 +123,16 @@ export const eisEndpointsMockData = [
         end_of_life_date: '2020-01-01',
       },
       display: { name: 'OpenAI Davinci', model_creator: 'OpenAI' },
+    },
+  },
+  {
+    inference_id: '.mock-elastic-preview-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'elastic-preview-model' },
+    metadata: {
+      heuristics: { properties: ['multilingual'], status: 'preview' },
+      display: { name: 'Elastic Preview Model', model_creator: 'Elastic' },
     },
   },
 ];

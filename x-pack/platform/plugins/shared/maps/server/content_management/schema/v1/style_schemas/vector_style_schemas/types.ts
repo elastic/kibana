@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
+import type { z } from '@kbn/zod';
 import type {
   colorDynamicSchema,
   colorStaticSchema,
@@ -42,38 +41,38 @@ import type { STYLE_TYPE } from '../../../../../../common/constants';
 import type { fieldMetaOptionsSchema } from './field_meta_options_schema';
 import type { styleFieldSchema } from './style_field_schema';
 
-export type ColorStaticStylePropertyDescriptor = TypeOf<typeof colorStaticSchema>;
-export type ColorDynamicOptions = TypeOf<typeof colorDynamicOptions>;
-export type ColorStaticOptions = TypeOf<typeof colorStaticOptions>;
-export type ColorDynamicStylePropertyDescriptor = TypeOf<typeof colorDynamicSchema>;
-export type ColorStylePropertyDescriptor = TypeOf<typeof colorSchema>;
+export type ColorStaticStylePropertyDescriptor = z.output<typeof colorStaticSchema>;
+export type ColorDynamicOptions = z.output<typeof colorDynamicOptions>;
+export type ColorStaticOptions = z.output<typeof colorStaticOptions>;
+export type ColorDynamicStylePropertyDescriptor = z.output<typeof colorDynamicSchema>;
+export type ColorStylePropertyDescriptor = z.output<typeof colorSchema>;
 
-export type CategoryColorStop = TypeOf<typeof categoryColorStop>;
-export type OrdinalColorStop = TypeOf<typeof ordinalColorStop>;
+export type CategoryColorStop = z.output<typeof categoryColorStop>;
+export type OrdinalColorStop = z.output<typeof ordinalColorStop>;
 
-export type IconDynamicOptions = TypeOf<typeof iconDynamicOptions>;
-export type IconStaticOptions = TypeOf<typeof iconStaticOptions>;
-export type IconStylePropertyDescriptor = TypeOf<typeof iconSchema>;
+export type IconDynamicOptions = z.output<typeof iconDynamicOptions>;
+export type IconStaticOptions = z.output<typeof iconStaticOptions>;
+export type IconStylePropertyDescriptor = z.output<typeof iconSchema>;
 
-export type IconStop = TypeOf<typeof iconStop>;
+export type IconStop = z.output<typeof iconStop>;
 
-export type LabelDynamicOptions = TypeOf<typeof labelDynamicOptions>;
-export type LabelStaticOptions = TypeOf<typeof labelStaticOptions>;
-export type LabelStylePropertyDescriptor = TypeOf<typeof labelSchema>;
+export type LabelDynamicOptions = z.output<typeof labelDynamicOptions>;
+export type LabelStaticOptions = z.output<typeof labelStaticOptions>;
+export type LabelStylePropertyDescriptor = z.output<typeof labelSchema>;
 
-export type LabelBorderSizeOptions = TypeOf<typeof labelBorderSizeOptions>;
-export type LabelPositionStylePropertyDescriptor = TypeOf<typeof labelPositionSchema>;
-export type LabelZoomRangeStylePropertyDescriptor = TypeOf<typeof labelZoomRangeSchema>;
+export type LabelBorderSizeOptions = z.output<typeof labelBorderSizeOptions>;
+export type LabelPositionStylePropertyDescriptor = z.output<typeof labelPositionSchema>;
+export type LabelZoomRangeStylePropertyDescriptor = z.output<typeof labelZoomRangeSchema>;
 
-export type OrientationDynamicOptions = TypeOf<typeof orientationDynamicOptions>;
-export type OrientationStaticOptions = TypeOf<typeof orientationStaticOptions>;
-export type OrientationStylePropertyDescriptor = TypeOf<typeof orientationSchema>;
+export type OrientationDynamicOptions = z.output<typeof orientationDynamicOptions>;
+export type OrientationStaticOptions = z.output<typeof orientationStaticOptions>;
+export type OrientationStylePropertyDescriptor = z.output<typeof orientationSchema>;
 
-export type SizeDynamicOptions = TypeOf<typeof sizeDynamicOptions>;
-export type SizeStaticOptions = TypeOf<typeof sizeStaticOptions>;
-export type SizeStylePropertyDescriptor = TypeOf<typeof sizeSchema>;
+export type SizeDynamicOptions = z.output<typeof sizeDynamicOptions>;
+export type SizeStaticOptions = z.output<typeof sizeStaticOptions>;
+export type SizeStylePropertyDescriptor = z.output<typeof sizeSchema>;
 
-export type SymbolizeAsOptions = TypeOf<typeof symbolizeAsOptions>;
+export type SymbolizeAsOptions = z.output<typeof symbolizeAsOptions>;
 
 export type DynamicStylePropertyOptions =
   | ColorDynamicOptions
@@ -102,10 +101,10 @@ export type StylePropertyOptions =
   | DynamicStylePropertyOptions
   | StaticStylePropertyOptions;
 
-export type VectorStylePropertiesDescriptor = Writable<TypeOf<typeof vectorStylePropertiesSchema>>;
+export type VectorStylePropertiesDescriptor = z.output<typeof vectorStylePropertiesSchema>;
 
-export type FieldMetaOptions = TypeOf<typeof fieldMetaOptionsSchema>;
-export type StylePropertyField = TypeOf<typeof styleFieldSchema>;
+export type FieldMetaOptions = z.output<typeof fieldMetaOptionsSchema>;
+export type StylePropertyField = z.output<typeof styleFieldSchema>;
 
 export interface RangeFieldMeta {
   min: number;
@@ -137,6 +136,6 @@ export interface StyleMetaDescriptor {
   geometryTypes?: GeometryTypes;
   fieldMeta: FieldMeta;
 }
-export type VectorStyleDescriptor = TypeOf<typeof vectorStyleSchema> & {
+export type VectorStyleDescriptor = z.output<typeof vectorStyleSchema> & {
   __styleMeta?: StyleMetaDescriptor;
 };

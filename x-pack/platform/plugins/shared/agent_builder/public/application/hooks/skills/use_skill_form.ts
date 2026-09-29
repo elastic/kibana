@@ -13,7 +13,6 @@ import {
 } from '../../components/skills/skill_form_validation';
 
 const SKILL_FORM_DEFAULT_VALUES: SkillFormData = {
-  id: '',
   name: '',
   description: '',
   content: '',

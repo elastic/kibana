@@ -11,12 +11,12 @@ import type { UnifiedReferenceAttachmentPayload } from '../../../common/types/do
 export const toReferenceMetadata = (
   index: string | string[] | undefined
 ): UnifiedReferenceAttachmentPayload['metadata'] => {
-  const normalizedIndex = toStringOrStringArray(index);
+  const normalizedIndex = toStringOrStringArray(index, { preserveArray: true });
   return normalizedIndex == null ? undefined : { index: normalizedIndex };
 };
 
 export const normalizeReferenceAttachmentId = (
   attachmentId: string | string[]
 ): string | string[] => {
-  return toStringOrStringArray(attachmentId) ?? attachmentId;
+  return toStringOrStringArray(attachmentId, { preserveArray: true }) ?? attachmentId;
 };

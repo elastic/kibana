@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
@@ -84,6 +85,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
         isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
       } as unknown as jest.Mocked<ActionsClient>,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,
@@ -235,6 +237,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
 
   it('throws 409 when the provided revision does not match the current rule revision', async () => {
     rulesClient.resolve.mockResolvedValue(liveAlertingRule);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
 
     await expect(
       detectionRulesClient.restoreRuleFromHistory({
@@ -244,7 +247,6 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       })
     ).rejects.toMatchObject({ statusCode: 409 });
 
-    expect(rulesClient.getHistory).not.toHaveBeenCalled();
     expect(rulesClient.update).not.toHaveBeenCalled();
   });
 
@@ -260,9 +262,10 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     ).resolves.not.toThrow();
   });
 
-  it('throws 409 when ruleRevision is provided but the rule no longer exists', async () => {
+  it('throws 409 when ruleRevision is provided but the rule was already deleted and restored', async () => {
     const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
     rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
 
     await expect(
       detectionRulesClient.restoreRuleFromHistory({
@@ -272,7 +275,47 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       })
     ).rejects.toMatchObject({ statusCode: 409 });
 
-    expect(rulesClient.getHistory).not.toHaveBeenCalled();
+    expect(rulesClient.getHistory).toHaveBeenCalled();
+    expect(rulesClient.create).not.toHaveBeenCalled();
+  });
+
+  it('throws 404 when ruleRevision is provided but the rule never existed', async () => {
+    const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+    rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockResolvedValue({ total: 0, items: [] });
+
+    await expect(
+      detectionRulesClient.restoreRuleFromHistory({
+        ruleId: RULE_ID,
+        changeId: CHANGE_ID,
+        currentRuleRevision: 1,
+      })
+    ).rejects.toMatchObject({ statusCode: 404, message: `ruleId: "${RULE_ID}" not found` });
+
+    expect(rulesClient.create).not.toHaveBeenCalled();
+  });
+
+  it('throws 404 for changeId, not ruleId, when a deleted rule has other history but not the requested changeId', async () => {
+    const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+    rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockImplementation(async (params) => {
+      if (params.filters) {
+        return { total: 0, items: [] };
+      }
+
+      return buildHistoryResult(snapshotAlertingRule, 'some-other-change-id');
+    });
+
+    await expect(
+      detectionRulesClient.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID })
+    ).rejects.toMatchObject({ statusCode: 404, message: `changeId: "${CHANGE_ID}" not found` });
+
+    expect(rulesClient.getHistory).toHaveBeenCalledTimes(2);
+    expect(rulesClient.getHistory).toHaveBeenLastCalledWith({
+      module: 'security',
+      ruleId: RULE_ID,
+      size: 1,
+    });
     expect(rulesClient.create).not.toHaveBeenCalled();
   });
 
@@ -566,7 +609,9 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
 
   describe('detection_rule_restore_error telemetry', () => {
     it('fires a "conflict" event and does not fire the success event when the revision is stale', async () => {
+      const historyResult = buildHistoryResult(snapshotAlertingRule, CHANGE_ID);
       rulesClient.resolve.mockResolvedValue(liveAlertingRule);
+      rulesClient.getHistory.mockResolvedValue(historyResult);
 
       await expect(
         detectionRulesClient.restoreRuleFromHistory({

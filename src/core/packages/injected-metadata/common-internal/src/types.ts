@@ -38,6 +38,30 @@ export interface InjectedMetadataExternalUrlPolicy {
   protocol?: string;
 }
 
+/**
+ * Which step of the locale resolution chain determined the rendered locale.
+ * @internal
+ */
+export type LocaleSource = 'profile' | 'cookie' | 'config' | 'browser' | 'default';
+
+/**
+ * Display-language values resolved at render time and surfaced to EBT as context.
+ * @internal
+ */
+export interface InjectedMetadataDisplayLanguage {
+  /** The locale Kibana rendered this page in. */
+  locale: string;
+  /**
+   * The normalized locale the browser's Accept-Language header resolves to.
+   * Absent when the browser's preference cannot be served.
+   */
+  browserPreferredLocale?: string;
+  /** Which step of the resolution chain produced {@link locale}. */
+  localeSource: LocaleSource;
+  /** The deployment's configured `i18n.defaultLocale`. */
+  configDefaultLocale: string;
+}
+
 /** @internal */
 export interface InjectedMetadataTheme {
   darkMode: DarkModeValue;
@@ -66,13 +90,14 @@ export interface InjectedMetadata {
     packageInfo: PackageInfo;
     airgapped: boolean;
     isCoreRenderingInReactConcurrentMode: boolean;
+    exposeNavDependencies?: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;
     initialFeatureFlags: Record<string, unknown>;
   };
   anonymousStatusPage: boolean;
-  i18n: {
+  i18n: InjectedMetadataDisplayLanguage & {
     /** `null` when the effective locale is English — no fetch is needed. */
     translationsUrl: string | null;
     availableLocales: Array<{ id: string; label: string }>;
@@ -96,6 +121,7 @@ export interface InjectedMetadata {
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
   userStorage: {
+    available: boolean;
     values: Record<string, unknown>;
   };
 }

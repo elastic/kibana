@@ -18,6 +18,7 @@ import type { RuleChangesHistoryResponse } from '../../../../../../../common/api
 import { ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 
 export const ruleHistoryRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -43,38 +44,43 @@ export const ruleHistoryRoute = (router: SecuritySolutionPluginRouter) => {
       async (context, request, response): Promise<IKibanaResponse<RuleChangesHistoryResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        try {
-          const { ruleId } = request.params;
-          const { page, per_page: perPage } = request.query;
+        return withSecuritySpan(
+          { name: 'getRuleHistoryRoute', labels: { solution: 'security' } },
+          async () => {
+            try {
+              const { ruleId } = request.params;
+              const { page, per_page: perPage } = request.query;
 
-          const ctx = await context.resolve(['core', 'securitySolution']);
+              const ctx = await context.resolve(['core', 'securitySolution']);
 
-          const isRuleChangesHistoryEnabled = await ctx.core.uiSettings.client.get<boolean>(
-            ENABLE_RULE_CHANGES_HISTORY_SETTING
-          );
-          if (!isRuleChangesHistoryEnabled) {
-            return siemResponse.error({
-              statusCode: 403,
-              body: 'Rule changes history is disabled. You may enable it in Advanced Settings.',
-            });
+              const isRuleChangesHistoryEnabled = await ctx.core.uiSettings.client.get<boolean>(
+                ENABLE_RULE_CHANGES_HISTORY_SETTING
+              );
+              if (!isRuleChangesHistoryEnabled) {
+                return siemResponse.error({
+                  statusCode: 403,
+                  body: 'Rule changes history is disabled. You may enable it in Advanced Settings.',
+                });
+              }
+
+              const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
+
+              const result = await detectionRulesClient.getHistoryForRule({
+                ruleId,
+                page,
+                perPage,
+              });
+
+              return response.ok({ body: result });
+            } catch (err) {
+              const error = transformError(err);
+              return siemResponse.error({
+                body: error.message,
+                statusCode: error.statusCode,
+              });
+            }
           }
-
-          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-
-          const result = await detectionRulesClient.getHistoryForRule({
-            ruleId,
-            page,
-            perPage,
-          });
-
-          return response.ok({ body: result });
-        } catch (err) {
-          const error = transformError(err);
-          return siemResponse.error({
-            body: error.message,
-            statusCode: error.statusCode,
-          });
-        }
+        );
       }
     );
 };

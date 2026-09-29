@@ -34,6 +34,7 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
   MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
+  MOCK_IDP_UIAM_PROJECT_TYPES,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
@@ -392,15 +393,17 @@ export async function createUiamSessionTokens({
         platform: [],
         organization: [],
         user: [],
-        project: [
-          {
+        // One grant per project type so the session can reach cross-project (CPS) linked
+        // projects of any type, not just the type of the Kibana instance being logged in to.
+        project: [...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
+          (grantedProjectType) => ({
             role_id: 'cloud-role-id',
             organization_id: organizationId,
-            project_type: projectType,
+            project_type: grantedProjectType,
             application_roles: roles,
             project_scope: { scope: 'all' },
-          },
-        ],
+          })
+        ),
       },
 
       nbf: iat,
@@ -451,7 +454,7 @@ export async function createUiamSessionTokens({
 export async function createUiamOAuthAccessToken({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   audience,
   fullName,
@@ -467,6 +470,7 @@ export async function createUiamOAuthAccessToken({
   email?: string;
   accessTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
@@ -508,15 +512,17 @@ export async function createUiamOAuthAccessToken({
         platform: [],
         organization: [],
         user: [],
-        project: [
-          {
+        // One grant per project type so the session can reach cross-project (CPS) linked
+        // projects of any type, not just the type of the Kibana instance being logged in to.
+        project: [...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
+          (grantedProjectType) => ({
             role_id: 'cloud-role-id',
             organization_id: organizationId,
-            project_type: projectType,
+            project_type: grantedProjectType,
             application_roles: roles,
             project_scope: { scope: 'all' },
-          },
-        ],
+          })
+        ),
       },
 
       nbf: iat,

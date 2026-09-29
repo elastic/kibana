@@ -34,6 +34,7 @@ const getDocViewerResult = (
   const prevRenderHeader = jest.fn();
   const prevRenderFooter = jest.fn();
   const prevDocViewer = {
+    title: 'test title' as string | undefined,
     renderHeader: prevRenderHeader,
     renderFooter: prevRenderFooter,
     docViewsRegistry: jest.fn((r) => r),
@@ -55,6 +56,25 @@ const getDocViewerResult = (
 
 describe('createSecurityDocumentProfileProviders', () => {
   describe('getDocViewer', () => {
+    it('sets the flyout title to "Alert: <rule_name>" for alert documents', () => {
+      const { result } = getDocViewerResult(
+        createRecord({ 'event.kind': 'signal', 'kibana.alert.rule.name': 'My Detection Rule' })
+      );
+      expect(result.title).toBe('Alert: My Detection Rule');
+    });
+
+    it('falls back to the previous title when the alert has no rule name', () => {
+      const { result } = getDocViewerResult(createRecord({ 'event.kind': 'signal' }));
+      expect(result.title).toBe('test title');
+    });
+
+    it('does not override the title for non-alert event documents', () => {
+      const { result } = getDocViewerResult(
+        createRecord({ 'event.kind': 'event', 'kibana.alert.rule.name': 'Should Not Appear' })
+      );
+      expect(result.title).toBe('test title');
+    });
+
     it('overrides renderHeader for alert documents', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({ 'event.kind': 'signal' })
@@ -91,7 +111,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       expect(result.renderFooter).not.toBe(prevRenderFooter);
     });
 
-    it('does not override renderHeader for attack discovery alerts', () => {
+    it('overrides renderHeader for attack discovery alerts', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -99,10 +119,11 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderHeader).toBe(prevRenderHeader);
+      expect(result.renderHeader).toBeDefined();
+      expect(result.renderHeader).not.toBe(prevRenderHeader);
     });
 
-    it('does not override renderFooter for attack discovery alerts', () => {
+    it('overrides renderFooter for attack discovery alerts', () => {
       const { result, prevRenderFooter } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -110,7 +131,8 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderFooter).toBe(prevRenderFooter);
+      expect(result.renderFooter).toBeDefined();
+      expect(result.renderFooter).not.toBe(prevRenderFooter);
     });
 
     it('adds the overview tab to the registry for alert documents', () => {
@@ -133,7 +155,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       );
     });
 
-    it('does not add the overview tab to the registry for attack discovery alerts', () => {
+    it('adds the overview tab to the registry for attack discovery alerts', () => {
       const { result } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -143,7 +165,9 @@ describe('createSecurityDocumentProfileProviders', () => {
       const registry = { add: jest.fn() };
       result.docViewsRegistry(registry as never);
 
-      expect(registry.add).not.toHaveBeenCalled();
+      expect(registry.add).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'doc_view_attack_overview' })
+      );
     });
 
     it('does not override renderHeader when event.kind is absent', () => {

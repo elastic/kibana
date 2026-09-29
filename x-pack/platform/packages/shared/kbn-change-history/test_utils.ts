@@ -5,7 +5,16 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { ChangeHistoryDocument } from './src/types';
+
+/**
+ * Creates a child test client carrying Kibana's product origin. Elasticsearch reserves
+ * direct access to system data streams, so plain Jest and FTR clients cannot manage
+ * `.kibana_change_history` without this header. See elastic/kibana#279803.
+ */
+export const asKibanaClient = (client: Client): Client =>
+  client.child({ headers: { 'x-elastic-product-origin': 'kibana' } });
 
 /**
  * Build a fully-typed {@link ChangeHistoryDocument} for use in unit tests. All

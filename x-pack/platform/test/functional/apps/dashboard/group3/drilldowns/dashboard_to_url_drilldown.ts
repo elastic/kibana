@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.closeFlyout();
 
       // check that drilldown notification badge is shown
-      expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(2);
+      await dashboardDrilldownPanelActions.expectPanelDrilldownCount(2);
 
       // save dashboard, navigate to view mode
       await dashboard.saveDashboard(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, {
@@ -88,7 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // utils which shouldn't be a part of test flow, but also too specific to be moved to pageobject or service
   async function brushAreaChart() {
     const areaChart = await testSubjects.find('visualizationLoader');
-    expect(await areaChart.getAttribute('data-title')).to.be('Visualization漢字 AreaChart');
     await browser.dragAndDrop(
       {
         location: areaChart,

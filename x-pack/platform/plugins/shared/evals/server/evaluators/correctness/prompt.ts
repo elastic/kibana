@@ -16,7 +16,7 @@ export const LlmCorrectnessEvaluationPrompt = createPrompt({
   name: 'llm_correctness_evaluation',
   description: 'Prompt for evaluating the correctness of LLM responses',
   input: z.object({
-    user_query: z.string().max(8192),
+    user_query: z.string().max(131072),
     agent_response: z.string().max(131072),
     ground_truth_response: z.string().max(131072).optional(),
   }),

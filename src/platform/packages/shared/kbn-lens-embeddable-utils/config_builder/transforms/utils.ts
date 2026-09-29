@@ -21,8 +21,14 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
+  getESQLQueryVariables,
+} from '@kbn/esql-utils';
+import { VariableNamePrefix } from '@kbn/esql-types';
 import { Sha256 } from '@kbn/crypto-browser';
+import { stableStringify } from '@kbn/std';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
@@ -35,6 +41,7 @@ import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
 import type { LensAttributes } from '../types';
 import type { LensApiAllOperations, LensApiConfig, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
+import { toApiFieldSettings, fromApiFieldSettings } from './columns/field_settings';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn, APIAdHocDataView, APIDataView } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
@@ -55,7 +62,6 @@ import type {
   DataSourceTypeESQL,
   DataSourceTypeNoESQL,
 } from '../schema/data_source';
-import type { DataLayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
 import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
@@ -64,11 +70,25 @@ export type DataSourceStateLayer =
   | PersistedIndexPatternLayer
   | TextBasedPersistedState['layers'][0];
 
+/**
+ * Reference name under which an XY by-value annotation layer persists its data
+ * view. Must match the name produced by the Lens XY persistence logic
+ * (`getLayerReferenceName` in x-pack/.../lens/public/visualizations/xy/persistence.ts),
+ * which lives in a plugin this shared package cannot import from.
+ */
+export function getXYAnnotationLayerReferenceName(layerId: string): string {
+  return `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layerId}`;
+}
+
+function getXYDataLayerReferenceName(layerId: string): string {
+  return `${LENS_LAYER_SUFFIX}${layerId}`;
+}
+
 function createDataViewReference(dataViewId: string, layerId: string): SavedObjectReference {
   return {
     type: INDEX_PATTERN_ID,
     id: dataViewId,
-    name: `${LENS_LAYER_SUFFIX}${layerId}`,
+    name: getXYDataLayerReferenceName(layerId),
   };
 }
 
@@ -79,7 +99,7 @@ function createAnnotationLayerDataViewReference(
   return {
     type: INDEX_PATTERN_ID,
     id: dataViewId,
-    name: `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layerId}`,
+    name: getXYAnnotationLayerReferenceName(layerId),
   };
 }
 
@@ -141,17 +161,46 @@ function normalizeWhitespace(str: string): string {
 }
 
 export function generateAdHocDataViewId(
-  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
+  dataView: Pick<
+    APIAdHocDataView,
+    | 'index'
+    | 'timeFieldName'
+    | 'esqlQuery'
+    | 'dataSourceType'
+    | 'name'
+    | 'allowHidden'
+    | 'fieldSettings'
+  >
 ): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.
   // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
   // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
-  if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
-    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
+  if (dataView.dataSourceType === 'esql') {
+    return !dataView.timeFieldName && dataView.esqlQuery
+      ? `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`
+      : base;
   }
-  return base;
+
+  // For form-based ad hoc data views, two over the same index+timeField can
+  // still differ in specifications (custom name, allowHidden, or runtime/scripted
+  // field settings). Always append a hash of the canonical specification fields so
+  // that identical specs map to the same id and different specs get distinct ids.
+  // Mirrors the ES|QL `base-<hash>` pattern above.
+  //
+  // `stableStringify` sorts keys and omits `undefined` values, so key order and
+  // absent/optional field settings can't perturb the hash.
+  const canonical = {
+    name: dataView.name ?? dataView.index,
+    allowHidden: dataView.allowHidden ? true : undefined, // treat false as undefined
+    fieldSettings:
+      dataView.fieldSettings && Object.keys(dataView.fieldSettings).length > 0
+        ? dataView.fieldSettings
+        : undefined,
+  };
+
+  return `${base}-${sha256Sync(stableStringify(canonical))}`;
 }
 
 export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -159,14 +208,12 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
     title: dataView.index,
-    name: dataView.index,
+    name: dataView.name ?? dataView.index,
     timeFieldName: dataView.timeFieldName,
     sourceFilters: [],
-    fieldFormats: {},
-    runtimeFieldMap: {},
-    fieldAttrs: {},
+    ...fromApiFieldSettings(dataView.fieldSettings),
     allowNoIndex: false,
-    allowHidden: false,
+    ...(dataView.allowHidden !== undefined ? { allowHidden: dataView.allowHidden } : {}),
     ...(dataView.dataSourceType ? { type: dataView.dataSourceType } : {}),
   };
 }
@@ -224,8 +271,72 @@ export function isDataViewSpec(spec: unknown): spec is DataViewSpec {
   return spec != null && typeof spec === 'object' && 'title' in spec;
 }
 
-function getReferenceCriteria(layerId: string) {
-  return (ref: SavedObjectReference) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`;
+export function isDataViewSpecWithTitle(spec: unknown): spec is DataViewSpec & { title: string } {
+  return isDataViewSpec(spec) && typeof spec.title === 'string' && spec.title.length > 0;
+}
+
+/**
+ * Builds the `data_view_spec` data source from an ad-hoc
+ * `DataViewSpec`. Shared by data layers and XY annotation layers so both emit an
+ * inline data view identically.
+ */
+export function buildDataViewSpecDataSource(
+  dataViewSpec: DataViewSpec & { title: string }
+): Extract<DataSourceType, { type: typeof AS_CODE_DATA_VIEW_SPEC_TYPE }> {
+  const fieldSettings = toApiFieldSettings(dataViewSpec);
+  return {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: dataViewSpec.title,
+    time_field: dataViewSpec.timeFieldName,
+    ...(dataViewSpec.name ? { name: dataViewSpec.name } : {}),
+    ...(dataViewSpec.allowHidden !== undefined
+      ? { allow_hidden_indices: dataViewSpec.allowHidden }
+      : {}),
+    ...(fieldSettings ? { field_settings: fieldSettings } : {}),
+  };
+}
+
+/**
+ * Resolves the data view id for a NoESQL layer. The id is taken, in priority
+ * order, from an ad hoc reference (`state.internalReferences`), a persisted
+ * reference (top-level `references`), or the layer's own inline `indexPatternId`.
+ * Data layers and XY annotation layers persist their data view under different
+ * reference names, hence the `referenceName` parameter.
+ */
+export function resolveDataViewId(
+  references: SavedObjectReference[],
+  adhocReferences: SavedObjectReference[],
+  referenceName: string,
+  inlineDataViewId?: string
+): string | undefined {
+  const matchesName = (ref: SavedObjectReference) => ref.name === referenceName;
+  return (
+    adhocReferences.find(matchesName)?.id ?? references.find(matchesName)?.id ?? inlineDataViewId
+  );
+}
+
+/**
+ * Builds the NoESQL `data_source` for a resolved data view id: an inline
+ * `data_view_spec` when the id points at an ad hoc data view, otherwise a
+ * `data_view_reference`. Shared by data layers and XY annotation layers so both
+ * emit the data view identically.
+ *
+ * `dataViewId` must be a non-empty id: an empty `ref_id` is not a valid data
+ * source, so callers are responsible for resolving the id (or handling its
+ * absence) before calling this.
+ */
+export function buildDataViewDataSource(
+  dataViewId: string,
+  adHocDataViews: Record<string, unknown>
+): DataSourceTypeNoESQL {
+  const dataViewSpec = adHocDataViews[dataViewId];
+  if (isDataViewSpecWithTitle(dataViewSpec)) {
+    return buildDataViewSpecDataSource(dataViewSpec);
+  }
+  return {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: dataViewId,
+  };
 }
 
 export function buildDataSourceStateNoESQL(
@@ -233,34 +344,20 @@ export function buildDataSourceStateNoESQL(
   layerId: string,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
-  adhocReferences: SavedObjectReference[] = []
+  adhocReferences: SavedObjectReference[] = [],
+  referenceName: string = getXYDataLayerReferenceName(layerId)
 ): DataSourceTypeNoESQL {
-  const referenceCriteria = getReferenceCriteria(layerId);
-  const adhocReference = adhocReferences?.find(referenceCriteria);
-
-  if (adhocReference && adHocDataViews?.[adhocReference.id]) {
-    const dataViewSpec = adHocDataViews[adhocReference.id];
-    if (isDataViewSpec(dataViewSpec) && dataViewSpec.title) {
-      return {
-        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-        index_pattern: dataViewSpec.title,
-        time_field: dataViewSpec.timeFieldName,
-      };
-    }
+  const inlineDataViewId = 'indexPatternId' in layer ? layer.indexPatternId : undefined;
+  const dataViewId = resolveDataViewId(
+    references,
+    adhocReferences,
+    referenceName,
+    inlineDataViewId
+  );
+  if (!dataViewId) {
+    throw new Error(`Cannot resolve the data view for layer "${layerId}".`);
   }
-
-  const reference = references?.find(referenceCriteria);
-  if (reference) {
-    return {
-      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      ref_id: reference.id,
-    };
-  }
-
-  return {
-    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    ref_id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
-  };
+  return buildDataViewDataSource(dataViewId, adHocDataViews);
 }
 
 /**
@@ -325,11 +422,16 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
       return {
         index: dataSource.index_pattern,
         timeFieldName: dataSource.time_field ?? timeFieldName,
+        ...(dataSource.name ? { name: dataSource.name } : {}),
+        ...(dataSource.allow_hidden_indices !== undefined
+          ? { allowHidden: dataSource.allow_hidden_indices }
+          : {}),
+        ...(dataSource.field_settings ? { fieldSettings: dataSource.field_settings } : {}),
       };
     case 'esql':
       return {
         index: getIndexPatternFromESQLQuery(dataSource.query),
-        timeFieldName: getTimeFieldFromESQLQuery(dataSource.query),
+        timeFieldName: parseTimeFieldFromESQLQuery(dataSource.query),
         esqlQuery: dataSource.query,
       };
     case AS_CODE_DATA_VIEW_REFERENCE_TYPE:
@@ -340,6 +442,27 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
     default:
       throw Error('Data Source type not supported');
   }
+}
+
+/**
+ * Stamps each column's ES|QL Control Variable by matching `??`-prefixed field names against the
+ * Identifier (`??`) variables declared in the layer query.
+ */
+function reconstructESQLControlVariables(
+  columns: TextBasedLayerColumn[],
+  esql: string
+): TextBasedLayerColumn[] {
+  const identifierVariables = new Set(getESQLQueryVariables(esql, VariableNamePrefix.IDENTIFIER));
+  if (identifierVariables.size === 0) {
+    return columns;
+  }
+  return columns.map((column) => {
+    if (!column.fieldName.startsWith(VariableNamePrefix.IDENTIFIER)) {
+      return column;
+    }
+    const variable = column.fieldName.slice(VariableNamePrefix.IDENTIFIER.length);
+    return variable && identifierVariables.has(variable) ? { ...column, variable } : column;
+  });
 }
 
 // internal function used to build datasource states layer
@@ -373,7 +496,7 @@ function buildDatasourceStatesLayer(
       index: generateAdHocDataViewId({ ...dataSourceIndex, dataSourceType: 'esql' }),
       query: { esql: ds.query },
       timeField: dataSourceIndex.timeFieldName || undefined,
-      columns,
+      columns: reconstructESQLControlVariables(columns, ds.query),
       ignoreGlobalFilters: layerWithSettings.ignore_global_filters,
     };
   }
@@ -503,30 +626,28 @@ export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
   config: GenericIndexPatternColumn | GenericIndexPatternColumn[],
-  first = false,
-  postfix = ''
+  first = false
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
-  const name = columnName + postfix;
 
   layer.columns = {
     ...layer.columns,
-    [name]: column,
+    [columnName]: column,
   };
 
-  const referenceColumnId = `${name}_reference`;
+  const referenceColumnId = `${columnName}_reference`;
   if (referenceColumn && 'references' in column) {
     column.references = [referenceColumnId];
     layer.columns[referenceColumnId] = referenceColumn;
   }
 
   if (first) {
-    layer.columnOrder.unshift(name);
+    layer.columnOrder.unshift(columnName);
     if (referenceColumn) {
       layer.columnOrder.unshift(referenceColumnId);
     }
   } else {
-    layer.columnOrder.push(name);
+    layer.columnOrder.push(columnName);
     if (referenceColumn) {
       layer.columnOrder.push(referenceColumnId);
     }
@@ -667,23 +788,10 @@ export const filtersAndQueryToApiFormat = (
   };
 };
 
-function extraQueryFromAPIState(state: LensApiConfig): { esql: string } | Query | undefined {
-  if ('data_source' in state && state.data_source.type === 'esql') {
-    return { esql: state.data_source.query };
-  }
-  if ('layers' in state && Array.isArray(state.layers)) {
-    // pick only the first one for now
-    const esqlLayer = state.layers.find(
-      (layer): layer is DataLayerTypeESQL =>
-        layer.type !== 'reference_lines' &&
-        layer.type !== 'annotations' &&
-        'data_source' in layer &&
-        layer.data_source?.type === 'esql'
-    );
-    if (esqlLayer && 'query' in esqlLayer.data_source) {
-      return { esql: esqlLayer.data_source.query };
-    }
-  }
+function extraQueryFromAPIState(state: LensApiConfig): Query | undefined {
+  // ES|QL queries live exclusively on the text-based datasource layers
+  // (written by the layer transforms); the top-level slot only carries the
+  // chart-scoped KQL/Lucene filter from the API `query` field.
   if ('query' in state && state.query) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }

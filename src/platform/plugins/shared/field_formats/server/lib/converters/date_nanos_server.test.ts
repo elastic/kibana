@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { DateNanosFormat } from './date_nanos_server';
 import type { FieldFormatsGetConfigFn } from '../../../common';
 
@@ -57,6 +58,13 @@ describe('Date Nanos Format: Server side edition', () => {
     const date = new DateNanosFormat({}, getConfig);
     convert = date.convertToText.bind(date);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 07:04:56.201900001"`);
+  });
+
+  test('should format missing values with the shared null label, like the client formatter', () => {
+    const date = new DateNanosFormat({ timezone: 'UTC' }, getConfig);
+    convert = date.convertToText.bind(date);
+    expect(convert(null)).toBe(NULL_LABEL);
+    expect(convert(undefined)).toBe(NULL_LABEL);
   });
 
   test('should defer to meta params for timezone, not the UI config', () => {

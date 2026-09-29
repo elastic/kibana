@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  coreFeatureFlagsMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -56,6 +56,7 @@ const taskManager = taskManagerMock.createStart();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const rulesClientContext: RulesClientContext = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -64,6 +65,7 @@ const rulesClientContext: RulesClientContext = {
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
+  getProfileUid: jest.fn(),
   createAPIKey: createAPIKeyMock,
   cloneAPIKey: jest.fn(),
   logger,
@@ -84,7 +86,6 @@ const rulesClientContext: RulesClientContext = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   minimumScheduleIntervalInMs: 0,
-  featureFlags: coreFeatureFlagsMock.createStart(),
   isServerless: false,
 };
 
@@ -437,6 +438,7 @@ describe('bulkEditRules', () => {
       rules: [],
       skipped: [],
       username: undefined,
+      profileUid: undefined,
     });
     expect(updateFn).toHaveBeenNthCalledWith(2, {
       apiKeysMap: expect.any(Map),
@@ -445,6 +447,7 @@ describe('bulkEditRules', () => {
       rules: [],
       skipped: [],
       username: undefined,
+      profileUid: undefined,
     });
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
@@ -586,6 +589,116 @@ describe('bulkEditRules', () => {
       ],
       total: 1,
     });
+  });
+
+  test('should log audit event for each successfully updated rule', async () => {
+    const decryptedRule1 = {
+      ...existingDecryptedRule,
+      attributes: { ...existingDecryptedRule.attributes, enabled: true },
+    };
+    const decryptedRule2 = {
+      ...existingDecryptedRule,
+      id: '2',
+      attributes: {
+        ...existingDecryptedRule.attributes,
+        name: 'my other rule',
+        apiKey: MOCK_API_KEY_2,
+        enabled: true,
+      },
+    };
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [decryptedRule1, decryptedRule2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        existingRule,
+        {
+          ...existingRule,
+          id: '2',
+          attributes: { ...existingRule.attributes, name: 'my other rule' },
+        },
+      ],
+    });
+
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ rules }) => {
+        rules.push(decryptedRule1);
+        rules.push(decryptedRule2);
+      }),
+      shouldInvalidateApiKeys: false,
+      requiredAuthOperation: WriteOperations.BulkEdit,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(2);
+    expect(auditLogger.log).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
+        }),
+      })
+    );
+    expect(auditLogger.log).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '2', name: 'my other rule' },
+        }),
+      })
+    );
+  });
+
+  test('should log audit event with BULK_EDIT_PARAMS action for read-auth operations', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEditRuleParams`,
+      updateFn: jest.fn().mockImplementation(({ rules }) => {
+        rules.push(existingDecryptedRule);
+      }),
+      shouldInvalidateApiKeys: false,
+      requiredAuthOperation: ReadOperations.BulkEditParams,
+      auditAction: RuleAuditAction.BULK_EDIT_PARAMS,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit_params',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
+        }),
+      })
+    );
+  });
+
+  test('should not log audit event for skipped rules', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ skipped }) => {
+        skipped.push({
+          id: 'skip-1',
+          name: 'skip-1',
+          skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason,
+        });
+      }),
+      shouldInvalidateApiKeys: false,
+      requiredAuthOperation: WriteOperations.BulkEdit,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
   });
 
   describe('internally managed rule types', () => {

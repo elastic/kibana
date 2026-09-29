@@ -6,6 +6,7 @@
  */
 
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
+import { bulkSnapshotRoute } from './bulk_snapshot';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
 import { createCompositeSLORoute } from './composite_slo/create_composite_slo';
 import { deleteCompositeSLORoute } from './composite_slo/delete_composite_slo';
@@ -31,6 +32,7 @@ import { getDiagnosisRoute } from './get_diagnosis';
 import { getSLOGroupedStatsRoute } from './get_grouped_stats';
 import { getPreviewData } from './get_preview_data';
 import { getSLORoute } from './get_slo';
+import { getSnapshotRoute } from './get_snapshot';
 import { getSloBurnRates } from './get_slo_burn_rates';
 import { getSloSettingsRoute } from './get_slo_settings';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
@@ -55,6 +57,8 @@ interface RouteRepositoryOptions {
 
 export const getSloRouteRepository = ({ isServerless }: RouteRepositoryOptions = {}) => {
   return {
+    ...bulkSnapshotRoute,
+    ...getSnapshotRoute,
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
     ...updateSloSettings(isServerless),

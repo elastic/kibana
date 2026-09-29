@@ -12,12 +12,15 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import { useBaseEsQuery } from './use_base_es_query';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/hooks/use_global_filter_query');
 
 const mockUseKibana = jest.mocked(useKibana);
+const mockUseGlobalFilterQuery = jest.mocked(useGlobalFilterQuery);
 
 const mockDataView = {
   id: 'entities-latest',
@@ -37,6 +40,19 @@ const wrapper = ({ children }: PropsWithChildren) => (
     <DataViewContext.Provider value={dataViewContextValue}>{children}</DataViewContext.Provider>
   </TestProviders>
 );
+
+const emptyGlobalFilterQuery = {
+  bool: { must: [], filter: [], should: [], must_not: [] },
+};
+
+const activeGlobalFilterQuery = {
+  bool: {
+    must: [],
+    filter: [{ term: { 'host.ip': '1.2.3.4' } }],
+    should: [],
+    must_not: [],
+  },
+};
 
 const flattenFilters = (filters: Array<Record<string, unknown>>): Array<Record<string, unknown>> =>
   filters.flatMap((f) =>
@@ -60,6 +76,8 @@ describe('useBaseEsQuery', () => {
         uiSettings: { get: jest.fn(() => false) },
       },
     } as unknown as ReturnType<typeof useKibana>);
+
+    mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: emptyGlobalFilterQuery });
   });
 
   const renderBaseEsQuery = () =>
@@ -97,5 +115,21 @@ describe('useBaseEsQuery', () => {
     expect(result.current.query).toBeDefined();
     expect(result.current.query?.bool).toBeDefined();
     expect(Array.isArray(result.current.query?.bool?.filter)).toBe(true);
+  });
+
+  it('does not append an empty global filter query as a nested bool', () => {
+    const { result } = renderBaseEsQuery();
+
+    const filters = result.current.query?.bool?.filter ?? [];
+    expect(filters).not.toContainEqual(emptyGlobalFilterQuery);
+  });
+
+  it('appends an active global filter query to the base query filter', () => {
+    mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: activeGlobalFilterQuery });
+
+    const { result } = renderBaseEsQuery();
+
+    const filters = result.current.query?.bool?.filter ?? [];
+    expect(filters).toContainEqual(activeGlobalFilterQuery);
   });
 });

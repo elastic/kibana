@@ -15,11 +15,11 @@ import * as i18n from './translations';
 import ScheduleIconSVG from '../icons/schedule.svg';
 import { CreateButton } from '../create_button';
 
-interface Props {
+interface EmptyPageProps {
   onCreateClick: () => void;
 }
 
-export const EmptyPage: React.FC<Props> = React.memo(({ onCreateClick }) => {
+export const EmptyPage: React.FC<EmptyPageProps> = React.memo(({ onCreateClick }) => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" data-test-subj="emptySchedule">
       <EuiFlexItem grow={false}>

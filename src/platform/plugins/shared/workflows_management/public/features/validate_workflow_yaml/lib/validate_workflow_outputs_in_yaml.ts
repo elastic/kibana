@@ -15,9 +15,9 @@ import {
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import { getStepNodesWithType } from '@kbn/workflows-yaml';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { validateWorkflowFields } from '../../../widgets/workflow_yaml_editor/lib/validation/validate_workflow_fields';
-import type { YamlValidationResult } from '../model/types';
 
 interface WorkflowOutputStepItem {
   id: string;
@@ -202,6 +202,7 @@ export function validateWorkflowOutputsInYaml(
           results.push({
             id: `${outputStep.id}-${error.fieldName || 'general'}`,
             owner: 'workflow-output-validation',
+            ruleId: 'invalidWorkflowOutput',
             severity: 'error',
             message,
             hoverMessage: null,

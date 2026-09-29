@@ -135,7 +135,7 @@ describe('StorageTreemap', () => {
 
             await userEvent.click(legendItem);
 
-            expect(onIndexSelected).toBeCalledWith({ indexName: index, pattern });
+            expect(onIndexSelected).toHaveBeenCalledWith({ indexName: index, pattern });
           });
         });
       });

@@ -78,8 +78,44 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
 
     const dataTestSubjPrepend = makeDataTestSubjPrepend(customDataTestSubj);
 
+    const actionItems = propertyActions.flatMap((action, key) => {
+      if (action.type === AttachmentActionType.CUSTOM) {
+        const customAction = action.render();
+        if (customAction == null) {
+          return [];
+        }
+        return [
+          <EuiFlexItem grow={false} key={`${action.type}-${key}`}>
+            <span>
+              <Suspense fallback={<EuiLoadingSpinner />}>{customAction}</Suspense>
+            </span>
+          </EuiFlexItem>,
+        ];
+      }
+
+      return [
+        <EuiFlexItem grow={false} key={`${action.type}-${key}`}>
+          <span>
+            <PropertyActionButton
+              disabled={action.disabled}
+              iconType={action.iconType}
+              label={action.label}
+              color={action.color}
+              onClick={() => onClosePopover(action.onClick)}
+              customDataTestSubj={customDataTestSubj}
+            />
+          </span>
+        </EuiFlexItem>,
+      ];
+    });
+
+    if (actionItems.length === 0) {
+      return null;
+    }
+
     return (
       <EuiPopover
+        aria-label={i18n.ACTIONS_ARIA}
         anchorPosition="downRight"
         data-test-subj={dataTestSubjPrepend}
         ownFocus
@@ -105,25 +141,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
           direction="column"
           gutterSize="none"
         >
-          {propertyActions.map((action, key) => (
-            <EuiFlexItem grow={false} key={`${action.type}-${key}`}>
-              <span>
-                {(action.type === AttachmentActionType.BUTTON && (
-                  <PropertyActionButton
-                    disabled={action.disabled}
-                    iconType={action.iconType}
-                    label={action.label}
-                    color={action.color}
-                    onClick={() => onClosePopover(action.onClick)}
-                    customDataTestSubj={customDataTestSubj}
-                  />
-                )) ||
-                  (action.type === AttachmentActionType.CUSTOM && (
-                    <Suspense fallback={<EuiLoadingSpinner />}>{action.render()}</Suspense>
-                  ))}
-              </span>
-            </EuiFlexItem>
-          ))}
+          {actionItems}
         </EuiFlexGroup>
       </EuiPopover>
     );

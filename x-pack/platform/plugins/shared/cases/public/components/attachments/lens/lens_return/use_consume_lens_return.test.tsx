@@ -109,7 +109,9 @@ describe('useConsumeLensReturn', () => {
     expect(getIncomingEmbeddablePackage).toHaveBeenCalledWith('securitySolutionUI', false);
     expect(getIncomingEmbeddablePackage).toHaveBeenCalledWith('securitySolutionUI', true);
     expect(storageRemove).toHaveBeenCalledWith(PENDING_LENS_ATTACH_STORAGE_ID);
-    expect(addSuccess).toHaveBeenCalled();
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: 'Added visualization Top hosts to case',
+    });
     expect(refreshCaseViewPage).toHaveBeenCalled();
   });
 });

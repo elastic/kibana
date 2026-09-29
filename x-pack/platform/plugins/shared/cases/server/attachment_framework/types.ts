@@ -7,43 +7,11 @@
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type { z } from '@kbn/zod/v4';
-import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
 import type {
   UnifiedAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../common/types/domain/attachment/v2';
-
-export type PersistableStateAttachmentState = Pick<
-  PersistableStateAttachmentPayload,
-  'persistableStateAttachmentTypeId' | 'persistableStateAttachmentState'
->;
-
-export interface PersistableStateAttachmentType
-  extends Omit<
-    PersistableState<PersistableStateAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
-  id: string;
-}
-
-export interface PersistableStateAttachmentTypeSetup
-  extends Omit<
-    PersistableStateDefinition<PersistableStateAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
-  id: string;
-}
-
-export interface ExternalReferenceAttachmentType {
-  id: string;
-  /**
-   * A function to validate data stored with the attachment type. This function should throw an error
-   * if the data is not in the form it expects. For **unified reference** types registered on the
-   * unified registry, the full `UnifiedReferenceAttachmentPayload` is passed (not metadata alone).
-   */
-  schemaValidator?: (data: unknown) => void;
-}
 
 /**
  * Unified attachment state for server-side persistence
@@ -55,32 +23,58 @@ export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'me
     | Pick<UnifiedValueAttachmentPayload, 'data'>
   );
 
+export interface WorkflowAttachmentTarget {
+  id: string;
+  index?: string;
+}
+
+export interface WorkflowAttachmentResolverContext {
+  attachment: UnifiedAttachmentState;
+  savedObjectId: string;
+}
+
+export interface WorkflowAttachmentValidationContext {
+  targets: readonly WorkflowAttachmentTarget[];
+  inputs: Record<string, unknown>;
+}
+
+/** Enables an attachment type as a workflow origin with optional target resolution and validation. */
+export interface AttachmentWorkflowDefinition {
+  /**
+   * Resolves the attachment targets that may be named by a workflow origin.
+   * Reference attachments default to their `attachmentId`; value attachments default to
+   * their Cases attachment saved-object id.
+   */
+  getTargets?: (context: WorkflowAttachmentResolverContext) => readonly WorkflowAttachmentTarget[];
+  /** Applies attachment-specific input/target alignment after Cases membership checks. */
+  validateTargets?: (context: WorkflowAttachmentValidationContext) => void;
+}
+
 export interface UnifiedAttachmentType
-  extends ExternalReferenceAttachmentType,
-    Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
-  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
-  schema?: z.ZodType;
+  extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
+  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
   /**
    * Schema exposed to workflow authors. When unset, workflow steps fall back to
    * `schema` if it is a Zod object; when `false`, the type is excluded.
    */
   workflowSchema?: z.ZodObject | false;
+  workflow?: AttachmentWorkflowDefinition;
 }
 
 export interface UnifiedAttachmentTypeSetup
-  extends ExternalReferenceAttachmentType,
-    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
-  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
-  schema?: z.ZodType;
+  extends Omit<
+    PersistableStateDefinition<UnifiedAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
+  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
   workflowSchema?: z.ZodObject | false;
+  workflow?: AttachmentWorkflowDefinition;
 }
 
 export interface AttachmentFramework {
-  registerExternalReference: (
-    externalReferenceAttachmentType: ExternalReferenceAttachmentType
-  ) => void;
-  registerPersistableState: (
-    persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
-  ) => void;
-  registerUnified: (unifiedAttachmentType: UnifiedAttachmentTypeSetup) => void;
+  registerAttachment: (attachmentType: UnifiedAttachmentTypeSetup) => void;
 }

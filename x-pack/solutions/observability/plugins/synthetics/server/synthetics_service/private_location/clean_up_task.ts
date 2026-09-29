@@ -53,6 +53,7 @@ export const registerCleanUpTask = (
 
                 const { items } = await fleet.packagePolicyService.list(soClient, {
                   kuery: getFilterForTestNowRun(),
+                  fields: ['name', 'created_at'],
                 });
 
                 const allItems = items.map((item) => {

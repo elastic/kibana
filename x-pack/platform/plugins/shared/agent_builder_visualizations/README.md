@@ -8,15 +8,16 @@ the browser-side attachment UI that renders them inline in a conversation.
 ## What it registers
 
 On `setup` the plugin registers four things with `agentBuilder` (and
-`agentContextLayer`):
+`agentBuilderSml`):
 
 - **`visualization` attachment type** (`server/attachment_types`) — validation of
   the unified attachment payload, by-reference resolution from Lens saved
   objects, and the agent-facing text representation.
 - **`create_visualization` tool** (`server/tools/create_visualization`) — creates
   or updates a visualization from a natural-language query. The caller (agent)
-  picks the renderer via the `renderer` parameter (`lens` by default, `vega` for
-  Vega-Lite); edits to an existing attachment keep its renderer.
+  says what to build via the `target` discriminated union (`lens`, `vega`,
+  `custom_content`, or `attachment` to update an existing one); edits keep the
+  attachment's renderer.
 - **`visualization-creation` skill** (`server/skills`) — guidance the agent
   follows when calling the tool, including when to prefer Vega over Lens.
 - **`visualization` SML type** (`server/sml_types`) — the screen/context layer

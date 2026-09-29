@@ -15,8 +15,7 @@ import { QueryClient } from '@kbn/react-query';
 import { createEditTagsAction } from './edit_tags';
 import * as flyout from '../components/tags_flyout';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -59,14 +58,14 @@ describe('createEditTagsAction', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  it('execute: opens flyout, POSTs deduped TAG items with tags array, toasts, calls onSuccess', async () => {
+  it('execute: opens flyout, POSTs one TAG item per episode with tags array, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha', 'beta']);
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
 
     await createEditTagsAction(deps).execute({
-      // Two episodes in the same group — only one TAG item should be posted
+      // Two episodes in the same group — both get tagged (episode-scoped)
       episodes: [
         makeEpisode({ 'episode.id': 'e1', group_hash: 'g1' }),
         makeEpisode({ 'episode.id': 'e2', group_hash: 'g1' }),
@@ -79,8 +78,9 @@ describe('createEditTagsAction', () => {
       spaces: deps.spaces,
       queryClient: deps.queryClient,
     });
-    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
-      { group_hash: 'g1', action_type: 'tag', tags: ['alpha', 'beta'] },
+    expect(bulk.bulkTagEpisodeActions).toHaveBeenCalledWith(deps.http, [
+      { episode_id: 'e1', tags: ['alpha', 'beta'] },
+      { episode_id: 'e2', tags: ['alpha', 'beta'] },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -89,7 +89,7 @@ describe('createEditTagsAction', () => {
   it('execute: passes last_tags into flyout when a single episode is selected', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
 
     await createEditTagsAction(deps).execute({
       episodes: [makeEpisode({ last_tags: ['existing', 'tags'] })],
@@ -107,10 +107,26 @@ describe('createEditTagsAction', () => {
     );
   });
 
+  it('execute: passes empty tags into flyout when multiple episodes are selected', async () => {
+    const deps = makeDeps();
+    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
+    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
+
+    await createEditTagsAction(deps).execute({
+      episodes: [
+        makeEpisode({ 'episode.id': 'e1', group_hash: 'g1', last_tags: ['foo', 'bar'] }),
+        makeEpisode({ 'episode.id': 'e2', group_hash: 'g2', last_tags: ['bar', 'baz'] }),
+      ],
+    });
+
+    const passedTags = (flyout.openTagsFlyout as jest.Mock).mock.calls[0][2] as string[];
+    expect(passedTags).toHaveLength(0);
+  });
+
   it('execute: error path calls notifications.toasts.addDanger', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockRejectedValue(new Error('network error'));
+    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
 
     await createEditTagsAction(deps).execute({ episodes: [makeEpisode()], onSuccess });

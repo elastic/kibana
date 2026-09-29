@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react';
 
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { updateProviders } from '../../../../timelines/store/actions';
 import { useNavigateToTimeline } from './use_navigate_to_timeline';
 import * as mock from './mock_data';
@@ -16,16 +15,17 @@ jest.mock('../../../../timelines/hooks/use_create_timeline', () => ({
   useCreateTimeline: () => jest.fn(),
 }));
 
-jest.mock('../../../../common/hooks/use_selector');
-(useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
-  defaultDataView: {
-    id: 'someId',
-  },
+jest.mock('../../../../data_view_manager/hooks/use_signal_index_name', () => ({
+  useSignalIndexName: () => 'mock-signal-index',
+}));
+
+jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns', () => ({
+  useSecurityDefaultPatterns: () => ({ id: 'someId', indexPatterns: [] }),
 }));
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,

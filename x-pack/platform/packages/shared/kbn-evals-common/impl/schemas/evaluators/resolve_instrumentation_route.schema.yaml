@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: Resolve Evals Trace Instrumentation Profiles API endpoint
+  version: '1'
+paths:
+  /internal/evals/traces/_resolve_instrumentation:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ResolveInstrumentation
+      description: Probes known instrumentation profiles for a trace
+      summary: Resolve trace instrumentation profiles
+      tags:
+        - Evals API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - trace_id
+              properties:
+                trace_id:
+                  type: string
+                  maxLength: 256
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - profiles
+                  - recommended_instrumentation
+                properties:
+                  profiles:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - profile
+                        - evidence
+                      properties:
+                        profile:
+                          type: string
+                          maxLength: 128
+                        evidence:
+                          type: object
+                          required:
+                            - user_query
+                            - agent_response
+                            - tool_calls
+                          properties:
+                            user_query:
+                              type: object
+                              required:
+                                - status
+                              properties:
+                                status:
+                                  type: string
+                                  enum:
+                                    - found
+                                    - not_found
+                                    - content_redacted
+                                field:
+                                  type: string
+                                  maxLength: 256
+                                sample:
+                                  type: string
+                                  maxLength: 512
+                            agent_response:
+                              type: object
+                              required:
+                                - status
+                              properties:
+                                status:
+                                  type: string
+                                  enum:
+                                    - found
+                                    - not_found
+                                    - content_redacted
+                                field:
+                                  type: string
+                                  maxLength: 256
+                                sample:
+                                  type: string
+                                  maxLength: 512
+                            tool_calls:
+                              type: object
+                              required:
+                                - status
+                              properties:
+                                status:
+                                  type: string
+                                  enum:
+                                    - found
+                                    - not_found
+                                    - content_redacted
+                                field:
+                                  type: string
+                                  maxLength: 256
+                                sample:
+                                  type: string
+                                  maxLength: 512
+                  recommended_instrumentation:
+                    type: object
+                    nullable: true
+                    required:
+                      - profile
+                    properties:
+                      profile:
+                        type: string
+                        maxLength: 128

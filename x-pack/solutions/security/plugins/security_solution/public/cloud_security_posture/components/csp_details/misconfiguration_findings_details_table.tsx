@@ -183,7 +183,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     entityId?: string;
     entityType?: string;
     /** Callback executed after expanding a misconfiguration finding. */
-    onShowFinding: (resourceId: string, ruleId: string) => void;
+    onShowFinding: (resourceId: string, ruleId: string, ruleName?: string) => void;
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -351,7 +351,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                   NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
                 );
 
-                onShowFinding(finding.resource.id, finding.rule.id);
+                onShowFinding(finding.resource.id, finding.rule.id, finding.rule.name);
               }}
             />
           </EuiToolTip>

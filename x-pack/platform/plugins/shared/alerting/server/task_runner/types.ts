@@ -26,6 +26,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -103,14 +104,35 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
    * to look at the raw `apiKey`/`uiamApiKey` fields again.
    */
   effectiveApiKey: string | null;
+  /**
+   * Id of the UIAM API key in `effectiveApiKey`, so the connector tasks the run enqueues record
+   * it and the API key invalidation task's in-use guard can find them. Undefined when the run
+   * did not resolve to the UIAM key.
+   */
+  uiamApiKeyId?: string;
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;
   version: string | undefined;
 }
 
+/**
+ * Rule task params after deserialization, with `spaceId` branded as {@link SpaceId}.
+ * The brand is applied once, at the trusted task-instance boundary, so it flows to
+ * the task runner, action schedulers and downstream consumers without per-call casts.
+ *
+ * Persisted task params are a loose bag (`consumer`, `adHocRunParamsId`, etc. are
+ * read ad hoc across the regular and ad-hoc runners), so the index signature is
+ * preserved; `alertId` and the branded `spaceId` are guaranteed.
+ */
+export type RuleTaskInstanceParams = ConcreteTaskInstance['params'] & {
+  alertId: string;
+  spaceId: SpaceId;
+};
+
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
+  params: RuleTaskInstanceParams;
 }
 
 // ActionScheduler
@@ -178,7 +200,7 @@ export interface RuleTypeRunnerContext {
   ruleId: string;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
-  spaceId: string;
+  spaceId: SpaceId;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
 }

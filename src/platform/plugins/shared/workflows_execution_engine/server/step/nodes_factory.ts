@@ -35,7 +35,6 @@ import type {
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
-  WorkflowGraph,
   WorkflowOutputGraphNode,
 } from '@kbn/workflows/graph';
 import {
@@ -51,7 +50,12 @@ import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
-import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
+import {
+  EnterForeachIterationNodeImpl,
+  EnterForeachNodeImpl,
+  ExitForeachIterationNodeImpl,
+  ExitForeachNodeImpl,
+} from './foreach_step';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
@@ -95,6 +99,7 @@ import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/st
 import type { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class NodesFactory {
@@ -102,7 +107,7 @@ export class NodesFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: WorkflowRuntimeGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
     private stepIoService: StepIoService
@@ -194,6 +199,15 @@ export class NodesFactory {
           stepLogger,
           this.stepIoService
         );
+      case 'enter-foreach-iteration':
+        return new EnterForeachIterationNodeImpl(
+          node,
+          this.workflowRuntime,
+          stepExecutionRuntime,
+          this.stepExecutionRuntimeFactory
+        );
+      case 'exit-foreach-iteration':
+        return new ExitForeachIterationNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'exit-foreach':
         return new ExitForeachNodeImpl(
           node as ExitForeachNode,

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
 import {
   type EuidSourceFields,
   GRAPH_ACTOR_EUID_SOURCE_FIELDS,
   TYPED_ENTITY_PREFIXES,
+  RELATIONSHIP_FIELDS_FORK_BATCH_SIZE,
 } from './constants';
 import {
   concatJsonObjectPropertyBool,
@@ -22,6 +23,7 @@ import {
   JSON_OBJECT_SEPARATOR,
   JSON_OBJECT_START,
   concatJsonObjectPropertyEsqlExprAsString,
+  concatJsonObjectPropertyEsqlExprAsStringArray,
   buildPinnedEsql,
 } from './utils';
 import type { EntityId, EntityRecord, RelationshipEsqlRow } from './types';
@@ -117,6 +119,7 @@ ${forkBranches}
           ${JSON_OBJECT_END}),
         ""
       ),
+      ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')},
       ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
@@ -217,86 +220,101 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
  * Queries for all relationship types for entities matching the provided entityIds.
  * Note: Relationships require the v2 entity store; returns an empty result if the
  * entities index does not exist.
+ *
+ * ENTITY_RELATIONSHIP_FIELDS is batched into groups of at most
+ * RELATIONSHIP_FIELDS_FORK_BATCH_SIZE (ES|QL FORK's branch limit) and each batch is issued as
+ * its own ES|QL query; the batches run in parallel and their records are concatenated. Each
+ * batch independently pre-aggregates via STATS BY (see buildRelationshipsEsqlQuery), so this
+ * merge stays a strict refinement of the single-query grouping — a batch only narrows which
+ * relationship fields are grouped together, and downstream regroupRelationships is unaffected.
+ * A failure in any batch rejects the whole call, matching the existing all-or-nothing semantics.
  */
 export const fetchEntityRelationships = async ({
   esClient,
   logger,
   entityIds,
-  spaceId,
-  entityStoreIndexExists,
+  entityStoreIndexName,
   pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
-  spaceId: string;
-  entityStoreIndexExists: boolean;
+  entityStoreIndexName: string | null;
   pinnedIds?: string[];
 }): Promise<EsqlToRecords<RelationshipEsqlRow>> => {
-  if (!entityStoreIndexExists) {
+  if (entityStoreIndexName == null) {
     return { columns: [], records: [] };
   }
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
+  const indexName = entityStoreIndexName;
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
-  const query = buildRelationshipsEsqlQuery({
-    indexName,
-    relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
-    entityIds,
-    pinnedIds,
-  });
   const filter = buildRelationshipDslFilter(entityIds);
   const params = [
     ...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id })),
     ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
   ];
 
-  logger.trace(`Relationships ES|QL query: ${query}`);
-  logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
+  const fieldBatches = chunk(ENTITY_RELATIONSHIP_FIELDS, RELATIONSHIP_FIELDS_FORK_BATCH_SIZE);
 
-  const response = await esClient.asCurrentUser.helpers
-    .esql({
-      columnar: false,
-      filter,
-      query,
-      params,
+  const responses = await Promise.all(
+    fieldBatches.map((relationshipFields) => {
+      const query = buildRelationshipsEsqlQuery({
+        indexName,
+        relationshipFields,
+        entityIds,
+        pinnedIds,
+      });
+
+      logger.trace(`Relationships ES|QL query: ${query}`);
+      logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
+
+      return esClient.asCurrentUser.helpers
+        .esql({
+          columnar: false,
+          filter,
+          query,
+          params,
+        })
+        .toRecords<RelationshipEsqlRow>();
     })
-    .toRecords<RelationshipEsqlRow>();
+  );
 
-  logger.trace(`Fetched [${response.records.length}] relationship records`);
+  const records = responses.flatMap((response) => response.records);
+  logger.trace(`Fetched [${records.length}] relationship records`);
 
-  return response;
+  return { columns: responses[0]?.columns ?? [], records };
 };
 
 export const fetchEntities = async ({
   esClient,
   logger,
   entityIds,
-  spaceId,
-  entityStoreIndexExists,
+  entityStoreIndexName,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
-  spaceId: string;
-  entityStoreIndexExists: boolean;
+  entityStoreIndexName: string | null;
 }): Promise<EsqlToRecords<EntityRecord>> => {
-  if (entityIds.length === 0 || !entityStoreIndexExists) {
+  if (entityIds.length === 0 || entityStoreIndexName == null) {
     return { columns: [], records: [] };
   }
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
+  const indexName = entityStoreIndexName;
 
   logger.trace(`Fetching entities from index [${indexName}] for ${entityIds.length} entities`);
   const esqlQuery = `SET unmapped_fields="nullify";
     FROM ${indexName}
     | WHERE entity.id IN (${entityIds.map((_, idx) => `?entityId${idx}`).join(',')})
-    | INLINE STATS __host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
     | EVAL id = entity.id
     | EVAL name = entity.name
     | EVAL type = entity.type
     | EVAL sub_type = entity.sub_type
+    // Kept as columns (not only inside docData) because the node-level riskScore range and
+    // assetCriticality distribution are computed in TypeScript from EntityRecord.
+    | EVAL riskScore = \`entity.risk.calculated_score_norm\`
+    | EVAL assetCriticality = asset.criticality
     | EVAL docData = CONCAT(${JSON_OBJECT_START},
       ${concatJsonObjectPropertyEsqlExprAsString('id', 'entity.id')},
       ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
@@ -316,14 +334,15 @@ export const fetchEntities = async ({
         CASE(
           host.ip IS NOT NULL,
           CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-            "\\"ip\\":[\\"", MV_CONCAT(__host_ip, "\\",\\""), "\\"]",
+            "\\"ip\\":[\\"", MV_CONCAT(TO_STRING(host.ip), "\\",\\""), "\\"]",
             ${JSON_OBJECT_END}),
           ""
         ),
+        ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')},
         ${JSON_OBJECT_SEPARATOR}, ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)},
       ${JSON_OBJECT_END},
     ${JSON_OBJECT_END})
-    | KEEP id, name, type, sub_type, docData`;
+    | KEEP id, name, type, sub_type, docData, riskScore, assetCriticality`;
   logger.trace(`Entities ES|QL query: ${esqlQuery}`);
 
   const response = await esClient.asCurrentUser.helpers

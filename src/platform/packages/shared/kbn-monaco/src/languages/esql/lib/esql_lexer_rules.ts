@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlCommandNames } from '@kbn/esql-language/src/commands/definitions/generated/commands/commands';
+import { esqlCommandRegistry } from '@kbn/esql-language';
 import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import type { monaco } from '../../../monaco_imports';
 
@@ -20,7 +20,11 @@ const brackets = [
 // to ensure single-quoted and triple-quoted ES|QL strings in Console share the same highlighting.
 const CLAUSE_KEYWORDS = ['by', 'on', 'with', 'metadata'];
 
-export const keywords = [...Object.values(EsqlCommandNames), ...CLAUSE_KEYWORDS];
+// The command registry is the source of truth for which commands Kibana supports (it's what
+// drives validation and autocomplete), so it's used here too. The generated `EsqlCommandNames`
+// enum is derived from Elasticsearch definitions and omits source commands (e.g. FROM, ROW,
+// SHOW, TS, PROMQL) plus a few others, which used to leave them unhighlighted.
+export const keywords = [...esqlCommandRegistry.getAllCommandNames(), ...CLAUSE_KEYWORDS];
 
 export const builtinFunctions = esqlFunctionNames;
 

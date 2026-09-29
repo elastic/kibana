@@ -18,14 +18,37 @@ import type {
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { removeAttachmentById } from './remove_attachment_by_id';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
+import { ConversationStreamService } from '../../../services/events';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { AppLeaveContext } from '../app_leave_context';
+import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
+import { RedirectLoading } from '../../components/redirects/redirect_loading';
 
-const noopOnAppLeave = () => {};
+/**
+ * Pins restricted (non-`manageAgents`) users to their space's default agent.
+ */
+export const PinnedConversationProvider: React.FC<
+  React.PropsWithChildren<{ baseValue: NonNullable<React.ContextType<typeof ConversationContext>> }>
+> = ({ baseValue, children }) => {
+  const { effectiveDefaultAgentId, isRestricted, isReady } = useEffectiveSpaceDefaultAgent();
+  const value = useMemo(
+    () =>
+      isRestricted && effectiveDefaultAgentId
+        ? { ...baseValue, agentId: effectiveDefaultAgentId }
+        : baseValue,
+    [baseValue, isRestricted, effectiveDefaultAgentId]
+  );
+  return (
+    <ConversationContext.Provider value={value}>
+      <ConversationChangeNotifier />
+      {isReady ? children : <RedirectLoading />}
+    </ConversationContext.Provider>
+  );
+};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
@@ -52,12 +75,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
           })),
+        removeAttachmentById: (attachmentId) =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            attachments: prevProps.attachments
+              ? removeAttachmentById(prevProps.attachments, attachmentId)
+              : prevProps.attachments,
+          })),
       });
     }
   }, [onRegisterCallbacks]);
 
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
+  const conversationStreamService = useMemo(
+    () => new ConversationStreamService(services.eventsService),
+    [services.eventsService]
+  );
 
   const kibanaServices = useMemo(
     () => ({
@@ -221,13 +255,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       greetingMessage: currentProps.greetingMessage,
+      onSubmit: currentProps.onSubmit,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
@@ -245,6 +279,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.greetingMessage,
+      currentProps.onSubmit,
       currentProps.browserApiTools,
       currentProps.attachments,
       upsertAttachments,
@@ -262,14 +297,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
-            <AppLeaveContext.Provider value={noopOnAppLeave}>
-              <StreamingProvider>
-                <ConversationContext.Provider value={conversationContextValue}>
-                  <ConversationChangeNotifier />
-                  {children}
-                </ConversationContext.Provider>
-              </StreamingProvider>
-            </AppLeaveContext.Provider>
+            <StreamingProvider conversationStreamService={conversationStreamService}>
+              <PinnedConversationProvider baseValue={conversationContextValue}>
+                {children}
+              </PinnedConversationProvider>
+            </StreamingProvider>
           </AgentBuilderServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>
