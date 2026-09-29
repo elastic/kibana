@@ -111,6 +111,9 @@ const eventsSearchRoute = createServerRoute({
       search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+      topology_feature_id: z
+        .union([z.string().max(255), z.array(z.string().max(255)).max(50)])
+        .optional(),
     }),
   }),
   handler: async ({
@@ -131,6 +134,7 @@ const eventsSearchRoute = createServerRoute({
       from,
       to,
       event_id: eventId,
+      topology_feature_id: topologyFeatureId,
       ...rest
     } = params.query ?? {};
 
@@ -142,6 +146,7 @@ const eventsSearchRoute = createServerRoute({
       status: toArray(status),
       stream: toArray(stream),
       severity: toArray(severity),
+      topologyFeatureIds: toArray(topologyFeatureId),
       search: search || undefined,
       ...(eventId ? { eventIds: [eventId] } : {}),
     });

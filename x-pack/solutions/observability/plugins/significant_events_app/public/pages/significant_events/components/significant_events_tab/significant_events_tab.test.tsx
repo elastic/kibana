@@ -103,6 +103,17 @@ jest.mock('../../../../hooks/use_time_range_update', () => ({
 jest.mock('../../hooks/use_fetch_streams', () => ({
   useFetchStreams: jest.fn(() => ({ data: { streams: [] } })),
 }));
+jest.mock('../../../../hooks/use_fetch_features', () => ({
+  useFetchFeatures: jest.fn(() => ({
+    data: {
+      features: [
+        { id: 'svc-checkout', type: 'entity', subtype: 'service', title: 'checkout' },
+        { id: 'svc-excluded', type: 'entity', subtype: 'service', excluded: true },
+        { id: 'dep-redis', type: 'dependency', subtype: 'cache', title: 'redis' },
+      ],
+    },
+  })),
+}));
 jest.mock('../../context/significant_events_page_context', () => ({
   useSignificantEventsPageContext: jest.fn(() => ({
     isRunning: false,
@@ -120,7 +131,28 @@ jest.mock('../streams_view/find_significant_events_button', () => ({
   FindSignificantEventsButton: () => null,
 }));
 jest.mock('./filter_popover', () => ({
-  FilterPopover: () => null,
+  // Renders one button per filter that selects every option, so tests can drive onChange.
+  FilterPopover: ({
+    label,
+    options,
+    onChange,
+  }: {
+    label: string;
+    options: Array<{ key?: string; label: string; checked?: 'on' }>;
+    onChange: (opts: Array<{ key?: string; label: string; checked?: 'on' }>) => void;
+  }) => (
+    <>
+      <button
+        type="button"
+        aria-label={`filter-${label}`}
+        data-test-subj={`filterPopover-${label}`}
+        onClick={() => onChange(options.map((o) => ({ ...o, checked: 'on' as const })))}
+      />
+      <span data-test-subj={`filterPopoverOptions-${label}`}>
+        {options.map((o) => o.label).join(',')}
+      </span>
+    </>
+  ),
 }));
 
 const event: SignificantEventResponse = {
@@ -250,6 +282,7 @@ describe('selectedEvent deep link', () => {
     statusFilter: ['open'],
     severityFilter: ['80-critical', '60-high'],
     streamFilter: [],
+    serviceFilter: [],
     setFilters: jest.fn(),
     resetFilters: jest.fn(),
     openEvent: jest.fn(),
@@ -392,7 +425,12 @@ describe('selectedEvent deep link', () => {
 
     // Adaptation writes the event's own properties to the URL without dropping the deep link
     expect(defaultUrlState.setFilters).toHaveBeenCalledWith(
-      { status: [event.status], severity: [event.severity], stream: event.stream_names },
+      {
+        status: [event.status],
+        severity: [event.severity],
+        stream: event.stream_names,
+        service: [],
+      },
       { keepSelectedEvent: true }
     );
   });
@@ -405,6 +443,7 @@ describe('selectedEvent deep link', () => {
       statusFilter: ['closed'],
       severityFilter: ['20-low'],
       streamFilter: ['logs.test'],
+      serviceFilter: ['svc-checkout'],
     });
 
     render(<SignificantEventsTab />);
@@ -412,6 +451,7 @@ describe('selectedEvent deep link', () => {
     expect(lastFetchArgs().status).toEqual(['closed']);
     expect(lastFetchArgs().severity).toEqual(['20-low']);
     expect(lastFetchArgs().stream).toEqual(['logs.test']);
+    expect(lastFetchArgs().topologyFeatureIds).toEqual(['svc-checkout']);
     expect(screen.getByTestId('significantEventsAppSignificantEventsTabButton')).toBeEnabled();
   });
 
@@ -425,6 +465,26 @@ describe('selectedEvent deep link', () => {
     render(<SignificantEventsTab />);
 
     expect(screen.getByTestId('significantEventsAppSignificantEventsTabButton')).toBeDisabled();
+  });
+
+  it('offers only active service KIs and writes the selection to the URL', () => {
+    mockUseSignificantEventsUrlState.mockReturnValue({
+      ...defaultUrlState,
+      selectedEventId: undefined,
+      openEventId: undefined,
+    });
+
+    render(<SignificantEventsTab />);
+
+    const serviceOptions = screen.getByTestId('filterPopoverOptions-Service');
+    expect(serviceOptions).toHaveTextContent('checkout');
+    expect(serviceOptions).not.toHaveTextContent('redis');
+    expect(serviceOptions).not.toHaveTextContent('svc-excluded');
+    expect(lastFetchArgs().topologyFeatureIds).toBeUndefined();
+
+    fireEvent.click(screen.getByTestId('filterPopover-Service'));
+
+    expect(defaultUrlState.setFilters).toHaveBeenCalledWith({ service: ['svc-checkout'] });
   });
 
   it('adapts the date range to the linked event lineage window', () => {
