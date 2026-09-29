@@ -322,10 +322,21 @@ export class WorkersService {
         // Attach-then-enable: the Worker only fires from rules carrying its action, so enabling
         // without attaching produces a Worker that never runs. Preflight and attachment-service
         // resolution already ran above, before anything was written.
-        // A failed bulk edit leaves the Worker off, not enabled-but-unattached.
+        // A failed bulk edit leaves the Worker off, not enabled-but-unattached: attach runs in
+        // passes (see alert_triage_rule_attachments.ts), so a later pass can throw after an
+        // earlier one already attached some rules. Roll those back on failure — best-effort, so
+        // a failed rollback does not mask the original error — rather than leave rules carrying
+        // the action while the Worker itself stays (or is reported) disabled.
         await attachAlertTriageWorkerToAllRules(alertTriageAttachmentService).catch(
-          (err: Error) => {
+          async (err: Error) => {
             this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+            await detachAlertTriageWorkerFromAllRules(alertTriageAttachmentService).catch(
+              (rollbackErr: Error) => {
+                this.logger.error(
+                  `Alert Triage Worker: rollback detach after failed attach also failed: ${rollbackErr.message}`
+                );
+              }
+            );
             throw err;
           }
         );

@@ -982,6 +982,51 @@ describe('WorkersService', () => {
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
+    it('attach fails partway through: rolls back the rules a prior pass already attached', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['r1', 'r2'], pageSize: 1 });
+      const realUpdateRuleAttachments = attachment.updateRuleAttachments.getMockImplementation();
+      // Pass 1 (attach r1) succeeds for real; pass 2 (attach r2) fails.
+      attachment.updateRuleAttachments
+        .mockImplementationOnce(realUpdateRuleAttachments!)
+        .mockRejectedValueOnce(new Error('bulk edit failed on pass 2'));
+      const { service } = makeService(harness, attachment);
+
+      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
+        'bulk edit failed on pass 2'
+      );
+
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      // The compensating rollback detaches r1, the rule the failed pass's predecessor attached,
+      // so no rule is left carrying the action while the Worker is reported disabled.
+      expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
+        attachRuleIds: [],
+        detachRuleIds: ['r1'],
+      });
+      expect(
+        (await attachment.getRuleAttachmentSelection({ search: '', attachmentFilter: 'attached' }))
+          .attachedRuleIds
+      ).toEqual([]);
+    });
+
+    it('attach fails and the rollback detach also fails: original attach error still surfaces', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['r1', 'r2'], pageSize: 1 });
+      const realUpdateRuleAttachments = attachment.updateRuleAttachments.getMockImplementation();
+      // Pass 1 (attach r1) succeeds for real, so there is something to roll back; pass 2
+      // (attach r2) fails, and the compensating rollback detach fails too.
+      attachment.updateRuleAttachments
+        .mockImplementationOnce(realUpdateRuleAttachments!)
+        .mockRejectedValueOnce(new Error('bulk edit failed on pass 2'))
+        .mockRejectedValueOnce(new Error('rollback also failed'));
+      const { service } = makeService(harness, attachment);
+
+      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
+        'bulk edit failed on pass 2'
+      );
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
     it('disable: detaches all attached rules after disabling the Worker', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
