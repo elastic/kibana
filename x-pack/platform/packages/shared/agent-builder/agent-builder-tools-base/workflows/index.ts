@@ -19,11 +19,6 @@ export {
 } from './execute_workflow';
 export type { WorkflowExecutionResult } from './execute_workflow_types';
 export {
-  startWorkflow,
-  type StartWorkflowParams,
-  type StartWorkflowResult,
-} from './start_workflow';
-export {
   hasWorkflowReadPrivilege,
   hasWorkflowExecutionReadPrivilege,
   hasWorkflowExecutePrivilege,
