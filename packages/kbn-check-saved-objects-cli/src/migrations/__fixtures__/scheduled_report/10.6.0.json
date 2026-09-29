@@ -52,9 +52,7 @@
           "tzid": "UTC"
         }
       },
-      "title": "[Logs] Web Traffic",
-      "createdById": "realm:[\"native\",\"default_native\",\"elastic\"]",
-      "createdByApiKeyId": "FcKZQ5wBzbyj5dh9Iz13"
+      "title": "[Logs] Web Traffic"
     }
   ]
 }
