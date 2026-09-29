@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { withTimeout } from './with_timeout';
@@ -18,9 +18,11 @@ const HYDRATE_TIMEOUT_MS = 20_000;
 
 export const decisionTreeHydrateStepDefinition = ({
   getSandboxStart,
+  analytics,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
+  analytics: AnalyticsServiceSetup;
   logger: Logger;
 }) =>
   createServerStepDefinition({
@@ -73,6 +75,8 @@ export const decisionTreeHydrateStepDefinition = ({
             spaceId,
             prompt,
             signal,
+            analytics,
+            conversationId,
           }),
         HYDRATE_TIMEOUT_MS,
         `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`

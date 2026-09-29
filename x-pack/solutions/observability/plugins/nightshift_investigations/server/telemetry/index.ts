@@ -17,3 +17,16 @@ export {
   type AppliedCortexEdit,
   type CortexTelemetry,
 } from './cortex_telemetry';
+export {
+  NIGHTSHIFT_DECISION_TREES_LOADED_EVENT_TYPE,
+  NIGHTSHIFT_DECISION_TREE_WRITTEN_EVENT_TYPE,
+  type DecisionTreeSelection,
+  type DecisionTreeWriteAction,
+  type DecisionTreesLoadedProps,
+  type DecisionTreeWrittenProps,
+} from './decision_tree_events';
+export {
+  createDecisionTreeTelemetry,
+  registerDecisionTreeTelemetryEvents,
+  type DecisionTreeTelemetry,
+} from './decision_tree_telemetry';

@@ -30,6 +30,7 @@ import {
 import type { DecisionTreeView, LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { DecisionTreeDetail, DecisionTreeStore } from '../../decision_trees/store';
+import type { DecisionTreeTelemetry, DecisionTreeWriteAction } from '../../telemetry';
 import {
   getConversationId,
   getScopedConversationId,
@@ -81,6 +82,7 @@ interface SubmissionOutcome {
   file_path: string;
   status: 'persisted' | 'rejected';
   detail: string;
+  action: DecisionTreeWriteAction;
 }
 
 /**
@@ -95,6 +97,7 @@ export const createSubmitOptimizerResultTool = ({
   getStore,
   getSpaceId,
   getUsername,
+  getTelemetry,
   peekLearnings,
   drainLearnings,
   logger,
@@ -104,6 +107,8 @@ export const createSubmitOptimizerResultTool = ({
   getSpaceId: (request: KibanaRequest) => string;
   /** Resolves the authenticated user, recorded as the version author. */
   getUsername?: (request: KibanaRequest) => string | undefined;
+  /** Binds the run's ids to the write events emitted for this submit. */
+  getTelemetry?: (conversationId?: string) => DecisionTreeTelemetry;
   /** Reads the learnings this conversation recorded this turn without clearing them. */
   peekLearnings?: (conversationId: string) => LearningRecord[];
   /** Takes and clears the learnings this conversation recorded this turn. */
@@ -156,6 +161,7 @@ export const createSubmitOptimizerResultTool = ({
     }
 
     const store = getStore(context.esClient.asCurrentUser, context.request);
+    const telemetry = getTelemetry?.(rawConversationId);
     const author = getUsername?.(context.request) || 'system';
     // Peek until every submission is accepted. Draining first would drop this turn's learnings
     // when the agent has to fix a rejected file and call submit again.
@@ -170,6 +176,9 @@ export const createSubmitOptimizerResultTool = ({
         learnings: turnLearnings,
       });
       drainLearnings?.(conversationId);
+      // A tree that had no learnings to attach is not a write, so only the trees actually
+      // committed are reported.
+      telemetry?.reportWritten(attached.map((): DecisionTreeWriteAction => 'learnings_only'));
       return {
         results: [
           {
@@ -213,12 +222,15 @@ export const createSubmitOptimizerResultTool = ({
           file_path: submission.file_path,
           status: 'rejected',
           detail,
+          action: 'rejected',
         });
       }
     }
 
     const rejected = outcomes.filter((outcome) => outcome.status === 'rejected');
     const persisted = outcomes.filter((outcome) => outcome.status === 'persisted');
+
+    telemetry?.reportWritten(outcomes.map((outcome) => outcome.action));
 
     if (rejected.length === 0) {
       drainLearnings?.(conversationId);
@@ -348,6 +360,14 @@ const persistSubmission = async ({
     evidenceGathererMetadata: metadata,
   });
 
+  // A tree that did not exist before is a create; an existing one is a reinforce when this edit
+  // marked a new causal edge, otherwise a plain update.
+  const action: DecisionTreeWriteAction = !existing
+    ? 'create'
+    : reinforced
+    ? 'reinforce'
+    : 'update';
+
   return {
     tree_id: treeId,
     file_path: filePath,
@@ -355,6 +375,7 @@ const persistSubmission = async ({
     detail: `${newTree.nodes.length} nodes, ${newTree.edges.length} edges${
       reinforced ? ', causal path marked' : ''
     }`,
+    action,
   };
 };
 
