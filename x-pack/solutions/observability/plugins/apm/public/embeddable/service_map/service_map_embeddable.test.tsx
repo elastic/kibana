@@ -28,7 +28,7 @@ jest.mock('../../components/app/service_map/graph', () => ({
         {props.fullMapHref ? <a href={props.fullMapHref as string}>View in Service map</a> : null}
         <button data-test-subj="serviceMapFitViewButton">Fit view</button>
         {/* Mirror real component: click/drag controls are only active when isInteractive=true */}
-        {props.isInteractive && (
+        {Boolean(props.isInteractive) && (
           <div data-test-subj="serviceMapInteractionControls">Interaction controls</div>
         )}
       </>
