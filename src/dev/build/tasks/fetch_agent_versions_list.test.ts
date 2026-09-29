@@ -45,7 +45,7 @@ describe('FetchAgentVersionsList', () => {
     };
 
     mockedFetch.mockReset();
-    (mockedBuild.resolvePath as Mock<any>).mockReset();
+    (mockedBuild.resolvePath as Mock<(...args: any[]) => any>).mockReset();
     mockedWrite.mockReset();
   });
 

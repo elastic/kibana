@@ -6356,9 +6356,6 @@ importers:
       axe-core:
         specifier: 4.13.0
         version: 4.13.0
-      babel-jest:
-        specifier: 29.7.0
-        version: 29.7.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
       babel-loader:
         specifier: 9.2.1
         version: 9.2.1(@babel/core@7.29.7(supports-color@10.2.2))(webpack@5.96.1)

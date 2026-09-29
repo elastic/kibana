@@ -13,6 +13,9 @@ export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 // Keep narrow: global test harness, transforms, CI selection.
 export const CRITICAL_FILES_JEST_UNIT_TESTS = [
   'scripts/jest.js',
+  'scripts/vitest.js',
+  'patches/**/*',
+  'pnpm-workspace.yaml',
   'scripts/jest_all.js',
   'package.json',
   'pnpm-lock.yaml',

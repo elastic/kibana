@@ -121,14 +121,17 @@ describe('discoverJestUnitConfigs', () => {
     mockKibanaDir = originalCwd;
   });
 
-  it('discovers configs from the Kibana directory, not the process cwd', () => {
+  it('discovers Vitest unit configs from the Kibana directory, not the process cwd', () => {
     Fs.mkdirSync(Path.join(repoRoot, 'pkg/has_tests'), { recursive: true });
-    Fs.writeFileSync(Path.join(repoRoot, 'pkg/has_tests/jest.config.js'), 'module.exports = {};');
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/has_tests/vitest.config.js'), 'module.exports = {};');
     Fs.writeFileSync(Path.join(repoRoot, 'pkg/has_tests/foo.test.ts'), '');
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/legacy'), { recursive: true });
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/legacy/jest.config.js'), 'module.exports = {};');
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/legacy/foo.test.ts'), '');
 
     process.chdir(otherCwd);
 
-    expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/has_tests/jest.config.js']);
+    expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/has_tests/vitest.config.js']);
   });
 
   it('discovers CommonJS configs', () => {

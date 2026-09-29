@@ -1933,7 +1933,6 @@
         "@jest/types",
         "@swc/jest",
         "@types/jest",
-        "babel-jest",
         "expect",
         "jest-canvas-mock",
         "jest-config",

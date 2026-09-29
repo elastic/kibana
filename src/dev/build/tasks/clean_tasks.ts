@@ -46,6 +46,7 @@ export const CleanPackageManagerRelatedFiles: Task = {
         build.resolvePath('pnpm-lock.yaml'),
         build.resolvePath('pnpm-workspace.yaml'),
         build.resolvePath('.npmrc'),
+        build.resolvePath('patches'),
         ...localDependencyFiles.map((path) => build.resolvePath(path)),
       ],
       log

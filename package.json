@@ -2146,7 +2146,6 @@
     "ajv-draft-04": "1.0.0",
     "autoprefixer": "10.4.7",
     "axe-core": "4.13.0",
-    "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
     "babel-plugin-add-module-exports": "1.0.4",
     "babel-plugin-require-context-hook": "1.0.0",

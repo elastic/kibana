@@ -28,6 +28,9 @@
     "@types/d3-color",
     // used by our FTR; knip can't trace this.
     "geckodriver",
+    // referenced by name as the testEnvironment of @kbn/test/jest_integration (via
+    // kbn-test/jest-preset.js); knip only traced it through the unit jest configs, now Vitest.
+    "jest-environment-jsdom",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
     // cypress-multi-reporters -> configFile -> reporterEnabled chain.
     "cypress-multi-reporters",

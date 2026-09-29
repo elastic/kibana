@@ -72,3 +72,5 @@ graphql
 oxlint-tsgolint
 bump-cli
 @oxlint/plugins
+vite
+vitest

@@ -11,7 +11,7 @@ import type { PluginPackage } from '@kbn/repo-packages';
 import { findUsedDependencies } from './find_used_dependencies';
 import { renderPnpmWorkspace } from './render_pnpm_workspace';
 import type { Task } from '../../lib';
-import { read, write } from '../../lib';
+import { copy, read, write } from '../../lib';
 
 export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
@@ -72,7 +72,13 @@ export const CreatePackageJson: Task = {
     // Reuse the repo's authored settings, minus the generated `packages:` block,
     // so the build dir is its own workspace root. Removed by CleanPackageManagerRelatedFiles.
     const rootWorkspace = await read(config.resolveFromRepo('pnpm-workspace.yaml'));
-    await write(build.resolvePath('pnpm-workspace.yaml'), renderPnpmWorkspace(rootWorkspace));
+    const { yaml, patchFiles } = renderPnpmWorkspace(rootWorkspace, (name) =>
+      Object.hasOwn(newPkg.dependencies, name)
+    );
+    await write(build.resolvePath('pnpm-workspace.yaml'), yaml);
+    for (const patchFile of patchFiles) {
+      await copy(config.resolveFromRepo(patchFile), build.resolvePath(patchFile));
+    }
   },
 };
 
