@@ -43,6 +43,15 @@ const createContext = (
 const getResultData = (result: unknown) =>
   (result as { results: Array<{ type: string; data: Record<string, unknown> }> }).results[0];
 
+const createToolWithMlClient = (mlClient: ReturnType<typeof createMlMock>) =>
+  createAdManageJobStateTool(
+    resolveMlCapabilities,
+    undefined,
+    undefined,
+    undefined,
+    () => mlClient as any
+  );
+
 describe('adManageJobStateTool', () => {
   it('has the correct ID and type', () => {
     expect(adManageJobStateTool.id).toBe(AD_MANAGE_JOB_STATE_TOOL_ID);
@@ -155,7 +164,7 @@ describe('adManageJobStateTool', () => {
     it('operation=await_batch_completion returns completed when the datafeed has stopped', async () => {
       const ml = createMlMock();
       const events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() };
-      const result = await adManageJobStateTool.handler(
+      const result = await createToolWithMlClient(ml).handler(
         {
           operation: 'await_batch_completion',
           job_id: 'my-job',
@@ -186,7 +195,7 @@ describe('adManageJobStateTool', () => {
         jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 50 } }],
       });
 
-      const result = await adManageJobStateTool.handler(
+      const result = await createToolWithMlClient(ml).handler(
         {
           operation: 'await_batch_completion',
           job_id: 'my-job',
@@ -218,7 +227,7 @@ describe('adManageJobStateTool', () => {
           jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 50 } }],
         });
 
-        const resultPromise = adManageJobStateTool.handler(
+        const resultPromise = createToolWithMlClient(ml).handler(
           {
             operation: 'await_batch_completion',
             job_id: 'my-job',
@@ -249,7 +258,7 @@ describe('adManageJobStateTool', () => {
         jobs: [{ state: 'failed', data_counts: {} }],
       });
 
-      const result = await adManageJobStateTool.handler(
+      const result = await createToolWithMlClient(ml).handler(
         { operation: 'await_batch_completion', job_id: 'my-job', max_wait_seconds: 0 },
         createContext(ml)
       );
@@ -267,7 +276,7 @@ describe('adManageJobStateTool', () => {
         jobs: [{ state: 'opened', data_counts: {} }],
       });
 
-      const result = await adManageJobStateTool.handler(
+      const result = await createToolWithMlClient(ml).handler(
         { operation: 'await_batch_completion', job_id: 'my-job', max_wait_seconds: 0 },
         createContext(ml)
       );

@@ -143,7 +143,8 @@ const resolveDateMathParam = (value: string): string => {
  * accidentally converting job IDs, entity values, or other strings that happen to
  * match the date-math pattern (e.g. `job_id_pattern: "now"`, `entity_value: "now-1d"`).
  */
-const TIME_PARAM_KEY_RE = /\b(?:time|date|start|end|from|to)\b/i;
+// `_` is a word character, so `\b` does not split snake_case keys such as `start_time`.
+const TIME_PARAM_KEY_RE = /(?:^|_)(?:time|date|start|end|from|to)(?:_|$)/i;
 
 /**
  * Converts Kibana-style relative date math (e.g. `now-2y`, `now-6M`, `now`) to
