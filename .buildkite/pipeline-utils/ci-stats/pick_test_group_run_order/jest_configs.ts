@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as globby from 'globby';
+import { globbySync } from 'globby';
 
 import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
 import { filterEmptyJestConfigs } from '../get_tests_from_config';
@@ -28,7 +28,7 @@ export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefi
 }
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {
-  return globby.sync(globsForSolutions(patterns, limitSolutions), {
+  return globbySync(globsForSolutions(patterns, limitSolutions), {
     cwd: getKibanaDir(),
     absolute: false,
     ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
