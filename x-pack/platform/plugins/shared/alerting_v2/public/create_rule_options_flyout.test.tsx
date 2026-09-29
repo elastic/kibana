@@ -80,8 +80,9 @@ jest.mock('./components/action_policy/form_flyout/create_action_policy_form_flyo
   CreateActionPolicyFormFlyout: mockCreateActionPolicyFormFlyout,
 }));
 
-jest.mock('./hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => true,
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./hooks/use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
 }));
 
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
@@ -123,6 +124,7 @@ describe('CreateRuleOptionsFlyout', () => {
     capturedComposeProps = {};
     pendingResolvers.length = 0;
     mockServices = createMockServices();
+    mockCreateActionPolicyDisabledReason = undefined;
   });
 
   describe('loading state', () => {
@@ -167,8 +169,8 @@ describe('CreateRuleOptionsFlyout', () => {
         (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyFormFlyout
       ).toBe(mockCreateActionPolicyFormFlyout);
       expect(
-        (capturedComposeProps.services as AlertingV2KibanaServices).canCreateActionPolicy
-      ).toBe(true);
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
+      ).toBeUndefined();
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {
@@ -225,6 +227,25 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.builderType).toBe('threshold');
       expect(capturedComposeProps.onClose).toBe(onClose);
+    });
+
+    it('passes why action policy creation is disabled to ComposeDiscoverFlyout', async () => {
+      mockCreateActionPolicyDisabledReason = 'You do not have permission to create action policies';
+      renderFlyout();
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('thresholdBtn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+      });
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
+      ).toBe('You do not have permission to create action policies');
     });
   });
 

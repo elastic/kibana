@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
@@ -39,8 +40,9 @@ jest.mock('./use_create_rule', () => ({
 jest.mock('./use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
 }));
-jest.mock('./use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => true,
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
 }));
 
 const mockNavigateToUrl = jest.fn();
@@ -147,6 +149,25 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('useComposeDiscoverFlyout — action policy creation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+    mockCreateActionPolicyDisabledReason = undefined;
+  });
+
+  it('passes why action policy creation is disabled to the rule form services', async () => {
+    mockCreateActionPolicyDisabledReason = 'You do not have permission to create action policies';
+
+    await renderAndOpenCreate();
+
+    expect(
+      (capturedFlyoutProps.services as RuleFormServices).createActionPolicyDisabledReason
+    ).toBe('You do not have permission to create action policies');
   });
 });
 
