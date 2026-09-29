@@ -6,14 +6,64 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import type { InvestigationImpact } from '@kbn/significant-events-schema';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import type {
+  InvestigationImpact,
+  InvestigationImpactEntity,
+} from '@kbn/significant-events-schema';
 import { EvidenceItem } from './evidence_list';
 import { EvidenceMarkdown } from './evidence_markdown';
 
 export interface ImpactSectionProps {
   impact: InvestigationImpact;
 }
+
+const EntityHeader: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <strong>{entity.name}</strong>
+      </EuiText>
+    </EuiFlexItem>
+    {entity.type && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{entity.type}</EuiBadge>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
+
+/** One impacted entity; its evidence is collapsed by default so the impact summary leads. */
+const ImpactEntity: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity }) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'investigationImpactEntity' });
+
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+      {entity.evidence ? (
+        <EuiAccordion
+          id={accordionId}
+          buttonContent={<EntityHeader entity={entity} />}
+          paddingSize="none"
+          data-test-subj="investigationOutputImpactEntityAccordion"
+        >
+          <EuiSpacer size="xs" />
+          <EvidenceItem evidence={entity.evidence} />
+        </EuiAccordion>
+      ) : (
+        <EntityHeader entity={entity} />
+      )}
+    </EuiPanel>
+  );
+};
 
 /**
  * What the investigation found was affected: the impact narrative and the evidence backing it,
@@ -52,26 +102,7 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({
                 grow={false}
                 data-test-subj="investigationOutputImpactEntity"
               >
-                <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <strong>{entity.name}</strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                    {entity.type && (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow">{entity.type}</EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                  {entity.evidence && (
-                    <>
-                      <EuiSpacer size="xs" />
-                      <EvidenceItem evidence={entity.evidence} />
-                    </>
-                  )}
-                </EuiPanel>
+                <ImpactEntity entity={entity} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

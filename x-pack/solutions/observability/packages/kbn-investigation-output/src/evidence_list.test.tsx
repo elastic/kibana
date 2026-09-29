@@ -87,10 +87,18 @@ describe('EvidenceList', () => {
     expect(legend).toHaveTextContent('all other repositories p99');
   });
 
-  it('renders no legend for a single-series chart', () => {
-    renderEvidence([chartEvidence]);
+  it('renders no series legend entry for a single-series chart', () => {
+    renderEvidence([{ ...chartEvidence, chart: { ...sampleChart, annotations: undefined } }]);
 
     expect(screen.queryByTestId('investigationEvidenceChartLegend')).not.toBeInTheDocument();
+  });
+
+  it('lists only the annotations in the legend of a single-series chart', () => {
+    renderEvidence([chartEvidence]);
+
+    const legend = screen.getByTestId('investigationEvidenceChartLegend');
+    expect(legend).toHaveTextContent('Deploy');
+    expect(legend).not.toHaveTextContent('orders-api');
   });
 
   it('renders an observation without a chart', () => {

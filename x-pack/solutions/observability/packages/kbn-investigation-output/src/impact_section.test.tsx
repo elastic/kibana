@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ImpactSection } from './impact_section';
 
@@ -62,6 +62,15 @@ describe('ImpactSection', () => {
     ).toBeInTheDocument();
     expect(screen.getAllByTestId('investigationOutputImpactEntity')).toHaveLength(2);
     expect(screen.getByText('service')).toBeInTheDocument();
-    expect(screen.getByText('Error rate peaked at 31%.')).toBeInTheDocument();
+
+    // Entity evidence starts collapsed and expands on click.
+    const toggle = screen.getByRole('button', { name: /checkout-service/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Error rate peaked at 31%.')).toBeVisible();
+
+    // An entity without evidence has nothing to expand.
+    expect(screen.queryByRole('button', { name: /payments-db/ })).not.toBeInTheDocument();
   });
 });

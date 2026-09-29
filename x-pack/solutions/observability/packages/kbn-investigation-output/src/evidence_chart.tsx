@@ -36,7 +36,9 @@ import { getTimeZone } from '@kbn/visualization-utils';
 import moment from 'moment-timezone';
 import type { EvidenceChart as EvidenceChartSpec } from '@kbn/significant-events-schema';
 
-const CHART_HEIGHT = 180;
+const CHART_HEIGHT = 200;
+/** Room above the plot for point annotation markers, which are drawn above its top edge. */
+const ANNOTATION_MARKER_MARGIN = 16;
 
 type YAxisUnit = NonNullable<EvidenceChartSpec['y_axis']['unit']>;
 
@@ -154,6 +156,22 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
     return { pointAnnotations: points, rangeAnnotations: ranges };
   }, [chart.annotations, isTime]);
 
+  const hasAnnotations = pointAnnotations.length > 0 || rangeAnnotations.length > 0;
+  // Point annotation markers are drawn above the plot, so reserve room for them there.
+  const hasPointAnnotations = pointAnnotations.length > 0;
+  const chartTheme = useMemo(
+    () =>
+      hasPointAnnotations
+        ? {
+            chartMargins: {
+              ...baseTheme.chartMargins,
+              top: baseTheme.chartMargins.top + ANNOTATION_MARKER_MARGIN,
+            },
+          }
+        : undefined,
+    [baseTheme.chartMargins, hasPointAnnotations]
+  );
+
   const xScaleType = isTime ? ScaleType.Time : ScaleType.Ordinal;
   const hasData = series.some(({ data }) => data.length > 0);
   const showLegend = series.length > 1;
@@ -170,7 +188,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
         <>
           <EuiSpacer size="xs" />
           <Chart size={{ height: CHART_HEIGHT }}>
-            <Settings baseTheme={baseTheme} showLegend={false} />
+            <Settings baseTheme={baseTheme} theme={chartTheme} showLegend={false} />
             <Axis
               id="x"
               position={Position.Bottom}
@@ -233,7 +251,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
               />
             )}
           </Chart>
-          {showLegend && (
+          {(showLegend || hasAnnotations) && (
             <EuiFlexGroup
               gutterSize="s"
               wrap
@@ -243,11 +261,48 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
               responsive={false}
               data-test-subj="investigationEvidenceChartLegend"
             >
-              {series.map(({ id, name }, index) => (
-                <EuiFlexItem key={id} grow={false}>
-                  <EuiHealth color={seriesColors[index % seriesColors.length]} textSize="xs">
-                    {name}
+              {showLegend &&
+                series.map(({ id, name }, index) => (
+                  <EuiFlexItem key={id} grow={false}>
+                    <EuiHealth color={seriesColors[index % seriesColors.length]} textSize="xs">
+                      {name}
+                    </EuiHealth>
+                  </EuiFlexItem>
+                ))}
+              {pointAnnotations.map(({ details }, index) => (
+                <EuiFlexItem
+                  key={`point-${index}`}
+                  grow={false}
+                  data-test-subj="investigationEvidenceChartAnnotation"
+                >
+                  <EuiHealth color={euiTheme.colors.accent} textSize="xs">
+                    {details}
                   </EuiHealth>
+                </EuiFlexItem>
+              ))}
+              {rangeAnnotations.map(({ details }, index) => (
+                <EuiFlexItem
+                  key={`range-${index}`}
+                  grow={false}
+                  data-test-subj="investigationEvidenceChartAnnotation"
+                >
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <span
+                        aria-hidden={true}
+                        css={css`
+                          display: inline-block;
+                          width: ${euiTheme.size.m};
+                          height: ${euiTheme.size.s};
+                          background: ${euiTheme.colors.accent};
+                          opacity: 0.3;
+                        `}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">{details}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

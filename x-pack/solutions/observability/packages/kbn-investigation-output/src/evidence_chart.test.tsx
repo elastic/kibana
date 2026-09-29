@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import moment from 'moment-timezone';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -28,6 +28,8 @@ jest.mock('@elastic/charts', () => {
     Axis: () => null,
     LineSeries: MockSeries,
     BarSeries: MockSeries,
+    LineAnnotation: () => null,
+    RectAnnotation: () => null,
   };
 });
 
@@ -87,5 +89,31 @@ describe('EvidenceChart', () => {
     expect(mockSeriesProps).toHaveBeenCalledWith(
       expect.objectContaining({ timeZone: moment.tz.guess(true) })
     );
+  });
+
+  it('lists point and range annotation labels below the chart', () => {
+    render(
+      <EvidenceChart
+        chart={{
+          ...chart,
+          annotations: [
+            { x: '2026-07-28T14:01:00Z', label: 'Deploy v2.3.1' },
+            { x: '2026-07-28T14:02:00Z', x_end: '2026-07-28T14:04:00Z', label: 'Pool exhausted' },
+          ],
+        }}
+      />
+    );
+
+    const annotations = screen.getAllByTestId('investigationEvidenceChartAnnotation');
+    expect(annotations.map((annotation) => annotation.textContent)).toEqual([
+      'Deploy v2.3.1',
+      'Pool exhausted',
+    ]);
+  });
+
+  it('renders no annotation list without annotations', () => {
+    render(<EvidenceChart chart={chart} />);
+
+    expect(screen.queryByTestId('investigationEvidenceChartAnnotation')).not.toBeInTheDocument();
   });
 });
