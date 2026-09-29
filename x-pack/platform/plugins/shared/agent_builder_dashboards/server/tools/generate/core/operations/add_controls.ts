@@ -18,7 +18,7 @@ import {
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { Logger } from '@kbn/core/server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
-import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
@@ -140,8 +140,21 @@ type DataControlInput = Exclude<ControlInput, { type: typeof TIME_SLIDER_CONTROL
 const getFieldCandidates = ({ type, field_name: fieldName }: DataControlInput): string[] =>
   type === RANGE_SLIDER_CONTROL ? [fieldName] : [fieldName, `${fieldName}.keyword`];
 
-const hasKbnFieldType = (types: string[], kbnFieldType: KBN_FIELD_TYPES): boolean =>
-  types.every((type) => castEsToKbnFieldTypeName(type) === kbnFieldType);
+/** Scalar numeric types a range slider can use; excludes object types like `aggregate_metric_double`. */
+const SCALAR_NUMERIC_FIELD_TYPES: ReadonlySet<string> = new Set([
+  ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.INTEGER,
+  ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.BYTE,
+  ES_FIELD_TYPES.DOUBLE,
+  ES_FIELD_TYPES.FLOAT,
+  ES_FIELD_TYPES.HALF_FLOAT,
+  ES_FIELD_TYPES.SCALED_FLOAT,
+  ES_FIELD_TYPES.UNSIGNED_LONG,
+]);
+
+const isScalarNumeric = (types: string[]): boolean =>
+  types.length > 0 && types.every((type) => SCALAR_NUMERIC_FIELD_TYPES.has(type));
 
 const TEXT_FIELD_TYPES: ReadonlySet<string> = new Set([
   ES_FIELD_TYPES.TEXT,
@@ -257,10 +270,7 @@ const resolveControlField = (
 
   if (
     control.type === RANGE_SLIDER_CONTROL &&
-    !hasKbnFieldType(
-      getUsableFieldTypes(capabilities, resolvedFieldName) ?? [],
-      KBN_FIELD_TYPES.NUMBER
-    )
+    !isScalarNumeric(getUsableFieldTypes(capabilities, resolvedFieldName) ?? [])
   ) {
     return { reason: `range_slider_control needs a numeric field on index "${control.index}".` };
   }

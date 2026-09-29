@@ -3045,7 +3045,11 @@ describe('add_controls / remove_controls operations', () => {
   });
 
   it('add_controls keeps a numeric range slider and rejects a keyword one', async () => {
-    const esClient = createFieldCapsEsClient({ bytes: 'long', status: 'keyword' });
+    const esClient = createFieldCapsEsClient({
+      bytes: 'long',
+      status: 'keyword',
+      latency: 'aggregate_metric_double',
+    });
 
     const { dashboardData, failures } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
@@ -3061,6 +3065,12 @@ describe('add_controls / remove_controls operations', () => {
             {
               type: 'range_slider_control',
               field_name: 'status',
+              index: 'kibana_sample_data_logs',
+              user_requested: true,
+            },
+            {
+              type: 'range_slider_control',
+              field_name: 'latency',
               index: 'kibana_sample_data_logs',
               user_requested: true,
             },
@@ -3080,7 +3090,7 @@ describe('add_controls / remove_controls operations', () => {
     expect(failures).toEqual([
       {
         type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: 'status',
+        identifier: 'status, latency',
         error: 'range_slider_control needs a numeric field on index "kibana_sample_data_logs".',
       },
     ]);
