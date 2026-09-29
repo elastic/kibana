@@ -28,19 +28,18 @@ interface DataViewData {
   requestedDataViewFound: boolean;
 }
 
-/**
- * Function to load the given data view by id, providing a fallback if it doesn't exist
- */
+/** Loads a supplied spec or a view by ID, using a fallback when the requested ID cannot be loaded. */
 export async function loadDataView({
   dataViewId,
   locationDataViewSpec,
   initialAdHocDataViewSpec,
-  services: { dataViews },
+  services: { dataViews, inlineDataViews },
   savedDataViews,
   adHocDataViews,
 }: {
   dataViewId?: string;
   locationDataViewSpec?: DataViewSpec;
+  /** Restored inline specs and their tab references must already be normalized together. */
   initialAdHocDataViewSpec?: DataViewSpec;
   services: DiscoverServices;
   savedDataViews: DataViewListItem[];
@@ -57,8 +56,7 @@ export async function loadDataView({
       // If passed a spec for a persisted data view, reassign the fetchId
       fetchId = locationDataViewSpec.id!;
     } else {
-      // If passed an ad hoc data view spec, clear the instance cache
-      // to avoid conflicts, then create and return the data view
+      // Keep eviction until inline editors no longer mutate shared cached instances in place.
       if (locationDataViewSpec.id) {
         dataViews.clearInstanceCache(locationDataViewSpec.id);
       }
@@ -73,7 +71,7 @@ export async function loadDataView({
 
   // If the initial ad hoc data view spec matches the data view id, create and return it
   if (dataViewId && initialAdHocDataViewSpec?.id === dataViewId) {
-    const createdAdHocDataView = await dataViews.create(initialAdHocDataViewSpec);
+    const createdAdHocDataView = await inlineDataViews.resolve(initialAdHocDataViewSpec);
     return {
       loadedDataView: createdAdHocDataView,
       requestedDataViewId: createdAdHocDataView.id,
@@ -116,10 +114,7 @@ export async function loadDataView({
   };
 }
 
-/**
- * Check if the given data view is valid, provide a fallback if it doesn't exist
- * And message the user in this case with toast notifications
- */
+/** Selects the loaded or current view and warns when the requested ID was not found. */
 function resolveDataView({
   dataViewData,
   currentDataView,
@@ -181,6 +176,7 @@ function resolveDataView({
   return loadedDataView;
 }
 
+/** Reuses or loads a view, applies fallback selection, and fetches missing inline fields. */
 export const loadAndResolveDataView = async ({
   dataViewId,
   locationDataViewSpec,

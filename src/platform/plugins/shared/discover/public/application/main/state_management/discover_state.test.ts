@@ -960,13 +960,28 @@ describe('Discover state', () => {
         const { services, state } = reload(storage, 'local-tab');
 
         await state.initializeTabs();
-        expect(state.getCurrentTab().id).toBe('local-tab');
+        expect(state.getCurrentTab()).toMatchObject({
+          id: 'local-tab',
+          appState: {
+            dataSource: createDataViewDataSource({ dataViewId: apiDataViewId }),
+            filters: [{ meta: { index: apiDataViewId } }, { meta: { index: 'other-data-view' } }],
+          },
+          initialInternalState: {
+            serializedSearchSource: {
+              index: { id: apiDataViewId },
+              filter: [{ meta: { index: apiDataViewId } }, { meta: { index: 'other-data-view' } }],
+            },
+          },
+        });
         await state.initializeSingleTab({ tabId: 'local-tab' });
 
         expect(
           selectTabRuntimeState(state.runtimeStateManager, 'local-tab').currentDataView$.getValue()
             ?.id
         ).toBe(apiDataViewId);
+        expect(state.getCurrentTab().appState.dataSource).toEqual(
+          createDataViewDataSource({ dataViewId: apiDataViewId })
+        );
         expectLoadedFilters(services, apiDataViewId);
       });
 
@@ -2267,8 +2282,8 @@ describe('Discover state', () => {
       expect(services.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(filters);
     });
 
-    test('loadSavedSearch with ad-hoc data view being added to internal state adHocDataViews', async () => {
-      const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
+    test('loadSavedSearch uses the derived inline ID in app state and runtime views', async () => {
+      const adHocDataViewId = generateInlineDataViewId(dataViewAdHoc.toSpec());
       const testServices = createDiscoverServicesMock();
       testServices.dataViews.create = jest.fn().mockImplementation((spec) => {
         return Promise.resolve({
@@ -2294,9 +2309,15 @@ describe('Discover state', () => {
         })
       );
       expect(state.getCurrentTab().appState.dataSource).toEqual(
-        createDataViewDataSource({ dataViewId: adHocDataViewId! })
+        createDataViewDataSource({ dataViewId: adHocDataViewId })
       );
+      const currentDataView = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
+      ).currentDataView$.getValue();
+      expect(currentDataView?.id).toBe(adHocDataViewId);
       expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe(adHocDataViewId);
+      expect(state.runtimeStateManager.adHocDataViews$.getValue()[0]).toBe(currentDataView);
     });
 
     test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
