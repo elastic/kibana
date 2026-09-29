@@ -46,4 +46,20 @@ describe('isAgentRestartSupported', () => {
     const agent = { active: true, local_metadata: { elastic: { agent: { version: 960 } } } } as any;
     expect(isAgentRestartSupported(agent)).toBe(false);
   });
+
+  it('returns true for SNAPSHOT build at minimum version', () => {
+    expect(isAgentRestartSupported(makeAgent('9.6.0-SNAPSHOT'))).toBe(true);
+  });
+
+  it('returns true for SNAPSHOT build above minimum version', () => {
+    expect(isAgentRestartSupported(makeAgent('9.7.0-SNAPSHOT'))).toBe(true);
+  });
+
+  it('returns false for SNAPSHOT build below minimum version', () => {
+    expect(isAgentRestartSupported(makeAgent('9.5.0-SNAPSHOT'))).toBe(false);
+  });
+
+  it('returns false for malformed version string', () => {
+    expect(isAgentRestartSupported(makeAgent('not-a-version'))).toBe(false);
+  });
 });
