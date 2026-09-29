@@ -123,9 +123,9 @@ entries:
   - https://github.com/elastic/kibana/pull/292349
 - file:
     name: 292471.yaml
-    checksum: 28b17dc2c1cf4970026c90a8f30b23ea52273827
+    checksum: 7fb3867d74f54fbc6ea8e65cfff9f45b4787eed7
   type: enhancement
-  title: Add a badge and banners on Elastic Inference Service models to indicate they are blocked
+  title: Add a blocked badge and banners to Elastic Inference Service models
   products:
   - product: cloud-serverless
   - product: kibana
@@ -248,9 +248,9 @@ entries:
   - https://github.com/elastic/kibana/issues/291117
 - file:
     name: 289590.yaml
-    checksum: ef409b559806897df56cbc98489f14abb94df944
+    checksum: 1e05b7015d20770eaf19c55ab120573027f9265c
   type: bug-fix
-  title: Fix automatic rule migrations defaulting to local ELSER even when ELSER on Elastic Inference Service is available
+  title: Fix rule migrations defaulting to local ELSER over Elastic Inference Service
   products:
   - product: cloud-serverless
   - product: kibana
