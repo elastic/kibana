@@ -206,7 +206,7 @@ describe('AiIndexDetailPage', () => {
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [], memory_enabled: true });
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
@@ -227,6 +227,27 @@ describe('AiIndexDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss AI index created message' }));
 
     expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['the global memory setting is disabled', false, true],
+    ['memory is disabled for the AI index', true, false],
+  ])('hides memory wording when %s', async (_scenario, globalMemoryEnabled, indexMemoryEnabled) => {
+    mockUseMemoryEnabled.mockReturnValue(globalMemoryEnabled);
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [],
+      memory_enabled: indexMemoryEnabled,
+    });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+    const callout = screen.getByTestId('contextAiIndexCreatedCallout');
+    expect(callout).toHaveTextContent('Add sources to build agent context from your data.');
+    expect(callout).not.toHaveTextContent(/memory/i);
   });
 
   it('does not show the success callout without creation navigation state', async () => {

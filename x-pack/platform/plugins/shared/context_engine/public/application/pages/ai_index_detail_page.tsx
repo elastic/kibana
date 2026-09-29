@@ -188,7 +188,10 @@ export const AiIndexDetailPage = () => {
       {selectedTab === 'overview' && (
         <>
           {showCreatedCallout && (
-            <AiIndexCreatedCallout onDismiss={() => setShowCreatedCallout(false)} />
+            <AiIndexCreatedCallout
+              onDismiss={() => setShowCreatedCallout(false)}
+              showMemory={isMemoryEnabled && aiIndex?.memory_enabled === true}
+            />
           )}
           <DescriptionPanel
             isLoading={isLoading}
