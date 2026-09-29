@@ -71,7 +71,6 @@ export const eventsWriteItemSchema = significantEventSchema
           source. If found, the write is skipped and the existing event_id is returned
           (written: false, reason: existing_active_event). Otherwise a new event is created with
           a generated event_id.
-          Otherwise a new event is created with a generated event_id.
         `
       ),
   })

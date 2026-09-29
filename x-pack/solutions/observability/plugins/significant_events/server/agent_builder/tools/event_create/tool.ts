@@ -19,6 +19,7 @@ import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_c
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { createEventToolHandler } from './handler';
+import { classifyError } from '../../utils/error_utils';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_source_fields';
 
@@ -135,12 +136,13 @@ export function createEventTool({
           ],
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running event_create: ${message}`);
+        const classified = classifyError(error);
+        const rawMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Error running event_create: ${rawMessage}`);
         telemetry.trackAgentToolEventCreate({
           success: false,
           stream_names: toolParams.slugs,
-          error_message: message,
+          error_message: rawMessage,
         });
         return {
           results: [
@@ -151,7 +153,7 @@ export function createEventTool({
                   'xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage',
                   {
                     defaultMessage: 'Failed to create significant event: {message}',
-                    values: { message },
+                    values: { message: classified },
                   }
                 ),
               },
