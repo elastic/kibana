@@ -550,6 +550,7 @@ await browserAuth.loginAsViewer();
 // custom role for finer-grained control
 await browserAuth.loginWithCustomRole({
   elasticsearch: {
+    cluster: [],
     indices: [{ names: ['logs-*'], privileges: ['read'] }],
   },
   kibana: [{ spaces: ['*'], base: [], feature: { discover: ['read'] } }],
