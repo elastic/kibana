@@ -1155,7 +1155,7 @@ paths:
                       description: Array of AI indices to associate with the agent.
                       items:
                         description: AI indices to associate with the agent.
-                        maxLength: 244
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -1689,7 +1689,7 @@ paths:
                       description: Array of AI indices to associate with the agent.
                       items:
                         description: AI indices to associate with the agent.
-                        maxLength: 244
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -23334,7 +23334,7 @@ paths:
                     - enabled
                 id:
                   description: The unique identifier of the AI Index.
-                  maxLength: 244
+                  maxLength: 256
                   minLength: 1
                   type: string
                 sources:
@@ -23872,7 +23872,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 244
+            maxLength: 256
             minLength: 1
             type: string
         - description: When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI Index still uses the same dest. Defaults to false.
@@ -24023,7 +24023,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 244
+            maxLength: 256
             minLength: 1
             type: string
       responses:
@@ -24309,7 +24309,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 244
+            maxLength: 256
             minLength: 1
             type: string
       requestBody:
@@ -24776,7 +24776,7 @@ paths:
           name: aiIndexId
           required: true
           schema:
-            maxLength: 244
+            maxLength: 256
             minLength: 1
             type: string
       responses:
@@ -79975,6 +79975,11 @@ paths:
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
+                    retentionDays:
+                      default: 60
+                      maximum: 3650
+                      minimum: 1
+                      type: integer
                 logExtraction:
                   additionalProperties: false
                   type: object

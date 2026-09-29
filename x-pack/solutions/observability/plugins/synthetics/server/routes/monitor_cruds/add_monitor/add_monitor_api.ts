@@ -39,6 +39,7 @@ import {
   DEFAULT_FIELDS,
   DEFAULT_NAMESPACE_STRING,
 } from '../../../../common/constants/monitor_defaults';
+import { mergeHttpAuthDefaults } from '../../../../common/utils/merge_http_auth_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
 import { DefaultRuleService } from '../../default_alerts/default_alert_service';
 import type { RouteContext } from '../../types';
@@ -289,7 +290,7 @@ export class AddEditMonitorAPI {
       });
     }
 
-    return {
+    const normalized = {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
@@ -298,6 +299,8 @@ export class AddEditMonitorAPI {
       [ConfigKey.MAINTENANCE_WINDOWS]:
         resolvedMaintenanceWindows ?? defaultFields?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [],
     } as MonitorFields;
+
+    return monitorType === MonitorTypeEnum.HTTP ? mergeHttpAuthDefaults(normalized) : normalized;
   }
 
   async validateUniqueMonitorName(name: string, id?: string) {
