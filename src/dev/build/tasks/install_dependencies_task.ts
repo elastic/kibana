@@ -25,6 +25,8 @@ export const InstallDependencies: Task = {
         '--no-frozen-lockfile',
         '--config.confirmModulesPurge=false',
         '--prefer-offline',
+        '--store-dir',
+        config.resolveFromRepo('.pnpm-store'),
       ],
       {
         cwd: build.resolvePath(),
