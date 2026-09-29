@@ -12,12 +12,17 @@ import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { restartAgent, bulkRestartAgents } from './restart';
-import { getAgents, getAgentsByKuery, getAgentPolicyForAgent, openPointInTime } from './crud';
-import { createAgentAction } from './actions';
+import {
+  getAgentsById,
+  getAgentsByKuery,
+  getAgentPolicyForAgent,
+  openPointInTime,
+} from './crud';
+import { createAgentAction, createErrorActionResults } from './actions';
 import { RestartActionRunner, restartBatch } from './restart_action_runner';
 
 jest.mock('./crud', () => ({
-  getAgents: jest.fn(),
+  getAgentsById: jest.fn(),
   getAgentsByKuery: jest.fn(),
   getAgentPolicyForAgent: jest.fn(),
   openPointInTime: jest.fn(),
@@ -25,6 +30,7 @@ jest.mock('./crud', () => ({
 
 jest.mock('./actions', () => ({
   createAgentAction: jest.fn(),
+  createErrorActionResults: jest.fn(),
 }));
 
 jest.mock('./restart_action_runner', () => ({
@@ -39,10 +45,13 @@ jest.mock('../spaces/get_current_namespace', () => ({
 const mockGetAgentPolicyForAgent = getAgentPolicyForAgent as jest.MockedFunction<
   typeof getAgentPolicyForAgent
 >;
-const mockGetAgents = getAgents as jest.MockedFunction<typeof getAgents>;
+const mockGetAgentsById = getAgentsById as jest.MockedFunction<typeof getAgentsById>;
 const mockGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 const mockOpenPointInTime = openPointInTime as jest.MockedFunction<typeof openPointInTime>;
 const mockCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
+const mockCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
+  typeof createErrorActionResults
+>;
 const mockRestartBatch = restartBatch as jest.MockedFunction<typeof restartBatch>;
 const mockRestartActionRunner = RestartActionRunner as jest.MockedClass<typeof RestartActionRunner>;
 const mockGetCurrentNamespace = getCurrentNamespace as jest.MockedFunction<
@@ -100,10 +109,11 @@ describe('restart', () => {
   });
 
   describe('bulkRestartAgents', () => {
-    it('should call restartBatch when agentIds provided and total <= batchSize', async () => {
+    it('should call restartBatch when agentIds provided', async () => {
       const agents = [{ id: 'agent-1' }, { id: 'agent-2' }] as any[];
-      mockGetAgents.mockResolvedValue(agents);
+      mockGetAgentsById.mockResolvedValue(agents);
       mockRestartBatch.mockResolvedValue({ actionId: 'bulk-action-1' });
+      mockCreateErrorActionResults.mockResolvedValue(undefined as any);
 
       const result = await bulkRestartAgents(esClient, soClient, {
         agentIds: ['agent-1', 'agent-2'],
@@ -113,6 +123,33 @@ describe('restart', () => {
       expect(mockRestartBatch).toHaveBeenCalledWith(esClient, soClient, agents, {
         spaceId: 'default',
       });
+      expect(mockCreateErrorActionResults).toHaveBeenCalledWith(
+        esClient,
+        'bulk-action-1',
+        {},
+        'agent not found'
+      );
+    });
+
+    it('should write error results for missing agentIds', async () => {
+      mockGetAgentsById.mockResolvedValue([
+        { id: 'agent-1' },
+        { id: 'missing-1', notFound: true },
+      ] as any[]);
+      mockRestartBatch.mockResolvedValue({ actionId: 'bulk-action-missing' });
+      mockCreateErrorActionResults.mockResolvedValue(undefined as any);
+
+      await bulkRestartAgents(esClient, soClient, { agentIds: ['agent-1', 'missing-1'] });
+
+      expect(mockRestartBatch).toHaveBeenCalledWith(esClient, soClient, [{ id: 'agent-1' }], {
+        spaceId: 'default',
+      });
+      expect(mockCreateErrorActionResults).toHaveBeenCalledWith(
+        esClient,
+        'bulk-action-missing',
+        { 'missing-1': expect.any(Error) },
+        'agent not found'
+      );
     });
 
     it('should call restartBatch for kuery when total <= batchSize', async () => {
