@@ -16,7 +16,9 @@ function makeInstance(instanceId: string, serviceId: string): ServiceInstance {
 function makeGroup(instanceId: string, serviceId: string): DeployGroup {
   return {
     instanceIds: [instanceId],
-    members: [{ instance: makeInstance(instanceId, serviceId), service: { id: serviceId } as never }],
+    members: [
+      { instance: makeInstance(instanceId, serviceId), service: { id: serviceId } as never },
+    ],
     isDuplicateGroup: false,
     packageName: 'aws',
   };
