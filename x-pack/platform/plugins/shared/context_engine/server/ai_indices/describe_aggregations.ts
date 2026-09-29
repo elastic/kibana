@@ -53,7 +53,6 @@ const countsQuery = ({ type, value }: AiIndexDest, field: string, size: number):
     `LIMIT ${size}`,
   ].join('\n| ');
 
-/** One `{ [field]: key, count }` record per row. */
 const runCounts = async (
   esClient: ElasticsearchClient,
   spaceId: string,

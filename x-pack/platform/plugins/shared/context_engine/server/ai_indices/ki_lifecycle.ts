@@ -13,7 +13,7 @@ const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 const KI_EXPIRES_AT_FIELD = 'expires_at';
 const GOVERNANCE_FIELD = 'governance';
 
-export const LIFECYCLE_FILTERS = [
+const LIFECYCLE_FILTERS = [
   `WHERE ${KI_LIFECYCLE_STATUS_FIELD} IS NULL OR ${KI_LIFECYCLE_STATUS_FIELD} == "active"`,
   `WHERE ${KI_EXPIRES_AT_FIELD} IS NULL OR ${KI_EXPIRES_AT_FIELD} > NOW()`,
 ];
