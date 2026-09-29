@@ -27,6 +27,7 @@ interface Props {
   hasSuggestions: boolean;
   filtered: boolean;
   onRetry: () => void;
+  onCreate: () => void;
 }
 
 export const ServiceAccountPickerPanel = ({
@@ -34,10 +35,11 @@ export const ServiceAccountPickerPanel = ({
   hasSuggestions,
   filtered,
   onRetry,
+  onCreate,
   children,
 }: PropsWithChildren<Props>) => {
   const { euiTheme } = useEuiTheme();
-  const { application, docLinks } = useKibana().services;
+  const { application, docLinks, security } = useKibana().services;
   const canManage = application.capabilities.management?.security?.service_accounts;
   return (
     <>
@@ -45,7 +47,7 @@ export const ServiceAccountPickerPanel = ({
         alignItems="center"
         justifyContent="spaceBetween"
         responsive={false}
-        css={css({ padding: euiTheme.size.m, borderBottom: euiTheme.border.thin })}
+        css={css({ padding: euiTheme.size.m, borderBottom: euiTheme.border.thin, flexShrink: 0 })}
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -126,6 +128,18 @@ export const ServiceAccountPickerPanel = ({
             </p>
           )}
         </EuiText>
+      )}
+      {status === 'ready' && security.serviceAccounts.canCreate() && (
+        <div
+          css={css({ padding: euiTheme.size.s, borderTop: euiTheme.border.thin, flexShrink: 0 })}
+        >
+          <EuiButtonEmpty size="s" iconType="plusCircle" onClick={onCreate}>
+            <FormattedMessage
+              id="workflows.editor.createServiceAccountButtonLabel"
+              defaultMessage="Create account"
+            />
+          </EuiButtonEmpty>
+        </div>
       )}
       {status === 'forbidden' && (
         <div css={css({ padding: euiTheme.size.m, borderTop: euiTheme.border.thin })}>
