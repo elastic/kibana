@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { castArray } from 'lodash';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { SEVERITY_OPTIONS, SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
 import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
 
+export const DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER: SignificantEventStatus[] = ['open'];
+export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
+
+export interface SignificantEventsFilters {
+  status: SignificantEventStatus[];
+  severity: Severity[];
+  stream: string[];
+}
+
 type TabQuery = ReturnType<typeof useSignificantEventsAppParams<'/{tab}'>>['query'];
+type ListParam = string | string[] | undefined;
 
 const omitSelectedEvent = (query: TabQuery): Omit<TabQuery, 'selectedEvent'> => {
   const { selectedEvent, ...rest } = query ?? {};
@@ -17,8 +30,30 @@ const omitSelectedEvent = (query: TabQuery): Omit<TabQuery, 'selectedEvent'> => 
 };
 
 /**
+ * Absent param = default; present = explicit selection (`key=` decodes to an empty selection).
+ * Unknown values are dropped and the order is canonicalised to the option list.
+ */
+const parseListParam = <T extends string>(
+  raw: ListParam,
+  options: readonly T[],
+  fallback: T[]
+): T[] => {
+  if (raw === undefined) {
+    return fallback;
+  }
+  const values = castArray(raw);
+  return options.filter((option) => values.includes(option));
+};
+
+// `query-string` drops empty arrays, so an empty selection is written as '' (serialised as `key=`).
+const encodeListParam = (values: string[]): string | string[] => (values.length ? values : '');
+
+/**
  * URL state for the significant events tab.
  *
+ * - `status` / `severity` / `stream`: the list filters. The URL is the single source of truth so
+ *   they survive a reload and follow browser history. Absent `status`/`severity` means the default
+ *   selection; `stream` is omitted when empty.
  * - `selectedEvent`: deep-link context (e.g. from a notification). Filters the list to just
  *   that event and adapts the filter controls to its properties.
  * - `openEvent`: the single source of truth for flyout visibility — the flyout is open iff
@@ -34,6 +69,71 @@ export const useSignificantEventsUrlState = () => {
 
   const selectedEventId = query?.selectedEvent;
   const openEventId = query?.openEvent;
+
+  const statusFilter = useMemo(
+    () =>
+      parseListParam(
+        query?.status,
+        SIGNIFICANT_EVENT_STATUS_OPTIONS,
+        DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER
+      ),
+    [query?.status]
+  );
+  const severityFilter = useMemo(
+    () =>
+      parseListParam(query?.severity, SEVERITY_OPTIONS, DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER),
+    [query?.severity]
+  );
+  const streamFilter = useMemo(
+    () => (query?.stream === undefined ? [] : castArray(query.stream).filter(Boolean)),
+    [query?.stream]
+  );
+
+  const filtersRef = useRef<SignificantEventsFilters>({
+    status: statusFilter,
+    severity: severityFilter,
+    stream: streamFilter,
+  });
+  filtersRef.current = { status: statusFilter, severity: severityFilter, stream: streamFilter };
+
+  /**
+   * replace (not push): filter edits should not pile up history entries. A filter edit exits the
+   * deep-link selection context (drops `selectedEvent`) unless the caller is adapting the filters
+   * to that very event. `openEvent` is kept so an edit does not close the flyout while the event
+   * is still in the list; a later fetch that drops the event clears it separately.
+   */
+  const setFilters = useCallback(
+    (partial: Partial<SignificantEventsFilters>, { keepSelectedEvent = false } = {}) => {
+      const next = { ...filtersRef.current, ...partial };
+      const {
+        status: _status,
+        severity: _severity,
+        stream: _stream,
+        ...rest
+      } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
+      router.replace('/{tab}', {
+        path: { tab: 'significant_events' },
+        query: {
+          ...rest,
+          status: encodeListParam(next.status),
+          severity: encodeListParam(next.severity),
+          ...(next.stream.length ? { stream: next.stream } : {}),
+        },
+      });
+    },
+    [router]
+  );
+
+  // Removing the params restores the defaults and exits the deep-link selection context.
+  const resetFilters = useCallback(() => {
+    const {
+      status: _status,
+      severity: _severity,
+      stream: _stream,
+      ...rest
+    } = omitSelectedEvent(queryRef.current);
+    router.replace('/{tab}', { path: { tab: 'significant_events' }, query: rest });
+  }, [router]);
 
   const openEvent = useCallback(
     (eventId: string) => {
@@ -91,5 +191,17 @@ export const useSignificantEventsUrlState = () => {
     }
   }, [selectedEventId, router]);
 
-  return { selectedEventId, openEventId, openEvent, closeEvent, clearSelectedEvent, toggleEvent };
+  return {
+    selectedEventId,
+    openEventId,
+    statusFilter,
+    severityFilter,
+    streamFilter,
+    setFilters,
+    resetFilters,
+    openEvent,
+    closeEvent,
+    clearSelectedEvent,
+    toggleEvent,
+  };
 };

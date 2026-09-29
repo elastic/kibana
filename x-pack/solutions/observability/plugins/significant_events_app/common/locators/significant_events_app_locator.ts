@@ -32,7 +32,8 @@ export interface SignificantEventsAppLocatorParams extends SerializableRecord {
   rangeFrom?: string;
   rangeTo?: string;
   search?: string;
-  status?: string;
+  status?: string | string[];
+  severity?: string | string[];
   type?: string | string[];
   subtype?: string | string[];
   stream?: string | string[];

@@ -1,0 +1,201 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act, renderHook } from '@testing-library/react';
+import { useSignificantEventsUrlState } from './use_significant_events_url_state';
+
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+
+let mockQuery: Record<string, unknown> = {};
+
+jest.mock('../../../../hooks/use_significant_events_app_params', () => ({
+  useSignificantEventsAppParams: () => ({ query: mockQuery }),
+}));
+
+jest.mock('../../../../hooks/use_significant_events_app_router', () => ({
+  useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
+}));
+
+const lastReplaceQuery = () => mockReplace.mock.calls.at(-1)![1].query as Record<string, unknown>;
+
+describe('useSignificantEventsUrlState', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockQuery = { rangeFrom: 'now-24h', rangeTo: 'now' };
+  });
+
+  describe('reading filters from the URL', () => {
+    it('falls back to the defaults when the params are absent', () => {
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      expect(result.current.statusFilter).toEqual(['open']);
+      expect(result.current.severityFilter).toEqual(['80-critical', '60-high']);
+      expect(result.current.streamFilter).toEqual([]);
+    });
+
+    it('treats an empty param as an empty selection', () => {
+      mockQuery = { status: '', severity: '' };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      expect(result.current.statusFilter).toEqual([]);
+      expect(result.current.severityFilter).toEqual([]);
+    });
+
+    it('accepts single and repeated values', () => {
+      mockQuery = { status: 'closed', severity: ['20-low', '40-medium'], stream: 'logs' };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      expect(result.current.statusFilter).toEqual(['closed']);
+      expect(result.current.severityFilter).toEqual(['40-medium', '20-low']);
+      expect(result.current.streamFilter).toEqual(['logs']);
+    });
+
+    it('drops unknown values and canonicalises the order', () => {
+      mockQuery = {
+        status: ['bogus', 'dismissed', 'open'],
+        severity: ['60-high', 'nope', '80-critical'],
+      };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      expect(result.current.statusFilter).toEqual(['open', 'dismissed']);
+      expect(result.current.severityFilter).toEqual(['80-critical', '60-high']);
+    });
+  });
+
+  describe('setFilters', () => {
+    it('writes the merged filters with a single replace and drops selectedEvent', () => {
+      mockQuery = {
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        selectedEvent: 'event-1',
+        openEvent: 'event-1',
+        severity: '20-low',
+        stream: ['logs'],
+      };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.setFilters({ status: ['closed'] }));
+
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
+        path: { tab: 'significant_events' },
+        query: {
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+          openEvent: 'event-1',
+          status: ['closed'],
+          severity: ['20-low'],
+          stream: ['logs'],
+        },
+      });
+    });
+
+    it('encodes an empty selection as an empty string', () => {
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.setFilters({ status: [], severity: [] }));
+
+      expect(lastReplaceQuery()).toMatchObject({ status: '', severity: '' });
+    });
+
+    it('removes the stream param when the selection is cleared', () => {
+      mockQuery = { stream: ['logs'] };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.setFilters({ stream: [] }));
+
+      expect(lastReplaceQuery()).not.toHaveProperty('stream');
+    });
+
+    it('keeps selectedEvent when asked to', () => {
+      mockQuery = { selectedEvent: 'event-1' };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() =>
+        result.current.setFilters(
+          { status: ['open'], severity: ['40-medium'], stream: ['logs'] },
+          { keepSelectedEvent: true }
+        )
+      );
+
+      expect(lastReplaceQuery()).toEqual({
+        selectedEvent: 'event-1',
+        status: ['open'],
+        severity: ['40-medium'],
+        stream: ['logs'],
+      });
+    });
+  });
+
+  describe('resetFilters', () => {
+    it('removes the filter params and selectedEvent, keeping the rest', () => {
+      mockQuery = {
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        status: 'closed',
+        severity: '',
+        stream: ['logs'],
+        selectedEvent: 'event-1',
+        openEvent: 'event-1',
+      };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.resetFilters());
+
+      expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
+        path: { tab: 'significant_events' },
+        query: { rangeFrom: 'now-24h', rangeTo: 'now', openEvent: 'event-1' },
+      });
+    });
+  });
+
+  describe('event selection preserves the filter params', () => {
+    beforeEach(() => {
+      mockQuery = {
+        status: 'closed',
+        severity: ['20-low'],
+        stream: 'logs',
+        selectedEvent: 'event-1',
+      };
+    });
+
+    it('openEvent', () => {
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.openEvent('event-2'));
+
+      expect(mockPush).toHaveBeenCalledWith('/{tab}', {
+        path: { tab: 'significant_events' },
+        query: { ...mockQuery, openEvent: 'event-2' },
+      });
+    });
+
+    it('closeEvent', () => {
+      mockQuery = { ...mockQuery, openEvent: 'event-1' };
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.closeEvent());
+
+      expect(mockPush).toHaveBeenLastCalledWith('/{tab}', {
+        path: { tab: 'significant_events' },
+        query: { status: 'closed', severity: ['20-low'], stream: 'logs', selectedEvent: 'event-1' },
+      });
+    });
+
+    it('clearSelectedEvent', () => {
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.clearSelectedEvent());
+
+      expect(mockReplace).toHaveBeenLastCalledWith('/{tab}', {
+        path: { tab: 'significant_events' },
+        query: { status: 'closed', severity: ['20-low'], stream: 'logs' },
+      });
+    });
+  });
+});

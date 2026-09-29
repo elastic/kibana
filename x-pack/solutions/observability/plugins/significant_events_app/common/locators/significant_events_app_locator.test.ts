@@ -56,6 +56,19 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     expect(path).toBe('/knowledge_indicators?stream=logs&stream=logs.nginx');
   });
 
+  it('serializes significant events filters as repeated keys', async () => {
+    const { path } = await locator.getLocation({
+      tab: 'significant_events',
+      status: ['open', 'closed'],
+      severity: ['80-critical', '60-high'],
+      stream: 'logs',
+    });
+
+    expect(path).toBe(
+      '/significant_events?status=open&status=closed&severity=80-critical&severity=60-high&stream=logs'
+    );
+  });
+
   it('omits undefined params', async () => {
     const { path } = await locator.getLocation({
       tab: 'queries',
