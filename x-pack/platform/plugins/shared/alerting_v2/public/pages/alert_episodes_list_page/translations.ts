@@ -53,6 +53,13 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
   }
 );
 
+export const EPISODES_LIST_COLUMN_GROUPING = i18n.translate(
+  'xpack.alertingV2.episodes.columns.grouping',
+  {
+    defaultMessage: 'Grouping',
+  }
+);
+
 export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.itemCount', {
     defaultMessage: 'Showing {count, plural, one {# episode} other {# episodes}}',

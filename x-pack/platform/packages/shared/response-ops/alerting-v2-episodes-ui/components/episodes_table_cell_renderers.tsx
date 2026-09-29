@@ -29,6 +29,7 @@ import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
+import { getNonEmptyGroupingFields } from '../utils/episode_grouping_data';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
@@ -44,7 +45,7 @@ const SHORT_RULE_ID_LENGTH = 7;
 
 const getEpisodeGroupingFromRow = (
   row: CellRendererProps['row'],
-  ruleGroupingFields: readonly string[] = []
+  ruleGroupingFields: readonly string[]
 ): { groupingFields: readonly string[]; groupingData: Record<string, unknown> } => {
   const episode = row.flattened as unknown as AlertEpisode;
 
@@ -147,6 +148,47 @@ export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
   return <AlertEpisodeSeverityBadge severity={severity} />;
 };
 
+export interface EpisodeGroupingCellProps extends CellRendererProps {
+  rulesCache: Record<string, Rule>;
+  isLoadingRules: boolean;
+  sourceDataViewsByRule?: Map<string, DataView>;
+}
+
+export const EpisodeGroupingCell = ({
+  row,
+  rulesCache,
+  isLoadingRules,
+  sourceDataViewsByRule,
+}: EpisodeGroupingCellProps) => {
+  const ruleId = row.flattened['rule.id'] as string | undefined;
+  const rule = ruleId ? rulesCache[ruleId] : undefined;
+
+  if (isLoadingRules && ruleId && !rule) {
+    return <EuiSkeletonText lines={1} />;
+  }
+
+  const { groupingFields, groupingData } = getEpisodeGroupingFromRow(
+    row,
+    rule?.grouping?.fields ?? []
+  );
+  const dataView = ruleId ? sourceDataViewsByRule?.get(ruleId) : undefined;
+  const fieldsWithValues = getNonEmptyGroupingFields(groupingFields, groupingData, dataView);
+
+  if (fieldsWithValues.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return (
+    <AlertingEpisodeGroupingTags
+      inline
+      fields={fieldsWithValues}
+      data={groupingData}
+      dataView={dataView}
+      data-test-subj="episodeGroupingCell"
+    />
+  );
+};
+
 export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
   isLoadingRules: boolean;
@@ -158,19 +200,17 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
    * instead of navigating to it. Modified and non-left clicks still follow the link.
    */
   onRuleNameClick?: (ruleId: string, sourceRuleInfo?: { category?: string }) => void;
-  /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
-  sourceDataViewsByRule?: Map<string, DataView>;
 }
 
 /**
- * Rule name, grouping values and breach query of an episode.
+ * Rule name and breach query of an episode. Grouping values live in their own column, see
+ * `EpisodeGroupingCell`.
  *
  * Everything is laid out as inline content on purpose. For `lineCount` row heights the data grid
  * clamps the cell wrapper to a number of lines with `-webkit-line-clamp`, which only counts line
  * boxes: block children (a flex column, for instance) fall outside the clamp and get sliced
  * mid-line instead. Inline flow also gives us the priority we want for free, since the clamp cuts
- * from the end: the name and the grouping values keep the lines they need and the query fills
- * whatever is left.
+ * from the end: the name keeps the lines it needs and the query fills whatever is left.
  */
 export const EpisodeRuleCell = ({
   row,
@@ -180,7 +220,6 @@ export const EpisodeRuleCell = ({
   rowHeight,
   getRuleDetailsHref,
   onRuleNameClick,
-  sourceDataViewsByRule,
 }: EpisodeRuleCellProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -203,21 +242,9 @@ export const EpisodeRuleCell = ({
     const displayName = dataRuleName ?? eventRuleName;
 
     if (displayName) {
-      const { groupingFields, groupingData } = getEpisodeGroupingFromRow(row);
       return (
         <span data-test-subj="episodeRuleCell">
           <span css={nameCss}>{displayName}</span>
-          {groupingFields.length > 0 ? (
-            <>
-              {' '}
-              <AlertingEpisodeGroupingTags
-                inline
-                fields={groupingFields}
-                data={groupingData}
-                data-test-subj="episodeRuleCellGroupingTags"
-              />
-            </>
-          ) : null}
         </span>
       );
     }
@@ -289,10 +316,6 @@ export const EpisodeRuleCell = ({
     );
   }
 
-  const { groupingFields, groupingData } = getEpisodeGroupingFromRow(
-    row,
-    rule.grouping?.fields ?? []
-  );
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const episode = row.flattened as unknown as AlertEpisode;
   // `source_id` means the row came from a source fetch, not that the rule is classic. Mixed
@@ -316,18 +339,6 @@ export const EpisodeRuleCell = ({
       <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>
-      {groupingFields.length > 0 ? (
-        <>
-          {' '}
-          <AlertingEpisodeGroupingTags
-            inline
-            fields={groupingFields}
-            data={groupingData}
-            dataView={sourceDataViewsByRule?.get(ruleId)}
-            data-test-subj="episodeRuleCellGroupingTags"
-          />
-        </>
-      ) : null}
       {showQuery && rule.query ? (
         <>
           <br />

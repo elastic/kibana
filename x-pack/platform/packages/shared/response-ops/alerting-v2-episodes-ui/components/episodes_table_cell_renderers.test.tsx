@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import {
   EpisodeDurationCell,
+  EpisodeGroupingCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
@@ -22,6 +23,13 @@ import {
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 type Rule = FindRulesResponse['items'][number];
+
+const makeRule = (name: string, grouping?: { fields: string[] }): Rule =>
+  ({
+    metadata: { name },
+    query: { format: 'standalone', breach: { query: `FROM ${name}` } },
+    ...(grouping ? { grouping } : {}),
+  } as unknown as Rule);
 
 const makeRow = (fields: Record<string, unknown>) => ({
   id: '0',
@@ -233,13 +241,6 @@ describe('EpisodeSeverityCell', () => {
 });
 
 describe('EpisodeRuleCell', () => {
-  const makeRule = (name: string, grouping?: { fields: string[] }): Rule =>
-    ({
-      metadata: { name },
-      query: { format: 'standalone', breach: { query: `FROM ${name}` } },
-      ...(grouping ? { grouping } : {}),
-    } as unknown as Rule);
-
   const getRuleDetailsHref = (ruleId: string) => `/app/alerting/rules/${ruleId}`;
 
   const ruleCellProps = {
@@ -352,7 +353,7 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
   });
 
-  it('renders source_grouping tags next to the embedded rule name when the rule SO is missing', () => {
+  it('does not render source_grouping tags next to the embedded rule name when the rule SO is missing', () => {
     const row = makeRow({
       'rule.id': 'v1-rule-id',
       'rule.name': 'Classic CPU Rule',
@@ -370,31 +371,7 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
     expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
-    expect(screen.getByTestId('episodeRuleCellGroupingTags')).toBeInTheDocument();
-    expect(screen.getByLabelText('host.name: web-01')).toBeInTheDocument();
-    expect(screen.getByText('web-01')).toBeInTheDocument();
-  });
-
-  it('renders source_grouping tags next to data.rule_name when the rule SO is missing', () => {
-    const row = makeRow({
-      'rule.id': 'v1-rule-id',
-      source_id: 'classic-alerts',
-      episode_data: JSON.stringify({ rule_name: 'High CPU on web-01' }),
-      source_grouping: { 'host.name': 'web-01' },
-    });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.getByText('High CPU on web-01')).toBeInTheDocument();
-    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
-    expect(screen.getByTestId('episodeRuleCellGroupingTags')).toBeInTheDocument();
-    expect(screen.getByLabelText('host.name: web-01')).toBeInTheDocument();
+    expect(screen.queryByText('web-01')).not.toBeInTheDocument();
   });
 
   it('renders a shortened rule id with no link when the rule and every name are missing', () => {
@@ -492,114 +469,6 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByTestId('episodeRuleCellNameLink')).toHaveTextContent('My Rule');
     expect(screen.queryByTestId('episodeRuleCellBreachQuery')).not.toBeInTheDocument();
-  });
-
-  it('renders grouping value tags inline after the rule name', () => {
-    const row = makeRow({
-      'rule.id': 'r1',
-      episode_data: JSON.stringify({ host: { name: 'server-1' } }),
-    });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    const tags = screen.getByTestId('episodeRuleCellGroupingTags');
-    expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
-    expect(screen.getByText('server-1')).toBeInTheDocument();
-    // The grid clamps the cell to a line count, which only works on inline content.
-    expect(tags.tagName).toBe('SPAN');
-  });
-
-  it('does not render grouping tags when rule has no grouping.fields', () => {
-    const row = makeRow({ 'rule.id': 'r1' });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule') }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
-  });
-
-  it('does not render grouping tags when source_grouping is missing on a source row', () => {
-    const row = makeRow({
-      'rule.id': 'r1',
-      source_id: 'classic-alerts',
-      source_grouping: null,
-    });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule') }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
-  });
-
-  it('reads grouping from source_grouping for a source row', () => {
-    const row = makeRow({
-      'rule.id': 'r1',
-      source_id: 'classic-alerts',
-      source_grouping: { 'host.name': 'from-source' },
-    });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.getByLabelText('host.name: from-source')).toBeInTheDocument();
-    expect(screen.getByText('from-source')).toBeInTheDocument();
-  });
-
-  it('reads grouping from episode_data for a native row', () => {
-    const row = makeRow({
-      'rule.id': 'r1',
-      episode_data: JSON.stringify({ host: { name: 'from-episode' } }),
-    });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.getByLabelText('host.name: from-episode')).toBeInTheDocument();
-    expect(screen.queryByLabelText('host.name: from-source')).not.toBeInTheDocument();
-  });
-
-  it('does not render grouping tags when all grouping values are empty', () => {
-    const row = makeRow({
-      'rule.id': 'r1',
-      episode_data: JSON.stringify({}),
-    });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
-    expect(screen.getByTestId('episodeRuleCellBreachQuery')).toHaveTextContent('FROM My Rule');
   });
 
   it('calls getRuleDetailsHref with isSourceRule=true for a source episode', () => {
@@ -754,5 +623,74 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
     expect(screen.queryByRole('code')).not.toBeInTheDocument();
+  });
+});
+
+describe('EpisodeGroupingCell', () => {
+  const groupingCellProps = { ...baseCellProps, columnId: 'grouping' };
+
+  it('renders grouping tags for a native row', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      episode_data: JSON.stringify({ host: { name: 'server-1' } }),
+    });
+    renderWithI18n(
+      <EpisodeGroupingCell
+        {...groupingCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        isLoadingRules={false}
+      />
+    );
+    expect(screen.getByTestId('episodeGroupingCell')).toBeInTheDocument();
+    expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
+  });
+
+  it('renders grouping tags from source_grouping for a classic alert row', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      source_id: 'classic-alerts',
+      source_grouping: { 'host.name': 'from-source' },
+    });
+    renderWithI18n(
+      <EpisodeGroupingCell
+        {...groupingCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule') }}
+        isLoadingRules={false}
+      />
+    );
+    expect(screen.getByLabelText('host.name: from-source')).toBeInTheDocument();
+  });
+
+  it('renders an em dash when the rule has no grouping fields', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    renderWithI18n(
+      <EpisodeGroupingCell
+        {...groupingCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule') }}
+        isLoadingRules={false}
+      />
+    );
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeGroupingCell')).not.toBeInTheDocument();
+  });
+
+  it('renders an em dash when all grouping values are empty', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      episode_data: JSON.stringify({}),
+    });
+    renderWithI18n(
+      <EpisodeGroupingCell
+        {...groupingCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        isLoadingRules={false}
+      />
+    );
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeGroupingCell')).not.toBeInTheDocument();
   });
 });
