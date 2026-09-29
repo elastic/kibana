@@ -267,6 +267,13 @@ describe('isValidJsonSchema', () => {
     expect(isValidJsonSchema(schema)).toBe(true);
   });
 
+  it('should accept a map-only property with no type and no properties', () => {
+    const schema = {
+      additionalProperties: { type: 'string' },
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
   it('should validate schema with const (constant value)', () => {
     const schema = {
       const: 'fixed-value',

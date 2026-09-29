@@ -223,7 +223,7 @@ export function buildFieldsZodValidator(
   if (schema.required && hasTypedAdditionalProperties) {
     const additionalSchema = jsonRoot!.additionalProperties as JSONSchema7;
     for (const requiredKey of schema.required) {
-      if (!shape[requiredKey]) {
+      if (!Object.hasOwn(shape, requiredKey)) {
         shape[requiredKey] = convertJsonSchemaToZodWithRefs(additionalSchema, schema);
       }
     }

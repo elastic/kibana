@@ -544,6 +544,18 @@ describe('buildFieldsZodValidator', () => {
     expect(validator.safeParse({ extra: 'ok' }).success).toBe(false);
   });
 
+  it('enforces required keys named like Object.prototype members', () => {
+    const schema = {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+      required: ['toString'],
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+
+    expect(validator.safeParse({ toString: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({}).success).toBe(false);
+  });
+
   it('should return empty object schema when schema has no properties', () => {
     const validator = buildFieldsZodValidator(null);
     expect(validator.parse({})).toEqual({});

@@ -810,6 +810,18 @@ describe('JsonModelSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('should accept a property with only additionalProperties and no type', () => {
+    const inputs = {
+      properties: {
+        tags: {
+          additionalProperties: { type: 'string' },
+        },
+      },
+    };
+    const result = JsonModelSchema.safeParse(inputs);
+    expect(result.success).toBe(true);
+  });
+
   it('should accept new JSON Schema object format for inputs', () => {
     const workflow = {
       version: '1',
