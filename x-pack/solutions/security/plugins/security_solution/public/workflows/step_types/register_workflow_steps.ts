@@ -62,6 +62,12 @@ export const registerWorkflowSteps = (
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./build_exception_entries_filter_step/build_exception_entries_filter_step').then(
+      (m) => m.buildExceptionEntriesFilterStepDefinition
+    )
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./create_exception_list_item_step/create_exception_list_item_step').then(
       (m) => m.createExceptionListItemStepDefinition
     )

@@ -117,6 +117,11 @@ consts:
   # consts in rule_tuning_worker.yaml.
   analysis_window_days: 7
   preview_invocation_count: 2
+  # How long an AI-created exception lasts before it needs re-approval, so a wrong
+  # diagnosis self-heals instead of permanently muting the rule.
+  # 30 days, in seconds (Liquid filters chain left-to-right, so the offset has to be
+  # a single addable value).
+  exception_expire_seconds: 2592000
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
   # the same alerts into the same review; consts.reviewed_tag in rule_tuning_worker.yaml
@@ -543,8 +548,38 @@ steps:
                 enum: [low, medium, high]
             required: [change_type, summary, title, fp_pattern, reasoning, confidence]
 
+  # Turns a proposed exception into a filters array (the rule's own filters plus one
+  # excluding matching alerts) instead of creating the exception itself, so the change
+  # can be backtested the same way a query change is below. Only the entries matter here;
+  # eligibility to actually run the backtest is decided by can_preview_query_change, same
+  # gate the query arm uses, since both reuse the same preview mechanism.
+  - name: build_exception_filter
+    type: security.buildExceptionEntriesFilter
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      existing_filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+    on-failure:
+      continue: true
+
+  # Adds the expiry offset to the current epoch and formats the result as the ISO 8601
+  # string the exceptions API's expire_time expects.
+  - name: compute_exception_expire_time
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' }}"
+    with:
+      expire_time: >-
+        {{ "now" | date: "%s" | plus: consts.exception_expire_seconds | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}
+
   # Rules using a data view, timestamp override, or alert suppression need fields
-  # the preview API cannot conditionally omit, so query auto-apply is restricted.
+  # the preview API cannot conditionally omit, and a saved-query rule has no inline
+  # query to preview, so query and exception auto-apply is restricted the same way
+  # (both reuse this same preview mechanism below). The exception arm additionally
+  # requires its filter to have been built: falling back to the rule's own filters
+  # would backtest the unchanged rule and present it as the exception's result.
   # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
   - name: can_preview_query_change
     type: data.set
@@ -553,8 +588,12 @@ steps:
         and steps.fetch_rule.output.enabled == true }}
     with:
       supported: >-
-        ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+        ${{ (steps.diagnose_rule.output.structured_output.change_type == 'query'
+            or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and steps.build_exception_filter.error == null
+              and steps.build_exception_filter.output.filters != null))
           and steps.fetch_rule.output.type == 'query'
+          and steps.fetch_rule.output.saved_id == null
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
@@ -599,10 +638,19 @@ steps:
           type: query
           name: "{{ steps.fetch_rule.output.name }}"
           description: "{{ steps.fetch_rule.output.description }}"
-          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+          # Only the query arm changes the query itself; the exception arm backtests via
+          # filters instead, so it previews the rule's own unchanged query.
+          query: >-
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
-          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          # build_exception_filter's output (the rule's filters plus the negated exception
+          # clause) takes precedence when it ran; otherwise this previews unchanged, same
+          # as the query arm.
+          filters: >-
+            ${{ steps.build_exception_filter.output.filters
+              | default: steps.fetch_rule.output.filters
+              | default: consts.no_items }}
           exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
           severity: "{{ steps.fetch_rule.output.severity }}"
           severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
@@ -639,6 +687,55 @@ steps:
       proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
+
+
+  # Maps severity strings to ordinal ranks so the ESQL query below can count
+  # alerts at or above a given severity without a Liquid rank table in the query.
+  # Only computed for risk_score proposals; a skipped step returns nil for all fields.
+  - name: compute_severity_ranks
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}"
+    with:
+      current_rank: >-
+        ${{ steps.fetch_rule.output.severity == 'critical' ? 4
+          : steps.fetch_rule.output.severity == 'high' ? 3
+          : steps.fetch_rule.output.severity == 'medium' ? 2
+          : 1 }}
+      proposed_rank: >-
+        ${{ steps.diagnose_rule.output.structured_output.proposed_severity == 'critical' ? 4
+          : steps.diagnose_rule.output.structured_output.proposed_severity == 'high' ? 3
+          : steps.diagnose_rule.output.structured_output.proposed_severity == 'medium' ? 2
+          : 1 }}
+
+  # Counts alerts in the analysis window at or above the current vs proposed severity,
+  # giving the analyst a sense of how many alerts the change would re-triage.
+  # on-failure: continue so a query error degrades gracefully to the plain before/after text.
+  - name: fetch_severity_counts
+    type: elasticsearch.esql.query
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}"
+    with:
+      allow_partial_results: false
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.alert.rule.uuid: "{{ inputs.rule_uuid }}"
+            - range:
+                "@timestamp":
+                  gte: "now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }}
+        | EVAL sev_rank = CASE(
+            `kibana.alert.severity` == "critical", 4,
+            `kibana.alert.severity` == "high", 3,
+            `kibana.alert.severity` == "medium", 2,
+            1
+          )
+        | STATS
+            at_or_above_current  = COUNT(*) WHERE sev_rank >= {{ steps.compute_severity_ranks.output.current_rank }},
+            at_or_above_proposed = COUNT(*) WHERE sev_rank >= {{ steps.compute_severity_ranks.output.proposed_rank }}
+    on-failure:
+      continue: true
 
   - name: compose_proposal
     type: data.set
@@ -690,12 +787,14 @@ steps:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
-        Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
+        Approving adds the exception to the rule's own exception list, expiring automatically on {{ steps.compute_exception_expire_time.output.expire_time }}. It can be removed or extended in the Detection Rules UI.
         {% when "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }}
-        Current severity: {{ steps.fetch_rule.output.severity }}
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
-        Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
+        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
+        {% if steps.fetch_severity_counts.error == null %}
+        Alerts at or above current severity ({{ steps.fetch_rule.output.severity }}) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days: {{ steps.fetch_severity_counts.output.values | first | first }}.
+        Alerts that would remain at or above proposed severity ({{ steps.diagnose_rule.output.structured_output.proposed_severity }}): {{ steps.fetch_severity_counts.output.values | first | last }}.
+        {% endif %}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
         {% when "threshold" %}
         Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
@@ -719,7 +818,8 @@ steps:
         Apply the recommended change in the Detection Rules UI.
         {% endcase %}
 
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query"
+          or steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
@@ -735,9 +835,10 @@ steps:
         Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest: this rule is not a query rule, or uses a data view, timestamp
-        override, or alert suppression, which the preview API cannot reproduce.
-        Approving still applies the proposed query, so judge it on the query itself
+        No backtest: this rule is not a plain query rule (saved query, data view,
+        timestamp override, or alert suppression are not supported by the preview),
+        or the proposed exception could not be converted into a preview filter.
+        Approving still applies the proposed change, so judge it on the change itself
         and the false positives above rather than on a simulated alert count.
         {% endif %}
         {% endif %}
@@ -811,6 +912,7 @@ steps:
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
                   entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                  expire_time: "{{ steps.compute_exception_expire_time.output.expire_time }}"
                 # Same as a query edit: an exception changes how many alerts the
                 # rule produces, so it can lose a detection. Re-ranking cannot,
                 # which is why the risk score arm is lower.
