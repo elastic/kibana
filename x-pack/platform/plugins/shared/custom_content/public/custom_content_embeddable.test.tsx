@@ -491,7 +491,7 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('agent event subscription', () => {
-    const buildCustomContentUpdatedEvent = (
+    const buildUpdateEvent = (
       embeddableId: string,
       panelTemplate: string,
       customEvent: string = CUSTOM_CONTENT_UPDATED_UI_EVENT
@@ -508,32 +508,32 @@ describe('customContentEmbeddableFactory', () => {
       },
     });
 
-    const setUpAgentBuilder = () => {
-      const chatEvents$ = new Subject<unknown>();
-      const openChat = jest.fn();
-      mockAgentBuilder = {
-        openChat,
-        events: {
-          ui: { activeConversation$: new BehaviorSubject({ id: 'conv-1' }) },
-          getChatEvents$: jest.fn(() => chatEvents$),
-        },
-      };
-      return { chatEvents$, openChat };
-    };
-
     // `useBatchedPublishingSubjects` flushes on the next macrotask
-    const emitAndFlush = async (chatEvents$: Subject<unknown>, event: unknown) =>
-      act(async () => {
-        chatEvents$.next(event);
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      });
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-    const startGenerating = async (openChat: jest.Mock) => {
+    const renderGeneratingPanel = async (isNewConversation = false) => {
+      const chatEvents$ = new Subject<unknown>();
+      const activeConversation$ = new BehaviorSubject<{ id?: string }>({
+        id: isNewConversation ? undefined : 'conv-1',
+      });
+      const getChatEvents$ = jest.fn(() => chatEvents$);
+      const openChat = jest.fn();
+      mockAgentBuilder = { openChat, events: { ui: { activeConversation$ }, getChatEvents$ } };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
       await act(async () => capturedComponentProps?.onGenerateWithChat?.());
       await act(async () => {
         openChat.mock.calls[0][0].onSubmit();
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await flush();
       });
+
+      const emit = (...events: unknown[]) =>
+        act(async () => {
+          events.forEach((event) => chatEvents$.next(event));
+          await flush();
+        });
+      return { embeddable, emit, activeConversation$, getChatEvents$ };
     };
 
     const expectGenerating = (isGenerating: boolean) =>
@@ -542,87 +542,35 @@ describe('customContentEmbeddableFactory', () => {
         String(isGenerating)
       );
 
-    it('applies template update from a custom content updated UI event', async () => {
-      const { chatEvents$ } = setUpAgentBuilder();
+    it('applies only its own update and then clears the generating state', async () => {
+      const { embeddable, emit } = await renderGeneratingPanel();
 
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-
-      await act(async () =>
-        chatEvents$.next(buildCustomContentUpdatedEvent('test-uuid', '<p>agent result</p>'))
+      await emit(
+        buildUpdateEvent('other-uuid', '<p>not mine</p>'),
+        buildUpdateEvent('test-uuid', '<p>other event</p>', 'workflow:yaml_changed')
       );
-
-      expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
-      expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledWith({
-        hasEsqlQuery: false,
-        templateSizeBytes: '<p>agent result</p>'.length,
-      });
-    });
-
-    it('applies its own update when another panel was updated in the same run', async () => {
-      const { chatEvents$ } = setUpAgentBuilder();
-
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-
-      await act(async () => {
-        chatEvents$.next(buildCustomContentUpdatedEvent('other-uuid', '<p>not mine</p>'));
-        chatEvents$.next(buildCustomContentUpdatedEvent('test-uuid', '<p>mine</p>'));
-      });
-
-      expect(embeddable.api.serializeState().template).toBe('<p>mine</p>');
-    });
-
-    it('ignores events for a different embeddable_id or other UI events', async () => {
-      const { chatEvents$ } = setUpAgentBuilder();
-
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-
-      await act(async () => {
-        chatEvents$.next(buildCustomContentUpdatedEvent('different-uuid', '<p>other panel</p>'));
-        chatEvents$.next(
-          buildCustomContentUpdatedEvent('test-uuid', '<p>other event</p>', 'workflow:yaml_changed')
-        );
-      });
-
       expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
-      expect(mockTelemetry.trackAgentUpdateApplied).not.toHaveBeenCalled();
-    });
-
-    it('clears the generating state once its own update is applied', async () => {
-      const { chatEvents$, openChat } = setUpAgentBuilder();
-
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-      await startGenerating(openChat);
       expectGenerating(true);
 
-      await emitAndFlush(
-        chatEvents$,
-        buildCustomContentUpdatedEvent('test-uuid', '<p>agent result</p>')
-      );
-
+      await emit(buildUpdateEvent('test-uuid', '<p>mine</p>'));
+      expect(embeddable.api.serializeState().template).toBe('<p>mine</p>');
+      expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledWith({
+        hasEsqlQuery: false,
+        templateSizeBytes: '<p>mine</p>'.length,
+      });
       expectGenerating(false);
     });
 
     it('applies the update from the first run of a new conversation', async () => {
-      const chatEvents$ = new Subject<unknown>();
-      const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({ id: undefined });
-      const getChatEvents$ = jest.fn(() => chatEvents$);
-      const openChat = jest.fn();
-      mockAgentBuilder = { openChat, events: { ui: { activeConversation$ }, getChatEvents$ } };
-
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-      await startGenerating(openChat);
+      const { embeddable, emit, activeConversation$, getChatEvents$ } = await renderGeneratingPanel(
+        true
+      );
+      expect(getChatEvents$).not.toHaveBeenCalled();
 
       // The chat creates the conversation before sending, so its id is published before the run streams
       await act(async () => activeConversation$.next({ id: 'new-conv' }));
-      await emitAndFlush(
-        chatEvents$,
-        buildCustomContentUpdatedEvent('test-uuid', '<p>first run</p>')
-      );
+      await emit(buildUpdateEvent('test-uuid', '<p>first run</p>'));
 
       expect(getChatEvents$).toHaveBeenCalledWith('new-conv');
       expect(embeddable.api.serializeState().template).toBe('<p>first run</p>');
@@ -633,19 +581,10 @@ describe('customContentEmbeddableFactory', () => {
       TimelineEventType.executionTerminated,
       TimelineEventType.executionFailed,
       TimelineEventType.executionAborted,
-    ])('clears the generating state on %s', async (terminalEventType) => {
-      const { chatEvents$, openChat } = setUpAgentBuilder();
+    ])('clears the generating state on %s', async (type) => {
+      const { embeddable, emit } = await renderGeneratingPanel();
 
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-      await startGenerating(openChat);
-      expectGenerating(true);
-
-      await emitAndFlush(chatEvents$, {
-        type: terminalEventType,
-        execution_id: 'exec-1',
-        data: {},
-      });
+      await emit({ type, execution_id: 'exec-1', data: {} });
 
       expectGenerating(false);
       expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
