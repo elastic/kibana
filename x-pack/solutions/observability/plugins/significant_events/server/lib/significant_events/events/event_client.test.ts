@@ -270,7 +270,7 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('status IN');
+      expect(dataQuery).toContain('status IN ("active", "open")');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('status IN')
       );
@@ -290,6 +290,29 @@ describe('EventClient', () => {
       expect(result.total).toBe(1);
     });
 
+    it('normalizes legacy status and severity values for flag-off reads', async () => {
+      const legacyEvent = {
+        ...createEvent(),
+        event_uuid: 'legacy-event-1',
+        status: 'open',
+        severity: '40-medium',
+      };
+      const { client } = createSearchClient({
+        hits: [legacyEvent as never],
+        total: 1,
+      });
+
+      await expect(client.findLatestByCurrentStatePaginated({})).resolves.toMatchObject({
+        hits: [
+          expect.objectContaining({
+            event_id: 'agent-event-1',
+            status: 'active',
+            severity: 'medium',
+          }),
+        ],
+      });
+    });
+
     it('filters severity after latest-per-slug reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],
@@ -303,7 +326,7 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('severity IN');
+      expect(dataQuery).toContain('severity IN ("critical", "80-critical", "high", "60-high")');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('severity IN')
       );
@@ -394,7 +417,7 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('status IN ("active")');
+      expect(dataQuery).toContain('status IN ("active", "open")');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('status IN')
       );

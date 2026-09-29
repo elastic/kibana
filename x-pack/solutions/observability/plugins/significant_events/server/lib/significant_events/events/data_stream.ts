@@ -17,6 +17,9 @@ export const eventsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
+    // Kept while the legacy read path is selectable. EventClient uses this as the fallback
+    // stable identifier for documents written before event_id was introduced.
+    event_uuid: mappings.keyword(),
     event_id: mappings.keyword(),
     stream_names: mappings.keyword(),
     status: mappings.keyword(),
