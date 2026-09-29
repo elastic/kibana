@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBetaBadge,
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -234,15 +233,6 @@ export const ManageEntityTypesView = () => {
                 defaultMessage: 'Manage {thing} types',
                 values: { thing: labThing(isElasticOn) },
               })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.streams.entityCentricLab.manage.labBadge', {
-                  defaultMessage: 'Lab',
-                })}
-                size="s"
-                color="hollow"
-              />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

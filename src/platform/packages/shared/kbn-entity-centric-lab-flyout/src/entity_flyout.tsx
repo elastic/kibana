@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,10 +17,11 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
@@ -56,6 +56,7 @@ import { TracesTab } from './traces_tab';
 import { ProfilingTab } from './profiling_tab';
 import { DashboardsTab } from './dashboards_tab';
 import { DashboardsListTab } from './dashboards_list_tab';
+import type { DashboardPreviewRequest } from './dashboards_list_tab';
 import { SlosTab } from './slos_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
@@ -66,6 +67,7 @@ import {
   buildEntityFlyoutContextAttachment,
   buildEntityFlyoutInitialMessage,
 } from './build_entity_flyout_attachment';
+import type { EntityKind } from './kind_templates';
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
 import { resolveEntityTypeIdForName } from './entity_type_id_mapping';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
@@ -203,7 +205,7 @@ interface EntityFlyoutProps {
    * panels inline; `'list'` shows a link-based list with managed + custom
    * dashboard sections.
    */
-  readonly dashboardStyle?: 'embedded' | 'list';
+  readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
   /**
    * Optional callback fired when the user clicks the "Add to filter" link
    * in the flyout footer. The host wires it to set page-level filters
@@ -287,6 +289,84 @@ const HEALTH_TAG_LABELS: ReadonlySet<string> = new Set([
   'Unhealthy',
 ]);
 
+/**
+ * Maps each {@link EntityKind} to its parent category icon so every entity
+ * within the same category (e.g. all hosts, all K8s resources) shows the
+ * same icon in the flyout header. Icons mirror the `ENTITY_CATEGORIES`
+ * descriptors in `fake_entities.ts`.
+ */
+const KIND_CATEGORY_ICON: Record<EntityKind, string> = {
+  host: 'storage',
+  node: 'logoKubernetes',
+  pod: 'logoKubernetes',
+  container: 'logoKubernetes',
+  deployment: 'logoKubernetes',
+  workload: 'logoKubernetes',
+  cluster: 'logoKubernetes',
+  namespace: 'logoKubernetes',
+  service: 'apmApp',
+  database: 'database',
+  cloud: 'storage',
+  middleware: 'logstashIf',
+  llm: 'sparkles',
+};
+
+// ---------------------------------------------------------------------------
+// Dashboard preview overlay (listWithPreview variant)
+// ---------------------------------------------------------------------------
+
+const DashboardPreviewContent = ({
+  preview,
+  entityName,
+}: {
+  readonly preview: DashboardPreviewRequest;
+  readonly entityName: string;
+}) => {
+  const { renderTabDashboard } = useEntityFlyoutServices();
+
+  const dashboardNode = useMemo(() => {
+    if (!renderTabDashboard) return null;
+    return renderTabDashboard(
+      {
+        savedObjectTitle: preview.dashboard.savedObjectTitle,
+        scopeField: preview.dashboard.scopeField,
+        savedObjectId: preview.dashboard.savedObjectId,
+      },
+      entityName
+    );
+  }, [renderTabDashboard, preview.dashboard, entityName]);
+
+  if (!dashboardNode) {
+    return (
+      <EuiEmptyPrompt
+        iconType="dashboardApp"
+        title={
+          <h2>
+            {i18n.translate('entityCentricLabFlyout.flyout.dashboardPreview.noRenderer.title', {
+              defaultMessage: 'Dashboard preview unavailable',
+            })}
+          </h2>
+        }
+        body={
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate(
+                'entityCentricLabFlyout.flyout.dashboardPreview.noRenderer.body',
+                {
+                  defaultMessage:
+                    'The dashboard renderer is not available. Open the dashboard in a new tab instead.',
+                }
+              )}
+            </p>
+          </EuiText>
+        }
+      />
+    );
+  }
+
+  return <>{dashboardNode}</>;
+};
+
 export const EntityFlyout = ({
   entityName,
   entityType,
@@ -321,6 +401,7 @@ export const EntityFlyout = ({
   // the first position will land on Metrics.
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
   const [dateStart, setDateStart] = useState('now-15m');
   const [dateEnd, setDateEnd] = useState('now');
   const handleTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
@@ -382,9 +463,10 @@ export const EntityFlyout = ({
   }, [overview.tags, hideHealthBadge, alertsBadge]);
   // Number of always-visible badges (category + type + alerts) in Phase 1.
   const VISIBLE_TAG_COUNT = hideHealthBadge && alertsBadge ? 3 : orderedTags.length;
-  const [showAllTags, setShowAllTags] = useState(false);
-  const visibleTags = showAllTags ? orderedTags : orderedTags.slice(0, VISIBLE_TAG_COUNT);
-  const overflowCount = orderedTags.length - VISIBLE_TAG_COUNT;
+  const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+  const visibleTags = orderedTags.slice(0, VISIBLE_TAG_COUNT);
+  const overflowTags = orderedTags.slice(VISIBLE_TAG_COUNT);
+  const overflowCount = overflowTags.length;
   const tabsData = useMemo(
     () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth, alertsActiveCount),
     [entityName, entityType, effectiveHealth, alertsActiveCount]
@@ -549,32 +631,6 @@ export const EntityFlyout = ({
     },
   }), []);
 
-  // Map each flyout tab to its most-relevant primary action, taking the
-  // entity kind into account so infra entities never show "View in APM".
-  // Tabs without a clear contextual action map to `null` — the
-  // primary button is hidden and only the ellipsis menu remains.
-  const primaryAction = useMemo(() => {
-    type Action = (typeof allActions)[keyof typeof allActions];
-    const serviceKinds = new Set(['service', 'deployment']);
-    const isService = serviceKinds.has(kind ?? '');
-
-    const kindDefault: Action | null = isService ? allActions.viewInApm : null;
-
-    const tabActionMap: Record<string, Action | null> = {
-      overview: kindDefault,
-      logs: allActions.viewLogsInDiscover,
-      traces: isService ? allActions.viewInApm : allActions.viewTracesInDiscover,
-      alerts: allActions.createAlertRule,
-      slos: allActions.createSlo,
-      services: allActions.viewInApm,
-      processes: null,
-      relationships: null,
-      dashboards: null,
-      profiling: isService ? allActions.viewInApm : null,
-    };
-    return tabActionMap[activeTab] ?? kindDefault;
-  }, [activeTab, allActions, kind]);
-
   // Resolve the integration page path for the current entity kind.
   // Kubernetes kinds deep-link to the Kubernetes OTel integration;
   // other kinds fall back to a toast (lab prototype — wire more
@@ -600,10 +656,10 @@ export const EntityFlyout = ({
     }
   }, [closeActionMenu, integrationPath, handleActionClick, allActions.viewInIntegrations.label]);
 
-  // Ellipsis menu: deep-link actions that aren't the current primary,
-  // then a separator, then "Add to case" (always) and "Create alert rule"
-  // (when it isn't the primary).
-  const ellipsisMenuItems = useMemo<EuiContextMenuPanelItemDescriptor[]>(() => {
+  // "Take action" menu: consolidates all actions into a single popover
+  // button (latest Kibana flyout pattern). Deep-link actions first, then
+  // a separator, then management actions (filter, case, alert rule, manage type).
+  const takeActionItems = useMemo<EuiContextMenuPanelItemDescriptor[]>(() => {
     const deepLinkActions = [
       allActions.viewInApm,
       allActions.viewMetricsInDiscover,
@@ -611,14 +667,12 @@ export const EntityFlyout = ({
       allActions.viewTracesInDiscover,
     ];
 
-    const items: EuiContextMenuPanelItemDescriptor[] = deepLinkActions
-      .filter((a) => !primaryAction || a.testSubj !== primaryAction.testSubj)
-      .map((a) => ({
-        name: a.label,
-        icon: a.icon,
-        'data-test-subj': `entityCentricLabFlyoutAction-${a.testSubj}`,
-        onClick: () => handleActionClick(a.label),
-      }));
+    const items: EuiContextMenuPanelItemDescriptor[] = deepLinkActions.map((a) => ({
+      name: a.label,
+      icon: a.icon,
+      'data-test-subj': `entityCentricLabFlyoutAction-${a.testSubj}`,
+      onClick: () => handleActionClick(a.label),
+    }));
 
     items.push({
       name: allActions.viewInIntegrations.label,
@@ -629,6 +683,20 @@ export const EntityFlyout = ({
 
     items.push({ isSeparator: true, key: 'sep-manage' });
 
+    if (onAddToFilter) {
+      items.push({
+        name: i18n.translate('entityCentricLabFlyout.flyout.addToFilter', {
+          defaultMessage: 'Add to filter',
+        }),
+        icon: 'filter',
+        'data-test-subj': 'entityCentricLabFlyoutAction-addToFilter',
+        onClick: () => {
+          closeActionMenu();
+          onAddToFilter();
+        },
+      });
+    }
+
     items.push({
       name: allActions.addToCase.label,
       icon: allActions.addToCase.icon,
@@ -636,21 +704,26 @@ export const EntityFlyout = ({
       onClick: () => handleActionClick(allActions.addToCase.label),
     });
 
-    if (!primaryAction || primaryAction.testSubj !== allActions.createAlertRule.testSubj) {
-      items.push({
-        name: allActions.createAlertRule.label,
-        icon: allActions.createAlertRule.icon,
-        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.createAlertRule.testSubj}`,
-        onClick: () => handleActionClick(allActions.createAlertRule.label),
-      });
-    }
+    items.push({
+      name: allActions.createAlertRule.label,
+      icon: allActions.createAlertRule.icon,
+      'data-test-subj': `entityCentricLabFlyoutAction-${allActions.createAlertRule.testSubj}`,
+      onClick: () => handleActionClick(allActions.createAlertRule.label),
+    });
+
+    items.push({
+      name: allActions.createSlo.label,
+      icon: allActions.createSlo.icon,
+      'data-test-subj': `entityCentricLabFlyoutAction-${allActions.createSlo.testSubj}`,
+      onClick: () => handleActionClick(allActions.createSlo.label),
+    });
 
     return items;
-  }, [allActions, primaryAction, handleActionClick, handleIntegrationsClick]);
+  }, [allActions, handleActionClick, handleIntegrationsClick, onAddToFilter, closeActionMenu]);
 
-  const ellipsisMenuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
-    () => [{ id: 0, items: ellipsisMenuItems }],
-    [ellipsisMenuItems]
+  const takeActionPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+    () => [{ id: 0, items: takeActionItems }],
+    [takeActionItems]
   );
 
   // Flyout tab / custom-link overrides are keyed by the specific entity-type
@@ -826,6 +899,7 @@ export const EntityFlyout = ({
     if (prevEntityRef.current === entityName) return;
     if (visibleTabs.length === 0) return;
     prevEntityRef.current = entityName;
+    setDashboardPreview(null);
     // When returning from a full-page expand (back-navigation), restore
     // the tab the user was on instead of resetting to the first tab.
     const STORED_TAB_KEY = 'entityCentricLab_activeTab';
@@ -843,7 +917,7 @@ export const EntityFlyout = ({
   }, [entityName, visibleTabs]);
 
   return (
-    <EuiFlyout
+    <EuiFlyoutResizable
       // No overlay mask: the flyout stays non-modal so the page behind it
       // (e.g. the service map) remains visible and clickable — clicking
       // another node opens a child flyout rather than being swallowed by a
@@ -855,12 +929,75 @@ export const EntityFlyout = ({
       session={session}
       onClose={onClose}
       hideCloseButton
-      size={size}
+      size={dashboardPreview ? 'l' : size}
       aria-labelledby={titleId}
-      data-test-subj="entityCentricLabFlyout"
+      data-test-subj={dashboardPreview ? 'entityCentricLabFlyoutDashboardPreview' : 'entityCentricLabFlyout'}
     >
+      {dashboardPreview ? (
+        <>
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="editorUndo"
+                  size="xs"
+                  flush="left"
+                  color="text"
+                  onClick={() => setDashboardPreview(null)}
+                  data-test-subj="entityCentricLabFlyoutDashboardPreviewBack"
+                >
+                  {i18n.translate('entityCentricLabFlyout.flyout.dashboardPreview.back', {
+                    defaultMessage: 'Back',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.translate(
+                    'entityCentricLabFlyout.flyout.closeAriaLabel',
+                    { defaultMessage: 'Close' }
+                  )}
+                  color="text"
+                  display="empty"
+                  onClick={onClose}
+                  data-test-subj="entityCentricLabFlyoutDashboardPreviewClose"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="s" />
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>{dashboardPreview.title}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="popout"
+                  size="xs"
+                  href={dashboardPreview.href}
+                  target="_blank"
+                  data-test-subj="entityCentricLabFlyoutDashboardPreviewOpenNewTab"
+                >
+                  {i18n.translate('entityCentricLabFlyout.flyout.dashboardPreview.viewInNewTab', {
+                    defaultMessage: 'View in new tab',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <DashboardPreviewContent
+              preview={dashboardPreview}
+              entityName={entityName}
+            />
+          </EuiFlyoutBody>
+        </>
+      ) : (
+        <>
       <EuiFlyoutHeader css={css`padding-bottom: 0;`}>
-        {/* Dedicated top row: expand + close icons right-aligned */}
+        {/* Top row: expand + close icons right-aligned */}
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs" responsive={false}>
           {onExpand ? (
             <EuiFlexItem grow={false}>
@@ -898,33 +1035,29 @@ export const EntityFlyout = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h2 id={titleId} data-test-subj="entityCentricLabFlyoutTitle">
-                {displayName}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="info" color="subdued" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('entityCentricLabFlyout.flyout.labBadgeLabel', {
-                defaultMessage: 'Lab',
-              })}
-              color="hollow"
-              size="s"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiHorizontalRule margin="s" />
+        {/* Timestamp above the title — latest Kibana flyout pattern */}
         <EuiText size="xs" color="subdued">
           {i18n.translate('entityCentricLabFlyout.flyout.lastUpdate', {
             defaultMessage: 'Last update {lastUpdate}',
             values: { lastUpdate: overview.lastUpdate },
           })}
         </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          {kind ? (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={KIND_CATEGORY_ICON[kind] ?? 'package'} size="l" />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h4 id={titleId} data-test-subj="entityCentricLabFlyoutTitle">
+                {displayName}
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
           {visibleTags.map((tag) => (
@@ -941,41 +1074,38 @@ export const EntityFlyout = ({
               </EuiBadge>
             </EuiFlexItem>
           ) : null}
-          {overflowCount > 0 && !showAllTags ? (
+          {overflowCount > 0 ? (
             <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                onClick={() => setShowAllTags(true)}
-                onClickAriaLabel={i18n.translate(
-                  'entityCentricLabFlyout.flyout.showMoreTags',
-                  {
-                    defaultMessage: 'Show {count} more tags',
-                    values: { count: overflowCount },
-                  }
-                )}
-                data-test-subj="entityCentricLabFlyoutShowMoreTags"
+              <EuiPopover
+                button={
+                  <EuiBadge
+                    color="hollow"
+                    onClick={() => setIsOverflowPopoverOpen((prev) => !prev)}
+                    onClickAriaLabel={i18n.translate(
+                      'entityCentricLabFlyout.flyout.showMoreTags',
+                      {
+                        defaultMessage: 'Show {count} more tags',
+                        values: { count: overflowCount },
+                      }
+                    )}
+                    data-test-subj="entityCentricLabFlyoutShowMoreTags"
+                  >
+                    {`+${overflowCount}`}
+                  </EuiBadge>
+                }
+                isOpen={isOverflowPopoverOpen}
+                closePopover={() => setIsOverflowPopoverOpen(false)}
+                panelPaddingSize="s"
+                anchorPosition="downLeft"
               >
-                {`+ ${overflowCount} more`}
-              </EuiBadge>
-            </EuiFlexItem>
-          ) : null}
-          {showAllTags && overflowCount > 0 ? (
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                onClick={() => setShowAllTags(false)}
-                onClickAriaLabel={i18n.translate(
-                  'entityCentricLabFlyout.flyout.showLessTags',
-                  { defaultMessage: 'Show fewer tags' }
-                )}
-                iconType="arrowUp"
-                iconSide="right"
-                data-test-subj="entityCentricLabFlyoutShowLessTags"
-              >
-                {i18n.translate('entityCentricLabFlyout.flyout.lessLabel', {
-                  defaultMessage: 'Less',
-                })}
-              </EuiBadge>
+                <EuiFlexGroup gutterSize="xs" wrap responsive={false} css={css`max-width: 300px;`}>
+                  {overflowTags.map((tag) => (
+                    <EuiFlexItem grow={false} key={tag.label}>
+                      <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiPopover>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
@@ -985,7 +1115,7 @@ export const EntityFlyout = ({
             <EuiTab
               key={tab.id}
               isSelected={tab.id === activeTab}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => { setActiveTab(tab.id); setDashboardPreview(null); }}
               data-test-subj={`entityCentricLabFlyoutTab-${tab.id}`}
               append={
                 tab.appendBadge !== undefined ? (
@@ -1001,7 +1131,7 @@ export const EntityFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {activeTab === 'dashboards' && dashboardStyle === 'list' ? null : (
+        {activeTab === 'dashboards' && (dashboardStyle === 'list' || dashboardStyle === 'listWithPreview') ? null : (
           <>
             <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -1033,122 +1163,57 @@ export const EntityFlyout = ({
           hideOwnership={hideOwnership}
           hideEvents={hideEvents}
           dashboardStyle={dashboardStyle}
+          onPreviewDashboard={dashboardStyle === 'listWithPreview' ? setDashboardPreview : undefined}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m" responsive={false}>
+          {agentBuilder?.openChat ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="productRobot"
+                data-test-subj="entityCentricLabFlyoutAddToChat"
+                onClick={handleAddToChat}
+              >
+                {i18n.translate('entityCentricLabFlyout.flyout.addToChat', {
+                  defaultMessage: 'Add to chat',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
-            {/*
-              Left-hand footer cluster: the wizard entry-point (gear) sits
-              alongside "Add to chat". It was previously in the header
-              toolbar, but the header now only carries the title, badges,
-              and tabs — moving the gear to the footer keeps type-level
-              configuration close to the other actions and out of the
-              header's identity area.
-            */}
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              {onManageEntityType ? (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'entityCentricLabFlyout.flyout.manageEntityTypeTooltip',
-                      {
-                        defaultMessage: 'Manage {thing} type',
-                        values: { thing: labThing(resourceCopy) },
-                      }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      iconType="gear"
-                      color="primary"
-                      onClick={onManageEntityType}
-                      aria-label={i18n.translate(
-                        'entityCentricLabFlyout.flyout.manageEntityTypeAriaLabel',
-                        {
-                          defaultMessage: 'Manage {thing} type',
-                          values: { thing: labThing(resourceCopy) },
-                        }
-                      )}
-                      data-test-subj="entityCentricLabFlyoutManageEntityType"
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              ) : null}
-              {onAddToFilter ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="filter"
-                    data-test-subj="entityCentricLabFlyoutAddToFilter"
-                    onClick={onAddToFilter}
-                  >
-                    {i18n.translate('entityCentricLabFlyout.flyout.addToFilter', {
-                      defaultMessage: 'Add to filter',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
-              {agentBuilder?.openChat ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="comment"
-                    data-test-subj="entityCentricLabFlyoutAddToChat"
-                    onClick={handleAddToChat}
-                  >
-                    {i18n.translate('entityCentricLabFlyout.flyout.addToChat', {
-                      defaultMessage: 'Add to chat',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {primaryAction ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    iconType={primaryAction.icon}
-                    data-test-subj={`entityCentricLabFlyoutPrimaryAction-${primaryAction.testSubj}`}
-                    onClick={() => handleActionClick(primaryAction.label)}
-                  >
-                    {primaryAction.label}
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  button={
-                    <EuiButtonIcon
-                      display="base"
-                      size="m"
-                      iconType="boxesHorizontal"
-                      data-test-subj="entityCentricLabFlyoutMoreActions"
-                      onClick={() => setIsActionMenuOpen((open) => !open)}
-                      aria-label={i18n.translate(
-                        'entityCentricLabFlyout.flyout.moreActionsAriaLabel',
-                        { defaultMessage: 'More actions' }
-                      )}
-                    />
-                  }
-                  isOpen={isActionMenuOpen}
-                  closePopover={closeActionMenu}
-                  panelPaddingSize="none"
-                  anchorPosition="upRight"
-                  data-test-subj="entityCentricLabFlyoutMoreActionsMenu"
+            <EuiPopover
+              button={
+                <EuiButton
+                  fill
+                  iconType="arrowDown"
+                  iconSide="right"
+                  data-test-subj="entityCentricLabFlyoutTakeAction"
+                  onClick={() => setIsActionMenuOpen((open) => !open)}
                 >
-                  <EuiContextMenu
-                    initialPanelId={0}
-                    panels={ellipsisMenuPanels}
-                    size="s"
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                  {i18n.translate('entityCentricLabFlyout.flyout.takeAction', {
+                    defaultMessage: 'Take action',
+                  })}
+                </EuiButton>
+              }
+              isOpen={isActionMenuOpen}
+              closePopover={closeActionMenu}
+              panelPaddingSize="none"
+              anchorPosition="upRight"
+              data-test-subj="entityCentricLabFlyoutTakeActionMenu"
+            >
+              <EuiContextMenu
+                initialPanelId={0}
+                panels={takeActionPanels}
+                size="s"
+              />
+            </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+        </>
+      )}
+    </EuiFlyoutResizable>
   );
 };
 
@@ -1166,6 +1231,7 @@ const TabContent = ({
   hideOwnership = false,
   hideEvents = false,
   dashboardStyle = 'embedded',
+  onPreviewDashboard,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -1179,7 +1245,8 @@ const TabContent = ({
   readonly hideAiSummary?: boolean;
   readonly hideOwnership?: boolean;
   readonly hideEvents?: boolean;
-  readonly dashboardStyle?: 'embedded' | 'list';
+  readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
+  readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
 }) => {
   const { resourceCopy = false, renderTabDashboard } = useEntityFlyoutServices();
 
@@ -1229,8 +1296,8 @@ const TabContent = ({
         <RelationshipsTab relationships={tabsData.relationships} onSelectEntity={onSelectEntity} />
       );
     case 'dashboards':
-      return dashboardStyle === 'list' ? (
-        <DashboardsListTab entityName={entityName} entityType={entityType} />
+      return dashboardStyle === 'list' || dashboardStyle === 'listWithPreview' ? (
+        <DashboardsListTab entityName={entityName} entityType={entityType} onPreviewDashboard={onPreviewDashboard} />
       ) : (
         <DashboardsTab
           entityName={entityName}

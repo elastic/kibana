@@ -252,10 +252,15 @@ const EntityNameLink = ({
  * the user doesn't read the category name twice.
  */
 
-const StatBadge = ({ label, value, color = 'hollow' }: { label: string; value: number; color?: string }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+const StatBadge = ({ label, value, color = 'hollow', showSeparator = false }: { label: string; value: number; color?: string; showSeparator?: boolean }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    {showSeparator ? (
+      <EuiFlexItem grow={false}>
+        <span style={{ borderLeft: '1px solid #D3DAE6', height: 20, display: 'inline-block' }} />
+      </EuiFlexItem>
+    ) : null}
     <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">{label}</EuiText>
+      <EuiText size="s">{label}</EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiBadge color={color}>{value.toLocaleString()}</EuiBadge>
@@ -302,6 +307,7 @@ const CategorySectionHeader = ({
               label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}
+              showSeparator
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -348,6 +354,7 @@ const CloudProviderSectionHeader = ({
         label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
+        showSeparator
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -394,6 +401,7 @@ const SectionHeader = ({
           label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
           value={alertsCount}
           color={alertsCount > 0 ? 'danger' : 'hollow'}
+          showSeparator
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -549,6 +557,7 @@ const GroupSectionHeader = ({ label, total, alertsCount }: { label: string; tota
         label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
+        showSeparator
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -570,6 +579,7 @@ const SubGroupSectionHeader = ({ label, total, alertsCount }: { label: string; t
         label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
+        showSeparator
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -615,6 +625,7 @@ const KubernetesSectionHeader = ({
               label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}
+              showSeparator
             />
           </EuiFlexItem>
         </EuiFlexGroup>

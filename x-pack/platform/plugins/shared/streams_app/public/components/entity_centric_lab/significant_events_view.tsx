@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 
@@ -20,15 +20,6 @@ export const SignificantEventsView = () => {
               {i18n.translate('xpack.streams.entityCentricLab.significantEvents.title', {
                 defaultMessage: 'Significant events',
               })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.streams.entityCentricLab.significantEvents.labBadge', {
-                  defaultMessage: 'Lab',
-                })}
-                size="s"
-                color="hollow"
-              />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

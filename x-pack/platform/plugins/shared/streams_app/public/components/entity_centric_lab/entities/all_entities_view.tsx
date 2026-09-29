@@ -12,7 +12,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Filter, Query } from '@kbn/es-query';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -2024,15 +2023,6 @@ const AllEntitiesViewInner = ({
                 : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
                     defaultMessage: 'All entities',
                   })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.streams.entityCentricLab.entities.labBadge', {
-                  defaultMessage: 'Lab',
-                })}
-                size="s"
-                color="hollow"
-              />
             </EuiFlexItem>
             {loadedView && isLoadedViewModified ? (
               <EuiFlexItem grow={false}>

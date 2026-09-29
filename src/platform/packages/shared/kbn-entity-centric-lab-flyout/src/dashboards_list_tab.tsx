@@ -288,14 +288,23 @@ const buildDashboardHref = (dashboard: DashboardDescriptor, entityName: string):
 // Component
 // ---------------------------------------------------------------------------
 
+export interface DashboardPreviewRequest {
+  readonly title: string;
+  readonly href: string;
+  readonly dashboard: DashboardDescriptor;
+}
+
 export interface DashboardsListTabProps {
   readonly entityName: string;
   readonly entityType?: string;
+  /** When provided, clicking a dashboard name calls this instead of opening a new tab. */
+  readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
 }
 
 export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
   entityName,
   entityType,
+  onPreviewDashboard,
 }) => {
   const { euiTheme } = useEuiTheme();
   const kind = entityTypeToKind(entityType) ?? inferEntityKind(entityName) ?? 'host';
@@ -359,18 +368,30 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
           defaultMessage: 'Name',
         }),
         width: '40%',
-        render: (title: string, item: DashboardDescriptor) => (
-          <EuiLink
-            href={buildDashboardHref(item, entityName)}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              window.open(buildDashboardHref(item, entityName), '_blank', 'noopener');
-            }}
-            external
-          >
-            {title}
-          </EuiLink>
-        ),
+        render: (title: string, item: DashboardDescriptor) => {
+          const href = buildDashboardHref(item, entityName);
+          if (onPreviewDashboard) {
+            return (
+              <EuiLink
+                onClick={() => onPreviewDashboard({ title, href, dashboard: item })}
+              >
+                {title}
+              </EuiLink>
+            );
+          }
+          return (
+            <EuiLink
+              href={href}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                window.open(href, '_blank', 'noopener');
+              }}
+              external
+            >
+              {title}
+            </EuiLink>
+          );
+        },
       },
       {
         field: 'title',
@@ -384,7 +405,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         ),
       },
     ],
-    [entityName]
+    [entityName, onPreviewDashboard]
   );
 
   // --- Custom table columns ---

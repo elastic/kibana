@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -463,15 +462,6 @@ const WizardHeader = ({
             <h2 id={titleId}>{titleText}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.translate('xpack.streams.entityCentricLab.editFlyout.labBadgeLabel', {
-              defaultMessage: 'Lab',
-            })}
-            size="s"
-            color="hollow"
-          />
-        </EuiFlexItem>
         {isCreate ? (
           <EuiFlexItem grow={false}>
             <EuiBadge color="primary">
@@ -594,16 +584,6 @@ const SubsetEditorHeader = ({
                   )}
             </h2>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.translate(
-              'xpack.streams.entityCentricLab.editFlyout.subsetEditor.labBadgeLabel',
-              { defaultMessage: 'Lab' }
-            )}
-            size="s"
-            color="hollow"
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

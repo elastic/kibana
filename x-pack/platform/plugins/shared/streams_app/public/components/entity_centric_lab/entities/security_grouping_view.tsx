@@ -191,9 +191,9 @@ const AccordionBadges = ({
 }) => (
   <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
+          <EuiText size="s">
             {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesLabel', {
               defaultMessage: 'Resources:',
             })}
@@ -205,9 +205,12 @@ const AccordionBadges = ({
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <span style={{ borderLeft: '1px solid #D3DAE6', height: 20, display: 'inline-block' }} />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
+          <EuiText size="s">
             {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesWithAlertsLabel', {
               defaultMessage: 'Resources with alerts:',
             })}

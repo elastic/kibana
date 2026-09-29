@@ -139,7 +139,7 @@ export const TABLE_STYLE_DIMENSION: VariationDimension = {
   ],
 };
 
-export type DashboardStyleVariation = 'embedded' | 'list';
+export type DashboardStyleVariation = 'embedded' | 'list' | 'listWithPreview';
 
 export const DASHBOARD_STYLE_DIMENSION: VariationDimension = {
   id: 'dashboardStyle',
@@ -155,6 +155,11 @@ export const DASHBOARD_STYLE_DIMENSION: VariationDimension = {
       id: 'list',
       label: 'List',
       description: 'Dashboard links with managed + custom sections',
+    },
+    {
+      id: 'listWithPreview',
+      label: 'List + Flyout preview',
+      description: 'Dashboard list — clicking a name previews it inline in the flyout',
     },
   ],
 };

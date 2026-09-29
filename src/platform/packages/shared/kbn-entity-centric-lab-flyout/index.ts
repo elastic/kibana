@@ -21,6 +21,7 @@ export { ProfilingTab } from './src/profiling_tab';
 export { DashboardsTab, getOotbDashboards } from './src/dashboards_tab';
 export type { DashboardDescriptor } from './src/dashboards_tab';
 export { DashboardsListTab } from './src/dashboards_list_tab';
+export type { DashboardPreviewRequest } from './src/dashboards_list_tab';
 export { SlosTab } from './src/slos_tab';
 export { ServicesTab } from './src/services_tab';
 export { ProcessesTab } from './src/processes_tab';

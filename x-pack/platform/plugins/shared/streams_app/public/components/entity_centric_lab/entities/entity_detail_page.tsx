@@ -18,7 +18,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -26,12 +25,17 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutResizable,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiNotificationBadge,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -61,6 +65,7 @@ import {
   inferEntityKind,
   type EntitySelectionContext,
   type OnSelectEntity,
+  type DashboardPreviewRequest,
   type FlyoutCustomLink,
   type LinkedDashboardOverride,
 } from '@kbn/entity-centric-lab-flyout';
@@ -72,7 +77,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
-import { buildFakeEntities } from './fake_entities';
+import { buildFakeEntities, getCategoryDescriptor } from './fake_entities';
 import { VariationProvider, useVariation } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
 import type { DataVariation } from './variation_registry';
@@ -153,6 +158,7 @@ const PageTabContent = ({
   hideOwnership = false,
   hideEvents = false,
   dashboardStyle = 'embedded',
+  onPreviewDashboard,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -166,7 +172,8 @@ const PageTabContent = ({
   readonly hideAiSummary?: boolean;
   readonly hideOwnership?: boolean;
   readonly hideEvents?: boolean;
-  readonly dashboardStyle?: 'embedded' | 'list';
+  readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
+  readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
 }) => {
   const { resourceCopy = false, renderTabDashboard: renderDash } = useEntityFlyoutServices();
 
@@ -193,7 +200,7 @@ const PageTabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} />;
+      return <OverviewTab overview={overview} metrics={tabsData.metrics} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} hideEvents={hideEvents} />;
     case 'metrics':
       return <MetricsTab metrics={tabsData.metrics} hideEvents={hideEvents} />;
     case 'logs':
@@ -216,8 +223,8 @@ const PageTabContent = ({
         />
       );
     case 'dashboards':
-      return dashboardStyle === 'list' ? (
-        <DashboardsListTab entityName={entityName} entityType={entityType} />
+      return dashboardStyle === 'list' || dashboardStyle === 'listWithPreview' ? (
+        <DashboardsListTab entityName={entityName} entityType={entityType} onPreviewDashboard={onPreviewDashboard} />
       ) : (
         <DashboardsTab
           entityName={entityName}
@@ -267,8 +274,9 @@ const EntityDetailPageInner = () => {
   const detailVariation = useVariation('detail');
   const dataVariation = useVariation('data') as DataVariation;
   const phaseVariation = useVariation('phase');
-  const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list';
+  const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list' | 'listWithPreview';
   const isPhase1 = phaseVariation === 'phase1';
+  const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
   // Track whether we arrived via in-app navigation (expandable flyout) so
   // we can use history.goBack() to restore the flyout on "Back".
   // history.action === 'PUSH' means the user navigated here from another
@@ -308,18 +316,21 @@ const EntityDetailPageInner = () => {
 
   const displayName = useEntityDisplayName(entityName, entityType);
 
-  // Health badge tag (lead with health) — in Phase 1 replace with alerts badge
+  // Badge order — Phase 1: category → type → alerts → rest (matches flyout).
+  // Non-Phase-1: lead with the health indicator badge.
   const orderedTags = useMemo(() => {
     if (isPhase1) {
       const withoutHealth = overview.tags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
+      const primary = withoutHealth.slice(0, 2);
+      const rest = withoutHealth.slice(2);
       if (entity?.alerts) {
-        const { total, active } = entity.alerts;
+        const { active } = entity.alerts;
         const alertTag = active > 0
           ? { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' }
           : { label: '0 active alerts', color: 'success' };
-        return [alertTag, ...withoutHealth];
+        return [...primary, alertTag, ...rest];
       }
-      return [{ label: 'N/A', color: 'hollow' }, ...withoutHealth];
+      return [...primary, { label: 'N/A', color: 'hollow' }, ...rest];
     }
     const healthIndex = overview.tags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
     if (healthIndex <= 0) return overview.tags;
@@ -350,12 +361,6 @@ const EntityDetailPageInner = () => {
         id: 'dashboards',
         label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.dashboards', {
           defaultMessage: 'Dashboards',
-        }),
-      },
-      {
-        id: 'metrics',
-        label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.metrics', {
-          defaultMessage: 'Metrics',
         }),
       },
       {
@@ -624,8 +629,23 @@ const EntityDetailPageInner = () => {
     [closeActionMenu, notifications]
   );
 
+  // Manage entity type — moved before actionPanels to avoid TDZ.
+  const handleManageEntityType = useCallback(() => {
+    const managedType = FAKE_ENTITY_TYPES.find(
+      (ft) => ft.name.toLowerCase() === entityType?.toLowerCase()
+    );
+    if (managedType) {
+      router.push('/manage-entity-types', {
+        path: {},
+        query: { edit: managedType.id },
+      });
+    } else {
+      router.push('/manage-entity-types', { path: {}, query: {} });
+    }
+  }, [entityType, router]);
+
   const actionPanels = useMemo(() => {
-    const items = [
+    const items: Array<{ name?: string; icon?: string; onClick?: () => void; isSeparator?: boolean; key?: string }> = [
       {
         name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewInApm', {
           defaultMessage: 'View in APM',
@@ -639,42 +659,70 @@ const EntityDetailPageInner = () => {
           ),
       },
       {
-        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewInLogs', {
-          defaultMessage: 'View in Logs Explorer',
+        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewMetrics', {
+          defaultMessage: 'View metrics in Discover',
         }),
-        icon: 'logoLogging',
+        icon: 'discoverApp',
         onClick: () =>
           handleActionClick(
-            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewInLogs', {
-              defaultMessage: 'View in Logs Explorer',
+            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewMetrics', {
+              defaultMessage: 'View metrics in Discover',
             })
           ),
       },
       {
-        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewInInfra', {
-          defaultMessage: 'View in Infrastructure',
+        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewLogs', {
+          defaultMessage: 'View logs in Discover',
         }),
-        icon: 'logoMetrics',
+        icon: 'discoverApp',
         onClick: () =>
           handleActionClick(
-            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewInInfra', {
-              defaultMessage: 'View in Infrastructure',
+            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewLogs', {
+              defaultMessage: 'View logs in Discover',
             })
           ),
       },
       {
-        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.openDashboard', {
-          defaultMessage: 'Open related dashboard',
+        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewTraces', {
+          defaultMessage: 'View traces in Discover',
         }),
-        icon: 'dashboardApp',
+        icon: 'discoverApp',
         onClick: () =>
           handleActionClick(
-            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.openDashboard', {
-              defaultMessage: 'Open related dashboard',
+            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewTraces', {
+              defaultMessage: 'View traces in Discover',
+            })
+          ),
+      },
+      {
+        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewInIntegrations', {
+          defaultMessage: 'View in Integrations',
+        }),
+        icon: 'package',
+        onClick: () =>
+          handleActionClick(
+            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.viewInIntegrations', {
+              defaultMessage: 'View in Integrations',
             })
           ),
       },
       { isSeparator: true, key: 'sep-manage' },
+    ];
+
+    if (isK8sEntity) {
+      items.push({
+        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.addToFilter', {
+          defaultMessage: 'Add to filter',
+        }),
+        icon: 'filter',
+        onClick: () => {
+          closeActionMenu();
+          handleAddToFilter();
+        },
+      });
+    }
+
+    items.push(
       {
         name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.addToCase', {
           defaultMessage: 'Add to case',
@@ -694,23 +742,27 @@ const EntityDetailPageInner = () => {
         icon: 'bell',
         onClick: () =>
           handleActionClick(
-            i18n.translate(
-              'xpack.streams.entityCentricLab.detailPage.actions.createAlertRule',
-              { defaultMessage: 'Create alert rule' }
-            )
+            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.createAlertRule', {
+              defaultMessage: 'Create alert rule',
+            })
           ),
       },
-    ];
-    return [
       {
-        id: 0,
-        title: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.panelTitle', {
-          defaultMessage: 'Actions',
+        name: i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.createSlo', {
+          defaultMessage: 'Create SLO',
         }),
-        items,
+        icon: 'visGauge',
+        onClick: () =>
+          handleActionClick(
+            i18n.translate('xpack.streams.entityCentricLab.detailPage.actions.createSlo', {
+              defaultMessage: 'Create SLO',
+            })
+          ),
       },
-    ];
-  }, [handleActionClick]);
+    );
+
+    return [{ id: 0, items }];
+  }, [handleActionClick, isK8sEntity, handleAddToFilter, closeActionMenu]);
 
   const handleAddToChat = useCallback(() => {
     if (!agentBuilder?.openChat) return;
@@ -725,20 +777,6 @@ const EntityDetailPageInner = () => {
   }, [agentBuilder, entityName]);
 
   // Manage entity type
-  const handleManageEntityType = useCallback(() => {
-    const managedType = FAKE_ENTITY_TYPES.find(
-      (ft) => ft.name.toLowerCase() === entityType?.toLowerCase()
-    );
-    if (managedType) {
-      router.push('/manage-entity-types', {
-        path: {},
-        query: { edit: managedType.id },
-      });
-    } else {
-      router.push('/manage-entity-types', { path: {}, query: {} });
-    }
-  }, [entityType, router]);
-
   // Unknown entity
   if (!entity) {
     return (
@@ -817,10 +855,12 @@ const EntityDetailPageInner = () => {
                   data-test-subj="entityDetailBackButton"
                 />
               </EuiFlexItem>
+              {entity?.category ? (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={getCategoryDescriptor(entity.category)?.icon ?? 'package'} size="l" />
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>{displayName}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge label="Lab" color="hollow" size="s" />
-              </EuiFlexItem>
             </EuiFlexGroup>
           }
           rightSideItems={[
@@ -828,13 +868,14 @@ const EntityDetailPageInner = () => {
               key="actions"
               button={
                 <EuiButton
+                  fill
                   iconType="arrowDown"
                   iconSide="right"
-                  data-test-subj="entityDetailPageActions"
+                  data-test-subj="entityDetailPageTakeAction"
                   onClick={() => setIsActionMenuOpen((open) => !open)}
                 >
-                  {i18n.translate('xpack.streams.entityCentricLab.detailPage.actions', {
-                    defaultMessage: 'Actions',
+                  {i18n.translate('xpack.streams.entityCentricLab.detailPage.takeAction', {
+                    defaultMessage: 'Take action',
                   })}
                 </EuiButton>
               }
@@ -849,7 +890,7 @@ const EntityDetailPageInner = () => {
               ? [
                   <EuiButtonEmpty
                     key="add-to-chat"
-                    iconType="comment"
+                    iconType="productRobot"
                     data-test-subj="entityDetailPageAddToChat"
                     onClick={handleAddToChat}
                   >
@@ -859,48 +900,11 @@ const EntityDetailPageInner = () => {
                   </EuiButtonEmpty>,
                 ]
               : []),
-            ...(isK8sEntity
-              ? [
-                  <EuiButtonEmpty
-                    key="add-to-filter"
-                    iconType="filter"
-                    data-test-subj="entityDetailPageAddToFilter"
-                    onClick={handleAddToFilter}
-                  >
-                    {i18n.translate('xpack.streams.entityCentricLab.detailPage.addToFilter', {
-                      defaultMessage: 'Add to filter',
-                    })}
-                  </EuiButtonEmpty>,
-                ]
-              : []),
-            ...(isPhase1
-              ? []
-              : [
-                  <EuiToolTip
-                    key="manage"
-                    content={i18n.translate(
-                      'xpack.streams.entityCentricLab.detailPage.manageEntityType',
-                      { defaultMessage: 'Manage resource type' }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      iconType="gear"
-                      color="primary"
-                      display="empty"
-                      size="m"
-                      onClick={handleManageEntityType}
-                      aria-label={i18n.translate(
-                        'xpack.streams.entityCentricLab.detailPage.manageEntityTypeAriaLabel',
-                        { defaultMessage: 'Manage resource type' }
-                      )}
-                    />
-                  </EuiToolTip>,
-                ]),
           ]}
           tabs={visibleTabs.map((tab) => ({
             label: tab.label,
             isSelected: tab.id === activeTab,
-            onClick: () => setActiveTab(tab.id),
+            onClick: () => { setActiveTab(tab.id); setDashboardPreview(null); },
             'data-test-subj': `entityDetailPageTab-${tab.id}`,
             append:
               tab.appendBadge !== undefined ? (
@@ -934,6 +938,7 @@ const EntityDetailPageInner = () => {
               hideOwnership={isPhase1}
               hideEvents={isPhase1}
               dashboardStyle={dashboardStyleVariation}
+              onPreviewDashboard={dashboardStyleVariation === 'listWithPreview' ? setDashboardPreview : undefined}
             />
           </EuiPanel>
         </StreamsAppPageTemplate.Body>
@@ -960,6 +965,80 @@ const EntityDetailPageInner = () => {
           hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
           dashboardStyle={dashboardStyleVariation}
         />
+      ) : null}
+
+      {dashboardPreview ? (
+        <EuiFlyoutResizable
+          ownFocus={false}
+          onClose={() => setDashboardPreview(null)}
+          hideCloseButton
+          size="l"
+          data-test-subj="entityDetailPageDashboardPreview"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="editorUndo"
+                  size="xs"
+                  flush="left"
+                  color="text"
+                  onClick={() => setDashboardPreview(null)}
+                  data-test-subj="entityDetailPageDashboardPreviewBack"
+                >
+                  {i18n.translate('xpack.streams.entityCentricLab.detailPage.dashboardPreview.back', {
+                    defaultMessage: 'Back',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.translate(
+                    'xpack.streams.entityCentricLab.detailPage.dashboardPreview.closeAriaLabel',
+                    { defaultMessage: 'Close' }
+                  )}
+                  color="text"
+                  display="empty"
+                  onClick={() => setDashboardPreview(null)}
+                  data-test-subj="entityDetailPageDashboardPreviewClose"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="s" />
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>{dashboardPreview.title}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="popout"
+                  size="xs"
+                  href={dashboardPreview.href}
+                  target="_blank"
+                  data-test-subj="entityDetailPageDashboardPreviewOpenNewTab"
+                >
+                  {i18n.translate(
+                    'xpack.streams.entityCentricLab.detailPage.dashboardPreview.viewInNewTab',
+                    { defaultMessage: 'View in new tab' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            {renderTabDashboard(
+              {
+                savedObjectTitle: dashboardPreview.dashboard.savedObjectTitle,
+                scopeField: dashboardPreview.dashboard.scopeField,
+                savedObjectId: dashboardPreview.dashboard.savedObjectId,
+              },
+              entityName
+            )}
+          </EuiFlyoutBody>
+        </EuiFlyoutResizable>
       ) : null}
     </EntityFlyoutServicesProvider>
   );

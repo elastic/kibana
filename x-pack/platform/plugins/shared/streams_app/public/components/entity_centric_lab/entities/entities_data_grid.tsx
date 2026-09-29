@@ -619,9 +619,9 @@ const GridSectionHeader = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
+            <EuiText size="s">
               {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesLabel', { defaultMessage: 'Resources:' })}
             </EuiText>
           </EuiFlexItem>
@@ -631,9 +631,12 @@ const GridSectionHeader = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <span style={{ borderLeft: '1px solid #D3DAE6', height: 20, display: 'inline-block' }} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
+            <EuiText size="s">
               {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesWithAlertsLabel', { defaultMessage: 'Resources with alerts:' })}
             </EuiText>
           </EuiFlexItem>
