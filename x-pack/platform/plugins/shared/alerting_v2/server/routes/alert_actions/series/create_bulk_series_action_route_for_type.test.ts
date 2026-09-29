@@ -28,7 +28,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     const RouteClass = makeRouteClass();
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe('/api/alerting/v2/series/_bulk_snooze');
+    expect(RouteClass.path).toBe('/internal/alerting/v2/series/_bulk_snooze');
     expect(RouteClass.options?.summary).toBe('Bulk snooze alert episode series');
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
@@ -44,7 +44,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     const request = {
       body: {
         items: [
-          { group_hash: 'group-1', expiry: '2026-08-12T00:00:00.000Z' },
+          { group_hash: 'group-1', snoozed_until: '2026-08-12T00:00:00.000Z' },
           { group_hash: 'group-2' },
         ],
       },
@@ -59,7 +59,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     await route.handle();
 
     expect(alertActionsClient.createBulkSeriesActions).toHaveBeenCalledWith([
-      { action_type: 'snooze', group_hash: 'group-1', expiry: '2026-08-12T00:00:00.000Z' },
+      { action_type: 'snooze', group_hash: 'group-1', snoozed_until: '2026-08-12T00:00:00.000Z' },
       { action_type: 'snooze', group_hash: 'group-2' },
     ]);
     expect(ctx.response.ok).toHaveBeenCalledWith({

@@ -169,7 +169,14 @@ const mapHitToSummary = (hit: estypes.SearchHit<ReportSourceDoc>): ThreatReportS
     .map((ioc) => ({ type: ioc.type, value: ioc.value }));
 
   const diamond = source.extracted?.diamond;
-  const summary: ThreatReportSummary = {
+  const summary: {
+    reportId: string;
+    iocs: typeof iocs;
+    title?: string;
+    bodyText?: string;
+    severity?: { level: string; score?: number };
+    diamond?: { signalCount?: number; suitable?: boolean };
+  } = {
     reportId: hit._id ?? '',
     iocs,
   };

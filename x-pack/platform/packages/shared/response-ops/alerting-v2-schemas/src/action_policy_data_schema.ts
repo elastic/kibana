@@ -18,6 +18,7 @@ import {
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
+  MAX_PER_PAGE,
 } from './constants';
 import {
   POLICY_MATCHER_DESCRIPTION,
@@ -40,7 +41,7 @@ const workflowActionPolicyDestinationSchema = z
     type: z
       .literal(actionPolicyDestinationTypeSchema.enum.workflow)
       .describe('The destination type.'),
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow connector identifier.'),
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow identifier.'),
   })
   .strict()
   .meta({ id: 'alerting_workflow_action_policy_destination' });
@@ -177,9 +178,16 @@ export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
 
 export type BulkSnoozeActionPoliciesBody = z.infer<typeof bulkSnoozeActionPoliciesBodySchema>;
 
+const actionPolicyNameSchema = z
+  .string()
+  .max(MAX_NAME_LENGTH)
+  .trim()
+  .min(1)
+  .describe('The name of the action policy.');
+
 const createActionPolicyDataBaseSchema = z
   .object({
-    name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
+    name: actionPolicyNameSchema,
     description: z
       .string()
       .max(MAX_DESCRIPTION_LENGTH)
@@ -211,12 +219,7 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
 
 export const updateActionPolicyDataSchema = z
   .object({
-    name: z
-      .string()
-      .min(1)
-      .max(MAX_NAME_LENGTH)
-      .optional()
-      .describe('The name of the action policy.'),
+    name: actionPolicyNameSchema.optional(),
     description: z
       .string()
       .max(MAX_DESCRIPTION_LENGTH)
@@ -282,7 +285,7 @@ export const findActionPoliciesRequestSchema = z
     page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
       .optional()
       .describe('The page number to return. Defaults to 1.'),
-    per_page: queryIntSchema({ min: 1, max: 100 })
+    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
       .optional()
       .describe('The number of action policies to return per page. Defaults to 20.'),
     search: z
@@ -301,6 +304,7 @@ export const findActionPoliciesRequestSchema = z
       .describe('The field to sort action policies by.'),
     sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
   })
+  .strict()
   .refine(
     ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
     { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }

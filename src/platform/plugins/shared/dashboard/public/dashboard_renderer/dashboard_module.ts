@@ -13,6 +13,7 @@ export { DashboardListingTable } from '../dashboard_listing/dashboard_listing_ta
 export { ClonePanelAction } from '../dashboard_actions/clone_panel_action';
 export { ExpandPanelAction } from '../dashboard_actions/expand_panel_action';
 export { FiltersNotificationAction } from '../dashboard_actions/filters_notification_action';
+export { esqlNotificationAction } from '../dashboard_actions/esql_notification_action';
 export { ExportCSVAction } from '../dashboard_actions/export_csv_action';
 export { ExportJSONAction } from '../dashboard_actions/export_json_action';
 export { AddToLibraryAction } from '../dashboard_actions/library_add_action';
