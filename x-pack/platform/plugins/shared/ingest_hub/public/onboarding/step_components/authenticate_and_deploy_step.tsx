@@ -209,9 +209,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         const agentPoliciesDirty = (() => {
           if (deploymentMethod !== 'agent_based') return false;
           const { agentHostsMode, selectedAgentPolicyIds } = agentBasedDeploymentFromFlow;
-          // A mode change from 'existing' to 'new' means the user wants a freshly created policy
-          // instead of the deployed one — always dirty (4131926221).
-          if (agentHostsMode === 'new' && (item.agentPolicyIds ?? []).length > 0) return true;
+          // A mode change from 'existing' to 'new' means the user wants a freshly created policy.
+          // Only dirty when the new policy has not yet been created (agentPolicyId unset) — after
+          // a successful new-policy deploy agentPolicyId is set and the SO matches, so no drift
+          // (4131926221, 4132097877).
+          if (
+            agentHostsMode === 'new' &&
+            (item.agentPolicyIds ?? []).length > 0 &&
+            !agentBasedDeploymentFromFlow.agentPolicyId
+          )
+            return true;
           const selected = new Set(selectedAgentPolicyIds);
           if (selected.size === 0 && agentHostsMode !== 'existing') return false;
           const deployed = new Set(item.agentPolicyIds ?? []);
@@ -249,6 +256,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     driftRetryKey,
     agentBasedDeploymentFromFlow?.agentCredentialMethod,
     agentBasedDeploymentFromFlow?.agentHostsMode,
+    agentBasedDeploymentFromFlow?.agentPolicyId,
   ]);
 
   // Called by ManagedIntegrationsSection when the static-key replace form becomes ready or is

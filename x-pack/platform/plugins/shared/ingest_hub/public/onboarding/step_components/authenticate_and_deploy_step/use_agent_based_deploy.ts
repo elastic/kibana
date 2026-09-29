@@ -129,8 +129,17 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       // For retries, keep only groups that have at least one instanceId to retry.
       // For fresh deploys, skip groups where every instance already has a package policy —
       // this handles incremental service additions (deploy A, add B, Next should only deploy B).
+      // Exception: when the user switches to 'new' agent-policy mode without having created the
+      // policy yet, include ALL active instances so deployNewAgentPolicy runs for every group and
+      // the dirty update does not re-attach instances to the old policy IDs (4132097890).
+      const isNewPolicySwitch =
+        !isRetry &&
+        agentBasedDeployment.agentHostsMode === 'new' &&
+        !agentBasedDeployment.agentPolicyId;
       const targetsToDeploy = isRetry
         ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
+        : isNewPolicySwitch
+        ? targets
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
       // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
@@ -237,8 +246,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Runs unconditionally when isDirty — before deploying new targets — so that existing
         // policies are always brought up to date in the same run even when the user adds a service
         // alongside the setting change.
+        // Skipped when switching to 'new' agent-policy mode (isNewPolicySwitch): in that case all
+        // instances are re-deployed to the newly created policy via deployNewAgentPolicy below, so
+        // updating the old policy IDs here would be wrong (4132097890).
         let dirtyUpdateApplied = false;
-        if (detectAndReviewStep.isDirty ?? false) {
+        if ((detectAndReviewStep.isDirty ?? false) && !isNewPolicySwitch) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           const byPolicy = new Map<string, string[]>();
           for (const [instanceId, policyId] of Object.entries(
