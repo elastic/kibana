@@ -342,6 +342,45 @@ describe('getEndpointStatusTool', () => {
       expect(data.lastSeen).toBe('2024-06-01T12:00:00Z');
     });
 
+    it('reports status "unknown", not a fabricated "offline", when metadata omits host_status', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-no-status', packages: ['endpoint'] }],
+        }),
+      };
+
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { Endpoint: { state: { isolation: false } } },
+              last_checkin: '2024-06-01T12:00:00Z',
+              // host_status intentionally absent
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
+
+      const result = await tool.handler({ hostName: 'no-status-host' }, mockContext);
+
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.status).toBe('unknown');
+    });
+
     it('returns endpoint_not_found when agent exists but metadata service returns empty', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
