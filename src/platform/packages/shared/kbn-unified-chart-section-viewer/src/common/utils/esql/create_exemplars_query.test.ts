@@ -34,14 +34,13 @@ describe('createExemplarsQuery', () => {
 SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
-  | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.http.route\`, \`resource.attributes.service.name\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
     );
   });
 
-  it('nullifies unmapped fields so a dimension absent from the exemplars stream cannot fail KEEP', () => {
+  it('nullifies unmapped fields so an inherited WHERE on a metrics-only field cannot fail verification', () => {
     const query = createExemplarsQuery({
       exemplarsIndex: TEST_EXEMPLARS_INDEX,
       metricItem: mockMetric,
@@ -50,7 +49,7 @@ FROM exemplars-generic.otel-default
     expect(query.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(true);
   });
 
-  it('appends each non-empty where statement as its own WHERE pipe before KEEP', () => {
+  it('appends each non-empty where statement as its own WHERE pipe before SORT', () => {
     expect(
       createExemplarsQuery({
         exemplarsIndex: TEST_EXEMPLARS_INDEX,
@@ -69,29 +68,24 @@ FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
   | WHERE attributes.http.route == "/orders"
   | WHERE attributes.http.response.status_code >= 500
-  | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.http.route\`, \`resource.attributes.service.name\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
     );
   });
 
-  it('keeps only the trace correlation columns when the metric declares no dimensions', () => {
-    expect(
-      createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: { ...mockMetric, dimensionFields: [] },
-      })
-    ).toBe(
-      `
-SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "http.server.request.duration"
-  | KEEP @timestamp, metric_name, value, trace.id, span.id
-  | SORT @timestamp DESC
-  | LIMIT 500
-`.trim()
-    );
+  it('returns whole documents: no KEEP, and dimensions do not change the query', () => {
+    const withDimensions = createExemplarsQuery({
+      exemplarsIndex: TEST_EXEMPLARS_INDEX,
+      metricItem: mockMetric,
+    });
+    const withoutDimensions = createExemplarsQuery({
+      exemplarsIndex: TEST_EXEMPLARS_INDEX,
+      metricItem: { ...mockMetric, dimensionFields: [] },
+    });
+
+    expect(withDimensions).not.toContain('KEEP');
+    expect(withDimensions).toBe(withoutDimensions);
   });
 
   it('honours an explicit maxRows override', () => {
@@ -106,7 +100,6 @@ FROM exemplars-generic.otel-default
 SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
-  | KEEP @timestamp, metric_name, value, trace.id, span.id
   | SORT @timestamp DESC
   | LIMIT 25
 `.trim()
@@ -128,7 +121,6 @@ FROM exemplars-generic.otel-default
 SET unmapped_fields = "NULLIFY";
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "odd\\"name"
-  | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.odd\`\`dimension\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -142,20 +134,6 @@ FROM exemplars-generic.otel-default
         metricItem: { ...mockMetric, metricName: 'metrics.odd\\name', dimensionFields: [] },
       })
     ).toContain('WHERE metric_name == "odd\\\\name"');
-  });
-
-  it('does not repeat a dimension that collides with a shared exemplar column', () => {
-    const query = createExemplarsQuery({
-      exemplarsIndex: TEST_EXEMPLARS_INDEX,
-      metricItem: {
-        ...mockMetric,
-        dimensionFields: [{ name: 'trace.id' }, { name: 'attributes.http.route' }],
-      },
-    });
-
-    expect(query).toContain(
-      'KEEP @timestamp, metric_name, value, trace.id, span.id, `attributes.http.route`'
-    );
   });
 
   describe('returns an empty string so callers skip the fetch', () => {

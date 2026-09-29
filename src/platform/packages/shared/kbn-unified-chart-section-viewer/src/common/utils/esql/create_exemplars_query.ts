@@ -9,24 +9,11 @@
 
 import { esql } from '@elastic/esql';
 import { fieldConstants } from '@kbn/discover-utils';
-import { escapeStringValue, sanitazeESQLInput } from '@kbn/esql-utils';
-import {
-  EXEMPLARS_MAX_ROWS,
-  EXEMPLARS_METRIC_NAME_FIELD,
-  EXEMPLARS_VALUE_FIELD,
-} from '../../constants';
+import { escapeStringValue } from '@kbn/esql-utils';
+import { EXEMPLARS_MAX_ROWS, EXEMPLARS_METRIC_NAME_FIELD } from '../../constants';
 import type { ParsedMetricItem } from '../../../types';
 
-const { TIMESTAMP_FIELD, TRACE_ID_FIELD, SPAN_ID_FIELD } = fieldConstants;
-
-// `trace.id` and `span.id` are aliases of the stream's native `trace_id` / `span_id`.
-const BASE_COLUMNS = [
-  TIMESTAMP_FIELD,
-  EXEMPLARS_METRIC_NAME_FIELD,
-  EXEMPLARS_VALUE_FIELD,
-  TRACE_ID_FIELD,
-  SPAN_ID_FIELD,
-];
+const { TIMESTAMP_FIELD } = fieldConstants;
 
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
@@ -38,8 +25,9 @@ interface CreateExemplarsQueryParams {
 
 /**
  * Builds the ES|QL query that fetches OTel exemplars for one metric from `exemplarsIndex`, or
- * `''` when the metric has no name. Takes no breakdown accessors on purpose: breaking the chart
- * down does not change which exemplars are fetched.
+ * `''` when the metric has no name. Returns whole documents (no `KEEP`) so the inspect view can
+ * show every field an exemplar carries. Takes no breakdown accessors on purpose: breaking the
+ * chart down does not change which exemplars are fetched.
  */
 export function createExemplarsQuery({
   metricItem,
@@ -47,15 +35,14 @@ export function createExemplarsQuery({
   whereStatements = [],
   maxRows = EXEMPLARS_MAX_ROWS,
 }: CreateExemplarsQueryParams): string {
-  const { metricName, dimensionFields } = metricItem;
+  const { metricName } = metricItem;
 
   if (!metricName) {
     return '';
   }
 
-  // The exemplars mapping is dynamic, so a dimension that has never appeared on an exemplar
-  // document is unmapped and would fail `KEEP` verification, as would an inherited `WHERE`
-  // on a metric field that only exists in the metrics stream.
+  // Inherited `WHERE` clauses can reference metric fields that exist only in the metrics stream;
+  // the exemplars mapping is dynamic, so those are unmapped and would fail verification.
   const query = esql.from(exemplarsIndex);
   query.addSetCommand('unmapped_fields', 'NULLIFY');
 
@@ -69,13 +56,6 @@ export function createExemplarsQuery({
     }
   }
 
-  const keepColumns = [
-    ...BASE_COLUMNS,
-    ...dimensionFields
-      .filter(({ name }) => !BASE_COLUMNS.includes(name))
-      .map(({ name }) => sanitazeESQLInput(name)),
-  ];
-  query.pipe(`KEEP ${keepColumns.join(', ')}`);
   query.pipe(`SORT ${TIMESTAMP_FIELD} DESC`);
   query.pipe(`LIMIT ${maxRows}`);
 

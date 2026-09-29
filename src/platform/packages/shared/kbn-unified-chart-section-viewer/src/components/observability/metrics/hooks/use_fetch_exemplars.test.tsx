@@ -58,7 +58,7 @@ const TEST_ESQL_VARIABLES: ESQLControlVariable[] = [
   { key: 'service', value: 'checkout-service', type: ESQLVariableType.VALUES },
 ];
 const TEST_ESQL_QUERY =
-  'FROM exemplars-generic.otel-default | WHERE metric_name == "http.server.request.duration" | KEEP @timestamp, metric_name, value, trace.id, span.id | SORT @timestamp DESC | LIMIT 500';
+  'SET unmapped_fields = "NULLIFY";\nFROM exemplars-generic.otel-default | WHERE metric_name == "http.server.request.duration" | SORT @timestamp DESC | LIMIT 500';
 const TEST_COLUMNS = ['@timestamp', 'metric_name', 'value', 'trace.id', 'span.id'].map((name) => ({
   name,
   type: 'keyword',
