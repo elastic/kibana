@@ -8,18 +8,35 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retryDelay: 0 } },
     logger: { log: () => {}, warn: () => {}, error: () => {} },
   });
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
+
+const createHttpFetchError = ({
+  responseStatus,
+  bodyStatusCode,
+}: {
+  responseStatus?: number;
+  bodyStatusCode?: number;
+}): IHttpFetchError<ResponseErrorBody> =>
+  Object.assign(new Error('Forbidden'), {
+    request: {} as Request,
+    response: responseStatus === undefined ? undefined : ({ status: responseStatus } as Response),
+    body:
+      bodyStatusCode === undefined
+        ? undefined
+        : { message: 'Forbidden', statusCode: bodyStatusCode },
+  });
 
 describe('useMatchedActionPolicies', () => {
   it('returns items and evaluation metadata from the API on success', async () => {
@@ -56,7 +73,7 @@ describe('useMatchedActionPolicies', () => {
 
   it('captures error when the API call fails', async () => {
     const http = httpServiceMock.createStartContract();
-    http.fetch.mockRejectedValueOnce(new Error('Network error'));
+    http.fetch.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useMatchedActionPolicies({ http, tags: ['env:prod'] }), {
       wrapper: createWrapper(),
@@ -69,6 +86,24 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.items).toEqual([]);
     expect(result.current.evaluatedCount).toBe(0);
     expect(result.current.isTruncated).toBe(false);
+    expect(http.fetch).toHaveBeenCalledTimes(4);
+  });
+
+  it.each([
+    ['response status', createHttpFetchError({ responseStatus: 403 })],
+    ['response body status code', createHttpFetchError({ bodyStatusCode: 403 })],
+  ])('does not retry a 403 exposed through the %s', async (_, forbiddenError) => {
+    const http = httpServiceMock.createStartContract();
+    http.fetch.mockRejectedValue(forbiddenError);
+
+    const { result } = renderHook(() => useMatchedActionPolicies({ http }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.error).toBe(forbiddenError);
+    expect(http.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('re-fetches when tags change', async () => {
@@ -96,6 +131,46 @@ describe('useMatchedActionPolicies', () => {
     await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-2'));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports previous matches while the query for new tags is still in flight', async () => {
+    const http = httpServiceMock.createStartContract();
+    let resolveNext: (value: unknown) => void = () => {};
+    http.fetch.mockResolvedValueOnce({
+      items: [{ action_policy: { id: 'ap-1' }, category: 'tags' }],
+      total: 1,
+      evaluated_count: 1,
+      is_truncated: false,
+    } as any);
+    http.fetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveNext = resolve;
+        })
+    );
+
+    const { result, rerender } = renderHook(
+      ({ tags }: { tags: string[] }) => useMatchedActionPolicies({ http, tags }),
+      { wrapper: createWrapper(), initialProps: { tags: ['env:prod'] } }
+    );
+
+    await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-1'));
+
+    rerender({ tags: ['env:staging'] });
+
+    await waitFor(() => expect(result.current.isPreviousData).toBe(true));
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.items[0].action_policy.id).toBe('ap-1');
+
+    resolveNext({
+      items: [{ action_policy: { id: 'ap-2' }, category: 'catch_all' }],
+      total: 1,
+      evaluated_count: 1,
+      is_truncated: false,
+    });
+
+    await waitFor(() => expect(result.current.isPreviousData).toBe(false));
+    expect(result.current.items[0].action_policy.id).toBe('ap-2');
   });
 
   it('fires a request with an empty rule body when no tags are provided', async () => {

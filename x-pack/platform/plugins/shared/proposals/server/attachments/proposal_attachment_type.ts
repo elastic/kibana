@@ -43,22 +43,17 @@ const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): st
  * only action the agent can request — it cannot run the action itself.
  */
 const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
-  // Deliberately NOT `PROPOSAL_WITHOUT_ACTION_LABEL`: this string is LLM prompt input
-  // and must stay untranslated and carry the analyst-directive clause. The UI badge
-  // ("No automated action") lives in public/translations.ts.
-  const label =
-    proposal.action?.name ??
-    proposal.actionWorkflowId ??
-    'No automated action — analyst carries this out themselves';
-
   // Both, because they can disagree: `expired` is the deadline evaluated on
   // read, while `status: 'expired'` is the settlement the gate writes when
   // nobody answered — which it can do before the deadline itself passes.
   const isExpired = proposal.expired || proposal.status === 'expired';
 
   const lines: string[] = [
-    `## Proposal: ${label}`,
+    `## Proposal: ${proposal.title}`,
     `Status: ${proposal.status}`,
+    // Its own line now that every proposal carries a title: the agent still has
+    // to know that nothing runs unless the analyst does it themselves.
+    proposal.actionWorkflowId ? '' : 'No automated action — analyst carries this out themselves',
     // Not "the deadline has passed": the gate can settle a proposal as expired
     // before its deadline, and `Decision deadline` below would then print a
     // future date directly under a banner claiming it was behind us.
@@ -121,7 +116,7 @@ export const createProposalAttachmentType = ({
         // proposal id here, which without this check would read it back to the
         // LLM for someone holding no proposals privilege at all.
         await privileges.assertCanRead(request);
-        const proposal = await getProposalsService().get(proposalId, spaceId);
+        const proposal = await getProposalsService().get(proposalId, spaceId, request);
         return { type: 'text', value: formatProposalForAgent(proposal) };
       } catch (error) {
         logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);

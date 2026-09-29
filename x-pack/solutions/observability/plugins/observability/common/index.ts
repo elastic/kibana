@@ -31,6 +31,7 @@ export {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
+  apmMaxNumberOfServices,
   enableInfrastructureAssetCustomDashboards,
   apmEnableTableSearchBar,
   apmAWSLambdaPriceFactor,

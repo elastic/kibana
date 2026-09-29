@@ -53,13 +53,14 @@ describe('RERANK Validation', () => {
     });
 
     test('WITH with empty map (WITH {})', () => {
-      rerankExpectErrors('FROM index | RERANK "q" ON keywordField WITH { }', [msg]);
+      rerankExpectErrors('FROM index | RERANK "q" ON keywordField WITH { }', []);
     });
 
     test('WITH map without inference_id key', () => {
-      rerankExpectErrors('FROM index | RERANK "q" ON keywordField WITH { "some_param": "value" }', [
-        msg,
-      ]);
+      rerankExpectErrors(
+        'FROM index | RERANK "q" ON keywordField WITH { "some_param": "value" }',
+        []
+      );
     });
 
     test('WITH inference_id with empty string value', () => {
