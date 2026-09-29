@@ -269,11 +269,13 @@ export const getElasticResource = (
   const deploymentId = cloud?.deploymentId || getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
 
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    return { type: ELASTIC_RESOURCE_TYPE_DEPLOYMENT, id: kibanaComponentId };
-  }
+  // Serverless projects also carry a deploymentId (the project ID) and a `<projectId>.kb`
+  // Kibana component in the cloud ID, so the project check must come first.
   if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
     return { type: ELASTIC_RESOURCE_TYPE_PROJECT, id: cloud.serverless.projectId };
+  }
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    return { type: ELASTIC_RESOURCE_TYPE_DEPLOYMENT, id: kibanaComponentId };
   }
   return {
     type: cloud?.isServerlessEnabled
