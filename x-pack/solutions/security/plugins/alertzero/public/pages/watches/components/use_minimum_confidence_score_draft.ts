@@ -77,7 +77,10 @@ export const useMinimumConfidenceScoreDraft = ({
       return;
     }
     const raw = Number(value);
-    if (!Number.isFinite(raw) || raw < 0 || raw > 100) {
+    // Integer only: a fractional percentage (e.g. 85.6) would persist as 0.856, but the next
+    // server echo redisplays it as Math.round(85.6) = 86 — showing an 86% floor while alerts
+    // as low as 85.6% actually qualify for closure.
+    if (!Number.isInteger(raw) || raw < 0 || raw > 100) {
       return;
     }
     draftRef.current = raw;

@@ -74,6 +74,22 @@ describe('useMinimumConfidenceScoreDraft', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('ignores fractional percentages', () => {
+    // Number('85.6') is a valid finite number in [0, 100], but persisting it would store
+    // 0.856 while the field displays a rounded 86% on the next server echo — a mismatch
+    // between what analysts see as the floor and what is actually enforced.
+    const onChange = jest.fn();
+    const { result } = renderHook(() =>
+      useMinimumConfidenceScoreDraft({ current: 0.85, onChange })
+    );
+
+    act(() => result.current.onValueChange(changeEvent('85.6')));
+    act(() => result.current.onBlur());
+
+    expect(result.current.draft).toBe(85);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('ignores out-of-range inputs (< 0)', () => {
     const onChange = jest.fn();
     const { result } = renderHook(() => useMinimumConfidenceScoreDraft({ current: 0.5, onChange }));

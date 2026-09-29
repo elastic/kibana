@@ -67,6 +67,18 @@ describe('MinimumConfidenceScoreField', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('ignores fractional percentages', () => {
+    // Persisting 85.6 would store 0.856 while the field displays a rounded 86% on the next
+    // server echo — a mismatch between the displayed floor and what is actually enforced.
+    const { onChange, input } = renderField(0.85);
+
+    fireEvent.change(input(), { target: { value: '85.6' } });
+    fireEvent.blur(input());
+
+    expect(input().value).toBe('85');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('ignores out-of-range inputs (< 0)', () => {
     const { onChange, input } = renderField(0.5);
 
