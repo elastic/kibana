@@ -613,6 +613,22 @@ describe('config validation', () => {
     });
   });
 
+  describe('auth.ears.enabled default', () => {
+    test('defaults enabled to true when ears.url is set but enabled is omitted', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com' } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(true);
+    });
+
+    test('respects explicit enabled: false when ears.url is set', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com', enabled: false } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(false);
+    });
+  });
+
   describe('auth.ears.ssl', () => {
     test('accepts certificate and key together', () => {
       const result = configSchema.validate({
