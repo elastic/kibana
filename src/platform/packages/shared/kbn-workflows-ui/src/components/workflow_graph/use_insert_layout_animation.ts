@@ -209,11 +209,22 @@ export function useInsertLayoutAnimation({
 
   const animatedEdges = isSliding
     ? edges.map((edge) => {
+        const edgeData = (edge.data ?? {}) as Record<string, unknown> & {
+          points?: unknown;
+          hideEndMarker?: boolean;
+        };
+        // Bypass-lane target edges (hideEndMarker=true) target invisible 1×1
+        // placeholder nodes. Keep their dagre waypoints so the fork-bus path
+        // and labels hold their *final* layout positions throughout the slide —
+        // the 1×1 node is invisible, so the endpoint mismatch during tween is
+        // never seen. Skipping drawIn avoids the progressive-reveal animation
+        // on structural placeholders.
+        if (edgeData.hideEndMarker) {
+          return edge;
+        }
         const targets = insertedIdsRef.current;
         const drawIn = targets.has(edge.source) || targets.has(edge.target);
-        const { points: _drop, ...restData } = (edge.data ?? {}) as Record<string, unknown> & {
-          points?: unknown;
-        };
+        const { points: _drop, ...restData } = edgeData;
         return {
           ...edge,
           data: {
@@ -226,10 +237,6 @@ export function useInsertLayoutAnimation({
         };
       })
     : edges;
-
-  // DEBUG: trace edge count at animation layer — remove once root cause is found
-  // eslint-disable-next-line no-console
-  console.log('[useInsertLayoutAnimation] animatedEdges:', animatedEdges.length, 'input edges:', edges.length, 'isSliding:', isSliding);
 
   return { nodes: animatedNodes, edges: animatedEdges, isSliding };
 }

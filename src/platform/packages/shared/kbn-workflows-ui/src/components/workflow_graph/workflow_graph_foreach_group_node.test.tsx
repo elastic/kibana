@@ -183,6 +183,26 @@ describe('WorkflowGraphForeachGroupNode', () => {
         screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')
       ).not.toBeInTheDocument();
     });
+
+    it('stops propagation on the + click so it cannot bubble into ReactFlow onNodeClick', () => {
+      // If the click reaches ReactFlow's React synthetic event system it selects the
+      // foreach and opens its edit panel, running replaceStepFragment on the foreach.
+      // We wrap the component in a div with a React onClick to simulate onNodeClick,
+      // then assert it never fires when the + button is clicked.
+      const parentClickSpy = jest.fn();
+      render(
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div onClick={parentClickSpy}>
+          <WorkflowGraphActionsContext.Provider value={{ edit: editActions }}>
+            <WorkflowGraphForeachGroupNode {...makeNodeProps({ hasBodySteps: false } as any)} />
+          </WorkflowGraphActionsContext.Provider>
+        </div>
+      );
+      fireEvent.click(screen.getByTestId('workflowGraphForeachGroupAddFirstStep'));
+      // The click must not reach the React parent — if it did, ReactFlow's onNodeClick
+      // would select the foreach and trigger its edit panel, deleting the foreach node.
+      expect(parentClickSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('3-dots action menu', () => {

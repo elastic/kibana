@@ -332,12 +332,11 @@ export const computeEdgePath = ({
   // the bus (LR) so all branch labels align on one row/column regardless of
   // how deep each branch target sits.
   //
-  // Exception: bypass-lane targets (hideEndMarker=true, invisible 1×1 nodes
-  // for empty branches) use a straight diagonal instead of the bus shape so
-  // the dangling stub looks like a simple labeled line, not a right-angle jog.
-  const isForkEdge =
-    !hideEndMarker &&
-    (branchType === 'switch' || branchType === 'then' || branchType === 'else');
+  // Bypass-lane targets (hideEndMarker=true, invisible 1×1 nodes for empty
+  // branches) intentionally use the same bus shape so all empty-case stubs
+  // spread out in a proper fan-out — consistent with non-empty branches and
+  // ensures labels at different targetX values sit on an aligned row.
+  const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
   // isLR checks both sides: the failure handle is unconditionally Position.Bottom (so that
   // the edge exits the bottom edge in both TB and LR), but spine/fork edges still anchor
   // on the right in LR. The target side is always direction-faithful, so checking it

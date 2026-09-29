@@ -68,6 +68,9 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
 
   const handleAddFirstStep = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Stop propagation so the click doesn't bubble into ReactFlow's onNodeClick,
+      // which would select the foreach and open its edit panel instead of the insert menu.
+      e.stopPropagation();
       if (!actions.edit) return;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       actions.edit.onInsert(

@@ -368,6 +368,19 @@ describe('WorkflowGraphEdge — branch label casing', () => {
     );
     expect(screen.getByText('caseA')).toBeInTheDocument();
   });
+
+  it('renders a placeholder label for switch cases with an empty match value', () => {
+    // A switch case with match: '' produces label=''. Without a placeholder,
+    // showLabel = Boolean('') = false and the label pill is never rendered —
+    // making it impossible for the user to distinguish the case on the canvas.
+    renderSingleEdge(
+      makeEdgeProps({
+        id: 'e-empty-match',
+        data: { branchType: 'switch', label: '' },
+      })
+    );
+    expect(screen.getByText('""')).toBeInTheDocument();
+  });
 });
 
 describe('WorkflowGraphEdge — on-failure route', () => {

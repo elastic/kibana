@@ -639,10 +639,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     flashNodeId,
   });
 
-  // DEBUG: trace edges into ReactFlow — remove once root cause is found
-  // eslint-disable-next-line no-console
-  console.log('[Canvas] animatedEdges:', animatedEdges.length, 'layoutEdges:', layoutEdges.length, 'animatedNodes:', animatedNodes.length, 'suppressInsertionControls:', suppressInsertionControls);
-
   const handleNodeClick = useCallback(
     (_evt: React.MouseEvent, node: { id: string; data: Record<string, unknown> }) => {
       const stepType = typeof node.data?.stepType === 'string' ? node.data.stepType : '';

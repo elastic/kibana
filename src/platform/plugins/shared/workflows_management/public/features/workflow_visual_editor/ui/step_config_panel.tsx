@@ -94,6 +94,8 @@ export interface StepConfigPanelProps {
   readonly minWidth?: number;
   readonly maxWidth?: number;
   readonly onResize?: (width: number) => void;
+  /** Called whenever the in-flight YAML fragment changes (every form edit). */
+  readonly onFragmentChange?: (fragment: string) => void;
 }
 
 const DEFAULT_FLYOUT_SIZE = 560;
@@ -213,6 +215,7 @@ export function StepConfigPanel({
   minWidth = DEFAULT_FLYOUT_MIN_WIDTH,
   maxWidth,
   onResize,
+  onFragmentChange,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -260,6 +263,10 @@ export function StepConfigPanel({
     setNameError(undefined);
     setExpandedField(null);
   }, [initialFragment]);
+
+  useEffect(() => {
+    onFragmentChange?.(fragment);
+  }, [fragment, onFragmentChange]);
 
   const schema = useMemo(() => getStepFormSchema(stepType, connectors), [stepType, connectors]);
   // Name is edited in the header only — never as a form body field.

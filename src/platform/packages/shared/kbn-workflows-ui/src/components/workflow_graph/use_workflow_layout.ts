@@ -313,7 +313,8 @@ export function useWorkflowLayout({
   }, [stepExecutionMap, scopeIdsByStepId, topologyMeta]);
 
   const derivedNodes = useMemo<Node[]>(() => {
-    const { allBypassLaneIds, innerNodeToGroupId, innerNodeCountByGroupId, allDomainNodes } = topologyMeta;
+    const { allBypassLaneIds, innerNodeToGroupId, innerNodeCountByGroupId, allDomainNodes } =
+      topologyMeta;
     const positionedById = new Map(layoutSnapshot.nodes.map((n) => [n.id, n]));
 
     const isHorizontal = direction === 'LR';
@@ -323,7 +324,17 @@ export function useWorkflowLayout({
     const domainNodes = allDomainNodes.map((n) => {
       const pos = positionedById.get(n.id);
       if (!pos) {
-        return { id: n.id, type: n.type, position: { x: 0, y: 0 }, data: n.data };
+        // Node not yet in the layout snapshot (e.g. a new preview inner node
+        // before dagre has run). Preserve parentId so an inner foreach node
+        // renders inside the container rather than at absolute {0,0}.
+        const parentId = innerNodeToGroupId.get(n.id);
+        return {
+          id: n.id,
+          type: n.type,
+          position: { x: 0, y: 0 },
+          data: n.data,
+          ...(parentId ? { parentId, extent: 'parent' as const } : {}),
+        };
       }
 
       // dagLayout returns absolute coordinates. React Flow expects positions
@@ -531,10 +542,6 @@ export function useWorkflowLayout({
     branchTraversal,
     syntheticTriggerExecution,
   ]);
-
-  // DEBUG: trace edge count at each layer — remove once root cause is found
-  // eslint-disable-next-line no-console
-  console.log('[useWorkflowLayout] derivedEdges:', derivedEdges.length, 'allEdges:', topologyMeta.allEdges.length, 'transformed.edges:', transformed.edges.length, 'workflow steps:', (workflow as any)?.steps?.length ?? 'n/a');
 
   return { nodes: derivedNodes, edges: derivedEdges, transformed };
 }

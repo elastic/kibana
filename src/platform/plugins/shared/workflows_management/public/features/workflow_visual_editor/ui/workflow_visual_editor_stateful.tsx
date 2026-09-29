@@ -33,13 +33,14 @@ import {
   type PendingInsertStepContext,
   type PendingInsertVisual,
   type RenderStepIcon,
-  useWorkflowsCapabilities,
   useWorkflowGraphPocToggles,
+  useWorkflowsCapabilities,
   type WorkflowGraphAnchorRect,
   WorkflowGraphCanvasWithoutProvider,
   type WorkflowGraphEditActions,
   type WorkflowGraphInsertionContext,
 } from '@kbn/workflows-ui';
+import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
@@ -53,16 +54,16 @@ import {
   selectEditorWorkflowLookup,
   selectEditorYaml,
   selectIsExecutionsTab,
-  selectYamlString,
   selectIsYamlSyntaxValid,
   selectStepExecutions,
   selectWorkflowId,
   selectWorkflowName,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  applyYamlEdit,
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
-  applyYamlEdit,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -70,7 +71,11 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../widgets/workflow_yaml_editor/lib/snippets/generate_trigger_snippet';
-import { type ActionOptionData, type ActionsMenuInsertionContext, ActionsMenuPopover } from '../../actions_menu_popover';
+import {
+  type ActionOptionData,
+  type ActionsMenuInsertionContext,
+  ActionsMenuPopover,
+} from '../../actions_menu_popover';
 import { collectStepsByName } from '../lib/collect_steps';
 import { buildDefaultStep, isStepIncomplete } from '../lib/step_form_schema';
 import {
@@ -184,7 +189,9 @@ const triggerFragmentFor = (triggerType: string): string => {
 };
 
 /** Maps a graph insertion context to the simplified menu context mode. */
-const toMenuInsertionContext = (ctx: WorkflowGraphInsertionContext): ActionsMenuInsertionContext => {
+const toMenuInsertionContext = (
+  ctx: WorkflowGraphInsertionContext
+): ActionsMenuInsertionContext => {
   if (ctx.mode === 'trigger') return { mode: 'trigger' };
   if (ctx.mode === 'fallback') return { mode: 'error' };
   return { mode: 'step' };
@@ -276,6 +283,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const [panel, setPanel] = useState<PanelState | null>(null);
   const [flashNodeId, setFlashNodeId] = useState<string | undefined>(undefined);
   const [pendingInsert, setPendingInsert] = useState<PendingInsertVisual | null>(null);
+  const [liveFragment, setLiveFragment] = useState<string | null>(null);
 
   // POC pattern: cache the last valid WorkflowYaml so the canvas can stay
   // up while the user fixes a YAML syntax error.
@@ -306,16 +314,75 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const workflow = definition ?? lastValidRef.current;
 
-  // DEBUG: trace workflow source — remove once root cause is found
-  // eslint-disable-next-line no-console
-  console.log('[StatefulEditor] definition steps:', (definition as any)?.steps?.length ?? 'UNDEFINED', 'lastValidRef steps:', (lastValidRef.current as any)?.steps?.length ?? 'UNDEFINED', 'panel:', panel?.mode ?? 'null');
-
   const disabledTriggerIds = useMemo(() => {
     const hasManual = workflow?.triggers?.some((t) => t.type === 'manual');
     return hasManual ? (['manual'] as const) : undefined;
   }, [workflow?.triggers]);
 
   const transformed = useMemo(() => transformWorkflowToGraph(workflow), [workflow]);
+
+  // When the insert flyout is open, compute a live preview of the graph that
+  // includes the in-flight step so the user sees branches (e.g. switch cases)
+  // update as they type — without committing to the Redux store.
+  //
+  // Both workflow and transformed must come from the same preview YAML so that
+  // useWorkflowLayout's topologyFingerprint (derived from workflow) changes when
+  // the preview changes — otherwise dagre skips layout and the new node lands at {0,0}.
+  const previewData = useMemo(() => {
+    if (!panel) return null;
+    // Use liveFragment when the user has edited the step (child effect fires first,
+    // but parent panelKey effect may clear it on the same flush). Fall back to
+    // panel.fragment (the default/initial YAML for the step) so the preview renders
+    // immediately when the panel opens, before the user types anything.
+    const fragment =
+      liveFragment ?? (panel.mode === 'insert' || panel.mode === 'edit' ? panel.fragment : null);
+    if (!fragment) return null;
+    let mutation = null;
+    if (panel.mode === 'insert') {
+      const ctx = panel.context;
+      mutation =
+        ctx.mode === 'prepend-step'
+          ? prependStep(yamlString, fragment)
+          : ctx.mode === 'after'
+          ? insertStepAfterName(yamlString, fragment, ctx.stepName)
+          : ctx.mode === 'branch'
+          ? insertStepIntoBranch(yamlString, fragment, ctx.stepName, ctx.branch)
+          : ctx.mode === 'fallback'
+          ? setStepFallback(yamlString, ctx.stepName, fragment)
+          : null;
+    } else if (panel.mode === 'edit') {
+      mutation = replaceStepFragment(yamlString, panel.stepName, fragment);
+    }
+    if (!mutation?.success) return null;
+    const parseResult = parseWorkflowYamlForAutocomplete(mutation.yaml);
+    if (!parseResult.success) return null;
+    const previewWorkflow = parseResult.data as WorkflowYaml;
+    return { workflow: previewWorkflow, transformed: transformWorkflowToGraph(previewWorkflow) };
+  }, [liveFragment, panel, yamlString]);
+
+  // Clear the live fragment when the panel closes or switches identity (e.g.
+  // clicking the foreach node while an insert is pending would switch directly
+  // from insert mode to edit mode, leaving the previous fragment in place for
+  // one render and letting replaceStepFragment clobber the wrong step).
+  const panelKey =
+    panel == null
+      ? null
+      : panel.mode === 'edit'
+      ? `edit:${panel.stepName}`
+      : panel.mode === 'edit-trigger'
+      ? `edit-trigger:${panel.triggerIndex}`
+      : panel.mode === 'insert'
+      ? `insert:${panel.context.mode}:${
+          panel.context.mode === 'after' ||
+          panel.context.mode === 'branch' ||
+          panel.context.mode === 'fallback'
+            ? panel.context.stepName
+            : ''
+        }`
+      : `insert-trigger:${panel.mode}`;
+  useEffect(() => {
+    setLiveFragment(null);
+  }, [panelKey]);
 
   const stepsByName = useMemo(() => collectStepsByName(workflow), [workflow]);
 
@@ -367,7 +434,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     },
     [dispatch, notifications.toasts]
   );
-
 
   /** Inserts a step fragment per the name-addressed insertion context and flashes the new node. */
   const insertFragment = useCallback(
@@ -478,14 +544,15 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const handlePanelCancel = useCallback(() => {
     if (keepNodeOnCancel && panel?.mode === 'insert') {
-      const parsedName = parseDocument(panel.fragment).get('name');
+      const fragment = liveFragment ?? panel.fragment;
+      const parsedName = parseDocument(fragment).get('name');
       const newName = typeof parsedName === 'string' ? parsedName : undefined;
-      insertFragment(panel.context, panel.fragment, newName);
+      insertFragment(panel.context, fragment, newName);
     }
     setPanel(null);
     setPendingInsert(null);
     setSelectedStep(null);
-  }, [keepNodeOnCancel, panel, insertFragment, setSelectedStep]);
+  }, [keepNodeOnCancel, panel, liveFragment, insertFragment, setSelectedStep]);
 
   const panelIsFallbackStep = useMemo(() => {
     if (!panel) return false;
@@ -599,9 +666,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         const isFallback =
           ref.kind === 'step' &&
           Boolean(
-            (transformed.nodes.find((n) => n.id === nodeId)?.data as
-              | { fallbackOf?: string }
-              | undefined)?.fallbackOf
+            (
+              transformed.nodes.find((n) => n.id === nodeId)?.data as
+                | { fallbackOf?: string }
+                | undefined
+            )?.fallbackOf
           );
         const yamlBeforeDelete = yamlString;
         const result =
@@ -758,10 +827,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
       // Let Monaco handle it when focus is already inside the editor.
       const target = event.target;
-      if (
-        target instanceof HTMLElement &&
-        target.closest('.monaco-editor')
-      ) {
+      if (target instanceof HTMLElement && target.closest('.monaco-editor')) {
         return;
       }
       event.preventDefault();
@@ -771,22 +837,21 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [editorRef]);
 
-  const handleCreationPickTrigger = useCallback(
-    (triggerType: 'manual' | 'alert' | 'scheduled') => {
-      setPanel({
-        mode: 'insert-trigger',
-        triggerType,
-        triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
-        fragment: triggerFragmentFor(triggerType),
-      });
-    },
-    []
-  );
+  const handleCreationPickTrigger = useCallback((triggerType: 'manual' | 'alert' | 'scheduled') => {
+    setPanel({
+      mode: 'insert-trigger',
+      triggerType,
+      triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
+      fragment: triggerFragmentFor(triggerType),
+    });
+  }, []);
 
   const handleCreationPickAction = useCallback(
     (anchor: DOMRect) => {
       const insertionCtx: WorkflowGraphInsertionContext = { mode: 'prepend-step' };
-      const pendingCtx = toPendingContext(insertionCtx, nodeIdForStepName) ?? { mode: 'step' as const };
+      const pendingCtx = toPendingContext(insertionCtx, nodeIdForStepName) ?? {
+        mode: 'step' as const,
+      };
       setInsertion({
         context: insertionCtx,
         anchor: {
@@ -864,8 +929,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       css={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}
     >
       <WorkflowGraphCanvasWithoutProvider
-        workflow={workflow}
-        transformed={transformed}
+        workflow={previewData?.workflow ?? workflow}
+        transformed={previewData?.transformed ?? transformed}
         stepExecutions={stepExecutions}
         isYamlValid={isYamlValid}
         selectedStepId={selectedStepId}
@@ -882,8 +947,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         incompleteNodeIds={incompleteNodeIds}
         flashNodeId={flashNodeId}
         emptyState={creationEmptyState}
-        pendingInsert={pendingInsert ?? undefined}
-        suppressInsertionControls={panel != null}
+        pendingInsert={previewData ? undefined : pendingInsert ?? undefined}
       />
       {insertion && (
         <ActionsMenuPopover
@@ -920,6 +984,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             typeof window !== 'undefined' ? window.innerWidth * 0.5 : DEFAULT_CONFIG_PANEL_WIDTH
           }
           onResize={(width) => setStoredPanelWidth(width)}
+          onFragmentChange={setLiveFragment}
         />
       )}
       {panel && (panel.mode === 'edit-trigger' || panel.mode === 'insert-trigger') && (

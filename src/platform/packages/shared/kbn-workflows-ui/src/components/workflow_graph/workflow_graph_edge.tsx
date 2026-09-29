@@ -60,6 +60,9 @@ function displayEdgeLabel(label: string): string {
   if (label === 'on failure') {
     return i18n.translate('workflowsUi.graph.onFailureLabel', { defaultMessage: 'on failure' });
   }
+  if (label === '') {
+    return i18n.translate('workflowsUi.graph.emptyCaseLabel', { defaultMessage: '""' });
+  }
   return label;
 }
 

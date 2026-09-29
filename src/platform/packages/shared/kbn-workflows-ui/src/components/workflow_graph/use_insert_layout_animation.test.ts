@@ -123,10 +123,76 @@ describe('useInsertLayoutAnimation', () => {
     expect(
       sliding.filter((e) => (e.data as { drawIn?: boolean } | undefined)?.drawIn)
     ).toHaveLength(2);
-    // Absolute waypoints are cleared for every edge while nodes tween.
+    // Absolute waypoints are cleared for non-bypass edges while nodes tween.
     for (const e of sliding) {
       expect((e.data as { points?: unknown } | undefined)?.points).toBeUndefined();
     }
+  });
+
+  it('keeps dagre waypoints and skips drawIn for bypass-lane target edges during sliding', () => {
+    // Bypass-lane target edges (hideEndMarker=true) point to invisible 1×1
+    // placeholder nodes. Their fork-bus path must remain at the final-layout
+    // positions throughout the tween so the branch label never disappears
+    // (Bug 2a: default edge collapse) and the full fan-out is visible from the
+    // start of animation (Bug 2b: "only the final bit" on new case edges).
+    const bypassPoints = [{ x: 50, y: 80 }];
+    const initial = [node('sw', 0, 0), node('after', 0, 200)];
+    const { result, rerender } = renderHook(
+      ({ nodes, flashNodeId }: { nodes: Node[]; flashNodeId?: string }) =>
+        useInsertLayoutAnimation({
+          nodes,
+          edges: [
+            // New bypass edge for the inserted case branch — targets a bypass node.
+            {
+              ...edge('sw-case0', 'sw', 'case0-bypass'),
+              data: { points: bypassPoints, hideEndMarker: true },
+            },
+            // Existing default bypass edge — also targets a bypass node.
+            {
+              ...edge('sw-default', 'sw', 'default-bypass'),
+              data: { points: bypassPoints, hideEndMarker: true },
+            },
+            // Normal edge — must still have points stripped.
+            {
+              ...edge('merge', 'case0-bypass', 'after'),
+              data: { points: [{ x: 0, y: 150 }] },
+            },
+          ],
+          flashNodeId,
+        }),
+      { initialProps: { nodes: initial, flashNodeId: undefined as string | undefined } }
+    );
+
+    rerender({
+      nodes: [
+        node('sw', 0, 0),
+        node('case0-bypass', -60, 122),
+        node('default-bypass', 60, 122),
+        node('after', 0, 244),
+      ],
+      flashNodeId: 'case0-bypass',
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(16);
+    });
+
+    const sliding = result.current.edges;
+
+    // Bypass edges keep their dagre waypoints.
+    const bypassEdges = sliding.filter(
+      (e) => (e.data as { hideEndMarker?: boolean } | undefined)?.hideEndMarker
+    );
+    expect(bypassEdges).toHaveLength(2);
+    for (const e of bypassEdges) {
+      expect((e.data as { points?: unknown } | undefined)?.points).toEqual(bypassPoints);
+      // drawIn must not be set — bypass nodes are invisible placeholders.
+      expect((e.data as { drawIn?: boolean } | undefined)?.drawIn).toBeUndefined();
+    }
+
+    // Non-bypass edges still have their waypoints stripped.
+    const mergeEdge = sliding.find((e) => e.id === 'merge');
+    expect((mergeEdge?.data as { points?: unknown } | undefined)?.points).toBeUndefined();
   });
 
   it('restores edge waypoints after the slide completes', () => {
