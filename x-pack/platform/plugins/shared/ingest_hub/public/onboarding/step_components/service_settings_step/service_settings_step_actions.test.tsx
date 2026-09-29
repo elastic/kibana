@@ -85,6 +85,7 @@ function renderStep(instances: ServiceInstance[], servicesMap: Map<string, AwsSe
     awsServicesMap: servicesMap,
     detectAndReviewStep: { policyIdsByInstance: {}, serviceStatuses: {} },
     servicesStep: { selectedServiceIds: instances.map((i) => i.serviceId) },
+    refetchAwsServiceMatrix: jest.fn(),
   });
   (useServiceSettings as jest.Mock).mockReturnValue({
     globalRegion: 'us-east-1',
@@ -183,6 +184,7 @@ describe('ServiceSettingsStep — global region lock', () => {
         serviceStatuses: detectAndReviewStep.serviceStatuses ?? {},
       },
       servicesStep: { selectedServiceIds: [] },
+      refetchAwsServiceMatrix: jest.fn(),
     });
     (useServiceSettings as jest.Mock).mockReturnValue({
       globalRegion: 'us-east-1',
@@ -244,6 +246,7 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
       awsServicesMap: servicesMap,
       detectAndReviewStep: { policyIdsByInstance: {}, serviceStatuses: {} },
       servicesStep: { selectedServiceIds },
+      refetchAwsServiceMatrix: jest.fn(),
     });
     (useServiceSettings as jest.Mock).mockReturnValue({
       globalRegion: 'us-east-1',
@@ -291,15 +294,43 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
     expect(screen.getByTestId('serviceSettingsStep-continueButton')).not.toBeDisabled();
   });
 
-  it('enables Next when a selected manifest has errored (Step 3 handles retry)', () => {
-    const erroredSvc: AwsServiceMatrixEntry = {
-      ...PENDING_SVC,
-      isManifestError: true,
-    };
-    renderWithManifestState(
-      new Map([['pending_svc', erroredSvc]]),
-      ['pending_svc']
+  it('disables Next and shows an error callout with retry when a selected manifest has errored', () => {
+    const mockRefetch = jest.fn();
+    (useOnboardingFlow as jest.Mock).mockReturnValue({
+      awsServicesMap: new Map([['pending_svc', { ...PENDING_SVC, isManifestError: true }]]),
+      detectAndReviewStep: { policyIdsByInstance: {}, serviceStatuses: {} },
+      servicesStep: { selectedServiceIds: ['pending_svc'] },
+      refetchAwsServiceMatrix: mockRefetch,
+    });
+    (useServiceSettings as jest.Mock).mockReturnValue({
+      globalRegion: 'us-east-1',
+      setGlobalRegion: jest.fn(),
+      instances: [],
+      filteredInstances: [],
+      incompleteInstances: [],
+      incompleteInstanceIds: new Set(),
+      searchQuery: '',
+      setSearchQuery: jest.fn(),
+      signalFilter: 'all',
+      setSignalFilter: jest.fn(),
+      getServiceVars: jest.fn().mockReturnValue({ enabledDataStreams: [], varsByDataStream: {} }),
+      setServiceFieldsAndInputs: jest.fn(),
+      addDuplicate: jest.fn(),
+      removeInstance: jest.fn(),
+      allInstanceNames: [],
+      globalRegionTouched: false,
+      setGlobalRegionTouched: jest.fn(),
+      isReady: true,
+      handleNext: jest.fn(),
+    });
+    render(
+      <I18nProvider>
+        <ServiceSettingsStep onContinue={jest.fn()} />
+      </I18nProvider>
     );
-    expect(screen.getByTestId('serviceSettingsStep-continueButton')).not.toBeDisabled();
+    expect(screen.getByTestId('serviceSettingsStep-continueButton')).toBeDisabled();
+    expect(screen.getByTestId('serviceSettingsStep-manifestErrorCallout')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('serviceSettingsStep-manifestRetryButton'));
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 });
