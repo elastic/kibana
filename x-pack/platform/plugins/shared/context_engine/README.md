@@ -77,7 +77,8 @@ and cannot be overridden:
   `governance.lifecycle.status` the status filter, any `governance.*` the
   drop. When a data stream is read, only the newest revision of each `id` per
   target is considered in every case (`METADATA _id, _index` are added when
-  missing). Indices outside the registry are read as-is.
+  missing). An index outside the registry is read as-is on its own; in a query
+  that also reads a registered dest, the pipeline applies to every row.
 - **Space filter.** Documents are visible when they carry no
   `permissions.kibana.privileges` element (public), or when one is scoped to
   the request's space or to `*`. The space comes from the request URL
