@@ -6,6 +6,7 @@
  */
 
 import path from 'path';
+import { hunts as awsIamHunts } from '../packs/aws-iam/hunts';
 import { readNdjson } from './episodes';
 import { enrichDocForGraph } from './graph_enrichment';
 import { scriptsDataDir } from './indexing';
@@ -40,8 +41,8 @@ describe('PACK_TI_SCENARIOS', () => {
     ]);
   });
 
-  it('gives aws-iam four scenarios and every other pack exactly one', () => {
-    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(4);
+  it('gives aws-iam five scenarios and every other pack exactly one', () => {
+    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(5);
     expect(PACK_TI_SCENARIOS.okta).toHaveLength(1);
     expect(PACK_TI_SCENARIOS.kubernetes).toHaveLength(1);
     expect(PACK_TI_SCENARIOS['github-actions']).toHaveLength(1);
@@ -51,6 +52,7 @@ describe('PACK_TI_SCENARIOS', () => {
     expect(allThreatIntelSourceIds().sort()).toEqual([
       'aws-iam-assume-role',
       'aws-iam-behavior-only',
+      'aws-iam-clean',
       'aws-iam-ioc-only',
       'ti-rss-aws-iam',
       'ti-rss-github-actions',
@@ -401,7 +403,7 @@ describe('resolveHistoricSourceName', () => {
         else newer.add(name);
       }
     }
-    expect(older.size).toBe(7);
+    expect(older.size).toBe(8);
     expect(newer.size).toBeGreaterThan(older.size);
   });
 });
@@ -454,20 +456,254 @@ describe('pack TI join contract', () => {
     expect(missing).toEqual([]);
   });
 
-  it('keeps article-only join IOCs off pack ECS so Tier 1 stays clean for behavior-only', async () => {
-    const scenario = PACK_TI_SCENARIOS['aws-iam'].find((s) => s.reportIdSlug === 'aws-iam-behavior-only');
-    expect(scenario?.joinIocsArticleOnly).toBe(true);
-    const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
-    const raw = await readNdjson(eventsPath);
-    const docs = raw.map((doc) => {
-      const next = structuredClone(doc);
-      ensureEcsSourceIp(next);
-      enrichDocForGraph(next);
-      return next;
+  it('keeps article-only join IOCs off pack ECS for every article-only scenario', async () => {
+    const articleOnlyScenarios = Object.values(PACK_TI_SCENARIOS)
+      .flat()
+      .filter((s) => s.joinIocsArticleOnly);
+    expect(new Set(articleOnlyScenarios.map((s) => s.reportIdSlug))).toEqual(
+      new Set(['aws-iam-behavior-only', 'aws-iam-clean'])
+    );
+
+    for (const scenario of articleOnlyScenarios) {
+      const eventsPath = path.join(scriptsDataDir('packs', scenario.packId), 'events.ndjson');
+      const raw = await readNdjson(eventsPath);
+      const docs = raw.map((doc) => {
+        const next = structuredClone(doc);
+        ensureEcsSourceIp(next);
+        enrichDocForGraph(next);
+        return next;
+      });
+      for (const ioc of scenario.joinIocs) {
+        const fieldValues = collectPackJoinFieldValues(docs, ioc.type);
+        expect(fieldValues.has(ioc.value)).toBe(false);
+      }
+    }
+  });
+});
+
+describe('aws-iam-clean scenario', () => {
+  const scenario = PACK_TI_SCENARIOS['aws-iam'].find((s) => s.reportIdSlug === 'aws-iam-clean')!;
+
+  it('is an article-only Tier 2 fixture on T1110.003', () => {
+    expect(scenario).toBeDefined();
+    expect(scenario.joinIocsArticleOnly).toBe(true);
+    expect(scenario.mitre).toEqual(['T1110.003']);
+  });
+
+  it('carries every scenarioRssMustContain token and a defanged IP in every slot', () => {
+    const tokens = scenarioRssMustContain(scenario);
+    const slots: Array<{ label: string; body: string }> = [
+      { label: 'scenario.body', body: scenario.body },
+      ...scenario.historicArticles.map((article, n) => ({
+        label: `historicArticles[${n}].body`,
+        body: article.body,
+      })),
+    ];
+    const missing: string[] = [];
+    for (const { label, body } of slots) {
+      for (const token of tokens) {
+        if (!body.includes(token)) missing.push(`${label} missing token "${token}"`);
+      }
+      expect(body).toMatch(/\d+\[\.\]\d+\[\.\]\d+\[\.\]\d+/);
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it('shares no mitre id with any other scenario in any pack', () => {
+    for (const other of Object.values(PACK_TI_SCENARIOS)
+      .flat()
+      .filter((s) => s !== scenario)) {
+      for (const technique of scenario.mitre) {
+        expect(other.mitre).not.toContain(technique);
+      }
+    }
+  });
+
+  it('never mentions tokens carried by other aws-iam scenarios that are absent from telemetry', () => {
+    // Static list of other-scenario decoys/anchors that are NOT on pack telemetry either,
+    // but which this scenario must not accidentally reuse (would break the "distinct decoy
+    // range" and "no cross-report correlation" properties both scenarios rely on).
+    const OTHER_SCENARIO_TOKENS = [
+      'TA-DEMO-SHADOW-ADMIN',
+      '198.51.100.40',
+      '198.51.100.41',
+      'research-analyst',
+      'WIN-ANALYST01',
+    ];
+    const blob = [scenario.body, ...scenario.historicArticles.map((a) => a.body)]
+      .join('\n')
+      .toLowerCase();
+    for (const token of OTHER_SCENARIO_TOKENS) {
+      expect(blob).not.toContain(token.toLowerCase());
+    }
+  });
+
+  // Derived (not hand-maintained) deny-list: every 4+ character segment of every leaf string
+  // value in the pack's seeded telemetry (events.ndjson + hunts.ts falsePositives), excluding
+  // metadata fields, must not appear as a substring of this scenario's prose. See the
+  // grounding-rule note on `PACK_TI_SCENARIOS['aws-iam']`'s aws-iam-clean entry: any 4+
+  // character substring of the article is a candidate grounded ES|QL LIKE fragment.
+  describe('telemetry segment deny-list (derived)', () => {
+    const METADATA_PATHS = new Set([
+      '@timestamp',
+      'ecs.version',
+      'event.id',
+      'event.kind',
+      'data_stream.type',
+      'data_stream.namespace',
+    ]);
+    // Segments that legitimately appear in telemetry only via fields an ES|QL hunt would
+    // never filter on. Exempted ONLY when every occurrence's field path is in this safe set.
+    const SAFE_PATH_SUFFIXES = [
+      'request_parameters.key',
+      'request_parameters.roleSessionName',
+      'event_type',
+    ];
+    const ALLOW_LIST = new Set(['2026', 'reports', 'source']);
+
+    const splitIntoSegments = (value: string): string[] =>
+      value
+        .split(/[^a-zA-Z0-9]+/)
+        .flatMap((run) => run.split(/(?<=[a-z0-9])(?=[A-Z])/))
+        .map((seg) => seg.toLowerCase())
+        .filter((seg) => seg.length >= 4);
+
+    const isPathSafe = (fullPath: string) =>
+      SAFE_PATH_SUFFIXES.some((suffix) => fullPath === suffix || fullPath.endsWith(`.${suffix}`));
+
+    const collectTelemetrySegmentPaths = async (): Promise<Map<string, Set<string>>> => {
+      const segmentPaths = new Map<string, Set<string>>();
+      const record = (fieldPath: string, value: unknown) => {
+        if (typeof value !== 'string') return;
+        for (const seg of splitIntoSegments(value)) {
+          const paths = segmentPaths.get(seg) ?? new Set<string>();
+          paths.add(fieldPath);
+          segmentPaths.set(seg, paths);
+        }
+      };
+      const walk = (node: unknown, fieldPath: string[]) => {
+        if (Array.isArray(node)) {
+          for (const item of node) walk(item, fieldPath);
+          return;
+        }
+        if (node && typeof node === 'object') {
+          for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+            const nextPath = [...fieldPath, key];
+            if (!METADATA_PATHS.has(nextPath.join('.'))) {
+              walk(value, nextPath);
+            }
+          }
+          return;
+        }
+        record(fieldPath.join('.'), node);
+      };
+
+      const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
+      const events = await readNdjson(eventsPath);
+      for (const doc of events) walk(doc, []);
+      for (const hunt of awsIamHunts) {
+        for (const doc of hunt.falsePositives ?? []) walk(doc, []);
+      }
+
+      return segmentPaths;
+    };
+
+    const computeBannedSegments = async (): Promise<string[]> => {
+      const segmentPaths = await collectTelemetrySegmentPaths();
+      const banned: string[] = [];
+      for (const [segment, paths] of segmentPaths) {
+        const isExempt = ALLOW_LIST.has(segment) && [...paths].every(isPathSafe);
+        if (!isExempt) {
+          banned.push(segment);
+        }
+      }
+      return banned;
+    };
+
+    const assertNoBannedSegment = (bannedSegments: string[]) => {
+      const slots: Array<{ label: string; text: string }> = [
+        { label: 'scenario.body', text: scenario.body },
+        { label: 'scenario.title', text: scenario.title },
+        ...scenario.historicArticles.flatMap((article, n) => [
+          { label: `historicArticles[${n}].title`, text: article.title },
+          { label: `historicArticles[${n}].body`, text: article.body },
+        ]),
+      ];
+      const violations: string[] = [];
+      for (const { label, text } of slots) {
+        const normalized = text.toLowerCase();
+        for (const segment of bannedSegments) {
+          if (normalized.includes(segment)) {
+            violations.push(`segment "${segment}" found in ${label}`);
+          }
+        }
+      }
+      expect(violations).toEqual([]);
+    };
+
+    it('contains no seeded telemetry segment (4+ chars) in any slot', async () => {
+      const banned = await computeBannedSegments();
+      assertNoBannedSegment(banned);
     });
-    for (const ioc of scenario!.joinIocs) {
-      const fieldValues = collectPackJoinFieldValues(docs, ioc.type);
-      expect(fieldValues.has(ioc.value)).toBe(false);
+
+    it('would catch a reintroduced telemetry word (deliberate-failure check)', async () => {
+      const banned = await computeBannedSegments();
+      expect(banned).toContain('user');
+      const pollutedScenario = {
+        ...scenario,
+        historicArticles: [
+          { ...scenario.historicArticles[0], body: `${scenario.historicArticles[0].body} user` },
+          ...scenario.historicArticles.slice(1),
+        ],
+      };
+      const slots = pollutedScenario.historicArticles.map((article, n) => ({
+        label: `historicArticles[${n}].body`,
+        text: article.body,
+      }));
+      const violations: string[] = [];
+      for (const { label, text } of slots) {
+        const normalized = text.toLowerCase();
+        for (const segment of banned) {
+          if (normalized.includes(segment))
+            violations.push(`segment "${segment}" found in ${label}`);
+        }
+      }
+      expect(
+        violations.some((v) => v.includes('historicArticles[0]') && v.includes('"user"'))
+      ).toBe(true);
+    });
+  });
+
+  it('builds historic docs with the expected extracted fields and trailing techniques line', () => {
+    const items = buildPackHistoricReportItemsForScenario({
+      scenario,
+      packIndex: 0,
+      packCount: 1,
+      startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+      endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+      reportsPerPack: 12,
+    });
+    expect(items.length).toBeGreaterThan(0);
+    for (const [itemIndex, item] of items.entries()) {
+      const doc = buildHistoricThreatReportDoc({
+        scenario,
+        item,
+        itemIndex,
+        packIndex: 0,
+        reportsPerPack: 12,
+        spaceId: 'default',
+        feedUrl: 'data:text/html,stub',
+        kind: 'historic',
+      });
+      expect(doc.extracted?.ttps.techniques).toEqual(['T1110.003']);
+      expect(doc.extracted?.iocs).toEqual([
+        { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
+        { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
+        { type: 'email', value: 'signin-watch@lab-demo.test' },
+      ]);
+      expect(doc.extracted?.threat_actors).toBeUndefined();
+      expect(doc.extracted?.diamond).toBeUndefined();
+      expect(doc.content.body_text.endsWith(' Techniques: T1110.003.')).toBe(true);
     }
   });
 });
@@ -525,15 +761,16 @@ describe('deterministic historic report ids', () => {
     expect(ids).toContain('ti-report-aws-iam-assume-role-historic-01');
     expect(ids).toContain('ti-report-aws-iam-ioc-only-historic-01');
     expect(ids).toContain('ti-report-aws-iam-behavior-only-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-clean-historic-01');
     for (const id of ids) {
       expect(id).toMatch(/^ti-report-[a-z0-9-]+-historic-\d{2}$/);
     }
   });
 
-  it('produces a unique id per report across all seven scenarios (guards the packId collision)', () => {
+  it('produces a unique id per report across all eight scenarios (guards the packId collision)', () => {
     const ids = buildAllHistoricDocs().map((doc) => doc.lineage.source_doc_ref.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids).toHaveLength(84);
+    expect(ids).toHaveLength(96);
   });
 
   it('builds identical ids and docs from identical inputs (idempotent by construction)', () => {

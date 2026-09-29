@@ -726,6 +726,107 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         emerging: 'AWS IAM behavior-led AssumeRole stream',
       },
     },
+    {
+      packId: 'aws-iam',
+      reportIdSlug: 'aws-iam-clean',
+      sourceId: 'aws-iam-clean',
+      name: 'AWS console password-spray advisory feed',
+      title: 'Advisory: AWS console password-spray targeting account 210987654321 in eu-central-1',
+      body:
+        // Clean/no-hit fixture: both halves are deliberately disjoint from seeded aws-iam
+        // CloudTrail telemetry. IOCs are article-only TEST-NET-3 decoys (Tier 1 stays clean).
+        // T1110.003 (Password Spraying) is the technique because it is structurally
+        // disjoint from telemetry, not merely absent: no seeded doc has event.action
+        // ConsoleLogin or any sign-in event, and every seeded doc is event.outcome success
+        // while this article describes failures only. T1531 (Account Access Removal) was
+        // rejected: under the Tier 2 grounding rule (report_grounding.ts), an ES|QL LIKE
+        // predicate grounds on any 4+ character substring of the report text, and T1531's
+        // characteristic verbs share such substrings with seeded event.action values
+        // (Delete* / DeleteTrail, *AccessKey* / CreateAccessKey, *UserPolicy* /
+        // AttachUserPolicy, *User* / ListUsers), so an article naming them could ground a
+        // hitting query. Every 4+ character segment of seeded telemetry is deliberately
+        // absent from this scenario's prose (enforced by a dedicated test).
+        'This advisory tracks an AWS console password-spray pattern against account ' +
+        '210987654321 in eu-central-1. Failed sign-in events named ConsoleLogin were logged ' +
+        'for console principals treasury-ops, ap-clerk-02, and payroll-batch, one guess per ' +
+        'principal per hour, from two source IP addresses: 203[.]0[.]113[.]60 (203.0.113.60) ' +
+        'and 203[.]0[.]113[.]61 (203.0.113.61). Direct sign-in questions to ' +
+        'signin-watch@lab-demo.test. No lockout was triggered and the console does not ' +
+        'enforce a second factor, so hunters should filter directly on the exact event name ' +
+        'ConsoleLogin with a failed outcome, not by service or category. This maps to ATT&CK ' +
+        'T1110.003 (password spraying).',
+      historicArticles: [
+        {
+          title: 'Advisory: AWS console password-spray targeting account 210987654321',
+          body:
+            'AWS console password-spray activity continues against account 210987654321 in ' +
+            'eu-central-1. ConsoleLogin failures repeat hourly for console principals ' +
+            'treasury-ops, ap-clerk-02, and payroll-batch from two source IP addresses: ' +
+            '203[.]0[.]113[.]60 (203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61). Direct ' +
+            'sign-in questions to signin-watch@lab-demo.test. Hunters should filter on the ' +
+            'exact event name ConsoleLogin with a failed outcome, not by service or category. ' +
+            'Maps to ATT&CK T1110.003.',
+        },
+        {
+          title: 'Sign-in watch bulletin: ConsoleLogin failures across eu-central-1',
+          body:
+            'A bulletin for eu-central-1: repeated ConsoleLogin failures against AWS account ' +
+            '210987654321 continue to target console principals treasury-ops, ap-clerk-02, ' +
+            'and payroll-batch. The two source IP addresses observed are ' +
+            '203[.]0[.]113[.]60 (203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61); contact ' +
+            'signin-watch@lab-demo.test with fresh sign-in reports. Filter on the exact event ' +
+            'name ConsoleLogin with a failed outcome, not by service or category, to hunt the ' +
+            'T1110.003 pattern.',
+        },
+        {
+          title: 'Threat note: repeated failed console sign-ins near treasury-ops and ap-clerk-02',
+          body:
+            'Threat note on password-spray attempts against console principals treasury-ops ' +
+            'and ap-clerk-02, plus payroll-batch, on AWS account 210987654321 (eu-central-1). ' +
+            'ConsoleLogin failed repeatedly from source IP addresses 203[.]0[.]113[.]60 ' +
+            '(203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61); reach ' +
+            'signin-watch@lab-demo.test with sign-in questions. Filter directly on the exact ' +
+            'event name ConsoleLogin with a failed outcome, never by service or category. ' +
+            'ATT&CK T1110.003.',
+        },
+        {
+          title: 'Password-spray pattern update: T1110.003 activity against AWS console principals',
+          body:
+            'Password-spray pattern update for account 210987654321 in eu-central-1: ' +
+            'T1110.003 activity keeps failing ConsoleLogin sign-ins for console principals ' +
+            'treasury-ops, ap-clerk-02, and payroll-batch from 203[.]0[.]113[.]60 ' +
+            '(203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61). Send sign-in reports to ' +
+            'signin-watch@lab-demo.test. Hunt the exact event name ConsoleLogin with a failed ' +
+            'outcome, not by service or category.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
+      joinIocsArticleOnly: true,
+      joinIocs: [
+        // TEST-NET-3 decoys: required in article bodies, deliberately absent from pack ECS.
+        // Distinct range from aws-iam-behavior-only's TEST-NET-2 so the two reports do not
+        // correlate. Email uses the reserved .test TLD, not .example (which is a substring
+        // of seeded dev-user@corp.example and would ground a LIKE "*example*" query).
+        { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
+        { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
+        { type: 'email', value: 'signin-watch@lab-demo.test' },
+      ],
+      narrative: [
+        '210987654321',
+        'ConsoleLogin',
+        'treasury-ops',
+        'ap-clerk-02',
+        'eu-central-1',
+        'T1110.003',
+      ],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security', 'clean-no-hit'],
+      mitre: ['T1110.003'],
+      categories: ['cloud-security', 'insider-threat'],
+      regions: ['europe', 'global'],
+      historicSourceAliases: {
+        emerging: 'AWS console sign-in watch',
+      },
+    },
   ],
   kubernetes: [
     {
