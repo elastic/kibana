@@ -624,7 +624,7 @@ src/platform/packages/shared/kbn-flot-charts @elastic/kibana-dashboards @elastic
 src/platform/packages/shared/kbn-ftr-benchmarks @elastic/kibana-operations
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
-src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/search-ml-ux
+src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/workchat-eng
 src/platform/packages/shared/kbn-grok-ui @elastic/streams-ui
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-human-readable-id @elastic/workflows-eng
@@ -1352,7 +1352,7 @@ x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigation
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
-x-pack/solutions/observability/packages/kbn-investigation-output @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/packages/kbn-investigation-output @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team @elastic/nightshift-investigations-team
 x-pack/solutions/observability/packages/kbn-nightshift-decision-trees @elastic/nightshift-investigations-team
 x-pack/solutions/observability/packages/kbn-nightshift-shared @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
@@ -1371,7 +1371,7 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-signals-log
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team @elastic/nightshift-investigations-team
 x-pack/solutions/observability/plugins/nightshift_sources @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/nightshift-context-and-research-team
@@ -3175,25 +3175,10 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/nightshift-sre-agent-team
 
 # Nightshift investigations managed workflows
-src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-# Decision-tree workflows and plugin surfaces (investigations team only)
-src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/decision_tree_hydrate @elastic/nightshift-investigations-team
-src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/decision_tree_reinforce @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/common/decision_trees.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/decision_trees @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/tools/decision_tree @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/agents/decision_tree_reinforcement @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/step_definitions/decision_tree_hydrate.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/step_definitions/decision_tree_prepare.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/lib/install_decision_tree_reinforcement_agent.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/lib/managed_workflows/install_decision_tree_workflows.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_tree.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_tree_version.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_trees_availability.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_tree_versions.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_trees.ts @elastic/nightshift-investigations-team
-x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_trees.test.ts @elastic/nightshift-investigations-team
-x-pack/solutions/observability/plugins/significant_events_app/public/pages/significant_events/components/decision_trees @elastic/nightshift-investigations-team
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team @elastic/nightshift-investigations-team
+# Decision-tree and Cortex UI in Significant Events (co-owned with the investigations team)
+x-pack/solutions/observability/plugins/significant_events_app/public/pages/significant_events/components/decision_trees @elastic/nightshift-sre-agent-team @elastic/nightshift-investigations-team
+x-pack/solutions/observability/plugins/significant_events_app/public/pages/significant_events/components/cortex @elastic/nightshift-sre-agent-team @elastic/nightshift-investigations-team
 
 # AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/security-solution
@@ -3550,6 +3535,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/elastic_defend_policy_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_alerting_v2 @elastic/rna-project-team
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
