@@ -89,7 +89,9 @@ export const METRICS_INDEX_PREFIX = 'metrics-';
 export const EXEMPLARS_INDEX_PREFIX = 'exemplars-';
 // Only `exemplars-*.otel-*` has a backing template; any other derived name results in an error.
 export const EXEMPLARS_OTEL_DATASET_MARKER = '.otel';
-// Shared exemplar document fields (elasticsearch#159849).
+// Kibana exposes OTel metric fields under the `metrics` passthrough object; exemplar documents
+// store the bare OTel metric name in `metric_name` and the sample in `value` (elasticsearch#159849).
+export const METRIC_FIELD_PREFIX = 'metrics.';
 export const EXEMPLARS_METRIC_NAME_FIELD = 'metric_name';
 export const EXEMPLARS_VALUE_FIELD = 'value';
 // Temp cap, remove when fixing observability-dev#6205.

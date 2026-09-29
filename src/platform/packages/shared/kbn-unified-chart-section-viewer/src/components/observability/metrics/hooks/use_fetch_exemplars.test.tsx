@@ -275,6 +275,36 @@ describe('useFetchExemplars', () => {
     });
   });
 
+  it('translates filters on the chart metric onto value and drops other metric-field filters', async () => {
+    const params = createParams();
+    params.fetchParams = {
+      ...params.fetchParams,
+      filters: [
+        ...TEST_FILTERS,
+        {
+          meta: { key: mockMetric.metricName, type: 'range' },
+          query: { range: { [mockMetric.metricName]: { gte: 0.5 } } },
+        },
+        {
+          meta: { key: 'metrics.orders.created', type: 'phrase' },
+          query: { match_phrase: { 'metrics.orders.created': 5 } },
+        },
+      ],
+    };
+
+    renderHook(() => useFetchExemplars(params));
+
+    await flushAsync();
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [
+          ...TEST_FILTERS,
+          { meta: { key: 'value', type: 'range' }, query: { range: { value: { gte: 0.5 } } } },
+        ],
+      })
+    );
+  });
+
   it('drops the previous rows while a refetch is in flight', async () => {
     const params = createParams();
     const { result, rerender } = renderHook(

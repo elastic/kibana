@@ -17,6 +17,7 @@ import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
 import { resolveExemplarsIndex } from '../../../../common/utils/exemplars/derive_exemplars_index';
+import { translateExemplarFilters } from '../../../../common/utils/exemplars/translate_exemplar_filters';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import { useExemplarsAvailabilityProbe } from '../context/exemplars_availability_provider';
@@ -101,7 +102,9 @@ export const useFetchExemplars = ({
           signal,
           dataView,
           timeRange: fetchParams.timeRange,
-          filters: fetchParams.filters,
+          // Filters on the chart's own metric field move onto `value`; other metric fields cannot
+          // apply to these exemplars and are dropped.
+          filters: translateExemplarFilters(fetchParams.filters, metricItem.metricName),
           // The copied `WHERE` clauses may reference Discover control variables (`?service`).
           variables: fetchParams.esqlVariables,
           uiSettings,
