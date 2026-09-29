@@ -36,11 +36,6 @@ import {
   getUpdatePrebuiltRulePatch,
 } from './utils/update_translated_rule';
 
-const PreBuiltRuleSchema = z.object({
-  id: z.string().min(1).max(256).describe('The correct prebuilt rule id.'),
-  title: z.string().min(1).max(500).describe('The title of the prebuilt rule.'),
-});
-
 const schema = z.object({
   migration_id: MigrationId,
   rule_id: z
@@ -54,18 +49,23 @@ const schema = z.object({
     .max(10_000)
     .optional()
     .describe(
-      `The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. Can be combined with new integration_ids, provided the index in the query is created from those integrations. Mutually exclusive with prebuilt_rule — if both are supplied, prebuilt_rule takes precedence. When supplied for a rule that currently has a prebuilt rule match, the match is cleared and the rule title and description revert to the original rule values. Cannot be used on rules that are already installed (elastic_rule.id is set).`
+      `The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. Can be combined with new integration_ids, provided the index in the query is created from those integrations. Mutually exclusive with prebuilt_rule_id — if both are supplied, prebuilt_rule_id takes precedence. When supplied for a rule that currently has a prebuilt rule match, the match is cleared and the rule title and description revert to the original rule values. Cannot be used on rules that are already installed (elastic_rule.id is set).`
     ),
-  prebuilt_rule: PreBuiltRuleSchema.optional().describe(
-    `The correct prebuilt rule match (id and title). Provide ONLY when the matched prebuilt rule needs to be updated. Can be combined with new integration_ids, provided the prebuilt rule relies on data from those integrations. Mutually exclusive with esql_query — if both are supplied, prebuilt_rule takes precedence. Cannot be used on rules that are already installed (elastic_rule.id is set).`
-  ),
+  prebuilt_rule_id: z
+    .string()
+    .min(1)
+    .max(256)
+    .optional()
+    .describe(
+      `The correct prebuilt rule id (rule_id UUID). Provide ONLY when the matched prebuilt rule needs to be updated. Title, description, severity, risk score and integrations are derived from the prebuilt rule, and any previous ES|QL query is cleared. Cannot be combined with integration_ids. Mutually exclusive with esql_query — if both are supplied, prebuilt_rule_id takes precedence. Cannot be used on rules that are already installed (elastic_rule.id is set).`
+    ),
   integration_ids: z
     .array(z.string().min(1).max(256))
     .min(1)
     .max(10)
     .optional()
     .describe(
-      `The correct integration id(s). Must be supplied together with esql_query or prebuilt_rule — integration_ids cannot be updated on its own. Pass one or more integration ids (up to 10).`
+      `The correct integration id(s) for an esql_query update. Must be supplied together with esql_query — integration_ids cannot be updated on its own or combined with prebuilt_rule_id. Pass one or more integration ids (up to 10).`
     ),
   comment: z
     .string()
@@ -111,8 +111,10 @@ Rules that are already installed (elastic_rule.id is set) are immutable and cann
 Two write paths — supply exactly one:
 
 ### Write path 1 — prebuilt rule match:
-- prebuilt_rule: corrected prebuilt rule match (id and title, both required)
-- integration_ids (optional): corrected integration ids related to the prebuilt rule
+- prebuilt_rule_id: the corrected prebuilt rule id. Title, description, severity, risk score and
+  integrations are derived from the prebuilt rule; any previous ES|QL query is cleared. An unknown
+  id is rejected. Do not supply integration_ids. If that prebuilt rule is already installed, the
+  migration rule becomes installed and can no longer be updated.
 
 ### Write path 2 — ES|QL query:
 - esql_query: corrected ES|QL query (validated before applying). If the rule currently has a
@@ -120,8 +122,8 @@ Two write paths — supply exactly one:
   to the original rule values.
 - integration_ids (optional): corrected integration ids whose index pattern the query uses
 
-If both prebuilt_rule and esql_query are supplied, prebuilt_rule takes precedence.
-integration_ids cannot be updated on its own — always supply it with esql_query or prebuilt_rule.
+If both prebuilt_rule_id and esql_query are supplied, prebuilt_rule_id takes precedence.
+integration_ids is only valid with esql_query.
 `,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
@@ -130,7 +132,7 @@ integration_ids cannot be updated on its own — always supply it with esql_quer
         migration_id: migrationId,
         rule_id: ruleId,
         esql_query: esqlQuery,
-        prebuilt_rule: prebuiltRule,
+        prebuilt_rule_id: prebuiltRuleId,
         integration_ids: integrationIds,
         comment,
       } = input;
@@ -169,18 +171,24 @@ integration_ids cannot be updated on its own — always supply it with esql_quer
         );
       }
 
-      // prebuilt_rule takes precedence; integration_ids alone is not a valid update.
+      // prebuilt_rule_id takes precedence. Its integrations are derived server-side, so
+      // integration_ids is only valid on the ES|QL path.
       let elasticRulePatch: UpdateElasticRulePatch;
       try {
-        if (prebuiltRule) {
-          elasticRulePatch = getUpdatePrebuiltRulePatch(prebuiltRule, integrationIds);
+        if (prebuiltRuleId) {
+          if (integrationIds != null) {
+            return createToolError(
+              'integration_ids cannot be combined with prebuilt_rule_id — integrations are derived from the prebuilt rule.'
+            );
+          }
+          elasticRulePatch = getUpdatePrebuiltRulePatch(prebuiltRuleId);
         } else if (esqlQuery) {
           elasticRulePatch = await getEsqlQueryUpdatePatch(esqlQuery, integrationIds, {
             validateEsql,
             currentRule,
           });
         } else {
-          return createToolError('Provide either esql_query or prebuilt_rule.');
+          return createToolError('Provide either esql_query or prebuilt_rule_id.');
         }
 
         const comments = [

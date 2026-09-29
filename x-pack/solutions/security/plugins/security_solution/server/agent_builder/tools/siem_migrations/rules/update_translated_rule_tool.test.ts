@@ -158,7 +158,7 @@ describe('updateTranslatedRuleTool', () => {
     expect(sendUiEvent).not.toHaveBeenCalled();
   });
 
-  it('should reject input when neither esql_query, prebuilt_rule nor integration_ids is provided', async () => {
+  it('should reject input when neither esql_query nor prebuilt_rule_id is provided', async () => {
     // GET now runs before the dispatch check, so it must be mocked.
     mockFetch.mockResolvedValueOnce(makeGetResponse(mockCurrentRule));
 
@@ -208,7 +208,7 @@ describe('updateTranslatedRuleTool', () => {
       const prebuiltInput = {
         migration_id: MIGRATION_ID,
         rule_id: RULE_ID,
-        prebuilt_rule: { id: 'some-prebuilt-uuid', title: 'Some Prebuilt Rule' },
+        prebuilt_rule_id: 'some-prebuilt-uuid',
         comment: 'Switching to prebuilt.',
       };
 
@@ -223,8 +223,53 @@ describe('updateTranslatedRuleTool', () => {
     });
   });
 
+  describe('prebuilt rule update', () => {
+    const makeContext = () =>
+      createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+      });
+
+    it('should PATCH only prebuilt_rule_id', async () => {
+      mockFetch.mockResolvedValueOnce(makeGetResponse(mockCurrentRule));
+      mockFetch.mockResolvedValueOnce(makePatchResponse());
+
+      await tool.handler(
+        { migration_id: MIGRATION_ID, rule_id: RULE_ID, prebuilt_rule_id: 'p-1', comment: 'x' },
+        makeContext()
+      );
+
+      const patchBody = mockFetch.mock.calls[1][1].body as Array<{ elastic_rule: unknown }>;
+      expect(patchBody[0].elastic_rule).toEqual({ prebuilt_rule_id: 'p-1' });
+    });
+
+    it('should reject integration_ids combined with prebuilt_rule_id without PATCHing', async () => {
+      mockFetch.mockResolvedValueOnce(makeGetResponse(mockCurrentRule));
+
+      const result = (await tool.handler(
+        {
+          migration_id: MIGRATION_ID,
+          rule_id: RULE_ID,
+          prebuilt_rule_id: 'p-1',
+          integration_ids: ['windows'],
+          comment: 'x',
+        },
+        makeContext()
+      )) as ToolHandlerStandardReturn;
+
+      expect({
+        message: (result.results[0].data as { message: string }).message,
+        fetchCalls: mockFetch.mock.calls.length,
+      }).toEqual({
+        message: expect.stringContaining(
+          'integration_ids cannot be combined with prebuilt_rule_id'
+        ),
+        fetchCalls: 1,
+      });
+    });
+  });
+
   describe('ES|QL update on a prebuilt-matched rule', () => {
-    it('should send prebuilt_rule_id: null and the original title in the PATCH body', async () => {
+    it('should send only the query and prebuilt_rule_id: null in the PATCH body', async () => {
       const prebuiltMatchedRule = {
         ...mockCurrentRule,
         elastic_rule: { prebuilt_rule_id: 'some-prebuilt-uuid', title: 'Prebuilt Rule Title' },
@@ -241,10 +286,10 @@ describe('updateTranslatedRuleTool', () => {
       // Second call is the PATCH — inspect its body (passed as an object, not JSON string)
       const patchCall = mockFetch.mock.calls[1];
       const patchBody = patchCall[1].body as Array<{ elastic_rule: Record<string, unknown> }>;
-      expect(patchBody[0].elastic_rule).toMatchObject({
+      expect(patchBody[0].elastic_rule).toEqual({
+        query: validInput.esql_query,
+        query_language: 'esql',
         prebuilt_rule_id: null,
-        title: 'Original Rule Title',
-        description: 'Original rule description',
       });
     });
   });

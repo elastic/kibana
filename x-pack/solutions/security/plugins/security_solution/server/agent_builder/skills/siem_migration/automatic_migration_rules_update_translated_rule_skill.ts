@@ -27,11 +27,11 @@ export const automaticMigrationRulesUpdateTranslatedRuleSkill = defineSkillType(
   id: RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE,
   name: RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE,
   basePath: 'skills/security/siem_migrations',
-  description: `Fix one or more aspects of a specific SIEM migration translated rule: the ES|QL query, the prebuilt rule match, or the matched integration.
+  description: `Fix one or more aspects of a specific SIEM migration translated rule: the ES|QL query, the prebuilt rule match, or the matched integration (for prebuilt-matched rules, integrations follow the prebuilt rule).
 
 Use when the user reports that the translated rule is wrong — the query has errors, it was matched to the wrong prebuilt rule, or it was matched to the wrong integration.
 Multiple aspects can be corrected in one call (e.g. a new ES|QL query together with a corrected integration).
-Internally there are two write paths: (1) prebuilt rule match (optionally with integration_ids), (2) ES|QL query update (optionally with integration_ids). Integration is never written on its own.`,
+Internally there are two write paths: (1) prebuilt rule match via prebuilt_rule_id (integrations derived from the prebuilt rule), (2) ES|QL query update (optionally with integration_ids). Integration is never written on its own.`,
   content: `
 # When to use this skill
 
@@ -42,10 +42,12 @@ Automatic Migration rule. Three aspects can be updated:
 2. **Prebuilt rule match** — the rule was matched to the wrong Elastic prebuilt rule.
 3. **Integration** — the rule was matched to the wrong Elastic integration.
 
-Internally there are **two write paths**: (1) prebuilt rule match, (2) ES|QL query update. Both paths
-accept an optional \`integration_ids\` field — whether the correction is an integration change or a
-wrong-index-pattern fix, it is always expressed as a combined \`esql_query\` + \`integration_ids\` call.
-Integration is never written on its own.
+Internally there are **two write paths**: (1) prebuilt rule match, (2) ES|QL query update. Only the
+ES|QL path accepts \`integration_ids\` — an integration change or a wrong-index-pattern fix is always
+a combined \`esql_query\` + \`integration_ids\` call. For a prebuilt match, integrations come from the
+prebuilt rule. For a rule that currently has a prebuilt match, an integration change means either
+choosing another prebuilt rule or switching to a custom ES|QL translation (see Integration match
+update workflow). Integration is never written on its own.
 
 This skill is mutating: it writes the correction back to a single migration rule and requires user
 confirmation before applying. If user asks to update multiple rules, take them one at a time and confirm each update.
@@ -70,13 +72,13 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
   and any comments. Always fetch first to understand what needs fixing.
 - \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\` — Apply corrections to the translated rule.
   Requires user confirmation. Two mutually exclusive write paths:
-  - **Path 1 — prebuilt rule match**: supply \`prebuilt_rule\` (object with \`id\` and \`title\`,
-    both required). Optionally add \`integration_ids\` when the prebuilt rule relies on specific
-    integrations; **omit it entirely** otherwise.
+  - **Path 1 — prebuilt rule match**: supply \`prebuilt_rule_id\` (the prebuilt rule UUID). Title,
+    description, severity, risk score and integrations are derived from the prebuilt rule, and any
+    previous ES|QL query is cleared. Never supply \`integration_ids\` with it — the tool rejects it.
   - **Path 2 — ES|QL query update**: supply \`esql_query\` (validated automatically before
     applying). Optionally add \`integration_ids\` when the index pattern comes from specific
     integrations; **omit it entirely** otherwise.
-  - \`integration_ids\` cannot be supplied without one of the above write paths.
+  - \`integration_ids\` can only be supplied with \`esql_query\`.
   - \`comment\` (required): markdown explanation of every aspect updated in this call —
     appended to the rule's comment history and shown to the user in the rule details flyout.
     See *Writing the change comment* below.
@@ -90,11 +92,11 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
    not present the correction options and do not call
    \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`. Explain that the rule has already been
    installed as a detection rule and can no longer be corrected through the migration. Stop there.
-3. **Present options**: ask the user what they want to fix:
+3. **Present options**: Ask the user what they want to fix:
    - Fix **ES|QL query**
    - Fix **Prebuilt rule match**
-   - Fix **Integration match**
-3. Based on the user's selection, follow the appropriate sub-workflow below.
+   - Fix **Integration match** (for a prebuilt-matched rule, see the caveat in the Integration match update workflow)
+4. Based on the user's selection, follow the appropriate sub-workflow below.
 
 ### Pre-built rule update workflow
 
@@ -105,20 +107,16 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
     b. Use \`recommend-prebuilt-rules\` skill and its search instructions to find exact prebuilt rule UUIDs, titles and related integrations.
 3. Once you have maximum of 5 candidates, show them to the user with a fit-gap analysis in a table and your recommendation.
 4. Once the user confirms the pre-built rule, update the translated rule using \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`
-   by supplying the \`prebuilt_rule\` object (both \`id\` and \`title\` are required).
-5. Below is a concrete example of the tool call for a pre-built rule update. When the matched prebuilt rule also relies on specific integrations, you may combine
-\`prebuilt_rule\` with \`integration_ids\` in the same call. **Omit \`integration_ids\` entirely** if the prebuilt rule does not rely on any specific integration — do not pass an empty array.
+   by supplying \`prebuilt_rule_id\`. Use the exact prebuilt rule title from the search results in the comment heading.
+   If the tool returns \`Prebuilt rule "<id>" not found\`, the id is unknown or deprecated — do not retry with a guessed id; search again or ask the user to pick another candidate.
+5. Below is a concrete example of the tool call for a pre-built rule update.
 
 \`\`\`json
 {
   "migration_id": "<migration_id>",
   "rule_id": "<rule_id>",
-  "prebuilt_rule": {
-    "id": "a2329f42-9a87-4e8c-9a4e-1b1e7d89f231",
-    "title": "PowerShell Obfuscated Script Block"
-  },
-  "integration_ids": ["windows"],
-  "comment": "**Prebuilt rule match updated** → \`PowerShell Obfuscated Script Block\`\\n\\nMatches the original detection logic for encoded PowerShell blocks. Updated integration to \`windows\` since that integration supplies the \`powershell.file.script_block_text\` field the prebuilt rule relies on."
+  "prebuilt_rule_id": "a2329f42-9a87-4e8c-9a4e-1b1e7d89f231",
+  "comment": "**Prebuilt rule match updated** → \`PowerShell Obfuscated Script Block\`\\n\\nMatches the original detection logic for encoded PowerShell blocks."
 }
 \`\`\`
 
@@ -167,6 +165,11 @@ then validates the ES|QL syntax — so ensure all placeholders are resolved befo
 ### Integration match update workflow
 
 Use this when the user reports that the rule was matched to the wrong Elastic integration.
+
+**If the rule currently has a prebuilt match (\`elastic_rule.prebuilt_rule_id\` is set):** its
+integrations come from that prebuilt rule and cannot be changed directly. Tell user that if they want to proceed,
+the rule will eventually be unmatched from that pre-built rule and will result in custom ESQL based rule.
+
 Changing the integration means the index pattern and field names change too, so the ES|QL query
 **must always be rewritten** alongside the integration update — both are updated in one call.
 
@@ -217,6 +220,7 @@ to the user in the rule details flyout — so write for that reader, not as a te
 - State what was wrong and why the correction fixes it.
 - Never restate the full query; it is already stored on the rule.
 - Never send a placeholder such as "Updated the query."
+- For a prebuilt rule match, never claim an integration change in the comment — integrations come from the prebuilt rule.
 
 **Examples by path:**
 
@@ -263,12 +267,12 @@ and \`CommandLine\` → \`process.args\`. Detection logic unchanged.
 - Never apply a query that still contains macro or lookup placeholders (\`[macro:…]\`,
   \`[lookup:…]\`) or the missing-index-pattern placeholder. Check missing resources first if such
   placeholders appear in the original.
-- **\`esql_query\` and \`prebuilt_rule\` are mutually exclusive** write paths. If both are supplied the tool applies \`prebuilt_rule\` and ignores \`esql_query\`. Always supply exactly one.
+- **\`esql_query\` and \`prebuilt_rule_id\` are mutually exclusive** write paths. If both are supplied the tool applies \`prebuilt_rule_id\` and ignores \`esql_query\`. Always supply exactly one.
 - **Supplying \`esql_query\` for a rule that currently has a prebuilt match unmatches it** —
   \`prebuilt_rule_id\` is cleared and title/description revert to the original rule's values. Only
   do this when the user genuinely wants a custom translation instead of the prebuilt rule, and
   say so in the \`comment\`.
-- **\`integration_ids\` cannot be supplied alone.** It must accompany either \`esql_query\` or \`prebuilt_rule\`.
+- **\`integration_ids\` cannot be supplied alone or with \`prebuilt_rule_id\`.** It must accompany \`esql_query\`.
 - **Never call the tool for a rule with \`elastic_rule.id\` set.** Installed rules are immutable —
   say so and stop.
 - Only propose ES|QL (query_language: esql). No other query languages are accepted by this tool.

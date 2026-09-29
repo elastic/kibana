@@ -16,8 +16,6 @@ export interface UpdateElasticRulePatch {
   query?: string;
   query_language?: 'esql';
   prebuilt_rule_id?: string | null;
-  title?: string;
-  description?: string;
   integration_ids?: string[];
 }
 
@@ -51,14 +49,11 @@ export const getEsqlQueryUpdatePatch = async (
   }
 
   // If the rule was previously matched to a prebuilt rule, clear that match so the document
-  // becomes a coherent custom rule. `prebuilt_rule_id: null` explicitly unsets the field in ES
-  // (partial-doc merge leaves omitted fields untouched).
+  // becomes a custom rule. `prebuilt_rule_id: null` explicitly unsets the field in ES
+  // (partial-doc merge leaves omitted fields untouched). Title, description, severity and
+  // risk score are derived from the original rule server-side.
   const unmatchFields: Partial<UpdateElasticRulePatch> = currentRule.elastic_rule?.prebuilt_rule_id
-    ? {
-        prebuilt_rule_id: null,
-        title: currentRule.original_rule.title,
-        description: currentRule.original_rule.description || currentRule.original_rule.title,
-      }
+    ? { prebuilt_rule_id: null }
     : {};
 
   return {
@@ -69,12 +64,7 @@ export const getEsqlQueryUpdatePatch = async (
   };
 };
 
-/** Builds the elastic_rule patch for a prebuilt rule match update. */
-export const getUpdatePrebuiltRulePatch = (
-  prebuiltRule: { id: string; title: string },
-  integrationIds: string[] | undefined
-): UpdateElasticRulePatch => ({
-  prebuilt_rule_id: prebuiltRule.id,
-  title: prebuiltRule.title,
-  ...(integrationIds != null ? { integration_ids: integrationIds } : {}),
+/** Builds the elastic_rule patch for a prebuilt rule match. Every other field is derived server-side from the prebuilt rule. */
+export const getUpdatePrebuiltRulePatch = (prebuiltRuleId: string): UpdateElasticRulePatch => ({
+  prebuilt_rule_id: prebuiltRuleId,
 });

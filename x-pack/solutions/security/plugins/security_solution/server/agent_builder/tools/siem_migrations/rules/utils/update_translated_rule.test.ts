@@ -106,7 +106,7 @@ describe('getEsqlQueryUpdatePatch', () => {
   describe('when the current rule has a prebuilt match', () => {
     const prebuiltMatchedRule = makeCurrentRule({ prebuilt_rule_id: 'some-prebuilt-uuid' });
 
-    it('should clear prebuilt_rule_id and reset title and description to the original rule values', async () => {
+    it('should only clear prebuilt_rule_id, leaving title and description to the server', async () => {
       const result = await getEsqlQueryUpdatePatch(validQuery, undefined, {
         validateEsql: validateEsqlSpy,
         currentRule: prebuiltMatchedRule,
@@ -115,25 +115,7 @@ describe('getEsqlQueryUpdatePatch', () => {
         query: validQuery,
         query_language: 'esql',
         prebuilt_rule_id: null,
-        title: 'Original Rule Title',
-        description: 'Original rule description',
       });
-    });
-
-    it('should fall back to the original title when original_rule.description is empty', async () => {
-      const ruleNoDescription = {
-        ...prebuiltMatchedRule,
-        original_rule: {
-          ...prebuiltMatchedRule.original_rule,
-          description: '',
-        },
-      } as unknown as RuleMigrationRule;
-
-      const result = await getEsqlQueryUpdatePatch(validQuery, undefined, {
-        validateEsql: validateEsqlSpy,
-        currentRule: ruleNoDescription,
-      });
-      expect(result).toMatchObject({ description: 'Original Rule Title' });
     });
 
     it('should include integration_ids alongside the unmatch fields', async () => {
@@ -157,28 +139,9 @@ describe('getEsqlQueryUpdatePatch', () => {
 });
 
 describe('getUpdatePrebuiltRulePatch', () => {
-  it('should map id→prebuilt_rule_id and title→title', () => {
-    const result = getUpdatePrebuiltRulePatch(
-      { id: 'a2329f42-9a87-4e8c-9a4e-1b1e7d89f231', title: 'PowerShell Obfuscated Script Block' },
-      undefined
-    );
-    expect(result).toEqual({
+  it('should send only prebuilt_rule_id so the server derives all other fields', () => {
+    expect(getUpdatePrebuiltRulePatch('a2329f42-9a87-4e8c-9a4e-1b1e7d89f231')).toEqual({
       prebuilt_rule_id: 'a2329f42-9a87-4e8c-9a4e-1b1e7d89f231',
-      title: 'PowerShell Obfuscated Script Block',
-    });
-  });
-
-  it('should not include integration_ids when not supplied', () => {
-    const result = getUpdatePrebuiltRulePatch({ id: 'some-id', title: 'Some Rule' }, undefined);
-    expect(result).not.toHaveProperty('integration_ids');
-  });
-
-  it('should include integration_ids in the patch when supplied', () => {
-    const result = getUpdatePrebuiltRulePatch({ id: 'some-id', title: 'Some Rule' }, ['windows']);
-    expect(result).toEqual({
-      prebuilt_rule_id: 'some-id',
-      title: 'Some Rule',
-      integration_ids: ['windows'],
     });
   });
 });
