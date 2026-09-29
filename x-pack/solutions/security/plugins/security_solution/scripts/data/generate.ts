@@ -53,6 +53,10 @@ import {
   seedThreatIntelForPacks,
   THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
 } from './lib/threat_intel_fixtures';
+import {
+  cleanAwsIamHostCorrelation,
+  seedAwsIamHostCorrelation,
+} from './lib/aws_iam_host_correlation';
 import { listPacks } from './packs';
 import {
   generateAndIndexAttackDiscoveries,
@@ -1087,6 +1091,9 @@ export const cli = () => {
             log,
             packIds: packIds.length > 0 ? packIds : undefined,
           });
+          if (packIds.includes('aws-iam')) {
+            await cleanAwsIamHostCorrelation({ esClient, log, startMs, endMs });
+          }
         }
 
         const fileSets = listEpisodeFileSets(episodes);
@@ -1137,6 +1144,10 @@ export const cli = () => {
           });
           assertPackProvenanceAuthored(result.pack);
           packResults.push(result);
+        }
+
+        if (packIds.includes('aws-iam')) {
+          await seedAwsIamHostCorrelation({ esClient, log, endMs });
         }
 
         if (threatIntel) {
