@@ -362,11 +362,14 @@ export const extractDiamond = async (
       `extract_diamond single call failed, falling back to per-vertex: ` +
         `${(singleCallErr as Error).message} report_id=${reportId}`
     );
-    // The single-call overflow retry already selected a degraded window. Reuse
-    // that same text for four vertex prompts and a smaller Reasoning window can
-    // overflow every call. Shrink again before the fallback loop.
+    // Bound fallback prompts even when the single call failed for a non-overflow
+    // reason (parse/schema). Resending the full article on four vertex calls can
+    // blow a Reasoning window on long reports. If we already degraded for overflow,
+    // shrink again; otherwise select the standard overflow window first.
     if (context.mode === 'degraded_context') {
       context = furtherShrinkOverflowArticleContext(context);
+    } else {
+      context = selectOverflowRetryArticleContext(text);
     }
   }
 

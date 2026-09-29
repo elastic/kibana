@@ -293,7 +293,7 @@ export const enrichReportCore = async (
     includeRaw: true,
   });
 
-  const startedAt = Date.now();
+  const coreStartedAt = Date.now();
   const coreCall = await invokeWithOverflowBounds({
     invoke: (prompt) =>
       coreStructured.invoke(prompt) as Promise<{
@@ -304,6 +304,7 @@ export const enrichReportCore = async (
     articleText: params.text,
     prepared: withBatchPrepared(prepared, firstBatch),
   });
+  const coreWallMs = Date.now() - coreStartedAt;
 
   const approvedIds = new Set(
     coreCall.result.parsed.approved_ioc_candidate_ids.filter((id) =>
@@ -320,8 +321,8 @@ export const enrichReportCore = async (
     ...chunkIocAdjudicationBatches([...skippedFromFirst, ...queuedBatches.flat()]).batches,
   ];
 
-  for (const batch of pendingBatches) {
-    if (batch.length === 0) continue;
+  for (const batch of pendingBatches.filter((entry) => entry.length > 0)) {
+    const batchStartedAt = Date.now();
     const batchCall = await invokeWithOverflowBounds({
       invoke: (prompt) =>
         adjudicationStructured.invoke(prompt) as Promise<{
@@ -332,6 +333,7 @@ export const enrichReportCore = async (
       articleText: params.text,
       prepared: withBatchPrepared(prepared, batch),
     });
+    const batchWallMs = Date.now() - batchStartedAt;
     for (const id of batchCall.result.parsed.approved_ioc_candidate_ids) {
       if (batchCall.reviewed.reviewable.some((candidate) => candidate.id === id)) {
         approvedIds.add(id);
@@ -348,7 +350,7 @@ export const enrichReportCore = async (
       'enrich_report_core_ioc_batch',
       model.connector.connectorId,
       batchCall.result.raw.response_metadata ?? {},
-      Date.now() - startedAt
+      batchWallMs
     );
   }
 
@@ -357,7 +359,7 @@ export const enrichReportCore = async (
     'enrich_report_core',
     model.connector.connectorId,
     coreCall.result.raw.response_metadata ?? {},
-    Date.now() - startedAt
+    coreWallMs
   );
 
   // Anything still unreviewed after overflow-bounded follow-ups keeps its heuristic

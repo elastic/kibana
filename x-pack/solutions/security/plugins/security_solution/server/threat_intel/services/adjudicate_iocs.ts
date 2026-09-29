@@ -113,6 +113,66 @@ interface ScoredOccurrence {
   score: number;
 }
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Case-insensitive host, case-sensitive path/query/hash (URL paths are distinct IOCs). */
+const isUrlBoundary = (char: string | undefined): boolean =>
+  char === undefined || /[\s"'<>)\]},.;]/.test(char);
+
+const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence[] => {
+  const scored: ScoredOccurrence[] = [];
+  try {
+    const parsed = new URL(urlValue);
+    const pathPart = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    // Match protocol+host case-insensitively, then require an exact path/query/hash
+    // so `/PAYLOAD` and `/payload` never share review context.
+    const hostPattern = new RegExp(
+      `${escapeRegExp(parsed.protocol)}//${escapeRegExp(parsed.host)}`,
+      'gi'
+    );
+    let hostMatch: RegExpExecArray | null;
+    while (
+      scored.length < MAX_OCCURRENCES_TO_SCORE &&
+      (hostMatch = hostPattern.exec(source)) !== null
+    ) {
+      const hostEnd = hostMatch.index + hostMatch[0].length;
+      const after = hostEnd + pathPart.length;
+      if (source.slice(hostEnd, after) === pathPart && isUrlBoundary(source[after])) {
+        const index = hostMatch.index;
+        const window = source.slice(
+          Math.max(0, index - CONTEXT_CHARS),
+          Math.min(source.length, after + CONTEXT_CHARS)
+        );
+        scored.push({
+          source,
+          index,
+          score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+        });
+      }
+    }
+  } catch {
+    // Fall through to exact search below when URL parsing fails.
+  }
+  if (scored.length === 0) {
+    let from = 0;
+    while (from < source.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
+      const index = source.indexOf(urlValue, from);
+      if (index < 0) break;
+      const window = source.slice(
+        Math.max(0, index - CONTEXT_CHARS),
+        Math.min(source.length, index + urlValue.length + CONTEXT_CHARS)
+      );
+      scored.push({
+        source,
+        index,
+        score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+      });
+      from = index + Math.max(urlValue.length, 1);
+    }
+  }
+  return scored;
+};
+
 const scoreOccurrences = (
   source: string,
   lowerSource: string,
@@ -148,16 +208,22 @@ const contextFor = (
   refangedText: string,
   lowerRefanged: string,
   value: string,
+  iocType: ExtractedIoc['type'],
   cache: Map<string, string>
 ): string => {
-  const lowerValue = value.toLowerCase();
-  const cached = cache.get(lowerValue);
+  // URLs cache on the exact value so `/PAYLOAD` and `/payload` stay distinct.
+  // Domains stay case-insensitive.
+  const cacheKey = iocType === 'url' ? value : value.toLowerCase();
+  const cached = cache.get(cacheKey);
   if (cached !== undefined) return cached;
 
-  const scored = [
-    ...scoreOccurrences(originalText, lowerOriginal, lowerValue),
-    ...scoreOccurrences(refangedText, lowerRefanged, lowerValue),
-  ];
+  const scored =
+    iocType === 'url'
+      ? [...scoreUrlOccurrences(originalText, value), ...scoreUrlOccurrences(refangedText, value)]
+      : [
+          ...scoreOccurrences(originalText, lowerOriginal, cacheKey),
+          ...scoreOccurrences(refangedText, lowerRefanged, cacheKey),
+        ];
   const best = scored.reduce<ScoredOccurrence | undefined>((winner, candidate) => {
     if (!winner || candidate.score > winner.score) return candidate;
     if (candidate.score === winner.score && candidate.index > winner.index) return candidate;
@@ -165,8 +231,16 @@ const contextFor = (
   }, undefined);
 
   const context = best === undefined ? '' : sliceContext(best.source, best.index, value.length);
-  cache.set(lowerValue, context);
+  cache.set(cacheKey, context);
   return context;
+};
+
+const originFor = (value: string): string | undefined => {
+  try {
+    return new URL(value).origin.toLowerCase();
+  } catch {
+    return undefined;
+  }
 };
 
 const hostnameFor = (value: string): string | undefined => {
@@ -179,9 +253,13 @@ const hostnameFor = (value: string): string | undefined => {
 
 const isSameOrigin = (ioc: ExtractedIoc, articleUrl?: string): boolean => {
   if (!articleUrl) return false;
+  if (ioc.type === 'url') {
+    const articleOrigin = originFor(articleUrl);
+    const iocOrigin = originFor(ioc.value);
+    return Boolean(articleOrigin && iocOrigin && articleOrigin === iocOrigin);
+  }
   const articleHost = hostnameFor(articleUrl);
   if (!articleHost) return false;
-  if (ioc.type === 'url') return hostnameFor(ioc.value) === articleHost;
   return ioc.type === 'domain' && ioc.value.toLowerCase() === articleHost;
 };
 
@@ -245,7 +323,13 @@ export const prepareIocAdjudication = (
         left.originalIndex - right.originalIndex
     );
 
-  const reviewable = candidates.map((candidate) => ({
+  // Apply the call budget before context search: scanning millions of characters
+  // for every extracted URL/domain would stall the server on IOC-rich reports.
+  const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+  const deferredCount = Math.max(0, candidates.length - capacity);
+  const inBudget = candidates.slice(0, capacity);
+
+  const reviewable = inBudget.map((candidate) => ({
     ...candidate,
     id: candidate.originalIndex,
     context: contextFor(
@@ -254,11 +338,12 @@ export const prepareIocAdjudication = (
       refangedText,
       lowerRefanged,
       candidate.ioc.value,
+      candidate.ioc.type,
       contextCache
     ),
   }));
 
-  const { batches, deferred } = chunkIocAdjudicationBatches(reviewable);
+  const { batches } = chunkIocAdjudicationBatches(reviewable);
   // Deferred candidates keep their heuristic tier. They are not a negative
   // model verdict, just past the batch budget for this enrichment run.
 
@@ -266,7 +351,7 @@ export const prepareIocAdjudication = (
     output,
     reviewable: batches.flat(),
     deterministicReferences,
-    deferredUnreviewed: deferred.length,
+    deferredUnreviewed: deferredCount,
   };
 };
 
@@ -277,7 +362,11 @@ export const prepareIocAdjudication = (
  */
 const shrinkContextAroundIoc = (context: string, value: string, maxChars: number): string => {
   if (context.length <= maxChars) return context;
-  const index = context.toLowerCase().indexOf(value.toLowerCase());
+  // Prefer an exact match so case-sensitive URL paths stay centered correctly.
+  let index = context.indexOf(value);
+  if (index < 0) {
+    index = context.toLowerCase().indexOf(value.toLowerCase());
+  }
   if (index < 0) {
     const start = Math.max(0, Math.floor((context.length - maxChars) / 2));
     return context.slice(start, start + maxChars);

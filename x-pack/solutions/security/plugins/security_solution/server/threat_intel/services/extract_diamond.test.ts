@@ -156,6 +156,26 @@ describe('extractDiamond', () => {
     );
   });
 
+  it('bounds per-vertex fallback context after a non-overflow single-call failure', async () => {
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
+    const { model, singleInvoke, vertexInvoke } = buildModel({
+      singleCall: fail('structured output parse failed'),
+      perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(singleInvoke).toHaveBeenCalledTimes(1);
+    expect(vertexInvoke).toHaveBeenCalled();
+    expect(result.extraction_mode).toBe('per_vertex_fallback');
+    expect(result.context_mode).toBe('degraded_context');
+    expect(String(vertexInvoke.mock.calls[0][0]).length).toBeLessThan(
+      String(singleInvoke.mock.calls[0][0]).length
+    );
+    expect(String(vertexInvoke.mock.calls[0][0])).toContain('MIDDLE_DIAMOND');
+    expect(result.adversary).toEqual(HIGH_VERTEX);
+  });
+
   it('shrinks context again for per-vertex fallback after overflow retry fails', async () => {
     const overflow = new InferenceTaskError(
       ChatCompletionErrorCode.ContextLengthExceededError,

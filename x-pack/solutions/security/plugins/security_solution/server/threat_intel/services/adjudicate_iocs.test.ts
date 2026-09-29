@@ -247,6 +247,77 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.output[prepared.reviewable.length].tier).toBe('discriminating');
   });
 
+  it('keeps case-sensitive URL path contexts distinct in the cache', () => {
+    const upper = 'https://evil.example/PAYLOAD';
+    const lower = 'https://evil.example/payload';
+    const prepared = prepareIocAdjudication({
+      text:
+        `The attacker staged ${upper} during initial access. ` +
+        `${'filler prose. '.repeat(40)}` +
+        `Documentation casually mentions ${lower} as an older sample name.`,
+      iocs: [candidate(upper), candidate(lower)],
+    });
+
+    expect(prepared.reviewable).toHaveLength(2);
+    expect(prepared.reviewable[0].context).toContain('attacker staged');
+    expect(prepared.reviewable[0].context).not.toContain('Documentation casually');
+    expect(prepared.reviewable[1].context).toContain('Documentation casually');
+    expect(prepared.reviewable[1].context).not.toContain('attacker staged');
+  });
+
+  it('matches URL review context with case-insensitive hosts and exact paths', () => {
+    const url = 'https://evil.example/PAYLOAD';
+    const prepared = prepareIocAdjudication({
+      text: 'The attacker downloaded https://Evil.Example/PAYLOAD during staging.',
+      iocs: [candidate(url)],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
+    expect(prepared.reviewable[0].context).toContain('/PAYLOAD');
+  });
+
+  it('does not treat a different port as the same origin citation', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'Payload mirrored at https://blog.example:8443/payload',
+      article_url: 'https://blog.example/article',
+      iocs: [candidate('https://blog.example:8443/payload')],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.deterministicReferences).toBe(0);
+  });
+
+  it('does not treat http and https as the same origin citation', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'See http://blog.example/payload for the binary.',
+      article_url: 'https://blog.example/article',
+      iocs: [candidate('http://blog.example/payload')],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.deterministicReferences).toBe(0);
+  });
+
+  it('applies the semantic review budget before building review contexts', () => {
+    const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+    const total = capacity + 25;
+    const iocs = Array.from({ length: total }, (_, index) =>
+      candidate(`https://evil.example/payload-${index}`, {
+        tier: 'discriminating',
+        tier_heuristic: 'discriminating',
+        tier_basis: 'url_path_entropy',
+      })
+    );
+    const text = iocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
+    const prepared = prepareIocAdjudication({ text, iocs });
+
+    expect(prepared.reviewable).toHaveLength(capacity);
+    expect(prepared.deferredUnreviewed).toBe(25);
+    // Deferred IOCs stay on the heuristic tier and are absent from reviewable.
+    expect(prepared.output[capacity].tier).toBe('discriminating');
+    expect(prepared.reviewable.some((entry) => entry.id === capacity)).toBe(false);
+  });
+
   it('shrinks candidate payload by size on a second overflow retry', () => {
     const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
       candidate(`https://evil.example/${'a'.repeat(1_800)}-${index}`)
