@@ -16,6 +16,7 @@ import {
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
+  selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store';
@@ -121,6 +122,7 @@ describe('WorkflowDetailTestModal', () => {
       mutateAsync: mockRunWorkflow,
       isLoading: false,
     } as unknown as ReturnType<typeof useRunWorkflow>);
+    jest.mocked(selectWorkflow).mockReturnValue(undefined);
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
     (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue(null);
@@ -291,6 +293,31 @@ describe('WorkflowDetailTestModal', () => {
       );
     });
     expect(mockSetSelectedExecution).not.toHaveBeenCalled();
+  });
+
+  it('opens a test run for an executor of a disabled workflow', async () => {
+    jest.mocked(selectWorkflow).mockReturnValue({
+      id: 'saved-workflow',
+      name: 'Saved workflow',
+      enabled: false,
+      yaml: 'name: Saved workflow',
+      createdAt: '',
+      lastUpdatedAt: '',
+      createdBy: 'owner',
+      lastUpdatedBy: 'owner',
+      definition: null,
+      valid: true,
+      permissions: { read: true, execute: true, edit: false, manage: false },
+    });
+    mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'saved-execution' });
+    const { getByTestId } = renderModal();
+    fireEvent.click(getByTestId('submit-modal'));
+    await waitFor(() =>
+      expect(mockTestWorkflow).toHaveBeenCalledWith({
+        inputs: { test: 'input' },
+        triggerTab: 'manual',
+      })
+    );
   });
 
   describe('warnings', () => {

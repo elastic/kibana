@@ -337,7 +337,8 @@ describe('getAxiosInstance', () => {
       logger,
       { clientId: 'my-client-id', clientSecret: 'my-client-secret', scope: 'grant' },
       configurationUtilities,
-      'client_secret_post'
+      'client_secret_post',
+      undefined
     );
 
     expect(result).not.toBeUndefined();

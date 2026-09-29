@@ -204,6 +204,13 @@ export class AgentBuilderPlugin
         }
         return services.agents.getRegistry({ request });
       },
+      getExecutionService: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Execution service not available — plugin has not started');
+        }
+        return services.execution;
+      },
       isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
@@ -220,6 +227,7 @@ export class AgentBuilderPlugin
           attachmentsService: services.attachments,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'workflow',
         });
       },
       isExperimentalEnabled: this.isExperimentalEnabled,
@@ -306,6 +314,9 @@ export class AgentBuilderPlugin
       renderers: {
         register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
+      conversationEvents: {
+        register: serviceSetups.conversationEvents.register.bind(serviceSetups.conversationEvents),
+      },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
@@ -329,7 +340,6 @@ export class AgentBuilderPlugin
     void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
-      logger: this.logger.get('tracing'),
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
@@ -453,6 +463,7 @@ export class AgentBuilderPlugin
             attachmentsService: attachments,
             coreStart,
             spaces,
+            source: 'server_api',
           }),
       },
       conversationTemplates,

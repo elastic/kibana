@@ -24,7 +24,7 @@ export const isWorkflowsEnabledForSpace = async ({
   featureFlags,
   uiSettingsClient,
 }: {
-  featureFlags: Pick<Parameters<typeof isWorkflowsEnabled>[0], 'getBooleanValue'>;
+  featureFlags: Parameters<typeof isWorkflowsEnabled>[0];
   uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
   if (!(await isWorkflowsEnabled(featureFlags))) return false;

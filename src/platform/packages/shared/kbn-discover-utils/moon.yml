@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/data-view-utils'
   - '@kbn/es-query'
   - '@kbn/esql-types'
+  - '@kbn/field-formats-common'
   - '@kbn/field-formats-plugin'
   - '@kbn/field-types'
   - '@kbn/i18n'

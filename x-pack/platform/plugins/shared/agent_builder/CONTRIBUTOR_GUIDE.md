@@ -1095,6 +1095,26 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
 }));
 ```
 
+### Opening flyouts from conversation details content
+
+Both conversation details flyouts are managed EUI flyouts in the
+`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, header,
+footer, or attachment renderer and have it stack on top with a Back button, open it as a main flyout
+in the same group by passing these options when you open it:
+
+```tsx
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+
+const options = {
+  session: 'start',
+  historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+};
+```
+
+Back returns to the conversation details flyout. Closing any flyout in the group closes all of them.
+A flyout opened with a different `historyKey` hides the conversation details flyout until it closes,
+with no Back button.
+
 ### Rules
 
 - **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.

@@ -20,7 +20,6 @@
     "@kbn/presentation-util",
     "@kbn/shared-ux-utility",
     "@kbn/scout",
-    "@kbn/app-header",
     "@kbn/ui-callout",
     "@kbn/cps",
     "@kbn/cps-utils"

@@ -711,6 +711,7 @@ export class SpaceTestApiClient {
   ) {
     const res = await this.supertest
       .delete(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({ force });
 

@@ -1,4 +1,5 @@
 # ----- Copy from internal roles config in elasticsearch-controller
+# Read-tier Dashboard/Discover grants: elastic/elasticsearch-controller#2058
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
@@ -89,13 +90,21 @@ viewer:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Dashboard/Discover `.all` was inert while those Kibana features were hidden.
+        # Keep `.read` so unhiding them does not grant write; SIEM `read` already
+        # composes the same read privileges. maps_v2/visualize_v2 stay `.all` because
+        # they remain hidden and Dashboard `read` already composes them.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.read
         - feature_workflowsManagement.read
+        - feature_alertzero.read
+        - feature_agenticInvestigations.read
+        - feature_proposals.read
+        - feature_agenticInvestigations.escalations_read
       resources: '*'
   run_as: []
 
@@ -239,6 +248,11 @@ editor:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
   run_as: []
 
@@ -337,13 +351,19 @@ t1_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 t2_analyst:
@@ -442,13 +462,19 @@ t2_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 t3_analyst:
@@ -579,6 +605,11 @@ t3_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 threat_intelligence_analyst:
@@ -688,6 +719,10 @@ threat_intelligence_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 rule_author:
@@ -806,6 +841,11 @@ rule_author:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 soc_manager:
@@ -938,6 +978,11 @@ soc_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 detections_admin:
@@ -1030,6 +1075,11 @@ detections_admin:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 platform_engineer:
@@ -1151,6 +1201,11 @@ platform_engineer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 endpoint_operations_analyst:
@@ -1281,6 +1336,10 @@ endpoint_operations_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 endpoint_policy_manager:
@@ -1395,6 +1454,10 @@ endpoint_policy_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 # admin role defined in elasticsearch controller

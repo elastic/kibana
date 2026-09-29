@@ -44,21 +44,15 @@ const patternBucket = (
   evidence: { hits: { hits: evidence } },
 });
 
-// `spaces` keys are backing index names, which is what a `_index` terms agg buckets on.
 const mainResponse = ({
   patterns = [],
-  spaces = ['context-engine-signals-default-000001'],
   total = 0,
 }: {
   patterns?: ReturnType<typeof patternBucket>[];
-  spaces?: string[];
   total?: number;
 } = {}) => ({
   hits: { total: { value: total, relation: 'eq' }, hits: [] },
-  aggregations: {
-    spaces: { buckets: spaces.map((key) => ({ key, doc_count: 1 })) },
-    patterns: { buckets: patterns },
-  },
+  aggregations: { patterns: { buckets: patterns } },
 });
 
 const conversationsResponse = (ids: string[]) => ({
@@ -98,6 +92,7 @@ describe('selectSignals', () => {
     selectSignals(esClient, {
       destValue: 'ai-index-idx-orders',
       sources: [],
+      spaceId: 'default',
       now: NOW,
       ...options,
     });
@@ -380,52 +375,62 @@ describe('selectSignals', () => {
     });
   });
 
-  it('reads every space and reports the ones the evidence came from', async () => {
-    esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
-      mainResponse({
-        spaces: [
-          'context-engine-signals-marketing-000001',
-          'context-engine-signals-default-000001',
-        ],
-      }) as never
-    );
+  it('reports the space the evidence came from', async () => {
+    esClient.search
+      .mockResolvedValueOnce(conversationsResponse([]) as never)
+      .mockResolvedValueOnce(mainResponse({ total: 3 }) as never);
 
-    const result = await run();
+    const result = await run({ spaceId: 'marketing' });
 
     expect(requestFor(MAIN)).toMatchObject({
-      index: 'context-engine-signals-*',
+      index: 'context-engine-signals-marketing',
       ignore_unavailable: true,
       allow_no_indices: true,
       track_total_hits: true,
     });
-    expect(result.spaces).toEqual(['default', 'marketing']);
-  });
-
-  it('reports a space once when its signals span more than one backing index', async () => {
-    esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
-      mainResponse({
-        spaces: [
-          'context-engine-signals-marketing-000001',
-          'context-engine-signals-marketing-000002',
-        ],
-      }) as never
-    );
-
-    const result = await run();
-
     expect(result.spaces).toEqual(['marketing']);
   });
 
-  it('keeps a space id that itself ends in digits', async () => {
+  it('reports no space when the window held no signals', async () => {
     esClient.search
       .mockResolvedValueOnce(conversationsResponse([]) as never)
-      .mockResolvedValueOnce(
-        mainResponse({ spaces: ['context-engine-signals-team-2026-000001'] }) as never
-      );
+      .mockResolvedValueOnce(mainResponse({ total: 0 }) as never);
 
     const result = await run();
 
-    expect(result.spaces).toEqual(['team-2026']);
+    expect(result.spaces).toEqual([]);
+  });
+
+  it('reads only the signals of the given space', async () => {
+    esClient.search
+      .mockResolvedValueOnce(conversationsResponse([]) as never)
+      .mockResolvedValueOnce(mainResponse() as never);
+
+    await run({ spaceId: 'marketing' });
+
+    expect(requestFor(0)).toMatchObject({
+      index: 'context-engine-signals-marketing',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    expect(requestFor(MAIN)).toMatchObject({
+      index: 'context-engine-signals-marketing',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+  });
+
+  it('does not read another space whose id starts with this one', async () => {
+    esClient.search
+      .mockResolvedValueOnce(conversationsResponse([]) as never)
+      .mockResolvedValueOnce(mainResponse() as never);
+
+    await run({ spaceId: 'marketing' });
+
+    expect(requestFor(0).index).toBe('context-engine-signals-marketing');
+    expect(requestFor(MAIN).index).toBe('context-engine-signals-marketing');
+    expect(requestFor(0).index).not.toContain('*');
+    expect(requestFor(MAIN).index).not.toContain('*');
   });
 
   it('skips the conversation lookup when the destination matches nothing', async () => {

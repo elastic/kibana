@@ -22,8 +22,6 @@ const { storybookAliases } = loadKibanaModule<typeof import('@kbn/dev/storybook/
   '@kbn/dev/storybook/aliases'
 );
 
-const GITHUB_CONTEXT = 'Build and Publish Storybooks';
-
 const STORYBOOK_DIRECTORY =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
     ? `pr-${process.env.BUILDKITE_PULL_REQUEST}`
@@ -43,7 +41,8 @@ const STORYBOOK_DOCS_ARCHIVE_FILE = 'storybook-docs.tar.gz';
 const STORYBOOK_DOCS_ARCHIVE_PATH = path.join(STORYBOOK_BUILD_DIR, STORYBOOK_DOCS_ARCHIVE_FILE);
 const STORYBOOK_DOCS_ARCHIVE_URL = `${STORYBOOK_BASE_URL}/${STORYBOOK_DOCS_ARCHIVE_FILE}`;
 
-const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
+const exec = (command: string, env?: NodeJS.ProcessEnv) =>
+  execSync(command, { stdio: 'inherit', env });
 
 const annotateStorybookDocsArtifacts = (
   archive: BuildDocsArchiveResult,
@@ -118,16 +117,6 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
   });
 };
 
-const ghStatus = (state: string, description: string) =>
-  exec(
-    `gh api "repos/elastic/kibana/statuses/${process.env.BUILDKITE_COMMIT}"`,
-    `-f state=${state}`,
-    `-f target_url="${process.env.BUILDKITE_BUILD_URL}"`,
-    `-f context="${GITHUB_CONTEXT}"`,
-    `-f description="${description}"`,
-    `--silent`
-  );
-
 const build = async (): Promise<{
   archive: BuildDocsArchiveResult;
   registry: BuildDocsRegistryResult;
@@ -201,6 +190,12 @@ const upload = (archive: BuildDocsArchiveResult, registry: BuildDocsRegistryResu
     'common',
     'activate_service_account.sh'
   );
+  const accessTokenFile = createGcsAccessTokenFile(activateScriptPath);
+  const gcloudEnv = {
+    ...process.env,
+    CLOUDSDK_AUTH_ACCESS_TOKEN_FILE: accessTokenFile,
+    CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT: '',
+  };
   try {
     console.log('--- Generating Storybooks HTML');
 
@@ -230,20 +225,22 @@ const upload = (archive: BuildDocsArchiveResult, registry: BuildDocsRegistryResu
     fs.writeFileSync('index.html', html);
 
     console.log('--- Uploading Storybooks');
-    exec(`
-      ${path.relative(process.cwd(), activateScriptPath)} gs://ci-artifacts.kibana.dev
+    exec(
+      `
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --no-user-output-enabled '${storybookDocsArchivePath}' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${STORYBOOK_DOCS_ARCHIVE_FILE}'
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=html --no-user-output-enabled 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
-    `);
+    `,
+      gcloudEnv
+    );
 
     console.log('--- Uploading Storybook docs assets');
     process.chdir(originalDirectory);
     process.chdir(STORYBOOK_DOCS_BUILD_DIR);
-    exec(`
-      ${path.relative(process.cwd(), activateScriptPath)} gs://ci-artifacts.kibana.dev
-      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${STORYBOOK_DOCS_DIRECTORY}/'
-    `);
+    exec(
+      `gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${STORYBOOK_DOCS_DIRECTORY}/'`,
+      gcloudEnv
+    );
 
     annotateStorybookDocsArtifacts(archive, registry);
 
@@ -253,18 +250,28 @@ const upload = (archive: BuildDocsArchiveResult, registry: BuildDocsRegistryResu
       );
     }
   } finally {
+    fs.rmSync(path.dirname(accessTokenFile), { recursive: true, force: true });
     process.chdir(originalDirectory);
   }
 };
 
+/** Mints one impersonated access token so parallel gcloud workers don't each exchange a token. */
+function createGcsAccessTokenFile(activateScriptPath: string): string {
+  exec(`${activateScriptPath} gs://ci-artifacts.kibana.dev`);
+
+  // Access tokens are valid for 1h, so uploads using this file must finish within that.
+  const token = execSync('gcloud auth print-access-token', {
+    stdio: ['ignore', 'pipe', 'inherit'],
+  })
+    .toString()
+    .trim();
+  const tokenDir = fs.mkdtempSync(path.join(os.tmpdir(), 'storybook-gcs-'));
+  const tokenFile = path.join(tokenDir, 'access_token');
+  fs.writeFileSync(tokenFile, token, { mode: 0o600 });
+  return tokenFile;
+}
+
 (async () => {
-  try {
-    ghStatus('pending', 'Building Storybooks');
-    const { archive, registry } = await build();
-    upload(archive, registry);
-    ghStatus('success', 'Storybooks built');
-  } catch (error) {
-    ghStatus('error', 'Building Storybooks failed');
-    throw error;
-  }
+  const { archive, registry } = await build();
+  upload(archive, registry);
 })();
