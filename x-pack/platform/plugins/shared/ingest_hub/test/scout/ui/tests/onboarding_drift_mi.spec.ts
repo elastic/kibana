@@ -459,7 +459,7 @@ test.describe(
       await page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle').click();
       await page.testSubj
         .locator('staticKeysReplace-secretAccessKey')
-        .fill('wJalrXUtnFEMI/K7MDENG');
+        .fill('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
 
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
