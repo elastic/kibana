@@ -47,7 +47,7 @@ interface ExpectedWorkerSettings {
  */
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
   'system-security-floor-alert-triage': {
-    settingsVersion: 2,
+    settingsVersion: 1,
     flatSettings: { autoCloseConfidenceScoreMinThreshold: 0.85 },
     triggerTypes: ['alert', 'manual'],
   },

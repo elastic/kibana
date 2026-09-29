@@ -31,15 +31,14 @@ const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
 
 /**
  * Stored defaults per unscheduled Worker. Owning no schedule is all these Workers have in
- * common: Alert Triage also carries Watch-owned `extras` and a bumped settings version, and
- * both change what already-installed spaces receive, so they are spelled out rather than
- * assumed uniform.
+ * common: Alert Triage also carries Watch-owned `extras`, which changes what already-installed
+ * spaces receive, so it is spelled out rather than assumed uniform.
  */
 const UNSCHEDULED_WORKER_DEFAULTS = new Map<string, Record<string, unknown>>([
   [
     SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
     {
-      settingsVersion: 2,
+      settingsVersion: 1,
       autonomyLevel: 'manual',
       extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
     },
@@ -446,6 +445,41 @@ describe('createWorkerSettingsRegistration', () => {
         );
       }
     );
+  });
+
+  describe('Worker-specific settings — alert triage', () => {
+    const registration = createWorkerSettingsRegistration(
+      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+    );
+
+    // Documents installed before this Worker's `extras` and narrowed autonomy levels existed
+    // still carry `settingsVersion: 1` and no `extras` at all. The settings version must not
+    // have moved on, or every such document becomes unreadable after upgrade.
+    it('reads a pre-existing v1 document with no extras and a since-dropped autonomy level', () => {
+      const stored = { settingsVersion: 1, autonomyLevel: 'assisted' };
+
+      expect(registration.withMissingDefaults(stored)).toEqual({
+        ...stored,
+        extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+      });
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+        autonomy: 'manual',
+        extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+      });
+    });
+
+    it('persists the backfilled extras and projected autonomy on the next save', () => {
+      const stored = { settingsVersion: 1, autonomyLevel: 'assisted' };
+
+      expect(registration.applyPatch(stored, {})).toEqual({
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+        },
+      });
+    });
   });
 
   describe('Workers that declare no extras', () => {
