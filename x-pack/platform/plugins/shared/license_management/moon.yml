@@ -40,7 +40,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - public/**/*
@@ -49,6 +49,6 @@ fileGroups:
     - __jest__/**/*
     - __mocks__/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

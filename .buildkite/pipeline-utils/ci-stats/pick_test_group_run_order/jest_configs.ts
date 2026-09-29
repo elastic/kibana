@@ -23,12 +23,13 @@ const SHARDED_JEST_CONFIGS = loadBuildkiteJson<typeof import('../../../sharded_j
 export const SHARD_ANNOTATION_SEP = '||shard=';
 
 /**
- * Discover Jest unit configs honoring LIMIT_SOLUTIONS, the disabled list,
- * the empty-config filter, and the shard map.
+ * Discover unit test configs honoring LIMIT_SOLUTIONS, the disabled list,
+ * the empty-config filter, and the shard map. Unit tests run on Vitest
+ * (`vitest.config.js`); `.buildkite` keeps its own Jest config (`jest.config.cjs`).
  */
 export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): string[] {
   const raw = globJestConfigs(
-    ['**/jest.config.js', '**/jest.config.cjs', '!**/__fixtures__/**'],
+    ['**/vitest.config.js', '**/jest.config.cjs', '!**/__fixtures__/**'],
     limitSolutions
   );
   return expandShardedJestConfigs(filterEmptyJestConfigs(raw));

@@ -1,0 +1,26 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - vitest-unit-tests
+
+tasks:
+  vitest:
+    command: node
+    args:
+      - scripts/vitest.js
+      - '--passWithNoTests'
+      - '--config'
+      - '@files(vitest-config)'
+    deps:
+      # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
+      # local/upstream source changes invalidate the vitest cache.
+      - target: '~:source'
+        cacheStrategy: hash
+      - target: '~:source-upstream'
+        cacheStrategy: hash
+    inputs:
+      - '@group(src)'
+    options:
+      mergeArgs: append
+      runFromWorkspaceRoot: true

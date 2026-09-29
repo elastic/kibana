@@ -8,5 +8,5 @@ is_test_execution_step
 
 .buildkite/scripts/bootstrap.sh
 
-echo '--- Jest'
-.buildkite/scripts/steps/test/jest_parallel.sh jest.config.js
+echo '--- Unit tests (Vitest)'
+.buildkite/scripts/steps/test/jest_parallel.sh vitest.config.js

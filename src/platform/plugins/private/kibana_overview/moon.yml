@@ -45,7 +45,7 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - public/**/*
@@ -53,6 +53,6 @@ fileGroups:
     - test/scout/**/*
     - test/scout_shared_ux_no_data/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

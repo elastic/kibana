@@ -30,7 +30,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -41,6 +41,6 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

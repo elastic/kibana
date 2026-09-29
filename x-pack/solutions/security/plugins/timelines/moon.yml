@@ -47,7 +47,7 @@ tags:
   - prod
   - group-security
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -56,6 +56,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

@@ -28,7 +28,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
   - is-webpack-built
 fileGroups:
   src:
@@ -36,8 +36,8 @@ fileGroups:
     - '**/*.ts'
     - src/languages/painless/autocomplete_definitions/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks:
   build-webpack:
     command: pnpm

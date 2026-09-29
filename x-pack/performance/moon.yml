@@ -37,12 +37,12 @@ tags:
   - dev
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - kbn_archives/large_arrays_data_view.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

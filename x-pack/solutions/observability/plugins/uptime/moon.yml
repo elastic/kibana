@@ -94,7 +94,7 @@ tags:
   - prod
   - group-observability
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -104,6 +104,6 @@ fileGroups:
     - server/**/*
     - server/legacy_uptime/lib/requests/__fixtures__/monitor_charts_mock.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

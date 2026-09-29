@@ -58,7 +58,7 @@ tags:
   - dev
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '**/*.js'
@@ -68,6 +68,6 @@ fileGroups:
     - '!target/**/*'
     - '!packages/**/*'
     - '!type_check_validation_loader.js'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

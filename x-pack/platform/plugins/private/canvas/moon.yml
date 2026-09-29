@@ -82,7 +82,7 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '*.ts'
@@ -97,6 +97,6 @@ fileGroups:
     - test/scout/**/*
     - types/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

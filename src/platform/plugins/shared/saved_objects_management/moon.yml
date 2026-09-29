@@ -52,7 +52,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -61,6 +61,6 @@ fileGroups:
     - test/scout*/**/*
     - '!target/**/*'
     - '!public/management_section/objects_table/saved_objects_table_pseudo.tsx'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

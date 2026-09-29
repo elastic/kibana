@@ -61,7 +61,7 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -73,6 +73,6 @@ fileGroups:
     - public/test_utils/vegalite_graph.json
     - public/test_utils/vega_graph.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

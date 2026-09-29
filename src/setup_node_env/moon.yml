@@ -26,7 +26,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - harden/**/*
@@ -34,6 +34,6 @@ fileGroups:
     - '*.js'
     - '*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

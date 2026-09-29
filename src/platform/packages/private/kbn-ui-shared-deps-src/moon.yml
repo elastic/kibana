@@ -25,7 +25,7 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
   - is-webpack-built
 fileGroups:
   src:
@@ -34,8 +34,8 @@ fileGroups:
     - '!src/entry.js'
     - '!**/*.config.js'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks:
   build-webpack:
     command: pnpm

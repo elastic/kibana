@@ -35,7 +35,7 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - encryption_keys/**/*
@@ -49,6 +49,6 @@ fileGroups:
     - '*.js'
     - '!target/**/*'
     - '!**/*.test.js'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

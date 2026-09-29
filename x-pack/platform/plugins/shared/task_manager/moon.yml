@@ -65,7 +65,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - server/**/*
@@ -74,6 +74,6 @@ fileGroups:
     - test/scout/**/*
     - test/scout_uiam_local/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

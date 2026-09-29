@@ -50,7 +50,7 @@ tags:
   - prod
   - group-workplaceai
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -59,6 +59,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

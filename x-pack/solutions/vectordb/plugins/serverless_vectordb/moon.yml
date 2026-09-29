@@ -63,7 +63,7 @@ tags:
   - prod
   - group-vectordb
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -73,6 +73,6 @@ fileGroups:
     - server/**/*.ts
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

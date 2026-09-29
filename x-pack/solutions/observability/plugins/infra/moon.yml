@@ -166,7 +166,7 @@ tags:
   - prod
   - group-observability
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -176,6 +176,6 @@ fileGroups:
     - test/scenarios/**/*
     - test/scout/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

@@ -25,7 +25,6 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
@@ -36,6 +35,4 @@ fileGroups:
     - ./src/data_sources/composable/component/system.json
     - ./src/data_sources/composable/template.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

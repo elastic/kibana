@@ -39,6 +39,7 @@ steps:
             - '/package.json'
             - '/tsconfig.base.json'
             - '/versions.json'
+            - '**/vitest.config.js'
             - '**/jest.config.js'
             - '**/jest.integration.config.js'
             - '**/*.test.js'

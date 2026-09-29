@@ -22,15 +22,15 @@ tags:
   - dev
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - rules/**/*
     - helpers/**/*
     - index.js
-    - jest.config.js
     - lib.js
     - oxlint_plugin.js
-  jest-config:
-    - jest.config.js
+    - vitest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

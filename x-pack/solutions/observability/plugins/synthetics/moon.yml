@@ -149,7 +149,7 @@ tags:
   - prod
   - group-observability
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -161,6 +161,6 @@ fileGroups:
     - test/scout_synthetics_agent_e2e/**/*
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

@@ -101,7 +101,7 @@ export function regenerateMoonProjects() {
 
       applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
 
-      applyJestTaskConfig(projectConfig);
+      applyVitestTaskConfig(projectConfig);
 
       projectConfig = applyDevOverrides(
         projectConfig,
@@ -275,25 +275,28 @@ function applyTsConfigSettings(
   }
 }
 
-function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
+function applyVitestTaskConfig(projectConfig: MoonProjectConfig) {
   if (!hasSourceRoot(projectConfig)) {
-    logger.warning('Skipping jest task config - no sourceRoot found in project config');
+    logger.warning('Skipping vitest task config - no sourceRoot found in project config');
     return;
   }
 
-  const jestConfigName = resolveFirstExisting(
+  const vitestConfigName = resolveFirstExisting(
     projectConfig.project.sourceRoot,
-    MOON_CONST.JEST_CONFIG_FILES
+    MOON_CONST.VITEST_CONFIG_FILES
   );
 
-  if (!jestConfigName) {
+  if (!vitestConfigName) {
     logger.warning(
-      `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
+      `Could not find vitest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
     );
   } else {
-    projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
+    projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_VITEST_UNIT]);
 
-    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
+    projectConfig.fileGroups = {
+      ...projectConfig.fileGroups,
+      'vitest-config': [vitestConfigName],
+    };
   }
 }
 

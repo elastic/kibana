@@ -27,7 +27,7 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
@@ -35,6 +35,6 @@ fileGroups:
     - '!target/**/*'
     - '!packaging/target/**/*'
     - '!packaging/example/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

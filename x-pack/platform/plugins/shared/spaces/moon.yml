@@ -96,7 +96,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -107,6 +107,6 @@ fileGroups:
     - test/scout_initial_solution_setup/**/*
     - test/scout_initial_solution_setup_api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

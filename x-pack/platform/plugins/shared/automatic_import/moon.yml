@@ -71,7 +71,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -80,6 +80,6 @@ fileGroups:
     - common/**/*.ts
     - test/scout_automatic_import/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

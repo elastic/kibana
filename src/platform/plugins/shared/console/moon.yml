@@ -71,7 +71,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -81,6 +81,6 @@ fileGroups:
     - test/**/*
     - server/lib/spec_definitions/kibana_api_doc_links/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  vitest-config:
+    - vitest.config.js
 tasks: {}

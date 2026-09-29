@@ -10,13 +10,17 @@ exitCode=0
 configs=""
 
 # Parallel execution tuning (can be overridden via env)
-#   JEST_MAX_PARALLEL: number of concurrent Jest config processes
+#   JEST_MAX_PARALLEL: number of concurrent config processes
 #   JEST_MAX_OLD_SPACE_MB: per-process max old space size (MB)
-# NOTE: defaults depend on TEST_TYPE — unit tests run 3 parallel processes
-# with a lower heap limit, while integration tests run 1 process with more memory.
-if [[ "$1" == 'jest.config.js' ]]; then
+#   VITEST_MAX_WORKERS / VITEST_POOL: worker pool of each Vitest (unit) config process
+# NOTE: unit tests (Vitest) run 2 config processes with 2 workers each, while
+# integration tests (Jest) run 1 process with more memory.
+if [[ "$1" == 'vitest.config.js' ]]; then
   TEST_TYPE="unit"
-  JEST_MAX_PARALLEL=3
+  # Each Vitest config process runs its own worker pool: 2 configs x 2 workers on a 4 vCPU agent.
+  JEST_MAX_PARALLEL="${JEST_MAX_PARALLEL:-2}"
+  export VITEST_MAX_WORKERS="${VITEST_MAX_WORKERS:-2}"
+  export VITEST_POOL="${VITEST_POOL:-forks}"
   JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-4096}"
 else
   TEST_TYPE="integration"
