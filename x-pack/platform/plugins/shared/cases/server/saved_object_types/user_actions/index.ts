@@ -9,7 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { createUserActionsMigrations } from '../migrations/user_actions';
-import { modelVersion1, modelVersion2 } from './model_versions';
+import { modelVersion1, modelVersion2, modelVersion3 } from './model_versions';
 
 /**
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
@@ -74,7 +74,6 @@ export const createCaseUserActionSavedObjectType = (): SavedObjectsType => ({
               uid: { type: 'keyword' },
             },
           },
-          // Added in model version 2: allows aggregating workflow run origins in telemetry.
           origin: {
             properties: {
               // origin.type — one of the CaseWorkflowRunOrigin discriminant values
@@ -113,6 +112,7 @@ export const createCaseUserActionSavedObjectType = (): SavedObjectsType => ({
   modelVersions: {
     1: modelVersion1,
     2: modelVersion2,
+    3: modelVersion3,
   },
   management: {
     importableAndExportable: true,

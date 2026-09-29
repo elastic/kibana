@@ -7,6 +7,7 @@
 
 import { modelVersion1 } from './model_version_1';
 import { modelVersion2 } from './model_version_2';
+import { modelVersion3 } from './model_version_3';
 
 describe('cases-user-actions model versions', () => {
   describe('version 1', () => {
@@ -65,6 +66,31 @@ describe('cases-user-actions model versions', () => {
       };
 
       expect(() => schema.validate(attrs)).toThrow();
+    });
+  });
+
+  describe('version 3', () => {
+    it('adds the payload.origin.type mapping', () => {
+      expect(modelVersion3.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            payload: {
+              properties: {
+                origin: {
+                  properties: {
+                    type: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('keeps the version 2 schemas because the attribute shape is unchanged', () => {
+      expect(modelVersion3.schemas).toEqual(modelVersion2.schemas);
     });
   });
 });
