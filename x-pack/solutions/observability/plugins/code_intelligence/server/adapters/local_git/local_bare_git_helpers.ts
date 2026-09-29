@@ -23,6 +23,8 @@ export const LOCAL_GIT_MAX_SPOOL_BYTES = 256 * 1024 * 1024;
 export const LOCAL_GIT_MAX_TOTAL_SPOOL_BYTES = 1024 * 1024 * 1024;
 /** Limits simultaneous Git scans that are creating spools. */
 export const LOCAL_GIT_MAX_SPOOL_CONCURRENCY = 2;
+/** Limits how long one scan waits in line for a concurrency slot. */
+export const LOCAL_GIT_SPOOL_SLOT_WAIT_MS = 4 * LOCAL_GIT_COMMAND_TIMEOUT_MS;
 /** Limits retained completed spools. */
 export const LOCAL_GIT_MAX_ACTIVE_SPOOLS = 16;
 /** Limits the lifetime of a continuation spool. */
@@ -65,6 +67,7 @@ export interface LocalBareGitOptions {
   readonly maxSpoolBytes?: number;
   readonly maxTotalSpoolBytes?: number;
   readonly maxSpoolConcurrency?: number;
+  readonly spoolSlotWaitMs?: number;
   readonly maxActiveSpools?: number;
   readonly spoolTtlMs?: number;
   /** Trusted absolute parent for private per-reader spool namespaces. */

@@ -93,10 +93,44 @@ export class LocalBareGitSourceReader implements SourceReader {
   /** Holds incomplete files that could not be unlinked and must continue consuming capacity. */
   private readonly failedSpools = new Map<string, number>();
   private activeScans = 0;
+  /** Grants released scan slots to waiting scans in arrival order. */
+  private readonly scanSlotWaiters: Array<() => void> = [];
 
   /** Binds source reads to explicit repositories and local resource limits. */
   public constructor(options: LocalBareGitOptions) {
     this.configuration = new LocalBareGitConfiguration(options);
+  }
+
+  /** Takes a scan slot, waiting in line up to the configured bound; false means the wait expired. */
+  private acquireScanSlot(): Promise<boolean> {
+    if (
+      this.scanSlotWaiters.length === 0 &&
+      this.activeScans < this.configuration.maxSpoolConcurrency
+    ) {
+      this.activeScans += 1;
+      return Promise.resolve(true);
+    }
+    return new Promise((resolve) => {
+      /** Receives a slot handed over directly by a releasing scan. */
+      const grant = (): void => {
+        clearTimeout(timer);
+        resolve(true);
+      };
+      /** Leaves the line once the bounded wait expires. */
+      const timer = setTimeout(() => {
+        const index = this.scanSlotWaiters.indexOf(grant);
+        if (index >= 0) this.scanSlotWaiters.splice(index, 1);
+        resolve(false);
+      }, this.configuration.spoolSlotWaitMs);
+      this.scanSlotWaiters.push(grant);
+    });
+  }
+
+  /** Hands a released slot to the oldest waiting scan, or frees it when nobody is waiting. */
+  private freeScanSlot(): void {
+    const next = this.scanSlotWaiters.shift();
+    if (next === undefined) this.activeScans -= 1;
+    else next();
   }
 
   /** Returns the one reusable batch reader bound to a configured bare repository path. */
@@ -369,32 +403,33 @@ export class LocalBareGitSourceReader implements SourceReader {
     request: string
   ): Promise<Spool | GitCommandFailure> {
     await this.cleanupExpiredSpools();
-    if (this.activeScans >= this.configuration.maxSpoolConcurrency)
+    if (!(await this.acquireScanSlot()))
       return {
         code: 'spool_concurrency_exceeded',
         message: 'Too many Git source scans are active.',
         retryable: true,
       };
-    if (
-      this.spools.size + this.pendingSpools + this.failedSpools.size >=
-        this.configuration.maxActiveSpools ||
-      this.spoolBytes + this.reservedSpoolBytes >= this.configuration.maxTotalSpoolBytes
-    )
-      return {
-        code: 'spool_capacity_exceeded',
-        message: 'Temporary source spool capacity is exhausted.',
-        retryable: true,
-      };
-    this.activeScans += 1;
-    this.pendingSpools += 1;
     /** Releases this scan's concurrency slot exactly once after its process group is stopped. */
     let scanSlotReleased = false;
     /** Keeps timeout retries from overlapping a still-running Git process group. */
     const releaseScanSlot = (): void => {
       if (scanSlotReleased) return;
       scanSlotReleased = true;
-      this.activeScans -= 1;
+      this.freeScanSlot();
     };
+    if (
+      this.spools.size + this.pendingSpools + this.failedSpools.size >=
+        this.configuration.maxActiveSpools ||
+      this.spoolBytes + this.reservedSpoolBytes >= this.configuration.maxTotalSpoolBytes
+    ) {
+      releaseScanSlot();
+      return {
+        code: 'spool_capacity_exceeded',
+        message: 'Temporary source spool capacity is exhausted.',
+        retryable: true,
+      };
+    }
+    this.pendingSpools += 1;
     /** Records whether a child close or escalation now owns concurrency-slot release. */
     let scanStarted = false;
     try {
