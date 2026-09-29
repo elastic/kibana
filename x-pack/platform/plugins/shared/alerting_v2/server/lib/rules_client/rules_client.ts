@@ -21,6 +21,7 @@ import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import {
   SavedObjectsUtils,
   type KibanaRequest as CoreKibanaRequest,
@@ -86,6 +87,7 @@ import type {
   FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
+  MatchRulesArgs,
   RotationCandidate,
   RuleResponse,
   UpdateRuleParams,
@@ -194,6 +196,13 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 
   return sortFieldMap[sortField];
 };
+
+const buildRuleTagsFilter = (tags: string[]): string =>
+  toKqlExpression(
+    nodeBuilder.or(
+      tags.map((tag) => nodeBuilder.is('metadata.tags', nodeTypes.literal.buildNode(tag, true)))
+    )
+  );
 
 @injectable()
 export class RulesClient {
@@ -1068,6 +1077,27 @@ export class RulesClient {
       page,
       per_page: perPage,
     };
+  }
+
+  /**
+   * Finds the rules in scope of a policy matcher: rules with at least one of its tags, or every rule
+   * when it has no tags. The matcher expression runs against alerts, so it can't narrow rules down.
+   */
+  @withApm
+  public async matchRules({
+    matcher,
+    page,
+    perPage,
+  }: MatchRulesArgs = {}): Promise<FindRulesResponse> {
+    const tags = matcher?.tags ?? [];
+
+    return this.findRules({
+      page,
+      perPage,
+      filter: tags.length > 0 ? buildRuleTagsFilter(tags) : undefined,
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
   }
 
   /**

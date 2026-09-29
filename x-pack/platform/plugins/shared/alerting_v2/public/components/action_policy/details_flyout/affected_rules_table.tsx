@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiToolTip,
+  type Criteria,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
+import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { useAlertingLocators } from '../../../application/locator_context';
+import { useFetchMatchingRules } from '../../../hooks/use_fetch_matching_rules';
+import type { RuleApiResponse } from '../../../services/rules_api';
+import { EMPTY_VALUE } from '../../../utils/rule_display';
+import { BadgeList } from '../badge_list';
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
+const OPEN_RULE_LABEL = i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.openRule', {
+  defaultMessage: 'Open rule in a new tab',
+});
+
+interface Props {
+  matcher?: PolicyMatcher | null;
+}
+
+export const AffectedRulesTable = ({ matcher }: Props) => {
+  const { rulesLocators } = useAlertingLocators();
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
+
+  const { data, isLoading, isFetching, isError } = useFetchMatchingRules({
+    matcher,
+    page,
+    perPage,
+  });
+
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = [
+    {
+      field: 'metadata.name',
+      name: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.column.name', {
+        defaultMessage: 'Name',
+      }),
+      truncateText: true,
+    },
+    {
+      field: 'metadata.tags',
+      name: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.column.tags', {
+        defaultMessage: 'Tags',
+      }),
+      render: (tags: RuleApiResponse['metadata']['tags']) =>
+        tags?.length ? <BadgeList items={tags} /> : EMPTY_VALUE,
+    },
+    {
+      name: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.column.actions', {
+        defaultMessage: 'Actions',
+      }),
+      width: '80px',
+      align: 'right',
+      render: ({ id }: RuleApiResponse) => (
+        <EuiToolTip content={OPEN_RULE_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="external"
+            href={rulesLocators.getRedirectUrl({ ruleId: id })}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={OPEN_RULE_LABEL}
+            data-test-subj={`actionPolicyAffectedRulesOpenRule-${id}`}
+          />
+        </EuiToolTip>
+      ),
+    },
+  ];
+
+  const onTableChange = ({ page: tablePage }: Criteria<RuleApiResponse>) => {
+    if (!tablePage) {
+      return;
+    }
+    setPage(tablePage.index + 1);
+    setPerPage(tablePage.size);
+  };
+
+  return (
+    <EuiBasicTable
+      tableCaption={i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.tableCaption', {
+        defaultMessage: 'Rules affected by this policy',
+      })}
+      items={data?.items ?? []}
+      itemId="id"
+      columns={columns}
+      loading={isFetching}
+      error={
+        isError
+          ? i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.error', {
+              defaultMessage: 'Unable to load the rules affected by this policy.',
+            })
+          : undefined
+      }
+      noItemsMessage={
+        isLoading
+          ? i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.loading', {
+              defaultMessage: 'Loading rules…',
+            })
+          : i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.noRules', {
+              defaultMessage: 'No rules have any of the tags in this policy scope.',
+            })
+      }
+      pagination={{
+        pageIndex: page - 1,
+        pageSize: perPage,
+        totalItemCount: data?.total ?? 0,
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
+      }}
+      onChange={onTableChange}
+      data-test-subj="actionPolicyAffectedRulesTable"
+    />
+  );
+};

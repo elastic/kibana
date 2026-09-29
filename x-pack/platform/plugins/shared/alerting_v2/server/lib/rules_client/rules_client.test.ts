@@ -2233,6 +2233,98 @@ describe('RulesClient', () => {
     });
   });
 
+  describe('matchRules', () => {
+    const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`;
+
+    it('finds the rules with any of the matcher tags, sorted by name', async () => {
+      const client = createClient();
+
+      await client.matchRules({ matcher: { tags: ['cpu', 'prod'] }, page: 2, perPage: 10 });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 2,
+          perPage: 10,
+          filter: `(${tagsField}: "cpu" OR ${tagsField}: "prod")`,
+          sortField: 'metadata.name.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('ignores the matcher expression', async () => {
+      const client = createClient();
+
+      await client.matchRules({ matcher: { tags: ['cpu'], expression: 'severity: critical' } });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: `${tagsField}: "cpu"` })
+      );
+    });
+
+    it('matches tags literally', async () => {
+      const client = createClient();
+
+      await client.matchRules({ matcher: { tags: ['team "a" OR *'] } });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: `${tagsField}: "team \\"a\\" OR *"` })
+      );
+    });
+
+    it.each([
+      ['no matcher', undefined],
+      ['a null matcher', null],
+      ['a catch-all matcher', { tags: null, expression: null }],
+      ['an expression-only matcher', { tags: [], expression: 'severity: critical' }],
+    ])('finds every rule for %s', async (_, matcher) => {
+      const client = createClient();
+
+      await client.matchRules({ matcher });
+
+      const [args] = rulesSavedObjectService.find.mock.calls[0];
+      expect(args.filter).toBeUndefined();
+      expect(args).toEqual(
+        expect.objectContaining({
+          page: 1,
+          perPage: 20,
+          sortField: 'metadata.name.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('returns the paginated matching rules', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.find.mockResolvedValueOnce({
+        saved_objects: [
+          soFindResult(
+            'rule-1',
+            createRuleSoAttributes({ metadata: { name: 'rule-1', tags: ['cpu'] } })
+          ),
+        ],
+        total: 21,
+        page: 2,
+        per_page: 20,
+      });
+
+      const res = await client.matchRules({ matcher: { tags: ['cpu'] }, page: 2 });
+
+      expect(res).toEqual({
+        items: [
+          expect.objectContaining({
+            id: 'rule-1',
+            metadata: expect.objectContaining({ name: 'rule-1', tags: ['cpu'] }),
+          }),
+        ],
+        total: 21,
+        page: 2,
+        per_page: 20,
+      });
+    });
+  });
+
   describe('getTags', () => {
     it('returns the aggregated tags without a filter or search', async () => {
       const client = createClient();

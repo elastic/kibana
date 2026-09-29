@@ -19,6 +19,7 @@ export type {
   DryRunResponse,
   FindRulesArgs,
   FindRulesResponse,
+  MatchRulesArgs,
   RuleResponse,
   UpdateRuleData,
 } from './types';

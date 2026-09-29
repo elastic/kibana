@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,31 +17,42 @@ const ELASTIC_UID = 'elastic_uid';
 const ELASTIC_ACTOR = { profile_uid: ELASTIC_UID };
 
 const mockBulkGet = jest.fn();
+let mockCanReadRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-      };
-    }
-    if (token === 'settings') {
-      return {
-        client: { get: () => 'YYYY-MM-DD HH:mm' },
-      };
-    }
-    if (token === 'userProfile') {
-      return { bulkGet: mockBulkGet };
-    }
-    if (token === 'http') {
-      return {
-        basePath: { prepend: (path: string) => `/base${path}` },
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({
+          capabilities: { alerting_v2_rules: { read: mockCanReadRules } },
+        });
+      }
+      if (token === 'application') {
+        return {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        };
+      }
+      if (token === 'settings') {
+        return {
+          client: { get: () => 'YYYY-MM-DD HH:mm' },
+        };
+      }
+      if (token === 'userProfile') {
+        return { bulkGet: mockBulkGet };
+      }
+      if (token === 'http') {
+        return {
+          basePath: { prepend: (path: string) => `/base${path}` },
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 let mockIsLicenseValid = true;
 jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
@@ -141,6 +152,7 @@ describe('ActionPolicyDetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsLicenseValid = true;
+    mockCanReadRules = true;
     mockBulkGet.mockResolvedValue([
       { uid: ELASTIC_UID, user: { username: 'elastic', full_name: 'Elastic User' } },
     ]);
@@ -377,6 +389,41 @@ describe('ActionPolicyDetailsFlyout', () => {
       const elements = await screen.findAllByText(ELASTIC_UID);
       expect(elements).toHaveLength(2);
       elements.forEach((element) => expect(element).toBeInTheDocument());
+    });
+  });
+
+  describe('affected rules', () => {
+    it('renders the See all affected rules link in the Policy scope title', () => {
+      renderFlyout();
+
+      expect(
+        within(screen.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).getByTestId(
+          'actionPolicyDetailsFlyoutSeeAffectedRulesLink'
+        )
+      ).toHaveTextContent('See all affected rules');
+    });
+
+    it('hides the link when the user cannot read rules', () => {
+      mockCanReadRules = false;
+      renderFlyout();
+
+      expect(screen.getByText('Policy scope')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink')
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens the Affected rules flyout when the link is clicked', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderFlyout();
+
+      await user.click(screen.getByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink'));
+
+      const affectedRulesFlyout = await screen.findByTestId('actionPolicyAffectedRulesFlyout');
+      expect(within(affectedRulesFlyout).getByText('Affected rules')).toBeInTheDocument();
+      expect(
+        within(affectedRulesFlyout).getByText('data.severity : "critical"')
+      ).toBeInTheDocument();
     });
   });
 
