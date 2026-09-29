@@ -13,7 +13,6 @@ import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { RulesClient } from '../lib/rules_client';
-import type { BulkResponse } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
@@ -26,6 +25,7 @@ import type {
   AlertingServerStart,
   AlertingServerStartDependencies,
   RulesClientApi,
+  InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from '../types';
@@ -84,14 +84,10 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
       },
-      async disableRulesAsInternalUser({
-        spaceId,
-        ids,
-      }: {
-        spaceId: SpaceId;
-        ids: string[];
-      }): Promise<BulkResponse> {
-        return buildInternalScope(spaceId).get(RulesClient).bulkDisableRules({ ids });
+      async getInternalRulesClientInSpace(spaceId: SpaceId): Promise<InternalRulesClientApi> {
+        const rulesClient = buildInternalScope(spaceId).get(RulesClient);
+        // Expose only disable, so the internal user cannot create, enable or edit rules.
+        return { bulkDisableRules: (params) => rulesClient.bulkDisableRules(params) };
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest

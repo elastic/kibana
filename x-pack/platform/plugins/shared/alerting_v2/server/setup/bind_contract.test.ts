@@ -77,7 +77,7 @@ describe('bindContract', () => {
     expect(start).toEqual({
       getRulesClientWithRequest: expect.any(Function),
       getRulesClientWithRequestInSpace: expect.any(Function),
-      disableRulesAsInternalUser: expect.any(Function),
+      getInternalRulesClientInSpace: expect.any(Function),
       getActionPolicyClientWithRequest: expect.any(Function),
       getActionPolicyClientWithRequestInSpace: expect.any(Function),
       getAlertEventsClientWithRequest: expect.any(Function),
@@ -142,7 +142,15 @@ describe('bindContract', () => {
     expect(scope.get(Request)).toBe(fakeRequest);
   });
 
-  describe('disableRulesAsInternalUser', () => {
+  describe('getInternalRulesClientInSpace', () => {
+    it('only exposes bulkDisableRules', async () => {
+      const start = container.get(AlertingStartToken);
+
+      const client = await start.getInternalRulesClientInSpace(asSpaceId('my-space'));
+
+      expect(Object.keys(client)).toEqual(['bulkDisableRules']);
+    });
+
     it('disables the rules through an internal-user rules SO client bound to the space', async () => {
       const internalClient = savedObjects.getUnsafeInternalClient();
       const namespacedClient = savedObjects.getUnsafeInternalClient();
@@ -150,10 +158,8 @@ describe('bindContract', () => {
       savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
       const start = container.get(AlertingStartToken);
 
-      const result = await start.disableRulesAsInternalUser({
-        spaceId: asSpaceId('my-space'),
-        ids: ['rule-1'],
-      });
+      const client = await start.getInternalRulesClientInSpace(asSpaceId('my-space'));
+      const result = await client.bulkDisableRules({ ids: ['rule-1'] });
 
       expect(result).toEqual({ affected_count: 1, errors: [] });
       expect(mockRulesClient.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
@@ -171,7 +177,7 @@ describe('bindContract', () => {
       savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
       const start = container.get(AlertingStartToken);
 
-      await start.disableRulesAsInternalUser({ spaceId: asSpaceId('default'), ids: ['rule-1'] });
+      await start.getInternalRulesClientInSpace(asSpaceId('default'));
 
       expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
       expect(scope.get(RuleSavedObjectsClientToken)).toBe(internalClient);
