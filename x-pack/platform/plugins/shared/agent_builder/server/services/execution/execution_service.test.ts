@@ -19,6 +19,7 @@ import {
   ConversationOriginType,
   ConversationRoundStatus,
   ExecutionStatus,
+  TimelineEventType,
   createRequestAbortedError,
   isBadRequestError,
 } from '@kbn/agent-builder-common';
@@ -1250,6 +1251,31 @@ describe('AgentExecutionService', () => {
       await append();
 
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('persists an attachment-only message with its attachment refs', async () => {
+      const attachmentRef = { attachment_id: 'attachment-1', version: 1, actor: 'user' as const };
+      (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
+        getAccessedRefs: () => [attachmentRef],
+        getAll: () => [],
+        drainChanges: () => [],
+      });
+
+      await append({
+        nextInput: { attachments: [{ type: 'text', data: { content: 'alert reason' } }] },
+      });
+
+      expect(attachmentsService.mergeAttachmentInputs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputs: [{ id: 'attachment-1', type: 'text', data: { content: 'alert reason' } }],
+        })
+      );
+
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events[0]).toMatchObject({
+        type: TimelineEventType.userMessage,
+        data: { message: '', attachment_refs: [attachmentRef] },
+      });
     });
 
     it('requires something to say', async () => {
