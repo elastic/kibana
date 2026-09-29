@@ -115,7 +115,7 @@ steps:
         status: open
         severity: "{{ event.rule.severity | default: 'medium' }}"
         description: >-
-          Automated triage of {{ event.alerts | size }} alert(s) from rule
+          Automated triage of {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %} from rule
           "{{ event.rule.name }}" ({{ event.rule.id }}).
         workflow_execution_id: "{{ execution.id }}"
 
@@ -167,7 +167,7 @@ steps:
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        Triage started for rule **{{ event.rule.name }}** ({{ event.alerts | size }} alert(s)). Model routed via the `alertzero_reasoning` Model Management feature.
+        Triage started for rule **{{ event.rule.name }}** ({{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %}). Model routed via the `alertzero_reasoning` Model Management feature.
         {% if variables.failed_attach_chunk_count > 0 %}
         ⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach as evidence after retries; some alerts are not visible in this Investigation.
         {% else %}
@@ -206,7 +206,7 @@ steps:
           with:
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             message: >-
-              ⚠️ Classification step failed for {{ event.alerts | size }} alert(s).
+              ⚠️ Classification step failed for {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %}.
               The Alert Analysis workflow may be disabled, or `workflow.execute` threw.
               Alerts have NOT been tagged or closed.
 
@@ -289,7 +289,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                ⚠️ Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
+                ⚠️ Alert Analysis returned no verdicts for {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %}.
                 Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
                 Likely causes: the `alertzero_reasoning` Model Management feature has no connector,
                 or the sub-workflow skipped the batch.
@@ -313,11 +313,11 @@ steps:
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   message: >-
                     ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
-                    {{ variables.alert_count }} alert(s) in this batch (see the sub-workflow's
-                    missing_alert_ids). Those alerts were NOT tagged, noted, or considered for
+                    {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %} in this batch (see the sub-workflow's
+                    missing_alert_ids). {% if variables.missing_alert_count == 1 %}That alert was{% else %}Those alerts were{% endif %} NOT tagged, noted, or considered for
                     closure by this Worker; only the {{ variables.verdict_count }} matched
-                    alert(s) will be triaged below. Re-run the Worker or follow up manually on
-                    the missing alert(s).
+                    alert{% if variables.verdict_count != 1 %}s{% endif %} will be triaged below. Re-run the Worker or follow up manually on
+                    the missing alert{% if variables.missing_alert_count != 1 %}s{% endif %}.
 
   - name: post_comment_classification_results
     type: ai.conversation.add_user_message
@@ -328,9 +328,9 @@ steps:
       message: |-
         Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
 
-          {{ steps.classify_alerts.output.grouped_counts_summary }}
+        {{ steps.classify_alerts.output.grouped_counts_summary }}
 
-          {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
+        {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
 
   # ---------------------------------------------------------------------------
   # 6. Attach impact summary (entity × verdict breakdown) to the Investigation.
@@ -438,7 +438,7 @@ steps:
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: >-
-        Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts | size }} alert(s).
+        Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
 
   # ---------------------------------------------------------------------------
   # 9. Autonomy gate — create a proposal to close FP alerts if any qualify.
@@ -466,7 +466,7 @@ steps:
         with:
           conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
           message: >-
-            Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
+            Proposing closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
             Autonomy level: {{ consts.worker_settings.autonomy }}.
             {% if consts.worker_settings.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
 
@@ -486,13 +486,13 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 message: >-
                   ⚠️ The closure proposal could not be completed: {{ error.message }}.
-                  {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
+                  {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
         with:
           workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: >-
-              {{ variables.fp_candidate_count }} alert(s) from rule "{{ event.rule.name }}" were classified as false positives at or above the configured confidence floor ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
+              {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ event.rule.name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
               Approving this proposal will close them with workflow_reason=false_positive.
             actionWorkflowId: system-alertzero-action-close-alerts-fp
             actionInput:
@@ -562,7 +562,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
+                Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.
 
       - name: handle_dismissed
         type: if
@@ -661,7 +661,7 @@ steps:
                 with:
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   message: >-
-                    Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and need manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+                    Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
             else:
               - name: post_comment_dismissed_read_failed
                 type: ai.conversation.add_user_message
@@ -672,7 +672,7 @@ steps:
                   message: >-
                     ⚠️ The proposal was dismissed, but its details could not be read after
                     retries ({{ steps.get_proposal.error.message }}). {{ variables.fp_candidate_count }}
-                    alert(s) remain tagged az:false_positive and untouched; this Investigation
+                    alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} tagged az:false_positive and untouched; this Investigation
                     stays open for manual follow-up.
 
       # An unanswered deadline is not a dismissal: nobody rejected the verdict, so the alerts
@@ -706,7 +706,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
+                No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
 
       # Any other terminal status means the gate settled in a way this Worker does not
       # expect. Leave the Investigation open so an analyst looks at it.
@@ -727,7 +727,7 @@ steps:
               # here — the gate's own output carries no per-alert result — so this reports
               # the ambiguity instead of a specific (possibly wrong) closed/open count.
               message: >-
-                ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert(s) may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
+                ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
 
   # ---------------------------------------------------------------------------
   # 10. No-FP branch: close the Investigation immediately.

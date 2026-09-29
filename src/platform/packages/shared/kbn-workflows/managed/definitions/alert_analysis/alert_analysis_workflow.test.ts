@@ -2042,8 +2042,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       variables: { output_verdicts: verdicts },
     });
 
-    expect(summary).toContain('2 alert(s) with host ws-1 classified as true positive.');
-    expect(summary).toContain('1 alert(s) with host dc-1 classified as false positive.');
+    expect(summary).toContain('2 alerts with host ws-1 classified as true positive.');
+    expect(summary).toContain('1 alert with host dc-1 classified as false positive.');
   });
 
   it('describes alerts with no host field in plain language instead of the __missing__ sentinel', () => {
@@ -2062,7 +2062,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       variables: { output_verdicts: verdicts },
     });
 
-    expect(summary).toContain('1 alert(s) with no host field classified as false positive.');
+    expect(summary).toContain('1 alert with no host field classified as false positive.');
     expect(summary).not.toContain('__missing__');
   });
 
@@ -2362,7 +2362,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summary).toContain('host-49');
     expect(summary).not.toContain('host-50');
     // 80 verdicts, 80 unique hosts → 30 omitted; overflow note must appear
-    expect(summary).toContain('30 additional host(s) omitted from summary');
+    expect(summary).toContain('30 additional hosts omitted from summary');
     expect(summary.length).toBeLessThanOrEqual(10000);
 
     const longHost = 'h'.repeat(200);

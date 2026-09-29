@@ -207,7 +207,7 @@ describe('floor_alert_triage — guard_get_proposal_readable', () => {
 
     expect(rendered).toContain('could not be read after');
     expect(rendered).toContain('timeout after 3 attempts');
-    expect(rendered).toContain('4 alert(s) remain tagged az:false_positive and untouched');
+    expect(rendered).toContain('4 alerts remain tagged az:false_positive and untouched');
   });
 });
 
@@ -281,14 +281,20 @@ describe('floor_alert_triage — post_comment_outcome_dismissed', () => {
 
   it('claims every FP candidate was re-tagged when no per-alert retag failed', () => {
     const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 0 });
-    expect(comment).toContain('3 alert(s) re-tagged');
+    expect(comment).toContain('3 alerts re-tagged');
     expect(comment).not.toContain('failed after retries');
   });
 
   it('reports the shortfall instead of claiming full success when a retag failed', () => {
     const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 1 });
-    expect(comment).toContain('2 of 3 alert(s) re-tagged');
-    expect(comment).toContain('1 failed after retries and need manual re-tagging');
+    expect(comment).toContain('2 of 3 alerts re-tagged');
+    expect(comment).toContain('1 failed after retries and needs manual re-tagging');
+  });
+
+  it('says "alert" rather than "alerts" for a single FP candidate', () => {
+    const comment = renderDismissedComment({ fpCandidateCount: 1, failedRetagCount: 0 });
+    expect(comment).toContain('1 alert re-tagged');
+    expect(comment).not.toContain('alerts');
   });
 });
 
@@ -366,8 +372,12 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
 
   it('reports the alert count without listing individual IDs, since the chip attachment above already shows them', () => {
     const comment = renderTriageStarted(3);
-    expect(comment).toContain('3 alert(s)');
+    expect(comment).toContain('3 alerts');
     expect(comment).not.toContain('alert-id-1');
+  });
+
+  it('says "alert" rather than "alerts" for a single alert', () => {
+    expect(renderTriageStarted(1)).toContain('(1 alert)');
   });
 
   it('renders the execution URL as a markdown link rather than a raw URL', () => {
@@ -557,16 +567,59 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
     expect(missingGuard?.condition).not.toContain('|');
   });
 
-  it('reports the shortfall and warns the missing alert(s) were not tagged, noted, or closed', () => {
+  it('reports the shortfall and warns the missing alerts were not tagged, noted, or closed', () => {
     const comment = stepByName('post_comment_missing_alert_ids');
     const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
     const rendered = renderString(template, {
       variables: { missing_alert_count: 2, alert_count: 5, verdict_count: 3 },
     });
 
-    expect(rendered).toContain('no verdict for 2 of 5 alert(s)');
+    expect(rendered).toContain('no verdict for 2 of 5 alerts');
     expect(rendered).toContain('NOT tagged, noted, or considered for closure');
-    expect(rendered).toContain('3 matched alert(s) will be triaged');
+    expect(rendered).toContain('3 matched alerts will be triaged');
+  });
+
+  it('uses the singular when exactly one alert is missing', () => {
+    const comment = stepByName('post_comment_missing_alert_ids');
+    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
+    const rendered = renderString(template, {
+      variables: { missing_alert_count: 1, alert_count: 2, verdict_count: 1 },
+    });
+
+    expect(rendered).toContain('no verdict for 1 of 2 alerts');
+    expect(rendered).toContain('That alert was NOT tagged');
+    expect(rendered).toContain('only the 1 matched alert will be triaged');
+    expect(rendered).toContain('follow up manually on the missing alert.');
+  });
+});
+
+describe('floor_alert_triage — post_comment_classification_results', () => {
+  const render = (): string => {
+    const comment = stepByName('post_comment_classification_results');
+    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
+    return renderString(template, {
+      steps: {
+        classify_alerts: {
+          output: {
+            true_positive_count: 0,
+            false_positive_count: 2,
+            inconclusive_count: 0,
+            grouped_counts_summary: '2 alerts with no host field classified as false positive.',
+            generated_summary: 'Both alerts look benign.',
+            connector_id: '',
+          },
+        },
+      },
+    });
+  };
+
+  it('starts every paragraph flush left, so the chat does not render indented text', () => {
+    const lines = render()
+      .split('\n')
+      .filter((line) => line.trim() !== '');
+
+    expect(lines).toHaveLength(3);
+    lines.forEach((line) => expect(line).toBe(line.trimStart()));
   });
 });
 

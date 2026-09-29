@@ -1627,7 +1627,7 @@ steps:
                 with:
                   conversation_id: "{{ variables.investigation_conversation_id }}"
                   message: |-
-                    Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
+                    Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item.size }} alert{% if foreach.item.size != 1 %}s{% endif %}) failed after retries and returned no verdicts. {% if foreach.item.size == 1 %}This alert will not get a verdict tag or note; an error note will record the miss, and a Worker re-run will retry it.{% else %}These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.{% endif %}
 
                     [View execution]({{ execution.url }})
             else:
@@ -1755,7 +1755,7 @@ steps:
                   conversation_id: "{{ variables.investigation_conversation_id }}"
                   message: >-
                     Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
-                    ({{ foreach.item | size }} alert(s)):
+                    ({{ foreach.item.size }} alert{% if foreach.item.size != 1 %}s{% endif %}):
                     {{ variables.batch_tp_count }} true positive,
                     {{ variables.batch_fp_count }} false positive,
                     {{ variables.batch_inc_count }} inconclusive.
@@ -2010,11 +2010,11 @@ steps:
                 {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
                 {%- assign fp = for_host | where: 'classification', 'false_positive' | size -%}
                 {%- assign inc = for_host | where: 'classification', 'inconclusive' | size -%}
-                {%- if tp > 0 %} {{ tp }} alert(s) with {{ host_label }} classified as true positive.{% endif -%}
-                {%- if fp > 0 %} {{ fp }} alert(s) with {{ host_label }} classified as false positive.{% endif -%}
-                {%- if inc > 0 %} {{ inc }} alert(s) with {{ host_label }} were inconclusive.{% endif -%}
+                {%- if tp > 0 %} {{ tp }} alert{% if tp != 1 %}s{% endif %} with {{ host_label }} classified as true positive.{% endif -%}
+                {%- if fp > 0 %} {{ fp }} alert{% if fp != 1 %}s{% endif %} with {{ host_label }} classified as false positive.{% endif -%}
+                {%- if inc > 0 %} {{ inc }} alert{% if inc != 1 %}s{% endif %} with {{ host_label }} {% if inc == 1 %}was{% else %}were{% endif %} inconclusive.{% endif -%}
                 {%- endfor -%}
-                {%- if all_host_names.size > 50 %} ({{ all_host_names.size | minus: 50 }} additional host(s) omitted from summary.){% endif -%}
+                {%- if all_host_names.size > 50 %}{% assign omitted_host_count = all_host_names.size | minus: 50 %} ({{ omitted_host_count }} additional host{% if omitted_host_count != 1 %}s{% endif %} omitted from summary.){% endif -%}
                 {%- endcapture -%}
                 {{- grouped_counts_summary_raw | strip | truncate: 10000, ' [truncated]' -}}
 
@@ -2168,7 +2168,7 @@ steps:
             Alert analysis finished for rule {{ variables.rule_name }}:
             {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
             in {{ variables.batch_llm_calls }} model call(s);
-            {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
+            {{ variables.auto_close_ids.size }} alert{% if variables.auto_close_ids.size != 1 %}s{% endif %} matched the auto-close thresholds.
 
     else:
       # Skipped alerts are unprocessed, so the Worker must not read an empty list as "all reconciled".
