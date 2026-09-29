@@ -61,6 +61,10 @@ const mergeOverrides = (
       getLogsExtractionOverrides(raw),
       overrides.logsExtraction
     ),
+    excludedUserNames:
+      overrides.excludedUserNames !== undefined
+        ? overrides.excludedUserNames
+        : raw.excludedUserNames,
   });
 
 // Read path: stored attributes in, full config out (missing fields get the current defaults).
@@ -68,6 +72,7 @@ const getWithLatestDefaults = (state: EntityStoreGlobalStateOverrides): EntitySt
   EntityStoreGlobalState.parse({
     historySnapshot: HistorySnapshotState.parse(state.historySnapshot ?? {}),
     logsExtraction: LogExtractionConfig.parse(getLogsExtractionOverrides(state)),
+    excludedUserNames: state.excludedUserNames ?? [],
   });
 
 export class EntityStoreGlobalStateClient {
