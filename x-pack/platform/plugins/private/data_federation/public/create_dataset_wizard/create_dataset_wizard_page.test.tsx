@@ -22,6 +22,7 @@ import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 // `CreateDatasetWizardPage` reaches `@kbn/monaco` through code editors used in the mapping step.
 // Loading the real module pulls in Monaco language registration which evaluates generated i18n
 // messages at import time (and can throw in Jest).
+/* eslint-disable @kbn/imports/no_direct_monaco_import */
 jest.mock('@kbn/monaco', () => ({ PainlessLang: { ID: 'painless' } }));
 
 jest.mock('@kbn/code-editor', () => ({

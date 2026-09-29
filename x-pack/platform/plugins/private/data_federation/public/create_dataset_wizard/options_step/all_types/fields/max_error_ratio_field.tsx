@@ -51,10 +51,8 @@ export function MaxErrorRatioField({ control }: { control: Control<CreateDataset
       helpText={
         <FormattedMessage
           id="xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioHelpText"
-          defaultMessage="If left blank, defaults to {defaultValue}."
-          values={{
-            defaultValue: <EuiCode>0.0</EuiCode>,
-          }}
+          defaultMessage="{defaultValue} by default"
+          values={{ defaultValue: <EuiCode>0.0</EuiCode> }}
         />
       }
       fullWidth

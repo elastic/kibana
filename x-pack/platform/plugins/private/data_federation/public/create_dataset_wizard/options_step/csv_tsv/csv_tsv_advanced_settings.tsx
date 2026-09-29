@@ -164,8 +164,19 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsTrimSpacesLabel}
-        helpText={createDatasetWizardStrings.settingsTrimSpacesHelp}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsTrimSpacesLabel}
+            infoText={createDatasetWizardStrings.settingsTrimSpacesDescription}
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp"
+            defaultMessage="{falseValue} by default"
+            values={{ falseValue: <EuiCode>false</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <TrimSpaces

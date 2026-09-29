@@ -362,11 +362,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(trimSpacesField).toBeInTheDocument();
     const trimSpacesRow = trimSpacesField.closest('.euiFormRow');
     expect(trimSpacesRow).not.toBeNull();
-    expect(
-      within(trimSpacesRow as HTMLElement).getByText(
-        createDatasetWizardStrings.settingsTrimSpacesHelp
-      )
-    ).toBeInTheDocument();
+    expect(trimSpacesRow).toHaveTextContent('false by default');
     // `Trim spaces` defaults to false, represented by an empty selection (placeholder shown).
     expect(
       within(trimSpacesField).getByPlaceholderText(

@@ -454,13 +454,6 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsPartitionDetectionHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHelp',
-    {
-      defaultMessage: 'auto by default',
-    }
-  ),
-
   settingsPartitionDetectionPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionPlaceholder',
     {
@@ -898,17 +891,17 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsTrimSpacesDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsTrimSpacesDescription',
+    {
+      defaultMessage: 'Remove surrounding ASCII whitespace from string field values.',
+    }
+  ),
+
   settingsTrimSpacesPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsTrimSpacesPlaceholder',
     {
       defaultMessage: 'Select trim spaces',
-    }
-  ),
-
-  settingsTrimSpacesHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp',
-    {
-      defaultMessage: 'false by default',
     }
   ),
 

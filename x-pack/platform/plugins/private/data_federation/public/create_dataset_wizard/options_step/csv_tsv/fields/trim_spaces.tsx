@@ -13,12 +13,12 @@ import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n'
 type TrimSpacesOption = EuiComboBoxOptionOption<string> & { value: 'true' | 'false' };
 
 const OPTIONS: TrimSpacesOption[] = [
-  { value: 'true', label: createDatasetWizardStrings.trueLabel },
   {
     value: 'false',
     label: createDatasetWizardStrings.falseLabel,
     append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
   },
+  { value: 'true', label: createDatasetWizardStrings.trueLabel },
 ];
 
 export function TrimSpaces({

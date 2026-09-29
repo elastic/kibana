@@ -15,7 +15,7 @@ export function DatetimeFormatHelpText() {
   return (
     <FormattedMessage
       id="xpack.dataFederation.createDatasetWizard.datetimeFormatHelpText"
-      defaultMessage="{defaultValue} by default, which is also ISO-8601"
+      defaultMessage="{defaultValue} by default (ISO-8601)"
       values={{ defaultValue: <EuiCode>{DEFAULT_DATETIME_FORMAT}</EuiCode> }}
     />
   );

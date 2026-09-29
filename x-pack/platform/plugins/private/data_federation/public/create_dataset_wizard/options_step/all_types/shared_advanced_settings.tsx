@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
+  DEFAULT_FILE_EXCLUSIONS,
   validatePartitionPath,
   type CreateDatasetFormValues,
 } from '../../create_dataset_form_state';
@@ -22,6 +23,10 @@ import { FileExclusionsSelect } from './fields/file_exclusions_select';
 import { MaxErrorRatioField } from './fields/max_error_ratio_field';
 import { MaxErrorsField } from './fields/max_errors_field';
 import { PartitionDetectionSelect } from '../../components/fields/partition_detection_select';
+
+const DEFAULT_FILE_EXCLUSIONS_DISPLAY = `[${DEFAULT_FILE_EXCLUSIONS.map(
+  (pattern) => `"${pattern}"`
+).join(', ')}]`;
 
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const partitionDetection = useWatch({ control, name: 'settings.partition_detection' });
@@ -41,6 +46,13 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
             infoText={createDatasetWizardStrings.settingsFileExclusionsDescription}
           />
         }
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsFileExclusionsHelpText"
+            defaultMessage="{defaultValue} by default"
+            values={{ defaultValue: <EuiCode>{DEFAULT_FILE_EXCLUSIONS_DISPLAY}</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <FileExclusionsSelect control={control} />
@@ -53,7 +65,13 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
             infoText={createDatasetWizardStrings.settingsPartitionDetectionDescription}
           />
         }
-        helpText={createDatasetWizardStrings.settingsPartitionDetectionHelp}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHelp"
+            defaultMessage="{defaultValue} by default"
+            values={{ defaultValue: <EuiCode>auto</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <PartitionDetectionSelect control={control} />
@@ -94,10 +112,8 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
         helpText={
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsErrorModeHelpText"
-            defaultMessage="Defaults to {failFast} when no option is selected."
-            values={{
-              failFast: <strong>{createDatasetWizardStrings.settingsErrorModeFailFast}</strong>,
-            }}
+            defaultMessage="{defaultValue} by default"
+            values={{ defaultValue: <EuiCode>fail fast</EuiCode> }}
           />
         }
         fullWidth
