@@ -183,7 +183,9 @@ const createPersistentHarness = () => {
     }
   );
   const management = {
-    getWorkflow: jest.fn(),
+    // Present-and-enabled by default, representing a healthy deployment; tests that exercise
+    // the Alert Analysis preflight check override this per-call to cover the blocked cases.
+    getWorkflow: jest.fn(async () => ({ enabled: true })),
     getWorkflows: jest.fn(),
     getWorkflowExecutions: jest.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
     getWorkflowExecution: jest.fn(async () => null),
@@ -813,6 +815,21 @@ describe('WorkersService', () => {
         expect.any(String),
         request
       );
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    // getWorkflow returns null for an absent workflow, distinct from a present-but-disabled
+    // one; both must refuse the enable the same way, or a missing sub-workflow lets every rule
+    // fire into a `workflow.execute` that has nothing to execute.
+    it('preflight fail: blocks the enable when the Alert Analysis workflow is missing entirely', async () => {
+      const harness = createPersistentHarness();
+      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce(null);
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 

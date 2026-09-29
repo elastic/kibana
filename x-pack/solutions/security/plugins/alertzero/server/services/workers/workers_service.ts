@@ -379,7 +379,10 @@ export class WorkersService {
         GLOBAL_WORKFLOW_SPACE_ID,
         request
       );
-      if (workflow && !workflow.enabled) {
+      // `getWorkflow` returns null for an absent workflow, not just a present-but-disabled one.
+      // `workflow.execute` against a nonexistent workflow fails the same way as against a
+      // disabled one, so both must block the enable the same way.
+      if (!workflow || !workflow.enabled) {
         return 'alertAnalysisWorkflowDisabled';
       }
     } catch (err) {
