@@ -11,6 +11,7 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
+import type { PanelSettingsApi } from '@kbn/embeddable-plugin/public';
 
 import type { LinksLayoutType } from '../../common/types';
 import LinksEditor from '../components/editor/links_editor';
@@ -32,11 +33,14 @@ export function getEditorFlyout({
   parentDashboard,
   onCompleteEdit,
   closeFlyout,
+  panelSettingsApi,
 }: {
   initialState?: EditorState;
   parentDashboard?: unknown;
   onCompleteEdit?: (newState?: EditorState) => void;
   closeFlyout: () => void;
+  /** Title, description and border of the panel being edited */
+  panelSettingsApi?: PanelSettingsApi;
 }) {
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
   return (
@@ -87,6 +91,7 @@ export function getEditorFlyout({
           : undefined
       }
       isByReference={Boolean(initialState?.refId)}
+      panelSettingsApi={panelSettingsApi}
     />
   );
 }

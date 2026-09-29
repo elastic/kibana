@@ -8,18 +8,20 @@
  */
 
 import type { EuiMarkdownEditorProps, EuiMarkdownFormatProps, UseEuiTheme } from '@elastic/eui';
-import { EuiMarkdownEditor, EuiMarkdownEditorHelpButton } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiMarkdownEditor,
+  EuiMarkdownEditorHelpButton,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { BehaviorSubject } from 'rxjs';
 import { SHORT_CONTAINER_QUERY, FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
 import { MarkdownRenderer } from './markdown_renderer';
-import { MarkdownEditorSettingsPopover } from './markdown_editor_settings_popover';
-import type { MarkdownSettingsState } from '../../server/embeddable/schemas';
 
 interface EuiMarkdownEditorRef {
   textarea: HTMLTextAreaElement;
@@ -68,6 +70,9 @@ const strings = {
   ariaLabel: i18n.translate('dashboardMarkdown.embeddableAriaLabel', {
     defaultMessage: 'Dashboard markdown editor',
   }),
+  settingsButtonLabel: i18n.translate('dashboardMarkdown.settingsButtonText', {
+    defaultMessage: 'Settings',
+  }),
 };
 export interface MarkdownEditorProps {
   parsingPluginList?: EuiMarkdownEditorProps['parsingPluginList'];
@@ -76,7 +81,8 @@ export interface MarkdownEditorProps {
   onCancel: () => void;
   onSave: (value: string) => Promise<void>;
   isPreview$: PublishingSubject<boolean>;
-  settings$: BehaviorSubject<MarkdownSettingsState>;
+  /** Opens the flyout with the panel settings */
+  onOpenSettings: () => void;
   uiPlugins?: EuiMarkdownEditorProps['uiPlugins'];
 }
 
@@ -87,27 +93,18 @@ export const MarkdownEditor = ({
   onCancel,
   onSave,
   isPreview$,
-  settings$,
+  onOpenSettings,
   uiPlugins = [],
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
-  const [isPreview, settings] = useBatchedPublishingSubjects(isPreview$, settings$);
+  const isPreview = useStateFromPublishingSubject(isPreview$);
   const [value, onChange] = useState(content);
 
   const editorRef = useRef<EuiMarkdownEditorRef>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useCaretPosition(editorRef, !isPreview);
-  const [haveSettingsChanged, setHaveSettingsChanged] = useState(false);
-  const isSaveable = Boolean(value === '' || value !== content || haveSettingsChanged);
-
-  const updateSettings = useCallback(
-    (nextSettings: Partial<MarkdownSettingsState>) => {
-      settings$.next({ ...settings, ...nextSettings } as MarkdownSettingsState);
-      setHaveSettingsChanged(true);
-    },
-    [settings, settings$]
-  );
+  const isSaveable = Boolean(value === '' || value !== content);
 
   return (
     <div css={styles.rootContainer}>
@@ -135,10 +132,20 @@ export const MarkdownEditor = ({
           toolbarProps={{
             right: (
               <>
-                <MarkdownEditorSettingsPopover
-                  settings={settings}
-                  updateSettings={updateSettings}
-                />
+                <EuiToolTip
+                  disableScreenReaderOutput
+                  content={strings.settingsButtonLabel}
+                  position="bottom"
+                >
+                  <EuiButtonIcon
+                    iconType="gear"
+                    color="text"
+                    size="s"
+                    aria-label={strings.settingsButtonLabel}
+                    onClick={onOpenSettings}
+                    data-test-subj="markdownEditorSettingsButton"
+                  />
+                </EuiToolTip>
                 <EuiMarkdownEditorHelpButton
                   uiPlugins={uiPlugins}
                   tooltipProps={{ position: 'bottom' }}

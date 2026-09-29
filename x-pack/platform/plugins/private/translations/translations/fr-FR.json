@@ -28606,7 +28606,6 @@
     "xpack.lens.config.readOnly": "Lecture seule : les modifications seront annulées à la fermeture",
     "xpack.lens.config.referenceLineDescription": "{count, plural, one {Reference line} other {Reference lines}}",
     "xpack.lens.config.selectLayerAriaLabel": "Sélectionnez {layerName} pour la conversion en mode requête",
-    "xpack.lens.config.showVisualizationLabel": "Configuration",
     "xpack.lens.config.switchToQueryModeAriaLabel": "Basculer en mode requête",
     "xpack.lens.config.switchToQueryModeButtonLabel": "Basculer en mode requête",
     "xpack.lens.config.switchToQueryModeTitle": "Basculer en mode requête",

@@ -17,6 +17,32 @@ import { ImageViewerContext } from '../image_viewer';
 import type { ImageEditorFlyoutProps } from './image_editor_flyout';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { imageEmbeddableFileKind } from '../../imports';
+import { BehaviorSubject } from 'rxjs';
+
+jest.mock('@kbn/embeddable-plugin/public', () => ({
+  ...jest.requireActual('@kbn/embeddable-plugin/public'),
+  // stub of the lazy loaded sections, lets the tests change the panel title
+  PanelSettingsFlyoutSections: ({
+    updateState,
+  }: {
+    updateState: (update: { title: string }) => void;
+  }) => (
+    <button data-test-subj="panelSettingsStub" onClick={() => updateState({ title: 'New title' })}>
+      change title
+    </button>
+  ),
+}));
+
+const createPanelSettingsApi = () => ({
+  title$: new BehaviorSubject<string | undefined>('Old title'),
+  hideTitle$: new BehaviorSubject<boolean | undefined>(undefined),
+  description$: new BehaviorSubject<string | undefined>(undefined),
+  hideBorder$: new BehaviorSubject<boolean | undefined>(undefined),
+  setTitle: jest.fn(),
+  setHideTitle: jest.fn(),
+  setDescription: jest.fn(),
+  setHideBorder: jest.fn(),
+});
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
 
@@ -127,4 +153,29 @@ test(`shouldn't be able to save if url is invalid`, async () => {
   const { getByTestId } = render(<ImageEditor initialImageConfig={initialImageConfig} />);
 
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeDisabled();
+});
+
+test('should apply the panel settings on save when editing a panel', async () => {
+  const onSave = jest.fn();
+  const panelSettingsApi = createPanelSettingsApi();
+  const { getByTestId } = render(
+    <ImageEditor
+      onSave={onSave}
+      panelSettingsApi={panelSettingsApi}
+      initialImageConfig={{
+        src: { type: 'url', url: 'https://elastic.co/image' },
+        object_fit: 'contain',
+        alt_text: 'alt text',
+      }}
+    />
+  );
+  await userEvent.click(getByTestId('panelSettingsStub'));
+  await userEvent.click(getByTestId('imageEmbeddableEditorSave'));
+  expect(panelSettingsApi.setTitle).toHaveBeenCalledWith('New title');
+  expect(onSave).toHaveBeenCalled();
+});
+
+test('should not show the panel settings when creating an image', () => {
+  const { queryByTestId } = render(<ImageEditor />);
+  expect(queryByTestId('panelSettingsStub')).not.toBeInTheDocument();
 });

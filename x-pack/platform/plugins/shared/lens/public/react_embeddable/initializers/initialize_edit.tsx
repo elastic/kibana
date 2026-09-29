@@ -33,6 +33,7 @@ import {
   ON_OPEN_PANEL_MENU,
   ON_SELECT_RANGE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { HasPanelSettingsInEditFlyout } from '@kbn/embeddable-plugin/public';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
@@ -40,6 +41,7 @@ import {
   saveUpdatedLinkedAnnotationsToLibrary,
 } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
+import type { LensPanelSettingsApi } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
 import type { StateManagementConfig } from './initialize_state_management';
@@ -109,13 +111,15 @@ export function initializeEditApi(
   searchContextApi: SearchContextConfig['api'],
   isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
   startDependencies: LensEmbeddableStartServices,
-  parentApi?: unknown
+  parentApi?: unknown,
+  panelSettingsApi?: LensPanelSettingsApi
 ): {
   api: HasSupportedTriggers &
     PublishesDisabledActionIds &
     HasEditCapabilities &
     HasReadOnlyCapabilities &
-    PublishesViewMode & { uuid: string } & LensHasEditPanel;
+    PublishesViewMode & { uuid: string } & LensHasEditPanel &
+    HasPanelSettingsInEditFlyout;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   const isManaged = (currentState: LensRuntimeState) => {
@@ -215,7 +219,8 @@ export function initializeEditApi(
     startDependencies,
     navigateToLensEditor,
     uuid,
-    parentApi
+    parentApi,
+    panelSettingsApi
   );
 
   /**
@@ -240,6 +245,12 @@ export function initializeEditApi(
       (!getState().ref_id &&
         Boolean(capabilities.dashboard_v2?.showWriteControls) &&
         Boolean(capabilities.visualize_v2.show))
+    );
+  };
+
+  const isEditingEnabled = () => {
+    return Boolean(
+      parentApi && apiHasAppContext(parentApi) && canEdit() && panelManagementApi.isEditingEnabled()
     );
   };
 
@@ -337,13 +348,16 @@ export function initializeEditApi(
       /**
        * Check everything here: user/app permissions and the current inline editing state
        */
-      isEditingEnabled: () => {
-        return Boolean(
-          parentApi &&
-            apiHasAppContext(parentApi) &&
-            canEdit() &&
-            panelManagementApi.isEditingEnabled()
-        );
+      isEditingEnabled,
+      /**
+       * The panel settings are part of the inline editing flyout, which is only used when the
+       * panel can be edited inline (otherwise editing navigates to the Lens editor)
+       */
+      hasPanelSettingsInEditFlyout: () => {
+        const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
+          ? parentApi.canEditInline
+          : true;
+        return Boolean(panelSettingsApi) && canEditInline && isEditingEnabled();
       },
       isReadOnlyEnabled: () => {
         // Check if user can actually edit this specific dashboard (considering access control)

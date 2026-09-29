@@ -26,9 +26,15 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiSpacer,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import {
+  PanelSettingsFlyoutSections,
+  usePanelSettings,
+  type PanelSettingsApi,
+} from '@kbn/embeddable-plugin/public';
 import { css, keyframes } from '@emotion/react';
 
 import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
@@ -64,6 +70,8 @@ export interface LinksEditorProps {
   parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
+  /** When editing an existing panel, its title, description and border can be edited too */
+  panelSettingsApi?: PanelSettingsApi;
 }
 
 export const LinksEditor = ({
@@ -75,6 +83,7 @@ export const LinksEditor = ({
   parentDashboardId,
   isByReference,
   flyoutId,
+  panelSettingsApi,
 }: LinksEditorProps) => {
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
@@ -88,6 +97,8 @@ export const LinksEditor = ({
   const [saveByReference, setSaveByReference] = useState(isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
+
+  const panelSettings = usePanelSettings(panelSettingsApi);
 
   useEffect(() => {
     if (!initialLinks) {
@@ -232,6 +243,16 @@ export const LinksEditor = ({
             </div>
           </EuiFormRow>
         </EuiForm>
+        {panelSettingsApi && panelSettings.state ? (
+          <>
+            <EuiSpacer size="m" />
+            <PanelSettingsFlyoutSections
+              api={panelSettingsApi}
+              state={panelSettings.state}
+              updateState={panelSettings.updateState}
+            />
+          </>
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
@@ -276,6 +297,8 @@ export const LinksEditor = ({
                     disabled={hasZeroLinks}
                     data-test-subj={'links--panelEditor--saveBtn'}
                     onClick={async () => {
+                      // apply the panel settings first, so they are part of the saved panel state
+                      panelSettings.apply();
                       if (saveByReference) {
                         setIsSaving(true);
                         onSaveToLibrary(orderedLinks, currentLayout)

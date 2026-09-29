@@ -28764,7 +28764,6 @@
     "xpack.lens.config.readOnly": "読み取り専用：変更は終了時に元に戻されます",
     "xpack.lens.config.referenceLineDescription": "{count, plural, one {Reference line} other {参照行}}",
     "xpack.lens.config.selectLayerAriaLabel": "クエリモードに変換するには{layerName}を選択してください",
-    "xpack.lens.config.showVisualizationLabel": "構成",
     "xpack.lens.config.switchToQueryModeAriaLabel": "クエリモードに切り替え",
     "xpack.lens.config.switchToQueryModeButtonLabel": "クエリモードに切り替え",
     "xpack.lens.config.switchToQueryModeTitle": "クエリモードに切り替え",

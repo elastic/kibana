@@ -32,6 +32,11 @@ import {
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
+import {
+  PanelSettingsFlyoutSections,
+  usePanelSettings,
+  type PanelSettingsApi,
+} from '@kbn/embeddable-plugin/public';
 import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,10 +66,13 @@ export interface ImageEditorFlyoutProps {
   initialImageConfig?: ImageConfig;
   user?: AuthenticatedUser;
   ariaLabelledBy: string;
+  /** When editing an existing panel, its title, description and border can be edited too */
+  panelSettingsApi?: PanelSettingsApi;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const isEditing = !!props.initialImageConfig;
+  const panelSettings = usePanelSettings(props.panelSettingsApi);
   const { euiTheme } = useEuiTheme();
   const { validateUrl } = useImageViewerContext();
   const [fileId, setFileId] = useState<undefined | string>(() =>
@@ -112,6 +120,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
 
   const onSave = () => {
     if (!isDraftImageConfigValid) return;
+    panelSettings.apply();
     props.onSave(draftImageConfig);
   };
 
@@ -390,11 +399,25 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             }}
           />
         </EuiFormRow>
+        {props.panelSettingsApi && panelSettings.state ? (
+          <>
+            <EuiSpacer size="m" />
+            <PanelSettingsFlyoutSections
+              api={props.panelSettingsApi}
+              state={panelSettings.state}
+              updateState={panelSettings.updateState}
+            />
+          </>
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={props.onCancel} flush="left">
+            <EuiButtonEmpty
+              onClick={props.onCancel}
+              flush="left"
+              data-test-subj="imageEmbeddableEditorCancel"
+            >
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.imageBackgroundCloseButtonText"
                 defaultMessage="Cancel"

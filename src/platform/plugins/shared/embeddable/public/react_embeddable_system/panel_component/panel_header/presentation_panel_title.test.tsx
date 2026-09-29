@@ -9,7 +9,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationPanelTitle } from './presentation_panel_title';
@@ -123,6 +123,76 @@ describe('PresentationPanelTitle', () => {
       fireEvent.keyDown(titleLink, { key: 'Tab', code: 'Tab' });
 
       expect(openCustomizePanelFlyout).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('inline title editing', () => {
+    const createWritableApi = (title?: string) => ({
+      uuid: 'test',
+      title$: new BehaviorSubject<string | undefined>(title),
+      hideTitle$: new BehaviorSubject<boolean | undefined>(undefined),
+      defaultTitle$: new BehaviorSubject<string | undefined>('Default title'),
+      setTitle: jest.fn(),
+      setHideTitle: jest.fn(),
+    });
+
+    beforeEach(() => {
+      jest.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(true);
+      jest.mocked(openCustomizePanelFlyout).mockClear();
+    });
+
+    afterEach(() => {
+      jest.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(false);
+    });
+
+    const editTitle = async (value: string) => {
+      fireEvent.click(screen.getByTestId('embeddablePanelTitle'));
+      const input = await screen.findByTestId('embeddablePanelTitleInput');
+      fireEvent.change(input, { target: { value } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+    };
+
+    it('saves a new title inline instead of opening the flyout', async () => {
+      const api = createWritableApi('CPU Usage');
+      renderWithTheme(
+        <PresentationPanelTitle
+          {...defaultProps}
+          api={api}
+          panelTitle="CPU Usage"
+          viewMode="edit"
+        />
+      );
+      await editTitle('Memory usage');
+      await waitFor(() => expect(api.setTitle).toHaveBeenCalledWith('Memory usage'));
+      expect(openCustomizePanelFlyout).not.toHaveBeenCalled();
+    });
+
+    it('resets to the default title when saving an empty or default value', async () => {
+      const api = createWritableApi('CPU Usage');
+      renderWithTheme(
+        <PresentationPanelTitle
+          {...defaultProps}
+          api={api}
+          panelTitle="CPU Usage"
+          viewMode="edit"
+        />
+      );
+      await editTitle('  ');
+      await waitFor(() => expect(api.setTitle).toHaveBeenCalledWith(undefined));
+    });
+
+    it('is not editable in view mode', () => {
+      const api = createWritableApi('CPU Usage');
+      renderWithTheme(
+        <PresentationPanelTitle
+          {...defaultProps}
+          api={api}
+          panelTitle="CPU Usage"
+          viewMode="view"
+        />
+      );
+      expect(screen.queryByTestId('euiInlineReadModeButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('embeddablePanelTitle')).toHaveTextContent('CPU Usage');
     });
   });
 });

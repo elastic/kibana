@@ -19,16 +19,36 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
 
   return new (class DashboardCustomizePanel {
     public readonly FLYOUT_TEST_SUBJ = 'customizePanel';
+    /** Flyouts that include the panel settings: customize panel, Lens and other edit flyouts */
+    private readonly SETTINGS_FLYOUT_TEST_SUBJS = [
+      this.FLYOUT_TEST_SUBJ,
+      'customizeLens',
+      'panelEditFlyout',
+      'links--panelEditor--flyout',
+      'createImageEmbeddableFlyout',
+    ];
+
+    private async findExistingTestSubject(testSubjs: string[]) {
+      for (const testSubj of testSubjs) {
+        if (await testSubjects.exists(testSubj, { timeout: 500 })) return testSubj;
+      }
+    }
     public readonly TOGGLE_TIME_RANGE_TEST_SUBJ = 'customizePanelShowCustomTimeRange';
 
     async expectCustomizePanelSettingsFlyoutOpen() {
       log.debug('expectCustomizePanelSettingsFlyoutOpen');
-      await testSubjects.existOrFail(this.FLYOUT_TEST_SUBJ);
+      await retry.try(async () => {
+        if (!(await this.findExistingTestSubject(this.SETTINGS_FLYOUT_TEST_SUBJS))) {
+          throw new Error('Panel settings flyout is not open');
+        }
+      });
     }
 
     async expectCustomizePanelSettingsFlyoutClosed() {
       log.debug('expectCustomizePanelSettingsFlyoutClosed');
-      await testSubjects.missingOrFail(this.FLYOUT_TEST_SUBJ);
+      for (const testSubj of this.SETTINGS_FLYOUT_TEST_SUBJS) {
+        await testSubjects.missingOrFail(testSubj);
+      }
     }
 
     async expectExistsCustomTimeRange() {
@@ -172,16 +192,32 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       log.debug('clickSaveButton');
       await retry.try(async () => {
         await toasts.dismissAll();
-        await testSubjects.click('saveCustomizePanelButton');
-        await testSubjects.waitForDeleted('saveCustomizePanelButton');
+        const saveButton =
+          (await this.findExistingTestSubject([
+            'saveCustomizePanelButton',
+            'panelEditFlyoutApplyButton',
+            'applyFlyoutButton',
+            'links--panelEditor--saveBtn',
+            'imageEmbeddableEditorSave',
+          ])) ?? 'saveCustomizePanelButton';
+        await testSubjects.click(saveButton);
+        await testSubjects.waitForDeleted(saveButton);
       });
     }
 
     public async clickCancelButton() {
       log.debug('clickCancelButton');
       await retry.try(async () => {
-        await testSubjects.click('cancelCustomizePanelButton');
-        await testSubjects.waitForDeleted('cancelCustomizePanelButton');
+        const cancelButton =
+          (await this.findExistingTestSubject([
+            'cancelCustomizePanelButton',
+            'panelEditFlyoutCancelButton',
+            'cancelFlyoutButton',
+            'links--panelEditor--closeBtn',
+            'imageEmbeddableEditorCancel',
+          ])) ?? 'cancelCustomizePanelButton';
+        await testSubjects.click(cancelButton);
+        await testSubjects.waitForDeleted(cancelButton);
       });
     }
   })();

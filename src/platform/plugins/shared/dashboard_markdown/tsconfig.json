@@ -12,6 +12,7 @@
     "@kbn/presentation-publishing",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
+    "@kbn/presentation-util",
     "@kbn/config-schema",
     "@kbn/zod",
     "@kbn/presentation-publishing-schemas",

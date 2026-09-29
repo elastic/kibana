@@ -6,6 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PanelSettingsApi } from '@kbn/embeddable-plugin/public';
 import type {
   TypedLensSerializedState,
   DatasourceStates,
@@ -35,6 +36,9 @@ export interface FlyoutWrapperProps {
   /** Tooltip to show when Apply button is disabled */
   applyButtonDisabledTooltip?: string;
 }
+
+/** The subset of the embeddable API needed to edit the panel title, description, border and time range */
+export type LensPanelSettingsApi = PanelSettingsApi;
 
 /** Callback for updating the visualization and datasources state. */
 export type LensPanelStateUpdater = (
@@ -101,6 +105,8 @@ export interface EditConfigPanelProps {
   parentApi?: unknown;
   /** Text for the apply button. Defaults to "Apply and close" */
   applyButtonLabel?: string;
+  /** When given, the flyout renders the panel title, description, border and time range settings */
+  panelSettingsApi?: LensPanelSettingsApi;
 }
 
 export interface LayerConfigurationProps {

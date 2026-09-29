@@ -16,7 +16,10 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
-import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
+import type {
+  EditConfigPanelProps,
+  LensPanelSettingsApi,
+} from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { isTextBasedLanguage } from '../helper';
 import type { PanelManagementApi } from './panel_management';
@@ -53,7 +56,8 @@ export function prepareInlineEditPanel(
     skipAppLeave?: boolean
   ) => () => Promise<void>,
   uuid?: string,
-  parentApi?: unknown
+  parentApi?: unknown,
+  panelSettingsApi?: LensPanelSettingsApi
 ) {
   return async function getConfigPanel({
     closeFlyout,
@@ -163,6 +167,7 @@ export function prepareInlineEditPanel(
         isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
         parentApi={parentApi}
         applyButtonLabel={applyButtonLabel}
+        panelSettingsApi={panelSettingsApi}
       />
     );
   };

@@ -28675,7 +28675,6 @@
     "xpack.lens.config.readOnly": "Lesezugriff: Änderungen werden beim Schließen rückgängig gemacht.",
     "xpack.lens.config.referenceLineDescription": "{count, plural, one {Reference line} other {Reference lines}}",
     "xpack.lens.config.selectLayerAriaLabel": "{layerName} für die Umstellung auf den Abfragemodus auswählen",
-    "xpack.lens.config.showVisualizationLabel": "Konfiguration",
     "xpack.lens.config.switchToQueryModeAriaLabel": "In den Abfragemodus wechseln",
     "xpack.lens.config.switchToQueryModeButtonLabel": "In den Abfragemodus wechseln",
     "xpack.lens.config.switchToQueryModeTitle": "In den Abfragemodus wechseln",
