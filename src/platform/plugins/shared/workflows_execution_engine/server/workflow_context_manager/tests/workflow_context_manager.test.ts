@@ -806,6 +806,50 @@ describe('WorkflowContextManager', () => {
       );
     });
 
+    it('prefers snapshotted input.items over re-evaluating the foreach expression', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'outerForeachStep',
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+      } as EsWorkflowExecution);
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId) => {
+          if (stepExecutionId === 'outerForeachStep_generated') {
+            return {
+              id: stepExecutionId,
+              stepId: 'outerForeachStep',
+              stepType: 'foreach',
+              input: {
+                foreach: '{{variables.items}}',
+                items: ['a', 'b'],
+              },
+              state: { index: 1, total: 2 },
+            };
+          }
+          return undefined;
+        });
+      (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockReturnValue([
+        'x',
+        'y',
+      ]);
+      (testContainer.templatingEngineMock.render as jest.Mock).mockReturnValue(['x', 'y']);
+
+      const context = testContainer.underTest.getContext();
+
+      expect(context.foreach).toEqual({
+        items: ['a', 'b'],
+        item: 'b',
+        index: 1,
+        total: 2,
+      });
+    });
+
     describe('nested foreach with inner expression {{foreach.item}}', () => {
       const outerItems = [
         ['innerA', 'innerB'],

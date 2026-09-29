@@ -150,10 +150,13 @@ describe('AlertZeroPlugin feature-flag gating', () => {
               ]),
               ui: expect.arrayContaining(['write']),
             }),
-            read: expect.objectContaining({ api: [ALERTZERO_API_PRIVILEGE_READ] }),
+            read: expect.objectContaining({
+              api: [ALERTZERO_API_PRIVILEGE_READ],
+            }),
           }),
         })
       );
+      expect(features.registerKibanaFeature.mock.calls[0][0].subFeatures).toBeUndefined();
       expect(registerRoutes).toHaveBeenCalled();
       expect(registerAgentType).toHaveBeenCalled();
     });
@@ -223,7 +226,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(2);
     });
 
     it('registers the inference tiers with the optional searchInferenceEndpoints setup contract', () => {
@@ -262,6 +265,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
+        inference: {},
       } as never);
 
       expect(initializeManagedWorkflows).toHaveBeenCalledWith(
@@ -284,6 +288,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
+        inference: {},
       } as never);
 
       expect(ensureAgentSafe).toHaveBeenCalledWith(

@@ -152,6 +152,10 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
+  async refresh() {
+    await this.page.testSubj.click('querySubmitButton');
+  }
+
   async openDashboardWithId(
     id: string,
     opts: { waitForRender?: boolean } = { waitForRender: true }
