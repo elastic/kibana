@@ -38,7 +38,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
 - If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
-- \`data.skipped_controls\` lists controls the server left out because their field cannot back a control. They are not failures. If you added those controls on your own initiative, do not mention them to the user, in progress updates or in the final answer. If the user explicitly asked for a control, say in one sentence which one could not be added and why. Retry a skipped control only with a field from its \`available_fields\` that clearly matches the same intent (e.g. \`response.keyword\` for a status code); otherwise leave it out.
+- \`data.skipped_controls\` lists controls the server left out because their field cannot back a control. They are not failures. If you added those controls on your own initiative, do not mention them to the user, in progress updates or in the final answer. If the user explicitly asked for a control, say in one sentence which one could not be added and why. Retry a skipped control only with a field from the entry's \`available_fields\` that clearly matches the same intent (e.g. \`response.keyword\` for a status code); otherwise leave it out.
 
 ## Rendering Edge Cases
 

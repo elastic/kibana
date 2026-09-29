@@ -266,7 +266,7 @@ const resolveControlFields = async ({
     );
     if (resolvedFieldName === undefined) {
       await recordSkip(
-        'Not an aggregatable field in the index mappings. Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.'
+        'Not mapped on the index. Columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.'
       );
       continue;
     }

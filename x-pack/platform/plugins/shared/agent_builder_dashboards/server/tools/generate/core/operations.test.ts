@@ -2926,7 +2926,7 @@ describe('add_controls / remove_controls operations', () => {
         fieldName: 'method',
         index: 'kibana_sample_data_logs',
         reason:
-          'Not an aggregatable field in the index mappings. Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.',
+          'Not mapped on the index. Columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.',
         availableFields: ['host', 'host.keyword'],
       },
     ]);

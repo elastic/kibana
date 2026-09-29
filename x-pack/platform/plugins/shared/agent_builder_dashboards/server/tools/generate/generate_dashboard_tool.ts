@@ -25,6 +25,7 @@ import {
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
+  groupSkippedControls,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
@@ -201,17 +202,7 @@ Use operations[] to:
                 ),
                 failures: failures.length > 0 ? failures : undefined,
                 skipped_controls:
-                  skippedControls.length > 0
-                    ? skippedControls.map(
-                        ({ identifier, fieldName, index, reason, availableFields }) => ({
-                          identifier,
-                          field_name: fieldName,
-                          index,
-                          reason,
-                          available_fields: availableFields,
-                        })
-                      )
-                    : undefined,
+                  skippedControls.length > 0 ? groupSkippedControls(skippedControls) : undefined,
               },
             },
           ],
