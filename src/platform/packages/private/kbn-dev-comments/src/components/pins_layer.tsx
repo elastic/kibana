@@ -13,10 +13,17 @@ import { css } from '@emotion/react';
 import { EuiAvatar, EuiPopover, euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PIN_SIZE } from '../constants';
-import { isOnScreen } from '../lib/anchor';
+import { isInTooltip, isOnScreen } from '../lib/anchor';
 import type { Comment } from '../types';
 import { useComments, useCommentsState, usePageComments } from './comments_context';
-import { popoverPanelProps, useLayerPortal, useLayerZIndex, usePanelZIndex } from './hooks';
+import {
+  atTooltipPanelProps,
+  atTooltipProps,
+  popoverPanelProps,
+  useLayerPortal,
+  useLayerZIndex,
+  usePanelZIndex,
+} from './hooks';
 import { pinShapeStyles } from './pin_marker';
 import { PopoverBody } from './popover_body';
 import { useResolvedAnchors } from './resolved_anchors';
@@ -26,26 +33,19 @@ interface PositionedPin {
   comment: Comment;
   x: number;
   y: number;
+  /** The element is in a tooltip: the pin is drawn over it, and must not take focus, which may be what shows the tooltip. */
+  inTooltip: boolean;
 }
+
+const keepFocus = (event: React.MouseEvent) => event.preventDefault();
 
 /** Panel padding, arrow and the distance EUI keeps from the viewport's edge. */
 const POPOVER_CHROME = 72;
-/** The thread's actions and reply form alone take most of this; past the edge of the viewport beats unusable. */
+/** Room for the thread's actions and reply form; past the viewport's edge beats unusable. */
 const MIN_BODY_HEIGHT = 300;
 
-interface PopoverPlacement {
-  side: 'top' | 'bottom';
-  /** Room for the thread body on `side`, so it scrolls instead of growing past the viewport when the screenshot is shown. */
-  maxHeight: number;
-}
-
-/**
- * The popover opens on the side of the pin with more room, sized to it. Left to
- * EUI, the side depended on the size, and the size on the side: a popover no
- * taller than the minimum fit below a pin low on the page, so there it stayed,
- * with a few lines' worth of room for the thread and most of the viewport free above.
- */
-const placePopover = (y: number): PopoverPlacement => {
+/** The side of the pin with more room, and the room there, so the thread scrolls instead of growing past the viewport. */
+const placePopover = (y: number): { side: 'top' | 'bottom'; maxHeight: number } => {
   const above = y - PIN_SIZE;
   const below = window.innerHeight - y;
   return {
@@ -67,7 +67,7 @@ const Pin = ({
 }: {
   pin: PositionedPin;
   isActive: boolean;
-  /** The thread was opened without a pointer (keyboard, guide); the pin takes focus so the thread is reachable. */
+  /** The thread was opened without a pointer: the pin takes focus so the thread is reachable. */
   takeFocus: boolean;
   zIndex: number;
   onToggle: () => void;
@@ -75,7 +75,7 @@ const Pin = ({
   onFocused: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { comment, x, y } = pin;
+  const { comment, x, y, inTooltip } = pin;
   const { author, resolved } = comment;
   const count = threadSize(comment);
   const placement = placePopover(y);
@@ -94,6 +94,7 @@ const Pin = ({
       ref={buttonRef}
       type="button"
       onClick={onToggle}
+      onMouseDown={inTooltip ? keepFocus : undefined}
       aria-label={
         resolved
           ? i18n.translate('devComments.pin.resolvedLabel', {
@@ -144,20 +145,21 @@ const Pin = ({
         top: ${y}px;
         transform: translate(-50%, -100%);
       `}
+      {...(inTooltip ? atTooltipProps : {})}
     >
-      {/* The panel is portalled to `body`, not next to the pin: inside the pins' container it could not stack above the comments panel, whatever its z-index. */}
+      {/* Portalled to `body`: inside the pins' container it could not stack above the comments panel. */}
       <EuiPopover
         button={button}
         aria-label={i18n.translate('devComments.pin.threadLabel', {
           defaultMessage: 'Comment thread',
         })}
         isOpen={isActive}
-        // Outside clicks reaching EUI are on developer tool UI (the comments panel) and must not close the thread; Close, Esc and page clicks do.
+        // Outside clicks reaching EUI are on the layer's UI; Close, Esc and page clicks close the thread.
         closePopover={() => {}}
         anchorPosition={placement.side === 'top' ? 'upCenter' : 'downCenter'}
         panelPaddingSize="none"
         repositionOnScroll
-        panelProps={popoverPanelProps}
+        panelProps={inTooltip ? atTooltipPanelProps : popoverPanelProps}
         panelRef={panelRef}
         ownFocus={false}
         zIndex={zIndex}
@@ -174,40 +176,44 @@ export const PinsLayer = () => {
   const controller = useComments();
   const zIndex = useLayerZIndex();
   const container = useLayerPortal('devCommentsPins', zIndex.pins);
+  const tooltipContainer = useLayerPortal('devCommentsTooltipPins', zIndex.tooltipPins);
   const comments = usePageComments();
   const resolvedAnchors = useResolvedAnchors();
   const activeThreadId = useCommentsState((state) => state.activeThreadId);
   const focusPinId = useCommentsState((state) => state.focusPinId);
 
-  // A pin goes where its element shows: not over the dialog or menu that covers it, as it would from a layer above the page.
+  // A pin goes where its element shows, not over the dialog or menu covering it.
   const pins = comments.flatMap<PositionedPin>((comment) => {
     const placed = resolvedAnchors.get(comment.id);
     return placed && placed.exposed && isOnScreen(placed.point)
-      ? [{ comment, ...placed.point }]
+      ? [{ comment, ...placed.point, inTooltip: isInTooltip(placed.element) }]
       : [];
   });
 
-  if (!container) {
+  if (!container || !tooltipContainer) {
     return null;
   }
 
-  return createPortal(
+  const renderPin = (pin: PositionedPin) => {
+    const { id } = pin.comment;
+    return (
+      <Pin
+        key={id}
+        pin={pin}
+        zIndex={zIndex.popover}
+        isActive={activeThreadId === id}
+        takeFocus={focusPinId === id}
+        onToggle={() => controller.openThread(activeThreadId === id ? null : id)}
+        onClose={() => controller.openThread(null)}
+        onFocused={() => controller.pinFocused(id)}
+      />
+    );
+  };
+
+  return (
     <>
-      {pins.map((pin) => (
-        <Pin
-          key={pin.comment.id}
-          pin={pin}
-          zIndex={zIndex.popover}
-          isActive={activeThreadId === pin.comment.id}
-          takeFocus={focusPinId === pin.comment.id}
-          onToggle={() =>
-            controller.openThread(activeThreadId === pin.comment.id ? null : pin.comment.id)
-          }
-          onClose={() => controller.openThread(null)}
-          onFocused={() => controller.pinFocused(pin.comment.id)}
-        />
-      ))}
-    </>,
-    container
+      {createPortal(pins.filter((pin) => !pin.inTooltip).map(renderPin), container)}
+      {createPortal(pins.filter((pin) => pin.inTooltip).map(renderPin), tooltipContainer)}
+    </>
   );
 };

@@ -11,7 +11,7 @@ import { IGNORE_SELECTOR, NAME_MAX_LENGTH, SELECTOR_MAX_LENGTH } from '../consta
 import type { AnchorLocator, AnchorTarget, ElementAnchor } from '../types';
 
 const TEST_SUBJ_ATTR = 'data-test-subj';
-/** Attributes locators are made of (see `buildAnchor`); with text, what a change of can make an anchor resolve differently. */
+/** Attributes locators are made of; a change to one (or to text) can make an anchor resolve differently. */
 export const LOCATOR_ATTRIBUTES = ['id', TEST_SUBJ_ATTR, 'aria-label'];
 const TEXT_MAX_LENGTH = 80;
 const LABEL_MAX_LENGTH = 60;
@@ -88,7 +88,7 @@ const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 const attributeSelector = (name: string, value: string): string =>
   `[${name}="${value.replace(/["\\]/g, '\\$&')}"]`;
 
-/** Selectors come from stored comments, which anyone with access to the store can have written, so an invalid one is a miss rather than an exception. */
+/** Selectors come from stored comments, which anyone with access to the store can write: an invalid one is a miss, not an exception. */
 const queryAll = (root: ParentNode, selector: string): Element[] => {
   try {
     return Array.from(root.querySelectorAll(selector));
@@ -122,19 +122,93 @@ export interface Point {
 export const isOnScreen = ({ x, y }: Point): boolean =>
   x >= 0 && y >= 0 && x <= window.innerWidth && y <= window.innerHeight;
 
+/** Hit-testing passes over such elements, as tooltips, to whatever is under them. */
+const takesNoPointerInput = (element: Element): boolean =>
+  getComputedStyle(element).pointerEvents === 'none';
+
 /**
- * Whether `element` is what shows at `point`, a spot within it: not a dialog,
- * menu or bar drawn over it there, which would be drawn over a pin at the spot
- * too. The layer's own UI does not count. An ancestor found there is taken for
- * the element, which may leave pointer events to it or, wrapped onto another
- * line, not reach the spot. Off screen there is nothing to test; the element passes.
+ * Whether `element` is what shows at `point`, a spot within it, rather than a
+ * dialog, menu or bar drawn over it there (which would cover a pin at the spot
+ * too). The layer's own UI does not count. Off screen, or taking no pointer
+ * input, the element passes: there is nothing to test.
  */
 export const isExposed = (element: Element, point: Point): boolean => {
-  if (!isOnScreen(point)) {
+  if (!isOnScreen(point) || takesNoPointerInput(element)) {
     return true;
   }
   const hit = document.elementsFromPoint(point.x, point.y).find((over) => !isIgnored(over));
   return hit === undefined || hit.contains(element) || element.contains(hit);
+};
+
+const TOOLTIP_SELECTOR = '[role="tooltip"]';
+
+/** Whether the element is in a tooltip: UI showing only while what it describes is hovered or focused. */
+export const isInTooltip = (element: Element): boolean =>
+  element.closest(TOOLTIP_SELECTOR) !== null;
+
+/** The tooltips the element (or what it is in) is described by, as a trigger is while its tooltip shows. */
+const tooltipsDescribing = (element: Element): Element[] =>
+  (element.closest('[aria-describedby]')?.getAttribute('aria-describedby') ?? '')
+    .split(/\s+/)
+    .flatMap((id) => {
+      const described = id ? document.getElementById(id) : null;
+      return described && matches(described, TOOLTIP_SELECTOR) ? [described] : [];
+    });
+
+/** The tooltip showing, if one is: the one describing `trigger` when that is, else whichever is (the last added, of several). */
+export const tooltipShowing = (
+  trigger: Element,
+  ignoreSelectors: readonly string[] = []
+): Element | null => {
+  const showing = (candidate: Element) =>
+    !isIgnored(candidate, ignoreSelectors) && isVisible(candidate);
+  return (
+    tooltipsDescribing(trigger).find(showing) ??
+    queryAll(document, TOOLTIP_SELECTOR).reverse().find(showing) ??
+    null
+  );
+};
+
+/** The element the tooltip describes or labels: the one that shows it. */
+export const triggerOf = (tooltip: Element): Element | null => {
+  if (!tooltip.id) {
+    return null;
+  }
+  const id = tooltip.id.replace(/["\\]/g, '\\$&');
+  return document.querySelector(`[aria-describedby~="${id}"], [aria-labelledby~="${id}"]`);
+};
+
+const contains = ({ left, top, right, bottom }: DOMRect, { x, y }: Point): boolean =>
+  x >= left && x <= right && y >= top && y <= bottom;
+
+/** The innermost element of `element` at `point`, going by their boxes. */
+const innermostAt = (element: Element, point: Point): Element => {
+  const child = Array.from(element.children)
+    .reverse()
+    .find((candidate) => contains(candidate.getBoundingClientRect(), point));
+  return child ? innermostAt(child, point) : element;
+};
+
+export interface TooltipHit {
+  tooltip: Element;
+  /** The innermost element of the tooltip at the point. */
+  hit: Element;
+}
+
+/** The tooltip showing at `point` (the last added, of several), and what of it is there. Hit-testing passes tooltips over: they are found by their boxes. */
+export const tooltipAt = (
+  point: Point,
+  ignoreSelectors: readonly string[] = []
+): TooltipHit | null => {
+  const tooltip = queryAll(document, TOOLTIP_SELECTOR)
+    .reverse()
+    .find(
+      (candidate) =>
+        !isIgnored(candidate, ignoreSelectors) &&
+        isVisible(candidate) &&
+        contains(candidate.getBoundingClientRect(), point)
+    );
+  return tooltip ? { tooltip, hit: innermostAt(tooltip, point) } : null;
 };
 
 /** Whether the element takes input, leaving aside what may be drawn over it. */
@@ -345,6 +419,9 @@ export const buildAnchor = (
   const text = collapse(element.textContent);
   if (TEXT_LOCATOR_TAGS.has(tag) && text && text.length <= TEXT_MAX_LENGTH) {
     addIfUnique({ type: 'text', tag, value: text });
+  } else if (matches(element, TOOLTIP_SELECTOR) && text && text.length <= NAME_MAX_LENGTH) {
+    // Mounted anew in a portal each time it shows, a tooltip has no stable path: it is its text.
+    addIfUnique({ type: 'text', tag: TOOLTIP_SELECTOR, value: text });
   }
   const selector = buildCssPath(element);
   if (selector.length <= SELECTOR_MAX_LENGTH) {
@@ -365,15 +442,24 @@ export interface ResolvedAnchor {
   exact: boolean;
 }
 
+/** Whether the element is in the hint of one of the layer's own buttons: a tooltip, but not the page's. */
+const isOfLayer = (element: Element): boolean => {
+  const tooltip = element.closest(TOOLTIP_SELECTOR);
+  const trigger = tooltip && triggerOf(tooltip);
+  return trigger != null && isIgnored(trigger);
+};
+
 /**
- * Finds the element an anchor points at: the first locator matching exactly one
+ * The element an anchor points at: the first locator matching exactly one
  * visible element. A structural path may match one element whose content
- * changed (an inexact match) but never picks among several: an ambiguous
- * locator, like one from a repeated component, is a miss.
+ * changed (inexactly), but never picks among several, nor stands in for a
+ * tooltip, one being found at another's path as easily as at its own.
  */
 export const resolveAnchor = (anchor: ElementAnchor): ResolvedAnchor | null => {
   for (const locator of anchor.locators) {
-    const found = queryLocator(locator).filter(isVisible);
+    const found = queryLocator(locator).filter(
+      (candidate) => isVisible(candidate) && !isOfLayer(candidate)
+    );
     if (locator.type === 'cssPath') {
       const exactMatches = found.filter(
         (candidate) => fingerprintOf(candidate) === locator.fingerprint
@@ -381,7 +467,7 @@ export const resolveAnchor = (anchor: ElementAnchor): ResolvedAnchor | null => {
       if (exactMatches.length === 1) {
         return { element: exactMatches[0], exact: true };
       }
-      if (exactMatches.length === 0 && found.length === 1) {
+      if (exactMatches.length === 0 && found.length === 1 && !isInTooltip(found[0])) {
         return { element: found[0], exact: false };
       }
     } else if (found.length === 1) {
@@ -407,14 +493,11 @@ export const getAnchorPoint = (anchor: ElementAnchor, element: Element): Point =
 /** A resolved anchor as it is shown: where its pin goes, and whether the element shows there. */
 export interface PlacedAnchor extends ResolvedAnchor {
   point: Point;
-  /**
-   * The element is what shows at the pin (see `isExposed`). Under a dialog,
-   * menu or bar it is on the page but out of sight, and so is its pin.
-   */
+  /** The element is what shows at the pin (see `isExposed`); under a dialog, menu or bar, neither is in sight. */
   exposed: boolean;
 }
 
-/** With `exposed` given, the element is not hit-tested: for when the layer itself has the page covered. */
+/** With `exposed` given, the element is not hit-tested: for when the layer itself covers the page. */
 export const placeAnchor = (
   anchor: ElementAnchor,
   resolved: ResolvedAnchor,
