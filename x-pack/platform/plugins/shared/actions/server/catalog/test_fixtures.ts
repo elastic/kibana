@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { generateKeyPairSync } from 'crypto';
 import { readFileSync } from 'fs';
 import path from 'path';
 import type { TypeMetadataState } from './types';
@@ -137,9 +138,28 @@ const DEV_PRIVATE_KEY = readFileSync(
   path.join(__dirname, '__fixtures__/dev_signing_key/catalog_dev_private_key.pem'),
   'utf8'
 );
+const DEV_PUBLIC_KEY = readFileSync(
+  path.join(__dirname, '__fixtures__/dev_signing_key/catalog_dev_public_key.pem'),
+  'utf8'
+);
+
+const rotationKeyPair = generateKeyPairSync('ed25519');
+export const ROTATION_PUBLIC_KEY = rotationKeyPair.publicKey
+  .export({ type: 'spki', format: 'pem' })
+  .toString();
+const ROTATION_PRIVATE_KEY = rotationKeyPair.privateKey
+  .export({ type: 'pkcs8', format: 'pem' })
+  .toString();
+
+export const TEST_PUBLIC_KEYS: readonly string[] = [DEV_PUBLIC_KEY, ROTATION_PUBLIC_KEY];
+
+export interface SignedManifestFixtureOptions {
+  keyIndex?: 0 | 1;
+}
 
 export const signedManifestFixture = (
-  overrides: Record<string, unknown> = {}
+  overrides: Record<string, unknown> = {},
+  options: SignedManifestFixtureOptions = {}
 ): { bytes: string; signature: string } => {
   const manifest = {
     schemaVersion: 1,
@@ -164,7 +184,8 @@ export const signedManifestFixture = (
     ...overrides,
   };
   const bytes = `${JSON.stringify(manifest)}\n`;
-  return { bytes, signature: signCatalogForTests(bytes, DEV_PRIVATE_KEY) };
+  const privateKey = options.keyIndex === 1 ? ROTATION_PRIVATE_KEY : DEV_PRIVATE_KEY;
+  return { bytes, signature: signCatalogForTests(bytes, privateKey) };
 };
 
 export interface FetchDoubleResponse {

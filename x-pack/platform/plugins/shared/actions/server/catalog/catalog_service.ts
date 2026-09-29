@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CatalogSource } from './types';
 import type { ConnectorCatalogStorage } from './catalog_storage';
 import { createConnectorCatalogStorage } from './catalog_storage';
-import { createLogOnce, type CatalogLogOnce } from './log_once';
+import type { CatalogLogOnce } from './log_once';
 import { runCatalogRefresh } from './catalog_refresh';
 import {
   loadCatalogFromIndex,
@@ -24,6 +24,7 @@ export interface DeclarativeCatalogServiceOptions {
   publicKeys: readonly string[];
   refreshIntervalMs: number;
   logger: Logger;
+  logOnce: CatalogLogOnce;
   buildType: VersionedTypeFactory;
   createStorage?: (esClient: ElasticsearchClient, logger: Logger) => ConnectorCatalogStorage;
   onStorageReady?: (storage: ConnectorCatalogStorage) => void;
@@ -42,7 +43,7 @@ export class DeclarativeCatalogService {
   private loading?: Promise<void>;
   private deps?: DeclarativeCatalogRegistrationDeps;
   private storage?: ConnectorCatalogStorage;
-  private logOnce?: CatalogLogOnce;
+  private readonly logOnce: CatalogLogOnce;
   private readonly types = new Map<string, VersionedConnectorType>();
   private indexPoll?: ReturnType<typeof setInterval>;
   private readonly createStorage: (
@@ -52,12 +53,12 @@ export class DeclarativeCatalogService {
 
   constructor(private readonly options: DeclarativeCatalogServiceOptions) {
     this.createStorage = options.createStorage ?? createConnectorCatalogStorage;
+    this.logOnce = options.logOnce;
   }
 
   public async loadAtBoot(deps: DeclarativeCatalogRegistrationDeps): Promise<void> {
     this.deps = deps;
     this.setStorage(this.createStorage(deps.esClient, this.options.logger));
-    this.logOnce = createLogOnce(this.options.logger);
     this.startReloadInterval();
     await this.loadFromIndex();
   }
@@ -100,8 +101,8 @@ export class DeclarativeCatalogService {
   }
 
   private async runLoad(): Promise<void> {
-    const { deps, storage, logOnce } = this;
-    if (!deps || !storage || !logOnce) {
+    const { deps, storage } = this;
+    if (!deps || !storage) {
       return;
     }
     await loadCatalogFromIndex({
@@ -112,13 +113,13 @@ export class DeclarativeCatalogService {
       buildType: this.options.buildType,
       types: this.types,
       logger: this.options.logger,
-      logOnce,
+      logOnce: this.logOnce,
     });
   }
 
   private async runRefresh(): Promise<void> {
-    const { storage, logOnce } = this;
-    if (!storage || !logOnce) {
+    const { storage } = this;
+    if (!storage) {
       return;
     }
     await runCatalogRefresh({
@@ -126,7 +127,7 @@ export class DeclarativeCatalogService {
       storage,
       publicKeys: this.options.publicKeys,
       logger: this.options.logger,
-      logOnce,
+      logOnce: this.logOnce,
       reload: () => this.loadFromIndex(),
     });
   }

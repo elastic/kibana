@@ -96,4 +96,10 @@ handler: console.log
       )
     ).toThrow('url and baseUrl templates may only reference config.*');
   });
+
+  it('rejects a spec version with leading zeros', () => {
+    expect(() =>
+      parseCatalogContract(ABUSE_IPDB_SPEC_FIXTURE.replace('version: "1.0"', 'version: "01.0"'))
+    ).toThrow('Declarative connector definition is invalid');
+  });
 });

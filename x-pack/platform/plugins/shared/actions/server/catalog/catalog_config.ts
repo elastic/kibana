@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
@@ -12,12 +13,19 @@ export const DEFAULT_CATALOG_URL = 'https://workflows.elastic.co/connectors/v1';
 const MIN_REFRESH_INTERVAL_MS = 10_000;
 
 export const catalogConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   url: schema.uri({
     scheme: ['http', 'https'],
     defaultValue: DEFAULT_CATALOG_URL,
   }),
-  localBundlePath: schema.maybe(schema.string({ minLength: 1, maxLength: 4096 })),
+  localBundlePath: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 4096,
+      validate: (value) =>
+        path.isAbsolute(value) ? undefined : 'localBundlePath must be an absolute path',
+    })
+  ),
   refreshInterval: schema.duration({
     defaultValue: '5m',
     validate: (value) => {

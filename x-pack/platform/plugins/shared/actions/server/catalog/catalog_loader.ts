@@ -18,6 +18,7 @@ import type { PinnedVersionsClient } from './pinned_versions';
 import { findPinnedSpecVersions } from './pinned_versions';
 import type { CatalogActionType, CatalogTypeMetadata, TypeMetadataState } from './types';
 import type { VersionedConnectorType } from './versioned_connector_type';
+import { ensureSufficientLicense } from '../lib/ensure_sufficient_license';
 
 export interface CatalogRegistryDeps {
   registerType: (actionType: CatalogActionType) => void;
@@ -99,7 +100,7 @@ export const loadCatalogFromIndex = async ({
 
   let manifest;
   try {
-    manifest = parseCatalogManifest(JSON.parse(stored.bytes), logger);
+    manifest = parseCatalogManifest(JSON.parse(stored.bytes), logOnce);
   } catch (error) {
     logOnce.error(
       stored.catalogVersion,
@@ -117,7 +118,7 @@ export const loadCatalogFromIndex = async ({
     listedById.set(row.id, rows);
   }
 
-  const pinned = await findPinnedSpecVersions(pinnedClient, logger);
+  const pinned = await findPinnedSpecVersions(pinnedClient, logOnce);
   const iconHashes = [
     ...new Set(
       Object.values(manifest.typeMetadata)
@@ -226,6 +227,15 @@ export const loadCatalogFromIndex = async ({
           if (built) {
             existing.addVersion(built);
           }
+        }
+        try {
+          ensureSufficientLicense({
+            id,
+            minimumLicenseRequired: metadata.minimumLicense,
+          } as CatalogActionType);
+        } catch (error) {
+          logOnce.error(manifest.catalogVersion, `license:${id}`, errorMessage(error));
+          continue;
         }
         const previousLicense = existing.getMetadata().minimumLicense;
         existing.updateMetadata(metadata);

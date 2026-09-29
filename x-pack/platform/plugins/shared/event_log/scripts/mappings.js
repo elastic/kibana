@@ -381,6 +381,10 @@ exports.EcsCustomPropertyMappings = {
                 ignore_above: 1024,
                 type: 'keyword',
               },
+              spec_version: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               gen_ai: {
                 properties: {
                   usage: {

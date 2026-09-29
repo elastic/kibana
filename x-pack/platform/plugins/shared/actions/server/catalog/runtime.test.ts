@@ -263,4 +263,59 @@ describe('executeDeclarativeRequest', () => {
       })
     );
   });
+
+  it('rejects __proto__ template segments', async () => {
+    await expect(
+      executeDeclarativeRequest({
+        context: createContext(jest.fn()),
+        connector,
+        request: {
+          method: 'GET',
+          url: 'https://example.test',
+          query: { x: '{{ input.__proto__ }}' },
+        },
+        input: {},
+      })
+    ).rejects.toThrow('Unsafe declarative template path segment "__proto__".');
+  });
+
+  it('rejects template roots other than input and config', async () => {
+    await expect(
+      executeDeclarativeRequest({
+        context: createContext(jest.fn()),
+        connector,
+        request: {
+          method: 'GET',
+          url: 'https://example.test',
+          query: { token: '{{ secrets.token }}' },
+        },
+        input: {},
+      })
+    ).rejects.toThrow(
+      'Declarative templates may only read from input or config. Received "secrets.token".'
+    );
+  });
+
+  it('drops an exact undefined template from query and json body and keeps null', async () => {
+    const requestMock = jest.fn().mockResolvedValue(response({ ok: true }));
+    await executeDeclarativeRequest({
+      context: createContext(requestMock),
+      connector,
+      request: {
+        method: 'POST',
+        url: 'https://example.test/body',
+        query: { gone: '{{ input.missing }}', kept: 'x' },
+        body: { gone: '{{ input.missing }}', nully: '{{ input.nully }}' },
+        bodyType: 'json',
+      },
+      input: { nully: null },
+    });
+
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: { kept: 'x' },
+        data: { nully: null },
+      })
+    );
+  });
 });

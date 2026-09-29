@@ -36,4 +36,24 @@ describe('validateSvgIcon', () => {
       )
     ).toThrow('unsupported active or external content');
   });
+
+  it('rejects style tags', () => {
+    expect(() =>
+      validateSvgIcon('<svg xmlns="http://www.w3.org/2000/svg"><style>body{}</style></svg>')
+    ).toThrow('unsupported active or external content');
+  });
+
+  it('rejects foreignObject', () => {
+    expect(() =>
+      validateSvgIcon(
+        '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject></foreignObject></svg>'
+      )
+    ).toThrow('unsupported active or external content');
+  });
+
+  it('rejects onload handlers', () => {
+    expect(() =>
+      validateSvgIcon('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>')
+    ).toThrow('unsupported active or external content');
+  });
 });

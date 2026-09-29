@@ -79,6 +79,8 @@ describe('getAll()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+    actionTypeRegistry.has = jest.fn().mockReturnValue(false);
+    actionTypeRegistry.get = jest.fn();
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -1318,6 +1320,74 @@ describe('getAll()', () => {
       });
     });
   });
+
+  describe('specVersion', () => {
+    const setupFind = (attributes: Record<string, unknown>) => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              name: 'test',
+              isMissingSecrets: false,
+              config: {},
+              ...attributes,
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 0 },
+          },
+        }
+      );
+    };
+
+    test('returns getLatestVersion(1) for an unpinned connector of a versioned type', async () => {
+      const getLatestVersion = jest.fn().mockReturnValue('1.3');
+      actionTypeRegistry.has = jest.fn().mockReturnValue(true);
+      actionTypeRegistry.get = jest.fn().mockReturnValue({
+        specVersions: { getLatestVersion },
+      });
+      setupFind({ actionTypeId: '.abuseipdb' });
+
+      const result = await actionsClient.getAll();
+
+      expect(result[0].specVersion).toBe('1.3');
+      expect(getLatestVersion).toHaveBeenCalledWith(1);
+    });
+
+    test('returns the pin for a pinned connector of a versioned type', async () => {
+      actionTypeRegistry.has = jest.fn().mockReturnValue(true);
+      actionTypeRegistry.get = jest.fn().mockReturnValue({
+        specVersions: { getLatestVersion: jest.fn().mockReturnValue('1.3') },
+      });
+      setupFind({ actionTypeId: '.abuseipdb', specVersion: '1.0' });
+
+      const result = await actionsClient.getAll();
+
+      expect(result[0].specVersion).toBe('1.0');
+    });
+
+    test('omits specVersion for a classic connector type', async () => {
+      actionTypeRegistry.has = jest.fn().mockReturnValue(true);
+      actionTypeRegistry.get = jest.fn().mockReturnValue({});
+      setupFind({ actionTypeId: '.webhook' });
+
+      const result = await actionsClient.getAll();
+
+      expect(result[0]).not.toHaveProperty('specVersion');
+    });
+  });
 });
 
 describe('getAllUnsecured()', () => {
@@ -1325,6 +1395,8 @@ describe('getAllUnsecured()', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+    actionTypeRegistry.has = jest.fn().mockReturnValue(false);
+    actionTypeRegistry.get = jest.fn();
   });
 
   test('calls internalSavedObjectRepository with parameters and returns inMemoryConnectors correctly', async () => {

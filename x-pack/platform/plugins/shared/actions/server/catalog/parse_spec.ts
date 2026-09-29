@@ -8,6 +8,7 @@
 import yaml from 'yaml';
 import { z, ZodError } from '@kbn/zod/v4';
 import type { CatalogContractSpec } from './types';
+import { SPEC_VERSION_REGEX } from './spec_version_format';
 
 const jsonSchemaRecord = z.record(z.string(), z.unknown());
 
@@ -159,7 +160,7 @@ const connectorSpecSchema = z
   .object({
     schemaVersion: z.literal(1),
     id: z.string().regex(/^\.[a-z0-9_-]+$/),
-    version: z.string().regex(/^\d+\.\d+$/),
+    version: z.string().regex(SPEC_VERSION_REGEX),
     config: jsonSchemaRecord,
     auth: z.union([connectorSpecAuthSchema, legacyAuthSchema]),
     actions: z

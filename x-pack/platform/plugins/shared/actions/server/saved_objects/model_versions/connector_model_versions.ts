@@ -63,7 +63,7 @@ export const connectorModelVersions = (
     changes: [
       {
         // `specVersion` pins a spec connector to the catalog version it was created from.
-        // No backfill: legacy documents stay unpinned and resolve to the active version.
+        // No backfill: unpinned documents resolve to the newest accepted 1.y.
         type: 'mappings_addition',
         addedMappings: {
           specVersion: { type: 'keyword' },

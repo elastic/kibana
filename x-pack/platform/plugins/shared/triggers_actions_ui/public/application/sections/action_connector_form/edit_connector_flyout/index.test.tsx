@@ -845,5 +845,66 @@ describe('EditConnectorFlyout', () => {
         );
       });
     });
+
+    it('saves with the target spec version after a failed upgrade switched the form', async () => {
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
+        {
+          id: '.test',
+          name: 'Test',
+          enabled: true,
+          enabled_in_config: true,
+          enabled_in_license: true,
+          supported_feature_ids: [],
+          minimum_license_required: 'basic',
+          is_system_action_type: false,
+          is_deprecated: false,
+          spec_version: '1.1',
+          spec_versions: { '1': '1.1' },
+        },
+      ]);
+      appMockRenderer.coreStart.http.put = jest
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error('Bad Request'), {
+            body: { message: 'config does not validate', statusCode: 400 },
+          })
+        )
+        .mockResolvedValue(updateConnectorResponse);
+
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, specVersion: '1.0' }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      expect(await screen.findByTestId('connector-spec-version-upgrade')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('connector-spec-version-upgrade'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledTimes(1);
+      });
+
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+
+      await waitFor(() => {
+        expect(getByTestId('edit-connector-flyout-save-btn')).not.toBeDisabled();
+      });
+
+      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledTimes(2);
+      });
+
+      const saveBody = JSON.parse(
+        (appMockRenderer.coreStart.http.put as jest.Mock).mock.calls[1][1].body
+      );
+      expect(saveBody.spec_version).toBe('1.1');
+    });
   });
 });

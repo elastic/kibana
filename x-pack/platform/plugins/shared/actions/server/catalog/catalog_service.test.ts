@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { DeclarativeCatalogService } from './catalog_service';
 import { loadCatalogFromIndex } from './catalog_loader';
 import { runCatalogRefresh } from './catalog_refresh';
+import { createLogOnce } from './log_once';
 import type { CatalogSource } from './types';
 import type { ConnectorCatalogStorage } from './catalog_storage';
 
@@ -37,6 +38,7 @@ describe('DeclarativeCatalogService', () => {
       publicKeys: ['key'],
       refreshIntervalMs: 10_000,
       logger,
+      logOnce: createLogOnce(logger),
       buildType: jest.fn(),
       createStorage: () => storage,
     });

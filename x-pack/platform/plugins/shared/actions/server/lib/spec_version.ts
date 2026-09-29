@@ -95,3 +95,9 @@ export const ensureSpecVersionLoaded = async (
     );
   }
 };
+
+/** Pin if present, otherwise the newest accepted 1.y. Undefined for classic types. */
+export const resolveExecutedSpecVersion = (
+  actionType: Pick<ActionType, 'specVersions'>,
+  pin: string | undefined
+): string | undefined => pin ?? actionType.specVersions?.getLatestVersion(1);

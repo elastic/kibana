@@ -51,6 +51,7 @@ const getAxiosInstanceWithAuth = jest.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
   get: jest.fn(),
+  has: jest.fn().mockReturnValue(false),
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
@@ -89,6 +90,7 @@ describe('get()', () => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(false);
+    (actionTypeRegistry.has as jest.Mock).mockReturnValue(false);
   });
 
   describe('authorization', () => {
@@ -619,6 +621,73 @@ describe('get()', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error validating connector: 1')
       );
+    });
+
+    test('returns the pin for a pinned connector of a versioned type', async () => {
+      (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue({
+        specVersions: { getLatestVersion: jest.fn().mockReturnValue('1.3') },
+      });
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Pinned',
+          actionTypeId: '.abuseipdb',
+          config: {},
+          isMissingSecrets: false,
+          specVersion: '1.0',
+        },
+        references: [],
+      });
+
+      const result = await get({ context: mockContext, id: '1' });
+
+      expect(result.specVersion).toBe('1.0');
+    });
+
+    test('returns getLatestVersion(1) for an unpinned connector of a versioned type', async () => {
+      const getLatestVersion = jest.fn().mockReturnValue('1.3');
+      (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue({
+        specVersions: { getLatestVersion },
+      });
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Unpinned',
+          actionTypeId: '.abuseipdb',
+          config: {},
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
+
+      const result = await get({ context: mockContext, id: '1' });
+
+      expect(result.specVersion).toBe('1.3');
+      expect(getLatestVersion).toHaveBeenCalledWith(1);
+    });
+
+    test('omits specVersion for a classic connector type', async () => {
+      (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue({});
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Classic',
+          actionTypeId: '.webhook',
+          config: {},
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
+
+      const result = await get({ context: mockContext, id: '1' });
+
+      expect(result).not.toHaveProperty('specVersion');
     });
 
     test('does not log a warning when connector schema validation passes', async () => {

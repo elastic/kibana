@@ -2119,6 +2119,134 @@ describe('Sub-feature connectors', () => {
     });
   });
 });
+
+describe('executed spec version', () => {
+  const specVersions = {
+    getLatestVersion: (major?: number) => (major === 1 ? '1.1' : '2.0'),
+    getLatestVersions: () => ({ '1': '1.1' }),
+    hasVersion: () => true,
+    getSpec: async () => ({ metadata: { id: 'test' }, actions: {}, test: {} }),
+    resolveRequest: async () => '1.1',
+  } as unknown as NonNullable<ConnectorType['specVersions']>;
+  const auditLogger = { log: jest.fn(), enabled: true, includeSavedObjectNames: false };
+
+  beforeEach(() => {
+    auditLogger.log.mockClear();
+    (securityMockStart.audit.asScoped as jest.Mock).mockReturnValue(auditLogger);
+  });
+
+  test('pinned connector start and completion events carry the pin', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      attributes: { ...connectorSavedObject.attributes, specVersion: '1.0' },
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      specVersions,
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(eventLogger.logEvent.mock.calls[0][0]?.kibana?.action?.execution).toEqual(
+      expect.objectContaining({ spec_version: '1.0' })
+    );
+    expect(eventLogger.logEvent.mock.calls[1][0]?.kibana?.action?.execution).toEqual(
+      expect.objectContaining({ spec_version: '1.0' })
+    );
+  });
+
+  test('unpinned versioned type events carry getLatestVersion(1)', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      specVersions,
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(eventLogger.logEvent.mock.calls[0][0]?.kibana?.action?.execution).toEqual(
+      expect.objectContaining({ spec_version: '1.1' })
+    );
+    expect(eventLogger.logEvent.mock.calls[1][0]?.kibana?.action?.execution).toEqual(
+      expect.objectContaining({ spec_version: '1.1' })
+    );
+  });
+
+  test('classic type events omit spec_version', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(
+      eventLogger.logEvent.mock.calls[0][0]?.kibana?.action?.execution?.spec_version
+    ).toBeUndefined();
+    expect(
+      eventLogger.logEvent.mock.calls[1][0]?.kibana?.action?.execution?.spec_version
+    ).toBeUndefined();
+  });
+
+  test('emits connector_execute audit with the version for a versioned type', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      attributes: { ...connectorSavedObject.attributes, specVersion: '1.2' },
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      specVersions,
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(securityMockStart.audit.asScoped).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'connector_execute', outcome: 'success' }),
+        message: expect.stringContaining('[spec_version=1.2]'),
+      })
+    );
+  });
+
+  test('does not emit connector_execute audit for a classic type', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
+  });
+
+  test('emits connector_execute audit with failure when validation fails', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      attributes: { ...connectorSavedObject.attributes, specVersion: '1.0' },
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      specVersions,
+    });
+
+    await actionExecutor.execute({
+      ...executeParams,
+      params: { foo: 'not-a-boolean' },
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'connector_execute', outcome: 'failure' }),
+        message: expect.stringContaining('[spec_version=1.0]'),
+      })
+    );
+  });
+});
+
 describe('Event log', () => {
   test('writes to event log for execute timeout', async () => {
     setupActionExecutorMock();

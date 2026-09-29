@@ -40,6 +40,7 @@ interface CreateActionEventLogRecordParams {
   isInMemory?: boolean;
   source?: ActionExecutionSource<unknown>;
   actionTypeId: string;
+  specVersion?: string;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
@@ -114,6 +115,10 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     } else {
       set(event, 'kibana.action.execution.source', source.type?.toLowerCase());
     }
+  }
+
+  if (params.specVersion !== undefined) {
+    set(event, 'kibana.action.execution.spec_version', params.specVersion);
   }
 
   for (const relatedSavedObject of relatedSavedObjects || []) {

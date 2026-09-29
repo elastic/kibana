@@ -10,6 +10,7 @@ import type { SpecVersionsContract } from '../types';
 import { SpecVersionRequestError } from './errors/spec_version_request_error';
 import {
   ensureSpecVersionLoaded,
+  resolveExecutedSpecVersion,
   resolveSpecVersionForCreate,
   resolveSpecVersionForUpdate,
 } from './spec_version';
@@ -149,5 +150,19 @@ describe('ensureSpecVersionLoaded', () => {
     ).rejects.toThrow(
       'Connector "c1" of type ".abuseipdb" is pinned to spec version "9.9", which is not available'
     );
+  });
+});
+
+describe('resolveExecutedSpecVersion', () => {
+  it('returns the pin when present', () => {
+    expect(resolveExecutedSpecVersion({ specVersions: createContract() }, '1.0')).toBe('1.0');
+  });
+
+  it('returns the newest accepted 1.y when unpinned on a versioned type', () => {
+    expect(resolveExecutedSpecVersion({ specVersions: createContract() }, undefined)).toBe('1.1');
+  });
+
+  it('returns undefined for classic types', () => {
+    expect(resolveExecutedSpecVersion({}, undefined)).toBeUndefined();
   });
 });

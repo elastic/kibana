@@ -550,4 +550,29 @@ describe('createActionEventLogRecordObject', () => {
       message: 'action execution start',
     });
   });
+
+  test('sets kibana.action.execution.spec_version', () => {
+    const event = createActionEventLogRecordObject({
+      actionId: '1',
+      action: 'execute',
+      actionExecutionId: '123abc',
+      savedObjects: [{ id: '1', type: 'action', typeId: '.abuseipdb' }],
+      actionTypeId: '.abuseipdb',
+      specVersion: '1.2',
+    });
+    expect(event.kibana?.action?.execution).toEqual(
+      expect.objectContaining({ spec_version: '1.2', uuid: '123abc' })
+    );
+  });
+
+  test('omits kibana.action.execution.spec_version when undefined', () => {
+    const event = createActionEventLogRecordObject({
+      actionId: '1',
+      action: 'execute',
+      actionExecutionId: '123abc',
+      savedObjects: [{ id: '1', type: 'action', typeId: '.slack' }],
+      actionTypeId: '.slack',
+    });
+    expect(event.kibana?.action?.execution).toEqual({ uuid: '123abc' });
+  });
 });

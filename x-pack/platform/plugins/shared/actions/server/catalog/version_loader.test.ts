@@ -16,6 +16,7 @@ import {
   LIVE_CATALOG_MANIFEST,
   LIVE_CATALOG_SIGNATURE,
 } from './test_fixtures';
+import { createLogOnce } from './log_once';
 import { SpecVersionLoader } from './version_loader';
 
 const V2_YAML = ABUSE_IPDB_SPEC_FIXTURE.replace('version: "1.0"', 'version: "1.1"');
@@ -42,7 +43,10 @@ describe('SpecVersionLoader', () => {
         addedAt: '2026-09-18T00:00:00.000Z',
       }),
     });
-    const loader = new SpecVersionLoader({ logger: loggerMock.create() });
+    const loader = new SpecVersionLoader({
+      logger: loggerMock.create(),
+      logOnce: createLogOnce(loggerMock.create()),
+    });
     loader.setStorage(storage);
 
     const materialized = await loader.load('.abuseipdb', '1.1');
@@ -54,7 +58,10 @@ describe('SpecVersionLoader', () => {
 
   it('fails without contacting anything when the definition is not in the index', async () => {
     const storage = createStorage();
-    const loader = new SpecVersionLoader({ logger: loggerMock.create() });
+    const loader = new SpecVersionLoader({
+      logger: loggerMock.create(),
+      logOnce: createLogOnce(loggerMock.create()),
+    });
     loader.setStorage(storage);
 
     await expect(loader.load('.abuseipdb', '9.9.9')).rejects.toThrow(
@@ -64,7 +71,10 @@ describe('SpecVersionLoader', () => {
   });
 
   it('fails without contacting anything when storage is not ready', async () => {
-    const loader = new SpecVersionLoader({ logger: loggerMock.create() });
+    const loader = new SpecVersionLoader({
+      logger: loggerMock.create(),
+      logOnce: createLogOnce(loggerMock.create()),
+    });
 
     await expect(loader.load('.abuseipdb', '1.1')).rejects.toThrow(
       'Spec definition:.abuseipdb@1.1 is not stored in the index'
@@ -81,7 +91,10 @@ describe('SpecVersionLoader', () => {
           })
       ) as jest.Mocked<ConnectorCatalogStorage>['getDefinition'],
     });
-    const loader = new SpecVersionLoader({ logger: loggerMock.create() });
+    const loader = new SpecVersionLoader({
+      logger: loggerMock.create(),
+      logOnce: createLogOnce(loggerMock.create()),
+    });
     loader.setStorage(storage);
 
     const first = loader.load('.abuseipdb', '1.1');
@@ -119,7 +132,11 @@ describe('SpecVersionLoader', () => {
       }),
     });
     const logger = loggerMock.create();
-    const loader = new SpecVersionLoader({ logger, publicKeys: CATALOG_PUBLIC_KEYS });
+    const loader = new SpecVersionLoader({
+      logger,
+      logOnce: createLogOnce(logger),
+      publicKeys: CATALOG_PUBLIC_KEYS,
+    });
     loader.setStorage(storage);
 
     const materialized = await loader.load('.abuseipdb', '1.1');
@@ -147,7 +164,11 @@ describe('SpecVersionLoader', () => {
       }),
     });
     const logger = loggerMock.create();
-    const loader = new SpecVersionLoader({ logger, publicKeys: CATALOG_PUBLIC_KEYS });
+    const loader = new SpecVersionLoader({
+      logger,
+      logOnce: createLogOnce(logger),
+      publicKeys: CATALOG_PUBLIC_KEYS,
+    });
     loader.setStorage(storage);
 
     await expect(loader.load('.abuseipdb', '1.1')).rejects.toThrow('failed integrity check');
@@ -175,6 +196,7 @@ describe('SpecVersionLoader', () => {
     });
     const loader = new SpecVersionLoader({
       logger: loggerMock.create(),
+      logOnce: createLogOnce(loggerMock.create()),
       publicKeys: CATALOG_PUBLIC_KEYS,
     });
     loader.setStorage(storage);
@@ -195,7 +217,7 @@ describe('SpecVersionLoader', () => {
       }),
     });
     const logger = loggerMock.create();
-    const loader = new SpecVersionLoader({ logger });
+    const loader = new SpecVersionLoader({ logger, logOnce: createLogOnce(logger) });
     loader.setStorage(storage);
 
     await expect(loader.load('.abuseipdb', '1.1')).rejects.toThrow('failed integrity check');

@@ -14,6 +14,8 @@ export type { VersionedTypeFactory } from './catalog_loader';
 export { createVersionedConnectorType } from './versioned_connector_type';
 export type { VersionedConnectorType } from './versioned_connector_type';
 export { SpecVersionLoader } from './version_loader';
+export { createLogOnce } from './log_once';
+export type { CatalogLogOnce } from './log_once';
 export {
   CATALOG_REFRESH_TASK_ID,
   CATALOG_REFRESH_TASK_TYPE,

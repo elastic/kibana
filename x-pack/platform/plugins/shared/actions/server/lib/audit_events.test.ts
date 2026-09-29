@@ -102,4 +102,35 @@ describe('#connectorAuditEvent', () => {
       }
     `);
   });
+
+  test('includes spec_version in a connector_execute message', () => {
+    expect(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.EXECUTE,
+        savedObject: { type: 'action', id: 'ACTION_ID', name: 'AbuseIPDB' },
+        specVersion: '1.2',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        message: 'User has executed connector [id=ACTION_ID] [spec_version=1.2]',
+        event: expect.objectContaining({
+          action: 'connector_execute',
+          outcome: 'success',
+        }),
+      })
+    );
+  });
+
+  test('omits spec_version from a connector_execute message when undefined', () => {
+    expect(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.EXECUTE,
+        savedObject: { type: 'action', id: 'ACTION_ID' },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        message: 'User has executed connector [id=ACTION_ID]',
+      })
+    );
+  });
 });

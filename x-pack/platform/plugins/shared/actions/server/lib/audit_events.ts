@@ -49,6 +49,7 @@ export interface ConnectorAuditEventParams {
   outcome?: EcsEvent['outcome'];
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
+  specVersion?: string;
 }
 
 export function connectorAuditEvent({
@@ -56,14 +57,16 @@ export function connectorAuditEvent({
   savedObject,
   outcome,
   error,
+  specVersion,
 }: ConnectorAuditEventParams): AuditEvent {
+  const versionSuffix = specVersion !== undefined ? ` [spec_version=${specVersion}]` : '';
   const doc = savedObject ? `connector [id=${savedObject.id}]` : 'a connector';
   const [present, progressive, past] = eventVerbs[action];
   const message = error
-    ? `Failed attempt to ${present} ${doc}`
+    ? `Failed attempt to ${present} ${doc}${versionSuffix}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+    ? `User is ${progressive} ${doc}${versionSuffix}`
+    : `User has ${past} ${doc}${versionSuffix}`;
   const type = eventTypes[action];
 
   return {

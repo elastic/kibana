@@ -296,4 +296,37 @@ describe('transform connector for export', () => {
       transformConnectorsForExport([connector], actionTypeRegistry)[0].attributes
     ).not.toHaveProperty('uiamApiKeyExternal');
   });
+
+  it('validates secrets against the pinned spec version', () => {
+    const resolveSchema = jest.fn().mockReturnValue(z.object({}));
+    actionTypeRegistry.get.mockReturnValue({
+      ...connectorType,
+      validate: {
+        config: { schema: z.object({}) },
+        params: { schema: z.object({}) },
+        secrets: { schema: z.object({}), resolveSchema },
+      },
+    });
+
+    transformConnectorsForExport(
+      [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: '.abuseipdb',
+            name: 'pinned',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+            specVersion: '1.2',
+          },
+          references: [],
+        },
+      ],
+      actionTypeRegistry
+    );
+
+    expect(resolveSchema).toHaveBeenCalledWith(expect.objectContaining({ specVersion: '1.2' }));
+  });
 });

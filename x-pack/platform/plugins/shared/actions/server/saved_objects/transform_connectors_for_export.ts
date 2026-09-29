@@ -33,7 +33,14 @@ function transformConnectorForExport(
 
   try {
     // If connector requires secrets, this will throw an error
-    validateSecrets(actionType, {}, { configurationUtilities });
+    validateSecrets(
+      actionType,
+      {},
+      {
+        configurationUtilities,
+        specVersion: connector.attributes.specVersion,
+      }
+    );
 
     // If connector has optional (or no) secrets, set isMissingSecrets value to value of hasAuth
     // If connector doesn't have hasAuth value, default to isMissingSecrets: false

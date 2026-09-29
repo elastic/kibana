@@ -14,6 +14,7 @@ import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
 import { getAuthMode } from '../../lib/get_auth_mode';
+import { resolveExecutedSpecVersion } from '../../../../lib/spec_version';
 
 export async function get({
   context,
@@ -72,6 +73,13 @@ export async function get({
       id,
     });
     const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
+    const actionTypeId = result.attributes.actionTypeId;
+    const specVersion = actionTypeRegistry.has(actionTypeId)
+      ? resolveExecutedSpecVersion(
+          actionTypeRegistry.get(actionTypeId),
+          result.attributes.specVersion
+        )
+      : result.attributes.specVersion;
 
     context.auditLogger?.log(
       connectorAuditEvent({
@@ -82,18 +90,16 @@ export async function get({
 
     connector = {
       id,
-      actionTypeId: result.attributes.actionTypeId,
+      actionTypeId,
       isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
-      isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
+      isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(actionTypeId),
       authMode,
-      ...(result.attributes.specVersion !== undefined
-        ? { specVersion: result.attributes.specVersion }
-        : {}),
+      ...(specVersion !== undefined ? { specVersion } : {}),
     };
   }
 

@@ -14,7 +14,7 @@ import { parseCatalogManifest } from './parse_manifest';
 import { MAX_ICON_BYTES, MAX_SPEC_BYTES, mapWithConcurrency } from './remote_catalog_source';
 import { verifyCatalogSignature } from './signature';
 import { buildVersion } from './build_version';
-import type { CatalogManifestRow, CatalogSource } from './types';
+import type { CatalogManifest, CatalogManifestRow, CatalogSource } from './types';
 
 const RESERVED_PREFIX = '.declarative-';
 const DEFAULT_FETCH_CONCURRENCY = 5;
@@ -32,93 +32,22 @@ export interface RunCatalogRefreshDeps {
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-/** Fetches, verifies, stores, and reloads the connector catalog (doc 7.4). */
-export const runCatalogRefresh = async ({
+const persistRowsAndAssets = async ({
   source,
   storage,
-  publicKeys,
-  logger,
   logOnce,
-  reload,
-  fetchConcurrency = DEFAULT_FETCH_CONCURRENCY,
-}: RunCatalogRefreshDeps): Promise<void> => {
-  let fetched: { bytes: string; signature: string };
-  try {
-    fetched = await source.readManifest();
-  } catch (error) {
-    logOnce.warnThenDebug(
-      'fetch_manifest',
-      `Failed to fetch the connector catalog from ${source.origin}: ${errorMessage(error)}`
-    );
-    return;
-  }
-
-  const stored = await storage.getManifest();
-  const fetchedHash = getContentHash(fetched.bytes);
-
-  if (stored && getContentHash(stored.bytes) === fetchedHash) {
-    let parsedForExistence;
-    try {
-      parsedForExistence = parseCatalogManifest(JSON.parse(stored.bytes), logger);
-    } catch (error) {
-      logOnce.error(
-        stored.catalogVersion,
-        'parse',
-        `Stored connector catalog manifest is invalid: ${errorMessage(error)}`
-      );
-      return;
-    }
-    const existing = await storage.existsDefinitions(parsedForExistence.connectors);
-    const missing = parsedForExistence.connectors.filter(
-      (row) => !existing.has(definitionDocId(row.id, row.version))
-    );
-    if (missing.length === 0) {
-      return;
-    }
-  }
-
-  if (!verifyCatalogSignature(fetched.bytes, fetched.signature, publicKeys)) {
-    logOnce.error(
-      stored?.catalogVersion ?? 'unsigned',
-      'signature',
-      'Connector catalog signature verification failed; leaving the previous catalog in place'
-    );
-    return;
-  }
-
-  let parsedJson: unknown;
-  try {
-    parsedJson = JSON.parse(fetched.bytes);
-  } catch (error) {
-    logOnce.error(
-      stored?.catalogVersion ?? 'invalid',
-      'json',
-      `Connector catalog is not valid JSON: ${errorMessage(error)}`
-    );
-    return;
-  }
-
-  let manifest;
-  try {
-    manifest = parseCatalogManifest(parsedJson, logger);
-  } catch (error) {
-    logOnce.error(
-      stored?.catalogVersion ?? 'invalid',
-      'parse',
-      `Connector catalog manifest is invalid: ${errorMessage(error)}`
-    );
-    return;
-  }
-
-  if (stored && manifest.sequence < stored.sequence) {
-    logOnce.warn(
-      manifest.catalogVersion,
-      'stale_sequence',
-      `Ignoring connector catalog sequence ${manifest.sequence}; stored sequence is ${stored.sequence}`
-    );
-    return;
-  }
-
+  manifest,
+  rows,
+  fetchConcurrency,
+}: {
+  source: CatalogSource;
+  storage: ConnectorCatalogStorage;
+  logOnce: CatalogLogOnce;
+  manifest: CatalogManifest;
+  rows: CatalogManifestRow[];
+  fetchConcurrency: number;
+}): Promise<number> => {
+  let storedCount = 0;
   const storedHashes = new Map(
     (await storage.listDefinitions()).map((row) => [
       definitionDocId(row.id, row.version),
@@ -127,7 +56,7 @@ export const runCatalogRefresh = async ({
   );
 
   const toFetch: CatalogManifestRow[] = [];
-  for (const row of manifest.connectors) {
+  for (const row of rows) {
     if (row.id.startsWith(RESERVED_PREFIX)) {
       logOnce.warn(
         manifest.catalogVersion,
@@ -168,7 +97,7 @@ export const runCatalogRefresh = async ({
           `Catalog entry "${row.id}@${row.version}" does not match its definition "${built.id}@${built.version}".`
         );
       }
-      await storage.putDefinitionCreate({
+      const result = await storage.putDefinitionCreate({
         id: built.id,
         version: built.version,
         yaml,
@@ -176,6 +105,9 @@ export const runCatalogRefresh = async ({
         catalogVersion: manifest.catalogVersion,
         addedAt: fetchedAt,
       });
+      if (result === 'created') {
+        storedCount += 1;
+      }
     } catch (error) {
       logOnce.warn(
         manifest.catalogVersion,
@@ -207,11 +139,14 @@ export const runCatalogRefresh = async ({
       }
       validateSvgIcon(svg);
       toIconDataUrl(svg);
-      await storage.putAssetCreate({
+      const result = await storage.putAssetCreate({
         contentHash: icon.contentHash,
         svg,
         addedAt: fetchedAt,
       });
+      if (result === 'created') {
+        storedCount += 1;
+      }
     } catch (error) {
       logOnce.warn(
         manifest.catalogVersion,
@@ -220,6 +155,129 @@ export const runCatalogRefresh = async ({
       );
     }
   }
+
+  return storedCount;
+};
+
+/** Fetches, verifies, stores, and reloads the connector catalog (doc 7.4). */
+export const runCatalogRefresh = async ({
+  source,
+  storage,
+  publicKeys,
+  logOnce,
+  reload,
+  fetchConcurrency = DEFAULT_FETCH_CONCURRENCY,
+}: RunCatalogRefreshDeps): Promise<void> => {
+  let fetched: { bytes: string; signature: string };
+  try {
+    fetched = await source.readManifest();
+  } catch (error) {
+    logOnce.warnThenDebug(
+      'fetch_manifest',
+      `Failed to fetch the connector catalog from ${source.origin}: ${errorMessage(error)}`
+    );
+    return;
+  }
+
+  logOnce.clear('fetch_manifest');
+
+  const stored = await storage.getManifest();
+  const sameBytes =
+    stored !== undefined && getContentHash(stored.bytes) === getContentHash(fetched.bytes);
+
+  if (sameBytes && stored) {
+    if (!verifyCatalogSignature(stored.bytes, stored.signature, publicKeys)) {
+      logOnce.warn(
+        stored.catalogVersion,
+        'stored_signature',
+        'Stored connector catalog signature verification failed; fetching a replacement'
+      );
+    } else {
+      let parsedForExistence;
+      try {
+        parsedForExistence = parseCatalogManifest(JSON.parse(stored.bytes), logOnce);
+      } catch (error) {
+        logOnce.error(
+          stored.catalogVersion,
+          'parse',
+          `Stored connector catalog manifest is invalid: ${errorMessage(error)}`
+        );
+        return;
+      }
+      const existing = await storage.existsDefinitions(parsedForExistence.connectors);
+      const missing = parsedForExistence.connectors.filter(
+        (row) =>
+          !row.id.startsWith(RESERVED_PREFIX) && !existing.has(definitionDocId(row.id, row.version))
+      );
+      if (missing.length === 0) {
+        return;
+      }
+      const storedCount = await persistRowsAndAssets({
+        source,
+        storage,
+        logOnce,
+        manifest: parsedForExistence,
+        rows: missing,
+        fetchConcurrency,
+      });
+      if (storedCount > 0) {
+        await reload();
+      }
+      return;
+    }
+  }
+
+  if (!verifyCatalogSignature(fetched.bytes, fetched.signature, publicKeys)) {
+    logOnce.warn(
+      stored?.catalogVersion ?? 'unsigned',
+      'signature',
+      'Connector catalog signature verification failed; leaving the previous catalog in place'
+    );
+    return;
+  }
+
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(fetched.bytes);
+  } catch (error) {
+    logOnce.error(
+      stored?.catalogVersion ?? 'invalid',
+      'json',
+      `Connector catalog is not valid JSON: ${errorMessage(error)}`
+    );
+    return;
+  }
+
+  let manifest;
+  try {
+    manifest = parseCatalogManifest(parsedJson, logOnce);
+  } catch (error) {
+    logOnce.error(
+      stored?.catalogVersion ?? 'invalid',
+      'parse',
+      `Connector catalog manifest is invalid: ${errorMessage(error)}`
+    );
+    return;
+  }
+
+  if (!sameBytes && stored && manifest.sequence <= stored.sequence) {
+    logOnce.warn(
+      manifest.catalogVersion,
+      'stale_sequence',
+      `Ignoring connector catalog sequence ${manifest.sequence}; stored sequence is ${stored.sequence}`
+    );
+    return;
+  }
+
+  const fetchedAt = new Date().toISOString();
+  await persistRowsAndAssets({
+    source,
+    storage,
+    logOnce,
+    manifest,
+    rows: manifest.connectors,
+    fetchConcurrency,
+  });
 
   const replaced = await storage.putManifest(
     {

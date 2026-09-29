@@ -6,20 +6,22 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { createLogOnce } from './log_once';
 import { parseCatalogManifest } from './parse_manifest';
 import { LIVE_CATALOG_MANIFEST } from './test_fixtures';
-
-const logger = loggerMock.create();
 
 const validManifest = () => JSON.parse(LIVE_CATALOG_MANIFEST) as Record<string, unknown>;
 
 describe('parseCatalogManifest', () => {
+  const logger = loggerMock.create();
+  const logOnce = createLogOnce(logger);
+
   beforeEach(() => {
     loggerMock.clear(logger);
   });
 
   it('parses the live catalog.json bytes', () => {
-    const manifest = parseCatalogManifest(validManifest(), logger);
+    const manifest = parseCatalogManifest(validManifest(), logOnce);
 
     expect(manifest.schemaVersion).toBe(1);
     expect(manifest.sequence).toBe(1);
@@ -35,7 +37,7 @@ describe('parseCatalogManifest', () => {
 
   it('ignores unknown root fields', () => {
     expect(() =>
-      parseCatalogManifest({ ...validManifest(), unexpected: true }, logger)
+      parseCatalogManifest({ ...validManifest(), unexpected: true }, logOnce)
     ).not.toThrow();
   });
 
@@ -53,17 +55,46 @@ describe('parseCatalogManifest', () => {
       contentHash: `sha256:${'a'.repeat(64)}`,
     });
 
-    const manifest = parseCatalogManifest(raw, logger);
+    const manifest = parseCatalogManifest(raw, logOnce);
     expect(manifest.skippedTypeMetadata).toEqual(['.broken']);
     expect(manifest.typeMetadata['.broken']).toBeUndefined();
     expect(manifest.connectors.find((row) => row.id === '.broken')).toBeUndefined();
     expect(manifest.typeMetadata['.abuseipdb']).toBeDefined();
   });
 
+  it('logs skipped metadata and rows once per catalogVersion then debugs repeats', () => {
+    const warnLogger = loggerMock.create();
+    const warnOnce = createLogOnce(warnLogger);
+    const raw = validManifest();
+    const typeMetadata = {
+      ...(raw.typeMetadata as Record<string, unknown>),
+      '.broken': { displayName: 'Broken' },
+    };
+    raw.typeMetadata = typeMetadata;
+    (raw.connectors as Array<Record<string, unknown>>).push({
+      id: '.broken',
+      version: '1.0',
+      definitionUrl: 'connectors/broken/1.0.yaml',
+      contentHash: `sha256:${'a'.repeat(64)}`,
+    });
+
+    parseCatalogManifest(raw, warnOnce);
+    parseCatalogManifest(raw, warnOnce);
+
+    expect(warnLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipping catalog type metadata for ".broken"')
+    );
+    expect(warnLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipping catalog row ".broken@1.0"')
+    );
+    expect(warnLogger.warn).toHaveBeenCalledTimes(2);
+    expect(warnLogger.debug).toHaveBeenCalledTimes(2);
+  });
+
   it('requires sequence', () => {
     const raw = validManifest();
     delete raw.sequence;
-    expect(() => parseCatalogManifest(raw, logger)).toThrow(
+    expect(() => parseCatalogManifest(raw, logOnce)).toThrow(
       'Declarative connector catalog is invalid'
     );
   });
@@ -71,7 +102,14 @@ describe('parseCatalogManifest', () => {
   it('rejects a non x.y row version', () => {
     const raw = validManifest();
     (raw.connectors as Array<Record<string, unknown>>)[0].version = '1.0.0';
-    const manifest = parseCatalogManifest(raw, logger);
+    const manifest = parseCatalogManifest(raw, logOnce);
     expect(manifest.connectors.find((row) => row.version === '1.0.0')).toBeUndefined();
+  });
+
+  it('rejects a row version with leading zeros', () => {
+    const raw = validManifest();
+    (raw.connectors as Array<Record<string, unknown>>)[0].version = '01.0';
+    const manifest = parseCatalogManifest(raw, logOnce);
+    expect(manifest.connectors.find((row) => row.version === '01.0')).toBeUndefined();
   });
 });

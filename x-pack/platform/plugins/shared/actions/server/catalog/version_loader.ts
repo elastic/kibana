@@ -10,12 +10,14 @@ import type { ConnectorCatalogStorage } from './catalog_storage';
 import { definitionDocId } from './catalog_storage';
 import { buildVersion } from './build_version';
 import { assertDefinitionYamlHash } from './definition_integrity';
+import type { CatalogLogOnce } from './log_once';
 import { parseCatalogManifest } from './parse_manifest';
 import { verifyCatalogSignature } from './signature';
 import type { BuiltVersion, CatalogManifestRow } from './types';
 
 export interface SpecVersionLoaderOptions {
   logger: Logger;
+  logOnce: CatalogLogOnce;
   publicKeys?: readonly string[];
 }
 
@@ -35,11 +37,13 @@ const integrityMessagePrefix = (id: string, version: string): string =>
 export class SpecVersionLoader {
   private storage?: ConnectorCatalogStorage;
   private readonly logger: Logger;
+  private readonly logOnce: CatalogLogOnce;
   private readonly publicKeys: readonly string[] | undefined;
   private readonly inFlight = new Map<string, Promise<BuiltVersion>>();
 
   constructor(options: SpecVersionLoaderOptions) {
     this.logger = options.logger;
+    this.logOnce = options.logOnce;
     this.publicKeys = options.publicKeys;
   }
 
@@ -70,7 +74,7 @@ export class SpecVersionLoader {
       if (!verifyCatalogSignature(stored.bytes, stored.signature, this.publicKeys)) {
         return undefined;
       }
-      return parseCatalogManifest(JSON.parse(stored.bytes), this.logger).connectors;
+      return parseCatalogManifest(JSON.parse(stored.bytes), this.logOnce).connectors;
     } catch {
       return undefined;
     }

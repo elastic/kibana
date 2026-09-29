@@ -362,7 +362,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
-        specVersion: connector.specVersion,
+        specVersion: targetSpecVersion ?? connector.specVersion,
       };
 
       const updatedConnector = await updateConnector(validConnector);
@@ -392,6 +392,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     preSubmitValidator,
     connector.id,
     connector.specVersion,
+    targetSpecVersion,
     updateConnector,
     onFormModifiedChange,
   ]);

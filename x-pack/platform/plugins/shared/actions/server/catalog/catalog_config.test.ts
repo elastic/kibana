@@ -11,10 +11,21 @@ describe('catalogConfigSchema', () => {
   it('applies documented defaults', () => {
     const config = catalogConfigSchema.validate({});
 
-    expect(config.enabled).toBe(false);
+    expect(config.enabled).toBe(true);
     expect(config.url).toBe('https://workflows.elastic.co/connectors/v1');
     expect(config.localBundlePath).toBeUndefined();
     expect(config.refreshInterval.asMilliseconds()).toBe(5 * 60 * 1000);
+  });
+
+  it('rejects a relative localBundlePath', () => {
+    expect(() => catalogConfigSchema.validate({ localBundlePath: 'relative/catalog' })).toThrow(
+      /localBundlePath must be an absolute path/
+    );
+  });
+
+  it('accepts an absolute localBundlePath', () => {
+    const config = catalogConfigSchema.validate({ localBundlePath: '/tmp/connector-catalog' });
+    expect(config.localBundlePath).toBe('/tmp/connector-catalog');
   });
 
   it('rejects a refresh interval below 10 seconds', () => {

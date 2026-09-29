@@ -12,6 +12,7 @@ import { CATALOG_PUBLIC_KEYS } from './keys/catalog_public_keys';
 import { createVersionedConnectorType } from './versioned_connector_type';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../plugin';
 import {
+  ABUSE_IPDB_SPEC_FIXTURE,
   LIVE_ABUSEIPDB_1_1_YAML,
   LIVE_ABUSEIPDB_1_0_YAML,
   LIVE_CATALOG_MANIFEST,
@@ -19,8 +20,10 @@ import {
   LIVE_ABUSEIPDB_ICON,
   LIVE_OKTA_1_0_YAML,
   TYPE_METADATA_FIXTURE,
+  signedManifestFixture,
 } from './test_fixtures';
 import { getContentHash } from './icon';
+import { buildVersion } from './build_version';
 import type { ConnectorCatalogStorage } from './catalog_storage';
 import { createConnectorTypeFromSpec } from '../lib/single_file_connectors/create_connector_from_spec';
 import { z } from '@kbn/zod/v4';
@@ -290,5 +293,84 @@ describe('loadCatalogFromIndex', () => {
     expect(result.registered).toBe(1);
     expect(registered).toEqual(['.okta']);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('.abuseipdb'));
+  });
+
+  it('keeps the previous metadata when an update would lower a third-party type below gold', async () => {
+    const yamlV10 = ABUSE_IPDB_SPEC_FIXTURE;
+    const yamlV11 = ABUSE_IPDB_SPEC_FIXTURE.replace('version: "1.0"', 'version: "1.1"');
+    const { bytes, signature } = signedManifestFixture({
+      typeMetadata: {
+        '.abuseipdb': {
+          displayName: 'AbuseIPDB',
+          description: 'Test',
+          minimumLicense: 'basic',
+          supportedFeatureIds: ['workflows'],
+        },
+      },
+      connectors: [
+        {
+          id: '.abuseipdb',
+          version: '1.0',
+          definitionUrl: 'connectors/abuseipdb/1.0.yaml',
+          contentHash: getContentHash(yamlV10),
+        },
+        {
+          id: '.abuseipdb',
+          version: '1.1',
+          definitionUrl: 'connectors/abuseipdb/1.1.yaml',
+          contentHash: getContentHash(yamlV11),
+        },
+      ],
+    });
+    const storage = createStorage();
+    storage.getManifest.mockResolvedValue({
+      bytes,
+      signature,
+      sequence: 1,
+      catalogVersion: 'sha256:test',
+      fetchedAt: '2026-09-17T12:00:00.000Z',
+    });
+    storage.listDefinitions.mockResolvedValue([
+      { id: '.abuseipdb', version: '1.0', contentHash: getContentHash(yamlV10) },
+      { id: '.abuseipdb', version: '1.1', contentHash: getContentHash(yamlV11) },
+    ]);
+    storage.getDefinition.mockImplementation(async (_id: string, version: string) => {
+      const yaml = version === '1.1' ? yamlV11 : yamlV10;
+      return {
+        id: '.abuseipdb',
+        version,
+        yaml,
+        contentHash: getContentHash(yaml),
+        catalogVersion: 'sha256:test',
+        addedAt: '2026-09-17T12:00:00.000Z',
+      };
+    });
+    const existing = createVersionedConnectorType({
+      id: '.abuseipdb',
+      versions: [buildVersion(yamlV10)],
+      metadata: { ...TYPE_METADATA_FIXTURE, minimumLicense: 'gold' },
+      actions,
+      logger,
+    });
+    const logOnce = createLogOnce(logger);
+    await loadCatalogFromIndex({
+      storage,
+      publicKeys: CATALOG_PUBLIC_KEYS,
+      registry: {
+        registerType: jest.fn(),
+        isTypeRegistered: () => true,
+      },
+      pinnedClient: {
+        find: jest.fn().mockResolvedValue({ aggregations: { types: { buckets: [] } } }),
+      },
+      buildType: ({ id, versions, metadata }) =>
+        createVersionedConnectorType({ id, versions, metadata, actions, logger }),
+      types: new Map([['.abuseipdb', existing]]),
+      logger,
+      logOnce,
+    });
+    expect(existing.getMetadata().minimumLicense).toBe('gold');
+    expect(existing.hasVersion('1.1')).toBe(true);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('gold license or higher'));
   });
 });

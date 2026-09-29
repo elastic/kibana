@@ -54,7 +54,8 @@ export const connectorResponseSchema = schema.object(
       schema.string({
         maxLength: 16,
         meta: {
-          description: 'Spec version the connector is pinned to. Omitted for classic connectors.',
+          description:
+            'Exact spec version the connector runs. Omitted for classic connector types.',
         },
       })
     ),

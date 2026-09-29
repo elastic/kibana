@@ -11,6 +11,7 @@ import { verifyCatalogSignature } from './signature';
 import { CATALOG_PUBLIC_KEYS } from './keys/catalog_public_keys';
 import { getContentHash } from './icon';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createLogOnce } from './log_once';
 import {
   LIVE_CATALOG_MANIFEST,
   LIVE_CATALOG_SIGNATURE,
@@ -18,6 +19,9 @@ import {
   LIVE_ABUSEIPDB_1_1_YAML,
   LIVE_OKTA_1_0_YAML,
 } from './test_fixtures';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { nextManifestHeader } = require('./live_fixtures/sign_catalog');
 
 describe('live catalog fixtures', () => {
   it('verifies catalog.json.sig with the dev public key', () => {
@@ -27,7 +31,10 @@ describe('live catalog fixtures', () => {
   });
 
   it('matches every row hash to the committed YAML and parses strictly', () => {
-    const manifest = parseCatalogManifest(JSON.parse(LIVE_CATALOG_MANIFEST), loggerMock.create());
+    const manifest = parseCatalogManifest(
+      JSON.parse(LIVE_CATALOG_MANIFEST),
+      createLogOnce(loggerMock.create())
+    );
     const files: Record<string, string> = {
       'connectors/abuseipdb/1.0.yaml': LIVE_ABUSEIPDB_1_0_YAML,
       'connectors/abuseipdb/1.1.yaml': LIVE_ABUSEIPDB_1_1_YAML,
@@ -39,5 +46,13 @@ describe('live catalog fixtures', () => {
       expect(getContentHash(yaml)).toBe(row.contentHash);
       expect(parseCatalogContract(yaml).version).toBe(row.version);
     }
+  });
+
+  it('bumps sequence and records previousCatalogVersion', () => {
+    expect(nextManifestHeader(undefined)).toEqual({ sequence: 1 });
+    expect(nextManifestHeader({ sequence: 1, catalogVersion: 'sha256:aa' })).toEqual({
+      sequence: 2,
+      previousCatalogVersion: 'sha256:aa',
+    });
   });
 });

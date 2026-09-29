@@ -21,6 +21,7 @@ import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
+import { resolveExecutedSpecVersion } from '../../../../lib/spec_version';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
 interface GetAllHelperOpts {
@@ -105,7 +106,20 @@ async function getAllHelper({
       isConnectorDeprecated(rawAction.attributes),
       connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
     );
-    return omit(connector, 'secrets');
+    const actionTypeId = rawAction.attributes.actionTypeId;
+    const specVersion = connectorTypeRegistry.has(actionTypeId)
+      ? resolveExecutedSpecVersion(
+          connectorTypeRegistry.get(actionTypeId),
+          rawAction.attributes.specVersion
+        )
+      : connector.specVersion;
+    return omit(
+      {
+        ...connector,
+        ...(specVersion !== undefined ? { specVersion } : {}),
+      },
+      'secrets'
+    );
   });
 
   if (auditLogger) {

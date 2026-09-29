@@ -6,9 +6,10 @@
  */
 
 import { z, ZodError } from '@kbn/zod/v4';
-import type { Logger } from '@kbn/core/server';
 import { LICENSE_TYPE, type LicenseType } from '@kbn/licensing-types';
 import { areValidFeatures } from '../../common';
+import type { CatalogLogOnce } from './log_once';
+import { SPEC_VERSION_REGEX } from './spec_version_format';
 import type { CatalogManifest, CatalogTypeMetadata } from './types';
 
 const LICENSE_TYPES = Object.values(LICENSE_TYPE).filter(
@@ -17,7 +18,7 @@ const LICENSE_TYPES = Object.values(LICENSE_TYPE).filter(
 
 const contentHashSchema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
 const connectorIdSchema = z.string().regex(/^\.[a-z0-9_-]+$/);
-const specVersionSchema = z.string().regex(/^\d+\.\d+$/);
+const specVersionSchema = z.string().regex(SPEC_VERSION_REGEX);
 const relativeAssetPathSchema = z
   .string()
   .min(1)
@@ -67,7 +68,7 @@ const formatIssues = (error: ZodError): string =>
     .join(', ');
 
 /** Parses a signed catalog.json document. Unknown root and per-id metadata fields are ignored. */
-export const parseCatalogManifest = (value: unknown, logger: Logger): CatalogManifest => {
+export const parseCatalogManifest = (value: unknown, logOnce: CatalogLogOnce): CatalogManifest => {
   let parsed;
   try {
     parsed = catalogManifestSchema.parse(value);
@@ -85,13 +86,21 @@ export const parseCatalogManifest = (value: unknown, logger: Logger): CatalogMan
   for (const [id, raw] of Object.entries(parsed.typeMetadata)) {
     if (!connectorIdSchema.safeParse(id).success) {
       skippedTypeMetadata.push(id);
-      logger.warn(`Skipping catalog type metadata for invalid id "${id}"`);
+      logOnce.warn(
+        parsed.catalogVersion,
+        `metadata:${id}`,
+        `Skipping catalog type metadata for invalid id "${id}"`
+      );
       continue;
     }
     const result = typeMetadataSchema.safeParse(raw);
     if (!result.success) {
       skippedTypeMetadata.push(id);
-      logger.warn(`Skipping catalog type metadata for "${id}": ${formatIssues(result.error)}`);
+      logOnce.warn(
+        parsed.catalogVersion,
+        `metadata:${id}`,
+        `Skipping catalog type metadata for "${id}": ${formatIssues(result.error)}`
+      );
       continue;
     }
     typeMetadata[id] = {
@@ -109,11 +118,17 @@ export const parseCatalogManifest = (value: unknown, logger: Logger): CatalogMan
   for (const [index, rawRow] of parsed.connectors.entries()) {
     const result = catalogRowSchema.safeParse(rawRow);
     if (!result.success) {
-      logger.warn(`Skipping catalog row ${index}: ${formatIssues(result.error)}`);
+      logOnce.warn(
+        parsed.catalogVersion,
+        `row:${index}`,
+        `Skipping catalog row ${index}: ${formatIssues(result.error)}`
+      );
       continue;
     }
     if (typeMetadata[result.data.id] === undefined) {
-      logger.warn(
+      logOnce.warn(
+        parsed.catalogVersion,
+        `row:${result.data.id}@${result.data.version}`,
         `Skipping catalog row "${result.data.id}@${result.data.version}": type metadata is missing or invalid`
       );
       continue;

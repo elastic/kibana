@@ -36,7 +36,8 @@ import {
   validateParams,
   validateSecrets,
 } from './validate_with_schema';
-import { ensureSpecVersionLoaded } from './spec_version';
+import { ensureSpecVersionLoaded, resolveExecutedSpecVersion } from './spec_version';
+import { ConnectorAuditAction, connectorAuditEvent } from './audit_events';
 import type {
   ActionType,
   ActionTypeConfig,
@@ -280,7 +281,7 @@ export class ActionExecutor {
     consumer?: string;
     spaceId?: string;
   }) {
-    const { spaces, eventLogger } = this.actionExecutorContext!;
+    const { spaces, eventLogger, actionTypeRegistry } = this.actionExecutorContext!;
 
     const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
@@ -297,6 +298,12 @@ export class ActionExecutor {
           },
         }
       : {};
+    const executedSpecVersion = actionTypeRegistry.has(this.actionInfo.actionTypeId)
+      ? resolveExecutedSpecVersion(
+          actionTypeRegistry.get(this.actionInfo.actionTypeId),
+          this.actionInfo.rawAction.specVersion
+        )
+      : undefined;
     // Write event log entry
     const event = createActionEventLogRecordObject({
       actionId,
@@ -322,6 +329,7 @@ export class ActionExecutor {
       isInMemory: this.actionInfo.isInMemory,
       ...(source ? { source } : {}),
       actionTypeId: this.actionInfo.actionTypeId,
+      specVersion: executedSpecVersion,
     });
 
     eventLogger.logEvent(event);
@@ -424,7 +432,8 @@ export class ActionExecutor {
         },
       },
       async (span) => {
-        const { actionTypeRegistry, analyticsService, eventLogger } = this.actionExecutorContext!;
+        const { actionTypeRegistry, analyticsService, eventLogger, security } =
+          this.actionExecutorContext!;
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
@@ -468,6 +477,7 @@ export class ActionExecutor {
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
+        const executedSpecVersion = resolveExecutedSpecVersion(actionType, specVersion);
 
         if (!actionType.executor) {
           throw new Error(
@@ -529,6 +539,7 @@ export class ActionExecutor {
           isInMemory: this.actionInfo.isInMemory,
           ...(source ? { source } : {}),
           actionTypeId,
+          specVersion: executedSpecVersion,
         });
 
         eventLogger.startTiming(event);
@@ -581,6 +592,16 @@ export class ActionExecutor {
             },
           });
           eventLogger.logEvent(event);
+          if (actionType.specVersions && request) {
+            security.audit.asScoped(request).log(
+              connectorAuditEvent({
+                action: ConnectorAuditAction.EXECUTE,
+                outcome: 'failure',
+                savedObject: { type: 'action', id: actionId, name },
+                specVersion: executedSpecVersion,
+              })
+            );
+          }
           return err.result;
         }
 
@@ -744,6 +765,16 @@ export class ActionExecutor {
           }
 
           eventLogger.logEvent(event);
+          if (actionType.specVersions && request) {
+            security.audit.asScoped(request).log(
+              connectorAuditEvent({
+                action: ConnectorAuditAction.EXECUTE,
+                outcome: result.status === 'ok' ? 'success' : 'failure',
+                savedObject: { type: 'action', id: actionId, name },
+                specVersion: executedSpecVersion,
+              })
+            );
+          }
         }
 
         // start genai extension

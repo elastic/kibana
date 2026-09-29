@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { CatalogLogOnce } from './log_once';
 
 export type PinnedVersionsClient = Pick<ISavedObjectsRepository, 'find'>;
 
@@ -30,7 +31,7 @@ const MAX_VERSIONS_PER_TYPE = 100;
  */
 export const findPinnedSpecVersions = async (
   client: PinnedVersionsClient,
-  logger: Logger
+  logOnce: CatalogLogOnce
 ): Promise<PinnedSpecVersions> => {
   const pinned: PinnedSpecVersions = new Map();
   try {
@@ -59,11 +60,14 @@ export const findPinnedSpecVersions = async (
       }
     }
   } catch (error) {
-    logger.warn(
+    logOnce.warnThenDebug(
+      'pinned_versions',
       `Failed to read pinned connector spec versions: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
+    return pinned;
   }
+  logOnce.clear('pinned_versions');
   return pinned;
 };

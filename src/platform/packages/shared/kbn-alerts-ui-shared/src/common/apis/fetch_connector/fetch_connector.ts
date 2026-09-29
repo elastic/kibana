@@ -34,6 +34,7 @@ export const transformConnectorResponse = (
     is_system_action: isSystemAction,
     is_connector_type_deprecated: isConnectorTypeDeprecated,
     auth_mode: authMode,
+    spec_version: specVersion,
     ...res
   } = result;
   return {
@@ -45,6 +46,7 @@ export const transformConnectorResponse = (
     isSystemAction,
     isConnectorTypeDeprecated,
     ...(authMode !== undefined ? { authMode } : {}),
+    ...(specVersion !== undefined ? { specVersion } : {}),
     ...res,
   };
 };

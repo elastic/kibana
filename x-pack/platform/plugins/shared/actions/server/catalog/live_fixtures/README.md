@@ -7,18 +7,22 @@ catalog.json
 catalog.json.sig
 connectors/abuseipdb/1.0.yaml
 connectors/abuseipdb/1.1.yaml
-connectors/abuseipdb/icons/sha256-<hash>.svg
+connectors/abuseipdb/icons/sha256:<hash>.svg
 connectors/okta/1.0.yaml
-connectors/okta/icons/sha256-<hash>.svg
+connectors/okta/icons/sha256:<hash>.svg
 ```
 
 `catalog.json` uses `MAJOR.MINOR` versions, `sequence`, and `typeMetadata`. Contract YAML has no `metadata` block.
+
+The catalog is enabled by default. Set `xpack.actions.catalog.enabled: false` to turn it off. `localBundlePath` must be an absolute path.
 
 After editing a YAML or icon, regenerate hashes and the signature:
 
 ```
 node sign_catalog.js
 ```
+
+`sign_catalog.js` reads the existing `catalog.json` when present, sets `sequence` to previous + 1, and records `previousCatalogVersion`. The first run (no existing file) uses `sequence: 1` and omits `previousCatalogVersion`.
 
 The signature is Ed25519 over the exact `catalog.json` bytes, verified with the PoC key in `../__fixtures__/dev_signing_key/`. Replace that key with the Elastic production key before the first release.
 
@@ -35,7 +39,6 @@ The signature is Ed25519 over the exact `catalog.json` bytes, verified with the 
 3. In `config/kibana.dev.yml`:
 
    ```
-   xpack.actions.catalog.enabled: true
    xpack.actions.catalog.url: http://127.0.0.1:8090
    xpack.actions.catalog.refreshInterval: 10s
    ```

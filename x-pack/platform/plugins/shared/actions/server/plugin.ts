@@ -142,6 +142,7 @@ import {
   LocalBundleSource,
   RemoteCatalogSource,
   SpecVersionLoader,
+  createLogOnce,
   createVersionedConnectorType,
   registerCatalogRefreshTask,
   scheduleCatalogRefreshTask,
@@ -1236,7 +1237,12 @@ export class ActionsPlugin
       return;
     }
     assertCatalogUrlAllowed(catalog.url, this.isDev);
-    const loader = new SpecVersionLoader({ logger: this.logger, publicKeys: CATALOG_PUBLIC_KEYS });
+    const logOnce = createLogOnce(this.logger);
+    const loader = new SpecVersionLoader({
+      logger: this.logger,
+      logOnce,
+      publicKeys: CATALOG_PUBLIC_KEYS,
+    });
     const buildType: VersionedTypeFactory = ({ id, versions, metadata }) =>
       createVersionedConnectorType({
         id,
@@ -1260,6 +1266,7 @@ export class ActionsPlugin
       publicKeys: CATALOG_PUBLIC_KEYS,
       refreshIntervalMs: catalog.refreshInterval.asMilliseconds(),
       logger: this.logger,
+      logOnce,
       buildType,
       onStorageReady: (storage) => loader.setStorage(storage),
     });

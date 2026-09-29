@@ -20,7 +20,7 @@ describe('config validation', () => {
 
   test('catalog defaults', () => {
     const config = configSchema.validate({});
-    expect(config.catalog.enabled).toBe(false);
+    expect(config.catalog.enabled).toBe(true);
     expect(config.catalog.url).toBe('https://workflows.elastic.co/connectors/v1');
     expect(config.catalog.localBundlePath).toBeUndefined();
     expect(config.catalog.refreshInterval.asMilliseconds()).toBe(5 * 60 * 1000);
@@ -48,7 +48,7 @@ describe('config validation', () => {
           },
         },
         "catalog": Object {
-          "enabled": false,
+          "enabled": true,
           "refreshInterval": "PT5M",
           "url": "https://workflows.elastic.co/connectors/v1",
         },
@@ -108,7 +108,7 @@ describe('config validation', () => {
           },
         },
         "catalog": Object {
-          "enabled": false,
+          "enabled": true,
           "refreshInterval": "PT5M",
           "url": "https://workflows.elastic.co/connectors/v1",
         },
@@ -277,7 +277,7 @@ describe('config validation', () => {
           },
         },
         "catalog": Object {
-          "enabled": false,
+          "enabled": true,
           "refreshInterval": "PT5M",
           "url": "https://workflows.elastic.co/connectors/v1",
         },
@@ -473,7 +473,7 @@ describe('config validation', () => {
           },
         },
         "catalog": Object {
-          "enabled": false,
+          "enabled": true,
           "refreshInterval": "PT5M",
           "url": "https://workflows.elastic.co/connectors/v1",
         },

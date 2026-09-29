@@ -31,4 +31,32 @@ describe('createLogOnce', () => {
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith('still down');
   });
+
+  it('clear re-arms a warnThenDebug key', () => {
+    const logger = loggingSystemMock.createLogger();
+    const logOnce = createLogOnce(logger);
+
+    logOnce.warnThenDebug('fetch', 'down');
+    logOnce.warnThenDebug('fetch', 'still down');
+    logOnce.clear('fetch');
+    logOnce.warnThenDebug('fetch', 'down again');
+
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenNthCalledWith(2, 'down again');
+  });
+
+  it('drops keys of the oldest catalogVersion after a third catalogVersion', () => {
+    const logger = loggingSystemMock.createLogger();
+    const logOnce = createLogOnce(logger, { keepCatalogVersions: 2 });
+
+    logOnce.warn('v1', 'a', 'v1');
+    logOnce.warn('v2', 'a', 'v2');
+    logOnce.warn('v3', 'a', 'v3');
+    logOnce.warn('v2', 'a', 'v2-repeat');
+    logOnce.warn('v1', 'a', 'v1-again');
+
+    expect(logger.warn).toHaveBeenCalledTimes(4);
+    expect(logger.debug).toHaveBeenCalledWith('v2-repeat');
+    expect(logger.warn).toHaveBeenNthCalledWith(4, 'v1-again');
+  });
 });

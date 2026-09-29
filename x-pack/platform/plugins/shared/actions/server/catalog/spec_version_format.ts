@@ -7,7 +7,8 @@
 
 export const SPEC_VERSION_MAX_LENGTH = 16;
 
-const EXACT_VERSION_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+export const SPEC_VERSION_REGEX = /^(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const EXACT_VERSION_PATTERN = SPEC_VERSION_REGEX;
 const MAJOR_REQUEST_PATTERN = /^(0|[1-9]\d*)$/;
 const REQUEST_PATTERN = /^(0|[1-9]\d*)(\.(0|[1-9]\d*))?$/;
 
