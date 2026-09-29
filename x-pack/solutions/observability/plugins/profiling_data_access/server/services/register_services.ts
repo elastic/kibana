@@ -6,11 +6,11 @@
  */
 
 import type { CloudStart } from '@kbn/cloud-plugin/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from '../universal_profiling/services/status';
-import type { ProfilingESClient } from '../utils/profiling_es_client';
+import type { CreateProfilingEsClient } from '../utils/profiling_es_client';
 import { createFetchFunctions } from './functions';
 import {
   createCloudSetupState,
@@ -19,7 +19,7 @@ import {
 import { createFetchESFunctions } from './functions/es_functions';
 
 export interface RegisterServicesParams {
-  createProfilingEsClient: (params: { esClient: ElasticsearchClient }) => ProfilingESClient;
+  createProfilingEsClient: CreateProfilingEsClient;
   logger: Logger;
   deps: {
     fleet?: FleetStartContract;

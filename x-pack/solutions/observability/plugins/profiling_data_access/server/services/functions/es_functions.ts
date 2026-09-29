@@ -30,6 +30,8 @@ export interface FetchFunctionsParams {
   aggregationFields?: AggregationField[];
   limit?: number;
   totalSeconds: number;
+  /** When provided, ES calls are cancelled once the signal aborts. */
+  abortSignal?: AbortSignal;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -44,6 +46,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
     aggregationFields,
     limit,
     totalSeconds,
+    abortSignal,
   }: FetchFunctionsParams) => {
     const [
       co2PerKWH,
@@ -64,7 +67,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
       core.uiSettings.client.get<boolean>(profilingShowErrorFrames),
     ]);
 
-    const profilingEsClient = createProfilingEsClient({ esClient });
+    const profilingEsClient = createProfilingEsClient({ esClient, abortSignal });
 
     const esTopNFunctions = await profilingEsClient.topNFunctions({
       sampleSize: targetSampleSize,

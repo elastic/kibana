@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchCapabilities,
-  ElasticsearchClient,
-} from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type { BuildFlavor } from '@kbn/config';
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
+import type { CreateProfilingEsClient } from '@kbn/profiling-data-access-plugin/server';
 import type { ProfilingConfig } from '..';
 import type {
   ProfilingPluginSetupDeps,
@@ -47,10 +43,7 @@ export interface RouteRegisterParameters {
     esCapabilities: ElasticsearchCapabilities;
   };
   services: {
-    createProfilingEsClient: (params: {
-      request: KibanaRequest;
-      esClient: ElasticsearchClient;
-    }) => ProfilingESClient;
+    createProfilingEsClient: CreateProfilingEsClient;
   };
 }
 

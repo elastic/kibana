@@ -20,7 +20,11 @@ export type ProfilingConfig = TypeOf<typeof configSchema>;
 export { profilingElasticsearchConfigSchema };
 export type { ProfilingElasticsearchConfig } from './config';
 export type { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart };
-export type { ProfilingESClient } from './utils/profiling_es_client';
+export type {
+  CreateProfilingEsClient,
+  CreateProfilingEsClientParams,
+  ProfilingESClient,
+} from './utils/profiling_es_client';
 
 export { getApmPolicy, ELASTIC_CLOUD_APM_POLICY } from './universal_profiling/lib/get_apm_policy';
 export { MAX_BUCKETS } from './universal_profiling/lib/cluster_settings';

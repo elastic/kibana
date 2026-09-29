@@ -70,3 +70,11 @@ export interface ProfilingESClient {
     status(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   };
 }
+
+export interface CreateProfilingEsClientParams {
+  esClient: ElasticsearchClient;
+  /** When provided, ES calls are cancelled once the signal aborts. */
+  abortSignal?: AbortSignal;
+}
+
+export type CreateProfilingEsClient = (params: CreateProfilingEsClientParams) => ProfilingESClient;

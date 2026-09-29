@@ -8,8 +8,6 @@
 import type {
   CoreSetup,
   CoreStart,
-  ElasticsearchClient,
-  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -17,7 +15,7 @@ import type {
 import type { ProfilingConfig } from '.';
 import { registerServices } from './services/register_services';
 import { createProfilingEsClient } from './utils/create_profiling_es_client';
-import type { ProfilingESClient } from './utils/profiling_es_client';
+import type { CreateProfilingEsClient } from './utils/profiling_es_client';
 import type { ProfilingPluginStartDeps } from './types';
 
 export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugin['setup']>;
@@ -42,19 +40,14 @@ export class ProfilingDataAccessPlugin implements Plugin {
         })
       : undefined;
 
-    const createProfilingEsClientWithRedirect = ({
+    const createProfilingEsClientWithRedirect: CreateProfilingEsClient = ({
       esClient: defaultEsClient,
-      request,
-    }: {
-      esClient: ElasticsearchClient;
-      request?: KibanaRequest;
-    }): ProfilingESClient => {
-      const remoteEsClient = request
-        ? profilingSpecificEsClient?.asScoped(request).asInternalUser
-        : profilingSpecificEsClient?.asInternalUser;
-
-      return createProfilingEsClient({ esClient: remoteEsClient ?? defaultEsClient, request });
-    };
+      abortSignal,
+    }) =>
+      createProfilingEsClient({
+        esClient: profilingSpecificEsClient?.asInternalUser ?? defaultEsClient,
+        abortSignal,
+      });
 
     const services = registerServices({
       createProfilingEsClient: createProfilingEsClientWithRedirect,

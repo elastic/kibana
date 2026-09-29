@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import {
   getFieldNameForTopNType,
@@ -201,7 +202,10 @@ export function queryTopNCommon({
       try {
         return response.ok({
           body: await topNElasticSearchQuery({
-            client: createProfilingEsClient({ request, esClient: client }),
+            client: createProfilingEsClient({
+              esClient: client,
+              abortSignal: getRequestAbortedSignal(request.events.aborted$),
+            }),
             logger,
             timeFrom,
             timeTo,

@@ -89,4 +89,16 @@ describe('createGetStatusService', () => {
     });
     expect(mockedGetCloudSetupState).not.toHaveBeenCalled();
   });
+
+  it('passes the abort signal to the setup state', async () => {
+    mockedGetSelfManagedSetupState.mockResolvedValue(createDefaultSetupState());
+    const abortSignal = new AbortController().signal;
+
+    const getStatus = createGetStatusService(createParams(false));
+    await getStatus({ soClient, esClient, abortSignal });
+
+    expect(mockedGetSelfManagedSetupState).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient, soClient, abortSignal })
+    );
+  });
 });

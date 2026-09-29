@@ -7,6 +7,7 @@
 
 import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { RouteRegisterParameters } from '../..';
 import { getRoutePaths } from '../../../../common';
 import { getHasSetupPrivileges } from './lib/get_has_setup_privileges';
@@ -91,6 +92,7 @@ export function registerSetupRoute({
             esClient: core.elasticsearch.client,
             soClient: core.savedObjects.client,
             spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
+            abortSignal: getRequestAbortedSignal(request.events.aborted$),
           });
 
         return response.ok({ body: { ...status, has_required_role: hasRequiredRole } });
@@ -167,7 +169,8 @@ export function registerSetupRoute({
         const esClient = await getClient(context);
         const core = await context.core;
 
-        const client = createProfilingEsClient({ esClient, request });
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+        const client = createProfilingEsClient({ esClient, abortSignal });
 
         const commonSetupParams: ProfilingSetupOptions = {
           client,
@@ -183,6 +186,7 @@ export function registerSetupRoute({
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: commonSetupParams.spaceId,
+          abortSignal,
         };
 
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;

@@ -126,4 +126,32 @@ describe('setup state services', () => {
       expect(mockedCloudSetupState).not.toHaveBeenCalled();
     });
   });
+
+  describe.each([
+    ['createCloudSetupState', setupStateModule.createCloudSetupState],
+    ['createSelfManagedSetupState', setupStateModule.createSelfManagedSetupState],
+  ])('%s', (_name, createService) => {
+    it('passes the abort signal to both profiling ES clients', async () => {
+      const abortSignal = new AbortController().signal;
+      const getSetupState = createService({
+        createProfilingEsClient,
+        deps: {
+          cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
+          fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],
+        },
+        logger,
+      });
+
+      await getSetupState({ esClient, soClient, abortSignal });
+
+      expect(createProfilingEsClient).toHaveBeenCalledWith({
+        esClient: internalEsClient,
+        abortSignal,
+      });
+      expect(createProfilingEsClient).toHaveBeenCalledWith({
+        esClient: currentEsClient,
+        abortSignal,
+      });
+    });
+  });
 });

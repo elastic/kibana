@@ -16,14 +16,23 @@ export interface SetupStateParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
+  /** When provided, ES calls are cancelled once the signal aborts. */
+  abortSignal?: AbortSignal;
 }
 
 type GetSetupStateParams = RegisterServicesParams & SetupStateParams;
 
-function getProfilingClients({ createProfilingEsClient, esClient }: GetSetupStateParams) {
+function getProfilingClients({
+  createProfilingEsClient,
+  esClient,
+  abortSignal,
+}: GetSetupStateParams) {
   return {
-    client: createProfilingEsClient({ esClient: esClient.asInternalUser }),
-    clientWithProfilingAuth: createProfilingEsClient({ esClient: esClient.asCurrentUser }),
+    client: createProfilingEsClient({ esClient: esClient.asInternalUser, abortSignal }),
+    clientWithProfilingAuth: createProfilingEsClient({
+      esClient: esClient.asCurrentUser,
+      abortSignal,
+    }),
   };
 }
 
@@ -58,11 +67,11 @@ export async function getSelfManagedSetupState(params: GetSetupStateParams): Pro
 }
 
 export function createCloudSetupState(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: SetupStateParams) =>
-    getCloudSetupState({ ...params, esClient, soClient, spaceId });
+  return async ({ esClient, soClient, spaceId, abortSignal }: SetupStateParams) =>
+    getCloudSetupState({ ...params, esClient, soClient, spaceId, abortSignal });
 }
 
 export function createSelfManagedSetupState(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: SetupStateParams) =>
-    getSelfManagedSetupState({ ...params, esClient, soClient, spaceId });
+  return async ({ esClient, soClient, spaceId, abortSignal }: SetupStateParams) =>
+    getSelfManagedSetupState({ ...params, esClient, soClient, spaceId, abortSignal });
 }

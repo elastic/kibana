@@ -17,6 +17,8 @@ export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
+  /** When provided, ES calls are cancelled once the signal aborts. */
+  abortSignal?: AbortSignal;
 }
 
 function toProfilingStatus(setupState: SetupState, hasSetup: boolean): ProfilingStatus {
@@ -29,8 +31,13 @@ function toProfilingStatus(setupState: SetupState, hasSetup: boolean): Profiling
 }
 
 export function createGetStatusService(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
-    const setupStateParams = { ...params, esClient, soClient, spaceId };
+  return async ({
+    esClient,
+    soClient,
+    spaceId,
+    abortSignal,
+  }: HasSetupParams): Promise<ProfilingStatus> => {
+    const setupStateParams = { ...params, esClient, soClient, spaceId, abortSignal };
 
     if (params.deps.cloud?.isCloudEnabled) {
       const setupState = await getCloudSetupState(setupStateParams);
