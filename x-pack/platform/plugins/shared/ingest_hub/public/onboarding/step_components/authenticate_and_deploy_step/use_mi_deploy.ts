@@ -508,6 +508,16 @@ export function useMiDeploy({
           retryRemainingPending = retryReconciliation.remainingPending;
         }
 
+        // Dirty-update failures (instance in policyIdsByInstance) whose settings have since been
+        // restored to match the SO (isDirty=false) are resolved: the unchanged policy is already
+        // correct and no PUT is needed. Retain only failures that still require action (4130821558).
+        const cleanedByDriftRestore = isDirty
+          ? []
+          : instanceIds.filter((id) => id in (policyIdsByInstance ?? {}));
+        const effectiveRemainingFailed = plan.remainingFailed.filter(
+          (id) => !cleanedByDriftRestore.includes(id)
+        );
+
         // Combine cleanup result with service-status update into one write so React batching
         // cannot lose pendingCleanupPolicyIds (4121333268).
         updateDetectAndReviewStep({
@@ -515,7 +525,7 @@ export function useMiDeploy({
             ? { pendingCleanupPolicyIds: retryRemainingPending }
             : {}),
           serviceStatuses: buildInstanceStatuses(plan.deployedTargets, []),
-          failedInstances: plan.remainingFailed,
+          failedInstances: effectiveRemainingFailed,
           deployErrors: {},
         });
 

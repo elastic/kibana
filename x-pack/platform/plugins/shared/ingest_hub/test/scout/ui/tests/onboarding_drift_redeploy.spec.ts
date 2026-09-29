@@ -1190,15 +1190,15 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       (route) => {
         soCallCount++;
         if (soCallCount === 1) {
-          route.fulfill({
+          void route.fulfill({
             status: 200,
             contentType: 'application/json',
             body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
           });
         } else if (soShouldFail) {
-          route.fulfill({ status: 500, body: 'Internal Server Error' });
+          void route.fulfill({ status: 500, body: 'Internal Server Error' });
         } else {
-          route.fulfill({
+          void route.fulfill({
             status: 200,
             contentType: 'application/json',
             body: JSON.stringify({ item: makeSoItem(DEP_ID) }),

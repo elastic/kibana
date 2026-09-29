@@ -33,6 +33,7 @@ import {
   detectServiceVarsDrift,
   detectAuthDrift,
 } from './authenticate_and_deploy_step/detect_drift';
+import { toSOAuthMethod } from './authenticate_and_deploy_step/agent_based_section/credential_method_selector';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
@@ -190,8 +191,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           awsServicesMap,
           deployedInstanceIds
         );
+        // In agent-based mode, authMethod is only written to session in edit mode; use
+        // agentCredentialMethod (the canonical UI state) converted to SO format so an unchanged
+        // return to Step 3 does not falsely report auth drift (4131515449).
+        const sessionAuthMethod =
+          deploymentMethod === 'agent_based'
+            ? toSOAuthMethod(agentBasedDeploymentFromFlow.agentCredentialMethod)
+            : authMethod;
         const authDirty = detectAuthDrift(
-          { authMethod, connectorId },
+          { authMethod: sessionAuthMethod, connectorId },
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
         // Detect agent policy selection drift: if the user has changed which agent policies
@@ -226,8 +234,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       });
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
-    // edits. Only auth mutations (connector swap, authMethod change) happen in this component's
-    // lifetime and need to re-trigger the check; adding them to deps is sufficient.
+    // edits. Only auth mutations (connector swap, authMethod change, agentCredentialMethod change)
+    // happen in this component's lifetime and need to re-trigger the check.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onboardingDeploymentId,
@@ -236,6 +244,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     connectorId,
     selectedAgentPoliciesKey,
     driftRetryKey,
+    agentBasedDeploymentFromFlow?.agentCredentialMethod,
   ]);
 
   // Called by ManagedIntegrationsSection when the static-key replace form becomes ready or is
@@ -805,7 +814,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         </>
       )}
 
-      {(showMiSection || showAgentSection) && isDirty && (
+      {(showMiSection || showAgentSection) && isDirty && (deployGroups.length > 0 || agentTargets.length > 0) && (
         <>
           <EuiCallOut
             announceOnMount
