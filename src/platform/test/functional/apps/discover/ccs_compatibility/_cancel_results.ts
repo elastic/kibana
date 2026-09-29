@@ -110,9 +110,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // Wait for the async search to be established on ES so that cancellation can retrieve
           // partial results via the async search ID. The secondary button becoming enabled
-          // signals SearchSessionState.Loading (after a 500ms delay), which is guaranteed to
-          // fire after the async search ID is available from ES (~200ms from
-          // wait_for_completion_timeout).
+          // signals SearchSessionState.Loading (after a 500ms delay). This is sufficient here
+          // because stall_time_seconds: 30 guarantees the search is still running, and
+          // wait_for_completion_timeout (200ms server contract) means the async-search ID is
+          // set by the client well within the 500ms window — unlike ES|QL where DELAY() is
+          // row-dependent and the task-poll is required to confirm continued execution.
           await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
           await testSubjects.existOrFail('queryCancelButton');
           await testSubjects.click('queryCancelButton');
@@ -172,38 +174,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   | STATS count = COUNT(*) BY buckets, delay`);
         await testSubjects.click('querySubmitButton');
 
-        // The secondary button becoming enabled signals SearchSessionState.Loading (after a 500ms
-        // delay) — a front-end readiness check confirming the client-side async search id is set.
+        // Wait for the secondary button to become enabled (signals SearchSessionState.Loading
+        // after a 500ms delay). Record when it became enabled so the combined check below can
+        // require an additional buffer for the async-search ID round-trip.
         await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
         await testSubjects.existOrFail('queryCancelButton');
+        const buttonEnabledAt = Date.now();
 
-        // Confirm the ES|QL compute task is *still* running right before we cancel it. This must
-        // be the last check before the click, not an earlier one: DELAY()'s total wall-clock
-        // contribution scales with however many remote rows the engine happens to evaluate it for
-        // (not a documented contract), so an earlier "it started running" check says nothing about
-        // whether it's still running by the time we act — only a check immediately preceding the
-        // click does. This action is only present in the tasks list while a compute driver is
-        // actively executing (the `esql` action prefix is `indices:data/read/esql`; the
-        // compute/driver sub-task is `indices:data/read/esql/compute`, as also relied on by the
-        // `query_activity` plugin). If this never becomes true, the query finished before we could
-        // reach it — a real signal to increase the delay, not a flaky timing artifact to paper over.
-        await retry.waitFor('esql compute task to still be running', async () => {
-          const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
-          return Object.values(nodes ?? {}).some(
-            (node) => Object.keys(node.tasks ?? {}).length > 0
-          );
-        });
-
-        // The task-poll above only confirms the *backend* compute is still running — it says
-        // nothing about whether the *client* has received its first async-search response yet
-        // (which is what sets the interceptor's local search id). That first response is bounded
-        // by the server-enforced wait_for_completion_timeout (200ms), but under CI load the round
-        // trip can occasionally exceed the 500ms the secondary button's delay budgets for, leaving
-        // the client's id unset when cancel fires — the search then errors out with no partial-
-        // results retrieval at all (id is required to attempt it). This buffer is bounded by that
-        // known 200ms server contract, unlike DELAY()'s row-count-dependent duration, so a fixed
-        // margin here is a deliberate choice, not an unaccounted-for guess.
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Combined liveness + response-received check, executed immediately before the click so
+        // there is no sleep gap between the last confirmation and the action. Two conditions must
+        // hold simultaneously:
+        //
+        //  1. Backend still computing: the compute/driver sub-task is only present while actively
+        //     executing (action `indices:data/read/esql/compute*`, as used by the query_activity
+        //     plugin). DELAY()'s wall-clock contribution scales with remote row count (it is
+        //     evaluated per-row by Case's lazy evaluator, not per-block), so we poll rather than
+        //     rely on a fixed constant — if this never becomes true the query finished before we
+        //     could reach it, a real signal to increase the delay.
+        //
+        //  2. First async-search response received: the secondary button becoming enabled only
+        //     guarantees ≥500ms since Loading state — it does not guarantee the client has received
+        //     the first HTTP response carrying the async-search ID (used to retrieve partial results
+        //     on cancel). Under CI load the round trip can exceed 500ms, leaving the ID unset.
+        //     Requiring ≥500ms elapsed since button-enabled adds a bounded, deliberate margin
+        //     (anchored to the server's wait_for_completion_timeout: 200ms contract) without a
+        //     separate sleep between the liveness check and the click.
+        await retry.waitFor(
+          'esql compute task still running and response buffer elapsed',
+          async () => {
+            if (Date.now() - buttonEnabledAt < 500) return false;
+            const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
+            return Object.values(nodes ?? {}).some(
+              (node) => Object.keys(node.tasks ?? {}).length > 0
+            );
+          }
+        );
 
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
