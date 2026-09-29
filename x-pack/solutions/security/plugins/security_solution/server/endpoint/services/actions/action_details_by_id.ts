@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { escapeQuotes } from '@kbn/es-query';
 import type {
   EndpointAppContextService,
   ScopedEndpointServices,
@@ -110,7 +111,9 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
         offset += HOSTNAME_LOOKUP_BATCH_SIZE
       ) {
         const batch = unresolvedAgentIds.slice(offset, offset + HOSTNAME_LOOKUP_BATCH_SIZE);
-        const kuery = `united.agent.agent.id: (${batch.map((id) => `"${id}"`).join(' OR ')})`;
+        const kuery = `united.agent.agent.id: (${batch
+          .map((id) => `"${escapeQuotes(id)}"`)
+          .join(' OR ')})`;
         // Best-effort: a failed batch leaves names empty rather than failing the whole read
         const metadata = await endpointService
           .getEndpointMetadataService(spaceId)

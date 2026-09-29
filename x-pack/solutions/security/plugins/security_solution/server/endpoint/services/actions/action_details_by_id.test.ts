@@ -229,6 +229,36 @@ describe('When using `getActionDetailsById()', () => {
     expect(details.hosts).toEqual({ 'agent-a': { name: 'linked-host-a' } });
   });
 
+  it('escapes quote characters in agent IDs before interpolating them into the CPS batch kuery', async () => {
+    // An unescaped agent id containing a `"` would break out of the quoted
+    // term and either throw a KQL parse error or, worse, silently change
+    // which agents the query matches. Every other id interpolated into a
+    // kuery in this diff goes through `escapeQuotes`; this batch must too.
+    const agentIdWithQuote = 'agent-a" OR agent.id: "agent-x';
+    actionRequests = createActionRequestsEsSearchResultsMock([agentIdWithQuote]);
+    applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
+
+    const getHostMetadataList = jest.fn().mockResolvedValue({
+      data: [],
+      total: 0,
+    });
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(true),
+    });
+
+    const [[queryOptions]] = getHostMetadataList.mock.calls;
+    expect((queryOptions as { kuery: string }).kuery).toBe(
+      String.raw`united.agent.agent.id: ("agent-a\" OR agent.id: \"agent-x")`
+    );
+  });
+
   it('matches the linked-project metadata row by Fleet agent id, not the endpoint agent id', async () => {
     // Endpoint metadata's own `agent.id` (`agent-a-endpoint-id`) differs from
     // the Fleet agent id (`agent-a`) the action and the batch kuery
