@@ -4328,8 +4328,12 @@ describe('Output Service', () => {
         expect(mockedAgentPolicyService.removeOutputFromAll).not.toHaveBeenCalled();
       });
 
-      it('includes integrations-all privilege when package policies are also affected', async () => {
+      it('checks integrations-all only on package-policy spaces, not on agent-only spaces', async () => {
         mockSecurity(true);
+        mockedAgentPolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['space-a']),
+          truncated: false,
+        });
         mockedPackagePolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
           spaceIds: new Set(['space-b']),
           truncated: false,
@@ -4338,8 +4342,25 @@ describe('Output Service', () => {
 
         await outputService.delete('output-test', { request: mockRequest });
 
-        expect(mockAtSpaces).toHaveBeenCalledWith(
+        // First call: agent-policy spaces only — no integrations-all required
+        expect(mockAtSpaces).toHaveBeenNthCalledWith(
+          1,
+          ['space-a'],
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('fleet-agent-policies-all')]),
+          })
+        );
+        expect(mockAtSpaces).not.toHaveBeenNthCalledWith(
+          1,
           expect.any(Array),
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('integrations-all')]),
+          })
+        );
+        // Second call: package-policy spaces — both privileges required
+        expect(mockAtSpaces).toHaveBeenNthCalledWith(
+          2,
+          ['space-b'],
           expect.objectContaining({
             kibana: expect.arrayContaining([
               expect.stringContaining('integrations-all'),
@@ -4349,22 +4370,24 @@ describe('Output Service', () => {
         );
       });
 
-      it('uses only fleet-agent-policies-all when no package policies are affected', async () => {
+      it('calls atSpaces only once (agent check) when no package policies are affected', async () => {
         mockSecurity(true);
         getMockedSoClient(); // packagePolicies spaceIds is empty by default in this block
 
         await outputService.delete('output-test', { request: mockRequest });
 
+        // Only the agent-policy check fires; the package-policy check is a no-op (empty set)
+        expect(mockAtSpaces).toHaveBeenCalledTimes(1);
         expect(mockAtSpaces).toHaveBeenCalledWith(
           expect.any(Array),
           expect.objectContaining({
             kibana: expect.arrayContaining([expect.stringContaining('fleet-agent-policies-all')]),
           })
         );
-        expect(mockAtSpaces).toHaveBeenCalledWith(
+        expect(mockAtSpaces).not.toHaveBeenCalledWith(
           expect.any(Array),
           expect.objectContaining({
-            kibana: expect.not.arrayContaining([expect.stringContaining('integrations-all')]),
+            kibana: expect.arrayContaining([expect.stringContaining('integrations-all')]),
           })
         );
       });

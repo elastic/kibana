@@ -1100,16 +1100,23 @@ class OutputService {
           `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
         );
       }
-      const allSpaceIds = new Set([...agentPolicySpaces.spaceIds, ...packagePolicySpaces.spaceIds]);
-      const apiPrivileges =
-        packagePolicySpaces.spaceIds.size > 0
-          ? ['integrations-all', 'fleet-agent-policies-all']
-          : ['fleet-agent-policies-all'];
+      const errorMessage = `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`;
+      // Agent-policy spaces only need fleet-agent-policies-all.
+      // Package-policy spaces also need integrations-all because removeOutputFromAll
+      // rewrites package policies too. Check them separately so a user with
+      // integrations-all only in the spaces that actually have package policies
+      // is not incorrectly blocked in agent-only spaces.
       await assertPrivilegesInSpaces({
         request,
-        spaceIds: allSpaceIds,
-        apiPrivileges,
-        errorMessage: `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        spaceIds: agentPolicySpaces.spaceIds,
+        apiPrivileges: ['fleet-agent-policies-all'],
+        errorMessage,
+      });
+      await assertPrivilegesInSpaces({
+        request,
+        spaceIds: packagePolicySpaces.spaceIds,
+        apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
+        errorMessage,
       });
     }
 
