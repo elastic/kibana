@@ -1,0 +1,32 @@
+# kibana.sandbox.yml plus the remote telemetry connector, selected by scout_hook.sh when the profile
+# configures remote telemetry. It repeats the sandbox and tracing settings because the Kibana test
+# server keeps just the last --config flag; keep the two files in sync.
+
+telemetry.tracing.exporters: ${NIGHTSHIFT_TRACING_EXPORTERS}
+
+xpack.sandbox:
+  enabled: true
+  host: ${SANDBOX_API_HOST:localhost}
+  port: ${SANDBOX_API_PORT:9090}
+  api_key: ${SANDBOX_API_KEY}
+  ssl:
+    certificate: ${SANDBOX_CLIENT_CERT_PATH}
+    key: ${SANDBOX_CLIENT_KEY_PATH}
+    certificate_authorities: ${SANDBOX_CA_CERT_PATH}
+
+# Remote telemetry credentials are resolved from the scout hook environment.
+xpack.actions.preconfigured.nightshift-evals-telemetry:
+  name: Remote Elasticsearch telemetry
+  actionTypeId: .webhook
+  config:
+    url: ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL}
+    method: post
+    hasAuth: false
+    authType: null
+  secrets:
+    secretHeaders:
+      Authorization: "ApiKey ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY}"
+
+xpack.nightshift_investigations.sandbox:
+  telemetry_connector_id: nightshift-evals-telemetry
+  telemetry_readable_indices: ${NIGHTSHIFT_SANDBOX_READABLE_INDICES}

@@ -187,7 +187,7 @@ describe('nightshift-investigations scout hook', () => {
     expect(result.output).toEqual({});
   });
 
-  it('exports telemetry from the profile, with shell fallback and an optional index hint', () => {
+  it('selects kibana.sandbox_telemetry.yml and exports telemetry from the profile, with shell fallback', () => {
     const shell = {
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://shell.example.com',
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'shell-key',
@@ -195,7 +195,7 @@ describe('nightshift-investigations scout hook', () => {
     expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
       ...shell,
       NIGHTSHIFT_SANDBOX_READABLE_INDICES: '',
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.telemetry.yml'),
+      SANDBOX_KIBANA_CONFIG: Path.join(__dirname, 'kibana.sandbox_telemetry.yml'),
     });
     expect(
       runHook(

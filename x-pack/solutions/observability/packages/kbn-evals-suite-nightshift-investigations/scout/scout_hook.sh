@@ -5,8 +5,9 @@
 # Reads the evals config JSON on stdin and prints `{"env": {...}}`. Sandbox credentials come from the
 # config's `sandbox` block, falling back to SANDBOX_* already exported in the shell (e.g. a
 # self-hosted sandbox). SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout
-# config set at kibana.sandbox.yml, which reads the credentials from the environment. Without an API
-# key it prints `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
+# config set at kibana.sandbox.yml, or kibana.sandbox_telemetry.yml when remote telemetry is
+# configured, which reads the credentials from the environment. Without an API key it prints `{}`,
+# so the config set falls back to plain `evals_tracing` and only smoke runs.
 
 set -euo pipefail
 
@@ -43,7 +44,8 @@ ca="$(resolve SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
 telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"
 readable_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
-telemetry_config=''
+remote_telemetry=''
+kibana_config="$script_dir/kibana.sandbox.yml"
 if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
   if [[ -z "$telemetry_url" || -z "$telemetry_key" ]]; then
     echo "nightshift-investigations scout hook: remote telemetry requires both URL and API key" >&2
@@ -53,7 +55,8 @@ if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
     echo "nightshift-investigations scout hook: remote telemetry requires sandbox credentials" >&2
     exit 1
   fi
-  telemetry_config="$script_dir/kibana.telemetry.yml"
+  remote_telemetry=1
+  kibana_config="$script_dir/kibana.sandbox_telemetry.yml"
 fi
 
 if [[ -z "$api_key" ]]; then
@@ -96,8 +99,8 @@ HOOK_HOST="$host" \
   HOOK_TELEMETRY_URL="$telemetry_url" \
   HOOK_TELEMETRY_KEY="$telemetry_key" \
   HOOK_READABLE_INDICES="$readable_indices" \
-  HOOK_TELEMETRY_CONFIG="$telemetry_config" \
-  HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
+  HOOK_REMOTE_TELEMETRY="$remote_telemetry" \
+  HOOK_KIBANA_CONFIG="$kibana_config" \
   jq -n '{
     env: (({
       SANDBOX_API_HOST: $ENV.HOOK_HOST,
@@ -109,10 +112,9 @@ HOOK_HOST="$host" \
       SANDBOX_CLIENT_KEY_PATH: $ENV.HOOK_KEY,
       SANDBOX_CA_CERT_PATH: $ENV.HOOK_CA,
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
-    } + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {
+    } + (if $ENV.HOOK_REMOTE_TELEMETRY != "" then {
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: $ENV.HOOK_TELEMETRY_URL,
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
-      NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES,
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: $ENV.HOOK_TELEMETRY_CONFIG
+      NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES
     } else {} end))
   }'

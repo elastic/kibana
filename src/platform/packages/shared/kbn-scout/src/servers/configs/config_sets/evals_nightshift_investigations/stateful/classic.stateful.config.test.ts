@@ -10,6 +10,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { parseRawFlags } from '@kbn/test-kibana-server';
 
 // `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flag from its source
 // to fail if it is renamed again without this config set following (see #292333).
@@ -35,13 +36,14 @@ const loadConfig = (env: Record<string, string>) => {
   return loaded;
 };
 
+const configArgs = (args: string[]) => args.filter((arg) => arg.startsWith('--config='));
+
 describe('evals_nightshift_investigations config set', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
-    delete process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('SANDBOX_')) delete process.env[key];
     }
@@ -79,10 +81,9 @@ describe('evals_nightshift_investigations config set', () => {
     expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
     expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
     expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
-    expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
-      `--config=${join(__dirname, 'kibana.tracing.yml')}`,
-      `--config=${SANDBOX_KIBANA_CONFIG}`,
-    ]);
+    // The Kibana test server keeps only the last --config, so the sandbox YAML must be the only one.
+    expect(configArgs(args)).toEqual([`--config=${SANDBOX_KIBANA_CONFIG}`]);
+    expect(configArgs(parseRawFlags(args))).toEqual([`--config=${SANDBOX_KIBANA_CONFIG}`]);
     expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
   });
 
@@ -98,8 +99,7 @@ describe('evals_nightshift_investigations config set', () => {
     expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
   });
 
-  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
-    const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
+  it('keeps tracing exporter headers in the environment for the sandbox YAML', () => {
     const exporters = JSON.stringify([
       {
         http: {
@@ -108,12 +108,7 @@ describe('evals_nightshift_investigations config set', () => {
         },
       },
     ]);
-    const { servers } = loadConfig({
-      SANDBOX_KIBANA_CONFIG,
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: telemetryConfig,
-      TRACING_EXPORTERS: exporters,
-    });
-    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${telemetryConfig}`);
+    const { servers } = loadConfig({ SANDBOX_KIBANA_CONFIG, TRACING_EXPORTERS: exporters });
     expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
   });
@@ -125,14 +120,8 @@ describe('evals_nightshift_investigations config set', () => {
     const { servers } = loadConfig({ TRACING_EXPORTERS: exporters });
     expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('smoke-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
-    expect(servers.kbnTestServer.serverArgs).toContain(
-      `--config=${join(__dirname, 'kibana.tracing.yml')}`
-    );
-  });
-
-  it('fails fast when the telemetry YAML is missing', () => {
-    expect(() =>
-      loadConfig({ SANDBOX_KIBANA_CONFIG, NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: '/missing.yml' })
-    ).toThrow('NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file');
+    expect(configArgs(servers.kbnTestServer.serverArgs)).toEqual([
+      `--config=${join(__dirname, 'kibana.tracing.yml')}`,
+    ]);
   });
 });

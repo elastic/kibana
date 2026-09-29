@@ -1,8 +1,13 @@
-# Sandbox-api connection for the investigation evals, loaded by the evals_nightshift_investigations
-# Scout config set when scout_hook.sh exports SANDBOX_KIBANA_CONFIG. Kibana resolves ${SANDBOX_*}
-# from the environment the hook exports, so no secret is written to disk or passed as an argument.
-# The ssl paths are optional: the hook exports them empty when unset, and Kibana then connects
-# without a client certificate, authenticated by the API key only.
+# Kibana config for the investigation evals, loaded by the evals_nightshift_investigations Scout
+# config set when scout_hook.sh exports SANDBOX_KIBANA_CONFIG. Kibana resolves ${SANDBOX_*} and
+# ${NIGHTSHIFT_TRACING_EXPORTERS} from the environment, so no secret is written to disk or passed as
+# an argument. The ssl paths are optional: the hook exports them empty when unset, and Kibana then
+# connects without a client certificate, authenticated by the API key only.
+#
+# This must be the only --config the config set passes: the Kibana test server keeps just the last
+# --config flag. kibana.sandbox_telemetry.yml repeats this file and adds the remote telemetry.
+
+telemetry.tracing.exporters: ${NIGHTSHIFT_TRACING_EXPORTERS}
 
 xpack.sandbox:
   enabled: true
