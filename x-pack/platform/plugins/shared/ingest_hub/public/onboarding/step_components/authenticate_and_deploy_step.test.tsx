@@ -710,6 +710,7 @@ describe('AuthenticateAndDeployStep', () => {
       name: 'AWS Fargate',
       deploymentMethods: [{ method: 'agent_based', preferred: true }],
       showInUI: true,
+      isManifestLoaded: true,
     };
 
     beforeEach(() => {
@@ -788,6 +789,7 @@ describe('AuthenticateAndDeployStep', () => {
       name: 'AWS Fargate',
       deploymentMethods: [{ method: 'agent_based', preferred: true }],
       showInUI: true,
+      isManifestLoaded: true,
     };
 
     beforeEach(() => {

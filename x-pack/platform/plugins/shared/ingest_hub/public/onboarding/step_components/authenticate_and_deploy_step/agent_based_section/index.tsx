@@ -53,6 +53,8 @@ interface AgentBasedSectionProps {
   failedInstances: string[];
   /** Per-instance error message from the last deploy attempt, keyed by instanceId. */
   deployErrors?: Record<string, string>;
+  /** When false, AWS credential entry is skipped — use for packages that declare no credential vars. Defaults to true. */
+  requiresCredentials?: boolean;
 }
 
 export function AgentBasedSection({
@@ -65,6 +67,7 @@ export function AgentBasedSection({
   hasFailed,
   failedInstances,
   deployErrors,
+  requiresCredentials = true,
 }: AgentBasedSectionProps) {
   const location = useLocation();
   // True when the wizard was opened via ?deploymentId=<id> (resume / edit mode).
@@ -86,6 +89,7 @@ export function AgentBasedSection({
   // ── Credential method ──────────────────────────────────────────────────────
   const credentialMethod = persistedCredentialMethod;
   const [isCredentialReady, setIsCredentialReady] = useState(() => {
+    if (!requiresCredentials) return true;
     // For methods backed by persisted text fields, initialize ready from stored values.
     if (persistedCredentialMethod === 'shared_credentials') {
       return !!(persistedSharedCredentialFile || persistedCredentialProfileName);
@@ -344,9 +348,10 @@ export function AgentBasedSection({
             </p>
           </EuiText>
 
-          {/* Credential fields — show in existing mode always; in new-policy mode until the policy
-              is created AND credentials are in memory (re-show after Back navigation remount). */}
-          {(!isPolicyCreated || agentHostsMode === 'existing' || !isCredentialReady) && (
+          {/* Credential fields — omitted entirely when requiresCredentials=false (packages with no
+              credential vars, e.g. awsfirehose); otherwise shown until the policy is created and
+              credentials are in memory (re-shown after Back navigation remount). */}
+          {requiresCredentials && (!isPolicyCreated || agentHostsMode === 'existing' || !isCredentialReady) && (
             <>
               <EuiSpacer size="m" />
 

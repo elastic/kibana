@@ -247,6 +247,17 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const showMiSection = !isAgentBased && miServiceIds.length > 0;
   const showAgentSection = isAgentBased && agentTargets.length > 0;
 
+  // True when at least one agent target's service declares configurable vars (e.g. credential
+  // vars). False for packages like awsfirehose that have no vars, so the credential form is
+  // skipped and the user isn't blocked on entering credentials that would be discarded anyway.
+  const requiresCredentials = useMemo(
+    () =>
+      agentTargets.some((group) =>
+        group.members.some(({ service }) => service.varDefsByInput !== undefined)
+      ),
+    [agentTargets]
+  );
+
   // ── ECF stack metadata helpers ────────────────────────────────────────────────
   const ecfStacks = useMemo(() => {
     const defaultNames: Record<string, string> = {
@@ -571,6 +582,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           hasFailed={agentHasFailed}
           failedInstances={agentFailedInstances}
           deployErrors={detectAndReviewStep.deployErrors}
+          requiresCredentials={requiresCredentials}
         />
       )}
 
