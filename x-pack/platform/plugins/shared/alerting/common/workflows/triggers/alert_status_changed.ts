@@ -144,7 +144,7 @@ export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
 triggers:
   - type: {triggerId}
     on:
-      condition: 'alert.status: "active" and rule.tags: "k8s"'
+      condition: 'event.alert.status: "active" and event.rule.tags: "k8s"'
 \`\`\``,
         values: { triggerId: AlertStatusChangedV1TriggerId },
       }),
@@ -154,13 +154,13 @@ triggers:
 triggers:
   - type: {triggerId}
     on:
-      condition: 'alert.status: "recovered" and rule.id: "my-rule-id"'
+      condition: 'event.alert.status: "recovered" and event.rule.id: "my-rule-id"'
 \`\`\``,
         values: { triggerId: AlertStatusChangedV1TriggerId },
       }),
     ],
   },
   snippets: {
-    condition: 'alert.status: "active" and rule.tags: "my-tag"',
+    condition: 'event.alert.status: "active" and event.rule.tags: "my-tag"',
   },
 };
