@@ -39,7 +39,7 @@ const initialState: EsqlWizardState = {
   bucketSpan: '1h',
   columns: [],
   emittedTimeField: '',
-  detectorFields: [],
+  detectors: [],
   influencers: [],
   summaryCountFieldName: '',
   delayedDataCheckEnabled: false,

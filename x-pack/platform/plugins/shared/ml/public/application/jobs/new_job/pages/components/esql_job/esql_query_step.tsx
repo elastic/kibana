@@ -32,21 +32,15 @@ import { getEsqlQueryWarnings, type EsqlQueryWarningClause } from './esql_query_
 import {
   EsqlSummaryCountFieldSelect,
   findDefaultSummaryCountField,
+  isCountShapedColumn,
 } from './esql_summary_count_field_select';
 import { EsqlDelayedDataCheckToggle } from './esql_delayed_data_check_toggle';
+import { EsqlDetectorsEditor } from './esql_detectors_editor';
+import { NUMERIC_ESQL_TYPES } from './esql_numeric_types';
+import { DEFAULT_DETECTOR_FUNCTION } from './esql_detector_functions';
+import type { EsqlDetectorConfig } from '../../../common/job_creator/esql_job_creator';
 
 const DEBOUNCE_MS = 300;
-const NUMERIC_ESQL_TYPES = new Set([
-  'byte',
-  'short',
-  'integer',
-  'long',
-  'unsigned_long',
-  'float',
-  'half_float',
-  'scaled_float',
-  'double',
-]);
 const DATE_ESQL_TYPES = new Set(['date', 'date_nanos']);
 
 const invalidateRequest = (requestGeneration: MutableRefObject<number>) => {
@@ -88,7 +82,7 @@ export interface EsqlQueryStepState {
   bucketSpan: string;
   columns: ESQLFieldWithMetadata[];
   emittedTimeField: string;
-  detectorFields: string[];
+  detectors: EsqlDetectorConfig[];
   influencers: string[];
   summaryCountFieldName: string;
   delayedDataCheckEnabled: boolean;
@@ -106,17 +100,9 @@ const EsqlQueryStepContent = () => {
   const requestGeneration = useRef(0);
 
   const allOptions = useMemo(() => toOptions(state.columns), [state.columns]);
-  const detectorOptions = useMemo(
-    () => toOptions(state.columns.filter(({ type }) => NUMERIC_ESQL_TYPES.has(type))),
-    [state.columns]
-  );
   const selectedEmittedTime = useMemo(
     () => allOptions.filter(({ label }) => label === state.emittedTimeField),
     [allOptions, state.emittedTimeField]
-  );
-  const selectedDetectorFields = useMemo(
-    () => detectorOptions.filter(({ label }) => state.detectorFields.includes(label)),
-    [detectorOptions, state.detectorFields]
   );
   const selectedInfluencers = useMemo(
     () => allOptions.filter(({ label }) => state.influencers.includes(label)),
@@ -140,7 +126,7 @@ const EsqlQueryStepContent = () => {
     setQueryState({
       columns: [],
       emittedTimeField: '',
-      detectorFields: [],
+      detectors: [],
       influencers: [],
       summaryCountFieldName: '',
       delayedDataCheckEnabled: false,
@@ -160,9 +146,16 @@ const EsqlQueryStepContent = () => {
           if (generation !== requestGeneration.current) return;
 
           const defaultSummaryCountField = findDefaultSummaryCountField(nextColumns);
+          const defaultDetectorField = nextColumns.find(
+            (column) => NUMERIC_ESQL_TYPES.has(column.type) && !isCountShapedColumn(column)
+          )?.name;
           setQueryState({
             columns: nextColumns,
             emittedTimeField: firstTimeField(nextColumns),
+            detectors:
+              defaultDetectorField !== undefined
+                ? [{ function: DEFAULT_DETECTOR_FUNCTION, field: defaultDetectorField }]
+                : [],
             summaryCountFieldName: defaultSummaryCountField,
             delayedDataCheckEnabled: defaultSummaryCountField !== '',
           });
@@ -286,25 +279,12 @@ const EsqlQueryStepContent = () => {
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('xpack.ml.esqlJob.query.detectorFieldsLabel', {
-          defaultMessage: 'Detector fields',
-        })}
-        fullWidth
-      >
-        <EuiComboBox
-          aria-label={i18n.translate('xpack.ml.esqlJob.query.detectorFieldsAriaLabel', {
-            defaultMessage: 'Detector fields',
-          })}
-          options={detectorOptions}
-          selectedOptions={selectedDetectorFields}
-          onChange={(options) =>
-            setQueryState({ detectorFields: options.map(({ label }) => label) })
-          }
-          isDisabled={isLoading || state.columns.length === 0}
-          data-test-subj="mlEsqlDetectorFields"
-        />
-      </EuiFormRow>
+      <EsqlDetectorsEditor
+        detectors={state.detectors}
+        columns={state.columns}
+        onChange={(detectors) => setQueryState({ detectors })}
+        isDisabled={isLoading || state.columns.length === 0}
+      />
 
       <EuiFormRow
         label={i18n.translate('xpack.ml.esqlJob.query.influencersLabel', {

@@ -18,10 +18,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import {
-  buildEsqlJobPayload,
-  createMeanDetectors,
-} from '../../../common/job_creator/esql_job_creator';
+import { buildEsqlJobPayload, createDetectors } from '../../../common/job_creator/esql_job_creator';
 import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
 import { extractEsqlErrorReason } from './esql_error_reason';
 import { useEsqlWizardContext } from './esql_wizard_context';
@@ -90,7 +87,7 @@ export const EsqlPreviewPanel = () => {
 
   const preview = useCallback(async () => {
     const generation = ++requestGeneration.current;
-    const detectors = createMeanDetectors(state.detectorFields);
+    const detectors = createDetectors(state.detectors);
     const { job, datafeed } = buildEsqlJobPayload({
       jobId: PREVIEW_JOB_ID,
       datafeedId: PREVIEW_DATAFEED_ID,

@@ -36,8 +36,31 @@ export interface EsqlJobPayload {
   datafeed: EsqlDatafeedConfig;
 }
 
-export const createMeanDetectors = (fieldNames: string[]): Detector[] =>
-  fieldNames.map((fieldName) => ({ function: 'mean', field_name: fieldName }));
+/**
+ * Per-detector configuration collected by the ES|QL wizard's detector
+ * editor. `byField`/`overField`/`partitionField` exist so the staged
+ * PICK_FIELDS wizard step (g2sz.10) can populate them without another type
+ * change; the current wizard UI never sets them.
+ */
+export interface EsqlDetectorConfig {
+  function: string;
+  field?: string;
+  byField?: string;
+  overField?: string;
+  partitionField?: string;
+}
+
+export const createDetectors = (detectors: EsqlDetectorConfig[]): Detector[] =>
+  detectors.map(({ function: detectorFunction, field, byField, overField, partitionField }) => {
+    const detector: Detector = { function: detectorFunction };
+
+    if (field !== undefined) detector.field_name = field;
+    if (byField !== undefined) detector.by_field_name = byField;
+    if (overField !== undefined) detector.over_field_name = overField;
+    if (partitionField !== undefined) detector.partition_field_name = partitionField;
+
+    return detector;
+  });
 
 export const buildEsqlJobPayload = ({
   jobId,

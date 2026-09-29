@@ -6,7 +6,7 @@
  */
 
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { buildEsqlJobPayload, createMeanDetectors } from './esql_job_creator';
+import { buildEsqlJobPayload, createDetectors } from './esql_job_creator';
 
 describe('buildEsqlJobPayload', () => {
   const detectors: Detector[] = [{ function: 'mean', field_name: 'avg_bytes' }];
@@ -108,11 +108,40 @@ describe('buildEsqlJobPayload', () => {
   });
 });
 
-describe('createMeanDetectors', () => {
-  it('maps each selected numeric field to the detector shape used by preview and create', () => {
-    expect(createMeanDetectors(['avg_bytes', 'latency'])).toStrictEqual([
+describe('createDetectors', () => {
+  it('maps each detector config to the API detector shape, omitting unset fields', () => {
+    expect(
+      createDetectors([
+        { function: 'mean', field: 'avg_bytes' },
+        { function: 'mean', field: 'latency' },
+      ])
+    ).toStrictEqual([
       { function: 'mean', field_name: 'avg_bytes' },
       { function: 'mean', field_name: 'latency' },
+    ]);
+  });
+
+  it('omits field_name for functions that do not take a field', () => {
+    expect(createDetectors([{ function: 'count' }])).toStrictEqual([{ function: 'count' }]);
+  });
+
+  it('maps by/over/partition field when supplied, forward-compatible with the staged wizard', () => {
+    expect(
+      createDetectors([
+        {
+          function: 'rare',
+          byField: 'host',
+          overField: 'region',
+          partitionField: 'env',
+        },
+      ])
+    ).toStrictEqual([
+      {
+        function: 'rare',
+        by_field_name: 'host',
+        over_field_name: 'region',
+        partition_field_name: 'env',
+      },
     ]);
   });
 });

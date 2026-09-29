@@ -49,7 +49,7 @@ const ValidWizardState = ({
         { name: 'host', type: 'keyword', userDefined: false },
       ],
       emittedTimeField: 'bucket',
-      detectorFields: ['avg_bytes'],
+      detectors: [{ function: 'mean', field: 'avg_bytes' }],
       influencers: ['host'],
       ...queryState,
     });
@@ -133,7 +133,7 @@ describe('EsqlCreateFlow', () => {
   });
 
   it.each([
-    ['no detector', { detectorFields: [] }],
+    ['no detector', { detectors: [] }],
     ['missing emitted time field', { emittedTimeField: '' }],
     ['stale emitted time field', { emittedTimeField: 'removed_time' }],
   ])('disables create with %s and makes no API calls', (_description, queryState) => {

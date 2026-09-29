@@ -10,25 +10,17 @@ import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 
-const NUMERIC_ESQL_TYPES = new Set([
-  'byte',
-  'short',
-  'integer',
-  'long',
-  'unsigned_long',
-  'float',
-  'half_float',
-  'scaled_float',
-  'double',
-]);
+import { NUMERIC_ESQL_TYPES } from './esql_numeric_types';
 
 /**
  * A column is treated as COUNT(*)-shaped when it is named doc_count/count
  * (case-insensitive), or when it is a `long`-typed column whose name mentions
  * "count". This is a simple naming heuristic, not proof the column actually
  * holds a row count — it only picks a sensible default for the picker below.
+ * Exported so the detectors editor's default seeding can exclude
+ * count-shaped columns from its "first numeric column" default too.
  */
-const isCountShapedColumn = ({ name, type }: ESQLFieldWithMetadata): boolean =>
+export const isCountShapedColumn = ({ name, type }: ESQLFieldWithMetadata): boolean =>
   /^(doc_count|count)$/i.test(name) || (type === 'long' && /count/i.test(name));
 
 export const findDefaultSummaryCountField = (columns: ESQLFieldWithMetadata[]): string =>

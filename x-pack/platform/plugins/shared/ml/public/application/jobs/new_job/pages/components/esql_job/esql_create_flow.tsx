@@ -14,24 +14,11 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { isJobIdValid, createDatafeedId } from '../../../../../../../common/util/job_utils';
 import { useNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
-import {
-  buildEsqlJobPayload,
-  createMeanDetectors,
-} from '../../../common/job_creator/esql_job_creator';
+import { buildEsqlJobPayload, createDetectors } from '../../../common/job_creator/esql_job_creator';
 import { extractEsqlErrorReason } from './esql_error_reason';
 import { useEsqlWizardContext } from './esql_wizard_context';
-
-const NUMERIC_ESQL_TYPES = new Set([
-  'byte',
-  'short',
-  'integer',
-  'long',
-  'unsigned_long',
-  'float',
-  'half_float',
-  'scaled_float',
-  'double',
-]);
+import { NUMERIC_ESQL_TYPES } from './esql_numeric_types';
+import { detectorFieldRequirement } from './esql_detector_functions';
 
 type CreatePhase =
   | 'idle'
@@ -69,9 +56,17 @@ export const EsqlCreateFlow = () => {
 
   const datafeedId = createDatafeedId(state.jobId);
   const jobIdInvalid = state.jobId !== '' && !isJobIdValid(state.jobId);
-  const selectedDetectorFieldsAreNumeric = state.detectorFields.every((fieldName) =>
-    state.columns.some(({ name, type }) => name === fieldName && NUMERIC_ESQL_TYPES.has(type))
-  );
+  const detectorsAreValid = state.detectors.every((detector) => {
+    const requirement = detectorFieldRequirement(detector.function);
+
+    if (requirement === 'none') return true;
+    if (!detector.field) return false;
+
+    return state.columns.some(
+      ({ name, type }) =>
+        name === detector.field && (requirement === 'any' || NUMERIC_ESQL_TYPES.has(type))
+    );
+  });
   const emittedTimeFieldExists = state.columns.some(({ name }) => name === state.emittedTimeField);
   const isValid = useMemo(
     () =>
@@ -83,9 +78,9 @@ export const EsqlCreateFlow = () => {
       state.bucketSpan !== '0' &&
       isValidRange(state.wizardStart, state.wizardEnd) &&
       emittedTimeFieldExists &&
-      state.detectorFields.length > 0 &&
-      selectedDetectorFieldsAreNumeric,
-    [emittedTimeFieldExists, selectedDetectorFieldsAreNumeric, state]
+      state.detectors.length > 0 &&
+      detectorsAreValid,
+    [detectorsAreValid, emittedTimeFieldExists, state]
   );
   const isSubmitting = !['idle', 'error'].includes(phase);
 
@@ -101,7 +96,7 @@ export const EsqlCreateFlow = () => {
       sourceTimeField: state.sourceTimeField,
       timeField: state.emittedTimeField,
       bucketSpan: state.bucketSpan,
-      detectors: createMeanDetectors(state.detectorFields),
+      detectors: createDetectors(state.detectors),
       influencers: state.influencers,
       summaryCountFieldName:
         state.summaryCountFieldName === '' ? undefined : state.summaryCountFieldName,

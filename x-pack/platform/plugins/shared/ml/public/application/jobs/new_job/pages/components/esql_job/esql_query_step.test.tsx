@@ -67,12 +67,12 @@ describe('EsqlQueryStep', () => {
     expect(getEsqlQueryColumns).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      fireEvent.focus(within(screen.getByTestId('mlEsqlDetectorFields')).getByRole('combobox'));
+      fireEvent.focus(within(screen.getByTestId('mlEsqlDetectorField-0')).getByRole('combobox'));
     });
-    const detectorFieldsListbox = screen.getByRole('listbox');
-    expect(within(detectorFieldsListbox).getByText('doc_count')).toBeInTheDocument();
-    expect(within(detectorFieldsListbox).getByText('avg_bytes')).toBeInTheDocument();
-    expect(within(detectorFieldsListbox).queryByText('host')).not.toBeInTheDocument();
+    const detectorFieldListbox = screen.getByRole('listbox');
+    expect(within(detectorFieldListbox).getByText('doc_count')).toBeInTheDocument();
+    expect(within(detectorFieldListbox).getByText('avg_bytes')).toBeInTheDocument();
+    expect(within(detectorFieldListbox).queryByText('host')).not.toBeInTheDocument();
 
     await act(async () => {
       fireEvent.focus(within(screen.getByTestId('mlEsqlInfluencers')).getByRole('combobox'));
@@ -294,10 +294,126 @@ describe('EsqlQueryStep', () => {
     await act(async () => {
       fireEvent.focus(within(screen.getByTestId('mlEsqlSummaryCountField')).getByRole('combobox'));
     });
-    fireEvent.click(screen.getByText('avg_bytes'));
+    fireEvent.click(within(screen.getByRole('listbox')).getByText('avg_bytes'));
 
     expect(screen.getByTestId('mlEsqlSummaryCountField')).toHaveTextContent('avg_bytes');
     expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeChecked();
+  });
+
+  it('seeds a default mean detector on the first numeric non-count column after the columns resolve', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('mean(avg_bytes)')
+    );
+    expect(screen.queryByTestId('mlEsqlDetectorSummary-1')).not.toBeInTheDocument();
+  });
+
+  it('seeds no detector when there is no numeric non-count column', async () => {
+    getEsqlQueryColumns.mockResolvedValue({
+      columns: [
+        { name: 'bucket', type: 'date', hasConflict: false, userDefined: false },
+        { name: 'host', type: 'keyword', hasConflict: false, userDefined: false },
+        { name: 'doc_count', type: 'long', hasConflict: false, userDefined: false },
+      ],
+    });
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlEmittedTimeField')).toHaveTextContent('bucket')
+    );
+    expect(screen.queryByTestId('mlEsqlDetectorSummary-0')).not.toBeInTheDocument();
+  });
+
+  it('changes the detector function and updates the visible summary', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('mean(avg_bytes)')
+    );
+
+    fireEvent.change(screen.getByTestId('mlEsqlDetectorFunction-0'), {
+      target: { value: 'sum' },
+    });
+
+    expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('sum(avg_bytes)');
+  });
+
+  it('clears the field and disables the field selector for a function that does not take one', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('mean(avg_bytes)')
+    );
+
+    fireEvent.change(screen.getByTestId('mlEsqlDetectorFunction-0'), {
+      target: { value: 'count' },
+    });
+
+    expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('count()');
+    expect(screen.queryByTestId('mlEsqlDetectorField-0')).not.toBeInTheDocument();
+  });
+
+  it('adds and removes detector rows', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('mean(avg_bytes)')
+    );
+
+    fireEvent.click(screen.getByTestId('mlEsqlAddDetectorButton'));
+    expect(screen.getByTestId('mlEsqlDetectorSummary-1')).toHaveTextContent('mean()');
+
+    fireEvent.click(screen.getByTestId('mlEsqlRemoveDetectorButton-1'));
+    expect(screen.queryByTestId('mlEsqlDetectorSummary-1')).not.toBeInTheDocument();
+  });
+
+  it('forces delayed-data checking off when the summary count field is cleared', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeChecked());
+
+    await act(async () => {
+      fireEvent.focus(within(screen.getByTestId('mlEsqlSummaryCountField')).getByRole('combobox'));
+    });
+    fireEvent.click(
+      within(screen.getByTestId('mlEsqlSummaryCountField')).getByTestId('comboBoxClearButton')
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).not.toBeChecked()
+    );
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeDisabled();
   });
 
   it('does not update state when an in-flight request resolves after unmount', async () => {
