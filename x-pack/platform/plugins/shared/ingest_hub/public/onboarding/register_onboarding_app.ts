@@ -10,7 +10,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { firstValueFrom, from, map, switchMap } from 'rxjs';
 import type { IngestHubStartDependencies } from '../types';
-import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../common/constants';
+import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../common/core/constants';
 
 export function registerOnboardingApp(
   coreSetup: CoreSetup<IngestHubStartDependencies>,
