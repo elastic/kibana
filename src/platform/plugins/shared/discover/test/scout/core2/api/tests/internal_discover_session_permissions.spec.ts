@@ -9,7 +9,7 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { StoredDiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionInternalData } from '../../../../../server/api/internal_schema';
 import { DISCOVER_SESSION_INTERNAL_API_BASE_PATH } from '../../../../../common/constants';
 import { BASE_HEADERS } from '../fixtures/constants';
 
@@ -18,7 +18,7 @@ apiTest.describe(
   { tag: tags.deploymentAgnostic },
   () => {
     let sessionId: string;
-    let storedSession: StoredDiscoverSession;
+    let sessionData: DiscoverSessionInternalData;
     let viewerHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiServices, apiClient, samlAuth }) => {
@@ -44,8 +44,8 @@ apiTest.describe(
       );
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.data.attributes.title).toBe('Read-only internal session');
-      storedSession = response.body.data;
+      expect(response.body.data.title).toBe('Read-only internal session');
+      sessionData = response.body.data;
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {
@@ -55,7 +55,7 @@ apiTest.describe(
     apiTest('forbids creating a session as a read-only user', async ({ apiClient }) => {
       const response = await apiClient.post(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
         headers: viewerHeaders,
-        body: storedSession,
+        body: sessionData,
         responseType: 'json',
       });
 
@@ -70,8 +70,8 @@ apiTest.describe(
           {
             headers: viewerHeaders,
             body: {
-              ...storedSession,
-              attributes: { ...storedSession.attributes, title: 'Forbidden replacement' },
+              ...sessionData,
+              title: 'Forbidden replacement',
             },
             responseType: 'json',
           }
@@ -88,7 +88,7 @@ apiTest.describe(
         );
 
         expect(loaded).toHaveStatusCode(200);
-        expect(loaded.body.data).toStrictEqual(storedSession);
+        expect(loaded.body.data).toStrictEqual(sessionData);
       }
     );
   }
