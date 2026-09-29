@@ -84,6 +84,21 @@ const messageCss = css`
 export function GenAiMessages({ inputMessages, outputMessages, systemInstructions, ebt }: Props) {
   const { euiTheme } = useEuiTheme();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  // Avoid duplicates when instrumentation sends both system instructions and
+  // a system message.
+  const hasSystemInstructions = inputMessages.some(({ role, content, parts }) => {
+    if (role !== 'system') return false;
+
+    const partsContent = parts
+      ?.filter(
+        (part): part is typeof part & { content: string } =>
+          part.type === 'text' && typeof part.content === 'string'
+      )
+      .map((part) => part.content)
+      .join('\n');
+
+    return content === systemInstructions || partsContent === systemInstructions;
+  });
 
   // Highlighted style applied when the copy button for that message is hovered.
   const highlightedCss = css`
@@ -93,7 +108,9 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
   `;
 
   const allMessages: GenAiMessage[] = [
-    ...(systemInstructions ? [{ role: 'system', content: systemInstructions }] : []),
+    ...(systemInstructions && !hasSystemInstructions
+      ? [{ role: 'system', content: systemInstructions }]
+      : []),
     ...inputMessages,
     ...outputMessages,
   ];
