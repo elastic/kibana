@@ -2951,6 +2951,41 @@ describe('add_controls / remove_controls operations', () => {
     );
   });
 
+  it('add_controls prefers the keyword sibling over an aggregatable text field', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockResolvedValue({
+      indices: ['kibana_sample_data_logs'],
+      fields: {
+        host: {
+          text: { type: 'text', aggregatable: true, searchable: true, metadata_field: false },
+        },
+        'host.keyword': {
+          keyword: { type: 'keyword', aggregatable: true, searchable: true, metadata_field: false },
+        },
+      },
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(failures).toEqual([]);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect((control.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY `host.keyword`'
+    );
+  });
+
   it('add_controls reports an unmapped user-requested control as a failure', async () => {
     const esClient = createFieldCapsEsClient({ host: 'keyword', 'host.keyword': 'keyword' });
 

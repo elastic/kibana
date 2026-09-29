@@ -18,7 +18,7 @@ import {
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { Logger } from '@kbn/core/server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
-import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
@@ -127,6 +127,32 @@ const getFieldCandidates = ({ type, field_name: fieldName }: DataControlInput): 
 const hasKbnFieldType = (types: string[], kbnFieldType: KBN_FIELD_TYPES): boolean =>
   types.every((type) => castEsToKbnFieldTypeName(type) === kbnFieldType);
 
+const TEXT_FIELD_TYPES: ReadonlySet<string> = new Set([
+  ES_FIELD_TYPES.TEXT,
+  ES_FIELD_TYPES.MATCH_ONLY_TEXT,
+]);
+
+/**
+ * Pick the first mapped candidate, but prefer the `.keyword` sibling over an analyzed
+ * text field, which can be aggregatable through `fielddata` yet groups on tokens.
+ */
+const pickFieldName = (
+  candidates: string[],
+  fieldTypes: AggregatableFieldTypes
+): string | undefined => {
+  const [firstCandidate, ...otherCandidates] = candidates.filter((candidate) =>
+    fieldTypes.has(candidate)
+  );
+  if (firstCandidate === undefined) {
+    return undefined;
+  }
+
+  const isTextField = (fieldTypes.get(firstCandidate) ?? []).some((type) =>
+    TEXT_FIELD_TYPES.has(type)
+  );
+  return isTextField && otherCandidates.length > 0 ? otherCandidates[0] : firstCandidate;
+};
+
 /**
  * Report an unresolved user-requested control as a failure. Controls with the
  * same message share one entry.
@@ -192,9 +218,7 @@ const resolveControlField = (
   control: DataControlInput,
   fieldTypes: AggregatableFieldTypes
 ): { resolvedFieldName: string } | { reason: string } => {
-  const resolvedFieldName = getFieldCandidates(control).find((candidate) =>
-    fieldTypes.has(candidate)
-  );
+  const resolvedFieldName = pickFieldName(getFieldCandidates(control), fieldTypes);
   if (resolvedFieldName === undefined) {
     return { reason: `Not mapped on index "${control.index}".` };
   }
