@@ -98,7 +98,7 @@ describe('RulesAdapterV2', () => {
         time_field: string;
         schedule: { every: string; lookback: string };
         grouping: { fields: string[] };
-        query: { format: string; breach: { query: string } };
+        query: { base: string };
       };
 
       expect(data.kind).toBe('signal');
@@ -112,8 +112,7 @@ describe('RulesAdapterV2', () => {
         lookback: METRIC_SERIES_LOOKBACK,
       });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
-      expect(data.query.format).toBe('standalone');
-      expectMetricSeriesBreach(data.query.breach.query);
+      expectMetricSeriesBreach(data.query.base);
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
     });
 
@@ -154,7 +153,7 @@ describe('RulesAdapterV2', () => {
         metadata: { name: string; tags: string[] };
         schedule: { every: string; lookback: string };
         grouping: { fields: string[] };
-        query: { breach: { query: string } };
+        query: { base: string };
       };
 
       expect(data.metadata.name).toBe('Updated title (match count)');
@@ -164,7 +163,7 @@ describe('RulesAdapterV2', () => {
         lookback: METRIC_SERIES_LOOKBACK,
       });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
-      expectMetricSeriesBreach(data.query.breach.query);
+      expectMetricSeriesBreach(data.query.base);
     });
 
     it('forwards timestampField as time_field and into the compiled BUCKET', async () => {
@@ -178,10 +177,10 @@ describe('RulesAdapterV2', () => {
 
       const data = lastUpdateCall(mock).data as {
         time_field: string;
-        query: { breach: { query: string } };
+        query: { base: string };
       };
       expect(data.time_field).toBe('event.ingested');
-      expect(data.query.breach.query).toContain('BUCKET(event.ingested, 1 minute)');
+      expect(data.query.base).toContain('BUCKET(event.ingested, 1 minute)');
     });
   });
 
@@ -194,7 +193,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: false });
       await adapter.createRule('rule-1', createDefinition);
 
-      expect(lastCreateCall(mock).data.query.breach.query).not.toContain('SET project_routing');
+      expect(lastCreateCall(mock).data.query.base).not.toContain('SET project_routing');
     });
 
     it('scopes the create breach query across all projects on serverless', async () => {
@@ -203,7 +202,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: true });
       await adapter.createRule('rule-1', createDefinition);
 
-      const query = lastCreateCall(mock).data.query.breach.query;
+      const query = lastCreateCall(mock).data.query.base;
       expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
       expectMetricSeriesBreach(query);
     });
@@ -214,7 +213,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: true });
       await adapter.updateRule('rule-1', updateDefinition);
 
-      const query = lastUpdateCall(mock).data.query.breach.query;
+      const query = lastUpdateCall(mock).data.query.base;
       expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
       expectMetricSeriesBreach(query);
     });
@@ -225,7 +224,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: true });
       await adapter.createRule('rule-1', createDefinition);
 
-      expect(Parser.parseErrors(lastCreateCall(mock).data.query.breach.query)).toEqual([]);
+      expect(Parser.parseErrors(lastCreateCall(mock).data.query.base)).toEqual([]);
     });
   });
 

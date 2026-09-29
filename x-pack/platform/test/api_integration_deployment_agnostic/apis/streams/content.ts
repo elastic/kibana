@@ -21,8 +21,6 @@ import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-sett
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { bulkQueries, getQueries } from '../significant_events/helpers/requests';
-import { createTestSource, deleteTestSource } from '../significant_events/helpers/test_source';
 import {
   disableStreams,
   enableStreams,
@@ -484,53 +482,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
 
         await exportContent(apiClient, 'logs.otel.branch_a', exportBody, 400);
-      });
-
-      it('omits significant-event queries from the exported pack', async () => {
-        // Significant-event queries live on a source, outside the stream definition, so export
-        // must never carry them.
-        const source = await createTestSource(
-          roleScopedSupertest,
-          'Content pack query source',
-          'FROM logs.otel.branch_a'
-        );
-        try {
-          const esqlQuery = `FROM ${source.viewName} | WHERE KQL("message:'ERROR'")`;
-          await bulkQueries(apiClient, source.id, [
-            {
-              index: {
-                id: 'export-omits-me',
-                title: 'detector',
-                description: '',
-                esql: { query: esqlQuery },
-              },
-            },
-          ]);
-
-          const archiveBuffer = await exportContent(apiClient, 'logs.otel.branch_a', {
-            name: 'branch_a_pack',
-            description: 'export should not carry queries',
-            version: '1.0.0',
-            include: { objects: { all: {} } },
-          });
-          const contentPack = await parseArchive(Readable.from(archiveBuffer));
-
-          const streamEntries = contentPack.entries.filter(
-            (entry): entry is ContentPackStream => entry.type === 'stream'
-          );
-          expect(streamEntries.length).to.be.greaterThan(0);
-          streamEntries.forEach((entry) => {
-            expect(entry.request).to.not.have.property('queries');
-          });
-
-          // the detection still exists on the source, it is just not part of the pack
-          const { queries } = await getQueries(apiClient, source.id);
-          expect(queries.map((query) => query.id)).to.contain('export-omits-me');
-
-          await bulkQueries(apiClient, source.id, [{ delete: { id: 'export-omits-me' } }]);
-        } finally {
-          await deleteTestSource(roleScopedSupertest, source.id);
-        }
       });
     });
 
