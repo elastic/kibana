@@ -112,7 +112,9 @@ describe('useSignificantEventsUrlState', () => {
       expect(lastReplaceQuery()).not.toHaveProperty('stream');
     });
 
-    it('keeps selectedEvent when asked to', () => {
+    it('keeps selectedEvent and the openEvent written by deep-link normalization', () => {
+      // Deep-link arrival: the mount effect writes openEvent = selectedEvent. A filter adaptation
+      // issued in the same flush must build on that write, not on the stale render snapshot.
       mockQuery = { selectedEvent: 'event-1' };
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
@@ -125,10 +127,22 @@ describe('useSignificantEventsUrlState', () => {
 
       expect(lastReplaceQuery()).toEqual({
         selectedEvent: 'event-1',
+        openEvent: 'event-1',
         status: ['open'],
         severity: ['40-medium'],
         stream: ['logs'],
       });
+    });
+
+    it('composes consecutive writes issued before a re-render', () => {
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => {
+        result.current.openEvent('event-2');
+        result.current.setFilters({ status: [] });
+      });
+
+      expect(lastReplaceQuery()).toMatchObject({ openEvent: 'event-2', status: '' });
     });
   });
 
@@ -187,14 +201,15 @@ describe('useSignificantEventsUrlState', () => {
       });
     });
 
-    it('clearSelectedEvent', () => {
+    it('clearSelectedEvent keeps the flyout open', () => {
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
       act(() => result.current.clearSelectedEvent());
 
+      // openEvent was written by deep-link normalization on mount and must survive the clear.
       expect(mockReplace).toHaveBeenLastCalledWith('/{tab}', {
         path: { tab: 'significant_events' },
-        query: { status: 'closed', severity: ['20-low'], stream: 'logs' },
+        query: { status: 'closed', severity: ['20-low'], stream: 'logs', openEvent: 'event-1' },
       });
     });
   });

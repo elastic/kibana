@@ -97,6 +97,21 @@ export const useSignificantEventsUrlState = () => {
   filtersRef.current = { status: statusFilter, severity: severityFilter, stream: streamFilter };
 
   /**
+   * Every URL write goes through here so that writes issued in the same tick compose: the ref is
+   * updated eagerly instead of waiting for the re-render that follows navigation. Otherwise the
+   * deep-link normalization effect and the tab's filter adaptation effect, which both run in the
+   * first effects flush when the list is already cached, would each write from the same stale
+   * snapshot and the second would drop the first's `openEvent`.
+   */
+  const write = useCallback(
+    (method: 'push' | 'replace', nextQuery: TabQuery) => {
+      queryRef.current = nextQuery;
+      router[method]('/{tab}', { path: { tab: 'significant_events' }, query: nextQuery });
+    },
+    [router]
+  );
+
+  /**
    * replace (not push): filter edits should not pile up history entries. A filter edit exits the
    * deep-link selection context (drops `selectedEvent`) unless the caller is adapting the filters
    * to that very event. `openEvent` is kept so an edit does not close the flyout while the event
@@ -105,23 +120,21 @@ export const useSignificantEventsUrlState = () => {
   const setFilters = useCallback(
     (partial: Partial<SignificantEventsFilters>, { keepSelectedEvent = false } = {}) => {
       const next = { ...filtersRef.current, ...partial };
+      filtersRef.current = next;
       const {
         status: _status,
         severity: _severity,
         stream: _stream,
         ...rest
       } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
-      router.replace('/{tab}', {
-        path: { tab: 'significant_events' },
-        query: {
-          ...rest,
-          status: encodeListParam(next.status),
-          severity: encodeListParam(next.severity),
-          ...(next.stream.length ? { stream: next.stream } : {}),
-        },
+      write('replace', {
+        ...rest,
+        status: encodeListParam(next.status),
+        severity: encodeListParam(next.severity),
+        ...(next.stream.length ? { stream: next.stream } : {}),
       });
     },
-    [router]
+    [write]
   );
 
   // Removing the params restores the defaults and exits the deep-link selection context.
@@ -132,37 +145,27 @@ export const useSignificantEventsUrlState = () => {
       stream: _stream,
       ...rest
     } = omitSelectedEvent(queryRef.current);
-    router.replace('/{tab}', { path: { tab: 'significant_events' }, query: rest });
-  }, [router]);
+    write('replace', rest);
+  }, [write]);
 
   const openEvent = useCallback(
-    (eventId: string) => {
-      router.push('/{tab}', {
-        path: { tab: 'significant_events' },
-        query: { ...(queryRef.current ?? {}), openEvent: eventId },
-      });
-    },
-    [router]
+    (eventId: string) => write('push', { ...(queryRef.current ?? {}), openEvent: eventId }),
+    [write]
   );
 
   const closeEvent = useCallback(() => {
     const { openEvent: _, ...rest } = queryRef.current ?? {};
-    router.push('/{tab}', {
-      path: { tab: 'significant_events' },
-      query: rest,
-    });
-  }, [router]);
+    write('push', rest);
+  }, [write]);
 
   // replace (not push): clearing is often triggered per keystroke from the search bar, and a
   // history entry per keystroke would make the back button restore the cleared selection.
   // Keep openEvent so a filter/search edit does not close the flyout while the event is still
   // in the list. A later fetch that drops the event clears openEvent separately.
-  const clearSelectedEvent = useCallback(() => {
-    router.replace('/{tab}', {
-      path: { tab: 'significant_events' },
-      query: omitSelectedEvent(queryRef.current),
-    });
-  }, [router]);
+  const clearSelectedEvent = useCallback(
+    () => write('replace', omitSelectedEvent(queryRef.current)),
+    [write]
+  );
 
   const toggleEvent = useCallback(
     (eventId: string) => {
@@ -184,12 +187,9 @@ export const useSignificantEventsUrlState = () => {
     }
     normalizedForRef.current = selectedEventId;
     if (!queryRef.current?.openEvent) {
-      router.replace('/{tab}', {
-        path: { tab: 'significant_events' },
-        query: { ...(queryRef.current ?? {}), openEvent: selectedEventId },
-      });
+      write('replace', { ...(queryRef.current ?? {}), openEvent: selectedEventId });
     }
-  }, [selectedEventId, router]);
+  }, [selectedEventId, write]);
 
   return {
     selectedEventId,

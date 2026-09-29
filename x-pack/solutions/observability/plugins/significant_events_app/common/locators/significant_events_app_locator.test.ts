@@ -69,6 +69,17 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     );
   });
 
+  it('encodes an empty status/severity selection explicitly and omits other empty arrays', async () => {
+    const { path } = await locator.getLocation({
+      tab: 'significant_events',
+      status: [],
+      severity: [],
+      stream: [],
+    });
+
+    expect(path).toBe('/significant_events?status=&severity=');
+  });
+
   it('omits undefined params', async () => {
     const { path } = await locator.getLocation({
       tab: 'queries',
