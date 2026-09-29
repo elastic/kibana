@@ -78,10 +78,11 @@ export type ExtractIocsResponse = TypeOf<typeof extractIocsResponseSchema>;
 // ── enrich_report_core ──────────────────────────────────────────────────────
 
 // Core receives the full article plus extract_iocs output. Text alone can be
-// 5M chars; 5,000 IOCs with value+defanged can add tens of MiB of JSON, so this
-// must exceed the text-only 10 MiB extract/gate caps or valid workflow payloads
-// 413 and stay pending forever.
-export const ENRICH_REPORT_CORE_MAX_BODY_BYTES = 50 * 1024 * 1024;
+// 5M chars; 5,000 IOCs each near their value/defanged/tier_basis/context bounds
+// can add ~57 MiB of JSON on top of that (worst case, not typical), so this
+// must clear ~62 MiB with margin or a maximally IOC-dense report 413s on every
+// retry and stays pending forever.
+export const ENRICH_REPORT_CORE_MAX_BODY_BYTES = 80 * 1024 * 1024;
 
 export const enrichReportCoreBodySchema = schema.object({
   text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
