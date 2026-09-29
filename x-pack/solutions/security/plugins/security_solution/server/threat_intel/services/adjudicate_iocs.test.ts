@@ -16,8 +16,10 @@ import {
   OVERFLOW_MAX_SEMANTIC_CANDIDATES,
   OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS,
   OVERFLOW_RETRY2_MAX_SEMANTIC_CANDIDATES,
+  OVERFLOW_RETRY2_MAX_VALUE_CHARS,
   prepareIocAdjudication,
   reconcileIocAdjudication,
+  truncateValuePreservingEnds,
 } from './adjudicate_iocs';
 
 const candidate = (value: string, overrides: Partial<ExtractedIoc> = {}): ExtractedIoc => ({
@@ -204,6 +206,10 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     // Skipped candidates keep their heuristic tier; only reviewed IDs are verdicted.
     expect(result.iocs[OVERFLOW_MAX_SEMANTIC_CANDIDATES].tier).toBe('discriminating');
     expect(result.adjudication.deferred_unreviewed).toBe(10);
+    // Deferred URL/domain IOCs stay out of anchors until reviewed.
+    expect(
+      result.anchor_iocs.some((ioc) => ioc.value === iocs[OVERFLOW_MAX_SEMANTIC_CANDIDATES].value)
+    ).toBe(false);
   });
 
   it('centers overflow context on the IOC instead of taking a leading prefix', () => {
@@ -340,5 +346,86 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
         }))
       ).length
     ).toBeLessThanOrEqual(OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS);
+  });
+
+  it('keeps long URL suffixes distinguishable after payload truncation', () => {
+    const prefix = `https://evil.example/${'a'.repeat(1_800)}`;
+    const left = `${prefix}-LEFT_UNIQUE`;
+    const right = `${prefix}-RIGHT_UNIQUE`;
+    const iocs = [candidate(left), candidate(right)];
+    const text = `Fetched ${left} then ${right}.`;
+    const prepared = prepareIocAdjudication({ text, iocs });
+    const second = boundIocAdjudicationForPayload(boundIocAdjudicationForOverflow(prepared));
+
+    expect(second.reviewable).toHaveLength(2);
+    expect(second.reviewable[0].ioc.value).not.toBe(second.reviewable[1].ioc.value);
+    expect(second.reviewable[0].ioc.value).toContain('LEFT_UNIQUE');
+    expect(second.reviewable[1].ioc.value).toContain('RIGHT_UNIQUE');
+    expect(second.reviewable[0].ioc.value.length).toBeLessThanOrEqual(
+      OVERFLOW_RETRY2_MAX_VALUE_CHARS
+    );
+  });
+
+  it('defers remaining prompt collisions instead of sending identical copies', () => {
+    // Differ only in the omitted middle so end-preserving truncation collides.
+    const head = 'H'.repeat(128);
+    const midA = 'A'.repeat(800);
+    const midB = 'B'.repeat(800);
+    const tail = 'T'.repeat(127);
+    const left = `${head}${midA}${tail}`;
+    const right = `${head}${midB}${tail}`;
+    const truncatedLeft = truncateValuePreservingEnds(left, OVERFLOW_RETRY2_MAX_VALUE_CHARS);
+    const truncatedRight = truncateValuePreservingEnds(right, OVERFLOW_RETRY2_MAX_VALUE_CHARS);
+    expect(truncatedLeft).toBe(truncatedRight);
+
+    const iocs = [
+      candidate(`https://evil.example/${left}`),
+      candidate(`https://evil.example/${right}`),
+    ];
+    // Re-check with the scheme prefix included in the truncated form.
+    const withSchemeLeft = truncateValuePreservingEnds(
+      iocs[0].value,
+      OVERFLOW_RETRY2_MAX_VALUE_CHARS
+    );
+    const withSchemeRight = truncateValuePreservingEnds(
+      iocs[1].value,
+      OVERFLOW_RETRY2_MAX_VALUE_CHARS
+    );
+    expect(withSchemeLeft).toBe(withSchemeRight);
+
+    const text = `Fetched ${iocs[0].value} then ${iocs[1].value}.`;
+    const prepared = prepareIocAdjudication({ text, iocs });
+    const second = boundIocAdjudicationForPayload(boundIocAdjudicationForOverflow(prepared));
+
+    expect(second.reviewable).toHaveLength(1);
+    expect(second.deferredUnreviewed).toBeGreaterThanOrEqual(1);
+  });
+
+  it('excludes deferred URL candidates from anchors until reviewed', () => {
+    const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+    const iocs = Array.from({ length: capacity + 5 }, (_, index) =>
+      candidate(`https://evil.example/payload-${index}`, {
+        tier: 'discriminating',
+        tier_heuristic: 'discriminating',
+        tier_basis: 'url_path_entropy',
+      })
+    );
+    const hash = candidate('a'.repeat(64), {
+      type: 'hash',
+      tier: 'discriminating',
+      tier_heuristic: 'discriminating',
+      tier_basis: 'hash_high_entropy',
+    });
+    const all = [...iocs, hash];
+    const text = all.map((ioc) => `Seen ${ioc.value}.`).join(' ');
+    const prepared = prepareIocAdjudication({ text, iocs: all });
+    const approved = new Set(prepared.reviewable.map((entry) => entry.id));
+    const result = reconcileIocAdjudication(prepared, approved);
+
+    expect(prepared.deferredUnreviewed).toBe(5);
+    expect(result.iocs[capacity].tier).toBe('discriminating');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === iocs[capacity].value)).toBe(false);
+    expect(result.anchor_iocs.some((ioc) => ioc.type === 'hash')).toBe(true);
+    expect(result.promotable_count).toBe(capacity + 1);
   });
 });

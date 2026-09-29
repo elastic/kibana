@@ -411,8 +411,26 @@ export const boundIocAdjudicationForOverflow = (
 };
 
 /**
+ * Truncate a long IOC value for an overflow prompt while keeping both ends so
+ * path suffixes remain distinguishable (`…` marks the omitted middle).
+ */
+export const truncateValuePreservingEnds = (value: string, maxChars: number): string => {
+  if (value.length <= maxChars) return value;
+  const ellipsis = '…';
+  if (maxChars <= ellipsis.length + 2) return value.slice(0, maxChars);
+  const budget = maxChars - ellipsis.length;
+  const head = Math.ceil(budget / 2);
+  const tail = Math.floor(budget / 2);
+  return `${value.slice(0, head)}${ellipsis}${value.slice(-tail)}`;
+};
+
+const promptIdentity = (type: string, value: string): string => `${type}:${value}`;
+
+/**
  * Further shrink an already overflow-bounded candidate set by truncating values
  * and dropping candidates until the JSON payload fits a small reasoning window.
+ * Truncation keeps path suffixes; any remaining identical prompt copies are
+ * deferred rather than sent as ambiguous duplicates.
  */
 export const boundIocAdjudicationForPayload = (
   prepared: PreparedIocAdjudication,
@@ -427,15 +445,29 @@ export const boundIocAdjudicationForPayload = (
       ...candidate,
       ioc: {
         ...candidate.ioc,
-        value: originalValue.slice(0, maxValueChars),
-        defanged: candidate.ioc.defanged?.slice(0, maxValueChars),
+        value: truncateValuePreservingEnds(originalValue, maxValueChars),
+        defanged: candidate.ioc.defanged
+          ? truncateValuePreservingEnds(candidate.ioc.defanged, maxValueChars)
+          : undefined,
       },
       // Center on the original value before truncating the prompt copy.
       context: shrinkContextAroundIoc(candidate.context, originalValue, maxContextChars),
     };
   });
 
-  let kept = truncated;
+  // If two long URLs still collide after end-preserving truncation, defer the
+  // duplicates so a single ambiguous prompt cannot verdict the wrong original.
+  const seenPromptIds = new Set<string>();
+  const unique: IocAdjudicationCandidate[] = [];
+  for (const candidate of truncated) {
+    const key = promptIdentity(candidate.ioc.type, candidate.ioc.value);
+    if (!seenPromptIds.has(key)) {
+      seenPromptIds.add(key);
+      unique.push(candidate);
+    }
+  }
+
+  let kept = unique;
   while (kept.length > 1 && candidatePayloadChars(kept) > maxPayloadChars) {
     kept = kept.slice(0, Math.max(1, Math.floor(kept.length / 2)));
   }
@@ -447,8 +479,10 @@ export const boundIocAdjudicationForPayload = (
         ...only,
         ioc: {
           ...only.ioc,
-          value: only.ioc.value.slice(0, Math.min(only.ioc.value.length, room)),
-          defanged: only.ioc.defanged?.slice(0, Math.min(only.ioc.defanged.length, room)),
+          value: truncateValuePreservingEnds(only.ioc.value, room),
+          defanged: only.ioc.defanged
+            ? truncateValuePreservingEnds(only.ioc.defanged, room)
+            : undefined,
         },
         context: '',
       },
@@ -470,6 +504,7 @@ export const reconcileIocAdjudication = (
   truncated?: boolean
 ): AdjudicateIocsResult => {
   const output = [...prepared.output];
+  const reviewedIndexes = new Set(prepared.reviewable.map((candidate) => candidate.originalIndex));
   for (const candidate of prepared.reviewable) {
     // Truncated overflow values are prompt-only; approve/reject against the
     // original IOC stored at originalIndex.
@@ -479,7 +514,15 @@ export const reconcileIocAdjudication = (
       : downgrade(original, 'semantic_reference');
   }
 
-  const anchorIocs = output.filter((ioc) => PROMOTABLE_TIERS.has(ioc.tier));
+  // Deferred URL/domain candidates keep heuristic tiers in `iocs`, but stay out
+  // of anchors/hash until a model pass reviews them.
+  const anchorIocs = output.filter((ioc, index) => {
+    if (!PROMOTABLE_TIERS.has(ioc.tier)) return false;
+    if ((ioc.type === 'url' || ioc.type === 'domain') && !reviewedIndexes.has(index)) {
+      return false;
+    }
+    return true;
+  });
   return {
     count: output.length,
     iocs: output,
