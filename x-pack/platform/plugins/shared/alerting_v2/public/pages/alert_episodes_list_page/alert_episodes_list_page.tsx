@@ -137,7 +137,7 @@ const TABLE_ROW_LINE_HEIGHT = '24px';
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
-  border-radius: ${euiTheme.border.radius.medium};
+  border-radius: ${euiTheme.border.radius.panel};
   border: ${euiTheme.border.thin};
   overflow: hidden;
 
@@ -165,11 +165,17 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export const AlertEpisodesListPage = () => (
-  <EpisodeDataSourceProvider dataSource={CLASSIC_EPISODES_DATA_SOURCE}>
-    <AlertEpisodesListPageContent />
-  </EpisodeDataSourceProvider>
-);
+export const AlertEpisodesListPage = () => {
+  const queryV2Source = useService(UserCapabilities).canRead('alerts');
+  return (
+    <EpisodeDataSourceProvider
+      dataSource={CLASSIC_EPISODES_DATA_SOURCE}
+      queryV2Source={queryV2Source}
+    >
+      <AlertEpisodesListPageContent />
+    </EpisodeDataSourceProvider>
+  );
+};
 
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
