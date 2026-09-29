@@ -99,7 +99,6 @@ export function createEmptyTrackedAlerts<
     all: {},
     seqNo: {},
     primaryTerm: {},
-    untracked: new Set<string>(),
     get(uuid: string) {
       return this.all[uuid];
     },
@@ -149,6 +148,7 @@ async function fetchAlertsByIds<AlertData extends RuleAlertData>({
     query: {
       bool: {
         must: [{ term: { [ALERT_RULE_UUID]: ruleId } }],
+        must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
         filter: [{ ids: { values: alertUuids } }],
       },
     },
@@ -164,18 +164,10 @@ export function populateTrackedAlerts<AlertData extends RuleAlertData>(
   for (const hit of hits) {
     const alertHit = hit._source as Alert & AlertData;
     const alertUuid = get(alertHit, ALERT_UUID);
-    const status = get(alertHit, ALERT_STATUS);
-
-    // Remember the id so a later create does not collide with it, and leave
-    // the document out of the update maps so it is not rewritten as active.
-    if (status === ALERT_STATUS_UNTRACKED) {
-      if (alertUuid) {
-        trackedAlerts.untracked.add(alertUuid);
-      }
-      continue;
-    }
 
     trackedAlerts.all[alertUuid] = alertHit;
+
+    const status = get(alertHit, ALERT_STATUS);
     if (status === ALERT_STATUS_ACTIVE) {
       trackedAlerts.active[alertUuid] = alertHit;
     }

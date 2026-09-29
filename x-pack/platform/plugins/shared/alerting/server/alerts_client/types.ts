@@ -47,8 +47,6 @@ export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
   all: Record<string, Alert & AlertData>;
   seqNo: Record<string, number | undefined>;
   primaryTerm: Record<string, number | undefined>;
-  // UUIDs whose existing document is status: untracked. These are not updated.
-  untracked: Set<string>;
   get: (uuid: string) => (Alert & AlertData) | undefined;
   getById: (id: string) => (Alert & AlertData) | undefined;
 }

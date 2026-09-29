@@ -577,6 +577,7 @@ describe('Alerts Client', () => {
             query: {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
                 filter: [{ ids: { values: ['missing-uuid'] } }],
               },
             },
@@ -1170,195 +1171,6 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should recover alerts when the tracked AAD document is missing', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            activeAlertsFromState: {
-              '1': trackedAlert1Raw,
-            },
-          });
-
-          // Report no alerts so the instance from task state recovers. Search
-          // returns no hits, so there is no tracked AAD document to update.
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          await alertsClient.persistAlerts();
-
-          expect(logger.warn).toHaveBeenCalledWith(
-            `Creating recovered alert document for alert(1) in .alerts-test.alerts-default - no existing alert document found ${ruleInfo}.`,
-            logTags
-          );
-
-          expect(clusterClient.bulk).toHaveBeenCalledWith({
-            index: '.alerts-test.alerts-default',
-            refresh: 'wait_for',
-            require_alias: !useDataStreamForAlerts,
-            body: [
-              {
-                create: {
-                  _id: 'abc',
-                  ...(useDataStreamForAlerts ? {} : { require_alias: true }),
-                },
-              },
-              getRecoveredIndexedAlertDoc({
-                [ALERT_UUID]: 'abc',
-                [ALERT_STATE_NAMESPACE]: { foo: true },
-              }),
-            ],
-          });
-        });
-
-        test('should set tracked to false when synthesizing a recovered alert that will not stay in task state', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, enabled: false },
-            activeAlertsFromState: {
-              '1': {
-                ...trackedAlert1Raw,
-                meta: {
-                  ...trackedAlert1Raw.meta,
-                  flapping: false,
-                  flappingHistory: [false, false, false],
-                },
-              },
-            },
-          });
-
-          // Search returns no hits, so recovery is synthesized rather than
-          // updated in place. The alert has no flapping history to keep.
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          await alertsClient.persistAlerts();
-
-          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
-            Record<string, unknown>
-          >;
-          const recoveredDocs = bulkBody.filter((item) => item[ALERT_STATUS] === 'recovered');
-          expect(recoveredDocs).toHaveLength(1);
-          expect(recoveredDocs[0][ALERT_TRACKED]).toEqual(false);
-        });
-
-        test('should not rewrite an untracked document when the alert recovers', async () => {
-          const emptySearch = {
-            took: 10,
-            timed_out: false,
-            _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
-            hits: { total: { relation: 'eq' as const, value: 0 }, hits: [] },
-          };
-          clusterClient.search.mockResolvedValueOnce(emptySearch).mockResolvedValueOnce({
-            ...emptySearch,
-            hits: {
-              total: { relation: 'eq', value: 1 },
-              hits: [
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  _seq_no: 41,
-                  _primary_term: 665,
-                  _source: {
-                    ...fetchedAlert1,
-                    [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
-                    [ALERT_TRACKED]: false,
-                  },
-                },
-              ],
-            },
-          });
-
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            activeAlertsFromState: {
-              '1': trackedAlert1Raw,
-            },
-          });
-
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          await alertsClient.persistAlerts();
-
-          expect(logger.debug).toHaveBeenCalledWith(
-            `Skipping update of untracked alert (1) in .alerts-test.alerts-default ${ruleInfo}.`,
-            logTags
-          );
-          expect(clusterClient.bulk).not.toHaveBeenCalled();
-        });
-
-        test('should not rewrite an untracked document when the alert is still active', async () => {
-          const emptySearch = {
-            took: 10,
-            timed_out: false,
-            _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
-            hits: { total: { relation: 'eq' as const, value: 0 }, hits: [] },
-          };
-          clusterClient.search.mockResolvedValueOnce(emptySearch).mockResolvedValueOnce({
-            ...emptySearch,
-            hits: {
-              total: { relation: 'eq', value: 1 },
-              hits: [
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  _seq_no: 41,
-                  _primary_term: 665,
-                  _source: {
-                    ...fetchedAlert1,
-                    [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
-                    [ALERT_TRACKED]: false,
-                  },
-                },
-              ],
-            },
-          });
-
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            activeAlertsFromState: {
-              '1': trackedAlert1Raw,
-            },
-          });
-
-          const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
-
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          await alertsClient.persistAlerts();
-
-          expect(logger.debug).toHaveBeenCalledWith(
-            `Skipping update of untracked alert (1) in .alerts-test.alerts-default ${ruleInfo}.`,
-            logTags
-          );
-          expect(clusterClient.bulk).not.toHaveBeenCalled();
-        });
-
         test('should recover unflattened recovered alerts in existing index', async () => {
           clusterClient.search.mockResolvedValue({
             took: 10,
@@ -1867,7 +1679,7 @@ describe('Alerts Client', () => {
           await alertsClient.persistAlerts();
 
           expect(logger.warn).toHaveBeenCalledWith(
-            `Creating recovered alert document for alert(1) in .alerts-test.alerts-default - no existing alert document found ${ruleInfo}.`,
+            `Not updating recovered alert(1) in .alerts-test.alerts-default - existing alert document not found ${ruleInfo}.`,
             logTags
           );
         });
