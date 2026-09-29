@@ -17,7 +17,9 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esClient.indices.delete({ index: 'heartbeat-8-full-test', ignore_unavailable: true });
+    // getPings uses heartbeat-*; UI/synthetics Scout leave browser archive docs
+    // (heartbeat-8.1.0-…, +4 in-window summary) that inflate total beyond 2000.
+    await esClient.indices.delete({ index: 'heartbeat-*', ignore_unavailable: true });
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
