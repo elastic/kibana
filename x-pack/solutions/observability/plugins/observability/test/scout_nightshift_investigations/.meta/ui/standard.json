@@ -1,5 +1,5 @@
 {
-  "sha1": "a84e4311e2b7d22b9ce591520139162930d9dfed",
+  "sha1": "f16d11c55c0edac9bd4e879d74ac5463110fef53",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -32,8 +32,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 79,
-        "column": 17
+        "line": 90,
+        "column": 18
+      }
+    },
+    {
+      "id": "4dd4f954d8f8955-ec412db80bb9b39",
+      "title": "Observability alert investigation action views a completed investigation from an alert row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
+        "line": 101,
+        "column": 13
+      }
+    },
+    {
+      "id": "4dd4f954d8f8955-026fa90c51b2bbf",
+      "title": "Observability alert investigation action views a completed investigation from the alert detail action menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
+        "line": 118,
+        "column": 16
       }
     }
   ]

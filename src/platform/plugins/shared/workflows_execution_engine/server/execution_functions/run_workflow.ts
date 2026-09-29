@@ -13,29 +13,36 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
+  WorkflowRepository,
 } from '@kbn/workflows';
+import { completeIdentityFailureCleanup } from './complete_identity_failure_cleanup';
+import { finalizeWorkflowIdentityFailure } from './finalize_workflow_identity_failure';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
+import { emitWorkflowIdentityFailureEvent } from '../lib/emit_workflow_identity_failure_event';
+import { hasWorkflowAccess } from '../lib/has_workflow_access';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { withWorkflowExecutionIdentity } from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
 } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export interface RunWorkflowResult {
   /** Dormant queued `workflow:run` tasks must be deleted by Task Manager after handling. */
   shouldDeleteTask?: boolean;
 }
 
-export async function runWorkflow({
+async function runWorkflowWithRequest({
   workflowRunId,
   spaceId,
   signal,
@@ -118,6 +125,45 @@ export async function runWorkflow({
     return;
   }
 
+  const currentWorkflow = await new WorkflowRepository({
+    esClient: dependencies.coreStart.elasticsearch.client.asInternalUser,
+    logger,
+  }).getWorkflow(execution.workflowId, spaceId, { includeGlobal: true, includeDeleted: true });
+  // Older test executions have no isEphemeral flag and still require edit access.
+  const requiredPermission =
+    execution.isTestRun && execution.isEphemeral !== false ? 'edit' : 'execute';
+  if (
+    currentWorkflow &&
+    !(await hasWorkflowAccess(
+      currentWorkflow,
+      fakeRequest,
+      dependencies.coreStart,
+      requiredPermission
+    ))
+  ) {
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowRunId,
+      status: ExecutionStatus.FAILED,
+      finishedAt: new Date().toISOString(),
+      error: {
+        type: 'WorkflowAccessDeniedError',
+        message: 'Workflow execution access was removed.',
+      },
+    });
+    await handlePostExecutionLoop({
+      workflowRunId,
+      spaceId,
+      logger,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      meteringService,
+      cloudSetup: dependencies.cloudSetup,
+    });
+    return;
+  }
+
   const handledQueuedRun = await handleQueuedWorkflowRunAtTaskStart({
     execution,
     workflowRunId,
@@ -129,8 +175,8 @@ export async function runWorkflow({
       workflowRunId,
       spaceId,
       logger,
-      fakeRequest,
       workflowExecutionRepository,
+      stepExecutionRepository,
       internalResumeWorkflowExecution,
       workflowTaskManager,
       meteringService,
@@ -224,11 +270,70 @@ export async function runWorkflow({
     workflowRunId,
     spaceId,
     logger,
-    fakeRequest,
     workflowExecutionRepository,
+    stepExecutionRepository,
     internalResumeWorkflowExecution,
     workflowTaskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });
 }
+
+export const runWorkflow = async (
+  params: Parameters<typeof runWorkflowWithRequest>[0]
+): ReturnType<typeof runWorkflowWithRequest> => {
+  const execution = await params.workflowExecutionRepository.getWorkflowExecutionById(
+    params.workflowRunId,
+    params.spaceId
+  );
+  if (!execution) {
+    throw new Error('Workflow execution not found.');
+  }
+  if (isTerminalStatus(execution.status)) {
+    await completeIdentityFailureCleanup(execution, {
+      ...params,
+      workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+      cloudSetup: params.dependencies.cloudSetup,
+    });
+    return;
+  }
+  let enteredExecution = false;
+  try {
+    return await withWorkflowExecutionIdentity(
+      params.dependencies.coreStart,
+      execution,
+      params.fakeRequest,
+      (fakeRequest) => {
+        enteredExecution = true;
+        return runWorkflowWithRequest({ ...params, fakeRequest });
+      }
+    );
+  } catch (error) {
+    if (!enteredExecution && execution.workflowDefinition?.settings?.run_as) {
+      const executionError = {
+        type: 'ServiceAccountExecutionError',
+        message: error instanceof Error ? error.message : String(error),
+      };
+      const failedExecution = await finalizeWorkflowIdentityFailure({
+        ...params,
+        error: executionError,
+      });
+      if (!failedExecution) throw error;
+      if (failedExecution.status === ExecutionStatus.FAILED) {
+        await emitWorkflowIdentityFailureEvent({
+          execution: failedExecution,
+          request: params.fakeRequest,
+          emitEvent: params.workflowsExecutionEngine.triggerEvents.emitEvent,
+          logger: params.logger,
+          maxEventChainDepth: params.config.eventDriven.maxChainDepth,
+        });
+      }
+      await completeIdentityFailureCleanup(failedExecution, {
+        ...params,
+        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+        cloudSetup: params.dependencies.cloudSetup,
+      });
+    }
+    throw error;
+  }
+};

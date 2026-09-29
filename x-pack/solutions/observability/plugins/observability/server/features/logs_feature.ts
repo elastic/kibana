@@ -32,7 +32,7 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
       all: {
         app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
         catalogue: ['infralogging', 'logs'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
           read: [],
@@ -56,7 +56,7 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
       read: {
         app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
         catalogue: ['infralogging', 'logs'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         alerting: {
           rule: {
             read: logsAlertingFeatures,

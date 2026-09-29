@@ -41,6 +41,15 @@ export const PlatformOrUndefined = lazySchema(() => Platform.nullable());
 export type PlatformOrUndefined = z.infer<typeof PlatformOrUndefined>;
 
 /**
+ * Pack-level platform restriction. To specify multiple platforms, use commas. For example, `linux,darwin`.
+ */
+export const PackPlatform = lazySchema(() => z.string().min(1).max(256));
+export type PackPlatform = z.infer<typeof PackPlatform>;
+
+export const PackPlatformOrUndefined = lazySchema(() => PackPlatform.nullable());
+export type PackPlatformOrUndefined = z.infer<typeof PackPlatformOrUndefined>;
+
+/**
  * The SQL query you want to run.
  */
 export const Query = lazySchema(() => z.string());
@@ -128,6 +137,15 @@ export const EnabledOrUndefined = lazySchema(() => Enabled.nullable());
 export type EnabledOrUndefined = z.infer<typeof EnabledOrUndefined>;
 
 /**
+ * Whether this query is enabled. When false, the query is omitted from the Fleet policy. Default is true.
+ */
+export const QueryEnabled = lazySchema(() => z.boolean());
+export type QueryEnabled = z.infer<typeof QueryEnabled>;
+
+export const QueryEnabledOrUndefined = lazySchema(() => QueryEnabled.nullable());
+export type QueryEnabledOrUndefined = z.infer<typeof QueryEnabledOrUndefined>;
+
+/**
  * A list of agents policy IDs.
  */
 export const PolicyIds = lazySchema(() => z.array(z.string()));
@@ -141,11 +159,14 @@ export const ECSMappingItem = lazySchema(() =>
     /**
      * The ECS field to map to.
      */
-    field: z.string().optional(),
+    field: z.string().optional().describe('The ECS field to map to.'),
     /**
      * The value to map to the ECS field.
      */
-    value: z.union([z.string(), z.array(z.string())]).optional(),
+    value: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .describe('The value to map to the ECS field.'),
   })
 );
 export type ECSMappingItem = z.infer<typeof ECSMappingItem>;
@@ -167,7 +188,7 @@ export const ECSMappingArrayItem = lazySchema(() =>
     /**
      * The ECS field name.
      */
-    key: z.string().optional(),
+    key: z.string().optional().describe('The ECS field name.'),
     value: ECSMappingItem.optional(),
   })
 );
@@ -182,6 +203,20 @@ export type ECSMappingArray = z.infer<typeof ECSMappingArray>;
 export const ECSMappingArrayOrUndefined = lazySchema(() => ECSMappingArray.nullable());
 export type ECSMappingArrayOrUndefined = z.infer<typeof ECSMappingArrayOrUndefined>;
 
+/**
+  * Controls the result document type emitted by osquerybeat for this pack or query.
+- `snapshot`: Full table snapshot on every scheduled run (default).
+- `differential`: Rows added or removed since the previous run.
+- `differential_added_only`: Only rows added since the previous run (no removals).
+
+  */
+export const ResultType = lazySchema(() =>
+  z.enum(['snapshot', 'differential', 'differential_added_only'])
+);
+export type ResultType = z.infer<typeof ResultType>;
+export type ResultTypeEnum = typeof ResultType.enum;
+export const ResultTypeEnum = ResultType.enum;
+
 export const ArrayQueriesItem = lazySchema(() =>
   z.object({
     id: QueryId.optional(),
@@ -191,6 +226,8 @@ export const ArrayQueriesItem = lazySchema(() =>
     platform: PlatformOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
   })
 );
 export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
@@ -235,15 +272,31 @@ well-formed parts (other recognized parts like `BYHOUR`,
 verbatim).
 
       */
-    rrule: z.string().max(2048),
+    rrule: z
+      .string()
+      .max(2048)
+      .describe(
+        'Fully serialized RFC 5545 RRULE string (e.g.\n`"FREQ=WEEKLY;BYDAY=MO,WE,FR"`). The Kibana UI writes only a\nsubset of parts — `FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`,\n`BYMONTH` — but the server accepts and round-trips any\nwell-formed parts (other recognized parts like `BYHOUR`,\n`BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are preserved\nverbatim).\n'
+      ),
     /**
      * RFC 3339 datetime string for the schedule's start.
      */
-    start_date: z.string().max(64).datetime(),
+    start_date: z
+      .string()
+      .max(64)
+      .datetime()
+      .describe("RFC 3339 datetime string for the schedule's start."),
     /**
      * Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`.
      */
-    end_date: z.string().max(64).datetime().optional(),
+    end_date: z
+      .string()
+      .max(64)
+      .datetime()
+      .optional()
+      .describe(
+        "Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`."
+      ),
     /**
       * Optional Go duration string for splay (random execution delay),
 e.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit
@@ -252,11 +305,22 @@ read for round-trip safety with osquerybeat's writer. Maximum
 12 hours (43200 seconds).
 
       */
-    splay: z.string().max(64).optional(),
+    splay: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Optional Go duration string for splay (random execution delay),\ne.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit\nvalues only; compound durations (`"1h30m"`) are tolerated on\nread for round-trip safety with osquerybeat\'s writer. Maximum\n12 hours (43200 seconds).\n'
+      ),
     /**
      * Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.
      */
-    timeout: z.number().optional(),
+    timeout: z
+      .number()
+      .optional()
+      .describe(
+        'Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.'
+      ),
   })
 );
 export type RRuleScheduleConfig = z.infer<typeof RRuleScheduleConfig>;
@@ -278,9 +342,18 @@ export const ObjectQueriesItem = lazySchema(() =>
       * Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
 
       */
-    interval: z.number().int().nullable().optional(),
+    interval: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe(
+        "Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.\n"
+      ),
     schedule_type: ScheduleTypeOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
   })
 );
 export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
@@ -346,3 +419,15 @@ export type PackInterval = z.infer<typeof PackInterval>;
 
 export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
 export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;
+
+export const ResultTypeOrUndefined = lazySchema(() => ResultType.nullable());
+export type ResultTypeOrUndefined = z.infer<typeof ResultTypeOrUndefined>;
+
+/**
+ * Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+ */
+export const MinOsqueryVersion = lazySchema(() => z.string().min(1).max(64));
+export type MinOsqueryVersion = z.infer<typeof MinOsqueryVersion>;
+
+export const MinOsqueryVersionOrUndefined = lazySchema(() => MinOsqueryVersion.nullable());
+export type MinOsqueryVersionOrUndefined = z.infer<typeof MinOsqueryVersionOrUndefined>;

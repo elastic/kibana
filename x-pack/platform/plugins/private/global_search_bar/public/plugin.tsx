@@ -114,7 +114,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
       });
     };
 
-    core.chrome.next.globalSearch.set({
+    core.chrome.controls.globalSearch.set({
       onClick: toggleSearchModal,
     });
 

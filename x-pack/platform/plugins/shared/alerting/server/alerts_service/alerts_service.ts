@@ -53,7 +53,9 @@ import {
   getAlertSnoozeSnapshot,
   installWithTimeout,
   InstallShutdownError,
+  installResourcesWithLock,
 } from './lib';
+import type { ResourceInstallLockManager } from './lib';
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import type { IAlertsClient } from '../alerts_client/types';
@@ -84,17 +86,28 @@ import type { GetAlertSnoozeSnapshotParams } from './lib/get_alert_snooze_snapsh
  */
 export const TOTAL_FIELDS_LIMIT = 2800;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
+// Prefix for the cluster-wide locks that coordinate resource installation across nodes.
+const RESOURCE_INSTALL_LOCK_PREFIX = 'alerting:resource-install';
 export const ECS_CONTEXT = `ecs`;
 export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
   kibanaVersion: string;
+  /** Kibana server UUID, included in install-lock wait/error logs. */
+  serverUuid?: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
   dataStreamAdapter: DataStreamAdapter;
   elasticsearchAndSOAvailability$: Observable<boolean>;
   isServerless: boolean;
+  /**
+   * When provided, resource installation is coordinated across Kibana nodes with
+   * a cluster-wide lock so only one node installs a given resource set at a time.
+   * Optional: when omitted (e.g. in tests, or when coordination is disabled),
+   * installation runs directly without a lock.
+   */
+  lockManager?: ResourceInstallLockManager;
   /**
    * Field limit applied to alerts-as-data indices/templates. Defaults to
    * `TOTAL_FIELDS_LIMIT` when not provided (e.g. in tests). In production this
@@ -419,17 +432,27 @@ export class AlertsService implements IAlertsService {
           }),
       ];
 
-      // Install in parallel
-      await Promise.all(
-        initFns.map((fn) =>
-          installWithTimeout({
-            installFn: async () => await fn(),
-            pluginStop$: this.options.pluginStop$,
-            logger: this.options.logger,
-            timeoutMs,
-          })
-        )
-      );
+      // Coordinate across nodes so only one installs the common resources at a
+      // time; the install itself runs its steps in parallel.
+      await installResourcesWithLock({
+        lockManager: this.options.lockManager,
+        lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:common`,
+        logger: this.options.logger,
+        serverUuid: this.options.serverUuid,
+        pluginStop$: this.options.pluginStop$,
+        installFn: async () => {
+          await Promise.all(
+            initFns.map((fn) =>
+              installWithTimeout({
+                installFn: async () => await fn(),
+                pluginStop$: this.options.pluginStop$,
+                logger: this.options.logger,
+                timeoutMs,
+              })
+            )
+          );
+        },
+      });
 
       this.initialized = true;
       this.isInitializing = false;
@@ -531,17 +554,27 @@ export class AlertsService implements IAlertsService {
         }),
     ]);
 
-    // We want to install these in sequence and not in parallel because
-    // the concrete index depends on the index template which depends on
+    // Coordinate across nodes so only one installs this context/namespace's
+    // resources at a time. Within the lock we install in sequence (not parallel)
+    // because the concrete index depends on the index template which depends on
     // the component template.
-    for (const fn of initFns) {
-      await installWithTimeout({
-        installFn: async () => await fn(),
-        pluginStop$: this.options.pluginStop$,
-        logger: this.options.logger,
-        timeoutMs,
-      });
-    }
+    await installResourcesWithLock({
+      lockManager: this.options.lockManager,
+      lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:${context}:${namespace}`,
+      logger: this.options.logger,
+      serverUuid: this.options.serverUuid,
+      pluginStop$: this.options.pluginStop$,
+      installFn: async () => {
+        for (const fn of initFns) {
+          await installWithTimeout({
+            installFn: async () => await fn(),
+            pluginStop$: this.options.pluginStop$,
+            logger: this.options.logger,
+            timeoutMs,
+          });
+        }
+      },
+    });
   }
 
   public async setAlertsToUntracked(opts: SetAlertsToUntrackedParams) {

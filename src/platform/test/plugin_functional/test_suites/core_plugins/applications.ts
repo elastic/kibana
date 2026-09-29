@@ -128,7 +128,7 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
     it('navigating away from chromeless application shows chrome', async () => {
       await common.navigateToApp('foo');
       await loadingScreenNotShown();
-      expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
+      await testSubjects.existOrFail('headerGlobalNav', { timeout: 5000 });
 
       const wrapperHeight = await getAppWrapperHeight();
       const windowHeight = (await browser.getWindowInnerSize()).height;

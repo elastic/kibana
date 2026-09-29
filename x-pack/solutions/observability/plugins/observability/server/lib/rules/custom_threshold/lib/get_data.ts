@@ -196,9 +196,6 @@ export const getData = async (
     if (aggs.groupings) {
       const { groupings } = aggs;
       const nextAfterKey = groupings.after_key;
-      if (groupings.buckets.length === 0 && Object.keys(previous).length === 0) {
-        return createNoDataResponse();
-      }
 
       for (const bucket of groupings.buckets) {
         const key = Object.values(bucket.key).join(',');

@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RulesApi } from './rules_api';
-import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_RULE_API_PATH, ALERTING_V2_RULE_API_PATH } from '../constants';
 
 describe('RulesApi', () => {
   const http = httpServiceMock.createStartContract();
@@ -81,32 +81,32 @@ describe('RulesApi', () => {
   });
 
   describe('enableRule', () => {
-    it('sends a POST request to the _enable path with the rule id', async () => {
+    it('sends a POST request to the _enable path with the encoded rule id', async () => {
       http.post.mockResolvedValue({ id: 'rule-1', enabled: true });
 
-      await api.enableRule('rule-1');
+      await api.enableRule('rule/../1');
 
-      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_enable`);
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule%2F..%2F1/_enable`);
     });
   });
 
   describe('disableRule', () => {
-    it('sends a POST request to the _disable path with the rule id', async () => {
+    it('sends a POST request to the _disable path with the encoded rule id', async () => {
       http.post.mockResolvedValue({ id: 'rule-1', enabled: false });
 
-      await api.disableRule('rule-1');
+      await api.disableRule('rule/../1');
 
-      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_disable`);
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule%2F..%2F1/_disable`);
     });
   });
 
   describe('runRule', () => {
-    it('sends a POST request to the _run path with the rule id', async () => {
+    it('sends a POST request to the _run path with the encoded rule id', async () => {
       http.post.mockResolvedValue(undefined);
 
-      await api.runRule('rule-1');
+      await api.runRule('rule/../1');
 
-      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_run`);
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule%2F..%2F1/_run`);
     });
   });
 
@@ -116,7 +116,7 @@ describe('RulesApi', () => {
 
       const result = await api.listTags();
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
         query: { search: undefined, kind: undefined },
       });
       expect(result).toEqual({ tags: ['cpu', 'memory'] });
@@ -127,7 +127,7 @@ describe('RulesApi', () => {
 
       await api.listTags({ search: 'pro' });
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
         query: { search: 'pro', kind: undefined },
       });
     });
@@ -137,7 +137,7 @@ describe('RulesApi', () => {
 
       await api.listTags({ kind: 'alert' });
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
         query: { search: undefined, kind: 'alert' },
       });
     });

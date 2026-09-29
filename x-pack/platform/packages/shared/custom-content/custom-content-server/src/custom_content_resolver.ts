@@ -14,8 +14,11 @@ import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+  CUSTOM_CONTENT_MIN_HEIGHT,
+  CUSTOM_CONTENT_MAX_HEIGHT,
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
+import { extractDeclaredHeight } from './extract_declared_height';
 
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
 - Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
@@ -30,6 +33,33 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 - Illustration is the one exception. The tokens above are the panel's UI vocabulary: surfaces, text, chrome, borders and data marks. They are not for pictures. When you are drawing a thing rather than charting it — an animal, a plant, a vehicle, a scene — pick colors that are plausible for the subject itself. Do NOT color an illustration from var(--cc-vis-N) or the accent tokens: those are a data palette, and an animal or object rendered in chart colors looks wrong. Literal colors are correct here, because a depicted thing looks the same in light and dark mode. The page background, all text, and any card behind the illustration still use tokens.
 - Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.
 - Motion durations: var(--cc-motion-fast), var(--cc-motion-normal), var(--cc-motion-slow), with var(--cc-ease) for easing. No arbitrary values like 1.6s or one-off cubic-bezier curves.`;
+
+const HEIGHT_DECLARATION_GUIDANCE = `HEIGHT DECLARATION — the FIRST line of your output must be exactly:
+<!-- cc-height: N -->
+where N is the height in CSS pixels your content occupies. Anything after N is ignored, so append your arithmetic there.
+
+The panel renders in a frame of exactly this height. It cannot measure itself and the host cannot measure it, so this number is the only sizing information anyone gets. Too small and the panel scrolls; too large and the content sits above a large empty gap, which looks broken. Aim to be accurate, not generous.
+
+Add it up from the markup you actually wrote, top to bottom, and show the arithmetic after the number so every term corresponds to something you wrote:
+- body padding: 32 (top and bottom together)
+- a heading row: 60
+- one row of KPI / status cards: 130 (a row, not a card — count rows as ceil(cards / columns))
+- one compact table or list row: 30, plus 30 for a header row
+- a section container (a card wrapping other content): 32 for its own padding
+- a paragraph of text: 24 per line you expect it to wrap to
+- a drawn chart or diagram: the height you actually gave it — this applies ONLY to something drawn at a fixed size, like an SVG with a set height or a CSS box with a height in pixels. A "bar chart" built by looping rows and drawing a coloured div per row is a TABLE: count it per row, not as a chart. Mis-classifying a row list as a chart is the most common way this number comes out far too large.
+
+Count only the spacing you actually wrote between sections. Do not add slack "to be safe" — the gap under the content is as visible as a scrollbar.
+
+Worked example — a heading plus four status cards in a two-column grid:
+32 + 60 + (2 rows x 130) = 352, so emit \`<!-- cc-height: 352 = 32 + 60 + 2x130 -->\`.
+
+Second example — a row of 4 KPI cards, then a 4-row bar list inside a card, then a footer line:
+32 + 130 + (32 + 30 + 4x30) + 24 = 368.
+
+Size for the data you were actually given. If the schema description or prompt says there are four items, size for four rows — do NOT pad for rows that might exist later. When a LIMIT in the query caps the rows, size for that limit. Between ${CUSTOM_CONTENT_MIN_HEIGHT} and ${CUSTOM_CONTENT_MAX_HEIGHT}.
+
+Emit nothing before this comment — no markdown fence, no blank line.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
@@ -115,6 +145,8 @@ OUTPUT RULES — follow these exactly:
 - The HTML must be fully self-contained: all CSS inline in <style> tags.
 ${SANDBOX_GUIDANCE}
 
+${HEIGHT_DECLARATION_GUIDANCE}
+
 ${colorSection()}
 
 CONTENT RULES:
@@ -135,6 +167,8 @@ OUTPUT RULES:
 - Output ONLY the HTML template. No markdown fences, no explanation.
 - All CSS inline in <style> tags.
 ${SANDBOX_GUIDANCE}
+
+${HEIGHT_DECLARATION_GUIDANCE}
 - Aggregation/grouping/sorting cannot happen in the template — it only receives \`rows\` and \`max\` as given. If the data needs grouping that isn't already reflected in \`rows\`, that has to happen upstream in the ES|QL query (STATS ... BY ...).
 - For charts use pure CSS or inline SVG.
 
@@ -156,6 +190,12 @@ export interface CustomContentTemplateResolverDeps {
   logger: Logger;
 }
 
+export interface ResolvedCustomContentTemplate {
+  template: string;
+  /** Height in CSS pixels the model estimated the content needs. Always within bounds. */
+  height: number;
+}
+
 export const createCustomContentTemplateResolver = ({
   modelProvider,
   esClient,
@@ -172,7 +212,7 @@ export const createCustomContentTemplateResolver = ({
     existingTemplate?: string;
     /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
     hasExistingQuery?: boolean;
-  }): Promise<string> => {
+  }): Promise<ResolvedCustomContentTemplate> => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
@@ -233,7 +273,7 @@ export const createCustomContentTemplateResolver = ({
       stream: false,
     });
 
-    const template = stripMarkdownFences(response.content);
+    const { template, height } = extractDeclaredHeight(stripMarkdownFences(response.content));
 
     if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
       throw new Error('Generated template was rejected: contains a <script> tag.');
@@ -244,6 +284,6 @@ export const createCustomContentTemplateResolver = ({
       );
     }
 
-    return template;
+    return { template, height };
   };
 };

@@ -202,10 +202,13 @@ export class DocViewer {
     return flyout.locator('[data-test-subj*="docTableRowAction"]').count();
   }
 
+  /** JSON editor rendered by the source tab. Use it to gate on that tab being rendered. */
+  getJsonCodeEditor(): Locator {
+    return this.page.getByLabel('Read only JSON view of an elasticsearch document');
+  }
+
   async getJsonCodeEditorValue(): Promise<string> {
-    await this.page
-      .getByLabel('Read only JSON view of an elasticsearch document')
-      .waitFor({ state: 'visible' });
+    await this.getJsonCodeEditor().waitFor({ state: 'visible' });
 
     const raw = await this.page.evaluate(() => {
       const monacoEnv = (window as unknown as MonacoJsonEnvironment).MonacoEnvironment;
@@ -252,6 +255,17 @@ export class DocViewer {
 
   getFieldNames(): Locator {
     return this.page.testSubj.locator('docViewerFlyout').locator('.kbnDocViewer__fieldName');
+  }
+
+  /**
+   * Scrolls the virtualized fields-table grid to its last row. Rows outside the
+   * mounted window are absent from the DOM until they are scrolled into view.
+   */
+  async scrollFieldsTableToBottom() {
+    await this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('.euiDataGrid__virtualized')
+      .evaluate((el) => el.scrollTo(0, el.scrollHeight));
   }
 
   async openFieldTypeFilter() {
@@ -379,6 +393,30 @@ export class DocViewer {
 
   async toggleColumn(fieldName: string) {
     await this.clickFieldActionInTable(fieldName, 'toggleColumnButton');
+  }
+
+  /**
+   * Opens the cell popover for a field's name cell, revealing the cell-level
+   * actions — unlike {@link openFieldDescription}, which opens the field's
+   * description. The expand button belongs to the enclosing grid cell and only
+   * mounts while that cell is hovered, so it is resolved from there rather than
+   * from the name element nested inside it.
+   */
+  async expandFieldNameCell(fieldName: string) {
+    await this.openTab('doc_view_table');
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+    const gridCell = nameCell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
+
+    await nameCell.evaluate((el) => {
+      el.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
+
+    await gridCell.hover();
+    await gridCell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+
+    await this.page.testSubj.locator('euiDataGridExpansionPopover').waitFor({ state: 'visible' });
   }
 
   async openSurroundingDocuments(rowIndex: number) {

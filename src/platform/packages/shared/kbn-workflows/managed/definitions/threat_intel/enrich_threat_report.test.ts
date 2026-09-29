@@ -33,7 +33,10 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
  * the three continued steps.
  */
 describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
-  const workflow = parse(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml) as { steps: unknown[] };
+  const workflow = parse(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml) as {
+    enabled?: boolean;
+    steps: unknown[];
+  };
 
   /** Steps whose failure must leave the report retryable. */
   const GATED_STEPS = ['extract_iocs', 'classify_severity', 'enrich_taxonomy'] as const;
@@ -103,5 +106,51 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   // gate was using its presence as a stand-in for step health.
   it('no longer references detection_actionability anywhere', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('detection_actionability');
+  });
+
+  // MVP stores and processes plain text only. Reports no longer carry content.body_html,
+  // and the enrichment routes accept bounded text, so the enrich workflow must not send an
+  // html body to any step.
+
+  it('ships disabled so operators must enable in Workflows management', () => {
+    expect(workflow.enabled).toBe(false);
+  });
+
+  // Not "-global": a space literally named "global" running the pre-space-aware
+  // version of this workflow would collide with a real global install's key.
+  it('uses a concurrency key with no space or "global" suffix', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain('key: "threat-intel-enrich"');
+  });
+
+  // No `/s/{id}/` prefix resolves to the `default` space implicitly, same as the
+  // former `routeSpaceId: "default"` variable did, without needing the variable.
+  it('calls the enrich routes with no space prefix, resolving to the default space', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('routeSpaceId');
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toMatch(/path:\s*"\/s\//);
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
+      'path: "/internal/threat_intel/assess_relevance"'
+    );
+  });
+
+  it('selects pending reports space-blind (no space_id filter on load_pending_reports)', () => {
+    const load = findStepByName(workflow.steps, 'load_pending_reports') as {
+      with?: { query?: { bool?: { filter?: unknown } } };
+    };
+    expect(load.with?.query?.bool?.filter).toBeUndefined();
+  });
+
+  describe('plain-text-only enrichment', () => {
+    it('never references content.body_html', () => {
+      expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('body_html');
+    });
+
+    it.each(['assess_relevance', 'extract_iocs'])('%s sends body_text but not html', (stepName) => {
+      const step = findStepByName(workflow.steps, stepName) as {
+        with?: { body?: Record<string, unknown> };
+      };
+      const body = step?.with?.body ?? {};
+      expect(body).toHaveProperty('text');
+      expect(body).not.toHaveProperty('html');
+    });
   });
 });

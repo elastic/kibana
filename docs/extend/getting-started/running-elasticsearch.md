@@ -13,7 +13,7 @@ There are many ways to run {{es}} while you are developing.
 This will run a snapshot of {{es}} that is usually built nightly. Snapshot status is available on the [dashboard](https://ci.kibana.dev/es-snapshots).
 
 ```bash
-yarn es snapshot
+pnpm es snapshot
 ```
 
 By default, two users are added to Elasticsearch:
@@ -24,7 +24,7 @@ By default, two users are added to Elasticsearch:
 See all available options, like how to specify a specific license, with the `--help` flag.
 
 ```bash
-yarn es snapshot --help
+pnpm es snapshot --help
 ```
 
 `--license trial` will give you access to all capabilities.
@@ -34,7 +34,7 @@ yarn es snapshot --help
 If you want to keep the data inside your {{es}} between usages of this command, you should use the following command, to keep your data folder outside the downloaded snapshot folder:
 
 ```bash
-yarn es snapshot -E path.data=../data
+pnpm es snapshot -E path.data=../data
 ```
 
 ## By source [_by_source]
@@ -42,7 +42,7 @@ yarn es snapshot -E path.data=../data
 If you have the {{es}} repo checked out locally and wish to run against that, use `source`. By default, it will reference an {{es}} checkout which is a sibling to the {{kib}} directory named elasticsearch. If you wish to use a checkout in another location you can provide that by supplying --source-path
 
 ```bash
-yarn es source
+pnpm es source
 ```
 
 
@@ -51,7 +51,7 @@ yarn es source
 Use this if you already have a distributable. For released versions, one can be obtained on the {{es}} downloads page.
 
 ```bash
-yarn es archive <full_path_to_archive>
+pnpm es archive <full_path_to_archive>
 ```
 
 Each of these will run {{es}} with a basic license. Additional options are available, pass --help for more information.
@@ -78,13 +78,13 @@ Setup remote clusters for cross cluster search (CCS) and cross cluster replicati
 Start your primary cluster by running:
 
 ```bash
-yarn es snapshot -E path.data=../data_prod1
+pnpm es snapshot -E path.data=../data_prod1
 ```
 
 Start your remote cluster by running:
 
 ```bash
-yarn es snapshot -E transport.port=9500 -E http.port=9201 -E path.data=../data_prod2
+pnpm es snapshot -E transport.port=9500 -E http.port=9201 -E path.data=../data_prod2
 ```
 
 Once both clusters are running, start {{kib}}. {{kib}} will connect to the primary cluster.

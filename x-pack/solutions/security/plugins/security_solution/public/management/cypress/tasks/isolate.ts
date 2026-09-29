@@ -30,10 +30,14 @@ export const interceptActionRequests = (
   }).as(alias);
 };
 
-export const sendActionResponse = (action: ActionDetails): void => {
+export const sendActionResponse = (
+  action: ActionDetails,
+  options?: { responseCode?: string }
+): void => {
   cy.task('sendHostActionResponse', {
     action,
     state: { state: 'success' },
+    responseCode: options?.responseCode,
   });
 };
 
@@ -105,14 +109,6 @@ export const toggleRuleOffAndOn = (ruleName: string): void => {
       cy.getByTestSubj('ruleSwitch').click();
       cy.getByTestSubj('ruleSwitch').should('have.attr', 'aria-checked', 'true');
     });
-};
-
-export const filterOutEndpoints = (endpointHostname: string): void => {
-  cy.getByTestSubj('filters-global-container').within(() => {
-    cy.getByTestSubj('queryInput').click();
-    cy.getByTestSubj('queryInput').type(`host.name: ${endpointHostname}`);
-    cy.getByTestSubj('querySubmitButton').click();
-  });
 };
 
 export const filterOutIsolatedHosts = (): void => {

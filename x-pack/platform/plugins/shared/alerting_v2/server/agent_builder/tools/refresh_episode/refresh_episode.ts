@@ -14,7 +14,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
 import { episodeAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
-import { alertEpisodeToEpisodeAttachment } from '../../../../common/agent_builder/episode_mappers';
+import { alertEpisodeToEpisodeAttachment } from '@kbn/alerting-v2-utils';
 import { loadRuleMetadata } from '../../common/load_rule_metadata';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';

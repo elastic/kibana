@@ -8,14 +8,15 @@
 import React from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { InventoryTsvbType, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type {
+  InventoryTsvbType,
+  InventoryItemType,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { OnboardingFlow } from '../../../../components/shared/templates/no_data_config';
-import { InfraPageTemplate } from '../../../../components/shared/templates/infra_page_template';
 import { NodeDetailsMetricDataResponseRT } from '../../../../../common/http_api/node_details_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTemplateHeaderBreadcrumbs } from '../../../../components/asset_details/hooks/use_page_header';
 import { MetricsSideNav } from './side_nav';
 import { MetricsTimeControls } from './time_controls';
 import type { NavItem } from '../lib/side_nav_context';
@@ -35,6 +36,7 @@ interface Props {
   sourceId: string;
   timeRange: MetricsTimeInput;
   metadataLoading: boolean;
+  schema?: DataSchemaFormat;
   isAutoReloading: boolean;
   refreshInterval: number;
   sideNav: NavItem[];
@@ -57,8 +59,6 @@ const parseRange = (range: MetricsTimeInput) => {
 };
 
 export const NodeDetailsPage = (props: Props) => {
-  const { breadcrumbs } = useTemplateHeaderBreadcrumbs();
-
   const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/node_details', {
@@ -70,6 +70,7 @@ export const NodeDetailsPage = (props: Props) => {
           timerange: parseRange(props.timeRange),
           cloudId: props.cloudId,
           sourceId: props.sourceId,
+          ...(props.schema === 'semconv' ? { schema: props.schema } : {}),
         }),
       });
 
@@ -80,6 +81,7 @@ export const NodeDetailsPage = (props: Props) => {
       props.nodeId,
       props.nodeType,
       props.requiredTsvb,
+      props.schema,
       props.sourceId,
       props.timeRange,
     ]
@@ -92,11 +94,10 @@ export const NodeDetailsPage = (props: Props) => {
   }
 
   return (
-    <InfraPageTemplate
-      onboardingFlow={OnboardingFlow.Infra}
-      pageHeader={{
-        pageTitle: props.name,
-        rightSideItems: [
+    <>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
           <MetricsTimeControls
             currentTimeRange={props.timeRange}
             isLiveStreaming={props.isAutoReloading}
@@ -105,15 +106,20 @@ export const NodeDetailsPage = (props: Props) => {
             onChangeTimeRange={props.setTimeRange}
             setAutoReload={props.setAutoReload}
             onRefresh={refetch}
-          />,
-        ],
-        breadcrumbs,
-      }}
-    >
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <MetricsSideNav loading={props.metadataLoading} name={props.name} items={props.sideNav} />
+          />
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        {metrics.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <MetricsSideNav
+              loading={props.metadataLoading}
+              name={props.name}
+              items={props.sideNav}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <SideNavContext.Provider
             value={{
@@ -135,6 +141,6 @@ export const NodeDetailsPage = (props: Props) => {
           </SideNavContext.Provider>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </InfraPageTemplate>
+    </>
   );
 };

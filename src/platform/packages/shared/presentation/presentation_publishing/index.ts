@@ -237,6 +237,7 @@ export {
   childrenUnsavedChanges$,
   DEBOUNCE_TIME as CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
 } from './interfaces/containers/container_state/children_unsaved_changes';
+export { childrenLatestState$ } from './interfaces/containers/container_state/children_latest_state';
 
 export {
   initializeStateApi,
@@ -299,7 +300,6 @@ export {
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
 
-export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';
-export { apiPublishesEsqlUsage, type PublishesEsqlUsage } from './interfaces/publishes_esql_usage';
+export { apiPublishesEsql, type PublishesEsql, useHasEsqlPanel } from './interfaces/publishes_esql';
 
 export { apiSupportsJsonExport, type SupportsJsonExport } from './interfaces/supports_json_export';

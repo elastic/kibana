@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import {
   updateConversationMetadataStepCommonDefinition,
   type UpdateConversationMetadataStepInput,
 } from '../../../common/workflows/steps/update_conversation_metadata';
-import type { ConversationClient } from '../../services/conversation/client';
+import { createConversationPublicClient } from '../../services/conversation/conversation_public_client';
+import type { ConversationStepDeps } from '../registry';
 
-export const updateConversationMetadataStepDefinition = (
-  getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>,
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
-) =>
+export const updateConversationMetadataStepDefinition = ({
+  getConversationClient,
+  getAgentRegistry,
+  isExperimentalEnabled,
+}: ConversationStepDeps) =>
   createServerStepDefinition({
     ...updateConversationMetadataStepCommonDefinition,
     handler: async (context: StepHandlerContext) => {
@@ -30,10 +31,14 @@ export const updateConversationMetadataStepDefinition = (
             ),
           };
         }
-        const client = await getConversationClient(request);
+        const [client, agentRegistry] = await Promise.all([
+          getConversationClient(request),
+          getAgentRegistry(request),
+        ]);
+        const publicClient = createConversationPublicClient({ client, agentRegistry });
         const input = context.input as UpdateConversationMetadataStepInput;
 
-        const { conversation, changedFields } = await client.patchMetadata(
+        const { conversation, changedFields } = await publicClient.patchMetadata(
           input.conversation_id,
           input.updates
         );

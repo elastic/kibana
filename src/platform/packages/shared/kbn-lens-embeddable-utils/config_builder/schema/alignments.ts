@@ -26,4 +26,4 @@ export const cornerPositionSchema = z.enum([
   'bottom_right',
 ]);
 
-export const placementSchema = z.enum(['before', 'after']);
+export const labelPlacementSchema = z.enum(['before', 'after', 'tooltip']);

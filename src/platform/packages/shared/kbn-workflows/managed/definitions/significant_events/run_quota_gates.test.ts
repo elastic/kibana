@@ -108,9 +108,9 @@ describe('Significant Events run quota workflow contracts', () => {
     }
   });
 
-  it('runs all three gates only for workers whose root origin is scheduled', () => {
+  it('runs detection and KI extraction gates only for workers whose root origin is scheduled', () => {
     expect(quotaSteps.map((step) => step.with?.body?.group).sort()).toEqual(
-      ['detection', 'investigation', 'ki_extraction'].sort()
+      ['detection', 'ki_extraction'].sort()
     );
 
     for (const step of quotaSteps) {
@@ -137,7 +137,8 @@ describe('Significant Events run quota workflow contracts', () => {
   });
 
   it('places discovery and KI gates before their expensive work', () => {
-    expect(definitions.discovery.steps.slice(0, 2).map(({ name }) => name)).toEqual([
+    expect(definitions.discovery.steps.slice(0, 3).map(({ name }) => name)).toEqual([
+      'bootstrap_cleanup_workflow',
       'check_budget',
       'exit_if_budget_denied',
     ]);
@@ -203,15 +204,12 @@ describe('Significant Events run quota workflow contracts', () => {
     );
   });
 
-  it('gates investigations after eligibility, event resolution, and deduplication but before launch', () => {
+  it('starts investigations after eligibility, event resolution, and deduplication', () => {
     const orderedSteps = [
       'gate_investigatable_severity',
       'resolve_open_event',
-      'check_prior_investigation',
       'guard_resolved_event',
       'guard_missing_investigation',
-      'consume_investigation_quota',
-      'guard_investigation_quota',
       'trigger_investigation',
     ];
     const indexes = orderedSteps.map((name) => stepIndex(definitions.discovery, name));
@@ -220,55 +218,12 @@ describe('Significant Events run quota workflow contracts', () => {
     expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
   });
 
-  it('derives investigation criticality from the resolved event severity', () => {
-    const gate = findStep(definitions.discovery, 'consume_investigation_quota');
-    const critical = gate.with?.body?.critical;
-
-    expect(critical).toBe(
-      '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
-    );
-    expect(
-      evaluateExpression(critical as string, {
-        steps: {
-          resolve_open_event: {
-            output: { hits: { hits: [{ _source: { severity: '80-critical' } }] } },
-          },
-        },
-      })
-    ).toBe(true);
-    expect(
-      evaluateExpression(critical as string, {
-        steps: {
-          resolve_open_event: {
-            output: { hits: { hits: [{ _source: { severity: '60-high' } }] } },
-          },
-        },
-      })
-    ).toBe(false);
-  });
-
-  it('prevents investigation launch only on explicit denial', () => {
-    const guard = findStep(definitions.discovery, 'guard_investigation_quota');
-
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: { output: { allowed: false } } },
-      })
-    ).toBe(false);
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: { output: { allowed: true } } },
-      })
-    ).toBe(true);
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: {} },
-      })
-    ).toBe(true);
-    expect(guard.steps?.[0]).toEqual(
+  it('delegates automatic investigation admission to the trigger step and fails open', () => {
+    expect(findStep(definitions.discovery, 'trigger_investigation')).toEqual(
       expect.objectContaining({
-        name: 'trigger_investigation',
-        type: 'workflow.executeAsync',
+        type: 'nightshift.triggerInvestigation',
+        with: expect.objectContaining({ trigger_type: 'automatic' }),
+        'on-failure': { continue: true },
       })
     );
   });

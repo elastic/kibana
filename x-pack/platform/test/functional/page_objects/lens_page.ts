@@ -228,11 +228,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       disableEmptyRows?: boolean;
     }) {
       await retry.try(async () => {
-        if (
-          !(await testSubjects.exists('lns-indexPattern-dimensionContainerClose', {
-            timeout: 1000,
-          }))
-        ) {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
           await testSubjects.click(opts.dimension);
         }
         await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose', {
@@ -649,7 +645,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isDimensionEditorOpen() {
-      return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
+      return await testSubjects.exists('lns-indexPattern-dimensionContainerClose');
     },
 
     // closes the dimension editor flyout
@@ -721,10 +717,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async dragRangeInput(testId: string, steps: number = 1, direction: 'left' | 'right' = 'right') {
       const inputEl = await testSubjects.find(testId);
-      await inputEl.focus();
       const browserKey = direction === 'left' ? browser.keys.LEFT : browser.keys.RIGHT;
       while (steps--) {
-        await browser.pressKeys(browserKey);
+        // key the element itself, so no focus change elsewhere can swallow the keystroke
+        await inputEl.pressKeys(browserKey);
       }
     },
 
@@ -842,6 +838,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
+    async openSaveOptionsIfNeeded() {
+      const secondarySubjects = [
+        'lnsApp_saveAndReturnButton-secondary-button',
+        'lnsApp_replaceInDashboardButton-secondary-button',
+        'lnsApp_replaceInCanvasButton-secondary-button',
+      ];
+      await retry.tryForTime(10000, async () => {
+        if (await testSubjects.exists('lnsApp_saveButton')) {
+          return;
+        }
+        for (const subject of secondarySubjects) {
+          if (await testSubjects.exists(subject)) {
+            await testSubjects.click(subject);
+            return;
+          }
+        }
+        throw new Error('Lens save controls have not rendered');
+      });
+      await testSubjects.existOrFail('lnsApp_saveButton', { timeout: 10000 });
+    },
+
     async save(
       title: string,
       saveAsNew?: boolean,
@@ -852,6 +869,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       description?: string
     ) {
       await header.waitUntilLoadingHasFinished();
+      await this.openSaveOptionsIfNeeded();
       await testSubjects.click('lnsApp_saveButton');
 
       await this.saveModal(
@@ -884,9 +902,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // remounts when the column label commits (DebouncedInput key). Wait for it
       // to exist, then type+assert in one retry so a remount cannot leave the
       // wait looking at a detached node.
-      await retry.waitFor('name-input to exist', async () =>
-        testSubjects.exists('name-input', { timeout: 1000 })
-      );
+      await retry.waitFor('name-input to exist', async () => testSubjects.exists('name-input'));
       await retry.try(async () => {
         await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
         expect(
@@ -921,7 +937,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async openStyleSettingsFlyout() {
       // Close dimension editor flyout
-      if (await this.isDimensionEditorOpen()) {
+      if (
+        await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        })
+      ) {
         await this.closeDimensionEditor();
       }
 
@@ -933,7 +953,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async openLegendSettingsFlyout() {
       // Close dimension editor flyout
-      if (await this.isDimensionEditorOpen()) {
+      if (
+        await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        })
+      ) {
         await this.closeDimensionEditor();
       }
 
@@ -1029,7 +1053,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openChartSwitchPopover(layerIndex = 0) {
       await this.ensureLayerTabIsActive(layerIndex);
 
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
+      if (await testSubjects.exists('lnsChartSwitchList')) {
         return;
       }
       await retry.try(async () => {
@@ -1222,7 +1246,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+        if (await testSubjects.waitForExists(`lnsLayerSplitButton--${index}`, { timeout: 1000 })) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerClone--${index}`);
@@ -1756,18 +1780,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
-      await retry.try(async () => {
+      // Callers may run this right after navigating to Lens; wait for the layer to render.
+      if (!(await find.existsByCssSelector('[data-test-subj^="lns-layerPanel-"]', 10000))) {
+        throw new Error('Lens layer panel has not rendered');
+      }
+      // Bounded below the default hook timeout so a blocked click reports its cause.
+      await retry.tryForTime(60000, async () => {
+        // The no-data popover can open late after navigation and cover the layer header.
+        await timePicker.ensureHiddenNoDataPopover();
         // Hover over the tab to make the layer actions button visible
         const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
-          await testSubjects.click(`lnsLayerSplitButton--${index}`);
+        // Click without the inner click retry so an intercepted click fails this attempt fast and
+        // the next attempt can dismiss whatever covered the button.
+        if (await testSubjects.waitForExists(`lnsLayerSplitButton--${index}`)) {
+          await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerSplitButton--${index}`);
         }
-        await testSubjects.click(`lnsLayerRemove--${index}`);
-        if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('lnsLayerRemoveConfirmButton');
+        await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerRemove--${index}`);
+        if (await testSubjects.waitForExists('lnsLayerRemoveModal')) {
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
@@ -1805,12 +1837,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
               // Determine scroll direction based on tab index
               // Lower indices are on the left, higher indices are on the right
               const scrollRightBtnExists = await testSubjects.exists(
-                'unifiedTabs_tabsBar_scrollRightBtn',
-                { timeout: 500 }
+                'unifiedTabs_tabsBar_scrollRightBtn'
               );
               const scrollLeftBtnExists = await testSubjects.exists(
-                'unifiedTabs_tabsBar_scrollLeftBtn',
-                { timeout: 500 }
+                'unifiedTabs_tabsBar_scrollLeftBtn'
               );
 
               // Try scrolling in the appropriate direction
@@ -1833,7 +1863,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         // Wait for the layer panel to render
         await retry.waitFor('layer panel to be visible', async () => {
-          return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
+          return await testSubjects.exists(`lns-layerPanel-${index}`);
         });
       }
     },
@@ -1855,7 +1885,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
           // Wait for the layer panel to render
           await retry.waitFor('layer panel to be visible', async () => {
-            return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
+            return await testSubjects.exists(`lns-layerPanel-${i}`);
           });
           return;
         }
@@ -1998,7 +2028,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async goToListingPageViaBreadcrumbs() {
       await retry.try(async () => {
         await testSubjects.click('breadcrumb first');
-        if (await testSubjects.exists('appLeaveConfirmModal')) {
+        if (await testSubjects.waitForExists('appLeaveConfirmModal', { timeout: 2000 })) {
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
@@ -2034,37 +2064,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return testSubjects.exists('lnsEmptySizeRatioOption');
     },
 
-    settingsMenuOpen() {
-      return testSubjects.exists('lnsApp__settingsMenu');
-    },
-
-    async openSettingsMenu() {
-      if (await this.settingsMenuOpen()) return;
-
-      await testSubjects.click('lnsApp_settingsButton');
-    },
-
-    async closeSettingsMenu() {
-      if (await this.settingsMenuOpen()) {
-        await testSubjects.click('lnsApp_settingsButton');
-      }
-    },
-
     async enableAutoApply() {
-      await this.openSettingsMenu();
-
       return testSubjects.setEuiSwitch('lnsToggleAutoApply', 'check');
     },
 
     async disableAutoApply() {
-      await this.openSettingsMenu();
-
       return testSubjects.setEuiSwitch('lnsToggleAutoApply', 'uncheck');
     },
 
     async getAutoApplyEnabled() {
-      await this.openSettingsMenu();
-
       return testSubjects.isEuiSwitchChecked('lnsToggleAutoApply');
     },
 
@@ -2161,18 +2169,40 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickShareButton() {
+      if (await testSubjects.exists('lnsApp_shareButton')) {
+        return await testSubjects.click('lnsApp_shareButton');
+      }
+      if (await testSubjects.exists('app-menu-overflow-button')) {
+        await testSubjects.click('app-menu-overflow-button');
+      }
       return await testSubjects.click('lnsApp_shareButton');
     },
 
     async clickExportButton() {
+      if (await testSubjects.exists('lnsApp_exportButton')) {
+        return await testSubjects.click('lnsApp_exportButton');
+      }
+      if (await testSubjects.exists('app-menu-overflow-button')) {
+        await testSubjects.click('app-menu-overflow-button');
+      }
       return await testSubjects.click('lnsApp_exportButton');
     },
 
     async isShareable() {
+      if (!(await testSubjects.exists('lnsApp_shareButton'))) {
+        if (await testSubjects.exists('app-menu-overflow-button')) {
+          await testSubjects.click('app-menu-overflow-button');
+        }
+      }
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    isExportActionEnabled() {
+    async isExportActionEnabled() {
+      if (!(await testSubjects.exists('lnsApp_exportButton'))) {
+        if (await testSubjects.exists('app-menu-overflow-button')) {
+          await testSubjects.click('app-menu-overflow-button');
+        }
+      }
       return testSubjects.isEnabled('lnsApp_exportButton');
     },
 

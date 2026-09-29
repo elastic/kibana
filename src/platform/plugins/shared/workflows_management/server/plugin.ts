@@ -29,8 +29,10 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -56,6 +58,7 @@ export class WorkflowsPlugin
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
+  private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
   private unregisterHitlLifecycleAuditor: (() => void) | null = null;
 
@@ -89,6 +92,14 @@ export class WorkflowsPlugin
       if (plugins.alerting) {
         plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
       }
+
+      registerConnectorEventTriggers({
+        inboundEventsEnabled: plugins.actions
+          .getActionsConfigurationUtilities()
+          .isInboundEventsEnabled(),
+        registerTriggerDefinition: (definition) =>
+          plugins.workflowsExtensions.registerTriggerDefinition(definition),
+      });
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
@@ -114,6 +125,30 @@ export class WorkflowsPlugin
       workflowsService,
       audit,
     });
+
+    core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
+      'workflowsManagement',
+      async (_context, request) => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        if (this.executionDataViewsBootstrap === null) {
+          this.executionDataViewsBootstrap = new ExecutionDataViewsBootstrap(
+            startPlugins.dataViews,
+            this.logger.get('executionDataViewsBootstrap')
+          );
+        }
+
+        const spaceId = spaces.getSpaceId(request);
+        const savedObjectsClient = coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .asScopedToNamespace(spaceId);
+
+        this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
+          spaceId,
+          savedObjectsClient,
+          coreStart.elasticsearch.client.asInternalUser
+        );
+      }
+    );
 
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');

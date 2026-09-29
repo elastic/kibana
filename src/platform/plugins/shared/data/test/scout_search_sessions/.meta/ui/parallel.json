@@ -1,5 +1,5 @@
 {
-  "sha1": "381aeff229a6996d00156e438b3faec8067e24a7",
+  "sha1": "9a287a76929564dc2fc5c7673b71958116c1f63a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -15,6 +15,19 @@
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/global.setup.ts",
         "line": 18,
         "column": 1
+      }
+    },
+    {
+      "id": "b52d7aefd4c2e4a-ea56eef63465547",
+      "title": "Background search management — accessibility Background search management states have no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_a11y.spec.ts",
+        "line": 40,
+        "column": 23
       }
     },
     {
