@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-export { ApprovalModal, type ApprovalModalProps, type DeclineParams } from './src/approval_modal';
+export { ApprovalModal, type ApprovalModalProps } from './src/approval_modal';
 export {
   ApprovalContent,
   type ApprovalContentProps,
   type ApprovalAction,
   type ApprovalDecision,
   type AlwaysAllowOption,
+  type DeclineParams,
 } from './src/approval_content';
 export {
   getApprovalOutcomeBadge,
