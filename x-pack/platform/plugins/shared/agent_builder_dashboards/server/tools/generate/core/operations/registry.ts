@@ -6,6 +6,7 @@
  */
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { z } from '@kbn/zod/v4';
 import { addControlsOperation } from './add_controls';
 import { addPanelsOperation } from './add_panels';
@@ -18,6 +19,7 @@ import { setMetadataOperation } from './set_metadata';
 import type { OperationExecutionContext } from './types';
 import { updatePanelLayoutsOperation } from './update_panel_layouts';
 import { resolvePanelCreationRequests } from './panel_creation';
+import { createAggregatableFieldTypesLoader } from './aggregatable_field_types';
 
 const operationDefinitions = [
   setMetadataOperation,
@@ -53,7 +55,7 @@ interface PrepareOperationExecutionParams {
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
   resolveCustomContentTemplate?: OperationExecutionContext['resolveCustomContentTemplate'];
   resolveAttachmentPanel?: OperationExecutionContext['resolveAttachmentPanel'];
-  esClient?: OperationExecutionContext['esClient'];
+  esClient?: ElasticsearchClient;
 }
 
 export const prepareOperationExecution = async ({
@@ -82,7 +84,7 @@ export const prepareOperationExecution = async ({
     resolvePanelContent,
     resolveCustomContentTemplate,
     resolveAttachmentPanel,
-    esClient,
+    loadAggregatableFieldTypes: esClient ? createAggregatableFieldTypesLoader(esClient) : undefined,
   };
 };
 

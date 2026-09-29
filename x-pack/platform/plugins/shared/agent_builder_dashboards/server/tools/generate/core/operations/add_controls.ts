@@ -17,13 +17,16 @@ import {
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { Logger } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure, type OperationSkip } from '../utils';
 import { defineOperation } from './types';
+import type {
+  AggregatableFieldTypes,
+  LoadAggregatableFieldTypes,
+} from './aggregatable_field_types';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -123,37 +126,11 @@ const MAX_AVAILABLE_FIELDS = 30;
 const getFieldCandidates = ({ type, field_name: fieldName }: DataControlInput): string[] =>
   type === RANGE_SLIDER_CONTROL ? [fieldName] : [fieldName, `${fieldName}.keyword`];
 
-const fetchAggregatableFieldTypes = async (
-  esClient: ElasticsearchClient,
-  index: string
-): Promise<Map<string, string[]>> => {
-  const response = await esClient.fieldCaps({
-    index,
-    fields: ['*'],
-    filters: '-metadata',
-    ignore_unavailable: true,
-    allow_no_indices: true,
-  });
-  return new Map(
-    Object.entries(response.fields)
-      .map(
-        ([fieldName, capsByType]) =>
-          [
-            fieldName,
-            Object.values(capsByType)
-              .filter(({ aggregatable }) => aggregatable)
-              .map(({ type }) => type),
-          ] as const
-      )
-      .filter(([, types]) => types.length > 0)
-  );
-};
-
 const hasKbnFieldType = (types: string[], kbnFieldType: KBN_FIELD_TYPES): boolean =>
   types.every((type) => castEsToKbnFieldTypeName(type) === kbnFieldType);
 
 const describeAvailableFields = (
-  fieldTypes: Map<string, string[]>,
+  fieldTypes: AggregatableFieldTypes,
   controlType: DataControlInput['type']
 ): string => {
   const isRangeSlider = controlType === RANGE_SLIDER_CONTROL;
@@ -213,18 +190,20 @@ const recordUnresolvedControl = ({
  */
 const resolveControlFields = async ({
   controls,
-  esClient,
+  loadAggregatableFieldTypes,
+  projectRouting,
   logger,
   failures,
   skipped,
 }: {
   controls: ControlInput[];
-  esClient?: ElasticsearchClient;
+  loadAggregatableFieldTypes?: LoadAggregatableFieldTypes;
+  projectRouting?: string;
   logger: Logger;
   failures: OperationFailure[];
   skipped: OperationSkip[];
 }): Promise<ControlInput[]> => {
-  if (!esClient) {
+  if (!loadAggregatableFieldTypes) {
     return controls;
   }
 
@@ -237,7 +216,7 @@ const resolveControlFields = async ({
         async (index) =>
           [
             index,
-            await fetchAggregatableFieldTypes(esClient, index).catch((error) => {
+            await loadAggregatableFieldTypes({ index, projectRouting }).catch((error) => {
               logger.warn(
                 `Could not load fields for index "${index}", adding its controls unvalidated: ${getErrorMessage(
                   error
@@ -361,7 +340,8 @@ export const addControlsOperation = defineOperation({
         controlsToAdd: operation.controls,
         failures: context.failures,
       }),
-      esClient: context.esClient,
+      loadAggregatableFieldTypes: context.loadAggregatableFieldTypes,
+      projectRouting: dashboardData.project_routing,
       logger: context.logger,
       failures: context.failures,
       skipped: context.skipped,
