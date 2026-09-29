@@ -130,7 +130,7 @@ export const RuleActionsAlertsFilter = ({
             onFiltersUpdated={onFiltersUpdated}
             showFilterBar
             submitOnBlur
-            showDatePicker={false}
+            showDatePicker="hidden"
             showSubmitButton={false}
             placeholder={i18n.translate(
               'responseOpsRuleForm.ruleActionsAlertsFilter.ActionAlertsFilterQueryPlaceholder',

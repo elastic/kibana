@@ -52,7 +52,7 @@ export default function OverviewHeader({
       >
         <unifiedSearch.ui.SearchBar
           appName="datasetQualityDetails"
-          showDatePicker={true}
+          showDatePicker="active"
           showFilterBar={false}
           showQueryMenu={false}
           showQueryInput={false}

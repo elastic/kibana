@@ -193,7 +193,7 @@ function wrapSearchBarInContext(
     timeHistory: mockTimeHistory,
     intl: null as any,
     showFilterBar: true,
-    showDatePicker: true,
+    showDatePicker: 'active',
     showAutoRefreshOnly: false,
     showSaveQuery: true,
     showQueryInput: true,
@@ -288,7 +288,7 @@ export const WithQueryInputOff = {
 export const WithDatePickerOff = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: 'hidden',
     }),
 
   name: 'with date picker off',
@@ -320,7 +320,7 @@ export const WithHiddenManageSavedObjectsLinkInLoadSavedQueryMenu = {
 export const WithTheDefaultDatePickerAutoRefreshIntervalOn = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: true,
+      showDatePicker: 'active',
       onRefreshChange: action('onRefreshChange'),
     }),
 
@@ -330,7 +330,7 @@ export const WithTheDefaultDatePickerAutoRefreshIntervalOn = {
 export const WithTheDefaultDatePickerAutoRefreshIntervalOff = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: true,
+      showDatePicker: 'active',
       isAutoRefreshDisabled: true,
     }),
 
@@ -340,7 +340,7 @@ export const WithTheDefaultDatePickerAutoRefreshIntervalOff = {
 export const WithOnlyTheDatePickerOn = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: true,
+      showDatePicker: 'active',
       showFilterBar: false,
       showQueryInput: false,
     }),
@@ -364,7 +364,7 @@ export const WithAdditionalFiltersUsedForSuggestions = {
 export const WithOnlyTheFilterBarOn = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: 'hidden',
       showFilterBar: true,
       showQueryInput: false,
       filters: [
@@ -398,7 +398,7 @@ export const WithOnlyTheFilterBarOn = {
 export const WithOnlyTheQueryBarOn = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: 'hidden',
       showFilterBar: false,
       showQueryInput: true,
       query: { query: 'Test: miaou', language: 'kuery' },
@@ -410,7 +410,7 @@ export const WithOnlyTheQueryBarOn = {
 export const WithQueryMenuOff = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: 'hidden',
       showFilterBar: false,
       showQueryInput: true,
       showQueryMenu: false,
@@ -423,7 +423,7 @@ export const WithQueryMenuOff = {
 export const WithOnlyTheFilterBarAndTheDatePickerOn = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: true,
+      showDatePicker: 'active',
       showFilterBar: true,
       showQueryInput: false,
       filters: [
@@ -595,7 +595,7 @@ export const WithoutSwitchQueryLanguage = {
 export const ShowOnlyQueryBarWithoutSubmit = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: 'hidden',
       showFilterBar: false,
       showAutoRefreshOnly: false,
       showQueryInput: true,
@@ -608,7 +608,7 @@ export const ShowOnlyQueryBarWithoutSubmit = {
 export const ShowOnlyDatepickerWithoutSubmit = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: true,
+      showDatePicker: 'active',
       showFilterBar: false,
       showAutoRefreshOnly: false,
       showQueryInput: false,
@@ -621,7 +621,7 @@ export const ShowOnlyDatepickerWithoutSubmit = {
 export const ShowOnlyQueryBarAndTimepickerWithoutSubmit = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: true,
+      showDatePicker: 'active',
       showFilterBar: false,
       showAutoRefreshOnly: false,
       showQueryInput: true,
@@ -634,7 +634,7 @@ export const ShowOnlyQueryBarAndTimepickerWithoutSubmit = {
 export const WithFilterBarOnButPinningOptionIsHiddenFromMenus = {
   render: () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: 'hidden',
       showFilterBar: true,
       showQueryInput: true,
       hiddenFilterPanelOptions: ['pinFilter'],

@@ -91,7 +91,7 @@ export class WhereExpression extends Component<Props, State> {
           <SearchBar
             appName={APP_ID}
             showFilterBar={false}
-            showDatePicker={false}
+            showDatePicker="hidden"
             showQueryInput={true}
             query={whereQuery ? whereQuery : getData().query.queryString.getDefaultQuery()}
             onQuerySubmit={this._onQueryChange}

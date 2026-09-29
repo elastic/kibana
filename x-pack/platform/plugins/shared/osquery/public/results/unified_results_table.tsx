@@ -596,7 +596,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             filtersForSuggestions={filtersForSuggestions}
             onQuerySubmit={handleQuerySubmit}
             onFiltersUpdated={handleFiltersUpdated}
-            showDatePicker={false}
+            showDatePicker="hidden"
             showQueryInput
             showFilterBar
             showQueryMenu={false}

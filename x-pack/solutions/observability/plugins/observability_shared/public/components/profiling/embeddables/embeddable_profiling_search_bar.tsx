@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import type { ShowDatePicker } from '@kbn/unified-search-plugin/public';
 import { EMBEDDABLE_PROFILING_SEARCH_BAR } from '.';
 import { getProfilingComponent } from '../helpers/component_registry';
 
 export interface EmbeddableProfilingSearchBarProps {
   kuery: string;
-  showDatePicker?: boolean;
+  showDatePicker?: ShowDatePicker;
   onQuerySubmit: (params: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query: string;

@@ -247,7 +247,7 @@ export function QueryStreamFlyout({
                               })}
                             </strong>
                           </EuiFlexGroup>
-                          <StreamsAppSearchBar showDatePicker />
+                          <StreamsAppSearchBar showDatePicker="active" />
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiSpacer size="m" />

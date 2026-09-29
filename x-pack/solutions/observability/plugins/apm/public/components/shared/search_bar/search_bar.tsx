@@ -65,7 +65,7 @@ export function SearchBar({
           boolFilter={searchBarBoolFilter}
           showQueryInput={showQueryInput}
           showFilterBar={showFilterBar}
-          showDatePicker
+          showDatePicker="active"
           showSubmitButton
         />
       )}

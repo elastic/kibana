@@ -74,7 +74,7 @@ export const useVisPreviewUnifiedSearch = ({
       showQueryInput: false,
       showFilterBar: false,
       showQueryMenu: false,
-      showDatePicker: true,
+      showDatePicker: 'active',
       showSubmitButton: false,
       disableQueryLanguageSwitcher: true,
       isAutoRefreshDisabled: true,

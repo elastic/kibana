@@ -9,7 +9,10 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type {
+  UnifiedSearchPublicPluginStart,
+  ShowDatePicker,
+} from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
@@ -22,7 +25,7 @@ export interface AlertsSearchBarProps {
   query?: string;
   filters?: Filter[];
   showFilterBar?: boolean;
-  showDatePicker?: boolean;
+  showDatePicker?: ShowDatePicker;
   showSubmitButton?: boolean;
   placeholder?: string;
   submitOnBlur?: boolean;

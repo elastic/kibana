@@ -161,7 +161,7 @@ const getWrapperWithTooltip = (
 };
 
 // @internal
-export type ShowDatePicker = boolean | { disabled: boolean; disabledReason?: string };
+export type ShowDatePicker = 'active' | 'hidden' | { disabled: boolean; disabledReason?: string };
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -379,7 +379,7 @@ export const QueryBarTopRow = React.memo(
 
     const {
       showQueryInput = true,
-      showDatePicker = true,
+      showDatePicker = 'active',
       showAutoRefreshOnly = false,
       showSubmitButton = true,
       enableDateRangePicker = true,
@@ -710,9 +710,9 @@ export const QueryBarTopRow = React.memo(
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
 
     // Visualize-style consumers request auto-refresh-only mode via
-    // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
+    // `showAutoRefreshOnly` + `showDatePicker === 'hidden'`: the picker renders readOnly with
     // only the auto-refresh play/pause button operable.
-    const isAutoRefreshOnly = showAutoRefreshOnly && !showDatePicker;
+    const isAutoRefreshOnly = showAutoRefreshOnly && showDatePicker === 'hidden';
 
     const dateFormatSetting: string | undefined = uiSettings.get('dateFormat');
     const inputDateFormats = useMemo(
@@ -792,8 +792,8 @@ export const QueryBarTopRow = React.memo(
         onDraftChange && draftIsDirty
           ? {
               query: draftQuery,
-              dateRangeFrom: showDatePicker ? draftDateRangeFrom : undefined,
-              dateRangeTo: showDatePicker ? draftDateRangeTo : undefined,
+              dateRangeFrom: showDatePicker !== 'hidden' ? draftDateRangeFrom : undefined,
+              dateRangeTo: showDatePicker !== 'hidden' ? draftDateRangeTo : undefined,
             }
           : undefined,
       [
@@ -831,7 +831,7 @@ export const QueryBarTopRow = React.memo(
     }
 
     function shouldRenderDatePicker(): boolean {
-      return Boolean(showDatePicker || showAutoRefreshOnly);
+      return showDatePicker !== 'hidden' || showAutoRefreshOnly;
     }
 
     function renderFilterMenuOnly(): boolean {
@@ -841,7 +841,7 @@ export const QueryBarTopRow = React.memo(
     function shouldRenderUpdateButton(): boolean {
       return (
         Boolean(showSubmitButton) &&
-        Boolean(showQueryInput || showDatePicker || showAutoRefreshOnly)
+        Boolean(showQueryInput || showDatePicker !== 'hidden' || showAutoRefreshOnly)
       );
     }
 

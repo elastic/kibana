@@ -25,7 +25,7 @@ export function SignificantEventsSearchBar({
   return (
     <unifiedSearch.ui.SearchBar
       appName="significantEventsApp"
-      showDatePicker={false}
+      showDatePicker="hidden"
       showFilterBar={false}
       showQueryMenu={false}
       showQueryInput={false}

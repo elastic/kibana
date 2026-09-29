@@ -33,7 +33,7 @@ export const AlertsSearchBar = ({
   rangeFrom,
   rangeTo,
   showFilterBar = false,
-  showDatePicker = true,
+  showDatePicker = 'active',
   showSubmitButton = true,
   placeholder = SEARCH_BAR_PLACEHOLDER,
   submitOnBlur = false,

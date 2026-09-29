@@ -66,7 +66,7 @@ export const SearchBar = () => {
                   defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND os.type:linux)',
                 })
           }
-          showDatePicker
+          showDatePicker="active"
           showFilterBar
           showSubmitButton
           showQueryMenu

@@ -77,7 +77,7 @@ export const SearchBarWrapper: FC<SearchBarProps> = ({
         showSubmitButton={false}
         appName={'aiops'}
         showFilterBar
-        showDatePicker={false}
+        showDatePicker="hidden"
         showQueryInput
         query={resultQuery}
         showSavedQueryControls={false}

@@ -124,7 +124,7 @@ export function PreviewPanel() {
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-              <StreamsAppSearchBar showDatePicker />
+              <StreamsAppSearchBar showDatePicker="active" />
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -13,7 +13,7 @@ import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const UnifiedSearchBar = ({
   onQuerySubmit,
-  showDatePicker = false,
+  showDatePicker = 'hidden',
   showSubmitButton = false,
   showFilterBar = false,
   showQueryMenu = false,

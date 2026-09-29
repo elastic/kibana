@@ -61,7 +61,7 @@ export function ApmRuleUnifiedSearchBar({
         showQueryInput={true}
         showQueryMenu={false}
         showFilterBar={false}
-        showDatePicker={false}
+        showDatePicker="hidden"
         showSubmitButton={false}
         displayStyle="inPage"
         onQueryChange={handleSubmit}

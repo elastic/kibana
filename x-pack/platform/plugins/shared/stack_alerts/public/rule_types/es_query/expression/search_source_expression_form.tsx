@@ -348,7 +348,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             allowSavingQueries
             showQueryInput
             showFilterBar
-            showDatePicker={false}
+            showDatePicker="hidden"
             showAutoRefreshOnly={false}
             showSubmitButton={false}
             dateRangeFrom={undefined}

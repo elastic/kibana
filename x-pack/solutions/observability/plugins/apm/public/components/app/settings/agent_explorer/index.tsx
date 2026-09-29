@@ -152,7 +152,7 @@ export function AgentExplorer() {
       </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>
-        <UnifiedSearchBar showDatePicker={false} showSubmitButton={false} isClearable={false} />
+        <UnifiedSearchBar showDatePicker="hidden" showSubmitButton={false} isClearable={false} />
       </EuiFlexItem>
       <EuiSpacer size="xs" />
       <EuiFlexItem>

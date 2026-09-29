@@ -56,7 +56,7 @@ export const AssetInventorySearchBar = ({
           appName="Asset Inventory"
           showFilterBar={true}
           showQueryInput={true}
-          showDatePicker={false}
+          showDatePicker="hidden"
           indexPatterns={[dataView]}
           onQuerySubmit={(payload, isUpdated) => {
             if (isUpdated) {

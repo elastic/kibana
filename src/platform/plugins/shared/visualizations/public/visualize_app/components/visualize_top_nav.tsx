@@ -185,7 +185,7 @@ const TopNav = ({
     // tsvb loads without an indexPattern initially (TODO investigate).
     // hide timefilter only if timeFieldName is explicitly undefined.
     const hasTimeField = vis.data.indexPattern ? !!vis.data.indexPattern.timeFieldName : true;
-    return vis.type.options.showTimePicker && hasTimeField;
+    return vis.type.options.showTimePicker && hasTimeField ? ('active' as const) : ('hidden' as const);
   };
   const showFilterBar = vis.type.options.showFilterBar;
   const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryInput;
@@ -353,7 +353,7 @@ const TopNav = ({
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
       indexPatterns={indexPatterns}
       screenTitle={vis.title}
-      showAutoRefreshOnly={!showDatePicker()}
+      showAutoRefreshOnly={showDatePicker() === 'hidden'}
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
@@ -394,7 +394,7 @@ const TopNav = ({
         appName={VISUALIZE_APP_NAME}
         indexPatterns={indexPatterns}
         showSearchBar
-        showDatePicker={false}
+        showDatePicker="hidden"
         showQueryInput={false}
       />
     ) : null;

@@ -449,7 +449,7 @@ export function StreamsTreeTable({
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
+            <StreamsAppSearchBar showDatePicker="active" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

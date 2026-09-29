@@ -181,7 +181,7 @@ export const useDashboardPreviewUnifiedSearch = ({
       appName: 'agentBuilderDashboards',
       isAutoRefreshDisabled: true,
       showQueryInput: true,
-      showDatePicker: true,
+      showDatePicker: 'active',
       showFilterBar: true,
       showQueryMenu: false,
       screenTitle: dashboardState.title,

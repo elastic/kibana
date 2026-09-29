@@ -1444,6 +1444,8 @@ export const LensTopNavMenu = ({
                   dataViews.indexPatterns
                 )
             )
+              ? 'active'
+              : 'hidden'
           }
           textBasedLanguageModeErrors={textBasedLanguageModeErrors}
           showFilterBar={true}

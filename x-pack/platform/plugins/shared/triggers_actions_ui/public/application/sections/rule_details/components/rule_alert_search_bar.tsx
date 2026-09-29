@@ -48,7 +48,7 @@ export const RuleAlertSearchBar = ({
             ruleTypeIds={[ruleTypeId]}
             showFilterBar
             showFilterControls
-            showDatePicker
+            showDatePicker="active"
             showSubmitButton
             urlStorageKey={RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY}
             filterControlsStorageKey={RULE_DETAILS_FILTER_CONTROLS_STORAGE_KEY}

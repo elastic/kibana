@@ -56,7 +56,7 @@ export const FindingsSearchBar = ({
         appName={PLUGIN_NAME}
         showFilterBar={true}
         showQueryInput={true}
-        showDatePicker={false}
+        showDatePicker="hidden"
         isLoading={loading || isRefreshing}
         indexPatterns={[dataView]}
         onQuerySubmit={(payload, isUpdated) => (isUpdated ? setQuery(payload) : refresh())}

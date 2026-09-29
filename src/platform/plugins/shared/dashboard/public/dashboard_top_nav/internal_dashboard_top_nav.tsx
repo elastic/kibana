@@ -373,7 +373,7 @@ export function InternalDashboardTopNav({
   // Disable the date picker when the dashboard has data views but none are time-based.
   const showDatePicker = useMemo(() => {
     if (!visibilityProps.showDatePicker) {
-      return false;
+      return 'hidden' as const;
     }
     const disabled =
       (allDataViews?.length ?? 0) > 0 &&

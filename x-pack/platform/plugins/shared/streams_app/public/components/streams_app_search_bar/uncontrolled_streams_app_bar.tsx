@@ -16,7 +16,7 @@ export function UncontrolledStreamsAppSearchBar(props: UncontrolledStreamsAppSea
   return (
     <unifiedSearch.ui.SearchBar
       appName="streamsApp"
-      showDatePicker={false}
+      showDatePicker="hidden"
       showFilterBar={false}
       showQueryMenu={false}
       showQueryInput={false}

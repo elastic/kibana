@@ -97,7 +97,7 @@ afterEach(() => {
 describe('<SearchBarUI />', () => {
   describe('when the query is NOT dirty', () => {
     const props = {
-      showDatePicker: false,
+      showDatePicker: 'hidden' as const,
       query: undefined,
       dateRangeFrom: 'now-15m',
       dateRangeTo: 'now',
@@ -124,7 +124,7 @@ describe('<SearchBarUI />', () => {
 
   describe('when the query is dirty', () => {
     const props = {
-      showDatePicker: false,
+      showDatePicker: 'hidden' as const,
       query: undefined,
       dateRangeFrom: 'now-1h',
       dateRangeTo: 'now-15m',

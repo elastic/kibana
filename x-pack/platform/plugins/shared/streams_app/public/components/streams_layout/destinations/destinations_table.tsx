@@ -343,7 +343,7 @@ function DestinationsTableContent() {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
+            <StreamsAppSearchBar showDatePicker="active" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

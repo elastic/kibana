@@ -192,7 +192,7 @@ export const DetectionsTab = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
-            <SignificantEventsSearchBar showDatePicker enableDateRangePicker />
+            <SignificantEventsSearchBar showDatePicker="active" enableDateRangePicker />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FindSignificantEventsButton
