@@ -1672,7 +1672,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Restart an agent`,
-      description: `Restart an Elastic Agent.`,
+      description: `Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
         availability: {
