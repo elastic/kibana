@@ -8,6 +8,7 @@
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { Logger } from '@kbn/logging';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { LogsDataAccessConfig } from '../config';
 import { createGetLogsRateTimeseries } from './get_logs_rate_timeseries/get_logs_rate_timeseries';
 import { createGetLogErrorRateTimeseries } from './get_logs_error_rate_timeseries/get_logs_error_rate_timeseries';
@@ -19,6 +20,7 @@ export interface RegisterServicesParams {
   logger: Logger;
   config: LogsDataAccessConfig;
   deps: {
+    analytics: AnalyticsServiceStart;
     savedObjects: SavedObjectsServiceStart;
     uiSettings: UiSettingsServiceStart;
   };

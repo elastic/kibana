@@ -40,6 +40,9 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/es-errors'
   - '@kbn/ml-random-sampler-utils'
+  - '@kbn/tracing-utils'
+  - '@kbn/inference-tracing'
+  - '@kbn/core-elasticsearch-server-mocks'
 tags:
   - plugin
   - prod

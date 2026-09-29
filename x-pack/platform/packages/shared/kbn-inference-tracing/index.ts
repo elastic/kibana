@@ -33,6 +33,7 @@ export {
 export { parseJsonAttr } from './src/util/parse_json_attr';
 
 export { isInferenceSpan } from './src/is_inference_span';
+export { isInInferenceContext } from './src/is_in_inference_context';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';
 export { PhoenixSpanProcessor } from './src/phoenix/phoenix_span_processor';
 export {

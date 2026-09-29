@@ -23,13 +23,14 @@ import { collectCandidates, selectRerankCandidates } from './collect_candidates'
 import { buildRerankInputs } from './rerank_input';
 import type { CountProbeResult, EsqlSearchScope } from './run_queries';
 import { runCountProbe } from './run_queries';
+import { observePhase } from '../../telemetry';
 
 /** Searches for log patterns matching a natural-language query using CATEGORIZE + inference RERANK. */
 export async function searchWithEsqlRerank(
   params: SemanticLogSearchParams,
   deps: SemanticLogSearchDeps
 ): Promise<SemanticLogSearchResult> {
-  const { logger, rerankInferenceId } = deps;
+  const { logger, rerankInferenceId, observation } = deps;
   const {
     esClient,
     target,
@@ -52,7 +53,12 @@ export async function searchWithEsqlRerank(
   // budget — decline with guidance rather than consuming 30 s and still timing out.
   let probeResult: CountProbeResult;
   try {
-    probeResult = await runCountProbe({ scope, esClient, abortSignal });
+    probeResult = await observePhase(
+      observation,
+      SEARCH_PHASE.PROBE,
+      () => runCountProbe({ scope, esClient, abortSignal }),
+      (result) => result.status === 'incomplete'
+    );
   } catch (error) {
     return toFailureResult(error, { logger, target, phase: SEARCH_PHASE.PROBE });
   }
@@ -72,7 +78,10 @@ export async function searchWithEsqlRerank(
   // Step 2: CATEGORIZE with adaptive sampling.
   let candidates: LogPattern[];
   try {
-    candidates = await collectCandidates({ scope, total, esClient, abortSignal });
+    candidates = await observePhase(observation, SEARCH_PHASE.SEARCH, () =>
+      collectCandidates({ scope, total, esClient, abortSignal, observation })
+    );
+    observation?.evidence({ candidate_count: candidates.length });
   } catch (error) {
     return toFailureResult(error, { logger, target, phase: SEARCH_PHASE.SEARCH });
   }
@@ -82,43 +91,55 @@ export async function searchWithEsqlRerank(
   }
 
   const capped = selectRerankCandidates(candidates, DEFAULT_RANK_WINDOW);
+  observation?.evidence({
+    selected_candidate_count: capped.length,
+    candidates_capped: capped.length < candidates.length,
+  });
 
   // Step 3: rerank the candidate set via the inference API, in its own phase so that a model that
   // is still loading is reported as `inference_not_ready` rather than as an oversized scope.
   // RERANK runs outside ES|QL because the two passes produce separate result sets that
   // ES|QL cannot union in a single statement.
   try {
-    const rerankResponse = await esClient.inference.rerank(
-      {
-        inference_id: rerankInferenceId,
-        query: nlQuery,
-        input: buildRerankInputs(capped),
-        top_n: maxPatterns,
-        // Elasticsearch's own budget for the call, which defaults below what the local endpoint
-        // needs for a full rank window. Without it the client `requestTimeout` below never applies.
-        timeout: RERANK_INFERENCE_TIMEOUT,
-        // We never read the echoed text; suppress it to avoid transferring the full input back.
-        // Must stay inside `task_settings`: as a top-level field, non-`elasticsearch` inference
-        // services reject it with `validation_exception`.
-        task_settings: { return_documents: false },
-      },
-      { signal: abortSignal, requestTimeout: RERANK_REQUEST_TIMEOUT_MS }
+    return await observePhase(
+      observation,
+      SEARCH_PHASE.RERANK,
+      async (): Promise<SemanticLogSearchResult> => {
+        const input = buildRerankInputs(capped);
+        observation?.inputSize(input.reduce((sum, text) => sum + text.length, 0));
+        const rerankResponse = await esClient.inference.rerank(
+          {
+            inference_id: rerankInferenceId,
+            query: nlQuery,
+            input,
+            top_n: maxPatterns,
+            // Elasticsearch's own budget for the call, which defaults below what the local endpoint
+            // needs for a full rank window. Without it the client `requestTimeout` below never applies.
+            timeout: RERANK_INFERENCE_TIMEOUT,
+            // We never read the echoed text; suppress it to avoid transferring the full input back.
+            // Must stay inside `task_settings`: as a top-level field, non-`elasticsearch` inference
+            // services reject it with `validation_exception`.
+            task_settings: { return_documents: false },
+          },
+          { signal: abortSignal, requestTimeout: RERANK_REQUEST_TIMEOUT_MS }
+        );
+
+        // TODO: derive a "nothing relevant matched" signal from the top relevance_score and surface it
+        // as a tool warning. Needs a threshold per endpoint rather than one constant, since the score
+        // scale belongs to whichever endpoint `rerankInferenceId` names.
+        const ranked = rerankResponse.rerank
+          .slice()
+          .sort((a, b) => b.relevance_score - a.relevance_score)
+          .slice(0, maxPatterns) // defensive bound in case top_n is not honoured
+          .flatMap((entry) => {
+            const candidate = capped[entry.index];
+            if (!candidate) return [];
+            return [{ ...candidate, relevanceScore: entry.relevance_score }];
+          });
+
+        return { status: 'success', patterns: ranked };
+      }
     );
-
-    // TODO: derive a "nothing relevant matched" signal from the top relevance_score and surface it
-    // as a tool warning. Needs a threshold per endpoint rather than one constant, since the score
-    // scale belongs to whichever endpoint `rerankInferenceId` names.
-    const ranked = rerankResponse.rerank
-      .slice()
-      .sort((a, b) => b.relevance_score - a.relevance_score)
-      .slice(0, maxPatterns) // defensive bound in case top_n is not honoured
-      .flatMap((entry) => {
-        const candidate = capped[entry.index];
-        if (!candidate) return [];
-        return [{ ...candidate, relevanceScore: entry.relevance_score }];
-      });
-
-    return { status: 'success', patterns: ranked };
   } catch (error) {
     return toFailureResult(error, { logger, target, phase: SEARCH_PHASE.RERANK });
   }

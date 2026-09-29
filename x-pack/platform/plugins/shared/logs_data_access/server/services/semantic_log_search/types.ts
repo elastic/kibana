@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { SearchObservation } from './telemetry';
 
 /**
  * Server-side dependencies threaded through the search path, as opposed to the caller's per-request
@@ -15,4 +16,5 @@ import type { Logger } from '@kbn/logging';
 export interface SemanticLogSearchDeps {
   logger: Logger;
   rerankInferenceId: string;
+  observation?: SearchObservation;
 }

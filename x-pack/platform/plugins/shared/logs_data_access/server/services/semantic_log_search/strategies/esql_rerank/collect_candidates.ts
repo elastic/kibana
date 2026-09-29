@@ -13,7 +13,8 @@ import type {
 } from '../../../../../common/services/semantic_log_search/types';
 import { NOISE_FRACTION_DEFAULT } from '../../constants';
 import type { EsqlSearchScope } from './run_queries';
-import { runCategorizePass } from './run_queries';
+import { MAX_CATEGORIZE_ROWS, runCategorizePass } from './run_queries';
+import type { SearchObservation } from '../../telemetry';
 
 // Target document count per CATEGORIZE pass. Caps the scan cost so it scales with this constant, not with corpus size.
 // https://github.com/elastic/kibana/blob/58b8b4792828/x-pack/platform/packages/shared/ml/random_sampler_utils/src/get_sample_probability.ts#L8
@@ -64,17 +65,35 @@ export async function collectCandidates({
   total,
   esClient,
   abortSignal,
+  observation,
 }: {
   scope: EsqlSearchScope;
   total: number;
   esClient: SemanticLogSearchParams['esClient'];
   abortSignal: AbortSignal | undefined;
+  observation?: SearchObservation;
 }): Promise<LogPattern[]> {
+  const runPass = (
+    pass: 'single' | 'head' | 'rare' | 'fallback',
+    params: Parameters<typeof runCategorizePass>[0]
+  ): Promise<LogPattern[]> =>
+    observation
+      ? observation.categorize(
+          {
+            pass,
+            sampling_probability: params.samplingProbability,
+            noise_threshold: params.noiseThreshold,
+            exclusion_count: params.exclusionPatterns.length,
+            row_limit: MAX_CATEGORIZE_ROWS,
+          },
+          () => runCategorizePass(params)
+        )
+      : runCategorizePass(params);
   const samplingProbability = getSampleProbability(total);
 
   if (samplingProbability >= 1) {
     // Small corpus: one unsampled pass, no noise threshold.
-    return runCategorizePass({
+    return runPass('single', {
       scope,
       exclusionPatterns: [],
       samplingProbability: 1,
@@ -92,7 +111,7 @@ export async function collectCandidates({
     1,
     Math.ceil(NOISE_FRACTION_DEFAULT * total * samplingProbability)
   );
-  const headPatterns = await runCategorizePass({
+  const headPatterns = await runPass('head', {
     scope,
     exclusionPatterns: [],
     samplingProbability,
@@ -106,7 +125,7 @@ export async function collectCandidates({
     // No head to exclude; run a plain unthresholded DESC pass instead.
     // ASC with no exclusions would keep only the rarest 1 000 rows on the implicit row-cap
     // truncation, discarding all representative patterns.
-    const fallbackPatterns = await runCategorizePass({
+    const fallbackPatterns = await runPass('fallback', {
       scope,
       exclusionPatterns: [],
       samplingProbability,
@@ -142,7 +161,7 @@ export async function collectCandidates({
   const residualProbability =
     sampledResidual > CATEGORIZE_SAMPLE_TARGET ? CATEGORIZE_SAMPLE_TARGET / sampledResidual : 1;
 
-  const rarePatterns = await runCategorizePass({
+  const rarePatterns = await runPass('rare', {
     scope,
     exclusionPatterns: exclusionTokens,
     samplingProbability: residualProbability,

@@ -33,7 +33,7 @@ export interface EsqlSearchScope {
 export type CountProbeResult = { status: 'counted'; total: number } | { status: 'incomplete' };
 
 // ES|QL's implicit row cap; explicit so the ASC-sort truncation invariant is not load-bearing on the default.
-const MAX_CATEGORIZE_ROWS = 1000;
+export const MAX_CATEGORIZE_ROWS = 1000;
 
 // Build FROM <target> | WHERE <time range> [| WHERE KQL(<filter>)].
 function buildBaseQuery(scope: EsqlSearchScope) {

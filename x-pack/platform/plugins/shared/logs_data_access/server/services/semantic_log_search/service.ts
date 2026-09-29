@@ -22,6 +22,7 @@ import { searchWithEsqlRerank } from './strategies';
 import { semanticLogSearchInputSchema } from './schema';
 import { errorResult, unavailableResult, toFailureResult, SEARCH_PHASE } from './results';
 import type { SemanticLogSearchDeps } from './types';
+import { createSemanticSearchTelemetry, observePhase } from './telemetry';
 
 /** Search for log patterns matching a natural language query. */
 export async function search(
@@ -44,26 +45,33 @@ export async function search(
   const input: SemanticLogSearchParams = { ...validation.data, esClient, abortSignal };
 
   try {
-    const fieldCheck = await hasRequiredFields(esClient, input.target);
-    if (fieldCheck === 'no_matching_indices') {
-      logger.debug(`Semantic log search found no indices matching target "${input.target}"`);
-      return unavailableResult(UNAVAILABLE_REASON.NO_MATCHING_INDICES);
-    }
-    if (fieldCheck === 'missing_fields') {
-      return unavailableResult(UNAVAILABLE_REASON.MISSING_FIELDS);
-    }
-    if (!(await detectRerankCapability(esClient, rerankInferenceId))) {
-      // The tool response cannot tell these apart — it carries a fixed reason whose warning tells
-      // the model not to retry — so the distinction is drawn here, where an operator will see it.
-      if (rerankInferenceId !== RERANK_ENDPOINT) {
-        logger.warn(
-          `Semantic log search is configured to use the inference endpoint "${rerankInferenceId}", ` +
-            `which this cluster does not have. Check xpack.logsDataAccess.semanticLogSearch.rerankInferenceId; ` +
-            `the default "${RERANK_ENDPOINT}" is preconfigured by Elasticsearch.`
-        );
+    const unavailable = await observePhase(
+      deps.observation,
+      SEARCH_PHASE.CAPABILITIES,
+      async () => {
+        const fieldCheck = await hasRequiredFields(esClient, input.target);
+        if (fieldCheck === 'no_matching_indices') {
+          logger.debug(`Semantic log search found no indices matching target "${input.target}"`);
+          return unavailableResult(UNAVAILABLE_REASON.NO_MATCHING_INDICES);
+        }
+        if (fieldCheck === 'missing_fields') {
+          return unavailableResult(UNAVAILABLE_REASON.MISSING_FIELDS);
+        }
+        if (!(await detectRerankCapability(esClient, rerankInferenceId))) {
+          // The tool response cannot tell these apart — it carries a fixed reason whose warning tells
+          // the model not to retry — so the distinction is drawn here, where an operator will see it.
+          if (rerankInferenceId !== RERANK_ENDPOINT) {
+            logger.warn(
+              `Semantic log search is configured to use the inference endpoint "${rerankInferenceId}", ` +
+                `which this cluster does not have. Check xpack.logsDataAccess.semanticLogSearch.rerankInferenceId; ` +
+                `the default "${RERANK_ENDPOINT}" is preconfigured by Elasticsearch.`
+            );
+          }
+          return unavailableResult(UNAVAILABLE_REASON.INFERENCE_UNAVAILABLE);
+        }
       }
-      return unavailableResult(UNAVAILABLE_REASON.INFERENCE_UNAVAILABLE);
-    }
+    );
+    if (unavailable) return unavailable;
   } catch (error) {
     return toFailureResult(error, {
       logger,
@@ -80,12 +88,14 @@ export function createSemanticLogSearchService(
   params: RegisterServicesParams
 ): SemanticLogSearchService {
   const { logger, config } = params;
+  const telemetry = createSemanticSearchTelemetry(params.deps.analytics);
   const deps: SemanticLogSearchDeps = {
     logger,
     rerankInferenceId: config.semanticLogSearch.rerankInferenceId,
   };
 
   return {
-    search: (searchParams) => search(searchParams, deps),
+    search: (searchParams) =>
+      telemetry.search((observation) => search(searchParams, { ...deps, observation })),
   };
 }

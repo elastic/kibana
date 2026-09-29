@@ -41,7 +41,8 @@ export const unavailableResult = (reason: UnavailableReason): SemanticLogSearchR
 
 // Tests the error type, not the signal: any non-abort error surfacing after an abort
 // (mapping error, 403) must still be classified as `execution`, not `cancelled`.
-function isCancellationError(error: unknown): boolean {
+/** Identifies cancellation consistently for service results and telemetry. */
+export function isCancellationError(error: unknown): boolean {
   return (
     isRequestAbortedError(error) ||
     (error instanceof Error &&
