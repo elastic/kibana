@@ -170,12 +170,14 @@ const renderDismissedComment = ({
   decidedBy,
   dismissedTag = 'az:true_positive',
   fpCandidateCount = 2,
+  failedRetagCount = 0,
 }: {
   dismissReason?: string;
   rationale?: string;
   decidedBy?: { username: string };
   dismissedTag?: string;
   fpCandidateCount?: number;
+  failedRetagCount?: number;
 }): string => {
   return renderString(dismissedInputTemplate, {
     steps: {
@@ -183,7 +185,11 @@ const renderDismissedComment = ({
         output: { decision: 'dismissed', dismissReason, rationale, decidedBy },
       },
     },
-    variables: { dismissed_tag: dismissedTag, fp_candidate_count: fpCandidateCount },
+    variables: {
+      dismissed_tag: dismissedTag,
+      fp_candidate_count: fpCandidateCount,
+      failed_retag_count: failedRetagCount,
+    },
   });
 };
 
@@ -216,6 +222,66 @@ describe('floor_alert_triage — post_comment_outcome_dismissed', () => {
   it('names the decider when decidedBy is present', () => {
     const comment = renderDismissedComment({ decidedBy: { username: 'analyst1' } });
     expect(comment).toContain('@analyst1');
+  });
+
+  it('claims every FP candidate was re-tagged when no per-alert retag failed', () => {
+    const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 0 });
+    expect(comment).toContain('3 alert(s) re-tagged');
+    expect(comment).not.toContain('failed after retries');
+  });
+
+  it('reports the shortfall instead of claiming full success when a retag failed', () => {
+    const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 1 });
+    expect(comment).toContain('2 of 3 alert(s) re-tagged');
+    expect(comment).toContain('1 failed after retries and need manual re-tagging');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// retag_dismissed_alerts — per-alert tag-update failures are counted, not
+// silently swallowed by the loop's on-failure: continue: true
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage — retag_dismissed_alerts failure tracking', () => {
+  it('initializes the failure counter alongside the dismissed_tag mapping', () => {
+    const mapStep = stepByName('map_dismiss_reason_to_tag');
+    expect(mapStep?.with?.failed_retag_count).toBe(0);
+  });
+
+  it('retries remove_fp_tag and add_dismissed_tag before the loop continues past a failure', () => {
+    const removeFpTag = stepByName('remove_fp_tag');
+    const addDismissedTag = stepByName('add_dismissed_tag');
+    const loop = stepByName('retag_dismissed_alerts');
+
+    expect(removeFpTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(addDismissedTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(loop?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('increments the counter when either tag call recorded an error', () => {
+    const recordFailure = stepByName('record_retag_failure');
+    expect(recordFailure?.type).toBe('data.set');
+    expect(recordFailure?.if).toBe(
+      '${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}'
+    );
+
+    const noError = { steps: { remove_fp_tag: {}, add_dismissed_tag: {} } };
+    const removeFailed = {
+      steps: { remove_fp_tag: { error: { message: 'x' } }, add_dismissed_tag: {} },
+    };
+    const addFailed = {
+      steps: { remove_fp_tag: {}, add_dismissed_tag: { error: { message: 'x' } } },
+    };
+
+    expect(evalExpr(recordFailure!.if!, noError)).toBe(false);
+    expect(evalExpr(recordFailure!.if!, removeFailed)).toBe(true);
+    expect(evalExpr(recordFailure!.if!, addFailed)).toBe(true);
+
+    expect(
+      evalExpr(recordFailure!.with!.failed_retag_count as string, {
+        variables: { failed_retag_count: 1 },
+      })
+    ).toBe(2);
   });
 });
 
