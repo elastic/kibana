@@ -136,7 +136,8 @@ import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios
 import { RelayClient, type RelayClientContract } from './lib/relay';
 import { assertCatalogUrlAllowed } from './catalog/catalog_config';
 import {
-  CATALOG_LOAD_TIMEOUT_MS,
+  CATALOG_BOOT_FETCH_TIMEOUT_MS,
+  CATALOG_BOOT_HARD_STOP_MS,
   CATALOG_PUBLIC_KEYS,
   DeclarativeCatalogService,
   LocalBundleSource,
@@ -1280,25 +1281,30 @@ export class ActionsPlugin
     }
     try {
       await withCatalogTimeout(
-        this.catalogService.loadAtBoot({
-          registerType: (actionType) => {
-            if (this.actionTypeRegistry!.has(actionType.id)) {
-              return;
-            }
-            ensureSufficientLicense(actionType);
-            this.actionTypeRegistry!.register(actionType);
+        this.catalogService.loadAtBoot(
+          {
+            registerType: (actionType) => {
+              if (this.actionTypeRegistry!.has(actionType.id)) {
+                return;
+              }
+              ensureSufficientLicense(actionType);
+              this.actionTypeRegistry!.register(actionType);
+            },
+            isTypeRegistered: (id) => this.actionTypeRegistry!.has(id),
+            updateFeatureUsageTier: (actionType) =>
+              this.actionTypeRegistry!.updateFeatureUsageTier(actionType as ActionType),
+            esClient: core.elasticsearch.client.asInternalUser,
+            savedObjectsRepository: core.savedObjects.createInternalRepository([
+              ACTION_SAVED_OBJECT_TYPE,
+            ]),
           },
-          isTypeRegistered: (id) => this.actionTypeRegistry!.has(id),
-          updateFeatureUsageTier: (actionType) =>
-            this.actionTypeRegistry!.updateFeatureUsageTier(actionType as ActionType),
-          esClient: core.elasticsearch.client.asInternalUser,
-          savedObjectsRepository: core.savedObjects.createInternalRepository([
-            ACTION_SAVED_OBJECT_TYPE,
-          ]),
-        }),
-        CATALOG_LOAD_TIMEOUT_MS,
+          { timeoutMs: CATALOG_BOOT_FETCH_TIMEOUT_MS }
+        ),
+        CATALOG_BOOT_HARD_STOP_MS,
         () => {
-          this.logger.warn('Connector catalog load timed out; starting with in-tree types only');
+          this.logger.warn(
+            'Connector catalog boot exceeded the start budget; starting with in-tree types only'
+          );
         },
         (error) => {
           this.logger.warn(

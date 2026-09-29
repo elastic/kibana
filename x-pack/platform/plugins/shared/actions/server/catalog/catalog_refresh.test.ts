@@ -73,18 +73,20 @@ describe('runCatalogRefresh', () => {
   it('stops before parse when the signature is invalid', async () => {
     const storage = createStorage();
     const reload = jest.fn();
-    await runCatalogRefresh({
-      source: {
-        origin: 'http://example.test',
-        readManifest: async () => ({ bytes: LIVE_CATALOG_MANIFEST, signature: 'not-a-sig' }),
-        readText: async () => '',
-      },
-      storage,
-      publicKeys: CATALOG_PUBLIC_KEYS,
-      logger,
-      logOnce: createLogOnce(logger),
-      reload,
-    });
+    await expect(
+      runCatalogRefresh({
+        source: {
+          origin: 'http://example.test',
+          readManifest: async () => ({ bytes: LIVE_CATALOG_MANIFEST, signature: 'not-a-sig' }),
+          readText: async () => '',
+        },
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'failed' });
     expect(storage.putDefinitionCreate).not.toHaveBeenCalled();
     expect(storage.putManifest).not.toHaveBeenCalled();
     expect(reload).not.toHaveBeenCalled();
@@ -110,15 +112,40 @@ describe('runCatalogRefresh', () => {
         definitionDocId('.okta', '1.0'),
       ])
     );
+    const abuseipdbIconHash =
+      'sha256:c2ed2c5ebe15e0b513f760b11b0bdd149236d298f06612f468368901ce19e012';
+    const oktaIconHash = 'sha256:61285080a6b979ac58e3a9f3c07ed506ee9075db01bd088bfdeaa1a57bdb9f84';
+    storage.getAssets.mockResolvedValue(
+      new Map([
+        [
+          abuseipdbIconHash,
+          {
+            contentHash: abuseipdbIconHash,
+            svg: LIVE_ABUSEIPDB_ICON,
+            addedAt: '2026-09-17T12:00:00.000Z',
+          },
+        ],
+        [
+          oktaIconHash,
+          {
+            contentHash: oktaIconHash,
+            svg: LIVE_OKTA_ICON,
+            addedAt: '2026-09-17T12:00:00.000Z',
+          },
+        ],
+      ])
+    );
     const reload = jest.fn();
-    await runCatalogRefresh({
-      source: liveSource(),
-      storage,
-      publicKeys: CATALOG_PUBLIC_KEYS,
-      logger,
-      logOnce: createLogOnce(logger),
-      reload,
-    });
+    await expect(
+      runCatalogRefresh({
+        source: liveSource(),
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'same' });
     expect(storage.putManifest).not.toHaveBeenCalled();
     expect(reload).not.toHaveBeenCalled();
   });
@@ -126,14 +153,16 @@ describe('runCatalogRefresh', () => {
   it('stores definitions and assets then replaces the manifest and reloads', async () => {
     const storage = createStorage();
     const reload = jest.fn();
-    await runCatalogRefresh({
-      source: liveSource(),
-      storage,
-      publicKeys: CATALOG_PUBLIC_KEYS,
-      logger,
-      logOnce: createLogOnce(logger),
-      reload,
-    });
+    await expect(
+      runCatalogRefresh({
+        source: liveSource(),
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'replaced' });
     expect(storage.putDefinitionCreate).toHaveBeenCalledTimes(3);
     expect(storage.putAssetCreate).toHaveBeenCalledTimes(2);
     expect(storage.putManifest).toHaveBeenCalledWith(
@@ -153,14 +182,16 @@ describe('runCatalogRefresh', () => {
       fetchedAt: '2026-09-17T12:00:00.000Z',
     });
     const reload = jest.fn();
-    await runCatalogRefresh({
-      source: liveSource(),
-      storage,
-      publicKeys: CATALOG_PUBLIC_KEYS,
-      logger,
-      logOnce: createLogOnce(logger),
-      reload,
-    });
+    await expect(
+      runCatalogRefresh({
+        source: liveSource(),
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'stale' });
     expect(storage.putManifest).not.toHaveBeenCalled();
     expect(storage.putDefinitionCreate).not.toHaveBeenCalled();
     expect(reload).not.toHaveBeenCalled();
@@ -222,8 +253,8 @@ describe('runCatalogRefresh', () => {
       reload: jest.fn(),
     };
 
-    await runCatalogRefresh(deps);
-    await runCatalogRefresh(deps);
+    await expect(runCatalogRefresh(deps)).resolves.toEqual({ outcome: 'failed' });
+    await expect(runCatalogRefresh(deps)).resolves.toEqual({ outcome: 'failed' });
     expect(fetchLogger.warn).toHaveBeenCalledTimes(1);
     expect(fetchLogger.debug).toHaveBeenCalledWith(expect.stringContaining('network down'));
 
@@ -248,14 +279,16 @@ describe('runCatalogRefresh', () => {
     const reload = jest.fn();
     const source = liveSource();
     const readText = jest.fn(source.readText);
-    await runCatalogRefresh({
-      source: { ...source, readText },
-      storage,
-      publicKeys: CATALOG_PUBLIC_KEYS,
-      logger,
-      logOnce: createLogOnce(logger),
-      reload,
-    });
+    await expect(
+      runCatalogRefresh({
+        source: { ...source, readText },
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'stale' });
     expect(readText).not.toHaveBeenCalled();
     expect(storage.putDefinitionCreate).not.toHaveBeenCalled();
     expect(storage.putManifest).not.toHaveBeenCalled();
@@ -278,14 +311,16 @@ describe('runCatalogRefresh', () => {
       new Set([definitionDocId('.abuseipdb', '1.1'), definitionDocId('.abuseipdb', '1.0')])
     );
     const reload = jest.fn();
-    await runCatalogRefresh({
-      source: liveSource(),
-      storage,
-      publicKeys: CATALOG_PUBLIC_KEYS,
-      logger,
-      logOnce: createLogOnce(logger),
-      reload,
-    });
+    await expect(
+      runCatalogRefresh({
+        source: liveSource(),
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'same' });
     expect(storage.putDefinitionCreate).toHaveBeenCalledWith(
       expect.objectContaining({ id: '.okta', version: '1.0' })
     );
@@ -411,20 +446,92 @@ describe('runCatalogRefresh', () => {
     const { bytes, signature } = signedManifestFixture({}, { keyIndex: 1 });
     const storage = createStorage();
     const reload = jest.fn();
-    await runCatalogRefresh({
-      source: {
-        origin: 'http://example.test',
-        readManifest: async () => ({ bytes, signature }),
-        readText: async () => ABUSE_IPDB_SPEC_FIXTURE,
-      },
-      storage,
-      publicKeys: TEST_PUBLIC_KEYS,
-      logger,
-      logOnce: createLogOnce(logger),
-      reload,
-    });
+    await expect(
+      runCatalogRefresh({
+        source: {
+          origin: 'http://example.test',
+          readManifest: async () => ({ bytes, signature }),
+          readText: async () => ABUSE_IPDB_SPEC_FIXTURE,
+        },
+        storage,
+        publicKeys: TEST_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'replaced' });
     expect(storage.putDefinitionCreate).toHaveBeenCalled();
     expect(storage.putManifest).toHaveBeenCalled();
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reload when putManifest returns stale', async () => {
+    const storage = createStorage();
+    storage.putManifest.mockResolvedValue('stale');
+    const reload = jest.fn();
+    await expect(
+      runCatalogRefresh({
+        source: liveSource(),
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'stale' });
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('skips icons when skipIcons is set', async () => {
+    const storage = createStorage();
+    const reload = jest.fn();
+    await expect(
+      runCatalogRefresh({
+        source: liveSource(),
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+        skipIcons: true,
+      })
+    ).resolves.toEqual({ outcome: 'replaced' });
+    expect(storage.putDefinitionCreate).toHaveBeenCalledTimes(3);
+    expect(storage.putAssetCreate).not.toHaveBeenCalled();
+    expect(storage.putManifest).toHaveBeenCalled();
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('fetches a missing icon when every row exists and the bytes are unchanged', async () => {
+    const storage = createStorage();
+    storage.getManifest.mockResolvedValue({
+      bytes: LIVE_CATALOG_MANIFEST,
+      signature: LIVE_CATALOG_SIGNATURE,
+      sequence: 1,
+      catalogVersion: 'sha256:aa',
+      fetchedAt: '2026-09-17T12:00:00.000Z',
+    });
+    storage.existsDefinitions.mockResolvedValue(
+      new Set([
+        definitionDocId('.abuseipdb', '1.1'),
+        definitionDocId('.abuseipdb', '1.0'),
+        definitionDocId('.okta', '1.0'),
+      ])
+    );
+    storage.getAssets.mockResolvedValue(new Map());
+    const reload = jest.fn();
+    await expect(
+      runCatalogRefresh({
+        source: liveSource(),
+        storage,
+        publicKeys: CATALOG_PUBLIC_KEYS,
+        logger,
+        logOnce: createLogOnce(logger),
+        reload,
+      })
+    ).resolves.toEqual({ outcome: 'same' });
+    expect(storage.putAssetCreate).toHaveBeenCalledTimes(2);
+    expect(storage.putManifest).not.toHaveBeenCalled();
     expect(reload).toHaveBeenCalledTimes(1);
   });
 });

@@ -32,6 +32,11 @@ export type VersionedTypeFactory = (options: {
   metadata: TypeMetadataState;
 }) => VersionedConnectorType;
 
+export interface LoadCatalogFromIndexResult {
+  registered: number;
+  manifestPresent: boolean;
+}
+
 export interface LoadCatalogFromIndexDeps {
   storage: ConnectorCatalogStorage;
   publicKeys: readonly string[];
@@ -84,10 +89,10 @@ export const loadCatalogFromIndex = async ({
   types,
   logger,
   logOnce,
-}: LoadCatalogFromIndexDeps): Promise<{ registered: number }> => {
+}: LoadCatalogFromIndexDeps): Promise<LoadCatalogFromIndexResult> => {
   const stored = await storage.getManifest();
   if (!stored) {
-    return { registered: 0 };
+    return { registered: 0, manifestPresent: false };
   }
   if (!verifyCatalogSignature(stored.bytes, stored.signature, publicKeys)) {
     logOnce.error(
@@ -95,7 +100,7 @@ export const loadCatalogFromIndex = async ({
       'signature',
       'Stored connector catalog signature verification failed; serving no catalog types'
     );
-    return { registered: 0 };
+    return { registered: 0, manifestPresent: true };
   }
 
   let manifest;
@@ -107,7 +112,7 @@ export const loadCatalogFromIndex = async ({
       'parse',
       `Stored connector catalog manifest is invalid: ${errorMessage(error)}`
     );
-    return { registered: 0 };
+    return { registered: 0, manifestPresent: true };
   }
 
   const listed = await storage.listDefinitions();
@@ -226,6 +231,7 @@ export const loadCatalogFromIndex = async ({
           const built = await tryBuild(version);
           if (built) {
             existing.addVersion(built);
+            logger.info(`Added connector catalog type version ${id}@${version}`);
           }
         }
         try {
@@ -288,6 +294,9 @@ export const loadCatalogFromIndex = async ({
       registry.registerType(type.actionType);
       types.set(id, type);
       registered += 1;
+      logger.info(
+        `Registered connector catalog type ${id} (versions ${type.getVersions().join(', ')})`
+      );
     } catch (error) {
       logOnce.error(
         manifest.catalogVersion,
@@ -297,5 +306,5 @@ export const loadCatalogFromIndex = async ({
     }
   }
 
-  return { registered };
+  return { registered, manifestPresent: true };
 };

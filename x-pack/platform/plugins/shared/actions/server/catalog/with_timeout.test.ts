@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { withCatalogTimeout } from './with_timeout';
+import {
+  CATALOG_BOOT_FETCH_TIMEOUT_MS,
+  CATALOG_BOOT_HARD_STOP_MS,
+  CATALOG_LOAD_TIMEOUT_MS,
+  withCatalogTimeout,
+} from './with_timeout';
 
 describe('withCatalogTimeout', () => {
   beforeEach(() => {
@@ -43,5 +48,11 @@ describe('withCatalogTimeout', () => {
       (error) => `failed:${error instanceof Error ? error.message : String(error)}`
     );
     await expect(result).resolves.toBe('failed:cluster_block_exception');
+  });
+
+  it('keeps the boot budgets ordered under the core start cap', () => {
+    expect(CATALOG_LOAD_TIMEOUT_MS).toBeLessThan(CATALOG_BOOT_FETCH_TIMEOUT_MS);
+    expect(CATALOG_BOOT_FETCH_TIMEOUT_MS).toBeLessThan(CATALOG_BOOT_HARD_STOP_MS);
+    expect(CATALOG_BOOT_HARD_STOP_MS).toBeLessThan(10_000);
   });
 });

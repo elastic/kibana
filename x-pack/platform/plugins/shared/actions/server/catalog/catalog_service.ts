@@ -10,14 +10,27 @@ import type { CatalogSource } from './types';
 import type { ConnectorCatalogStorage } from './catalog_storage';
 import { createConnectorCatalogStorage } from './catalog_storage';
 import type { CatalogLogOnce } from './log_once';
-import { runCatalogRefresh } from './catalog_refresh';
+import { runCatalogRefresh, type CatalogRefreshResult } from './catalog_refresh';
 import {
   loadCatalogFromIndex,
   type CatalogRegistryDeps,
+  type LoadCatalogFromIndexResult,
   type VersionedTypeFactory,
 } from './catalog_loader';
 import type { PinnedVersionsClient } from './pinned_versions';
 import type { VersionedConnectorType } from './versioned_connector_type';
+import { CATALOG_LOAD_TIMEOUT_MS, withCatalogTimeout } from './with_timeout';
+
+const BOOT_FETCH_CONCURRENCY = 20;
+
+export interface CatalogBootFetchOptions {
+  timeoutMs: number;
+}
+
+export interface CatalogRefreshOptions {
+  fetchConcurrency?: number;
+  skipIcons?: boolean;
+}
 
 export interface DeclarativeCatalogServiceOptions {
   source: CatalogSource;
@@ -39,8 +52,8 @@ export interface DeclarativeCatalogRegistrationDeps extends CatalogRegistryDeps 
  * Owns catalog storage, the refresh task entry, and the per-node reload interval.
  */
 export class DeclarativeCatalogService {
-  private refreshing?: Promise<void>;
-  private loading?: Promise<void>;
+  private refreshing?: Promise<CatalogRefreshResult | undefined>;
+  private loading?: Promise<LoadCatalogFromIndexResult>;
   private deps?: DeclarativeCatalogRegistrationDeps;
   private storage?: ConnectorCatalogStorage;
   private readonly logOnce: CatalogLogOnce;
@@ -56,11 +69,40 @@ export class DeclarativeCatalogService {
     this.logOnce = options.logOnce;
   }
 
-  public async loadAtBoot(deps: DeclarativeCatalogRegistrationDeps): Promise<void> {
+  public async loadAtBoot(
+    deps: DeclarativeCatalogRegistrationDeps,
+    bootFetch?: CatalogBootFetchOptions
+  ): Promise<void> {
     this.deps = deps;
     this.setStorage(this.createStorage(deps.esClient, this.options.logger));
     this.startReloadInterval();
-    await this.loadFromIndex();
+    const result = await withCatalogTimeout(this.loadFromIndex(), CATALOG_LOAD_TIMEOUT_MS, () => {
+      this.options.logger.warn(
+        'Connector catalog load timed out; starting with in-tree types only'
+      );
+      return undefined;
+    });
+    if (result === undefined || result.manifestPresent || bootFetch === undefined) {
+      return;
+    }
+
+    this.options.logger.info('Connector catalog index is empty; fetching the catalog at boot');
+    await withCatalogTimeout(
+      this.runBootFetch(),
+      bootFetch.timeoutMs,
+      () => {
+        this.options.logger.warn(
+          `Connector catalog boot fetch exceeded ${bootFetch.timeoutMs}ms; continuing in the background`
+        );
+      },
+      (error) => {
+        this.options.logger.warn(
+          `Connector catalog boot fetch failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    );
   }
 
   public stop(): void {
@@ -70,11 +112,13 @@ export class DeclarativeCatalogService {
     }
   }
 
-  public refresh = async (): Promise<void> => {
+  public refresh = async (
+    options?: CatalogRefreshOptions
+  ): Promise<CatalogRefreshResult | undefined> => {
     if (this.refreshing) {
       return this.refreshing;
     }
-    this.refreshing = this.runRefresh().finally(() => {
+    this.refreshing = this.runRefresh(options).finally(() => {
       this.refreshing = undefined;
     });
     return this.refreshing;
@@ -90,7 +134,7 @@ export class DeclarativeCatalogService {
     this.indexPoll.unref?.();
   }
 
-  private async loadFromIndex(): Promise<void> {
+  private async loadFromIndex(): Promise<LoadCatalogFromIndexResult> {
     if (this.loading) {
       return this.loading;
     }
@@ -100,12 +144,12 @@ export class DeclarativeCatalogService {
     return this.loading;
   }
 
-  private async runLoad(): Promise<void> {
+  private async runLoad(): Promise<LoadCatalogFromIndexResult> {
     const { deps, storage } = this;
     if (!deps || !storage) {
-      return;
+      return { registered: 0, manifestPresent: false };
     }
-    await loadCatalogFromIndex({
+    return loadCatalogFromIndex({
       storage,
       publicKeys: this.options.publicKeys,
       registry: deps,
@@ -117,18 +161,37 @@ export class DeclarativeCatalogService {
     });
   }
 
-  private async runRefresh(): Promise<void> {
+  private async runBootFetch(): Promise<void> {
+    const refreshResult = await this.refresh({
+      fetchConcurrency: BOOT_FETCH_CONCURRENCY,
+      skipIcons: true,
+    });
+    const loadResult = await this.loadFromIndex();
+    this.options.logger.info(
+      `Connector catalog boot fetch finished (${refreshResult?.outcome ?? 'skipped'}); registered ${
+        loadResult.registered
+      } catalog types`
+    );
+  }
+
+  private async runRefresh(
+    options?: CatalogRefreshOptions
+  ): Promise<CatalogRefreshResult | undefined> {
     const { storage } = this;
     if (!storage) {
-      return;
+      return undefined;
     }
-    await runCatalogRefresh({
+    return runCatalogRefresh({
       source: this.options.source,
       storage,
       publicKeys: this.options.publicKeys,
       logger: this.options.logger,
       logOnce: this.logOnce,
-      reload: () => this.loadFromIndex(),
+      reload: async () => {
+        await this.loadFromIndex();
+      },
+      fetchConcurrency: options?.fetchConcurrency,
+      skipIcons: options?.skipIcons,
     });
   }
 

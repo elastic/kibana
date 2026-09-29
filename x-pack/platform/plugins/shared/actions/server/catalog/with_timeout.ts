@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+/** Budget for the catalog index read at boot. */
 export const CATALOG_LOAD_TIMEOUT_MS = 5_000;
+/** Budget for the empty-index catalog fetch at boot. */
+export const CATALOG_BOOT_FETCH_TIMEOUT_MS = 8_000;
+/** Outer hard stop for catalog boot, below the core 10 s start cap. */
+export const CATALOG_BOOT_HARD_STOP_MS = 9_000;
 
 export const withCatalogTimeout = async <T>(
   promise: Promise<T>,

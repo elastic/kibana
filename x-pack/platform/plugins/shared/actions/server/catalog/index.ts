@@ -22,6 +22,11 @@ export {
   registerCatalogRefreshTask,
   scheduleCatalogRefreshTask,
 } from './catalog_refresh_task';
-export { CATALOG_LOAD_TIMEOUT_MS, withCatalogTimeout } from './with_timeout';
+export {
+  CATALOG_BOOT_FETCH_TIMEOUT_MS,
+  CATALOG_BOOT_HARD_STOP_MS,
+  CATALOG_LOAD_TIMEOUT_MS,
+  withCatalogTimeout,
+} from './with_timeout';
 export { CATALOG_PUBLIC_KEYS } from './keys/catalog_public_keys';
 export type { CatalogActionType } from './types';

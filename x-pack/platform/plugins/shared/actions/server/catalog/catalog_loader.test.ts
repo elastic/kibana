@@ -43,6 +43,7 @@ describe('loadCatalogFromIndex', () => {
   beforeEach(() => {
     logger.error.mockClear();
     logger.warn.mockClear();
+    logger.info.mockClear();
     mockedCreateType.mockImplementation((spec) => ({
       id: spec.metadata.id,
       name: spec.metadata.displayName,
@@ -115,6 +116,7 @@ describe('loadCatalogFromIndex', () => {
       logOnce: createLogOnce(logger),
     });
     expect(result.registered).toBe(0);
+    expect(result.manifestPresent).toBe(false);
     expect(registered).toEqual([]);
   });
 
@@ -141,6 +143,7 @@ describe('loadCatalogFromIndex', () => {
       logOnce: createLogOnce(logger),
     });
     expect(result.registered).toBe(0);
+    expect(result.manifestPresent).toBe(true);
   });
 
   it('registers a new id and skips an in-tree collision', async () => {
@@ -169,7 +172,11 @@ describe('loadCatalogFromIndex', () => {
       logOnce: createLogOnce(logger),
     });
     expect(result.registered).toBe(1);
+    expect(result.manifestPresent).toBe(true);
     expect(registered).toEqual(['.abuseipdb']);
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Registered connector catalog type .abuseipdb (versions ')
+    );
   });
 
   it('builds a definition when the stored YAML hash matches the signed manifest row', async () => {

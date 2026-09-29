@@ -749,19 +749,22 @@ describe('Actions Plugin', () => {
         await setupEnabledCatalog();
         await plugin.start(coreStart, pluginsStart);
 
-        expect(loadAtBoot).toHaveBeenCalledWith({
-          registerType: expect.any(Function),
-          isTypeRegistered: expect.any(Function),
-          updateFeatureUsageTier: expect.any(Function),
-          esClient: coreStart.elasticsearch.client.asInternalUser,
-          savedObjectsRepository: expect.anything(),
-        });
+        expect(loadAtBoot).toHaveBeenCalledWith(
+          {
+            registerType: expect.any(Function),
+            isTypeRegistered: expect.any(Function),
+            updateFeatureUsageTier: expect.any(Function),
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            savedObjectsRepository: expect.anything(),
+          },
+          { timeoutMs: 8_000 }
+        );
         expect(pluginsStart.taskManager.ensureScheduled).toHaveBeenCalledWith(
           expect.objectContaining({ taskType: CATALOG_REFRESH_TASK_TYPE })
         );
       });
 
-      it('returns the start contract and logs when catalog load times out', async () => {
+      it('returns the start contract and logs when the catalog boot hits the hard stop', async () => {
         const loadAtBoot = jest.fn(() => new Promise<void>(() => {}));
         (DeclarativeCatalogService as jest.Mock).mockImplementationOnce(() => ({
           loadAtBoot,
@@ -772,8 +775,9 @@ describe('Actions Plugin', () => {
         );
         await setupEnabledCatalog();
         await expect(plugin.start(coreStart, pluginsStart)).resolves.toBeDefined();
+        expect((withCatalogTimeout as jest.Mock).mock.calls[0][1]).toBe(9_000);
         expect(context.logger.get().warn).toHaveBeenCalledWith(
-          'Connector catalog load timed out; starting with in-tree types only'
+          'Connector catalog boot exceeded the start budget; starting with in-tree types only'
         );
       });
 
@@ -787,6 +791,20 @@ describe('Actions Plugin', () => {
         await expect(plugin.start(coreStart, pluginsStart)).resolves.toBeDefined();
         expect(context.logger.get().warn).toHaveBeenCalledWith(
           'Connector catalog load failed; starting with in-tree types only: cluster_block_exception'
+        );
+      });
+
+      it('passes the boot fetch budget so an empty index is fetched at boot', async () => {
+        const loadAtBoot = jest.fn().mockResolvedValue(undefined);
+        (DeclarativeCatalogService as jest.Mock).mockImplementationOnce(() => ({
+          loadAtBoot,
+          stop: jest.fn(),
+        }));
+        await setupEnabledCatalog();
+        await plugin.start(coreStart, pluginsStart);
+        expect(loadAtBoot.mock.calls[0][1]).toEqual({ timeoutMs: 8_000 });
+        expect(pluginsStart.taskManager.ensureScheduled).toHaveBeenCalledWith(
+          expect.objectContaining({ taskType: CATALOG_REFRESH_TASK_TYPE })
         );
       });
     });
