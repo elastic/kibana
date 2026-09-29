@@ -12,21 +12,19 @@ import type { ReactElement, ReactNode } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
 interface TooltipButtonProps {
-  isDisabled?: boolean;
   hasAriaDisabled?: boolean;
 }
 
 /**
- * A natively disabled button fires no pointer events, so its tooltip could never open. With a
- * tooltip, a disabled button defaults to `aria-disabled`, which keeps it hoverable and focusable.
+ * A natively disabled button fires no pointer events, so its tooltip could never open. EUI applies
+ * `hasAriaDisabled` only while it treats the button as disabled, so defaulting it on leaves EUI to
+ * decide which props disable the button.
  */
 export const resolveTooltipButtonProps = <T extends TooltipButtonProps>(
   buttonProps: T,
   tooltip: ReactNode
 ): T =>
-  tooltip && buttonProps.isDisabled && buttonProps.hasAriaDisabled === undefined
-    ? { ...buttonProps, hasAriaDisabled: true }
-    : buttonProps;
+  tooltip ? { ...buttonProps, hasAriaDisabled: buttonProps.hasAriaDisabled ?? true } : buttonProps;
 
 export const withTooltip = (button: ReactElement, tooltip: ReactNode): ReactElement =>
   tooltip ? React.createElement(EuiToolTip, { content: tooltip, children: button }) : button;

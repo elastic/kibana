@@ -85,7 +85,8 @@ const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
 
 const titleStyles = () => ({
   title: css`
-    a {
+    a,
+    button {
       font-weight: inherit;
     }
   `,

@@ -186,8 +186,9 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
   /**
-   * Tooltip shown on hover and focus, e.g. to explain why the action is disabled. A disabled action
-   * with a tooltip defaults `hasAriaDisabled` to true so the tooltip can still open.
+   * Tooltip shown on hover and focus, e.g. to explain why the action is disabled. An action with a
+   * tooltip defaults `hasAriaDisabled` to true, so the tooltip still opens while the action is
+   * disabled or loading.
    */
   tooltip?: ReactNode;
 }

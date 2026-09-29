@@ -536,3 +536,48 @@ describe('FlyoutTemplate body subsections', () => {
     parseChildren.mockRestore();
   });
 });
+
+describe('FlyoutTemplate body data attributes', () => {
+  it('forwards data attributes from sections, accordions, and subsections', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Section title="Overview" data-test-subj="section" data-kind="a">
+            <FlyoutTemplate.Body.Section.Subsection
+              title="Host"
+              data-test-subj="subsection"
+              data-kind="b"
+            >
+              host content
+            </FlyoutTemplate.Body.Section.Subsection>
+          </FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.Accordion title="Errors" data-test-subj="accordion" data-kind="c">
+            error list
+          </FlyoutTemplate.Body.Accordion>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('section')).toHaveAttribute('data-kind', 'a');
+    expect(screen.getByTestId('subsection')).toHaveAttribute('data-kind', 'b');
+    expect(screen.getByTestId('accordion')).toHaveAttribute('data-kind', 'c');
+  });
+
+  it('keeps the attributes the section styles depend on', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Section
+            title="Overview"
+            data-test-subj="section"
+            data-flyout-section="other"
+          >
+            content
+          </FlyoutTemplate.Body.Section>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('section')).toHaveAttribute('data-flyout-section', 'section');
+  });
+});

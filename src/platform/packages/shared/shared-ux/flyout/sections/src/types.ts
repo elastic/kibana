@@ -8,7 +8,7 @@
  */
 
 import type { MouseEventHandler, ReactNode } from 'react';
-import type { EuiAccordionProps, EuiIconProps } from '@elastic/eui';
+import type { DataAttributeProps, EuiAccordionProps, EuiIconProps } from '@elastic/eui';
 
 interface FlyoutSectionActionBase {
   label: ReactNode;
@@ -31,7 +31,7 @@ type FlyoutSectionButtonAction = FlyoutSectionActionBase & {
 
 export type FlyoutSectionAction = FlyoutSectionLinkAction | FlyoutSectionButtonAction;
 
-export interface FlyoutSectionProps {
+export interface FlyoutSectionProps extends DataAttributeProps {
   /** Seeds the section's DOM id and the title id naming it; auto-generated when omitted. */
   id?: string;
   /** Section title */
@@ -51,7 +51,7 @@ export interface FlyoutSectionProps {
   children?: ReactNode;
 }
 
-export interface FlyoutSubsectionProps {
+export interface FlyoutSubsectionProps extends DataAttributeProps {
   /** DOM id for the subsection wrapper, for use as a scroll or link target. */
   id?: string;
   title: ReactNode;
@@ -66,7 +66,7 @@ export interface FlyoutSubsectionProps {
  */
 type ForwardedAccordionProps = Pick<EuiAccordionProps, 'isLoading' | 'isLoadingMessage'>;
 
-export interface FlyoutAccordionProps extends ForwardedAccordionProps {
+export interface FlyoutAccordionProps extends ForwardedAccordionProps, DataAttributeProps {
   /** Seeds the accordion's internal DOM id; auto-generated when omitted. */
   id?: string;
   /** Accordion title, styled to match a section title. */

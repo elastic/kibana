@@ -111,40 +111,46 @@ describe('FlyoutTemplate footer', () => {
       </FlyoutTemplate>
     );
 
-    await userEvent.hover(screen.getByRole('button', { name: 'Discard' }));
+    const button = screen.getByRole('button', { name: 'Discard' });
+    expect(button).not.toHaveAttribute('aria-disabled');
+
+    await userEvent.hover(button);
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Discards unsaved edits');
   });
 
-  it('keeps a disabled action with a tooltip hoverable through aria-disabled', async () => {
-    const onClick = jest.fn();
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Body>
-          <span>content</span>
-        </FlyoutTemplate.Body>
-        <FlyoutTemplate.Footer>
-          <FlyoutTemplate.Footer.PrimaryAction
-            label="Save"
-            onClick={onClick}
-            isDisabled
-            tooltip="Fix the errors to save"
-          />
-        </FlyoutTemplate.Footer>
-      </FlyoutTemplate>
-    );
+  it.each([{ isDisabled: true }, { disabled: true }, { isLoading: true }])(
+    'keeps an action with a tooltip hoverable through aria-disabled when given %p',
+    async (disabledProps) => {
+      const onClick = jest.fn();
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.PrimaryAction
+              label="Save"
+              onClick={onClick}
+              {...disabledProps}
+              tooltip="Fix the errors to save"
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
 
-    const button = screen.getByRole('button', { name: 'Save' });
-    expect(button).toHaveAttribute('aria-disabled', 'true');
-    expect(button).not.toBeDisabled();
+      const button = screen.getByRole('button', { name: 'Save' });
+      expect(button).toHaveAttribute('aria-disabled', 'true');
+      expect(button).not.toBeDisabled();
 
-    // EUI gives an aria-disabled button `pointer-events: none`, so the pointer lands on the
-    // tooltip anchor around it, as it does in a browser.
-    await userEvent.hover(button.parentElement!);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Fix the errors to save');
+      // EUI gives an aria-disabled button `pointer-events: none`, so the pointer lands on the
+      // tooltip anchor around it, as it does in a browser.
+      await userEvent.hover(button.parentElement!);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Fix the errors to save');
 
-    await userEvent.setup({ pointerEventsCheck: 0 }).click(button);
-    expect(onClick).not.toHaveBeenCalled();
-  });
+      await userEvent.setup({ pointerEventsCheck: 0 }).click(button);
+      expect(onClick).not.toHaveBeenCalled();
+    }
+  );
 
   it('renders the menu trigger to the right of the secondary action', () => {
     renderTemplate(
