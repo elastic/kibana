@@ -70,7 +70,23 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     expect(buildTargetsPerActorQuery(overrideConfig, 'default')).toBe(
       'SET unmapped_fields="nullify";\nFROM test | LIMIT 1'
     );
-    expect(override).toHaveBeenCalledWith('default');
+    expect(override).toHaveBeenCalledWith('default', undefined);
+  });
+
+  it('forwards the page actor values to esqlQueryOverride', () => {
+    const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
+    const overrideConfig: RelationshipIntegrationConfig = {
+      kind: 'override',
+      id: 'test_override',
+      name: 'Test Override',
+      indexPattern: (ns) => `logs-test-${ns}`,
+      relationshipKey: 'supervises',
+      targetEntityType: 'user',
+      scopeToPageActorValues: true,
+      esqlQueryOverride: override,
+    };
+    buildTargetsPerActorQuery(overrideConfig, 'default', ['bob@corp', '001']);
+    expect(override).toHaveBeenCalledWith('default', ['bob@corp', '001']);
   });
 
   it('prepends the engine preamble exactly once on the override path (overrides must not include their own SET)', () => {

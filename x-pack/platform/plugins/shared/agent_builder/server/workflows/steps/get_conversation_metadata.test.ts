@@ -14,6 +14,7 @@ import {
 const experimentalEnabled = jest.fn().mockResolvedValue(true);
 const experimentalDisabled = jest.fn().mockResolvedValue(false);
 const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
+const getExecutionService = jest.fn();
 
 describe('getConversationMetadataStepDefinition', () => {
   it('creates expected step definition structure', () => {
@@ -21,6 +22,7 @@ describe('getConversationMetadataStepDefinition', () => {
     const definition = getConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
 
@@ -41,6 +43,7 @@ describe('getConversationMetadataStepDefinition', () => {
     const definition = getConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
     const context = createStepHandlerContext({
@@ -70,6 +73,7 @@ describe('getConversationMetadataStepDefinition', () => {
     const definition = getConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
     const result = await definition.handler(
@@ -91,6 +95,7 @@ describe('getConversationMetadataStepDefinition', () => {
     const definition = getConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
     const result = await definition.handler(
@@ -107,6 +112,7 @@ describe('getConversationMetadataStepDefinition', () => {
     const definition = getConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
 
@@ -118,6 +124,7 @@ describe('getConversationMetadataStepDefinition', () => {
     const definition = getConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalDisabled,
     });
 
