@@ -11,7 +11,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { escapeQuotes } from '@kbn/es-query';
 
-import { HostStatus } from '../../../../../../common/endpoint/types';
+import type { HostStatus } from '../../../../../../common/endpoint/types';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { GET_ENDPOINT_STATUS_TOOL_ID } from '../..';
@@ -83,13 +83,14 @@ export const getEndpointStatusTool = (
         let hostName = params.hostName;
         const requestedAgentId = params.agentId;
 
-        // The endpoint metadata detail route requires the `securitySolution`
-        // feature privilege (`requiredPrivileges: ['securitySolution']`) before
-        // `withEndpointAuthz({ any: ['canReadSecuritySolution', 'canAccessFleet'] })`
-        // (`server/endpoint/routes/metadata/index.ts`). Fleet access alone never
-        // reaches that route, so the effective gate is `canReadSecuritySolution`.
-        // The internal fleet and metadata services skip both checks, so assert
-        // it here before resolving or reporting on a host.
+        // The endpoint metadata detail route allows either privilege
+        // (`withEndpointAuthz({ any: ['canReadSecuritySolution', 'canAccessFleet'] })`,
+        // `server/endpoint/routes/metadata/index.ts`), but this tool deliberately
+        // requires the stricter `canReadSecuritySolution` on its own — a
+        // Fleet-only caller can reach the route yet should not get host status
+        // through this tool. The internal fleet and metadata services skip both
+        // route-level checks, so assert this narrower privilege here before
+        // resolving or reporting on a host.
         const authz = await endpointAppContextService.getEndpointAuthz(request);
         if (!authz.canReadSecuritySolution) {
           return insufficientPrivilegesResult('canReadSecuritySolution');
@@ -242,7 +243,14 @@ export const getEndpointStatusTool = (
             ?.agent?.id ?? agentId;
         const isolated = Boolean(hostMetadata.metadata.Endpoint?.state?.isolation);
         const lastSeen = hostMetadata.last_checkin || null;
-        const status = hostMetadata.host_status || HostStatus.OFFLINE;
+        // The metadata service can return a document with no `host_status`
+        // (e.g. a race between enrollment and the first checkin). Reporting a
+        // fabricated `offline` in that gap would tell the caller the host is
+        // known to be down when its state is simply unknown; `HostStatus` has
+        // no "unknown" member (widening it would ripple into every UI
+        // switch/map keyed on the enum), so fall back to the string literal
+        // and widen the field's type at the point of use instead.
+        const status: HostStatus | 'unknown' = hostMetadata.host_status || 'unknown';
 
         return {
           results: [
