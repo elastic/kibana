@@ -444,27 +444,8 @@ describe('ConversationInput', () => {
   describe('attachment removal', () => {
     const attachment = { id: 'a1', type: 'text', data: {} };
 
-    it('removes a normal attachment via context when image upload is enabled', () => {
+    it('removes a normal attachment via context', () => {
       const removeAttachment = jest.fn();
-      mockedUseExperimentalFeatures.mockReturnValue(true);
-      mockedUseConversationContext.mockReturnValue({
-        attachments: [attachment],
-        upsertAttachments: jest.fn(),
-        removeAttachment,
-        resetAttachments: jest.fn(),
-        isEmbeddedContext: false,
-        conversationActions: {} as never,
-      } as never);
-
-      renderInput(<ConversationInput />);
-      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
-
-      expect(removeAttachment).toHaveBeenCalledWith(0);
-    });
-
-    it('still removes a normal attachment via context when image upload is disabled', () => {
-      const removeAttachment = jest.fn();
-      mockedUseExperimentalFeatures.mockReturnValue(false);
       mockedUseConversationContext.mockReturnValue({
         attachments: [attachment],
         upsertAttachments: jest.fn(),
