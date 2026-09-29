@@ -23,7 +23,7 @@ const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: Readon
         key.includes('API_KEY') ||
         key.includes('CREDENTIALS') ||
         key.includes('TOKEN') ||
-        key === 'GCS_CREDENTIALS';
+        key === 'TRACING_EXPORTERS';
       return `${key}=${isSensitive ? '[redacted]' : value}`;
     })
     .join(' ');
