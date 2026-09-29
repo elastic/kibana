@@ -31,6 +31,7 @@ const ConnectedAssigneesInner = ({
   assigneeUids,
   status,
   refetchConversation,
+  buttonIconSize,
 }: AssigneesSlotRenderProps) => {
   const { manageEscalations, manageInvestigations } = useAgenticInvestigationsCapabilities();
 
@@ -69,6 +70,7 @@ const ConnectedAssigneesInner = ({
     refresh,
     canManage,
     labels: CONNECTED_ASSIGNEES_LABELS,
+    buttonIconSize,
   });
 
   return <>{renderPicker(items[0])}</>;
