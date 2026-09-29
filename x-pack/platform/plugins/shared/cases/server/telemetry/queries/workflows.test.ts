@@ -31,6 +31,8 @@ describe('workflows', () => {
         caseCardinality: number;
         uniqueUsers: number;
         byOriginType: Array<{ key: string; doc_count: number }>;
+        alertRuns: number;
+        eventRuns: number;
       }> = {}
     ) => ({
       total: overrides.total ?? 0,
@@ -52,6 +54,12 @@ describe('workflows', () => {
         },
         uniqueUsers: { value: overrides.uniqueUsers ?? 0 },
         byOriginType: { buckets: overrides.byOriginType ?? [] },
+        byAttachmentType: {
+          buckets: {
+            alert: { doc_count: overrides.alertRuns ?? 0 },
+            event: { doc_count: overrides.eventRuns ?? 0 },
+          },
+        },
       },
     });
 
@@ -88,6 +96,7 @@ describe('workflows', () => {
           attachments: 0,
           unattributed: 0,
         },
+        byAttachmentType: { alert: 0, event: 0, other: 0 },
         configurationsWithWorkflowTags: 0,
       });
     });
@@ -108,6 +117,7 @@ describe('workflows', () => {
               { key: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, doc_count: 2 },
               { key: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
             ],
+            alertRuns: 1,
           })
         )
         .mockResolvedValueOnce(makeConfigResponse(4));
@@ -127,6 +137,7 @@ describe('workflows', () => {
           // 10 total − (6 + 2 + 1) = 1
           unattributed: 1,
         },
+        byAttachmentType: { alert: 1, event: 0, other: 0 },
         configurationsWithWorkflowTags: 4,
       });
     });
@@ -165,6 +176,66 @@ describe('workflows', () => {
       const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
       expect(result.byOriginType.unattributed).toBe(0);
+    });
+
+    it('breaks attachment-origin runs down by attachment type, deriving other as the residual', async () => {
+      savedObjectsRepository.find.mockReset();
+      savedObjectsRepository.find
+        .mockResolvedValueOnce(
+          makeRunsResponse({
+            total: 9,
+            byOriginType: [
+              { key: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, doc_count: 5 },
+              { key: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, doc_count: 4 },
+            ],
+            alertRuns: 5,
+            eventRuns: 3,
+          })
+        )
+        .mockResolvedValueOnce(makeConfigResponse(0));
+
+      const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
+
+      // (5 + 4) attachment-origin runs − (5 + 3) = 1
+      expect(result.byAttachmentType).toEqual({ alert: 5, event: 3, other: 1 });
+    });
+
+    it('clamps other to 0 when attachment type counts somehow exceed attachment-origin runs', async () => {
+      savedObjectsRepository.find.mockReset();
+      savedObjectsRepository.find
+        .mockResolvedValueOnce(
+          makeRunsResponse({
+            total: 2,
+            byOriginType: [{ key: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, doc_count: 2 }],
+            alertRuns: 3,
+          })
+        )
+        .mockResolvedValueOnce(makeConfigResponse(0));
+
+      const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
+
+      expect(result.byAttachmentType.other).toBe(0);
+    });
+
+    it('filters attachment types by exact attachment type ID', async () => {
+      await getWorkflowsTelemetryData({ savedObjectsClient, logger });
+
+      expect(savedObjectsRepository.find.mock.calls[0][0].aggs?.byAttachmentType).toEqual({
+        filters: {
+          filters: {
+            alert: {
+              term: {
+                'cases-user-actions.attributes.payload.origin.attachmentType': 'security.alert',
+              },
+            },
+            event: {
+              term: {
+                'cases-user-actions.attributes.payload.origin.attachmentType': 'security.event',
+              },
+            },
+          },
+        },
+      });
     });
   });
 });
