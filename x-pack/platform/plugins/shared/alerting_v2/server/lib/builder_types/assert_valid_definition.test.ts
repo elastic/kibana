@@ -18,10 +18,7 @@ import type { FoldedVersionsRecord } from './folded_versions';
 const simpleSchema = z.object({ value: z.string().max(100) }).strict();
 
 const makeQuery = (): import('@kbn/alerting-v2-rule-builders').GeneratedQuery => ({
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | LIMIT 10' },
-  },
+  query: { base: 'FROM logs-* | LIMIT 10' },
 });
 
 /** A FoldedVersionsRecord that considers every (type, version) pair as folded. */

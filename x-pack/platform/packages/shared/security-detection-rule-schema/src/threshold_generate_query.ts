@@ -37,7 +37,7 @@ const andAll = (predicates: ESQLSingleAstItem[]): ESQLSingleAstItem => {
 // generateThresholdQuery
 //
 // Compiles a security.detection.threshold rule's builder fields into a
-// standalone breach query.  Follows the design stage by stage:
+// base query.  Follows the design stage by stage:
 //
 //   1. FROM the index sources.
 //   2. Optional WHERE KQL() / WHERE QSTR(allow_wildcard: true) — only when
@@ -53,8 +53,8 @@ const andAll = (predicates: ESQLSingleAstItem[]): ESQLSingleAstItem => {
 // Design deliberately omits MIN/MAX bucket timestamps that v1's translation
 // also emits.  Do not add them.
 //
-// The function returns the standalone query shape:
-//   { format: 'standalone', breach: { query: '<full ES|QL text>' } }
+// The function returns the single-query shape:
+//   { base: '<full ES|QL text>' }
 // with no grouping or time_field overrides — execution-time compile results
 // must not carry them.  grouping is absent on this type: the ungrouped
 // fallback hash gives each output row its own episode.
@@ -182,10 +182,7 @@ export const generateThresholdQuery = ({
   });
 
   return {
-    query: {
-      format: 'standalone' as const,
-      breach: { query: queryText },
-    },
+    query: { base: queryText },
     // No grouping or time_field overrides: execution-time compile results must
     // not carry them.  grouping is absent on this type; the STATS ... BY
     // bucketing lives inside the query text, not on the rule's framework fields.

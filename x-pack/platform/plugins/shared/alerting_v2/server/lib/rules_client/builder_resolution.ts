@@ -25,11 +25,8 @@ import type {
 } from '../builder_types';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import type { ResolvedCreateRuleData, ResolvedUpdateRuleData } from './types';
-import { toStoredQuery } from './utils';
-import {
-  adaptToKind,
-  assertGeneratedQueryIsValid,
-} from '../builder_types/generated_query_validation';
+import { toApiQuery } from '../../saved_objects/legacy_rule_shape';
+import { assertGeneratedQueryIsValid } from '../builder_types/generated_query_validation';
 
 /** Options shared by all resolution functions. */
 export interface BuilderResolutionOptions {
@@ -330,41 +327,13 @@ export function resolveCreateRuleBuilder(
     }
 
     // Write-time types (default): compile and persist the query.
-    const generated = adaptToKind(
-      registry.generate(builderType, builderFields, {
-        kind: data.kind,
-        schedule: data.schedule,
-        time_field: data.time_field,
-      }),
-      data.kind,
-      builderType
-    );
+    const generated = registry.generate(builderType, builderFields, {
+      kind: data.kind,
+      schedule: data.schedule,
+      time_field: data.time_field,
+    });
 
-    const hasGeneratedRecovery =
-      generated.query.format === 'composed' && generated.query.recovery != null;
-    let effectiveGenerated = generated;
-    let effectiveStrategy = data.recovery_strategy;
-
-    if (hasGeneratedRecovery) {
-      if (effectiveStrategy === undefined) {
-        effectiveStrategy = 'query';
-      } else if (effectiveStrategy !== 'query') {
-        effectiveGenerated = {
-          ...generated,
-          query: { ...generated.query, recovery: undefined },
-        };
-      }
-    }
-
-    const resolved = withGenerated(
-      {
-        ...data,
-        ...(effectiveStrategy !== data.recovery_strategy
-          ? { recovery_strategy: effectiveStrategy }
-          : {}),
-      },
-      effectiveGenerated
-    );
+    const resolved = withGenerated(data, generated);
     assertGeneratedQueryIsValid(resolved, builderType);
     return resolved;
   }
@@ -470,60 +439,45 @@ export function resolveUpdateRuleBuilder(
     };
     const effectiveTimeField = data.time_field ?? existing.time_field;
 
-    const generated = adaptToKind(
-      registry.generate(effectiveType, requestedFields as OpaqueBuilderFields, {
-        id: ruleId,
-        kind: existing.kind,
-        schedule: effectiveSchedule,
-        time_field: effectiveTimeField,
-      }),
-      existing.kind,
-      effectiveType
-    );
-
-    const hasGeneratedRecovery =
-      generated.query.format === 'composed' && generated.query.recovery != null;
-    let effectiveGenerated = generated;
-    let effectiveStrategy = data.recovery_strategy ?? existing.recovery_strategy;
-
-    if (hasGeneratedRecovery) {
-      if (effectiveStrategy === undefined || effectiveStrategy === null) {
-        effectiveStrategy = 'query';
-      } else if (effectiveStrategy !== 'query') {
-        effectiveGenerated = {
-          ...generated,
-          query: { ...generated.query, recovery: undefined },
-        };
-      }
-    }
+    const generated = registry.generate(effectiveType, requestedFields as OpaqueBuilderFields, {
+      id: ruleId,
+      kind: existing.kind,
+      schedule: effectiveSchedule,
+      time_field: effectiveTimeField,
+    });
 
     const resolvedData = withGenerated(
       {
         ...data,
         metadata: { ...data.metadata, builder_type: effectiveType },
-        ...(effectiveStrategy !== data.recovery_strategy
-          ? { recovery_strategy: effectiveStrategy }
-          : {}),
       },
-      effectiveGenerated
+      generated
     );
 
     // Fix: assertGeneratedQueryIsValid also runs on the update path.
     // Previously this check was missing from updates, allowing a builder to
-    // generate a query that violates invariants (e.g. recovery_strategy: 'query'
-    // but no recovery block generated) without being rejected.
+    // generate a query that violates invariants (e.g. a condition recovery with
+    // no breach to recover against) without being rejected.
     //
-    // `kind` comes from the stored rule — updates cannot change it — so it is
-    // always present and guarantees RuleQueryValidationContext.kind is satisfied.
+    // `kind`, `recovery` and `no_data` come from the stored rule when the
+    // request does not change them, so the invariants read the merged shape.
     //
     // Ref: rule-execution-logic.md "What this design needs from the framework"
-    assertGeneratedQueryIsValid({ ...resolvedData, kind: existing.kind }, effectiveType);
+    assertGeneratedQueryIsValid(
+      {
+        ...resolvedData,
+        kind: existing.kind,
+        recovery: resolvedData.recovery ?? existing.recovery,
+        no_data: resolvedData.no_data ?? existing.no_data,
+      },
+      effectiveType
+    );
 
     return resolvedData;
   }
 
-  const storedQuery = existing.query !== undefined ? toStoredQuery(existing.query) : undefined;
-  const queryChanged = data.query !== undefined && !isEqual(toStoredQuery(data.query), storedQuery);
+  const storedQuery = existing.query !== undefined ? toApiQuery(existing.query) : undefined;
+  const queryChanged = data.query !== undefined && !isEqual(data.query, storedQuery);
 
   if (queryChanged && effectiveType) {
     // The direct-query-write protection exists for registered (server-side)
@@ -669,9 +623,9 @@ export function resolveReplaceRuleBuilder(
   //   - the stored rule has no builder_fields to drop, and
   //   - the query is identical to the stored query.
   const storedBuilderFields = existing.metadata.builder_fields;
-  const storedQuery = existing.query !== undefined ? toStoredQuery(existing.query) : undefined;
+  const storedQuery = existing.query !== undefined ? toApiQuery(existing.query) : undefined;
   const bodyQuery = data.query;
-  const queryChanged = !bodyQuery || !isEqual(toStoredQuery(bodyQuery), storedQuery);
+  const queryChanged = !bodyQuery || !isEqual(bodyQuery, storedQuery);
   const typePreserved = data.metadata?.builder_type === existingType;
 
   if (typePreserved && !storedBuilderFields && !queryChanged) {
