@@ -71,3 +71,4 @@ graphql
 @cfworker/json-schema
 oxlint-tsgolint
 bump-cli
+@oxlint/plugins
