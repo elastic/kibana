@@ -64,7 +64,7 @@ spaceTest.describe(
 
     spaceTest(
       "allows a Discover alert user to view a rule's results",
-      async ({ browserAuth, page, pageObjects }) => {
+      async ({ browserAuth, pageObjects }) => {
         const role: KibanaRole = {
           elasticsearch: {
             cluster: [],
@@ -91,10 +91,8 @@ spaceTest.describe(
           ],
         };
         await browserAuth.loginWithCustomRole(role);
-        await page.gotoApp(`management/insightsAndAlerting/triggersActions/rule/${ruleId}`);
-        await page.testSubj.locator('appHeaderTitle').waitFor({ state: 'visible' });
-        await page.testSubj.click('app-menu-overflow-button');
-        await page.testSubj.click('ruleDetails-viewInDiscover');
+        await pageObjects.insightsAndAlerting.gotoRuleDetails(ruleId);
+        await pageObjects.insightsAndAlerting.viewRuleInDiscover();
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.dataGrid.waitForDocTableRendered();
         await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(sourceIndex);
