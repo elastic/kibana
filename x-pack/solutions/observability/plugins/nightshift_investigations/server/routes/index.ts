@@ -15,12 +15,21 @@ import { followInvestigationRoute } from './follow_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
 import { listCortexPagesRoute } from './list_cortex_pages';
 import { getCortexPageRoute } from './get_cortex_page';
+import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_page';
+import { archiveCortexPageRoute } from './archive_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
 import { getDecisionTreeRoute } from './get_decision_tree';
 import { listDecisionTreeVersionsRoute } from './list_decision_tree_versions';
 import { getDecisionTreeVersionRoute } from './get_decision_tree_version';
+import {
+  createAutomationRoute,
+  listAutomationsRoute,
+  getAutomationRoute,
+  updateAutomationRoute,
+  deleteAutomationRoute,
+} from './automations';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -33,12 +42,20 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getInvestigationAvailabilityRoute,
   ...listCortexPagesRoute,
   ...getCortexPageRoute,
+  ...createCortexPageRoute,
+  ...updateCortexPageRoute,
+  ...archiveCortexPageRoute,
   ...getCortexAvailabilityRoute,
   ...getDecisionTreesAvailabilityRoute,
   ...listDecisionTreesRoute,
   ...getDecisionTreeRoute,
   ...listDecisionTreeVersionsRoute,
   ...getDecisionTreeVersionRoute,
+  ...createAutomationRoute,
+  ...listAutomationsRoute,
+  ...getAutomationRoute,
+  ...updateAutomationRoute,
+  ...deleteAutomationRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

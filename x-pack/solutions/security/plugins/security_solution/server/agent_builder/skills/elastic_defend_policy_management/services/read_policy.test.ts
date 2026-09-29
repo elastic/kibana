@@ -105,6 +105,13 @@ describe('getEndpointPolicy', () => {
     const { access, soClient, getById, listByName, ensureInCurrentSpace } =
       await createReadAccess();
     const policy = createEndpointPolicy({ id: 'policy-id-1', name: 'Endpoint Policy' });
+    const endpointInput = policy.inputs.find((input) => input.type === 'endpoint');
+    if (endpointInput?.config == null) {
+      throw new Error('expected generated endpoint input config');
+    }
+    Object.assign(endpointInput.config, {
+      integration_config: { value: { endpointConfig: { preset: { value: 'EDRComplete' } } } },
+    });
     getById.mockResolvedValue(policy);
 
     const result = await getEndpointPolicy(access, { idOrName: '  policy-id-1  ' });
@@ -117,6 +124,7 @@ describe('getEndpointPolicy', () => {
       integrationPolicyIds: ['policy-id-1'],
     });
     expect(result.policy.id).toBe('policy-id-1');
+    expect(result.policy.creationPreset).toBeUndefined();
   });
 
   it('fails closed on a non-endpoint id without name fallback', async () => {
@@ -395,11 +403,19 @@ describe('getEndpointPolicy', () => {
       agents: 99,
     });
     Object.assign(policy.inputs[0], { compiled_input: { secret: 'nope' } });
+    const endpointInput = policy.inputs.find((input) => input.type === 'endpoint');
+    if (endpointInput?.config == null) {
+      throw new Error('expected generated endpoint input config');
+    }
+    Object.assign(endpointInput.config, {
+      integration_config: { value: { endpointConfig: { preset: 'EDRComplete' } } },
+    });
     getById.mockResolvedValue(policy);
 
     const result = await getEndpointPolicy(access, { idOrName: 'policy-id-2' });
 
     expect(Object.keys(result)).toEqual([
+      'kind',
       'policy',
       'storedConfig',
       'normalizedConfig',
@@ -407,6 +423,7 @@ describe('getEndpointPolicy', () => {
     ]);
     expect(Object.keys(result.policy).sort()).toEqual(
       [
+        'creationPreset',
         'description',
         'id',
         'name',
@@ -423,6 +440,7 @@ describe('getEndpointPolicy', () => {
       description: 'visible description',
       revision: policy.revision,
       version: 'WzEsMV0=',
+      creationPreset: 'EDRComplete',
       updatedAt: policy.updated_at,
       updatedBy: policy.updated_by,
       packageVersion: policy.package?.version,
