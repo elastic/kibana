@@ -228,10 +228,7 @@ download_tmp_artifact() {
 
     if [[ -z "$expected_sha256" ]]; then
       echo "No recorded checksum for ${artifact_name} (build ${build_id}), skipping GCS download."
-    elif "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
-      && gcloud storage cp \
-        "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
-        "${dest_dir}/${artifact_name}"; then
+    elif download_tmp_artifact_from_gcs "$artifact_name" "$dest_dir" "$build_id"; then
       if [[ "$(sha256_of "${dest_dir}/${artifact_name}")" == "$expected_sha256" ]]; then
         return 0
       fi
@@ -248,7 +245,7 @@ download_tmp_artifact() {
 
 upload_tmp_artifact() {
   local local_path="$1" artifact_name="$2" build_id="$3"
-  local region pids=() failures=0 sha256
+  local region pids=() failures=0 sha256 token_file
 
   # Downloads only trust GCS objects matching the checksum recorded in the producing build's meta-data
   if ! sha256="$(sha256_of "$local_path")" || ! buildkite-agent meta-data set "tmp-artifact-sha256:${artifact_name}" "$sha256"; then
@@ -256,13 +253,13 @@ upload_tmp_artifact() {
     return 0
   fi
 
-  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
+  if ! token_file="$(create_gcs_access_token_file "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}")"; then
     echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
     return 0
   fi
 
   for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
-    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" &
+    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" "$token_file" &
     pids+=("$!")
   done
 
@@ -271,6 +268,7 @@ upload_tmp_artifact() {
       failures=$((failures + 1))
     fi
   done
+  rm -rf "$(dirname "$token_file")"
 
   if [[ "$failures" -gt 0 ]]; then
     echo "GCS upload of ${artifact_name} failed for ${failures}/${#GCS_CI_ARTIFACT_REGIONS[@]} bucket(s); same-region downloads will fall back to the buildkite artifact." >&2
@@ -280,11 +278,44 @@ upload_tmp_artifact() {
 }
 
 upload_tmp_artifact_to_region() {
-  local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  local local_path="$1" artifact_name="$2" build_id="$3" region="$4" token_file="$5"
 
-  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
-    "$local_path" \
-    "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+  CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False \
+    retry 3 5 gcloud_with_access_token "$token_file" storage cp \
+      "$local_path" \
+      "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+}
+
+download_tmp_artifact_from_gcs() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local bucket="kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" token_file status=0
+
+  token_file="$(create_gcs_access_token_file "$bucket")" || return 1
+  gcloud_with_access_token "$token_file" storage cp \
+    "gs://${bucket}/tmp/builds/${build_id}/${artifact_name}" \
+    "${dest_dir}/${artifact_name}" || status=$?
+  rm -rf "$(dirname "$token_file")"
+  return "$status"
+}
+
+# Mints one impersonated access token and prints its file path, so gcloud storage workers share it instead of each exchanging a Workload Identity token.
+create_gcs_access_token_file() {
+  local bucket="$1" token_dir
+
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "$bucket" >&2 || return 1
+  token_dir="$(mktemp -d -t gcs-token-XXXXXX)"
+  if ! gcloud auth print-access-token > "$token_dir/access_token" || [[ ! -s "$token_dir/access_token" ]]; then
+    rm -rf "$token_dir"
+    return 1
+  fi
+  echo "$token_dir/access_token"
+}
+
+# Impersonation must be off here: gcloud applies it before reading the token file, which would restart per-worker token requests.
+gcloud_with_access_token() {
+  local token_file="$1"
+  shift
+  CLOUDSDK_AUTH_ACCESS_TOKEN_FILE="$token_file" CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT= gcloud "$@"
 }
 
 # Artifacts of other builds are checked against the checksum Buildkite recorded for their buildkite artifact
@@ -315,7 +346,7 @@ extract_moon_cache() {
 
   mkdir -p ./.moon
   staging_dir="$(mktemp -d ./.moon/cache-restore.XXXXXX)"
-  if ! tar -xf "$archive" --zstd --no-same-owner --no-same-permissions -C "$staging_dir"; then
+  if ! tar -xf "$archive" --no-same-owner --no-same-permissions -C "$staging_dir"; then
     rm -rf "$staging_dir"
     echo "Failed to extract ${archive}, skipping moon cache restore." >&2
     return 1
@@ -331,13 +362,13 @@ validate_moon_cache_archive() {
   local archive="$1" entries names
 
   # `tar -tv` prints one line per entry, starting with its type and permissions (e.g. "-rw-r--r--")
-  if ! entries="$(tar -tvf "$archive" --zstd)"; then
+  if ! entries="$(tar -tvf "$archive")"; then
     echo "Unable to list ${archive}." >&2
     return 1
   fi
 
   # `tar -t` prints only the entry paths
-  if ! names="$(tar -tf "$archive" --zstd)"; then
+  if ! names="$(tar -tf "$archive")"; then
     echo "Unable to list ${archive}." >&2
     return 1
   fi
