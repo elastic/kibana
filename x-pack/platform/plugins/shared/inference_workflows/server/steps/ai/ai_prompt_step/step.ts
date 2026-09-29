@@ -30,9 +30,6 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
             'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.'
           );
         }
-        if (!searchInferenceEndpoints) {
-          throw new Error('searchInferenceEndpoints service is not available');
-        }
         const feature = searchInferenceEndpoints.features.get(connectorIdByFeature);
         if (feature && feature.taskType !== 'chat_completion') {
           throw new Error(

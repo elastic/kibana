@@ -75,6 +75,7 @@ import type { StateUpdate } from './state';
 import {
   eventsForContext,
   groupTimelineEntries,
+  isTimelineCustomEvent,
   isTimelineRound,
   roundResponse,
 } from './utils/context_timeline';
@@ -235,11 +236,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           context: {
             userMessage: processedConversation.nextInput.message,
             recentContext: buildRecentContext(
-              groupTimelineEntries(processedConversation.timeline).map((entry) =>
-                isTimelineRound(entry)
-                  ? { input: entry.userMessage.data, response: roundResponse(entry) }
-                  : { input: entry.userMessage.data }
-              )
+              groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
+                // Custom events carry no user input to match skills against.
+                if (isTimelineCustomEvent(entry)) {
+                  return [];
+                }
+                return isTimelineRound(entry)
+                  ? [{ input: entry.userMessage.data, response: roundResponse(entry) }]
+                  : [{ input: entry.userMessage.data }];
+              })
             ),
           },
           modelProvider,
@@ -435,12 +440,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
-      // prevent LangGraph from inheriting the parent graph's
-      // abort signals via the __pregel_abort_signals configurable key. Without this,
-      // the parent graph's cleanup abort cascades to the standalone execution.
-      ...(context.executionMode === AgentExecutionMode.standalone
-        ? { configurable: { __pregel_abort_signals: undefined } }
-        : {}),
+      configurable: {
+        checkpoint_ns: '',
+        // prevent LangGraph from inheriting the parent graph's
+        // abort signals via the __pregel_abort_signals configurable key. Without this,
+        // the parent graph's cleanup abort cascades to the standalone execution.
+        ...(context.executionMode === AgentExecutionMode.standalone
+          ? { __pregel_abort_signals: undefined }
+          : {}),
+      },
     }
   );
 
