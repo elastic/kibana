@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -15,6 +14,7 @@ import {
   OBSERVABILITY_OVERVIEW_APP_ID,
   SIGNIFICANT_EVENTS_APP_ID,
 } from '@kbn/deeplinks-observability';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import { NightshiftAppHeader } from './app/app_header';
@@ -31,6 +31,9 @@ export function NightshiftPage(): React.ReactElement | null {
     nightshiftInvestigations,
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
+  const { canConfigure, canManage } = getNightshiftCapabilities(
+    application.capabilities.nightshift
+  );
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/settings',
   });
@@ -46,7 +49,6 @@ export function NightshiftPage(): React.ReactElement | null {
     [application, managementHref]
   );
 
-  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const canManageSandboxSecrets =
     canManage && nightshiftInvestigations?.investigationsClient != null;
   const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
@@ -90,8 +92,8 @@ export function NightshiftPage(): React.ReactElement | null {
       <NightshiftAppHeader
         onManagementClick={navigateToManagement}
         managementHref={managementHref}
-        onSettingsClick={navigateToSettings}
-        settingsHref={settingsHref}
+        onSettingsClick={canConfigure ? navigateToSettings : undefined}
+        settingsHref={canConfigure ? settingsHref : undefined}
         onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
       />
       <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">

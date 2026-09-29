@@ -62,8 +62,8 @@ export function NightshiftAppHeader({
 }: {
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
-  onSettingsClick: () => void | Promise<void>;
-  settingsHref: string;
+  onSettingsClick?: () => void | Promise<void>;
+  settingsHref?: string;
   /** Shows the sandbox secrets menu item when set. */
   onSandboxSecretsClick?: () => void;
 }): React.ReactElement {
@@ -93,18 +93,22 @@ export function NightshiftAppHeader({
           },
           testId: 'nightshiftManagementLink',
         },
-        {
-          id: 'nightshiftSettings',
-          label: settingsLabel,
-          iconType: 'gear',
-          href: settingsHref,
-          run: (params) => {
-            applyEbtProps(settingsEbtProps, params);
-            void onSettingsClick();
-          },
-          testId: 'nightshiftSettingsLink',
-          overflow: true,
-        },
+        ...(onSettingsClick && settingsHref
+          ? [
+              {
+                id: 'nightshiftSettings',
+                label: settingsLabel,
+                iconType: 'gear' as const,
+                href: settingsHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(settingsEbtProps, params);
+                  void onSettingsClick();
+                },
+                testId: 'nightshiftSettingsLink',
+                overflow: true,
+              },
+            ]
+          : []),
       ],
     }),
     [managementHref, onManagementClick, onSandboxSecretsClick, onSettingsClick, settingsHref]
