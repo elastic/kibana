@@ -225,17 +225,19 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
-  it('should show "Filter alerts" toggle', async () => {
+  it('should show Kibana standard and ES|QL alerting scope options', async () => {
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
+    expect(await screen.findByTestId('maintenanceWindowScopeSection')).toBeInTheDocument();
+    expect(screen.getByTestId('maintenanceWindowScopeStandardAlerting')).toBeInTheDocument();
+    expect(screen.getByTestId('maintenanceWindowScopeEsqlAlerting')).toBeInTheDocument();
   });
 
-  it('should show "Filter alerts" toggle even when no rule types', async () => {
+  it('should show scope options even when no rule types', async () => {
     getRuleTypes.mockResolvedValue([]);
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
+    expect(await screen.findByTestId('maintenanceWindowScopeSection')).toBeInTheDocument();
   });
 
   it('should show warning correctly when scoped query filter is on and scope query is set', async () => {

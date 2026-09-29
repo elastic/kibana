@@ -10,7 +10,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { paths } from '../../constants';
@@ -101,8 +100,9 @@ export interface RulesListHeaderProps {
 }
 
 /**
- * App header that reads Content List phase so the create menu stays hidden
- * during the true empty state (create options live in that empty state).
+ * App header for the ES|QL rules list. Create menu is shown whenever the user
+ * can write rules, including the empty state (create options also remain in
+ * that empty state for discovery).
  * Must render under {@link ContentListProvider}.
  */
 export const RulesListHeader = ({
@@ -114,9 +114,6 @@ export const RulesListHeader = ({
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: RulesListHeaderProps) => {
-  const phase = useContentListPhase();
-  const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
-
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
 
@@ -130,7 +127,7 @@ export const RulesListHeader = ({
       {
         id: 'v1Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
-          defaultMessage: 'Name A',
+          defaultMessage: 'Standard rules',
         }),
         isSelected: false,
         href: basePath.prepend(triggersActionsRoute),
@@ -139,7 +136,7 @@ export const RulesListHeader = ({
       {
         id: 'v2Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
-          defaultMessage: 'Name B',
+          defaultMessage: 'ES|QL rules',
         }),
         isSelected: true,
         href: basePath.prepend(paths.ruleList),
@@ -157,7 +154,7 @@ export const RulesListHeader = ({
 
   const headerMenu = useMemo(
     () =>
-      showHeaderMenu
+      canWrite
         ? getRulesListMenu({
             onCreateRule,
             onCreateEsqlRule,
@@ -168,7 +165,7 @@ export const RulesListHeader = ({
           })
         : undefined,
     [
-      showHeaderMenu,
+      canWrite,
       onCreateRule,
       onCreateEsqlRule,
       onCreateWithAgent,

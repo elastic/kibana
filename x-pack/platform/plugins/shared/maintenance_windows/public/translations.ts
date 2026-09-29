@@ -170,6 +170,70 @@ export const CREATE_FORM_SOLUTION_STACK_RULES = i18n.translate(
   }
 );
 
+export const CREATE_FORM_SCOPE_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.title',
+  {
+    defaultMessage: 'Scope',
+  }
+);
+
+export const CREATE_FORM_SCOPE_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.description',
+  {
+    defaultMessage:
+      'Select the scope of this maintenance window by choosing what to suppress during maintenance',
+  }
+);
+
+export const CREATE_FORM_SCOPE_STANDARD_ALERTING_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.standardAlerting.title',
+  {
+    defaultMessage: 'Kibana standard alerting',
+  }
+);
+
+export const CREATE_FORM_SCOPE_STANDARD_ALERTING_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.standardAlerting.description',
+  {
+    defaultMessage: 'Suppress notifications from Kibana standard alerting during maintenance',
+  }
+);
+
+export const CREATE_FORM_SCOPE_STANDARD_ALERTING_FILTER_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.standardAlerting.filterLabel',
+  {
+    defaultMessage: 'Filter alerts',
+  }
+);
+
+export const CREATE_FORM_SCOPE_ESQL_ALERTING_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.title',
+  {
+    defaultMessage: 'Kibana ES|QL alerting',
+  }
+);
+
+export const CREATE_FORM_SCOPE_ESQL_ALERTING_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.description',
+  {
+    defaultMessage: 'Suppress notifications from Kibana ES|QL alerting during maintenance',
+  }
+);
+
+export const CREATE_FORM_SCOPE_ESQL_ALERTING_FILTER_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.filterLabel',
+  {
+    defaultMessage: 'Filter alerts',
+  }
+);
+
+export const CREATE_FORM_SCOPE_ESQL_ALERTING_FILTER_PLACEHOLDER = i18n.translate(
+  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.filterPlaceholder',
+  {
+    defaultMessage: 'Search alerts (e.g. data.host.name:"my-host" or data.severity:"low")',
+  }
+);
+
 export const CREATE_FORM_SCOPED_QUERY_TITLE = i18n.translate(
   'xpack.maintenanceWindows.createForm.scopedQuery.title',
   {

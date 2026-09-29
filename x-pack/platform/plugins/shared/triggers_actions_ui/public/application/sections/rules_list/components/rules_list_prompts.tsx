@@ -18,6 +18,7 @@ interface RulesListPromptsProps {
   showCreateFirstRulePrompt: boolean;
   showCreateRuleButtonInPrompt: boolean;
   onCreateRulesClick: () => void;
+  documentationHref?: string;
 }
 
 export const RulesListPrompts = (props: RulesListPromptsProps) => {
@@ -27,6 +28,7 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
     showCreateRuleButtonInPrompt,
     showCreateFirstRulePrompt,
     onCreateRulesClick,
+    documentationHref,
   } = props;
   if (showNoAuthPrompt)
     return (
@@ -45,6 +47,7 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
       <EmptyPrompt
         showCreateRule={showCreateRuleButtonInPrompt}
         onCreateRulesClick={onCreateRulesClick}
+        documentationHref={documentationHref}
       />
     );
   }

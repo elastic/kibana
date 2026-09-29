@@ -180,6 +180,7 @@ export const RulesList = ({
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
+    docLinks,
     ...startServices
   } = kibanaServices;
 
@@ -789,6 +790,7 @@ export const RulesList = ({
         showCreateRuleButtonInPrompt={showCreateRuleButtonInPrompt}
         showSpinner={showSpinner}
         onCreateRulesClick={openRuleTypeModal}
+        documentationHref={docLinks?.links.alerting.guide}
       />
       <EuiPageTemplate.Section data-test-subj="rulesListSection" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (

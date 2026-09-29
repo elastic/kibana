@@ -10,7 +10,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
+import { esqlRulesOnlyBadge } from '../../components/esql_rules_only_badge';
+import { EsqlRulesOnlyCallout } from '../../components/esql_rules_only_callout';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -86,11 +87,12 @@ export const ExecutionHistoryPage = () => {
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
-        badges={[experimentalBadge]}
+        badges={[esqlRulesOnlyBadge]}
         spacing="bleed"
         tabs={tabs}
       />
       <EuiSpacer size="m" />
+      <EsqlRulesOnlyCallout page="executionHistory" />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
       ) : (

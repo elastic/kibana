@@ -6,6 +6,7 @@
  */
 
 import React, { lazy, useEffect, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { rulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +22,7 @@ import { getV1RulesPageTabs } from '../rules_page/get_v1_rules_page_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
 import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
+import { StandardRulesEsqlIntroBanner } from './components/standard_rules_esql_intro_banner';
 
 const RulesList = lazy(() => import('./components/rules_list'));
 
@@ -115,6 +117,12 @@ export const RulesListContainer = () => {
         menu={rulesListMenu}
         docLink={docLink}
       />
+      {mode === RULES_PAGE_MODE.v1AndV2Tabs ? (
+        <>
+          <EuiSpacer size="m" />
+          <StandardRulesEsqlIntroBanner />
+        </>
+      ) : null}
       <RulesList
         rulesListKey="rules-page"
         showCreateRuleButtonInPrompt={true}

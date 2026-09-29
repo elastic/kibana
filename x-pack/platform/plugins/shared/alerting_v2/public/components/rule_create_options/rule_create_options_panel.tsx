@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiImage,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -22,10 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CreateOptionItem } from '../create_options';
-import { CreateOptionsPanel } from '../create_options';
 import type { AgentBuilderSkillsRequirements } from '../../hooks/use_are_agent_builder_skills_available';
-import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
   id: string;
@@ -130,83 +126,6 @@ const flyoutCardDisabledStyle = css({
   cursor: 'not-allowed',
   opacity: 0.5,
 });
-
-/** Rules list empty state — delegates to generic CreateOptionsPanel. */
-const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
-  onCreateEsqlRule,
-  onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
-  onCreateThresholdRule,
-}) => {
-  const primaryItems = useMemo<CreateOptionItem[]>(
-    () => [
-      {
-        id: 'create-esql-rule',
-        iconType: 'productDiscover',
-        title: ESQL_RULE_TITLE,
-        description: ESQL_RULE_DESCRIPTION,
-        onClick: onCreateEsqlRule,
-        'data-test-subj': 'createEsqlRuleCard',
-      },
-      {
-        id: 'create-with-agent',
-        iconType: 'productAgent',
-        title: AI_AGENT_TITLE,
-        description: AI_AGENT_DESCRIPTION,
-        onClick: onCreateWithAgent,
-        disabled: createWithAgentDisabled,
-        tooltipText: createWithAgentTooltipText,
-        'data-test-subj': 'createWithAgentCard',
-      },
-    ],
-    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabled, createWithAgentTooltipText]
-  );
-
-  const secondaryItems = useMemo<CreateOptionItem[]>(
-    () => [
-      {
-        id: 'create-threshold-rule',
-        iconType: 'chartThreshold',
-        title: THRESHOLD_RULE_TITLE,
-        description: THRESHOLD_RULE_DESCRIPTION,
-        onClick: onCreateThresholdRule ?? noop,
-        'data-test-subj': 'createThresholdRuleCard',
-      },
-    ],
-    [onCreateThresholdRule]
-  );
-
-  return (
-    <CreateOptionsPanel
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
-            defaultMessage="No rules yet. Let's get started!"
-          />
-        </h2>
-      }
-      icon={
-        <EuiImage
-          size="fullWidth"
-          src={rulesListEmptyIllustration}
-          alt=""
-          data-test-subj="rulesListEmptyIllustration"
-        />
-      }
-      items={primaryItems}
-      secondaryItems={secondaryItems}
-      secondaryLabel={
-        <FormattedMessage
-          id="xpack.alertingV2.ruleCreateOptionsPanel.orStartFromBuilderLabel"
-          defaultMessage="or start from a builder"
-        />
-      }
-      data-test-subj="ruleCreateOptionsPanel"
-    />
-  );
-};
 
 const RuleBuilderSectionDivider: React.FC = () => (
   <>
@@ -347,12 +266,5 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
 };
 
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = (props) => {
-  const { layout = 'horizontal' } = props;
-  const isVerticalLayout = layout === 'vertical';
-
-  if (!isVerticalLayout) {
-    return <RuleCreateOptionsListEmptyState {...props} />;
-  }
-
   return <RuleCreateOptionsFlyoutPanel {...props} />;
 };

@@ -18,10 +18,20 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 jest.mock('@kbn/app-header', () => ({
   APP_HEADER_TEST_SUBJECTS: { title: 'appHeaderTitle' },
-  AppHeader: ({ title }: { title: string }) => (
+  AppHeader: ({
+    title,
+    badges,
+  }: {
+    title: string;
+    badges?: Array<{ label: string; 'data-test-subj'?: string }>;
+  }) => (
     <div>
       <h1 data-test-subj="appHeaderTitle">{title}</h1>
-      <span data-test-subj="alertingV2ExperimentalBadge" />
+      {badges?.map((badge) => (
+        <span key={badge['data-test-subj'] ?? badge.label} data-test-subj={badge['data-test-subj']}>
+          {badge.label}
+        </span>
+      ))}
     </div>
   ),
 }));
@@ -96,11 +106,15 @@ describe('RuleLibraryPage', () => {
     mockGetRuleTemplate.mockResolvedValue(mockTemplate);
   });
 
-  it('renders the page title and experimental badge', () => {
+  it('renders the page title, badges, and ES|QL-only callout', () => {
     renderPage();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule library');
+    expect(screen.getByTestId('alertingV2EsqlRulesOnlyBadge')).toHaveTextContent(
+      'ES|QL rules only'
+    );
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('esqlRulesOnlyCallout')).toBeInTheDocument();
   });
 
   it('renders the rule library list', () => {

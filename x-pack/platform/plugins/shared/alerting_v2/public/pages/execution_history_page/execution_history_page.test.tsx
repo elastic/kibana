@@ -215,11 +215,15 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByRole('tab', { name: /rules/i })).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('renders the experimental badge in the page header', () => {
+  it('renders the ES|QL rules only badge and callout in the page header', () => {
     mockFetchResult();
     renderPage();
 
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EsqlRulesOnlyBadge')).toHaveTextContent(
+      'ES|QL rules only'
+    );
+    expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('esqlRulesOnlyCallout')).toBeInTheDocument();
   });
 
   describe('Rules tab (default)', () => {

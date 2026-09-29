@@ -11,6 +11,8 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
+import { esqlRulesOnlyBadge } from '../../components/esql_rules_only_badge';
+import { EsqlRulesOnlyCallout } from '../../components/esql_rules_only_callout';
 
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
@@ -108,10 +110,12 @@ export const ActionPoliciesListHeader = ({
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
+        badges={[esqlRulesOnlyBadge]}
         spacing="bleed"
         menu={headerMenu}
       />
       <EuiSpacer size="m" />
+      <EsqlRulesOnlyCallout page="actionPolicies" />
     </>
   );
 };

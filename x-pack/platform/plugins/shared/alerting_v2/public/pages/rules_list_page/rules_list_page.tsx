@@ -22,10 +22,7 @@ import {
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
-import {
-  RuleCreateOptionsPanel,
-  getCreateWithAgentTooltipText,
-} from '../../components/rule_create_options/rule_create_options_panel';
+import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 import {
   KindFilter,
@@ -36,7 +33,8 @@ import {
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
-import { CentralizedActionPoliciesBanner } from './centralized_action_policies_banner';
+import { EsqlRulesIntroBanner } from './esql_rules_intro_banner';
+import { EsqlRulesEmptyState } from './esql_rules_empty_state';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -76,6 +74,7 @@ export const RulesListPage = () => {
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
   const { navigateToUrl } = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
+  const documentationHref = useService(CoreStart('docLinks')).links.alerting.guide;
   const navigateToSequenceBuilder = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.sequenceRuleCreate));
   }, [navigateToUrl, basePath]);
@@ -102,12 +101,12 @@ export const RulesListPage = () => {
   };
 
   const emptyState = canWrite ? (
-    <RuleCreateOptionsPanel
-      onCreateEsqlRule={openCreateFlyout}
+    <EsqlRulesEmptyState
+      onCreateRule={openCreateOptionsFlyout}
       onCreateWithAgent={navigateToAgentBuilder}
       createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
       createWithAgentTooltipText={createWithAgentTooltipText}
-      onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+      documentationHref={documentationHref}
     />
   ) : (
     <EuiEmptyPrompt
@@ -190,7 +189,7 @@ export const RulesListPage = () => {
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
-        <CentralizedActionPoliciesBanner />
+        <EsqlRulesIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>

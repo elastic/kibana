@@ -47,8 +47,7 @@ import { useGetRuleTypes } from '../hooks/use_get_rule_types';
 import { useUiSetting } from '../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
-import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
-import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
+import { MaintenanceWindowScopeSection } from './maintenance_window_scope_section';
 
 const UseField = getUseField({ component: Field });
 
@@ -88,12 +87,15 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const userConfirmedSaveWithoutFiltersRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
 
-  const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(!!initialValue?.scopedQuery);
+  const [isStandardAlertingEnabled, setIsStandardAlertingEnabled] = useState(true);
+  const [isEsqlAlertingEnabled, setIsEsqlAlertingEnabled] = useState(true);
+  const [esqlFilterQuery, setEsqlFilterQuery] = useState('');
   const [query, setQuery] = useState<string>(initialValue?.scopedQuery?.kql || '');
   const [filters, setFilters] = useState<Filter[]>(
     (initialValue?.scopedQuery?.filters as Filter[]) || []
   );
   const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
+  const isScopedQueryEnabled = isStandardAlertingEnabled;
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
@@ -154,11 +156,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         return;
       }
 
-      if (isScopedQueryEnabled && !scopedQueryPayload) {
-        setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE]);
-        return;
-      }
-
       const startDate = moment(formData.startDate);
       const endDate = moment(formData.endDate);
       const maintenanceWindow = {
@@ -193,7 +190,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     },
     [
       scopedQueryErrors.length,
-      isScopedQueryEnabled,
       scopedQueryPayload,
       defaultTimezone,
       isEditMode,
@@ -230,15 +226,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     return ruleTypes.map((ruleType) => ruleType.id);
   }, [ruleTypes, mounted]);
 
-  const onScopeQueryToggle = useCallback(
+  const onStandardAlertingEnabledChange = useCallback(
     (isEnabled: boolean) => {
-      setIsScopedQueryEnabled(isEnabled);
+      setIsStandardAlertingEnabled(isEnabled);
       if (scopedQueryErrors.length) {
         setScopedQueryErrors([]);
       }
     },
-    [setIsScopedQueryEnabled, scopedQueryErrors, setScopedQueryErrors]
+    [scopedQueryErrors]
   );
+
+  const onEsqlAlertingEnabledChange = useCallback((isEnabled: boolean) => {
+    setIsEsqlAlertingEnabled(isEnabled);
+  }, []);
 
   const onQueryChange = useCallback(
     (newQuery: string) => {
@@ -428,30 +428,21 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         <>
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuerySwitch
-                  checked={isScopedQueryEnabled}
-                  onEnabledChange={onScopeQueryToggle}
-                />
-              )}
-            </UseField>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuery
-                  ruleTypeIds={ruleTypeIds}
-                  query={query}
-                  filters={filters}
-                  isLoading={isLoadingRuleTypes}
-                  isEnabled={isScopedQueryEnabled}
-                  errors={scopedQueryErrors}
-                  onQueryChange={onQueryChange}
-                  onFiltersChange={setFilters}
-                />
-              )}
-            </UseField>
+            <MaintenanceWindowScopeSection
+              standardAlertingEnabled={isStandardAlertingEnabled}
+              onStandardAlertingEnabledChange={onStandardAlertingEnabledChange}
+              esqlAlertingEnabled={isEsqlAlertingEnabled}
+              onEsqlAlertingEnabledChange={onEsqlAlertingEnabledChange}
+              ruleTypeIds={ruleTypeIds}
+              query={query}
+              filters={filters}
+              isLoadingRuleTypes={isLoadingRuleTypes}
+              errors={scopedQueryErrors}
+              onQueryChange={onQueryChange}
+              onFiltersChange={setFilters}
+              esqlFilterQuery={esqlFilterQuery}
+              onEsqlFilterQueryChange={setEsqlFilterQuery}
+            />
           </EuiFlexItem>
         </>
         {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (

@@ -14,11 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ContentList, ContentListProvider } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
-import {
-  ActionPolicyCreateOptionsPanel,
-  getCreateActionPolicyWithAgentTooltipText,
-  type ActionPolicyCreateOption,
-} from '../../../components/action_policy/create_options/action_policy_create_options_panel';
+import { getCreateActionPolicyWithAgentTooltipText } from '../../../components/action_policy/create_options/action_policy_create_options_panel';
+import { ActionPoliciesEmptyState } from './action_policies_empty_state';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT, paths } from '../../../constants';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
@@ -64,23 +61,6 @@ const tagFieldDefinition: FieldDefinition = {
 
 const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition, tagFieldDefinition];
 
-const CREATE_POLICY_OPTION_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyTitle',
-  { defaultMessage: 'Create policy' }
-);
-const CREATE_POLICY_OPTION_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyDescription',
-  { defaultMessage: 'Match alert episodes and send them to destinations.' }
-);
-const CREATE_WITH_AGENT_OPTION_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentTitle',
-  { defaultMessage: 'Create with AI Agent' }
-);
-const CREATE_WITH_AGENT_OPTION_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentDescription',
-  { defaultMessage: 'Set up an action policy with the help of the AI Agent.' }
-);
-
 export const ActionPoliciesTable = () => {
   const refetchRef = useRef<() => void>(() => {});
   const onRefetchReady = useCallback((refetchFn: () => void) => {
@@ -92,6 +72,7 @@ export const ActionPoliciesTable = () => {
 
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const documentationHref = useService(CoreStart('docLinks')).links.alerting.actionPolicies;
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
   const navigateToAgentBuilder = useNavigateToAgentBuilder(
     CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT
@@ -185,37 +166,14 @@ export const ActionPoliciesTable = () => {
 
   const itemConfig = useMemo(() => ({}), []);
 
-  const createOptions = useMemo<ActionPolicyCreateOption[]>(
-    () => [
-      {
-        id: 'create-policy',
-        iconType: 'workflow',
-        title: CREATE_POLICY_OPTION_TITLE,
-        description: CREATE_POLICY_OPTION_DESCRIPTION,
-        onClick: navigateToCreate,
-        'data-test-subj': 'createActionPolicyCard',
-      },
-      {
-        id: 'create-with-agent',
-        iconType: 'productAgent',
-        title: CREATE_WITH_AGENT_OPTION_TITLE,
-        description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
-        onClick: navigateToAgentBuilder,
-        disabled: !areAgentBuilderSkillsAvailable,
-        tooltipText: createWithAgentTooltipText,
-        'data-test-subj': 'createActionPolicyWithAgentCard',
-      },
-    ],
-    [
-      navigateToCreate,
-      navigateToAgentBuilder,
-      areAgentBuilderSkillsAvailable,
-      createWithAgentTooltipText,
-    ]
-  );
-
   const emptyState = canWrite ? (
-    <ActionPolicyCreateOptionsPanel options={createOptions} />
+    <ActionPoliciesEmptyState
+      onCreatePolicy={navigateToCreate}
+      onCreateWithAgent={navigateToAgentBuilder}
+      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+      createWithAgentTooltipText={createWithAgentTooltipText}
+      documentationHref={documentationHref}
+    />
   ) : (
     <EuiEmptyPrompt
       iconType="documents"

@@ -30,14 +30,6 @@ describe('RuleCreateOptionsPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the empty state title', () => {
-    renderPanel();
-
-    expect(
-      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
-    ).toBeInTheDocument();
-  });
-
   it('calls onCreateEsqlRule when the "ES|QL rule" card is clicked', () => {
     renderPanel();
 
@@ -58,7 +50,6 @@ describe('RuleCreateOptionsPanel', () => {
     renderPanel();
 
     expect(screen.getByText('or start from a builder')).toBeInTheDocument();
-    expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
   it('renders the "Threshold rule" card', () => {
@@ -70,7 +61,7 @@ describe('RuleCreateOptionsPanel', () => {
   it('calls onCreateThresholdRule when the "Threshold rule" card is clicked', () => {
     renderPanel();
 
-    fireEvent.click(screen.getByTestId('createThresholdRuleCard'));
+    fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
 
     expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
   });
@@ -111,30 +102,6 @@ describe('RuleCreateOptionsPanel', () => {
 
     fireEvent.mouseOver(screen.getByTestId('createWithAgentCard'));
 
-    expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
-  });
-
-  it('renders the agent card disabled and shows the tooltip on hover in the vertical (flyout) layout', async () => {
-    render(
-      <I18nProvider>
-        <RuleCreateOptionsPanel
-          layout="vertical"
-          onCreateEsqlRule={onCreateEsqlRule}
-          onCreateWithAgent={onCreateWithAgent}
-          createWithAgentDisabled
-          createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdRule={onCreateThresholdRule}
-        />
-      </I18nProvider>
-    );
-
-    const agentCard = screen.getByTestId('createWithAgentCard');
-    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
-
-    fireEvent.click(screen.getByRole('button', { name: /with ai agent/i }));
-    expect(onCreateWithAgent).not.toHaveBeenCalled();
-
-    fireEvent.mouseOver(agentCard);
     expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
   });
 

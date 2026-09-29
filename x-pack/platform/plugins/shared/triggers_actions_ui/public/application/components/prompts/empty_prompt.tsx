@@ -7,56 +7,93 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
+import { checklistDoc } from '@elastic/eui-illustrations';
 
 export const EmptyPrompt = ({
   onCreateRulesClick,
   showCreateRule = true,
+  documentationHref,
 }: {
   onCreateRulesClick: () => void;
   showCreateRule: boolean;
+  documentationHref?: string;
 }) => {
-  const renderActions = () => {
-    if (showCreateRule) {
-      return [
-        <EuiButton
-          iconType="plusCircle"
-          data-test-subj="createFirstRuleButton"
-          key="create-action"
-          fill
-          onClick={onCreateRulesClick}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
-            defaultMessage="Create rule"
-          />
-        </EuiButton>,
-      ];
-    }
-    return null;
-  };
-
   return (
-    <EuiPageTemplate.EmptyPrompt
-      iconType="watchesApp"
-      data-test-subj="createFirstRuleEmptyPrompt"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
-            defaultMessage="Create your first rule"
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.emptyPrompt.emptyDesc"
-            defaultMessage="Receive an alert through email, Slack, or another connector when a condition is met."
-          />
-        </p>
-      }
-      actions={renderActions()}
-    />
+    <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+      <EuiFlexItem grow={false}>
+        <EuiEmptyPrompt
+          data-test-subj="createFirstRuleEmptyPrompt"
+          layout="horizontal"
+          color="plain"
+          icon={
+            <EuiIllustration
+              type={checklistDoc}
+              alt=""
+              style={{ maxInlineSize: 240, marginInline: 'auto' }}
+            />
+          }
+          title={
+            <h2 style={{ whiteSpace: 'nowrap' }}>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
+                defaultMessage="Get started with Standard rules"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.emptyPrompt.emptyDesc"
+                defaultMessage="Create classic alerting rules that evaluate conditions on a schedule and send notifications when they are met. For the newer ES|QL-based experience, switch to the ES|QL rules tab."
+              />
+            </p>
+          }
+          actions={
+            showCreateRule ? (
+              <EuiButton
+                iconType="plusCircle"
+                data-test-subj="createFirstRuleButton"
+                fill
+                onClick={onCreateRulesClick}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
+                  defaultMessage="Create rule"
+                />
+              </EuiButton>
+            ) : undefined
+          }
+          footer={
+            documentationHref ? (
+              <>
+                <EuiTitle size="xxs">
+                  <span>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.components.emptyPrompt.footerTitle"
+                      defaultMessage="Need help?"
+                    />
+                  </span>
+                </EuiTitle>{' '}
+                <EuiLink href={documentationHref} target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.components.emptyPrompt.footerLink"
+                    defaultMessage="Read documentation"
+                  />
+                </EuiLink>
+              </>
+            ) : undefined
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

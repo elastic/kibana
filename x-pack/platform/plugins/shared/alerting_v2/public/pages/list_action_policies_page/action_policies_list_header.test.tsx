@@ -43,11 +43,15 @@ describe('ActionPoliciesListHeader', () => {
     mockPhase = 'populated';
   });
 
-  it('renders the page title without an experimental badge', () => {
+  it('renders the page title with an ES|QL rules only badge and callout', () => {
     renderHeader();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
+    expect(screen.getByTestId('alertingV2EsqlRulesOnlyBadge')).toHaveTextContent(
+      'ES|QL rules only'
+    );
     expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('esqlRulesOnlyCallout')).toBeInTheDocument();
   });
 
   it('renders the create split button when the user can write and the list is populated', () => {
