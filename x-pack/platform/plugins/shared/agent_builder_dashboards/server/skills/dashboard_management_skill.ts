@@ -28,6 +28,10 @@ Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
+## Talking to the User
+
+Keep every message short and in the user's terms, including progress updates between tool calls. Say what the dashboard shows and what they can do with it. Do not explain how you built it, such as tool calls, operations, field mappings, ES|QL details, or why you picked one field over another, unless the user asks.
+
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
