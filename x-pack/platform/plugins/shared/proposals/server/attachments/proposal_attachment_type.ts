@@ -121,7 +121,7 @@ export const createProposalAttachmentType = ({
         // proposal id here, which without this check would read it back to the
         // LLM for someone holding no proposals privilege at all.
         await privileges.assertCanRead(request);
-        const proposal = await getProposalsService().get(proposalId, spaceId);
+        const proposal = await getProposalsService().get(proposalId, spaceId, request);
         return { type: 'text', value: formatProposalForAgent(proposal) };
       } catch (error) {
         logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);
