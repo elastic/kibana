@@ -25,6 +25,7 @@ import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
   loadSourceCatalog,
   resolveSourcesBySlug,
+  assertSourceEnabled,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 
@@ -137,6 +138,7 @@ export function createQueryKnowledgeIndicatorTool({
 
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
+        assertSourceEnabled(source);
         sourceId = source.id;
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
