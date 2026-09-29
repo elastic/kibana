@@ -149,6 +149,13 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     );
   });
 
+  it('gates find_related_reports on enrich_report_core succeeding too', () => {
+    // Its query reads steps.enrich_report_core.output.anchor_iocs; without this
+    // guard an enrich_report_core error would run the step against undefined.
+    const step = findStepByName(workflow.steps, 'find_related_reports') as { if?: string };
+    expect(step.if).toContain('steps.enrich_report_core.error == null');
+  });
+
   it('excludes hard-rejected reports from already-extracted fingerprint dedup', () => {
     const step = findStepByName(workflow.steps, 'check_already_extracted') as {
       with?: { query?: { bool?: { must_not?: unknown[] } } };

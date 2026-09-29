@@ -263,7 +263,9 @@ steps:
       # term was calibrated against a hash that cannot move with model verdicts.
       - name: find_related_reports
         type: elasticsearch.search
-        if: "steps.extract_iocs.output.ioc_set_hash : *"
+        # Must also gate on enrich_report_core succeeding: anchor_iocs below
+        # comes from its output, and an error leaves that undefined.
+        if: "${{ steps.extract_iocs.output.ioc_set_hash != null and steps.enrich_report_core.error == null }}"
         with:
           index: .kibana-threat-reports
           size: 15
