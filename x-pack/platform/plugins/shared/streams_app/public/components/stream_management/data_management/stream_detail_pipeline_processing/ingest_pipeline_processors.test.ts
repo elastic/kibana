@@ -184,6 +184,48 @@ describe('ingest pipeline processor UI serialization', () => {
     ]);
   });
 
+  it.each([
+    ['freetext', 'ctx.url?.domain != null'],
+    ['script-object', { source: 'ctx.url?.domain != null', lang: 'painless' }],
+  ])('round-trips %s conditions on registered_domain processors', (_label, condition) => {
+    const onFailure = [{ set: { field: 'error.message', value: 'failed' } }];
+    const processor: IngestProcessorContainer = {
+      registered_domain: {
+        field: 'url.domain',
+        target_field: 'url',
+        ignore_missing: true,
+        if: condition,
+        on_failure: onFailure,
+      },
+    };
+
+    const uiDefinition = processorsToUiDefinition([processor]);
+
+    expect(uiDefinition.steps[0]).toEqual(
+      expect.objectContaining({
+        action: 'registered_domain',
+        expression: 'url.domain',
+        prefix: 'url',
+        ignore_missing: true,
+        if: condition,
+        on_failure: onFailure,
+      })
+    );
+    expect(uiDefinition.steps[0]).not.toHaveProperty('field');
+    expect(uiDefinition.steps[0]).not.toHaveProperty('target_field');
+    expect(uiDefinitionToProcessors(uiDefinition)).toEqual([
+      {
+        registered_domain: {
+          field: 'url.domain',
+          target_field: 'url',
+          ignore_missing: true,
+          if: condition,
+          on_failure: onFailure,
+        },
+      },
+    ]);
+  });
+
   it('preserves native enrich processor fields when persisting editable steps', async () => {
     const uiDefinition = processorsToUiDefinition([
       {
