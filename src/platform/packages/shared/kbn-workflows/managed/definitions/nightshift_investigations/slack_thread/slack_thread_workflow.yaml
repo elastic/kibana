@@ -1,0 +1,127 @@
+version: '1'
+name: Nightshift Slack Thread Investigation
+description: >
+  Keeps one Nightshift investigation per Slack thread. Mentioning the app starts it; every later
+  human reply in the thread re-runs it in the same conversation. Each run posts or edits one
+  status message in the thread: started, then the findings or the failure.
+enabled: true
+settings:
+  # Longer than the investigation's own timeout, since this run waits for it.
+  timeout: '65m'
+  # One run per thread at a time, in arrival order, so replies build on each other.
+  concurrency:
+    key: 'nightshift-slack-thread-{{ event.connectorId }}-{{ event.channel }}-{{ event.threadId | default: event.messageId }}'
+    strategy: queue
+    max: 1
+tags:
+  - observability
+  - investigation
+  - nightshift
+
+triggers:
+  - type: slack2.app_mention
+    connector-id: '*'
+  # Only human replies in a thread. The app's own posts and edits come back as message events:
+  # posts carry botId, and edits carry a message_changed subtype that may lack botId.
+  - type: slack2.message
+    connector-id: '*'
+    on:
+      condition: 'event.threadId:* and not event.botId:* and not event.subtype:*'
+
+steps:
+  # A mention creates the thread's investigation; a reply only continues an existing one.
+  - name: find_investigation
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        workspace: '${{ event.workspace }}'
+        channel: '{{ event.channel }}'
+        thread_ts: '{{ event.threadId | default: event.messageId }}'
+        text: '${{ event.text }}'
+        create: "${{ execution.triggeredBy == 'slack2.app_mention' }}"
+
+  - name: in_investigation_thread
+    type: if
+    condition: '${{ steps.find_investigation.output.investigation_id != null }}'
+    steps:
+      - name: set_investigation_url
+        type: data.set
+        with:
+          investigation_url: "{{ kibanaUrl }}{% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/nightshift?investigationId={{ steps.find_investigation.output.investigation_id }}"
+
+      # One status message per thread: a run announces itself as soon as it starts, or re-announces
+      # itself on the message an earlier run posted, and then edits it with the result.
+      - name: post_started
+        type: slack2.sendMessage
+        connector-id: '{{ event.connectorId }}'
+        with:
+          channel: '{{ event.channel }}'
+          threadTs: '{{ event.threadId | default: event.messageId }}'
+          messageTs: '${{ steps.find_investigation.output.slack_message_ts }}'
+          text: "{% if steps.find_investigation.output.slack_message_ts %}Investigating the follow-up.{% else %}Investigation started.{% endif %} <{{ variables.investigation_url }}|View the investigation>"
+        on-failure:
+          continue: true
+
+      # Recorded before the investigation runs so a failed run still leaves later runs a message
+      # to edit.
+      - name: record_status_message
+        type: kibana.request
+        if: '${{ steps.post_started.output.ts != null }}'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workspace: '${{ event.workspace }}'
+            channel: '{{ event.channel }}'
+            thread_ts: '{{ event.threadId | default: event.messageId }}'
+            create: false
+            slack_message_ts: '{{ steps.post_started.output.ts }}'
+        on-failure:
+          continue: true
+
+      # A failed investigation is reported from its record below rather than failing this run.
+      - name: investigate
+        type: workflow.execute
+        with:
+          workflow-id: system-nightshift-investigation
+          inputs:
+            title: '{{ steps.find_investigation.output.title }}'
+            # ai.agent has no input for the round's author, so the Slack author goes in the text.
+            message: |
+              Slack user <@{{ event.sender }}> wrote in the investigation's thread:
+
+              {{ event.text }}
+            investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
+            conversation_id: '{{ steps.find_investigation.output.conversation_id }}'
+        on-failure:
+          continue: true
+
+      - name: get_investigation
+        type: kibana.request
+        with:
+          method: GET
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ steps.find_investigation.output.investigation_id }}'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+
+      - name: post_result
+        type: slack2.sendMessage
+        connector-id: '{{ event.connectorId }}'
+        with:
+          channel: '{{ event.channel }}'
+          threadTs: '{{ event.threadId | default: event.messageId }}'
+          messageTs: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.slack_message_ts }}'
+          text: |
+            {% if steps.get_investigation.output.status == 'completed' %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
+
+            {% endif %}{{ steps.get_investigation.output.summary }}{% else %}Investigation failed.{% endif %}
+
+            <{{ variables.investigation_url }}|View the investigation>
+        on-failure:
+          continue: true

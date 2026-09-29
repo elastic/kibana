@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v5 as uuidv5 } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -38,6 +39,7 @@ import type {
 import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   freeFormContextSchema,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
@@ -115,6 +117,41 @@ const withDerivedSubjectSummary = (
       : collapsed;
 
   return { ...subject, summary };
+};
+
+/** Namespace for the ids derived from a Slack thread. Changing it orphans every thread's record. */
+const SLACK_THREAD_ID_NAMESPACE = '6f1c3a52-8d4e-4b7a-9e21-3c5d7f0a9b64';
+
+const MAX_SLACK_THREAD_TITLE_LENGTH = 80;
+const DEFAULT_SLACK_THREAD_TITLE = 'Slack investigation';
+
+/** Response of POST /internal/nightshift/investigations/_slack_thread. */
+export interface SlackThreadInvestigation {
+  investigation_id: string;
+  conversation_id?: string;
+  title: string;
+  slack_message_ts?: string;
+}
+
+const toSlackThreadInvestigation = (record: InvestigationRecord): SlackThreadInvestigation => ({
+  investigation_id: record.id,
+  conversation_id: record.conversation_id,
+  title: record.title,
+  slack_message_ts: record.slack_message_ts,
+});
+
+/** A headline from the opening message, with Slack mentions and markup collapsed away. */
+const toSlackThreadTitle = (text: string | undefined): string => {
+  const collapsed = (text ?? '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!collapsed) {
+    return DEFAULT_SLACK_THREAD_TITLE;
+  }
+  return collapsed.length > MAX_SLACK_THREAD_TITLE_LENGTH
+    ? `${collapsed.slice(0, MAX_SLACK_THREAD_TITLE_LENGTH - 1).trimEnd()}…`
+    : collapsed;
 };
 
 interface ExecutionInvestigationMetadata {
@@ -663,6 +700,67 @@ export class NightshiftInvestigationsClient {
       reopen: isTerminalStatus(existing.status),
     });
     return existing.conversation_id;
+  }
+
+  /**
+   * The investigation for a Slack thread. Its ids derive from the thread, so concurrent calls for
+   * one thread agree on a single record and conversation. Without `create`, a thread that has no
+   * investigation yet returns undefined. `slackMessageTs` records the thread's status message on an
+   * existing investigation whatever its status.
+   */
+  async findOrCreateSlackThread({
+    workspace,
+    channel,
+    threadTs,
+    text,
+    create,
+    slackMessageTs,
+  }: {
+    workspace?: string;
+    channel: string;
+    threadTs: string;
+    text?: string;
+    create: boolean;
+    slackMessageTs?: string;
+  }): Promise<SlackThreadInvestigation | undefined> {
+    const threadKey = [workspace, channel, threadTs].filter(Boolean).join('/');
+    const investigationId = uuidv5(`investigation/${threadKey}`, SLACK_THREAD_ID_NAMESPACE);
+
+    const existing = await this.investigationRepository.get(investigationId);
+    if (existing) {
+      if (slackMessageTs && slackMessageTs !== existing.slack_message_ts) {
+        await this.investigationRepository.update({
+          id: existing.id,
+          patch: { slack_message_ts: slackMessageTs },
+        });
+        return toSlackThreadInvestigation({ ...existing, slack_message_ts: slackMessageTs });
+      }
+      return toSlackThreadInvestigation(existing);
+    }
+    if (!create) {
+      return undefined;
+    }
+    if (!(await this.isAvailable())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+
+    const attributes: InvestigationAttributes = {
+      title: toSlackThreadTitle(text),
+      status: 'pending',
+      // Like any manual run, a thread is defined by its prompt rather than an entity, so the
+      // subject stays the placeholder the UI hides. The thread itself is identified by
+      // slack_channel/slack_thread_ts and by the ids derived from it.
+      ...toSubjectFields({ type: 'manual', id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID }),
+      trigger_type: 'manual',
+      created_at: new Date().toISOString(),
+      conversation_id: uuidv5(`conversation/${threadKey}`, SLACK_THREAD_ID_NAMESPACE),
+      slack_channel: channel,
+      slack_thread_ts: threadTs,
+    };
+    await this.createIgnoringConflict({ id: investigationId, attributes });
+
+    const created = await this.investigationRepository.get(investigationId);
+    return toSlackThreadInvestigation(created ?? { id: investigationId, ...attributes });
   }
 
   /**
