@@ -60,7 +60,7 @@ const dataControlInputFields = {
     .boolean()
     .optional()
     .describe(
-      'True when the user asked for this control. Leave unset for controls you add on your own.'
+      'True only when the user named this specific filter or field. Leave unset when you chose the field, including when the user only asked for controls in general.'
     ),
   ...controlLayoutFields,
 };
