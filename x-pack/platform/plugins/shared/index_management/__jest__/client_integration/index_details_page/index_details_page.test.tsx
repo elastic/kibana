@@ -1516,9 +1516,6 @@ describe('<IndexDetailsPage />', () => {
           expect(screen.getByTestId('indexDetailsMappingsSaveMappings')).not.toBeDisabled()
         );
 
-        const getMock = jest.mocked(httpSetup.get);
-        const requestsBefore = getMock.mock.calls.length;
-
         fireEvent.click(screen.getByTestId('indexDetailsMappingsSaveMappings'));
 
         await waitFor(() => {
@@ -1527,9 +1524,12 @@ describe('<IndexDetailsPage />', () => {
           });
         });
 
-        // Assert refetch rather than JSON view — that view is covered elsewhere and is expensive here.
+        // Verify the post-save refetch is consumed: JSON view reads the loaded mapping payload
+        // (not local pending-field state). Checking for the field name avoids a full JSON equality
+        // assert that was expensive/flaky on CI.
+        await clickToggleView('JSON');
         await waitFor(() => {
-          expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
+          expect(screen.getByTestId('indexDetailsMappingsCodeBlock')).toHaveTextContent('my_field');
         });
         expect(screen.queryByTestId('indexDetailsSaveMappingsError')).not.toBeInTheDocument();
       }, 20000);
