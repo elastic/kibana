@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { EsqlDetectorsEditor } from './esql_detectors_editor';
 import type { EsqlDetectorConfig } from '../../../common/job_creator/esql_job_creator';
 
-const columns = [
+const columns: ESQLFieldWithMetadata[] = [
   { name: 'bucket', type: 'date', hasConflict: false, userDefined: false },
   { name: 'host', type: 'keyword', hasConflict: false, userDefined: false },
   { name: 'region', type: 'keyword', hasConflict: false, userDefined: false },

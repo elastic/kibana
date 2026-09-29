@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { pruneEsqlSelections } from './esql_prune_selections';
 
-const columns = [
+const columns: ESQLFieldWithMetadata[] = [
   { name: 'bucket', type: 'date', hasConflict: false, userDefined: false },
   { name: 'host', type: 'keyword', hasConflict: false, userDefined: false },
   { name: 'avg_bytes', type: 'double', hasConflict: false, userDefined: false },
