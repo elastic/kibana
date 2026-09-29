@@ -141,6 +141,7 @@ export const datasetSchema = schema.object({
       multi_value_syntax: schema.maybe(
         schema.oneOf([schema.literal('none'), schema.literal('brackets')])
       ),
+      partition_sample_size: schema.maybe(schema.string({ maxLength: 255 })),
       region: optionalString,
       schema_sample_size: schema.maybe(
         schema.number({

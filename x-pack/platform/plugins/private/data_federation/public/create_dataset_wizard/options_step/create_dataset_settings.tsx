@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { EuiAccordion, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
@@ -99,38 +99,41 @@ export function CreateDatasetAdditionalSettings({
   const showCommonSettings = format ? hasCommonSettingsForFormat : true;
   const showAdvancedAsPlainContent = Boolean(format) && !hasCommonSettingsForFormat;
 
-  const advancedSettingsContent = useMemo(() => FormatAdvancedSettingsComponent ? (
+  const advancedSettingsContent = (
     <>
-      <FormatAdvancedSettingsComponent control={control} />
-      <EuiSpacer size="m" />
+      {FormatAdvancedSettingsComponent ? (
+        <>
+          <FormatAdvancedSettingsComponent control={control} />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <SharedAdvancedSettings control={control} />
     </>
-  ) : <></>, [FormatAdvancedSettingsComponent]);
-
+  );
 
   return (
     <>
       {showCommonSettings ? (
         <>
-        <EuiAccordion
-          id="createDatasetWizardCommonSettings"
-          data-test-subj="createDatasetWizardCommonSettings"
-          buttonContent={
-            <EuiTitle size="xxs">
-              <h4>{createDatasetWizardStrings.commonSettingsSectionTitle}</h4>
-            </EuiTitle>
-          }
-          initialIsOpen={commonAccordionIsOpen}
-          forceState={commonAccordionIsOpen ? 'open' : 'closed'}
-          onToggle={(nextIsOpen) => commonAccordionField.onChange(nextIsOpen)}
-          paddingSize="m"
-        >
-          <SharedCommonSettings control={control} />
-          {FormatCommonSettingsComponent ? (
-            <FormatCommonSettingsComponent control={control} />
-          ) : null}
-        </EuiAccordion>
-        <EuiSpacer size="m" /> 
+          <EuiAccordion
+            id="createDatasetWizardCommonSettings"
+            data-test-subj="createDatasetWizardCommonSettings"
+            buttonContent={
+              <EuiTitle size="xxs">
+                <h4>{createDatasetWizardStrings.commonSettingsSectionTitle}</h4>
+              </EuiTitle>
+            }
+            initialIsOpen={commonAccordionIsOpen}
+            forceState={commonAccordionIsOpen ? 'open' : 'closed'}
+            onToggle={(nextIsOpen) => commonAccordionField.onChange(nextIsOpen)}
+            paddingSize="m"
+          >
+            <SharedCommonSettings control={control} />
+            {FormatCommonSettingsComponent ? (
+              <FormatCommonSettingsComponent control={control} />
+            ) : null}
+          </EuiAccordion>
+          <EuiSpacer size="m" />
         </>
       ) : null}
       {showAdvancedAsPlainContent ? (

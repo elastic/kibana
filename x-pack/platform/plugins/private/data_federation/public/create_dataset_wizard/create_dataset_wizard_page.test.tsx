@@ -325,6 +325,7 @@ describe('CreateDatasetWizardPage', () => {
         region: 'us-east-1',
         file_sort_by: ['mtime'],
         file_order: 'desc',
+        partition_sample_size: '100',
       },
     };
 
@@ -393,6 +394,7 @@ describe('CreateDatasetWizardPage', () => {
             region: 'us-east-1',
             file_sort_by: ['mtime'],
             file_order: 'desc',
+            partition_sample_size: '100',
           }),
         })
       );
