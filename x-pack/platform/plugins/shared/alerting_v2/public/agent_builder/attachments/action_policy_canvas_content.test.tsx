@@ -23,6 +23,7 @@ const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddDanger = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
 jest.mock('../../services/action_policies_api', () => ({
   ActionPoliciesApi: 'ActionPoliciesApi',
@@ -57,6 +58,10 @@ jest.mock('@kbn/core-di-browser', () => ({
       application: mockApplicationService,
       http: mockHttpService,
       notifications: mockNotificationsService,
+      uiSettings: {
+        get: (id: string) =>
+          id === 'alerting:v2:experimentalFeatures' && mockAlertingV2ExperimentalFeaturesEnabled,
+      },
       WorkflowApi: mockWorkflowApiService,
       RulesApi: mockRulesApiService,
       ActionPoliciesApi: mockActionPoliciesApiService,
@@ -138,6 +143,7 @@ describe('ActionPolicyCanvasContent', () => {
     jest.clearAllMocks();
     mockGetWorkflow.mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
     mockGetRule.mockResolvedValue({ id: 'abc', name: 'Test Rule' });
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
   });
 
   describe('rendering', () => {
@@ -153,6 +159,14 @@ describe('ActionPolicyCanvasContent', () => {
   });
 
   describe('action buttons for proposed (unsaved) policies', () => {
+    it('hides save actions when Alerting V2 experimental features are disabled', async () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+
+      const { registerActionButtons } = await renderCanvas();
+
+      expect(getLastRegisteredButtons(registerActionButtons)).toEqual([]);
+    });
+
     it('registers Create policy button', async () => {
       const { registerActionButtons } = await renderCanvas();
       const buttons = getLastRegisteredButtons(registerActionButtons);
