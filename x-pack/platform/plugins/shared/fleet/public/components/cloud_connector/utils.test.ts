@@ -652,11 +652,11 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).not.toContain('RESOURCE_ID');
     });
 
-    it('should use ESS deployment ID when both serverless and cloud are enabled', () => {
+    it('should use the serverless project ID when both serverless and cloud are enabled', () => {
       const hybridCloudSetup = {
         ...mockCloudSetup,
         isServerlessEnabled: true,
-        serverless: { projectId: 'serverless-should-not-use' },
+        serverless: { projectId: 'serverless-project-id' },
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
@@ -665,8 +665,9 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         iacTemplateUrl: mockIacTemplateUrl,
       });
 
-      expect(result).toContain('kibana-component-id');
-      expect(result).not.toContain('serverless-should-not-use');
+      expect(result).toBe(
+        'https://example.com/templates/single-account/serverless-project-id/cloudformation.yaml'
+      );
     });
 
     it('should handle complex cloud ID with base64 encoding', () => {
@@ -1085,8 +1086,9 @@ describe('Workload Identity template URLs', () => {
   const serverlessProductionCloud = {
     isCloudEnabled: true,
     isServerlessEnabled: true,
-    cloudId: encodeCloudId('us-east-1.aws.elastic.cloud', 'kibana'),
+    cloudId: encodeCloudId('us-east-1.aws.elastic.cloud', `${PROJECT_ID}.kb`),
     deploymentUrl: `https://cloud.elastic.co/projects/security/${PROJECT_ID}`,
+    deploymentId: PROJECT_ID,
     organizationId: '10',
     csp: 'aws',
     baseUrl: 'https://cloud.elastic.co',
@@ -1335,14 +1337,14 @@ describe('Workload Identity template URLs', () => {
       });
     });
 
-    it('keeps Elastic Cloud Hosted precedence when both deployment and project data are present', () => {
+    it('uses the project ID on Serverless even when a deployment ID and Kibana component are present', () => {
       expect(
         getElasticResource({
           ...echQaCloud,
           isServerlessEnabled: true,
-          serverless: { projectId: 'should-not-be-used' },
+          serverless: { projectId: PROJECT_ID },
         } as CloudSetup)
-      ).toEqual({ type: 'deployment', id: KIBANA_COMPONENT_ID });
+      ).toEqual({ type: 'project', id: PROJECT_ID });
     });
 
     it('returns the resource type without an ID when nothing can be derived', () => {

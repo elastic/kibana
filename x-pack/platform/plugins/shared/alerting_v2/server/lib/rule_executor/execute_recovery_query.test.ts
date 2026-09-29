@@ -43,13 +43,9 @@ describe('executeRecoveryQuery', () => {
 
     const rule = createRuleResponse({
       kind: 'alert',
-      recovery_strategy: 'query',
+      recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       grouping: { fields: ['host.name'] },
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | LIMIT 10' },
-        recovery: { query: 'FROM logs-* | WHERE recovered = true' },
-      },
+      query: { base: 'FROM logs-* | LIMIT 10' },
     });
 
     const recoveredHash = buildGroupHash({
@@ -95,7 +91,10 @@ describe('executeRecoveryQuery', () => {
     const events = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-* | WHERE recovered = true',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1', 'hash-2']),
@@ -129,7 +128,7 @@ describe('executeRecoveryQuery', () => {
       logger: loggerService,
       rule: createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'query',
+        recovery: { strategy: 'query', query: 'FROM logs-* | STATS count(*) BY host.name' },
         grouping: { fields: groupingFields },
       }),
       effectiveQuery: 'FROM logs-* | STATS count(*) BY host.name',
@@ -155,7 +154,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-* | WHERE invalid syntax',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -176,7 +178,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -198,7 +203,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -217,7 +225,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -239,7 +250,10 @@ describe('executeRecoveryQuery', () => {
     await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-*',
       input,
       activeGroupHashes: toActive(['hash-1']),
