@@ -946,6 +946,9 @@ importers:
       '@kbn/code-editor':
         specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/code_editor/impl
+      '@kbn/code-intelligence-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/code_intelligence
       '@kbn/coloring':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-coloring
@@ -9561,6 +9564,8 @@ importers:
   x-pack/solutions/observability/plugins/apm_data_access: {}
 
   x-pack/solutions/observability/plugins/client_apps: {}
+
+  x-pack/solutions/observability/plugins/code_intelligence: {}
 
   x-pack/solutions/observability/plugins/exploratory_view: {}
 

@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/code-intelligence-plugin",
+  "owner": ["@elastic/obs-knowledge-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Private server plugin for extracting and browsing a code intelligence catalog",
+  "plugin": {
+    "id": "codeIntelligence",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "code_intelligence"],
+    "requiredPlugins": ["workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": ["sandbox", "spaces"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
+  }
+}

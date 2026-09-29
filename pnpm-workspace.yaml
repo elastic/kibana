@@ -1555,6 +1555,7 @@ packages:
   - 'x-pack/solutions/observability/plugins/apm'
   - 'x-pack/solutions/observability/plugins/apm_data_access'
   - 'x-pack/solutions/observability/plugins/client_apps'
+  - 'x-pack/solutions/observability/plugins/code_intelligence'
   - 'x-pack/solutions/observability/plugins/exploratory_view'
   - 'x-pack/solutions/observability/plugins/infra'
   - 'x-pack/solutions/observability/plugins/metrics_data_access'
