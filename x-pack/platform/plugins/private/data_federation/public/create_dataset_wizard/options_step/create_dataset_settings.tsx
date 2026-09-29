@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useMemo, type FunctionComponent } from 'react';
 import { EuiAccordion, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
@@ -100,9 +99,19 @@ export function CreateDatasetAdditionalSettings({
   const showCommonSettings = format ? hasCommonSettingsForFormat : true;
   const showAdvancedAsPlainContent = Boolean(format) && !hasCommonSettingsForFormat;
 
+  const advancedSettingsContent = useMemo(() => FormatAdvancedSettingsComponent ? (
+    <>
+      <FormatAdvancedSettingsComponent control={control} />
+      <EuiSpacer size="m" />
+      <SharedAdvancedSettings control={control} />
+    </>
+  ) : <></>, [FormatAdvancedSettingsComponent]);
+
+
   return (
     <>
       {showCommonSettings ? (
+        <>
         <EuiAccordion
           id="createDatasetWizardCommonSettings"
           data-test-subj="createDatasetWizardCommonSettings"
@@ -121,21 +130,16 @@ export function CreateDatasetAdditionalSettings({
             <FormatCommonSettingsComponent control={control} />
           ) : null}
         </EuiAccordion>
+        <EuiSpacer size="m" /> 
+        </>
       ) : null}
-      {showCommonSettings ? <EuiSpacer size="m" /> : null}
       {showAdvancedAsPlainContent ? (
         <div
           id="createDatasetWizardAdvancedSettings"
           data-test-subj="createDatasetWizardAdvancedSettings"
           style={{ padding: 16 }}
         >
-          {FormatAdvancedSettingsComponent ? (
-            <>
-              <FormatAdvancedSettingsComponent control={control} />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          <SharedAdvancedSettings control={control} />
+          {advancedSettingsContent}
         </div>
       ) : (
         <EuiAccordion
@@ -151,13 +155,7 @@ export function CreateDatasetAdditionalSettings({
           onToggle={(nextIsOpen) => advancedAccordionField.onChange(nextIsOpen)}
           paddingSize="m"
         >
-          {FormatAdvancedSettingsComponent ? (
-            <>
-              <FormatAdvancedSettingsComponent control={control} />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          <SharedAdvancedSettings control={control} />
+          {advancedSettingsContent}
         </EuiAccordion>
       )}
     </>
