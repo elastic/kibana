@@ -46,6 +46,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   id: string;
   actionTypeId: string;
   name: string;
+  description?: string;
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
@@ -100,7 +101,7 @@ export type ConnectorFormSchema<
   Partial<
     Pick<
       UserConfiguredActionConnector<Config, Secrets>,
-      'id' | 'name' | 'authMode' | 'isInboundEventsEnabled'
+      'id' | 'name' | 'description' | 'authMode' | 'isInboundEventsEnabled'
     >
   >;
 

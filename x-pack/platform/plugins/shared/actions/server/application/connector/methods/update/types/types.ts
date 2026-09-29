@@ -10,6 +10,7 @@ import type { ActionsClientContext } from '../../../../../actions_client';
 
 export interface ConnectorUpdate {
   name: string;
+  description?: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
   isInboundEventsEnabled?: boolean;

@@ -25,7 +25,7 @@ export const createListConnectorsTool = ({
   id: 'list_connectors',
   type: ToolType.builtin,
   description:
-    "List connectors available to this agent that can be called as tools. Returns each connector's id, name, type, and a short description. Call this before deciding which connector to use or before calling get_connector_sub_actions.",
+    "List connectors available to this agent that can be called as tools. Returns each connector's id, name, type, a short description of the connector type, and an optional instanceDescription written by the user that explains what this specific connector is for and when to use it. Prefer instanceDescription when choosing between connectors. Call this before deciding which connector to use or before calling get_connector_sub_actions.",
   schema: listConnectorsSchema,
   confirmation: { askUser: 'never' },
   handler: async (_input, context) => {

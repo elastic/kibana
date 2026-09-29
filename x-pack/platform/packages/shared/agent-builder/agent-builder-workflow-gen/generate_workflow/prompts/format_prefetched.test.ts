@@ -99,6 +99,27 @@ describe('formatConnectorsBlock', () => {
       ].join('\n')
     );
   });
+
+  it('appends the user-provided connector description to the instance line', () => {
+    const connectors: ConnectorSummary[] = [
+      {
+        id: 'slack-1',
+        name: 'Eng',
+        description: 'Post incident updates here.\nNot for customer comms.',
+        actionTypeId: '.slack',
+        stepTypes: ['slack'],
+      },
+    ];
+
+    expect(formatConnectorsBlock(connectors)).toBe(
+      [
+        '### .slack',
+        'Step types: slack',
+        'Instances:',
+        '  - slack-1 (Eng): Post incident updates here. Not for customer comms.',
+      ].join('\n')
+    );
+  });
 });
 
 const step = (over: Partial<StepDefinitionSummary> = {}): StepDefinitionSummary => ({

@@ -24,6 +24,7 @@ export function connectorFromInMemoryConnector({
     id,
     actionTypeId: inMemoryConnector.actionTypeId,
     name: inMemoryConnector.name,
+    ...(inMemoryConnector.description ? { description: inMemoryConnector.description } : {}),
     isPreconfigured: inMemoryConnector.isPreconfigured,
     isSystemAction: inMemoryConnector.isSystemAction,
     isDeprecated: isConnectorDeprecated(inMemoryConnector),

@@ -52,6 +52,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         connector_id: connectorId,
         connector_name: connectorName,
         connector_type: connectorType,
+        connector_description: connectorDescription,
       } = attachment.data;
 
       const spec = getConnectorSpec(connectorType);
@@ -67,6 +68,9 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
           const parts: string[] = [
             `Connector: ${connectorName} (${connectorType})`,
             `Description: ${description}`,
+            ...(connectorDescription
+              ? [`When to use this connector: ${connectorDescription}`]
+              : []),
             `Connector ID: ${connectorId}`,
             '',
             `Required JSON shape for tool ${toolId}:`,

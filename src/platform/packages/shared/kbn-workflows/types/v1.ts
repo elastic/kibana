@@ -591,6 +591,8 @@ export interface ConnectorSubAction {
 export interface ConnectorInstance {
   id: string;
   name: string;
+  /** User-provided description of what the connector is for and when to use it. */
+  description?: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;

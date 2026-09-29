@@ -62,6 +62,38 @@ describe('ConnectorFormFieldsGlobal', () => {
     });
   });
 
+  it('submits the description', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('connectorDescriptionInput'));
+    await userEvent.paste('Use for production alerts.');
+    await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: expect.objectContaining({ description: 'Use for production alerts.' }),
+        isValid: true,
+      });
+    });
+  });
+
+  it('prefills the description in edit mode', async () => {
+    render(
+      <FormTestProvider
+        onSubmit={onSubmit}
+        defaultValue={{ ...defaultValue, description: 'Existing description' }}
+      >
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={true} />
+      </FormTestProvider>
+    );
+
+    expect(screen.getByTestId('connectorDescriptionInput')).toHaveValue('Existing description');
+  });
+
   it('validates the name correctly', async () => {
     render(
       /**

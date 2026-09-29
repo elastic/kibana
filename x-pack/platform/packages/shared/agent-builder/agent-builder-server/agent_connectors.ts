@@ -9,16 +9,26 @@ import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from './tools';
 
 /** Minimal actions-client interface needed by the connector helpers below. */
+interface MinimalConnector {
+  id: string;
+  name: string;
+  actionTypeId: string;
+  description?: string;
+}
+
 interface MinimalActionsClient {
-  getAll(): Promise<Array<{ id: string; name: string; actionTypeId: string }>>;
-  get(opts: { id: string }): Promise<{ id: string; name: string; actionTypeId: string }>;
+  getAll(): Promise<MinimalConnector[]>;
+  get(opts: { id: string }): Promise<MinimalConnector>;
 }
 
 export interface ConnectorSummary {
   id: string;
   name: string;
   type: string;
+  /** Generic description of the connector type. */
   description: string;
+  /** User-provided description of what this connector instance is for and when to use it. */
+  instanceDescription?: string;
 }
 
 export interface ConnectorSubActionDetail {
@@ -31,7 +41,10 @@ export interface ConnectorDetail {
   id: string;
   name: string;
   type: string;
+  /** Generic description of the connector type. */
   description: string;
+  /** User-provided description of what this connector instance is for and when to use it. */
+  instanceDescription?: string;
   subActions: ConnectorSubActionDetail[];
 }
 
@@ -57,6 +70,7 @@ export const listAgentConnectors = async (
         name: c.name,
         type: c.actionTypeId,
         description: spec.metadata.description ?? c.name,
+        ...(c.description ? { instanceDescription: c.description } : {}),
       };
     });
 };
@@ -90,6 +104,7 @@ export const getAgentConnectorDetail = async (
     name: connector.name,
     type: connector.actionTypeId,
     description: spec.metadata.description ?? connector.name,
+    ...(connector.description ? { instanceDescription: connector.description } : {}),
     subActions,
   };
 };

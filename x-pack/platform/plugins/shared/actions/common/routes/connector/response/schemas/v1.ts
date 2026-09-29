@@ -18,6 +18,14 @@ const connectorResponseFields = {
       description: ' The name of the connector.',
     },
   }),
+  description: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'A user-provided description of the connector, such as what it is used for and when to use it.',
+      },
+    })
+  ),
   config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   connector_type_id: schema.string({
     meta: { description: 'The connector type identifier.' },

@@ -1,0 +1,60 @@
+{
+  "10.4.0": [
+    {
+      "name": "Slack Connector without inbound identity",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "hasInboundEventIdentity": false
+    },
+    {
+      "name": "Datadog Connector with apiKey",
+      "actionTypeId": ".datadog",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://api.datadoghq.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": "eyJhcGlLZXkiOiJjaXBoZXJ0ZXh0In0=",
+      "hasInboundEventIdentity": true
+    }
+  ],
+  "10.5.0": [
+    {
+      "name": "Slack Connector without inbound identity",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "hasInboundEventIdentity": false
+    },
+    {
+      "name": "Datadog Connector with apiKey",
+      "actionTypeId": ".datadog",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://api.datadoghq.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": "eyJhcGlLZXkiOiJjaXBoZXJ0ZXh0In0=",
+      "hasInboundEventIdentity": true
+    }
+  ]
+}

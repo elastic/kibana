@@ -128,10 +128,19 @@ export const useConnectorCreateForm = ({
         }
       }
 
-      const { actionTypeId: typeId, name, config, secrets, id, isInboundEventsEnabled } = data;
+      const {
+        actionTypeId: typeId,
+        name,
+        description,
+        config,
+        secrets,
+        id,
+        isInboundEventsEnabled,
+      } = data;
       return createConnector({
         actionTypeId: typeId,
         name: name ?? '',
+        ...(description ? { description } : {}),
         config: config ?? {},
         secrets: secrets ?? {},
         id: id ?? '',

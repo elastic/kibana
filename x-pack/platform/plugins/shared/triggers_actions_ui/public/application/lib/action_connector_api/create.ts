@@ -16,7 +16,7 @@ import type {
 const rewriteBodyRequest: RewriteResponseCase<
   Pick<
     ActionConnectorWithoutId,
-    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+    'actionTypeId' | 'name' | 'description' | 'config' | 'secrets' | 'isInboundEventsEnabled'
   >
 > = ({ actionTypeId, isInboundEventsEnabled, ...res }) => ({
   ...res,
@@ -58,7 +58,7 @@ export async function createActionConnector({
   http: HttpSetup;
   connector: Pick<
     ActionConnectorWithoutId,
-    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+    'actionTypeId' | 'name' | 'description' | 'config' | 'secrets' | 'isInboundEventsEnabled'
   >;
   id?: string;
 }): Promise<ActionConnector> {

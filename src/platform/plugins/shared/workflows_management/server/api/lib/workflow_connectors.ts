@@ -96,6 +96,7 @@ export const getAvailableConnectors = async (params: {
       connectorTypes[connector.actionTypeId].instances.push({
         id: connector.id,
         name: connector.name,
+        ...(connector.description ? { description: connector.description } : {}),
         isPreconfigured: connector.isPreconfigured,
         isDeprecated: connector.isDeprecated,
         ...getConnectorInstanceConfig(connector),

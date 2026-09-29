@@ -45,7 +45,7 @@ export async function updateActionConnector({
   http: HttpSetup;
   connector: Pick<
     ActionConnectorWithoutId,
-    'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+    'name' | 'description' | 'config' | 'secrets' | 'isInboundEventsEnabled'
   >;
   id: string;
 }): Promise<ActionConnector> {
@@ -54,6 +54,7 @@ export async function updateActionConnector({
     {
       body: JSON.stringify({
         name: connector.name,
+        ...(connector.description !== undefined ? { description: connector.description } : {}),
         config: connector.config,
         secrets: connector.secrets,
         ...(connector.isInboundEventsEnabled !== undefined

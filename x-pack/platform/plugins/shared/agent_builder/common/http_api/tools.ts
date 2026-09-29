@@ -284,6 +284,7 @@ export interface AgentConnectorSummary {
   name: string;
   type: string;
   description: string;
+  instanceDescription?: string;
 }
 
 export type ListAgentConnectorsResponse = AgentConnectorSummary[];
@@ -301,5 +302,6 @@ export interface AgentConnectorDetailResponse {
   name: string;
   type: string;
   description: string;
+  instanceDescription?: string;
   subActions: AgentConnectorSubActionDetail[];
 }

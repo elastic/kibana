@@ -22,16 +22,19 @@ const createConnector = ({
   name,
   actionTypeId,
   config = {},
+  description,
 }: {
   id: string;
   name: string;
   actionTypeId: string;
   config?: Record<string, unknown>;
+  description?: string;
 }) => ({
   id,
   name,
   actionTypeId,
   config,
+  ...(description ? { description } : {}),
   isMissingSecrets: false,
   isPreconfigured: false,
   isDeprecated: false,
@@ -55,7 +58,12 @@ describe('listAgentConnectors', () => {
         actionTypeId: '.slack',
         config: { webhookUrl: SECRET_WEBHOOK_URL },
       }),
-      createConnector({ id: 'github-1', name: 'My GitHub', actionTypeId: '.github' }),
+      createConnector({
+        id: 'github-1',
+        name: 'My GitHub',
+        actionTypeId: '.github',
+        description: 'Use for the elastic/kibana repository.',
+      }),
       createConnector({ id: 'email-1', name: 'Ops email', actionTypeId: '.email' }),
     ]);
   });
@@ -90,6 +98,23 @@ describe('listAgentConnectors', () => {
     expect(JSON.stringify(result)).not.toContain(SECRET_WEBHOOK_URL);
     expect(JSON.stringify(result)).not.toContain('webhookUrl');
     expect(JSON.stringify(result)).not.toContain('isMissingSecrets');
+  });
+
+  it('includes the user-provided description when present', async () => {
+    const result = await listAgentConnectors(
+      createCallContext(['github-1', 'slack-1']),
+      getActionsClient
+    );
+
+    expect(result).toEqual([
+      { id: 'slack-1', name: 'My Slack', actionTypeId: '.slack' },
+      {
+        id: 'github-1',
+        name: 'My GitHub',
+        actionTypeId: '.github',
+        description: 'Use for the elastic/kibana repository.',
+      },
+    ]);
   });
 
   it('returns an empty list when the allow-list is empty', async () => {

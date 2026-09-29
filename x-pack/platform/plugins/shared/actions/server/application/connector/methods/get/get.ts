@@ -89,6 +89,7 @@ export async function get({
       actionTypeId: result.attributes.actionTypeId,
       isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
+      ...(result.attributes.description ? { description: result.attributes.description } : {}),
       config: result.attributes.config,
       isPreconfigured: false,
       isSystemAction: false,

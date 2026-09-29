@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { validateEmptyStrings } from '../../../../../validate_empty_strings';
 import {
   CONNECTOR_CONFIG_KEY_MAX_LENGTH,
+  CONNECTOR_DESCRIPTION_MAX_LENGTH,
   CONNECTOR_ID_MAX_LENGTH,
   CONNECTOR_NAME_MAX_LENGTH,
 } from '../../../../..';
@@ -26,6 +27,15 @@ const updateConnectorBodyFields = {
     validate: validateEmptyStrings,
     meta: { description: 'The display name for the connector.' },
   }),
+  description: schema.maybe(
+    schema.string({
+      maxLength: CONNECTOR_DESCRIPTION_MAX_LENGTH,
+      meta: {
+        description:
+          'A description of the connector, such as what it is used for and when to use it. It is shown to users and to AI agents. Omit to keep the current description; set to an empty string to clear it.',
+      },
+    })
+  ),
   config: schema.recordOf(
     schema.string({ maxLength: CONNECTOR_CONFIG_KEY_MAX_LENGTH }),
     schema.any({ validate: validateEmptyStrings }),

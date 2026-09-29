@@ -111,6 +111,50 @@ describe('createConnectorRoute', () => {
     });
   });
 
+  it('forwards the description and returns it in the response', async () => {
+    const { handler } = setupRoute();
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        name: 'My name',
+        actionTypeId: 'abc',
+        description: 'Use for prod alerts.',
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'My name',
+          description: 'Use for prod alerts.',
+          connector_type_id: 'abc',
+          config: {},
+          secrets: {},
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.create).toHaveBeenCalledWith({
+      action: {
+        name: 'My name',
+        description: 'Use for prod alerts.',
+        actionTypeId: 'abc',
+        config: {},
+        secrets: {},
+      },
+      options: undefined,
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ description: 'Use for prod alerts.' }),
+    });
+  });
+
   it('Returns error message to kibana on error', async () => {
     const { config, handler } = setupRoute();
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id?}"`);

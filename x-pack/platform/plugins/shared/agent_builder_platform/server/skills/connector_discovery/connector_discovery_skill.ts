@@ -19,6 +19,7 @@ const CONNECTOR_DISCOVERY_CONTENT = [
   "When a user's request could be fulfilled or assisted by an external integration:",
   '',
   '1. Call `list_connectors` to see what connectors are available to this agent. If the list is empty, tell the user no connectors are set up and the task is out of scope.',
+  '   Each connector may include an `instanceDescription` written by the user. It explains what that specific connector is for and when to use it (for example, which workspace, repository, or environment it targets). Use it to choose between connectors, especially between several connectors of the same type.',
   '',
   '2. If a connector looks applicable, call `get_connector_sub_actions` with its `connector_id` to load its available sub-actions and their parameter schemas.',
   '',

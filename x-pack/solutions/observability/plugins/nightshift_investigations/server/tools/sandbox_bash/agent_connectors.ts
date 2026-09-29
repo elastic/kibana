@@ -15,6 +15,7 @@ export interface AgentConnector {
   id: string;
   name: string;
   actionTypeId: string;
+  description?: string;
 }
 
 /**
@@ -33,7 +34,12 @@ export const listAgentConnectors = async (
     const allowedSet = new Set(callContext.allowedConnectorIds);
     return all
       .filter((c) => allowedSet.has(c.id))
-      .map((c) => ({ id: c.id, name: c.name, actionTypeId: c.actionTypeId }));
+      .map(({ id, name, actionTypeId, description }) => ({
+        id,
+        name,
+        actionTypeId,
+        ...(description ? { description } : {}),
+      }));
   } catch (err) {
     return [];
   }

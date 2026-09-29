@@ -85,7 +85,15 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId, authMode } = attributes;
-  const { name, config, secrets, isInboundEventsEnabled: requestedInboundEventsEnabled } = action;
+  const {
+    name,
+    description,
+    config,
+    secrets,
+    isInboundEventsEnabled: requestedInboundEventsEnabled,
+  } = action;
+  // An omitted description keeps the stored one; an empty string clears it.
+  const descriptionForSave = description === undefined ? attributes.description : description;
 
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
@@ -222,6 +230,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     'apiKey',
     'uiamApiKey',
     'uiamApiKeyExternal',
+    'description',
   ]);
 
   const result = await tryCatch(
@@ -232,6 +241,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           ...attributesWithoutIdentity,
           actionTypeId,
           name,
+          ...(descriptionForSave ? { description: descriptionForSave } : {}),
           isMissingSecrets: false,
           config: configForSave,
           secrets: validatedActionTypeSecrets,
@@ -316,6 +326,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     actionTypeId: result.attributes.actionTypeId as string,
     isMissingSecrets: result.attributes.isMissingSecrets as boolean,
     name: result.attributes.name as string,
+    ...(result.attributes.description
+      ? { description: result.attributes.description as string }
+      : {}),
     config: result.attributes.config as Record<string, unknown>,
     isPreconfigured: false,
     isSystemAction: false,

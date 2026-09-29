@@ -1178,7 +1178,7 @@ describe('EditConnectorFlyout', () => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
           '/api/actions/connector/123',
           {
-            body: '{"name":"My new name","config":{"testTextField":"My text field"},"secrets":{"secretTextField":"password"}}',
+            body: '{"name":"My new name","description":"","config":{"testTextField":"My text field"},"secrets":{"secretTextField":"password"}}',
           }
         );
       });
@@ -1229,7 +1229,7 @@ describe('EditConnectorFlyout', () => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
           '/api/actions/connector/123',
           {
-            body: '{"name":"My test","config":{"testTextField":"My updated text field"},"secrets":{"secretTextField":"password"}}',
+            body: '{"name":"My test","description":"","config":{"testTextField":"My updated text field"},"secrets":{"secretTextField":"password"}}',
           }
         );
       });
@@ -1267,7 +1267,7 @@ describe('EditConnectorFlyout', () => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
           '/api/actions/connector/123',
           {
-            body: '{"name":"My new name","config":{"testTextField":"My text field"},"secrets":{"secretTextField":"password"}}',
+            body: '{"name":"My new name","description":"","config":{"testTextField":"My text field"},"secrets":{"secretTextField":"password"}}',
           }
         );
       });

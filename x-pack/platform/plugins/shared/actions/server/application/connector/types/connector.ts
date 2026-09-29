@@ -15,6 +15,7 @@ export interface Connector {
   id: ConnectorSchemaType['id'];
   actionTypeId: ConnectorSchemaType['actionTypeId'];
   name: ConnectorSchemaType['name'];
+  description?: ConnectorSchemaType['description'];
   isMissingSecrets?: ConnectorSchemaType['isMissingSecrets'];
   config?: ConnectorSchemaType['config'];
   isPreconfigured: ConnectorSchemaType['isPreconfigured'];

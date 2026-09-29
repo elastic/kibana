@@ -12,8 +12,27 @@ import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary 
 export interface ConnectorActionTypeGroup {
   actionTypeId: string;
   stepTypes: string[];
-  instances: Array<{ id: string; name: string }>;
+  instances: Array<{ id: string; name: string; description?: string }>;
 }
+
+const toInstance = ({
+  id,
+  name,
+  description,
+}: ConnectorSummary): ConnectorActionTypeGroup['instances'][number] => ({
+  id,
+  name,
+  ...(description ? { description } : {}),
+});
+
+const formatInstance = ({
+  id,
+  name,
+  description,
+}: ConnectorActionTypeGroup['instances'][number]): string =>
+  description
+    ? `  - ${id} (${name}): ${description.replace(/\s+/g, ' ').trim()}`
+    : `  - ${id} (${name})`;
 
 export const groupConnectorsByActionType = (
   connectors: ConnectorSummary[]
@@ -22,12 +41,12 @@ export const groupConnectorsByActionType = (
   for (const c of connectors) {
     const existing = map.get(c.actionTypeId);
     if (existing) {
-      existing.instances.push({ id: c.id, name: c.name });
+      existing.instances.push(toInstance(c));
     } else {
       map.set(c.actionTypeId, {
         actionTypeId: c.actionTypeId,
         stepTypes: c.stepTypes,
-        instances: [{ id: c.id, name: c.name }],
+        instances: [toInstance(c)],
       });
     }
   }
@@ -44,7 +63,7 @@ export const formatConnectorsBlock = (connectors: ConnectorSummary[]): string =>
         `### ${g.actionTypeId}`,
         `Step types: ${g.stepTypes.join(', ')}`,
         'Instances:',
-        ...g.instances.map((i) => `  - ${i.id} (${i.name})`),
+        ...g.instances.map(formatInstance),
       ].join('\n')
     )
     .join('\n\n');

@@ -64,6 +64,7 @@ export interface GenerateWorkflowResponse {
 export interface ConnectorSummary {
   id: string;
   name: string;
+  description?: string;
   actionTypeId: string;
   stepTypes: string[];
 }

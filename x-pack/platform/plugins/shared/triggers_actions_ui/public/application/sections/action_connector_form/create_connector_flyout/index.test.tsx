@@ -1157,6 +1157,7 @@ describe('CreateConnectorFlyout', () => {
           {
             body: JSON.stringify({
               name: 'First edit',
+              description: '',
               config: { testTextField: 'My text field' },
               secrets: {},
             }),
