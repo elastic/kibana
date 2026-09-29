@@ -92,15 +92,14 @@ describe('useEntitiesListQuery', () => {
     });
   });
 
-  it('does not re-fetch when only executionContext identity changes', async () => {
-    // Regression guard: executionContext must NOT be part of the react-query queryKey.
-    // If it were, every inline buildExecutionContext(...) at the call site would produce
-    // a fresh object per render → new queryKey → unbounded refetch loop.
-    const makeContext = (): KibanaExecutionContext => ({
+  it('does not re-fetch when only executionContext changes', async () => {
+    // React Query hashes query keys structurally, so the context values must differ
+    // between rerenders for this to fail if executionContext ever enters the queryKey.
+    const makeContext = (id: string): KibanaExecutionContext => ({
       child: {
         type: 'security_solution',
         name: 'entity_analytics:entity_store_management',
-        id: 'entities_list',
+        id,
       },
     });
     const searchParams = {
@@ -115,17 +114,15 @@ describe('useEntitiesListQuery', () => {
     const { rerender } = renderHook(
       ({ executionContext }: { executionContext: KibanaExecutionContext }) =>
         useEntitiesListQuery({ ...searchParams, skip: false, executionContext }),
-      { wrapper: TestWrapper, initialProps: { executionContext: makeContext() } }
+      { wrapper: TestWrapper, initialProps: { executionContext: makeContext('caller_0') } }
     );
 
     await waitFor(() => expect(fetchEntitiesListV2Mock).toHaveBeenCalledTimes(1));
 
-    // Rerender 5 times with a fresh (identity-different) context object each time.
-    for (let i = 0; i < 5; i++) {
-      act(() => rerender({ executionContext: makeContext() }));
+    for (let i = 1; i <= 5; i++) {
+      act(() => rerender({ executionContext: makeContext(`caller_${i}`) }));
     }
 
-    // The fetch count must not grow — context identity changes must not trigger refetches.
     expect(fetchEntitiesListV2Mock).toHaveBeenCalledTimes(1);
   });
 
