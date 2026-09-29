@@ -188,6 +188,7 @@ export const ConversationsPage: React.FC = () => {
       assignSuccess: QUEUE_PAGE_INFO.assignSuccess,
       assignError: QUEUE_PAGE_INFO.assignError,
     },
+    buttonIconSize: 's',
   });
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
