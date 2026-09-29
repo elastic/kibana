@@ -49,7 +49,6 @@ export const datasetSchema = schema.object({
           schema.literal('csv'),
           schema.literal('tsv'),
           schema.literal('ndjson'),
-          schema.literal('orc'),
         ])
       ),
       // Universal

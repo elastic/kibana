@@ -6,12 +6,12 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
+import type { DatasetSettings, DatasetSettingsFile, DatasetFormat } from '../../common/dataset_types';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from './mapping_step/mapping_editor';
 
-export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
+export type DatasetFormatFormValue = '' | DatasetFormat;
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 export type DatasetModeFormValue = '' | 'quoted' | 'escaped' | 'plain';
 export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';

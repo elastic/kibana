@@ -23,7 +23,6 @@ import { FormatSelect } from '../define_step/fields/format_select';
 import { NdjsonCommonSettings } from './ndjson/ndjson_common_settings';
 import { ParquetAdvancedSettings } from './parquet/parquet_advanced_settings';
 import { ParquetCommonSettings } from './parquet/parquet_common_settings';
-import { PartitionDetectionSelect } from '../components/fields/partition_detection_select';
 import { SharedAdvancedSettings } from './all_types/shared_advanced_settings';
 import { SharedCommonSettings } from './all_types/shared_common_settings';
 
@@ -66,18 +65,6 @@ export function CreateDatasetFormatField({
         isInvalid={Boolean(formatFieldState.error)}
         isAutoDetected={Boolean(formatWasAutoDetectedField.value)}
       />
-    </EuiFormRow>
-  );
-}
-
-export function CreateDatasetPartitionDetectionField({
-  control,
-}: {
-  control: Control<CreateDatasetFormValues>;
-}) {
-  return (
-    <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
-      <PartitionDetectionSelect control={control} />
     </EuiFormRow>
   );
 }
@@ -177,14 +164,6 @@ export function CreateDatasetAdditionalSettings({
   );
 }
 
-function OrcCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return <div data-test-subj="createDatasetOrcCommonSettings" />;
-}
-
-function OrcAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return <div data-test-subj="createDatasetOrcAdvancedSettings" />;
-}
-
 function NdjsonAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return null;
 }
@@ -194,7 +173,6 @@ const FORMAT_HAS_COMMON_SETTINGS: Record<Exclude<DatasetFormatFormValue, ''>, bo
   tsv: true,
   ndjson: true,
   parquet: false,
-  orc: false,
 };
 
 const FORMAT_COMMON_SETTING_COMPONENTS: Record<
@@ -205,7 +183,6 @@ const FORMAT_COMMON_SETTING_COMPONENTS: Record<
   tsv: CsvTsvCommonSettings,
   ndjson: NdjsonCommonSettings,
   parquet: ParquetCommonSettings,
-  orc: OrcCommonSettings,
 };
 
 const FORMAT_ADVANCED_SETTING_COMPONENTS: Record<
@@ -216,5 +193,4 @@ const FORMAT_ADVANCED_SETTING_COMPONENTS: Record<
   tsv: CsvTsvAdvancedSettings,
   ndjson: NdjsonAdvancedSettings,
   parquet: ParquetAdvancedSettings,
-  orc: OrcAdvancedSettings,
 };

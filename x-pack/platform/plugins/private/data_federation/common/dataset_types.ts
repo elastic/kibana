@@ -59,8 +59,10 @@ export interface DatasetMappings {
   properties: Record<string, DatasetMappingProperty>;
 }
 
+export type DatasetFormat = 'parquet' | 'csv' | 'tsv' | 'ndjson';
+
 export interface DatasetSettingsFile {
-  format?: 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
+  format?: DatasetFormat;
 
   // Universal
   file_exclusions?: string[];
