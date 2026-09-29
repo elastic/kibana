@@ -43,6 +43,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
     defaultMessage: 'Approved',
   }),
+  expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
+    defaultMessage: 'Expired',
+  }),
   applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',
   }),
