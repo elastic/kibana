@@ -66,25 +66,25 @@ const selectFittingWindows = (text: string, budget: number): ArticleContext | un
   for (let count = DISTRIBUTED_WINDOW_COUNT; count >= 2; count--) {
     const separatorChars = OMISSION_MARKER.length * (count - 1);
     const sourceBudget = budget - separatorChars;
-    if (sourceBudget < MIN_USEFUL_WINDOW_CHARS * count) continue;
+    if (sourceBudget >= MIN_USEFUL_WINDOW_CHARS * count) {
+      const windowChars = Math.floor(sourceBudget / count);
+      const maxStart = Math.max(0, text.length - windowChars);
+      const windows: string[] = [];
 
-    const windowChars = Math.floor(sourceBudget / count);
-    const maxStart = Math.max(0, text.length - windowChars);
-    const windows: string[] = [];
+      for (let index = 0; index < count; index++) {
+        const start = index === count - 1 ? maxStart : Math.round((maxStart * index) / (count - 1));
+        windows.push(text.slice(start, start + windowChars));
+      }
 
-    for (let index = 0; index < count; index++) {
-      const start = index === count - 1 ? maxStart : Math.round((maxStart * index) / (count - 1));
-      windows.push(text.slice(start, start + windowChars));
+      const selectedChars = windows.reduce((sum, window) => sum + window.length, 0);
+      return {
+        text: windows.join(OMISSION_MARKER),
+        mode: 'degraded_context',
+        original_chars: text.length,
+        selected_chars: selectedChars,
+        coverage: selectedChars / text.length,
+      };
     }
-
-    const selectedChars = windows.reduce((sum, window) => sum + window.length, 0);
-    return {
-      text: windows.join(OMISSION_MARKER),
-      mode: 'degraded_context',
-      original_chars: text.length,
-      selected_chars: selectedChars,
-      coverage: selectedChars / text.length,
-    };
   }
   return undefined;
 };

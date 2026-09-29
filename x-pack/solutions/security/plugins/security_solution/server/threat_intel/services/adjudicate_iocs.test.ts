@@ -139,6 +139,34 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).not.toContain('vendor write-up');
   });
 
+  it('prefers an attributed defanged occurrence over an earlier canonical citation', () => {
+    const canonical = 'https://evil.example/payload';
+    const defanged = 'hxxps://evil[.]example/payload';
+    const prepared = prepareIocAdjudication({
+      text:
+        `See ${canonical} for background. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `The attacker downloaded ${defanged} during staging.`,
+      iocs: [candidate(canonical, { defanged })],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
+    expect(prepared.reviewable[0].context).not.toContain('for background');
+  });
+
+  it('reuses cached review context for duplicate candidate values', () => {
+    const url = 'https://evil.example/payload';
+    const prepared = prepareIocAdjudication({
+      text: `The attacker downloaded ${url} twice.`,
+      iocs: [candidate(url), candidate(url)],
+    });
+
+    expect(prepared.reviewable).toHaveLength(2);
+    expect(prepared.reviewable[0].context).toBe(prepared.reviewable[1].context);
+    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
+  });
+
   it('keeps an approved tier_basis within the response schema bound', () => {
     const longBasis = 'b'.repeat(MAX_IOC_TIER_BASIS_LENGTH);
     const prepared = prepareIocAdjudication({

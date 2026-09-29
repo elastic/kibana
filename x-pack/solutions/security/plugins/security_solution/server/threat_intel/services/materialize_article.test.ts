@@ -153,6 +153,15 @@ describe('materializeArticle', () => {
     expect(result.materialization.reason).toBe('Jina Reader returned HTTP 503');
   });
 
+  it('marks HTTP 408 timeouts as retryable fallbacks', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(new Response('timeout', { status: 408 }));
+    const result = await run({}, fetchFn as typeof fetch);
+
+    expect(result.body_text).toBe(INPUT.rss_body_text);
+    expect(result.materialization.status).toBe('retryable_fallback');
+    expect(result.materialization.reason).toBe('Jina Reader returned HTTP 408');
+  });
+
   it('keeps permanent HTTP failures as non-retryable fallbacks', async () => {
     const fetchFn = jest.fn().mockResolvedValue(new Response('gone', { status: 404 }));
     const result = await run({}, fetchFn as typeof fetch);
@@ -173,12 +182,12 @@ describe('materializeArticle', () => {
 
   it('treats NXDOMAIN as a permanent fallback so dead links cannot stall the batch', async () => {
     const fetchFn = jest.fn();
-    const lookupFn = jest
+    const failingLookup = jest
       .fn()
       .mockRejectedValue(
         Object.assign(new Error('getaddrinfo ENOTFOUND gone.example'), { code: 'ENOTFOUND' })
       );
-    const result = await run({}, fetchFn as typeof fetch, { lookupFn });
+    const result = await run({}, fetchFn as typeof fetch, { lookupFn: failingLookup });
 
     expect(result.materialization.status).toBe('fallback');
     expect(result.materialization.reason).toMatch(/ENOTFOUND/);
@@ -187,7 +196,7 @@ describe('materializeArticle', () => {
 
   it('does not treat a hostname containing "network" as a retryable failure', async () => {
     const fetchFn = jest.fn();
-    const lookupFn = jest.fn().mockRejectedValue(
+    const failingLookup = jest.fn().mockRejectedValue(
       Object.assign(new Error('getaddrinfo ENOTFOUND research.network.example'), {
         code: 'ENOTFOUND',
       })
@@ -195,7 +204,7 @@ describe('materializeArticle', () => {
     const result = await run(
       { article_url: 'https://research.network.example/report' },
       fetchFn as typeof fetch,
-      { lookupFn }
+      { lookupFn: failingLookup }
     );
 
     expect(result.materialization.status).toBe('fallback');
@@ -211,10 +220,10 @@ describe('materializeArticle', () => {
         }),
         { status: 200 }
       )
-    ) as typeof fetch;
+    );
     const result = await run(
       { article_url: 'https://user:secret@example.com/threat-report' },
-      fetchFn
+      fetchFn as typeof fetch
     );
 
     expect(fetchFn).toHaveBeenCalled();

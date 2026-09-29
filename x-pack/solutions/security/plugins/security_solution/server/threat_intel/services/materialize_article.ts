@@ -77,7 +77,7 @@ const isRetryableMaterializationError = (error: unknown): boolean => {
   const httpMatch = /Jina Reader returned HTTP (\d+)/i.exec(message);
   if (httpMatch) {
     const code = Number(httpMatch[1]);
-    return code === 429 || code >= 500;
+    return code === 408 || code === 429 || code >= 500;
   }
   // EAI_AGAIN is a transient resolver failure. ENOTFOUND / NXDOMAIN is not.
   return /\bfetch failed\b|ECONNRESET|ECONNREFUSED|EAI_AGAIN|ENETUNREACH|EHOSTUNREACH/i.test(

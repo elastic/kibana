@@ -87,49 +87,74 @@ const sliceContext = (source: string, index: number, valueLength: number): strin
  * Prefer an occurrence whose surrounding prose looks like attacker attribution
  * over a bare first hit (often a citation). When scores tie, keep the later
  * occurrence so mid/late campaign write-ups win over an early docs link.
+ *
+ * Cap scored occurrences per value and cache by value so a pathological article
+ * with millions of repeats cannot multiply work across hundreds of candidates.
  */
 const ATTRIBUTION_CONTEXT_CUE =
   /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
+const MAX_OCCURRENCES_TO_SCORE = 32;
 
-const bestOccurrenceIndex = (source: string, lowerSource: string, lowerValue: string): number => {
-  let bestIndex = -1;
-  let bestScore = Number.NEGATIVE_INFINITY;
+interface ScoredOccurrence {
+  source: string;
+  index: number;
+  score: number;
+}
+
+const scoreOccurrences = (
+  source: string,
+  lowerSource: string,
+  lowerValue: string
+): ScoredOccurrence[] => {
+  const scored: ScoredOccurrence[] = [];
   let from = 0;
-  while (from < lowerSource.length) {
+  while (from < lowerSource.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
     const index = lowerSource.indexOf(lowerValue, from);
     if (index < 0) break;
     const window = source.slice(
       Math.max(0, index - CONTEXT_CHARS),
       Math.min(source.length, index + lowerValue.length + CONTEXT_CHARS)
     );
-    const score = (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index;
-    if (score >= bestScore) {
-      bestScore = score;
-      bestIndex = index;
-    }
+    scored.push({
+      source,
+      index,
+      score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+    });
     from = index + Math.max(lowerValue.length, 1);
   }
-  return bestIndex;
+  return scored;
 };
 
 /**
- * Prefer the original article span. When the IOC was published defanged
- * (`hxxps://evil[.]example/...`), the canonical value only appears in the
- * refanged copy that extraction already uses — take context from there.
+ * Pick review context from the best-scoring occurrence across both the original
+ * article and its refanged copy. Canonical citations and later defanged attacker
+ * mentions must compete in one pass so we do not lock onto the first spelling.
  */
 const contextFor = (
   originalText: string,
   lowerOriginal: string,
   refangedText: string,
   lowerRefanged: string,
-  value: string
+  value: string,
+  cache: Map<string, string>
 ): string => {
   const lowerValue = value.toLowerCase();
-  const originalIndex = bestOccurrenceIndex(originalText, lowerOriginal, lowerValue);
-  if (originalIndex >= 0) return sliceContext(originalText, originalIndex, value.length);
-  const refangedIndex = bestOccurrenceIndex(refangedText, lowerRefanged, lowerValue);
-  if (refangedIndex >= 0) return sliceContext(refangedText, refangedIndex, value.length);
-  return '';
+  const cached = cache.get(lowerValue);
+  if (cached !== undefined) return cached;
+
+  const scored = [
+    ...scoreOccurrences(originalText, lowerOriginal, lowerValue),
+    ...scoreOccurrences(refangedText, lowerRefanged, lowerValue),
+  ];
+  const best = scored.reduce<ScoredOccurrence | undefined>((winner, candidate) => {
+    if (!winner || candidate.score > winner.score) return candidate;
+    if (candidate.score === winner.score && candidate.index > winner.index) return candidate;
+    return winner;
+  }, undefined);
+
+  const context = best === undefined ? '' : sliceContext(best.source, best.index, value.length);
+  cache.set(lowerValue, context);
+  return context;
 };
 
 const hostnameFor = (value: string): string | undefined => {
@@ -170,6 +195,7 @@ export const prepareIocAdjudication = (
   const lowerOriginal = params.text.toLowerCase();
   const refangedText = refang(params.text);
   const lowerRefanged = refangedText.toLowerCase();
+  const contextCache = new Map<string, string>();
   let deterministicReferences = 0;
 
   const candidates = params.iocs
@@ -200,7 +226,8 @@ export const prepareIocAdjudication = (
       lowerOriginal,
       refangedText,
       lowerRefanged,
-      candidate.ioc.value
+      candidate.ioc.value,
+      contextCache
     ),
   }));
   const overflow = candidates.slice(MAX_SEMANTIC_CANDIDATES);
