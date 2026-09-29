@@ -221,15 +221,19 @@ export function validateMonitor(
             payload: monitorFields,
           };
         }
-        // Keytab path is a file on the agent host — not provisionable on managed public locations.
-        if (hasPublicServiceLocation(monitorFields.locations)) {
-          return {
-            valid: false,
-            reason: INVALID_AUTH_CONFIGURATION_ERROR,
-            details: INVALID_KERBEROS_KEYTAB_PUBLIC_LOCATION_DETAILS,
-            payload: monitorFields,
-          };
-        }
+      }
+
+      // Host-file paths (config_path / keytab) are not provisionable on managed public locations.
+      const usesHostFile =
+        hasPath ||
+        (kerberos.auth_type === KerberosAuthType.KEYTAB && Boolean(kerberos.keytab?.trim()));
+      if (usesHostFile && hasPublicServiceLocation(monitorFields.locations)) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS,
+          payload: monitorFields,
+        };
       }
     }
 
@@ -688,11 +692,11 @@ const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
   }
 );
 
-const INVALID_KERBEROS_KEYTAB_PUBLIC_LOCATION_DETAILS = i18n.translate(
-  'xpack.synthetics.server.monitors.invalidKerberosKeytabPublicLocationDetails',
+const INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosHostFilePublicLocationDetails',
   {
     defaultMessage:
-      'Kerberos keytab authentication requires a keytab file on the agent host and is only supported on private locations.',
+      'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
   }
 );
 

@@ -468,6 +468,13 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private',
+            isServiceManaged: false,
+          },
+        ],
         [ConfigKey.KERBEROS]: {
           enabled: true,
           auth_type: 'password',
@@ -608,7 +615,34 @@ describe('validateMonitor', () => {
         valid: false,
         reason: 'Monitor authentication configuration is invalid',
         details:
-          'Kerberos keytab authentication requires a keytab file on the agent host and is only supported on private locations.',
+          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+      });
+    });
+
+    it('invalidates Kerberos config_path on a public location', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
       });
     });
 

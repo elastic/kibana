@@ -127,6 +127,25 @@ describe('mergeSourceMonitor', () => {
     });
   });
 
+  it('clears Kerberos/NTLM when the patch sets the block to null', () => {
+    const previous = {
+      ...testMonitor,
+      [ConfigKey.NTLM]: {
+        enabled: true,
+        username: 'svc-monitor',
+        password: 'old-password',
+        domain: 'EXAMPLE',
+        workstation: 'MONITOR',
+      },
+    } as EncryptedSyntheticsMonitor;
+
+    const result = mergeSourceMonitor(previous, {
+      [ConfigKey.NTLM]: null,
+    } as unknown as EncryptedSyntheticsMonitor) as MonitorFields;
+
+    expect(result[ConfigKey.NTLM]).toBeNull();
+  });
+
   it('should not omit null or undefined values', () => {
     const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
 

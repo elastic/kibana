@@ -85,4 +85,25 @@ describe('mergeHttpAuthDefaults', () => {
       keytab: '',
     });
   });
+
+  it('resets disabled Kerberos/NTLM blocks to defaults (clears secrets)', () => {
+    const merged = mergeHttpAuthDefaults({
+      [ConfigKey.KERBEROS]: {
+        enabled: false,
+        auth_type: KerberosAuthType.PASSWORD,
+        username: 'svc',
+        password: 'stale-secret',
+        config_path: '/etc/krb5.conf',
+      },
+      [ConfigKey.NTLM]: {
+        enabled: false,
+        username: 'ntlm-user',
+        password: 'ntlm-pass',
+        domain: 'EXAMPLE',
+      },
+    });
+
+    expect(merged[ConfigKey.KERBEROS]).toEqual(DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS]);
+    expect(merged[ConfigKey.NTLM]).toEqual(DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM]);
+  });
 });
