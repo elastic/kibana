@@ -414,8 +414,31 @@ export const resolveHuntScope = async ({
     logger?.warn(`Hunt dataset discovery failed; scope stays blocked: ${message}`);
     return blocked('blocked:discovery_failed');
   }
+  // Nothing matched (or nothing to match). With searchable IOCs the hunt can still run
+  // Tier 1 across every log source; without them there is nothing to search for broadly. The
+  // coordinator hands over only IOCs Tier 1 can query, so a non-empty list here
+  // means at least one clause will be built.
+  const blockedOrBroad = async (resolution: BlockedResolution): Promise<HuntScope> => {
+    if (!report.iocs || report.iocs.length === 0) return blocked(resolution);
+    return finish(
+      await buildDiscoveredScope({
+        esClient,
+        spaceId,
+        matches: datasets,
+        blocked: staticScope,
+        resolution: 'discovered:broad',
+      })
+    );
+  };
+
   if (datasets.length === 0) {
-    return staticPresent ? finish(staticScope) : blocked('blocked:no_datasets');
+    if (staticPresent) return finish(staticScope);
+    // Discovery lists data streams only, but the broad target is the whole `logs-*`
+    // space: a plain index or alias under it (an imported archive) is still a place
+    // an IOC can be searched. Only when nothing at all answers to the discovery
+    // pattern is there truly nothing to hunt.
+    const [, anyLogSource] = await checkPattern(esClient, HUNT_DISCOVERY_PATTERN);
+    return anyLogSource ? blockedOrBroad('blocked:no_datasets') : blocked('blocked:no_datasets');
   }
 
   const deterministic = matchDatasetsDeterministic({
@@ -435,23 +458,6 @@ export const resolveHuntScope = async ({
     );
   }
   if (staticPresent) return finish(staticScope);
-
-  // Nothing matched. With IOCs the hunt can still run Tier 1 across every
-  // discovered dataset; without them there is nothing to search for broadly. The
-  // coordinator hands over only IOCs Tier 1 can query, so a non-empty list here
-  // means at least one clause will be built.
-  const blockedOrBroad = async (resolution: BlockedResolution): Promise<HuntScope> => {
-    if (!report.iocs || report.iocs.length === 0) return blocked(resolution);
-    return finish(
-      await buildDiscoveredScope({
-        esClient,
-        spaceId,
-        matches: datasets,
-        blocked: staticScope,
-        resolution: 'discovered:broad',
-      })
-    );
-  };
 
   if (!model) return blockedOrBroad('blocked:model_unavailable');
   const modelMatch = await matchDatasetsWithModel({ model, datasets, report, logger });

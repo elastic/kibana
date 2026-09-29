@@ -623,6 +623,38 @@ describe('resolveHuntScope', () => {
       expect(result.index_patterns).toEqual([]);
     });
 
+    it('goes broad when discovery finds no data streams but plain logs-* indices exist and the report has IOCs', async () => {
+      // An estate with only an imported archive index: nothing parses as a dataset, yet
+      // the broad target covers that index and the IOC can be searched there.
+      const esClient = createMockEsClient(new Set([alertsPattern, 'logs-*']));
+      mockDiscover.mockResolvedValue([]);
+
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { ...report, iocs: [{ type: 'ip', value: '192.0.2.30' }] },
+        logger,
+      });
+
+      expect(result.resolution).toBe('discovered:broad');
+      expect(result.required).toEqual(broadSearchPatterns());
+      expect(mockDeterministic).not.toHaveBeenCalled();
+    });
+
+    it('stays blocked:no_datasets with IOCs when nothing at all answers to logs-*', async () => {
+      const esClient = createMockEsClient(new Set([alertsPattern]));
+      mockDiscover.mockResolvedValue([]);
+
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { ...report, iocs: [{ type: 'ip', value: '192.0.2.30' }] },
+        logger,
+      });
+
+      expect(result.resolution).toBe('blocked:no_datasets');
+    });
+
     it('is blocked:no_datasets when discovery returns no datasets', async () => {
       const esClient = createMockEsClient(new Set([alertsPattern]));
       mockDiscover.mockResolvedValue([]);
