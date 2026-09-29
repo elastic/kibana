@@ -18,12 +18,19 @@ import {
   type DiscoverSessionApiClassicTab,
   type DiscoverSessionApiEsqlTab,
 } from '@kbn/as-code-discover-schema';
+import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
 import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { fromStoredTab } from '../../../common/embeddable/transform_utils';
+import { fromStoredSearchEmbeddableByValue } from '../../../common/embeddable/transform_utils';
+import { toByValuePanelState } from '../../../common/embeddable/transform_utils.fixtures';
+import {
+  fromStoredSessionSearchAndTable,
+  fromStoredSessionSettings,
+} from '../../../common/session/session_tab_mapping';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -32,38 +39,40 @@ import {
 } from './transform_discover_session.fixtures';
 
 describe('discover session API transforms', () => {
+  const classicApiTab: DiscoverSessionApiClassicTab = {
+    id: 'tab-classic',
+    label: 'Classic',
+    type: DiscoverTabType.Default,
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'logs-data-view',
+    },
+    query: { language: 'kql', expression: 'service.name : "api"' },
+    filters: [],
+    sort: [{ name: '@timestamp', direction: 'desc' }],
+    view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+    hide_chart: false,
+    hide_table: false,
+    hide_aggregated_preview: true,
+    breakdown_field: 'host.name',
+    chart_interval: 'h',
+    time_range: { from: 'now-15m', to: 'now' },
+    refresh_interval: { pause: true, value: 0 },
+    vis_context: {
+      suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: {
+        visualizationType: 'lnsXY',
+        state: { foo: 'bar' },
+      },
+    },
+  };
+
   const apiData: DiscoverSessionApiData = {
     title: 'Session',
     description: 'Session description',
     tags: ['tag-1', 'tag-2'],
     tabs: [
-      {
-        id: 'tab-classic',
-        label: 'Classic',
-        type: DiscoverTabType.Default,
-        data_source: {
-          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-          ref_id: 'logs-data-view',
-        },
-        query: { language: 'kql', expression: 'service.name : "api"' },
-        filters: [],
-        sort: [{ name: '@timestamp', direction: 'desc' }],
-        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-        hide_chart: false,
-        hide_table: false,
-        hide_aggregated_preview: true,
-        breakdown_field: 'host.name',
-        chart_interval: 'h',
-        time_range: { from: 'now-15m', to: 'now' },
-        refresh_interval: { pause: true, value: 0 },
-        vis_context: {
-          suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
-          attributes: {
-            visualizationType: 'lnsXY',
-            state: { foo: 'bar' },
-          },
-        },
-      },
+      classicApiTab,
       {
         id: 'tab-esql',
         label: 'ES|QL',
@@ -109,6 +118,41 @@ describe('discover session API transforms', () => {
       single_select: true,
     },
   };
+
+  it('converts shared tab fields without handling type settings, vis_context, or controls', () => {
+    const [classicTab, metricsTab] = discoverSessionAttributes.tabs;
+    const tab = {
+      ...classicTab,
+      attributes: {
+        ...classicTab.attributes,
+        tabTypeState: metricsTab.attributes.tabTypeState,
+        visContext: metricsTab.attributes.visContext,
+        controlGroupJson: '{', // Invalid JSON: this mapper must leave control parsing to the caller.
+      },
+    };
+    const originalTab = cloneDeep(tab); // Keep a separate copy to catch changes to nested fields.
+    const {
+      type: _type,
+      vis_context: _visContext,
+      control_panels: _controlPanels,
+      ...expectedFields
+    } = discoverSessionApiData.tabs[0];
+
+    const searchSource = parseSearchSourceJSON(
+      tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+    const searchAndTableFields = fromStoredSessionSearchAndTable(tab.attributes, searchSource);
+    const sessionFields = fromStoredSessionSettings(tab.attributes);
+    expect(searchAndTableFields).not.toHaveProperty('hide_chart');
+    expect(sessionFields).not.toHaveProperty('data_source');
+    expect({
+      id: tab.id,
+      label: tab.label,
+      ...searchAndTableFields,
+      ...sessionFields,
+    }).toStrictEqual(expectedFields);
+    expect(tab).toStrictEqual(originalTab);
+  });
 
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
@@ -220,16 +264,17 @@ describe('discover session API transforms', () => {
           query: { match_phrase: { 'host.name': 'web-01' } },
         },
       ];
+      const storedTabAttributes = {
+        ...classicTab.attributes,
+        kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSource) },
+      };
 
       const { sessionState } = transformDiscoverSessionOut({
         ...discoverSessionAttributes,
         tabs: [
           {
             ...classicTab,
-            attributes: {
-              ...classicTab.attributes,
-              kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSource) },
-            },
+            attributes: storedTabAttributes,
           },
         ],
       });
@@ -238,6 +283,13 @@ describe('discover session API transforms', () => {
 
       expect(selfFilter).not.toHaveProperty('data_view_id');
       expect(foreignFilter).toHaveProperty('data_view_id', 'foreign-data-view-id');
+      // By-value panels do not apply the session policies, so they keep the inline ID.
+      const [panelTab] = fromStoredSearchEmbeddableByValue(
+        toByValuePanelState(storedTabAttributes)
+      ).tabs;
+      expect(panelTab).toMatchObject({
+        filters: [{ data_view_id: inlineDataViewId }, { data_view_id: 'foreign-data-view-id' }],
+      });
 
       const { attributes, references } = transformDiscoverSessionIn(sessionState);
       const roundTrippedSearchSource = injectReferences(
@@ -297,6 +349,24 @@ describe('discover session API transforms', () => {
       });
     });
 
+    it('preserves a refresh_interval with a zero value', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              refreshInterval: { pause: false, value: 0 },
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0].refresh_interval).toEqual({ pause: false, value: 0 });
+    });
+
     it('extracts tag IDs from saved object references', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
         { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
@@ -306,21 +376,26 @@ describe('discover session API transforms', () => {
       expect(transformed.tags).toEqual(['tag-1']);
     });
 
-    it('maps esqlApproximation to esql_approximation for ES|QL tabs', () => {
-      const { sessionState } = transformDiscoverSessionOut({
-        ...discoverSessionAttributes,
-        tabs: [
-          {
-            ...discoverSessionAttributes.tabs[1],
-            attributes: {
-              ...discoverSessionAttributes.tabs[1].attributes,
-              esqlApproximation: true,
+    it.each([true, false])(
+      'maps esqlApproximation %s to esql_approximation for ES|QL tabs',
+      (esqlApproximation) => {
+        const { sessionState } = transformDiscoverSessionOut({
+          ...discoverSessionAttributes,
+          tabs: [
+            {
+              ...discoverSessionAttributes.tabs[1],
+              attributes: {
+                ...discoverSessionAttributes.tabs[1].attributes,
+                esqlApproximation,
+              },
             },
-          },
-        ],
-      });
-      expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(true);
-    });
+          ],
+        });
+        expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(
+          esqlApproximation
+        );
+      }
+    );
 
     it('omits esql_approximation when esqlApproximation is absent from an ES|QL tab', () => {
       const { sessionState } = transformDiscoverSessionOut({
@@ -513,33 +588,38 @@ describe('discover session API transforms', () => {
       expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
     });
 
-    it('persists refresh_interval independently when time_range is absent', () => {
-      const [, esqlTab] = apiData.tabs;
-      const { attributes } = transformDiscoverSessionIn({
-        ...apiData,
-        tabs: [
-          {
-            ...esqlTab,
-            refresh_interval: { pause: false, value: 5000 },
-          },
-        ],
-      });
+    it.each([5000, 0])(
+      'persists refresh_interval with value %s independently when time_range is absent',
+      (value) => {
+        const [, esqlTab] = apiData.tabs;
+        const { attributes } = transformDiscoverSessionIn({
+          ...apiData,
+          tabs: [
+            {
+              ...esqlTab,
+              refresh_interval: { pause: false, value },
+            },
+          ],
+        });
 
-      expect(attributes.tabs[0].attributes.timeRestore).toBe(false);
-      expect(attributes.tabs[0].attributes.refreshInterval).toEqual({
-        pause: false,
-        value: 5000,
-      });
-    });
+        expect(attributes.tabs[0].attributes.timeRestore).toBe(false);
+        expect(attributes.tabs[0].attributes.refreshInterval).toEqual({ pause: false, value });
+      }
+    );
 
-    it('maps esql_approximation to esqlApproximation for ES|QL tabs', () => {
-      const [, esqlTab] = apiData.tabs;
-      const { attributes } = transformDiscoverSessionIn({
-        ...apiData,
-        tabs: [{ ...esqlTab, esql_approximation: true } as DiscoverSessionApiEsqlTab],
-      });
-      expect(attributes.tabs[0].attributes.esqlApproximation).toBe(true);
-    });
+    it.each([true, false])(
+      'maps esql_approximation %s to esqlApproximation for ES|QL tabs',
+      (esqlApproximation) => {
+        const [, esqlTab] = apiData.tabs;
+        const { attributes } = transformDiscoverSessionIn({
+          ...apiData,
+          tabs: [
+            { ...esqlTab, esql_approximation: esqlApproximation } as DiscoverSessionApiEsqlTab,
+          ],
+        });
+        expect(attributes.tabs[0].attributes.esqlApproximation).toBe(esqlApproximation);
+      }
+    );
 
     it('omits esqlApproximation when esql_approximation is absent from an ES|QL tab', () => {
       const [, esqlTab] = apiData.tabs;
@@ -566,7 +646,30 @@ describe('discover session API transforms', () => {
     });
 
     it('adds tab-prefixed references for data view reference tabs', () => {
-      const { attributes, references } = transformDiscoverSessionIn(apiData);
+      const [, esqlTab] = apiData.tabs;
+      const input: DiscoverSessionApiData = {
+        ...apiData,
+        tabs: [
+          {
+            ...classicApiTab,
+            filters: [
+              {
+                type: ASCODE_FILTER_TYPE.CONDITION,
+                condition: {
+                  field: 'log.level',
+                  operator: ASCODE_FILTER_OPERATOR.IS,
+                  value: 'error',
+                },
+                data_view_id: 'foreign-data-view',
+              },
+            ],
+          },
+          esqlTab,
+        ],
+      };
+      const originalInput = cloneDeep(input);
+
+      const { attributes, references } = transformDiscoverSessionIn(input);
 
       expect(attributes.tabs[0].attributes.visContext).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
@@ -589,6 +692,31 @@ describe('discover session API transforms', () => {
         type: 'index-pattern',
         id: 'logs-data-view',
       });
+      expect(references).toContainEqual({
+        name: 'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+        type: 'index-pattern',
+        id: 'foreign-data-view',
+      });
+
+      const searchSource = parseSearchSourceJSON(
+        attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      expect(searchSource).toHaveProperty(
+        'indexRefName',
+        'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.index'
+      );
+      expect(searchSource.index).toBeUndefined();
+      expect(searchSource.filter).toMatchObject([
+        {
+          meta: {
+            indexRefName:
+              'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          },
+          query: { match_phrase: { 'log.level': 'error' } },
+        },
+      ]);
+      expect(searchSource.filter?.[0].meta.index).toBeUndefined();
+      expect(input).toStrictEqual(originalInput);
     });
   });
 
@@ -803,9 +931,13 @@ describe('discover session API transforms', () => {
         sessionState
       );
 
-      // Reading the session changes neither the source document nor the shared panel conversion.
+      // Reading the session changes neither the source document nor the by-value panel conversion,
+      // which still drops pinned filters.
       expect(storedTab.attributes.kibanaSavedObjectMeta.searchSourceJSON).toBe(searchSourceJSON);
-      expect(fromStoredTab(storedTab.attributes)).toMatchObject({
+      const [panelTab] = fromStoredSearchEmbeddableByValue(
+        toByValuePanelState(storedTab.attributes)
+      ).tabs;
+      expect(panelTab).toMatchObject({
         filters: [expectedApiFilters[1]],
       });
     });
