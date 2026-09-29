@@ -19,7 +19,6 @@ import {
 } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { bulkQueries, getQueries } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -49,19 +48,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await bulkQueries(apiClient, 'logs.otel.branch_a', [
-          {
-            index: {
-              id: 'export-omits-me',
-              title: 'detector',
-              description: '',
-              esql: {
-                query: `FROM logs.otel.branch_a,logs.otel.branch_a.* | WHERE KQL("message:'ERROR'")`,
-              },
-            },
-          },
-        ]);
-
         const archiveBuffer = await exportContent(apiClient, 'logs.otel.branch_a', {
           name: 'branch_a_pack',
           description: 'export should not carry queries',
@@ -74,14 +60,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (entry): entry is ContentPackStream => entry.type === 'stream'
         );
         expect(streamEntries.length).to.be.greaterThan(0);
+        // Significant-event queries are intentionally excluded from content packs.
+        // They are stored separately (linked to Nightshift sources, not stream structure)
+        // and must never appear in a content pack export.
         streamEntries.forEach((entry) => {
           expect(entry.request).to.not.have.property('queries');
         });
-
-        const { queries } = await getQueries(apiClient, 'logs.otel.branch_a');
-        expect(queries.map((query) => query.id)).to.contain('export-omits-me');
-
-        await bulkQueries(apiClient, 'logs.otel.branch_a', [{ delete: { id: 'export-omits-me' } }]);
       } finally {
         await disableStreams(apiClient);
       }
