@@ -110,6 +110,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       }
 
       const snapshot = collector.finalize();
+      this.publishAlertStatusChanges(rawInput, collector, pipelineState);
       this.publishExecutionSucceeded(rawInput, collector, pipelineState, snapshot);
       return {
         completed: true,
@@ -144,6 +145,49 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     );
 
     return chain(input);
+  }
+
+  /**
+   * Publishes one `alert.status.changed` bus event per episode transition collected
+   * by {@link DirectorStep}. Called only on the success path, before
+   * `publishExecutionSucceeded`. Returns without doing anything when the rule
+   * resolved without episode tracking (signal rules, or runs where the director
+   * step was skipped due to an empty alert batch).
+   */
+  private publishAlertStatusChanges(
+    rawInput: RuleExecutionPipelineInput,
+    collector: MetricCollector,
+    finalState: RulePipelineState
+  ): void {
+    const { rule, logger, alertStatusTransitions } = finalState;
+
+    if (!rule || !alertStatusTransitions || alertStatusTransitions.length === 0) {
+      return;
+    }
+
+    const rulePayload = {
+      ruleId: rawInput.ruleId,
+      name: rule.metadata.name,
+      spaceId: rawInput.spaceId,
+      tags: rule.metadata.tags ?? [],
+    };
+
+    for (const transition of alertStatusTransitions) {
+      try {
+        this.eventPublisher.publishAlertStatusChanged({
+          executionId: collector.executionId,
+          scheduledAt: rawInput.scheduledAt,
+          rule: rulePayload,
+          transition,
+        });
+      } catch (error) {
+        logger.warn({
+          message: 'Failed to publish alert status changed event',
+          error,
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
+        });
+      }
+    }
   }
 
   private publishExecutionSucceeded(

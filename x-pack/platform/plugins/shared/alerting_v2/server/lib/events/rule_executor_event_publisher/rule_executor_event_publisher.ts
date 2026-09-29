@@ -17,10 +17,13 @@ import type { EventBus } from '../event_bus';
 import {
   RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
   RULE_EXECUTION_FAILED_EVENT_TYPE,
+  ALERT_STATUS_CHANGED_BUS_EVENT_TYPE,
   type RuleExecutionSucceededEvent,
   type RuleExecutionSucceededPayload,
   type RuleExecutionFailedEvent,
   type RuleExecutionFailedPayload,
+  type AlertStatusChangedBusEvent,
+  type AlertStatusChangedBusPayload,
 } from './events';
 
 /**
@@ -29,10 +32,14 @@ import {
  * Called by {@link RuleExecutionPipeline} at the end of a run to emit a
  * `rule.execution.succeeded` event on success or a `rule.execution.failed`
  * event when the run throws.
+ *
+ * `publishAlertStatusChanged` is called once per episode status transition on
+ * a successful run. Halted and failed runs do NOT call it.
  */
 export interface RuleExecutorEventPublisherContract {
   publishExecutionSucceeded(payload: RuleExecutionSucceededPayload): void;
   publishExecutionFailed(payload: RuleExecutionFailedPayload): void;
+  publishAlertStatusChanged(payload: AlertStatusChangedBusPayload): void;
 }
 
 /**
@@ -64,6 +71,15 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
   public publishExecutionFailed(payload: RuleExecutionFailedPayload): void {
     const event: RuleExecutionFailedEvent = {
       type: RULE_EXECUTION_FAILED_EVENT_TYPE,
+      payload,
+    };
+
+    this.eventBus.publish(event, { request: this.request });
+  }
+
+  public publishAlertStatusChanged(payload: AlertStatusChangedBusPayload): void {
+    const event: AlertStatusChangedBusEvent = {
+      type: ALERT_STATUS_CHANGED_BUS_EVENT_TYPE,
       payload,
     };
 

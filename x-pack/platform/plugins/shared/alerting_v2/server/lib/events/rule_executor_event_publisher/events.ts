@@ -6,6 +6,7 @@
  */
 
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
+import type { AlertStatusTransition } from '../../director/director';
 
 /** Discriminator value for {@link RuleExecutionSucceededEvent}. */
 export const RULE_EXECUTION_SUCCEEDED_EVENT_TYPE = 'rule.execution.succeeded' as const;
@@ -68,10 +69,48 @@ export interface RuleExecutionFailedEvent {
   readonly payload: RuleExecutionFailedPayload;
 }
 
+/** Discriminator value for {@link AlertStatusChangedBusEvent}. */
+export const ALERT_STATUS_CHANGED_BUS_EVENT_TYPE = 'alert.status.changed' as const;
+
+/**
+ * Payload of one {@link AlertStatusChangedBusEvent}.
+ *
+ * Carries the minimal identity needed for the workflow trigger binding to
+ * project into {@link AlertStatusChangedPayload}: rule identity, the
+ * transition details from the director, and the execution correlation keys.
+ */
+export interface AlertStatusChangedBusPayload {
+  readonly executionId: string;
+  readonly scheduledAt: string;
+  readonly rule: {
+    readonly ruleId: string;
+    readonly name: string;
+    readonly spaceId: string;
+    readonly tags: readonly string[];
+  };
+  readonly transition: AlertStatusTransition;
+}
+
+/**
+ * One domain event per episode status transition produced by a successful
+ * rule execution.
+ *
+ * Published once per transition in {@link AlertStatusChangedBusPayload.transition}.
+ * Halted and failed runs do NOT publish this event.
+ * User-locked episodes are excluded (their status is held by a user action).
+ */
+export interface AlertStatusChangedBusEvent {
+  readonly type: typeof ALERT_STATUS_CHANGED_BUS_EVENT_TYPE;
+  readonly payload: AlertStatusChangedBusPayload;
+}
+
 /**
  * Discriminated union of every domain event published by the rule executor.
  *
  * Adding a new executor event (e.g. a halted outcome) is a matter of defining
  * it above and adding it here.
  */
-export type RuleExecutorEvent = RuleExecutionSucceededEvent | RuleExecutionFailedEvent;
+export type RuleExecutorEvent =
+  | RuleExecutionSucceededEvent
+  | RuleExecutionFailedEvent
+  | AlertStatusChangedBusEvent;

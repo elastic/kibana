@@ -14,6 +14,7 @@ import type { ExecutionContext } from '../execution_context';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { RuleExecutionCounter } from './metrics/counters';
 import type { ActiveAlertGroupHash } from './queries';
+import type { AlertStatusTransition } from '../director/director';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -37,6 +38,8 @@ export interface RulePipelineState {
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
+  /** Status transitions collected by {@link DirectorStep}. One entry per episode that changed status this run. */
+  readonly alertStatusTransitions?: ReadonlyArray<AlertStatusTransition>;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
