@@ -660,7 +660,7 @@ describe('floor_alert_triage — post_comment_classification_results', () => {
 });
 
 describe('floor_alert_triage — close_investigation_no_fp', () => {
-  it('nests an analyzed-batch guard rather than combining conditions with `and`', () => {
+  it('nests an analyzed-batch guard so each condition stays a single comparison', () => {
     const outer = stepByName('close_investigation_no_fp');
     const inner = stepByName('close_investigation_no_fp_when_analyzed');
 

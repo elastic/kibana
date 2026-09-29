@@ -268,8 +268,9 @@ steps:
   # sub-workflow returned 0 verdicts for a non-empty batch — a missing Model
   # Management connector, or the sub-workflow skipped.
   # Counts are materialised first: `${{ event.alerts | size > 0 }}` is invalid Liquid
-  # (the engine parses `size > 0` as a filter name). The if-condition engine also
-  # rejects `and`, so the two comparisons stay nested.
+  # (the engine parses `size > 0` as a filter name), so a condition takes no filters.
+  # `and`/`or` do work, but Liquid gives them no grouping or precedence, so the two
+  # comparisons stay nested rather than combined.
   - name: compute_classification_guard_counts
     type: data.set
     with:
@@ -520,9 +521,9 @@ steps:
           proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
 
       # One value per outcome so every branch below is a single comparison (if-conditions
-      # take neither filters nor `and`). `decision` and `status` are separate axes (D48):
-      # an approved close ends `succeeded`, a dismissal ends with `decision: dismissed`, and
-      # an unanswered deadline ends `expired` with no decision.
+      # take no filters, and `and`/`or` have no precedence). `decision` and `status` are
+      # separate axes (D48): an approved close ends `succeeded`, a dismissal ends with
+      # `decision: dismissed`, and an unanswered deadline ends `expired` with no decision.
       - name: resolve_proposal_outcome
         type: data.set
         with:
