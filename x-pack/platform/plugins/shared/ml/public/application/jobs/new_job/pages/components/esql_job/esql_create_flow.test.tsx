@@ -278,4 +278,74 @@ describe('EsqlCreateFlow', () => {
       laterCalls.forEach((call) => expect(call).not.toHaveBeenCalled());
     }
   );
+
+  it('maps by/over/partition fields through to the created job detector (g2sz.10)', async () => {
+    renderCreateFlow({
+      queryState: {
+        columns: [
+          { name: 'bucket', type: 'date', userDefined: false },
+          { name: 'avg_bytes', type: 'double', userDefined: false },
+          { name: 'host', type: 'keyword', userDefined: false },
+          { name: 'region', type: 'keyword', userDefined: false },
+          { name: 'service', type: 'keyword', userDefined: false },
+        ],
+        detectors: [
+          {
+            function: 'mean',
+            field: 'avg_bytes',
+            byField: 'host',
+            overField: 'region',
+            partitionField: 'service',
+          },
+        ],
+      },
+    });
+
+    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+    await waitFor(() => expect(createButton).toBeEnabled());
+    fireEvent.click(createButton);
+
+    await waitFor(() => expect(mockAddJob).toHaveBeenCalledTimes(1));
+    expect(mockAddJob).toHaveBeenCalledWith({
+      jobId: 'esql-job-1',
+      job: expect.objectContaining({
+        analysis_config: expect.objectContaining({
+          detectors: [
+            expect.objectContaining({
+              function: 'mean',
+              field_name: 'avg_bytes',
+              by_field_name: 'host',
+              over_field_name: 'region',
+              partition_field_name: 'service',
+            }),
+          ],
+        }),
+      }),
+    });
+  });
+
+  it('disables Create for a rare detector with no by field (carry-over from g2sz.6)', async () => {
+    renderCreateFlow({
+      queryState: {
+        detectors: [{ function: 'rare' }],
+      },
+    });
+
+    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+
+    expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
+  });
+
+  it('enables Create for a rare detector once a by field is set', async () => {
+    renderCreateFlow({
+      queryState: {
+        detectors: [{ function: 'rare', byField: 'host' }],
+      },
+    });
+
+    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+
+    await waitFor(() => expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeEnabled());
+  });
 });
