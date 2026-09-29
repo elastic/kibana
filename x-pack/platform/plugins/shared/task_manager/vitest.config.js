@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/shared/task_manager',
-  ],
+  roots: ['x-pack/platform/plugins/shared/task_manager'],
 });

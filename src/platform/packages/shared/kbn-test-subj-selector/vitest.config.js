@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/platform/packages/shared/kbn-test-subj-selector',
-  ],
+  roots: ['src/platform/packages/shared/kbn-test-subj-selector'],
 });

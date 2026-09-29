@@ -9,10 +9,12 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/shared/index_management',
-  ],
+  roots: ['x-pack/platform/plugins/shared/index_management'],
   aliases: [
-    { find: /^@kbn\/code-editor$/, replacement: 'x-pack/platform/plugins/shared/index_management/__mocks__/@kbn/code-editor/index.tsx' },
+    {
+      find: /^@kbn\/code-editor$/,
+      replacement:
+        'x-pack/platform/plugins/shared/index_management/__mocks__/@kbn/code-editor/index.tsx',
+    },
   ],
 });

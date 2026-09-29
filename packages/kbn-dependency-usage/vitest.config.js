@@ -8,11 +8,9 @@
  */
 
 /* eslint-disable no-restricted-syntax */
-import { createKbnVitestConfig } from '@kbn/test/vitest/preset.js';
+import { createKbnVitestConfig } from '@kbn/test/vitest/preset';
 
 export default createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'packages/kbn-dependency-usage',
-  ],
+  roots: ['packages/kbn-dependency-usage'],
 });

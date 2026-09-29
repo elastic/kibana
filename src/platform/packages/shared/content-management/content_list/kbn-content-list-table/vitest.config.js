@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/content-management/content_list/kbn-content-list-table',
-  ],
+  roots: ['src/platform/packages/shared/content-management/content_list/kbn-content-list-table'],
 });

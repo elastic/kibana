@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/private/kbn-esql-editor',
-  ],
-  setupFiles: [
-    'src/platform/packages/private/kbn-esql-editor/setup_tests.ts',
-  ],
+  roots: ['src/platform/packages/private/kbn-esql-editor'],
+  setupFiles: ['src/platform/packages/private/kbn-esql-editor/setup_tests.ts'],
 });

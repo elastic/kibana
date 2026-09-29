@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/content-management/access_control/access_control_public',
-  ],
+  roots: ['src/platform/packages/shared/content-management/access_control/access_control_public'],
 });

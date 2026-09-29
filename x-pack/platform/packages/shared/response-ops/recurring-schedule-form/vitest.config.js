@@ -9,9 +9,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/response-ops/recurring-schedule-form',
-  ],
+  roots: ['x-pack/platform/packages/shared/response-ops/recurring-schedule-form'],
   setupFiles: [
     'x-pack/platform/packages/shared/response-ops/recurring-schedule-form/setup_tests.ts',
   ],

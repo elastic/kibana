@@ -13,11 +13,11 @@ import type { MockInstance } from 'vitest';
 import Os from 'os';
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   parseMoonJestOutput,

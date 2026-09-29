@@ -9,10 +9,12 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/observability/plugins/synthetics',
-  ],
+  roots: ['x-pack/solutions/observability/plugins/synthetics'],
   aliases: [
-    { find: /^@kbn\/code-editor$/, replacement: 'x-pack/solutions/observability/plugins/synthetics/__mocks__/@kbn/code-editor/index.ts' },
+    {
+      find: /^@kbn\/code-editor$/,
+      replacement:
+        'x-pack/solutions/observability/plugins/synthetics/__mocks__/@kbn/code-editor/index.ts',
+    },
   ],
 });

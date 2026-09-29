@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/kbn-ui/favorite-button',
-  ],
-  setupFiles: [
-    'src/platform/kbn-ui/favorite-button/setup_tests.ts',
-  ],
+  roots: ['src/platform/kbn-ui/favorite-button'],
+  setupFiles: ['src/platform/kbn-ui/favorite-button/setup_tests.ts'],
 });

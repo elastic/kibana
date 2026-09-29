@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/solutions/observability/packages/kbn-evals-suite-significant-events',
-  ],
+  roots: ['x-pack/solutions/observability/packages/kbn-evals-suite-significant-events'],
 });

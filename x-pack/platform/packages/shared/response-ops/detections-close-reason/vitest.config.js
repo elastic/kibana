@@ -9,9 +9,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/response-ops/detections-close-reason',
-  ],
+  roots: ['x-pack/platform/packages/shared/response-ops/detections-close-reason'],
   setupFiles: [
     'x-pack/platform/packages/shared/response-ops/detections-close-reason/setup_tests.ts',
   ],

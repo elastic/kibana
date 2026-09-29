@@ -22,53 +22,53 @@ const mockLog = {
 vi.mock('getopts', () => vi.fn());
 
 vi.mock('fs', () => {
-      const mocked = {
-      promises: {
-        mkdir: vi.fn().mockResolvedValue(undefined),
-        writeFile: vi.fn().mockResolvedValue(undefined),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    promises: {
+      mkdir: vi.fn().mockResolvedValue(undefined),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/path/to',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/path/to',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('child_process', () => {
-      const mocked = {
-      spawn: vi.fn(),
-      execFile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    spawn: vi.fn(),
+    execFile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/tooling-log', () => {
-      const mocked = {
-      ToolingLog: vi.fn().mockImplementation(() => mockLog),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolingLog: vi.fn().mockImplementation(() => mockLog),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ci-stats-reporter', () => {
-      const mocked = {
-      getTimeReporter: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimeReporter: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./configs/get_jest_configs', () => {
-      const mocked = {
-      getJestConfigs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getJestConfigs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./shard_config', async () => {
-  return (await vi.importActual('./shard_config'));
+  return await vi.importActual('./shard_config');
 });
 
 // Mock process.exit to prevent tests from actually exiting
@@ -104,11 +104,15 @@ describe('run_all.ts', () => {
     process.env.JEST_WARMUP_DELAY_MS = '0';
 
     // Set up mocks
-    mockGetopts = vi.mocked((await vi.importMock('getopts')));
+    mockGetopts = vi.mocked(await vi.importMock('getopts'));
     mockSpawn = vi.mocked((await vi.importMock('child_process')).spawn);
     mockExecFile = vi.mocked((await vi.importMock('child_process')).execFile);
-    mockGetJestConfigs = vi.mocked((await vi.importMock('./configs/get_jest_configs')).getJestConfigs);
-    mockGetTimeReporter = vi.mocked((await vi.importMock('@kbn/ci-stats-reporter')).getTimeReporter);
+    mockGetJestConfigs = vi.mocked(
+      (await vi.importMock('./configs/get_jest_configs')).getJestConfigs
+    );
+    mockGetTimeReporter = vi.mocked(
+      (await vi.importMock('@kbn/ci-stats-reporter')).getTimeReporter
+    );
     mockReporter = vi.fn();
     mockGetTimeReporter.mockReturnValue(mockReporter);
 

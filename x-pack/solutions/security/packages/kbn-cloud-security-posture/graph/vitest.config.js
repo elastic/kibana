@@ -9,9 +9,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph',
-  ],
+  roots: ['x-pack/solutions/security/packages/kbn-cloud-security-posture/graph'],
   setupFiles: [
     'jest-canvas-mock',
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/setup_tests.ts',

@@ -11,10 +11,11 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/kbn-unified-histogram',
-  ],
+  roots: ['src/platform/packages/shared/kbn-unified-histogram'],
   aliases: [
-    { find: /^table$/, replacement: 'src/platform/packages/shared/kbn-unified-histogram/__mocks__/table.ts' },
+    {
+      find: /^table$/,
+      replacement: 'src/platform/packages/shared/kbn-unified-histogram/__mocks__/table.ts',
+    },
   ],
 });

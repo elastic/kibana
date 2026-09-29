@@ -9,10 +9,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/observability/packages/kbn-alerts-grouping',
-  ],
-  setupFiles: [
-    'x-pack/solutions/observability/packages/kbn-alerts-grouping/setup_tests.ts',
-  ],
+  roots: ['x-pack/solutions/observability/packages/kbn-alerts-grouping'],
+  setupFiles: ['x-pack/solutions/observability/packages/kbn-alerts-grouping/setup_tests.ts'],
 });

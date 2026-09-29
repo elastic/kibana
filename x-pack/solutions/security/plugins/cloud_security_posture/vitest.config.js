@@ -9,10 +9,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/plugins/cloud_security_posture',
-  ],
-  setupFiles: [
-    'x-pack/solutions/security/plugins/cloud_security_posture/jest.setup.js',
-  ],
+  roots: ['x-pack/solutions/security/plugins/cloud_security_posture'],
+  setupFiles: ['x-pack/solutions/security/plugins/cloud_security_posture/jest.setup.js'],
 });

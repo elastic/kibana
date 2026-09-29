@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/private/kbn-reporting/get_csv_panel_actions',
-  ],
+  roots: ['src/platform/packages/private/kbn-reporting/get_csv_panel_actions'],
 });

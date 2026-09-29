@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/packages/kbn-alertzero-common',
-  ],
+  roots: ['x-pack/solutions/security/packages/kbn-alertzero-common'],
 });

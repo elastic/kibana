@@ -9,10 +9,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/response-ops/alerts-delete',
-  ],
-  setupFiles: [
-    'x-pack/platform/packages/shared/response-ops/alerts-delete/setup_tests.ts',
-  ],
+  roots: ['x-pack/platform/packages/shared/response-ops/alerts-delete'],
+  setupFiles: ['x-pack/platform/packages/shared/response-ops/alerts-delete/setup_tests.ts'],
 });

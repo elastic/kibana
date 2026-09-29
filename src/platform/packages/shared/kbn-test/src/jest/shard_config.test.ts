@@ -11,18 +11,18 @@ import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { readFileSync } from 'fs';
 import {

@@ -518,7 +518,7 @@ export function boom() {
     });
 
     it('evaluates lazy properties on first access', async () => {
-      const lazyObjectModule = (await vi.importActual('@kbn/lazy-object'));
+      const lazyObjectModule = await vi.importActual('@kbn/lazy-object');
       const factory = vi.fn(() => 'computed');
       const exports = evaluate(
         `

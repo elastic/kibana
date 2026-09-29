@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'packages/kbn-performance-testing-dataset-extractor',
-  ],
+  roots: ['packages/kbn-performance-testing-dataset-extractor'],
 });

@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/kbn-data-view-validation',
-  ],
+  roots: ['src/platform/packages/shared/kbn-data-view-validation'],
 });

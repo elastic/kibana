@@ -9,10 +9,11 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/private/gen_ai_settings',
-  ],
+  roots: ['x-pack/platform/plugins/private/gen_ai_settings'],
   aliases: [
-    { find: /^@kbn\/anonymization-ui$/, replacement: 'x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/index.ts' },
+    {
+      find: /^@kbn\/anonymization-ui$/,
+      replacement: 'x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/index.ts',
+    },
   ],
 });

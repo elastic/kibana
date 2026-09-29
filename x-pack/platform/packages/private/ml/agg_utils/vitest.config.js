@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/platform/packages/private/ml/agg_utils',
-  ],
+  roots: ['x-pack/platform/packages/private/ml/agg_utils'],
 });

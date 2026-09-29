@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/platform/packages/shared/ai-infra/inference-langchain',
-  ],
+  roots: ['x-pack/platform/packages/shared/ai-infra/inference-langchain'],
 });

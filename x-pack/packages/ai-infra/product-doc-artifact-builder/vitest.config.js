@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/packages/ai-infra/product-doc-artifact-builder',
-  ],
+  roots: ['x-pack/packages/ai-infra/product-doc-artifact-builder'],
 });

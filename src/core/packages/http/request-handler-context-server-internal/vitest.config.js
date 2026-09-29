@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/core/packages/http/request-handler-context-server-internal',
-  ],
+  roots: ['src/core/packages/http/request-handler-context-server-internal'],
 });

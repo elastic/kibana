@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/kbn-lens-embeddable-utils',
-  ],
-  setupFiles: [
-    'jest-canvas-mock',
-  ],
+  roots: ['src/platform/packages/shared/kbn-lens-embeddable-utils'],
+  setupFiles: ['jest-canvas-mock'],
 });

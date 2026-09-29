@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/kbn-unified-chart-section-viewer',
-  ],
+  roots: ['src/platform/packages/shared/kbn-unified-chart-section-viewer'],
 });

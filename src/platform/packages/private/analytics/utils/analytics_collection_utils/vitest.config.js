@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/private/analytics/utils/analytics_collection_utils',
-  ],
+  roots: ['src/platform/packages/private/analytics/utils/analytics_collection_utils'],
 });

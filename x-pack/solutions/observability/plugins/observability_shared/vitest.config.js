@@ -9,9 +9,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/observability/plugins/observability_shared',
-  ],
+  roots: ['x-pack/solutions/observability/plugins/observability_shared'],
   setupFiles: [
     'x-pack/solutions/observability/plugins/observability_shared/.storybook/jest_setup.js',
   ],

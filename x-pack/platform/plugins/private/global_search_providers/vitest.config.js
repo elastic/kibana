@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/private/global_search_providers',
-  ],
+  roots: ['x-pack/platform/plugins/private/global_search_providers'],
 });

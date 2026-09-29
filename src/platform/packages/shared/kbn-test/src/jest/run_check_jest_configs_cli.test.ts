@@ -12,32 +12,32 @@ import type { Mock } from 'vitest';
 
 // Mock external dependencies
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-cli-errors', () => {
-      const mocked = {
-      createFailError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./configs/get_jest_configs', () => {
-      const mocked = {
-      getJestConfigs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getJestConfigs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock performance.now for consistent timing
 const mockPerformanceNow = vi.fn();
@@ -61,7 +61,9 @@ describe('runCheckJestConfigsCli', () => {
     // Set up mocks
     mockRun = vi.mocked((await vi.importMock('@kbn/dev-cli-runner')).run);
     mockCreateFailError = vi.mocked((await vi.importMock('@kbn/dev-cli-errors')).createFailError);
-    mockGetJestConfigs = vi.mocked((await vi.importMock('./configs/get_jest_configs')).getJestConfigs);
+    mockGetJestConfigs = vi.mocked(
+      (await vi.importMock('./configs/get_jest_configs')).getJestConfigs
+    );
 
     mockLog = {
       info: vi.fn(),

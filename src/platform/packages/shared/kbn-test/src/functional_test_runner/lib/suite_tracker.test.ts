@@ -128,9 +128,7 @@ describe('SuiteTracker', () => {
     const { lifecycle } = await runLifecycleWithMocks([MOCKS.WITH_TESTS]);
     await lifecycle.cleanup.trigger();
 
-    expect((fs.writeFileSync as Mock).mock.calls[0][0]).toEqual(
-      process.env.TEST_METADATA_PATH
-    );
+    expect((fs.writeFileSync as Mock).mock.calls[0][0]).toEqual(process.env.TEST_METADATA_PATH);
   });
 
   it('identifies suites with tests as leaf suites', async () => {

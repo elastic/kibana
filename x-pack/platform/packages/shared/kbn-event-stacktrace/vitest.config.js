@@ -9,10 +9,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/kbn-event-stacktrace',
-  ],
-  setupFiles: [
-    'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook/jest_setup.js',
-  ],
+  roots: ['x-pack/platform/packages/shared/kbn-event-stacktrace'],
+  setupFiles: ['x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook/jest_setup.js'],
 });

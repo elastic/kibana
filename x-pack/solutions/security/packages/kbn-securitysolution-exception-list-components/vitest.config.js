@@ -9,9 +9,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components',
-  ],
+  roots: ['x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components'],
   setupFiles: [
     'x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/setup_test.ts',
   ],

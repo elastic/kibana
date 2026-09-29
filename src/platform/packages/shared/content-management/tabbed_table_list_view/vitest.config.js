@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/content-management/tabbed_table_list_view',
-  ],
+  roots: ['src/platform/packages/shared/content-management/tabbed_table_list_view'],
 });

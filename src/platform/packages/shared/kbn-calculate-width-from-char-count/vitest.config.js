@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/platform/packages/shared/kbn-calculate-width-from-char-count',
-  ],
+  roots: ['src/platform/packages/shared/kbn-calculate-width-from-char-count'],
 });

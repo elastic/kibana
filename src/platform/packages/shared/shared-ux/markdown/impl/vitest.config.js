@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/shared-ux/markdown/impl',
-  ],
-  setupFiles: [
-    'src/platform/packages/shared/shared-ux/markdown/impl/setup_tests.ts',
-  ],
+  roots: ['src/platform/packages/shared/shared-ux/markdown/impl'],
+  setupFiles: ['src/platform/packages/shared/shared-ux/markdown/impl/setup_tests.ts'],
 });

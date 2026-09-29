@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'packages/kbn-mock-idp-plugin',
-  ],
+  roots: ['packages/kbn-mock-idp-plugin'],
 });

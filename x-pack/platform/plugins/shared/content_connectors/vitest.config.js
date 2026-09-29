@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/shared/content_connectors',
-  ],
+  roots: ['x-pack/platform/plugins/shared/content_connectors'],
 });

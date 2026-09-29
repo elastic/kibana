@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/platform/packages/shared/security/plugin_types_server',
-  ],
+  roots: ['x-pack/platform/packages/shared/security/plugin_types_server'],
 });

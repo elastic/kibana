@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'packages/kbn-eslint-plugin-alerting-v2',
-  ],
+  roots: ['packages/kbn-eslint-plugin-alerting-v2'],
 });

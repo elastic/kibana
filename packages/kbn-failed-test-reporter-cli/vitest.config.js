@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'packages/kbn-failed-test-reporter-cli',
-  ],
+  roots: ['packages/kbn-failed-test-reporter-cli'],
 });

@@ -9,9 +9,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui',
-  ],
+  roots: ['x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui'],
   setupFiles: [
     'x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/setup_tests.ts',
   ],

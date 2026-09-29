@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/plugins/ecs_data_quality_dashboard',
-  ],
+  roots: ['x-pack/solutions/security/plugins/ecs_data_quality_dashboard'],
 });

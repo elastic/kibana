@@ -9,11 +9,16 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/shared/stack_connectors',
-  ],
+  roots: ['x-pack/platform/plugins/shared/stack_connectors'],
   aliases: [
-    { find: /^@elastic\/eui\/es\/components\/icon\/assets\/(.*)$/, replacement: 'x-pack/platform/plugins/shared/stack_connectors/__mocks__/eui_icon_assets.js' },
-    { find: /^@kbn\/code-editor$/, replacement: 'x-pack/platform/plugins/shared/stack_connectors/__mocks__/@kbn/code-editor/index.tsx' },
+    {
+      find: /^@elastic\/eui\/es\/components\/icon\/assets\/(.*)$/,
+      replacement: 'x-pack/platform/plugins/shared/stack_connectors/__mocks__/eui_icon_assets.js',
+    },
+    {
+      find: /^@kbn\/code-editor$/,
+      replacement:
+        'x-pack/platform/plugins/shared/stack_connectors/__mocks__/@kbn/code-editor/index.tsx',
+    },
   ],
 });

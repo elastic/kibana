@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/plugins/shared/saved_objects_tagging_oss',
-  ],
+  roots: ['src/platform/plugins/shared/saved_objects_tagging_oss'],
 });

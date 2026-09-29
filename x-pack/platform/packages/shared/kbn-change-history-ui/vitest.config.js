@@ -9,10 +9,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/kbn-change-history-ui',
-  ],
-  setupFiles: [
-    'x-pack/platform/packages/shared/kbn-change-history-ui/jest.setup.js',
-  ],
+  roots: ['x-pack/platform/packages/shared/kbn-change-history-ui'],
+  setupFiles: ['x-pack/platform/packages/shared/kbn-change-history-ui/jest.setup.js'],
 });

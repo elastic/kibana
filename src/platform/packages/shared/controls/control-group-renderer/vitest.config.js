@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/controls/control-group-renderer',
-  ],
-  setupFiles: [
-    'src/platform/plugins/shared/controls/jest_setup.ts',
-  ],
+  roots: ['src/platform/packages/shared/controls/control-group-renderer'],
+  setupFiles: ['src/platform/plugins/shared/controls/jest_setup.ts'],
 });

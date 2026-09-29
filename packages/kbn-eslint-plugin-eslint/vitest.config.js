@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'packages/kbn-eslint-plugin-eslint',
-  ],
-  aliases: [
-    { find: /^@oxlint\/plugins$/, replacement: 'node_modules/@oxlint/plugins/index.cjs' },
-  ],
+  roots: ['packages/kbn-eslint-plugin-eslint'],
+  aliases: [{ find: /^@oxlint\/plugins$/, replacement: 'node_modules/@oxlint/plugins/index.cjs' }],
 });

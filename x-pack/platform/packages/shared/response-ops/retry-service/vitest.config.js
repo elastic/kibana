@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/response-ops/retry-service',
-  ],
+  roots: ['x-pack/platform/packages/shared/response-ops/retry-service'],
 });

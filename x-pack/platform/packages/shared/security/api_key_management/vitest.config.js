@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/security/api_key_management',
-  ],
+  roots: ['x-pack/platform/packages/shared/security/api_key_management'],
 });

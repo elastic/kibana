@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/plugins/private/vis_default_editor',
-  ],
+  roots: ['src/platform/plugins/private/vis_default_editor'],
 });

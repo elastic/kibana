@@ -14,7 +14,5 @@ module.exports = createKbnVitestConfig({
     'x-pack/platform/plugins/shared/agent_builder/server',
     'x-pack/platform/plugins/shared/agent_builder/common',
   ],
-  setupFiles: [
-    'x-pack/platform/plugins/shared/agent_builder/jest.setup.js',
-  ],
+  setupFiles: ['x-pack/platform/plugins/shared/agent_builder/jest.setup.js'],
 });

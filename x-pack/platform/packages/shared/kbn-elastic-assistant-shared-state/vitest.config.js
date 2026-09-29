@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state',
-  ],
+  roots: ['x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state'],
 });

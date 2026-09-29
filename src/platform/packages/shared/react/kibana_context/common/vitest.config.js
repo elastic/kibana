@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/platform/packages/shared/react/kibana_context/common',
-  ],
+  roots: ['src/platform/packages/shared/react/kibana_context/common'],
 });

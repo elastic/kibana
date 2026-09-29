@@ -34,33 +34,33 @@ describe('getJestConfigs', () => {
 
     // Mock REPO_ROOT
     vi.doMock('@kbn/repo-info', () => {
-          const mocked = {
-              REPO_ROOT: '/repo',
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        REPO_ROOT: '/repo',
+      };
+      return { ...mocked, default: mocked };
+    });
 
     // Mock Jest modules that are dynamically imported
     vi.doMock('jest-config', () => {
-          const mocked = {
-              readConfig: vi.fn().mockResolvedValue({
-                projectConfig: {},
-                globalConfig: {},
-              }),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        readConfig: vi.fn().mockResolvedValue({
+          projectConfig: {},
+          globalConfig: {},
+        }),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     vi.doMock('jest', () => {
-          const mocked = {
-              SearchSource: vi.fn().mockImplementation(() => ({
-                getTestPaths: vi.fn().mockResolvedValue({
-                  tests: [], // We'll customize this per test
-                }),
-              })),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        SearchSource: vi.fn().mockImplementation(() => ({
+          getTestPaths: vi.fn().mockResolvedValue({
+            tests: [], // We'll customize this per test
+          }),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     vi.doMock('jest-runtime', () => ({
       default: {

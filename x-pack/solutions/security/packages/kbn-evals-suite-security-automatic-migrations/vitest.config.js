@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/src',
-  ],
+  roots: ['x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/src'],
 });

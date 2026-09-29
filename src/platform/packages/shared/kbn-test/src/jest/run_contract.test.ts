@@ -10,53 +10,53 @@
 import { vi } from 'vitest';
 
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-cli-errors', () => {
-      const mocked = {
-      createFailError: (message: string) => new Error(message),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailError: (message: string) => new Error(message),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-validation-runner', () => {
-      const mocked = {
-      buildValidationCliArgs: vi.fn(),
-      describeValidationNoTargetsScope: vi.fn(),
-      formatReproductionCommand: vi.fn(),
-      readValidationRunFlags: vi.fn(),
-      resolveValidationBaseContext: vi.fn(),
-      VALIDATION_RUN_HELP: [],
-      VALIDATION_RUN_STRING_FLAGS: [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildValidationCliArgs: vi.fn(),
+    describeValidationNoTargetsScope: vi.fn(),
+    formatReproductionCommand: vi.fn(),
+    readValidationRunFlags: vi.fn(),
+    resolveValidationBaseContext: vi.fn(),
+    VALIDATION_RUN_HELP: [],
+    VALIDATION_RUN_STRING_FLAGS: [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../jest-preset', () => {
-      const mocked = {
-      testMatch: ['**/*.test.ts'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    testMatch: ['**/*.test.ts'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./run', () => {
-      const mocked = {
-      findConfigInDirectoryTree: vi.fn(),
-      runJest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findConfigInDirectoryTree: vi.fn(),
+    runJest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { planJestContractRuns } from './run_contract';
 

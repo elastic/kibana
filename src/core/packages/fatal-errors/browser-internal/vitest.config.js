@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/core/packages/fatal-errors/browser-internal',
-  ],
+  roots: ['src/core/packages/fatal-errors/browser-internal'],
 });

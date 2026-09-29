@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/shared-ux/button/exit_full_screen',
-  ],
+  roots: ['src/platform/packages/shared/shared-ux/button/exit_full_screen'],
 });

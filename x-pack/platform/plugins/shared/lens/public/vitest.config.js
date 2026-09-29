@@ -9,9 +9,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/shared/lens/public',
-  ],
+  roots: ['x-pack/platform/plugins/shared/lens/public'],
   setupFiles: [
     'jest-canvas-mock',
     'x-pack/platform/plugins/shared/lens/public/jest_setup_lens_builder.ts',

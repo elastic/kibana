@@ -11,11 +11,11 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('child_process', () => {
-      const mocked = {
-      execFile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    execFile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { execFile } from 'child_process';
 import {

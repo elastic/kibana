@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/ml/random_sampler_utils',
-  ],
+  roots: ['x-pack/platform/packages/shared/ml/random_sampler_utils'],
 });

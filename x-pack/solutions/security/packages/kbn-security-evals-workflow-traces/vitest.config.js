@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/solutions/security/packages/kbn-security-evals-workflow-traces',
-  ],
+  roots: ['x-pack/solutions/security/packages/kbn-security-evals-workflow-traces'],
 });

@@ -9,13 +9,27 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/plugins/security_solution/public/app',
-  ],
+  roots: ['x-pack/solutions/security/plugins/security_solution/public/app'],
   aliases: [
-    { find: /^@kbn\/core\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/core.mock.ts' },
-    { find: /^@kbn\/task-manager-plugin\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/task_manager.mock.ts' },
-    { find: /^@kbn\/alerting-plugin\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/alert.mock.ts' },
-    { find: /^@kbn\/actions-plugin\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/action.mock.ts' },
+    {
+      find: /^@kbn\/core\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/core.mock.ts',
+    },
+    {
+      find: /^@kbn\/task-manager-plugin\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/task_manager.mock.ts',
+    },
+    {
+      find: /^@kbn\/alerting-plugin\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/alert.mock.ts',
+    },
+    {
+      find: /^@kbn\/actions-plugin\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/action.mock.ts',
+    },
   ],
 });

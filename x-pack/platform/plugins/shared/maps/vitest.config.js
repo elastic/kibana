@@ -9,10 +9,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/shared/maps',
-  ],
-  setupFiles: [
-    'x-pack/platform/plugins/shared/maps/jest_setup.ts',
-  ],
+  roots: ['x-pack/platform/plugins/shared/maps'],
+  setupFiles: ['x-pack/platform/plugins/shared/maps/jest_setup.ts'],
 });

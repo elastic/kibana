@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/platform/plugins/private/indices_metadata',
-  ],
+  roots: ['x-pack/platform/plugins/private/indices_metadata'],
 });

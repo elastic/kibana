@@ -9,22 +9,34 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main',
-  ],
+  roots: ['x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main'],
   include: [
     'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/*.test.{js,mjs,ts,tsx}',
     'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/hooks/**/*.test.{js,mjs,ts,tsx}',
     'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/tabs/**/*.test.{js,mjs,ts,tsx}',
     'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/utils/**/*.test.{js,mjs,ts,tsx}',
   ],
-  setupFiles: [
-    'x-pack/solutions/security/plugins/security_solution/public/flyout/test/setup.ts',
-  ],
+  setupFiles: ['x-pack/solutions/security/plugins/security_solution/public/flyout/test/setup.ts'],
   aliases: [
-    { find: /^@kbn\/core\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/core.mock.ts' },
-    { find: /^@kbn\/task-manager-plugin\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/task_manager.mock.ts' },
-    { find: /^@kbn\/alerting-plugin\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/alert.mock.ts' },
-    { find: /^@kbn\/actions-plugin\/server$/, replacement: 'x-pack/solutions/security/plugins/security_solution/server/__mocks__/action.mock.ts' },
+    {
+      find: /^@kbn\/core\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/core.mock.ts',
+    },
+    {
+      find: /^@kbn\/task-manager-plugin\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/task_manager.mock.ts',
+    },
+    {
+      find: /^@kbn\/alerting-plugin\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/alert.mock.ts',
+    },
+    {
+      find: /^@kbn\/actions-plugin\/server$/,
+      replacement:
+        'x-pack/solutions/security/plugins/security_solution/server/__mocks__/action.mock.ts',
+    },
   ],
 });

@@ -21,7 +21,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/kbn-datemath',
-  ],
+  roots: ['src/platform/packages/shared/kbn-datemath'],
 });

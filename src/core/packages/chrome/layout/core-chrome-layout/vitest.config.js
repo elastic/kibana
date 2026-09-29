@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/core/packages/chrome/layout/core-chrome-layout',
-  ],
+  roots: ['src/core/packages/chrome/layout/core-chrome-layout'],
 });

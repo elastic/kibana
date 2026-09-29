@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/kbn-visualization-ui-components',
-  ],
-  setupFiles: [
-    'jest-canvas-mock',
-  ],
+  roots: ['src/platform/packages/shared/kbn-visualization-ui-components'],
+  setupFiles: ['jest-canvas-mock'],
 });

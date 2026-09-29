@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/private/ml/field_stats_flyout',
-  ],
+  roots: ['x-pack/platform/packages/private/ml/field_stats_flyout'],
 });

@@ -15,7 +15,5 @@ module.exports = createKbnVitestConfig({
     'src/platform/plugins/shared/workflows_management/common',
     'src/platform/plugins/shared/workflows_management/public',
   ],
-  aliases: [
-    { find: /^uuid$/, replacement: 'node_modules/uuid/dist/index.js' },
-  ],
+  aliases: [{ find: /^uuid$/, replacement: 'node_modules/uuid/dist/index.js' }],
 });

@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/plugins/private/image_embeddable',
-  ],
-  setupFiles: [
-    'src/platform/plugins/private/image_embeddable/jest_setup.ts',
-  ],
+  roots: ['src/platform/plugins/private/image_embeddable'],
+  setupFiles: ['src/platform/plugins/private/image_embeddable/jest_setup.ts'],
 });

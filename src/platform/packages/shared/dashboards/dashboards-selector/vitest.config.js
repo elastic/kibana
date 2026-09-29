@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/dashboards/dashboards-selector',
-  ],
-  setupFiles: [
-    'src/platform/packages/shared/dashboards/dashboards-selector/setup_tests.ts',
-  ],
+  roots: ['src/platform/packages/shared/dashboards/dashboards-selector'],
+  setupFiles: ['src/platform/packages/shared/dashboards/dashboards-selector/setup_tests.ts'],
 });

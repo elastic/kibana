@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli',
-  ],
+  roots: ['x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli'],
 });

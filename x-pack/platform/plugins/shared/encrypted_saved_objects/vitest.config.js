@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/shared/encrypted_saved_objects',
-  ],
+  roots: ['x-pack/platform/plugins/shared/encrypted_saved_objects'],
 });

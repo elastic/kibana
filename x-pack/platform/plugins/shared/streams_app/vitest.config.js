@@ -14,7 +14,5 @@ module.exports = createKbnVitestConfig({
     'x-pack/platform/plugins/shared/streams_app/common',
     'x-pack/platform/plugins/shared/streams_app/server',
   ],
-  setupFiles: [
-    'x-pack/platform/plugins/shared/streams_app/.storybook/jest_setup.js',
-  ],
+  setupFiles: ['x-pack/platform/plugins/shared/streams_app/.storybook/jest_setup.js'],
 });

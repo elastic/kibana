@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/core/packages/saved-objects/server',
-  ],
+  roots: ['src/core/packages/saved-objects/server'],
 });

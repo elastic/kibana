@@ -12,81 +12,81 @@ import type { Mock, MockInstance } from 'vitest';
 
 // Mock all dependencies before importing anything else
 vi.mock('@kbn/scout-info', () => {
-      const mocked = {
-      SCOUT_REPORTER_ENABLED: false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SCOUT_REPORTER_ENABLED: false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('jest', () => {
-      const mocked = {
-      run: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('jest-config', () => {
-      const mocked = {
-      readInitialOptions: vi.fn().mockResolvedValue({ config: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readInitialOptions: vi.fn().mockResolvedValue({ config: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/tooling-log', () => {
-      const mocked = {
-      ToolingLog: vi.fn().mockImplementation(() => ({
-        verbose: vi.fn(),
-        info: vi.fn(),
-        debug: vi.fn(),
-        error: vi.fn(),
-        warning: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolingLog: vi.fn().mockImplementation(() => ({
+      verbose: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ci-stats-reporter', () => {
-      const mocked = {
-      getTimeReporter: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimeReporter: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs', () => {
-      const mocked = {
-      promises: {
-        mkdir: vi.fn().mockResolvedValue(undefined),
-        stat: vi.fn().mockResolvedValue({ isFile: () => true }),
-      },
-      existsSync: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    promises: {
+      mkdir: vi.fn().mockResolvedValue(undefined),
+      stat: vi.fn().mockResolvedValue({ isFile: () => true }),
+    },
+    existsSync: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-cli-errors', () => {
-      const mocked = {
-      createFailError: vi.fn((msg) => new Error(msg)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailError: vi.fn((msg) => new Error(msg)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('getopts', () => vi.fn());
 
 vi.mock('./buildkite_checkpoint', () => {
-      const mocked = {
-      isInBuildkite: vi.fn().mockReturnValue(false),
-      isConfigCompleted: vi.fn().mockResolvedValue(false),
-      markConfigCompletedSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInBuildkite: vi.fn().mockReturnValue(false),
+    isConfigCompleted: vi.fn().mockResolvedValue(false),
+    markConfigCompletedSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { relative } from 'path';
 import {
@@ -215,7 +215,7 @@ describe('run.ts', () => {
     let mockGetopts: Mock;
 
     beforeEach(async () => {
-      mockGetopts = vi.mocked((await vi.importMock('getopts')));
+      mockGetopts = vi.mocked(await vi.importMock('getopts'));
     });
 
     it('should parse arguments with verbose flag', () => {
@@ -312,7 +312,7 @@ describe('run.ts', () => {
       mockExistsSync.mockImplementation((path: string) => path === '/parent/jest.config.js');
 
       // Mock REPO_ROOT for this test
-      const mockRepoInfo = vi.mocked((await vi.importMock('@kbn/repo-info')));
+      const mockRepoInfo = vi.mocked(await vi.importMock('@kbn/repo-info'));
       const originalRepoRoot = mockRepoInfo.REPO_ROOT;
       mockRepoInfo.REPO_ROOT = '/';
 
@@ -667,7 +667,7 @@ describe('run.ts', () => {
     describe('JEST_CONFIG_PATH environment variable', () => {
       it('sets JEST_CONFIG_PATH when SCOUT_REPORTER_ENABLED is true and config is provided', async () => {
         // Mock SCOUT_REPORTER_ENABLED to be true
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         // Simulate the Scout configuration logic from run.ts
@@ -684,7 +684,7 @@ describe('run.ts', () => {
 
       it('does not set JEST_CONFIG_PATH when SCOUT_REPORTER_ENABLED is false', async () => {
         // Mock SCOUT_REPORTER_ENABLED to be false
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = false;
 
         // Simulate the Scout configuration logic from run.ts
@@ -700,7 +700,7 @@ describe('run.ts', () => {
 
       it('does not set JEST_CONFIG_PATH when resolvedConfigPath is null', async () => {
         // Mock SCOUT_REPORTER_ENABLED to be true
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         // Simulate the Scout configuration logic with null config path
@@ -716,7 +716,7 @@ describe('run.ts', () => {
 
       it('does not set JEST_CONFIG_PATH when resolvedConfigPath is undefined', async () => {
         // Mock SCOUT_REPORTER_ENABLED to be true
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         // Simulate the Scout configuration logic with undefined config path
@@ -732,7 +732,7 @@ describe('run.ts', () => {
 
       it('does not set JEST_CONFIG_PATH when resolvedConfigPath is empty string', async () => {
         // Mock SCOUT_REPORTER_ENABLED to be true
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         // Simulate the Scout configuration logic with empty config path
@@ -750,7 +750,7 @@ describe('run.ts', () => {
     describe('relative path calculations', () => {
       it('sets relative path correctly for same directory', async () => {
         // Mock SCOUT_REPORTER_ENABLED to be true
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         // Test the relative path calculation for same directory
@@ -766,7 +766,7 @@ describe('run.ts', () => {
       });
 
       it('sets relative path correctly for parent directory', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         const resolvedConfigPath = '/current/jest.config.js';
@@ -780,7 +780,7 @@ describe('run.ts', () => {
       });
 
       it('sets relative path correctly for nested subdirectory', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         const resolvedConfigPath = '/current/working/dir/nested/deep/jest.config.js';
@@ -794,7 +794,7 @@ describe('run.ts', () => {
       });
 
       it('handles special config file names', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         const testCases = [
@@ -818,7 +818,7 @@ describe('run.ts', () => {
 
     describe('edge cases and error conditions', () => {
       it('handles SCOUT_REPORTER_ENABLED being undefined', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = undefined as any;
 
         const resolvedConfigPath = '/path/to/jest.config.js';
@@ -831,7 +831,7 @@ describe('run.ts', () => {
       });
 
       it('handles SCOUT_REPORTER_ENABLED being null', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = null as any;
 
         const resolvedConfigPath = '/path/to/jest.config.js';
@@ -844,7 +844,7 @@ describe('run.ts', () => {
       });
 
       it('handles SCOUT_REPORTER_ENABLED being 0', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = 0 as any;
 
         const resolvedConfigPath = '/path/to/jest.config.js';
@@ -857,7 +857,7 @@ describe('run.ts', () => {
       });
 
       it('handles SCOUT_REPORTER_ENABLED being empty string', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = '' as any;
 
         const resolvedConfigPath = '/path/to/jest.config.js';
@@ -873,7 +873,7 @@ describe('run.ts', () => {
         // Set an existing value
         process.env.JEST_CONFIG_PATH = 'existing/path/config.js';
 
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = false;
 
         const resolvedConfigPath = '/path/to/jest.config.js';
@@ -889,7 +889,7 @@ describe('run.ts', () => {
         // Set an existing value
         process.env.JEST_CONFIG_PATH = 'existing/path/config.js';
 
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
         mockScoutInfo.SCOUT_REPORTER_ENABLED = true;
 
         const resolvedConfigPath = '/new/path/jest.config.js';
@@ -905,7 +905,7 @@ describe('run.ts', () => {
 
     describe('integration with different Scout reporter values', () => {
       it('handles truthy values correctly', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
 
         const truthyValues = [true, 1, 'true', 'yes', 'enabled', {}, []];
 
@@ -925,7 +925,7 @@ describe('run.ts', () => {
       });
 
       it('handles falsy values correctly', async () => {
-        const mockScoutInfo = vi.mocked((await vi.importMock('@kbn/scout-info')));
+        const mockScoutInfo = vi.mocked(await vi.importMock('@kbn/scout-info'));
 
         const falsyValues = [false, 0, '', null, undefined, NaN];
 
@@ -952,7 +952,7 @@ describe('run.ts', () => {
     let mockProcessExit: MockInstance;
 
     beforeEach(async () => {
-      mockGetopts = vi.mocked((await vi.importMock('getopts')));
+      mockGetopts = vi.mocked(await vi.importMock('getopts'));
       mockIsInBuildkite = vi.mocked((await vi.importMock('./buildkite_checkpoint')).isInBuildkite);
       mockIsConfigCompleted = vi.mocked(
         (await vi.importMock('./buildkite_checkpoint')).isConfigCompleted

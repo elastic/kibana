@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/core/packages/test-helpers/so-type-serializer',
-  ],
+  roots: ['src/core/packages/test-helpers/so-type-serializer'],
 });

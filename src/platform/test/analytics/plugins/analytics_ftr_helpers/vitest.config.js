@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/test/analytics/plugins/analytics_ftr_helpers',
-  ],
+  roots: ['src/platform/test/analytics/plugins/analytics_ftr_helpers'],
 });

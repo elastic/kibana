@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/platform/kbn-ui/_tooling',
-  ],
+  roots: ['src/platform/kbn-ui/_tooling'],
 });

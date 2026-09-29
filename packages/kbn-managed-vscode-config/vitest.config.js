@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'packages/kbn-managed-vscode-config',
-  ],
+  roots: ['packages/kbn-managed-vscode-config'],
 });

@@ -19,9 +19,9 @@ import { EsVersion } from '../../functional_test_runner';
 import { parseFlags, FLAG_OPTIONS } from './flags';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'some-uuid' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'some-uuid' };
+  return { ...mocked, default: mocked };
+});
 
 const cwdMock = (process.cwd = vi.fn().mockReturnValue(REPO_ROOT));
 

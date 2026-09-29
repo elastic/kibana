@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/packages/shared/response-ops/alerting-v2-common-queries',
-  ],
+  roots: ['x-pack/platform/packages/shared/response-ops/alerting-v2-common-queries'],
 });

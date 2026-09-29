@@ -16,9 +16,9 @@ import { EsVersion } from '../../functional_test_runner';
 import { parseFlags, FLAG_OPTIONS } from './flags';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'some-uuid' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'some-uuid' };
+  return { ...mocked, default: mocked };
+});
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(

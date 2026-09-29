@@ -11,10 +11,6 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/plugins/shared/chart_expressions/expression_metric',
-  ],
-  setupFiles: [
-    'jest-canvas-mock',
-  ],
+  roots: ['src/platform/plugins/shared/chart_expressions/expression_metric'],
+  setupFiles: ['jest-canvas-mock'],
 });

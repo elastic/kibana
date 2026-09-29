@@ -11,9 +11,7 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/packages/shared/shared-ux/display/kbn-announcement-banner',
-  ],
+  roots: ['src/platform/packages/shared/shared-ux/display/kbn-announcement-banner'],
   setupFiles: [
     'src/platform/packages/shared/shared-ux/display/kbn-announcement-banner/setup_tests.ts',
   ],

@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/solutions/observability/packages/kbn-nightshift-decision-trees',
-  ],
+  roots: ['x-pack/solutions/observability/packages/kbn-nightshift-decision-trees'],
 });

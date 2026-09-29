@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'x-pack/platform/plugins/private/otel_telemetry_collection',
-  ],
+  roots: ['x-pack/platform/plugins/private/otel_telemetry_collection'],
 });

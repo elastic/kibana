@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'src/platform/plugins/shared/telemetry_collection_manager',
-  ],
+  roots: ['src/platform/plugins/shared/telemetry_collection_manager'],
 });

@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/platform/plugins/private/telemetry_collection_xpack',
-  ],
+  roots: ['x-pack/platform/plugins/private/telemetry_collection_xpack'],
 });

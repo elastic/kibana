@@ -11,7 +11,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'node',
-  roots: [
-    'src/platform/packages/shared/kbn-server-route-repository-client',
-  ],
+  roots: ['src/platform/packages/shared/kbn-server-route-repository-client'],
 });

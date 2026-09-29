@@ -9,7 +9,5 @@ const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
 
 module.exports = createKbnVitestConfig({
   environment: 'jsdom',
-  roots: [
-    'x-pack/solutions/workplaceai/plugins/workplace_ai_app',
-  ],
+  roots: ['x-pack/solutions/workplaceai/plugins/workplace_ai_app'],
 });
