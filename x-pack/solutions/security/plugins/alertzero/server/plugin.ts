@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentClient } from '@kbn/fleet-plugin/server';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
@@ -47,6 +48,7 @@ import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './ag
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerStepDefinitions } from './step_types';
 import { registerHuntInvestigationTemplate } from './conversation_templates/hunt_investigation';
+import { makeResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 
 export class AlertZeroPlugin
   implements
@@ -71,6 +73,7 @@ export class AlertZeroPlugin
   private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
   private huntServices?: HuntServices;
   private reportsEsClient?: ElasticsearchClient;
+  private fleetAgentClient?: AgentClient;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -112,6 +115,7 @@ export class AlertZeroPlugin
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
       getReportsEsClient: () => this.requireReportsEsClient(),
+      getResolveHostEnrollment: () => makeResolveHostEnrollment(this.fleetAgentClient),
       logger: this.logger.get('steps'),
     });
     // Registered in setup so the builtin tool is available to Agent Builder before
@@ -165,6 +169,7 @@ export class AlertZeroPlugin
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.reportsEsClient = core.elasticsearch.client.asInternalUser;
+    this.fleetAgentClient = plugins.fleet?.agentService.asInternalUser;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 

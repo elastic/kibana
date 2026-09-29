@@ -19,6 +19,7 @@ import type {
 } from '@kbn/search-inference-endpoints/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -64,6 +65,12 @@ export interface AlertZeroStartDependencies {
    * connector an operator picked for a tier.
    */
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  /**
+   * Optional, matching the plugin manifest. Resolves a hunted host's Fleet
+   * enrollment so package_report can fill a respond action's endpoint_ids.
+   * Absence degrades every host to unenrolled, same as no agent found.
+   */
+  fleet?: FleetStartContract;
 }
 
 export type AlertZeroRouter = IRouter;

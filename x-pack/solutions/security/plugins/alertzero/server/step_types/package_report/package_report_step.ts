@@ -29,6 +29,8 @@ export interface PackageReportStepDependencies {
    * with reason `disabled` and proposals still mint.
    */
   isContextEngineEnabled?: (spaceId: string) => Promise<boolean>;
+  /** Defaults to treating every host as unenrolled when not provided (e.g. no Fleet plugin). */
+  getResolveHostEnrollment?: () => RunPackageReportDeps['resolveHostEnrollment'];
 }
 
 interface EsCoverageClient {
@@ -172,6 +174,7 @@ export const getPackageReportStepDefinition = ({
   getActionsService,
   getConversations,
   isContextEngineEnabled = async () => true,
+  getResolveHostEnrollment = () => defaultResolveHostEnrollment,
 }: PackageReportStepDependencies) =>
   createServerStepDefinition({
     ...packageReportStepCommonDefinition,
@@ -226,7 +229,7 @@ export const getPackageReportStepDefinition = ({
             listRespondActions,
             writeCoverageKis,
             patchExpectedProposalCount,
-            resolveHostEnrollment: defaultResolveHostEnrollment,
+            resolveHostEnrollment: getResolveHostEnrollment(),
             rehydrateProcessSelectors: defaultRehydrateProcessSelectors,
           },
         });
