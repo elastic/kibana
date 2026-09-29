@@ -150,7 +150,10 @@ const urlPathCandidates = (parsed: URL): string[] => {
   }
   const candidates = [encoded];
   try {
-    const decodedPath = decodeURIComponent(parsed.pathname);
+    // decodeURI keeps reserved path delimiters (`%2F`, `%3F`, …) encoded so a
+    // candidate like `/a%2Fb` cannot steal context from a distinct `/a/b` URL.
+    // Non-reserved UTF-8 sequences (`%C3%A9` → é) still decode for source matching.
+    const decodedPath = decodeURI(parsed.pathname);
     const decoded = `${decodedPath}${parsed.search}${parsed.hash}`;
     if (decoded !== encoded) candidates.push(decoded);
   } catch {

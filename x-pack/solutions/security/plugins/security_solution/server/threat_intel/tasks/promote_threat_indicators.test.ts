@@ -50,6 +50,7 @@ jest.mock('@kbn/task-manager-plugin/server', () => ({
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intel';
 import {
   buildBulkOpsForTest,
+  SOURCES_REMOVE_SCRIPT_FOR_TEST,
   SOURCES_UPSERT_SCRIPT_FOR_TEST,
   PROMOTE_THREAT_INDICATORS_TASK_TYPE,
   registerPromoteThreatIndicatorsTask,
@@ -57,6 +58,12 @@ import {
 
 const NOW = '2024-06-01T00:00:00.000Z';
 const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
+
+type TestOp = ReturnType<typeof buildBulkOpsForTest>[number];
+const upsertOps = (ops: TestOp[]) =>
+  ops.filter((op): op is Extract<TestOp, { kind: 'upsert' }> => op.kind === 'upsert');
+const retractOps = (ops: TestOp[]) =>
+  ops.filter((op): op is Extract<TestOp, { kind: 'retract' }> => op.kind === 'retract');
 
 /** Minimal ReportHit factory. */
 const makeReport = ({
@@ -74,6 +81,7 @@ const makeReport = ({
     value: string;
     reference?: string;
     tier?: string;
+    tier_basis?: string;
     deferred_unreviewed?: boolean;
   }>;
   sourceName?: string;
@@ -109,11 +117,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
 
-      expect(ops).toHaveLength(1);
-      expect(Buffer.byteLength(ops[0]._id, 'utf8')).toBeLessThanOrEqual(512);
-      expect(ops[0]._id).toMatch(/^default:url:[0-9a-f]{64}$/);
+      const [op] = upsertOps(ops);
+      expect(op).toBeDefined();
+      expect(Buffer.byteLength(op._id, 'utf8')).toBeLessThanOrEqual(512);
+      expect(op._id).toMatch(/^default:url:[0-9a-f]{64}$/);
       // The readable value is still queryable, it just is not the id.
-      const indicator = (ops[0].upsert.threat as { indicator: Record<string, unknown> }).indicator;
+      const indicator = (op.upsert.threat as { indicator: Record<string, unknown> }).indicator;
       expect((indicator.url as { full: string }).full).toBe(longUrl);
     });
 
@@ -190,7 +199,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '2001:db8::1' }] })],
         NOW
       );
-      const indicator = (ops[0].upsert.threat as { indicator: Record<string, unknown> }).indicator;
+      const indicator = (upsertOps(ops)[0].upsert.threat as { indicator: Record<string, unknown> })
+        .indicator;
       expect(indicator.type).toBe('ipv6-addr');
       expect(indicator.ip).toBe('2001:db8::1');
     });
@@ -203,7 +213,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
       expect(ops).toHaveLength(1);
-      const op = ops[0];
+      const op = upsertOps(ops)[0];
       // Stable, space-scoped _id
       expect(op._id).toBe('default:ip:1.2.3.4');
       expect((op.upsert as Record<string, unknown>).space_id).toBe('default');
@@ -241,10 +251,10 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
       // Each upsert doc's sources[] carries only that report's entry (for the
       // first-time-seen path where the doc doesn't exist yet).
-      const src0 = (ops[0].upsert as Record<string, unknown>).sources as Array<
+      const src0 = (upsertOps(ops)[0].upsert as Record<string, unknown>).sources as Array<
         Record<string, unknown>
       >;
-      const src1 = (ops[1].upsert as Record<string, unknown>).sources as Array<
+      const src1 = (upsertOps(ops)[1].upsert as Record<string, unknown>).sources as Array<
         Record<string, unknown>
       >;
       expect(src0[0].report_id).toBe('r1');
@@ -310,27 +320,29 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
 
-      expect(ops[0].scriptParams.reference).toBe(
+      expect(upsertOps(ops)[0].scriptParams.reference).toBe(
         'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
       );
     });
 
     it('removes credentials from report and IOC provenance before promotion', () => {
-      const [op] = buildBulkOpsForTest(
-        [
-          makeReport({
-            id: 'r-credentialed',
-            iocs: [
-              {
-                type: 'ip',
-                value: '1.2.3.4',
-                reference: 'https://ioc-user:ioc-password@references.example.com/report',
-              },
-            ],
-            sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
-          }),
-        ],
-        NOW
+      const [op] = upsertOps(
+        buildBulkOpsForTest(
+          [
+            makeReport({
+              id: 'r-credentialed',
+              iocs: [
+                {
+                  type: 'ip',
+                  value: '1.2.3.4',
+                  reference: 'https://ioc-user:ioc-password@references.example.com/report',
+                },
+              ],
+              sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
+            }),
+          ],
+          NOW
+        )
       );
 
       expect(op.scriptParams.reference).toBe('https://references.example.com/report');
@@ -343,15 +355,17 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
 
     it('rejects unsupported references and falls back to sanitized source provenance', () => {
-      const [op] = buildBulkOpsForTest(
-        [
-          makeReport({
-            id: 'r-unsafe-reference',
-            iocs: [{ type: 'ip', value: '1.2.3.4', reference: 'file:///etc/passwd' }],
-            sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
-          }),
-        ],
-        NOW
+      const [op] = upsertOps(
+        buildBulkOpsForTest(
+          [
+            makeReport({
+              id: 'r-unsafe-reference',
+              iocs: [{ type: 'ip', value: '1.2.3.4', reference: 'file:///etc/passwd' }],
+              sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
+            }),
+          ],
+          NOW
+        )
       );
 
       expect(op.scriptParams.reference).toBe('https://feeds.example.com/source');
@@ -407,6 +421,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
   describe('deferred_unreviewed promotion gate', () => {
     it('skips URL/domain IOCs marked deferred_unreviewed', () => {
       const reviewedHash = 'a'.repeat(64);
+      const deferredUrl = 'https://evil.example/deferred';
       const ops = buildBulkOpsForTest(
         [
           makeReport({
@@ -414,7 +429,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
             iocs: [
               {
                 type: 'url',
-                value: 'https://evil.example/deferred',
+                value: deferredUrl,
                 tier: 'discriminating',
                 deferred_unreviewed: true,
               },
@@ -425,14 +440,19 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
 
-      expect(ops).toHaveLength(1);
+      const upserts = upsertOps(ops);
+      const retracts = retractOps(ops);
+      expect(upserts).toHaveLength(1);
       expect(
         (
-          ops[0].upsert as {
+          upserts[0].upsert as {
             threat: { indicator: { file?: { hash?: { sha256?: string } } } };
           }
         ).threat.indicator.file?.hash?.sha256
       ).toBe(reviewedHash);
+      expect(retracts.map((op) => op._id)).toEqual([
+        `default:url:${new URL(deferredUrl).toString()}`,
+      ]);
     });
 
     it('still promotes when deferred_unreviewed is absent on older reports', () => {
@@ -446,7 +466,62 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
 
-      expect(ops).toHaveLength(1);
+      expect(upsertOps(ops)).toHaveLength(1);
+    });
+
+    it('does not upsert IOCs from a gate-rejected report and retracts prior citations', () => {
+      const url = 'https://evil.example/payload';
+      const ops = buildBulkOpsForTest(
+        [
+          {
+            ...makeReport({
+              id: 'r-rejected',
+              iocs: [{ type: 'url', value: url, tier: 'discriminating' }],
+            }),
+            _source: {
+              ...makeReport({
+                id: 'r-rejected',
+                iocs: [{ type: 'url', value: url, tier: 'discriminating' }],
+              })._source,
+              extracted: {
+                iocs: [{ type: 'url', value: url, tier: 'discriminating' }],
+                gate: { is_intelligence: false },
+              },
+              lineage: {
+                extracted_at: EXTRACTED_AT,
+                extraction_method: 'workflow_v4_rejected',
+              },
+            },
+          },
+        ],
+        NOW
+      );
+
+      expect(upsertOps(ops)).toHaveLength(0);
+      expect(retractOps(ops)).toHaveLength(1);
+    });
+
+    it('retracts a semantically downgraded URL that is no longer promotable', () => {
+      const url = 'https://evil.example/payload';
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-downgraded',
+            iocs: [
+              {
+                type: 'url',
+                value: url,
+                tier: 'reference',
+                tier_basis: 'semantic_reference',
+              },
+            ],
+          }),
+        ],
+        NOW
+      );
+
+      expect(upsertOps(ops)).toHaveLength(0);
+      expect(retractOps(ops)).toHaveLength(1);
     });
   });
 
@@ -463,7 +538,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       // Same value, different spaces → two isolated _ids, so the scripted upsert
       // never merges sources[] across space boundaries.
       expect(ops.map((op) => op._id)).toEqual(['team-a:ip:9.9.9.9', 'team-b:ip:9.9.9.9']);
-      expect((ops[0].upsert as Record<string, unknown>).space_id).toBe('team-a');
+      expect((upsertOps(ops)[0].upsert as Record<string, unknown>).space_id).toBe('team-a');
       expect((ops[1].upsert as Record<string, unknown>).space_id).toBe('team-b');
     });
 
@@ -475,7 +550,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       const ops = buildBulkOpsForTest([report], NOW);
 
       expect(ops[0]._id).toBe('*:ip:8.8.8.8');
-      expect((ops[0].upsert as Record<string, unknown>).space_id).toBe('*');
+      expect((upsertOps(ops)[0].upsert as Record<string, unknown>).space_id).toBe('*');
     });
   });
 });
@@ -925,7 +1000,7 @@ describe('vetting gate', () => {
     );
 
     expect(ops.map((op) => op._id)).toEqual(['default:ip:5.5.5.5']);
-    expect(ops[0].upsert.ioc_tier).toBe('uncertain');
+    expect(upsertOps(ops)[0].upsert.ioc_tier).toBe('uncertain');
   });
 
   it.each([['reference'], ['denied']])('drops %s IOCs', (tier) => {
@@ -954,7 +1029,9 @@ describe('vetting gate', () => {
       NOW
     );
 
-    expect(ops[0].upsert).toEqual(expect.objectContaining({ ioc_tier: 'discriminating' }));
+    expect(upsertOps(ops)[0].upsert).toEqual(
+      expect.objectContaining({ ioc_tier: 'discriminating' })
+    );
   });
 
   /**
@@ -971,7 +1048,7 @@ describe('vetting gate', () => {
         NOW
       );
 
-      expect(ops[0].scriptParams.ioc_tier).toBe('contextual');
+      expect(upsertOps(ops)[0].scriptParams.ioc_tier).toBe('contextual');
     });
 
     it('assigns ioc_tier in the script', () => {
@@ -994,7 +1071,9 @@ describe('vetting gate', () => {
           NOW
         );
 
-        expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(`'${ops[0].scriptParams.ioc_tier}': `);
+        expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(
+          `'${upsertOps(ops)[0].scriptParams.ioc_tier}': `
+        );
       }
     );
   });
@@ -1009,7 +1088,7 @@ describe('buildBulkOpsForTest — severity in scriptParams', () => {
       [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '1.2.3.4' }] })],
       NOW
     );
-    expect(ops[0].scriptParams.severity).toBe('low');
+    expect(upsertOps(ops)[0].scriptParams.severity).toBe('low');
   });
 
   it('passes null when the report carries no severity', () => {
@@ -1018,7 +1097,7 @@ describe('buildBulkOpsForTest — severity in scriptParams', () => {
 
     const ops = buildBulkOpsForTest([report], NOW);
 
-    expect(ops[0].scriptParams.severity).toBeNull();
+    expect(upsertOps(ops)[0].scriptParams.severity).toBeNull();
   });
 
   // The original bug was that the script never touched confidence at all: the
@@ -1030,5 +1109,12 @@ describe('buildBulkOpsForTest — severity in scriptParams', () => {
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(
       'ctx._source.threat.indicator.confidence = params.severity'
     );
+  });
+});
+
+describe('SOURCES_REMOVE_SCRIPT_FOR_TEST', () => {
+  it('removes the citing report and deletes the indicator when no citations remain', () => {
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.report_id == params.report_id');
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain("ctx.op = 'delete'");
   });
 });

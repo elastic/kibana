@@ -348,6 +348,19 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).toContain('café');
   });
 
+  it('does not treat percent-encoded reserved path bytes as a different URL path', () => {
+    const prepared = prepareIocAdjudication({
+      text:
+        'Docs list https://evil.example/a%2Fb as a reference. ' +
+        `${'filler prose. '.repeat(40)}` +
+        'The attacker later downloaded https://evil.example/a/b.',
+      iocs: [candidate('https://evil.example/a%2Fb')],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('Docs list');
+    expect(prepared.reviewable[0].context).not.toContain('attacker later downloaded');
+  });
+
   it('requires whole-hostname boundaries for domain review context', () => {
     const prepared = prepareIocAdjudication({
       text:

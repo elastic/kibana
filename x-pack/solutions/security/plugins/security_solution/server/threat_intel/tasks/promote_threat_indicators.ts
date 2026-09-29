@@ -127,10 +127,12 @@ interface ReportHit {
         value?: string;
         reference?: string;
         tier?: string;
+        tier_basis?: string;
         deferred_unreviewed?: boolean;
       }>;
+      gate?: { is_intelligence?: boolean };
     };
-    lineage?: { extracted_at?: string };
+    lineage?: { extracted_at?: string; extraction_method?: string };
   };
 }
 
@@ -147,6 +149,7 @@ interface SourceEntry {
 }
 
 interface IocIndicatorOp {
+  kind: 'upsert';
   _index: typeof THREAT_INTEL_INDICATORS_INDEX;
   _id: string;
   /** Full initial document for the upsert (first-time-seen path). */
@@ -164,6 +167,18 @@ interface IocIndicatorOp {
     ioc_tier: string;
   };
 }
+
+interface IocRetractOp {
+  kind: 'retract';
+  _index: typeof THREAT_INTEL_INDICATORS_INDEX;
+  _id: string;
+  scriptParams: {
+    report_id: string;
+    now: string;
+  };
+}
+
+type PromoteBulkOp = IocIndicatorOp | IocRetractOp;
 
 /**
  * Ceiling on the sources[] provenance array. `sources` is `nested`, capped at
@@ -281,6 +296,22 @@ if (params.ioc_tier != null) {
 }
 `.trim();
 
+/** Drop this report's citation; delete the indicator when no citations remain. */
+const SOURCES_REMOVE_SCRIPT = `
+if (ctx._source.sources == null) {
+  ctx._source.sources = [];
+}
+ctx._source.sources.removeIf(entry -> entry != null && entry.report_id == params.report_id);
+if (ctx._source.sources.size() == 0) {
+  ctx.op = 'delete';
+} else {
+  ctx._source['@timestamp'] = params.now;
+  if (ctx._source.threat != null && ctx._source.threat.indicator != null) {
+    ctx._source.threat.indicator.last_seen = params.now;
+  }
+}
+`.trim();
+
 const isIocType = (value: unknown): value is IocType =>
   typeof value === 'string' && (IOC_TYPES as readonly string[]).includes(value);
 
@@ -379,8 +410,17 @@ const ecsIndicatorPayload = (type: IocType, rawValue: string): Record<string, un
   return { type: 'file', file: { hash: { [hashField]: rawValue.toLowerCase() } } };
 };
 
-const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
-  const ops: IocIndicatorOp[] = [];
+/**
+ * Gate-rejected reports must not contribute new Indicator Match rows. They may
+ * still carry stale `extracted.iocs` from a prior partial enrichment; promotion
+ * still visits them so those citations can be retracted.
+ */
+const isRejectedReport = (report: ReportHit): boolean =>
+  report._source?.extracted?.gate?.is_intelligence === false ||
+  report._source?.lineage?.extraction_method === 'workflow_v4_rejected';
+
+const buildBulkOps = (reports: ReportHit[], now: string): PromoteBulkOp[] => {
+  const ops: PromoteBulkOp[] = [];
   for (const report of reports) {
     const reportId = report._id;
     // Reports carry space_id (seeded/global rows use GLOBAL_SPACE_ID). It scopes
@@ -393,6 +433,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     const severity = report._source?.severity?.level;
     const trailLabel = report._source?.content?.title ?? null;
     const firstSeen = report._source?.lineage?.extracted_at ?? now;
+    const rejected = isRejectedReport(report);
 
     // Two filters. The type/value check is defensive on the indexer boundary so
     // a single malformed row never poisons the bulk write. The tier check is the
@@ -400,15 +441,20 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     // become live Indicator Match rows. `deferred_unreviewed` is the semantic
     // review gate: URL/domain candidates past the batch budget keep a heuristic
     // tier for debugging but must not reach the live index until reviewed.
-    const usableIocs = iocs.filter(
-      (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
-        typeof ioc.value === 'string' &&
-        ioc.value.length > 0 &&
-        isIocType(ioc.type) &&
-        isWellFormedForType(ioc.type, ioc.value) &&
-        isPromotableTier(ioc.tier) &&
-        ioc.deferred_unreviewed !== true
-    );
+    // Gate-rejected reports never upsert, even when stale heuristic IOCs remain.
+    const usableIocs = rejected
+      ? []
+      : iocs.filter(
+          (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
+            typeof ioc.value === 'string' &&
+            ioc.value.length > 0 &&
+            isIocType(ioc.type) &&
+            isWellFormedForType(ioc.type, ioc.value) &&
+            isPromotableTier(ioc.tier) &&
+            ioc.deferred_unreviewed !== true
+        );
+    const usableIds = new Set(usableIocs.map((ioc) => indicatorId(spaceId, ioc.type, ioc.value)));
+
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
       // Prefer a per-IOC reference when present, then fall back to the report's
@@ -424,6 +470,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
       };
 
       ops.push({
+        kind: 'upsert',
         _index: THREAT_INTEL_INDICATORS_INDEX,
         _id: id,
         upsert: {
@@ -461,6 +508,35 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
         },
       });
     }
+
+    // Retract prior citations when a retry downgrades/defers an IOC or when the
+    // gate rejects a report that already contributed live indicators. Skip IOCs
+    // that could never have been promoted (denylist / private / etc.) so missing
+    // docs do not spam permanent bulk errors.
+    for (const ioc of iocs) {
+      if (
+        typeof ioc.value === 'string' &&
+        ioc.value.length > 0 &&
+        isIocType(ioc.type) &&
+        isWellFormedForType(ioc.type, ioc.value)
+      ) {
+        const id = indicatorId(spaceId, ioc.type, ioc.value);
+        if (!usableIds.has(id)) {
+          const mayHaveBeenPromoted =
+            rejected ||
+            isPromotableTier(ioc.tier) ||
+            (typeof ioc.tier_basis === 'string' && ioc.tier_basis.startsWith('semantic_'));
+          if (mayHaveBeenPromoted) {
+            ops.push({
+              kind: 'retract',
+              _index: THREAT_INTEL_INDICATORS_INDEX,
+              _id: id,
+              scriptParams: { report_id: reportId, now },
+            });
+          }
+        }
+      }
+    }
   }
   return ops;
 };
@@ -475,6 +551,7 @@ export const buildBulkOpsForTest = buildBulkOps;
  * coverage.
  */
 export const SOURCES_UPSERT_SCRIPT_FOR_TEST = SOURCES_UPSERT_SCRIPT;
+export const SOURCES_REMOVE_SCRIPT_FOR_TEST = SOURCES_REMOVE_SCRIPT;
 
 /** Error types worth waiting out, alongside `TRANSIENT_ES_STATUSES`. */
 const RETRYABLE_BULK_ERROR_TYPES: ReadonlySet<string> = new Set([
@@ -541,6 +618,15 @@ interface BulkScriptedUpsert {
   script: { source: string; lang: 'painless'; params: Record<string, unknown> };
   upsert: Record<string, unknown>;
 }
+/** Retract path: script-only update. Missing docs are expected and ignored. */
+interface BulkScriptedRetract {
+  script: { source: string; lang: 'painless'; params: Record<string, unknown> };
+}
+
+const isIgnorableRetractMiss = (
+  op: PromoteBulkOp,
+  item: estypes.BulkResponseItem | undefined
+): boolean => op.kind === 'retract' && item?.error?.type === 'document_missing_exception';
 
 export const registerPromoteThreatIndicatorsTask = ({
   taskManager,
@@ -673,7 +759,9 @@ export const registerPromoteThreatIndicatorsTask = ({
                       'content.title',
                       'severity.level',
                       'extracted.iocs',
+                      'extracted.gate.is_intelligence',
                       'lineage.extracted_at',
+                      'lineage.extraction_method',
                     ],
                     query: {
                       bool: {
@@ -716,17 +804,29 @@ export const registerPromoteThreatIndicatorsTask = ({
                   chunkStart += BULK_OPS_CHUNK_SIZE
                 ) {
                   const chunk = ops.slice(chunkStart, chunkStart + BULK_OPS_CHUNK_SIZE);
-                  const bulkBody: Array<BulkUpdateAction | BulkScriptedUpsert> = [];
+                  const bulkBody: Array<
+                    BulkUpdateAction | BulkScriptedUpsert | BulkScriptedRetract
+                  > = [];
                   for (const op of chunk) {
                     bulkBody.push({ update: { _index: op._index, _id: op._id } });
-                    bulkBody.push({
-                      script: {
-                        source: SOURCES_UPSERT_SCRIPT,
-                        lang: 'painless',
-                        params: op.scriptParams as Record<string, unknown>,
-                      },
-                      upsert: op.upsert,
-                    });
+                    if (op.kind === 'retract') {
+                      bulkBody.push({
+                        script: {
+                          source: SOURCES_REMOVE_SCRIPT,
+                          lang: 'painless',
+                          params: op.scriptParams as Record<string, unknown>,
+                        },
+                      });
+                    } else {
+                      bulkBody.push({
+                        script: {
+                          source: SOURCES_UPSERT_SCRIPT,
+                          lang: 'painless',
+                          params: op.scriptParams as Record<string, unknown>,
+                        },
+                        upsert: op.upsert,
+                      });
+                    }
                   }
                   try {
                     const bulkResponse = await esClient.bulk(
@@ -734,11 +834,25 @@ export const registerPromoteThreatIndicatorsTask = ({
                       { signal }
                     );
                     if (bulkResponse.errors) {
-                      const failedItems = bulkResponse.items
-                        .map((item) => item.update ?? item.index ?? item.create)
-                        .filter((action): action is estypes.BulkResponseItem => !!action?.error);
-                      const retryable = failedItems.filter(isRetryableBulkFailure);
-                      const permanent = failedItems.filter((item) => !isRetryableBulkFailure(item));
+                      // One bulk item per op; index aligns with `chunk`.
+                      const itemResults = bulkResponse.items.map(
+                        (item) => item.update ?? item.index ?? item.create
+                      );
+                      const failed = itemResults
+                        .map((item, index) => ({ item, op: chunk[index] }))
+                        .filter(
+                          (
+                            entry
+                          ): entry is {
+                            item: estypes.BulkResponseItem;
+                            op: PromoteBulkOp;
+                          } =>
+                            !!entry.item?.error &&
+                            !!entry.op &&
+                            !isIgnorableRetractMiss(entry.op, entry.item)
+                        );
+                      const retryable = failed.filter(({ item }) => isRetryableBulkFailure(item));
+                      const permanent = failed.filter(({ item }) => !isRetryableBulkFailure(item));
 
                       if (retryable.length > 0) {
                         hadRetryableWriteFailures = true;
@@ -746,7 +860,7 @@ export const registerPromoteThreatIndicatorsTask = ({
                           `IOC indicator bulk hit ${retryable.length} transient rejection(s) of ` +
                             `${chunk.length} operations. Holding the sync checkpoint so the next run ` +
                             `re-scans this range (first error: ${JSON.stringify(
-                              retryable[0].error ?? {}
+                              retryable[0].item.error ?? {}
                             )})`
                         );
                       }
@@ -759,14 +873,14 @@ export const registerPromoteThreatIndicatorsTask = ({
                             `Indicator Match rules and are being skipped so the sync checkpoint can ` +
                             `advance: retrying them would fail the same way and stall promotion for ` +
                             `every space. Ids: ${permanent
-                              .map((item) => item._id)
+                              .map(({ item }) => item._id)
                               .slice(0, 10)
                               .join(', ')}${permanent.length > 10 ? ', …' : ''} ` +
-                            `(first error: ${JSON.stringify(permanent[0].error ?? {})})`
+                            `(first error: ${JSON.stringify(permanent[0].item.error ?? {})})`
                         );
                       }
 
-                      indicatorsWritten += chunk.length - failedItems.length;
+                      indicatorsWritten += chunk.length - failed.length;
                     } else {
                       indicatorsWritten += chunk.length;
                     }
