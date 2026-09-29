@@ -53,7 +53,6 @@ const preExistingAreas = {
   pushes: getPushesMock,
   configuration: getConfigurationMock,
   casesSystemAction: getCasesSystemActionMock,
-  workflows: getWorkflowsMock,
 };
 
 const zeroCount = { total: 0, monthly: 0, weekly: 0, daily: 0 };
@@ -93,6 +92,21 @@ const expectedFieldLibrary = {
   main: populatedFieldLibraryScope,
 };
 
+const expectedWorkflows = {
+  runs: { total: 4, monthly: 4, weekly: 3, daily: 1 },
+  totalCasesWithRuns: 3,
+  totalUniqueUsers: 2,
+  byOriginType: {
+    case: 1,
+    observable: 1,
+    observables: 0,
+    attachment: 0,
+    attachments: 0,
+    unattributed: 2,
+  },
+  configurationsWithWorkflowTags: 1,
+};
+
 describe('collectTelemetryData', () => {
   const logger = loggingSystemMock.createLogger();
   const savedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsRepositoryMock.create());
@@ -117,17 +131,20 @@ describe('collectTelemetryData', () => {
       obs: populatedFieldLibraryScope,
       main: populatedFieldLibraryScope,
     });
+    getWorkflowsMock.mockResolvedValue(expectedWorkflows);
   });
 
-  it('reports templates and field library alongside every pre-existing area', async () => {
+  it('reports templates, field library, and workflows alongside every pre-existing area', async () => {
     const result = await collect();
 
     expect(getTemplatesMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
     expect(getFieldLibraryMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
+    expect(getWorkflowsMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
     expect(result).toStrictEqual({
       ...preExistingPayload(),
       templates: expectedTemplates,
       fieldLibrary: expectedFieldLibrary,
+      workflows: expectedWorkflows,
     });
   });
 
@@ -145,6 +162,7 @@ describe('collectTelemetryData', () => {
       expect(result).toStrictEqual({
         ...preExistingPayload(),
         fieldLibrary: expectedFieldLibrary,
+        workflows: expectedWorkflows,
       });
     });
 
@@ -168,14 +186,39 @@ describe('collectTelemetryData', () => {
       expect(result).toStrictEqual({
         ...preExistingPayload(),
         templates: expectedTemplates,
+        workflows: expectedWorkflows,
       });
+    });
+  });
+
+  describe('when the workflows query fails', () => {
+    beforeEach(() => {
+      getWorkflowsMock.mockRejectedValue(new Error('workflows boom'));
+    });
+
+    it('omits only the workflows key, leaving every other area intact', async () => {
+      const result = await collect();
+
+      // Absent, not zeroed: zeroed would be indistinguishable from a deployment that has never
+      // run a workflow from a case.
+      expect(result).toStrictEqual({
+        ...preExistingPayload(),
+        templates: expectedTemplates,
+        fieldLibrary: expectedFieldLibrary,
+      });
+    });
+
+    it('logs the failure', async () => {
+      await collect();
+
+      expect(logger.debug).toHaveBeenCalledWith('Failed collecting Cases workflows telemetry data');
     });
   });
 
   describe('when a pre-existing area fails', () => {
     // The pre-existing contract: any failure here discards the whole payload so that an
     // error is distinguishable from a cluster that simply does not use cases. This step
-    // must not change that, templates and field library included.
+    // must not change that, templates, field library, and workflows included.
     it.each(Object.keys(preExistingAreas))('empties the whole payload for %s', async (area) => {
       preExistingAreas[area as keyof typeof preExistingAreas].mockRejectedValue(
         new Error(`${area} boom`)
@@ -184,13 +227,14 @@ describe('collectTelemetryData', () => {
       expect(await collect()).toStrictEqual({});
     });
 
-    it('discards successfully collected templates and field library areas too', async () => {
+    it('discards successfully collected templates, field library, and workflows areas too', async () => {
       getCasesMock.mockRejectedValue(new Error('cases boom'));
 
       const result = await collect();
 
       expect(getTemplatesMock).toHaveBeenCalled();
       expect(getFieldLibraryMock).toHaveBeenCalled();
+      expect(getWorkflowsMock).toHaveBeenCalled();
       expect(result).toStrictEqual({});
     });
 
