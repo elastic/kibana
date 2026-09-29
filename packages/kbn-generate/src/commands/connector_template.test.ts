@@ -18,7 +18,7 @@ const TEMPLATE_PATH = Path.resolve(
 );
 
 describe('connector scaffold template', () => {
-  it('scaffolds a license the actions plugin accepts for a third party type', async () => {
+  it('scaffolds the enterprise license new third party connectors default to', async () => {
     // The template is asserted as source rather than rendered: ejs compiles with
     // `new Function`, which the Jest preset disallows. `minimumLicense` is a
     // literal in the template, not an interpolated value, so the source is exact.
@@ -27,9 +27,10 @@ describe('connector scaffold template', () => {
 
     expect(minimumLicense).toBeDefined();
     expect(LICENSE_TYPE).toHaveProperty(minimumLicense as string);
-    // `ensureSufficientLicense` in the actions plugin throws for a third party
-    // action type below enterprise, which exits Kibana on startup. Only `.server-log`
-    // and `.index` are exempt, and a scaffolded connector is never either.
+    // New third party connectors default to an enterprise license by policy, which is
+    // stricter than the platform floor: `ensureSufficientLicense` in the actions plugin
+    // throws only below gold, and exits Kibana on startup when it does. Only
+    // `.server-log` and `.index` are exempt, and a scaffolded connector is never either.
     expect(LICENSE_TYPE[minimumLicense as keyof typeof LICENSE_TYPE]).toBeGreaterThanOrEqual(
       LICENSE_TYPE.enterprise
     );
