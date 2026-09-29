@@ -16,6 +16,7 @@ import {
   LOCAL_GIT_MAX_SPOOL_CONCURRENCY,
   LOCAL_GIT_MAX_TOTAL_SPOOL_BYTES,
   LOCAL_GIT_PAGE_SIZE,
+  LOCAL_GIT_SPOOL_SLOT_WAIT_MS,
   LOCAL_GIT_SPOOL_TTL_MS,
   containsControlCharacter,
 } from './local_bare_git_helpers';
@@ -32,6 +33,7 @@ export class LocalBareGitConfiguration {
   public readonly maxSpoolBytes: number;
   public readonly maxTotalSpoolBytes: number;
   public readonly maxSpoolConcurrency: number;
+  public readonly spoolSlotWaitMs: number;
   public readonly maxActiveSpools: number;
   public readonly spoolTtlMs: number;
   public readonly spoolRootPath: string;
@@ -65,6 +67,7 @@ export class LocalBareGitConfiguration {
     this.maxSpoolBytes = options.maxSpoolBytes ?? LOCAL_GIT_MAX_SPOOL_BYTES;
     this.maxTotalSpoolBytes = options.maxTotalSpoolBytes ?? LOCAL_GIT_MAX_TOTAL_SPOOL_BYTES;
     this.maxSpoolConcurrency = options.maxSpoolConcurrency ?? LOCAL_GIT_MAX_SPOOL_CONCURRENCY;
+    this.spoolSlotWaitMs = options.spoolSlotWaitMs ?? LOCAL_GIT_SPOOL_SLOT_WAIT_MS;
     this.maxActiveSpools = options.maxActiveSpools ?? LOCAL_GIT_MAX_ACTIVE_SPOOLS;
     this.spoolTtlMs = options.spoolTtlMs ?? LOCAL_GIT_SPOOL_TTL_MS;
     this.spoolRootPath = options.spoolRootPath ?? join(tmpdir(), SPOOL_ROOT_NAME);
@@ -78,10 +81,12 @@ export class LocalBareGitConfiguration {
         this.maxSpoolBytes,
         this.maxTotalSpoolBytes,
         this.maxSpoolConcurrency,
+        this.spoolSlotWaitMs,
         this.maxActiveSpools,
         this.spoolTtlMs,
       ].some((value) => !Number.isSafeInteger(value) || value < 1) ||
       this.commandTimeoutMs > MAX_TIMER_DELAY_MS ||
+      this.spoolSlotWaitMs > MAX_TIMER_DELAY_MS ||
       this.spoolTtlMs > MAX_TIMER_DELAY_MS ||
       this.maxSpoolBytes > this.maxTotalSpoolBytes
     )
