@@ -110,6 +110,7 @@ export async function relaySendMessage(
       channel,
       message: input.text,
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
+      ...(input.messageTs ? { messageTs: input.messageTs } : {}),
     });
 
     return { ok: true, channel: resolvedChannel, ts: ref };

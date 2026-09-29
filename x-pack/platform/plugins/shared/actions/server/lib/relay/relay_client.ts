@@ -179,12 +179,14 @@ export class RelayClient implements RelayClientContract {
     channel,
     message,
     threadTs,
+    messageTs,
   }: RelayTriggerInput): Promise<RelayTriggerResponse> {
     const response = await this.post('/v1/slack/trigger', {
       tenant_key: tenantKey,
       channel,
       message,
       ...(threadTs ? { thread_ts: threadTs } : {}),
+      ...(messageTs ? { message_ts: messageTs } : {}),
     });
 
     const body = response.data as RelayTriggerResponseBody | undefined;

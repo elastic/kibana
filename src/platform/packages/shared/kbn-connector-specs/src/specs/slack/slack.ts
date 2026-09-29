@@ -1116,7 +1116,9 @@ export const Slack: ConnectorSpec = {
           text: typedInput.text,
         };
 
-        if (typedInput.threadTs) {
+        if (typedInput.messageTs) {
+          payload.ts = typedInput.messageTs;
+        } else if (typedInput.threadTs) {
           payload.thread_ts = typedInput.threadTs;
         }
         if (typedInput.unfurlLinks !== undefined) {
@@ -1126,6 +1128,8 @@ export const Slack: ConnectorSpec = {
           payload.unfurl_media = typedInput.unfurlMedia;
         }
 
+        const method = typedInput.messageTs ? 'chat.update' : 'chat.postMessage';
+
         try {
           ctx.log.debug(`Slack sendMessage request: channel=${typedInput.channel}`);
           const response = await slackRequestWithRateLimitRetry({
@@ -1133,7 +1137,7 @@ export const Slack: ConnectorSpec = {
             action: 'sendMessage',
             maxRetries: SLACK_MAX_RETRIES,
             request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
+              ctx.client.post(`${SLACK_API_BASE}/${method}`, payload, {
                 headers: {
                   'Content-Type': 'application/json; charset=utf-8',
                 },

@@ -74,6 +74,8 @@ export interface RelayTriggerInput {
   message: string;
   /** Timestamp of the message to reply to, when posting into an existing thread. */
   threadTs?: string;
+  /** Timestamp of a message this app posted earlier; the Relay edits it instead of posting. */
+  messageTs?: string;
 }
 
 export interface RelayTriggerResponse {

@@ -668,6 +668,12 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe('Timestamp of another message to reply to (creates a threaded reply)'),
+    messageTs: z
+      .string()
+      .optional()
+      .describe(
+        'Timestamp of a message this app posted earlier. When set, that message is edited in place instead of posting a new one.'
+      ),
     unfurlLinks: z
       .boolean()
       .optional()
