@@ -211,7 +211,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
       data-test-subj="paginated-basic-table"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -900,7 +900,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
       data-test-subj="paginated-basic-table"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"

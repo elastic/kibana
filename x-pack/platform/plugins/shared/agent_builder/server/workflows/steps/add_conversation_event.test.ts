@@ -44,6 +44,7 @@ describe('addConversationEventStepDefinition', () => {
     const definition = addConversationEventStepDefinition({
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
+      getExecutionService: jest.fn(),
       isExperimentalEnabled,
     });
     return { conv, isExperimentalEnabled, definition };
