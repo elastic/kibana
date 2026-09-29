@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
 import { ElasticsearchCatalogWriter } from './adapters/elasticsearch_catalog';
+import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
 import type { ExtractionService } from './extraction_service';
 
 const repositoryIdentity = schema.string({ minLength: 3, maxLength: 256 });
@@ -59,7 +60,7 @@ export const registerRoutes = ({
       }
       try {
         const { elasticsearch } = await context.core;
-        const id = extractionService.start(
+        const id = await extractionService.start(
           request.body.repository,
           request.body.revision,
           request,
@@ -68,6 +69,9 @@ export const registerRoutes = ({
         );
         return response.accepted({ body: { id } });
       } catch (error) {
+        if (error instanceof ExtractionAlreadyRunningError) {
+          return response.conflict({ body: { message: error.message } });
+        }
         return response.customError({
           statusCode: 429,
           body: { message: error instanceof Error ? error.message : 'Extraction could not start.' },

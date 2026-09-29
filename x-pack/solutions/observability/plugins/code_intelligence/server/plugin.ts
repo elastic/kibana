@@ -8,6 +8,7 @@
 import { randomBytes } from 'node:crypto';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
@@ -56,6 +57,7 @@ export class CodeIntelligencePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   private readonly config: CodeIntelligenceConfig;
+  private lockManager: LockManagerService | undefined;
   private services: StartedServices | undefined;
   private workflowsManagement: WorkflowsServerPluginSetup['management'] | undefined;
 
@@ -74,6 +76,7 @@ export class CodeIntelligencePlugin
 
     plugins.workflowsExtensions.registerManagedWorkflowOwner(managedWorkflowOwner);
     this.workflowsManagement = plugins.workflowsManagement.management;
+    this.lockManager = new LockManagerService(core, this.context.logger.get());
     registerRoutes({
       catalogIndex: this.config.catalogIndex,
       getServices: () => {
@@ -91,6 +94,7 @@ export class CodeIntelligencePlugin
     if (
       !this.config.enabled ||
       this.workflowsManagement === undefined ||
+      this.lockManager === undefined ||
       this.config.workflowConnectorId === undefined ||
       this.config.repositories.length === 0
     ) {
@@ -117,6 +121,7 @@ export class CodeIntelligencePlugin
     };
     this.services = {
       extractionService: new ExtractionService({
+        lockManager: this.lockManager,
         managedWorkflows: managedClient,
         management: this.workflowsManagement,
         reader: new LocalBareGitSourceReader(options),

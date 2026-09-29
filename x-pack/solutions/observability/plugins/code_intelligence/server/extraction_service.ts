@@ -8,6 +8,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { isLockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
@@ -16,6 +17,7 @@ import type { QueryValidator } from './domain/ports/query_validator';
 import type { RepositoryResolver } from './domain/ports/repository_resolver';
 import type { SourceReader } from './domain/ports/source_reader';
 import { extractRepository } from './extract_repository';
+import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
 import { InProcessClassificationWorkflowClient } from './workflows/in_process_classification_client';
 
 export interface ExtractionStatus {
@@ -42,12 +44,18 @@ interface MutableExtractionStatus {
   completedAt?: string;
 }
 
+/** Names the cluster-wide lock held for the whole extraction of one repository. */
+export const extractionLockId = (repository: string): string =>
+  `code_intelligence_extraction:${repository}`;
+
 export class ExtractionService {
   private readonly runs = new Map<string, MutableExtractionStatus>();
   private readonly promises = new Map<string, Promise<void>>();
 
   public constructor(
     private readonly dependencies: {
+      /** Serializes runs of one repository across Kibana instances, since each run prunes the catalog. */
+      readonly lockManager: Pick<LockManagerService, 'withLock'>;
       readonly managedWorkflows: PluginScopedManagedWorkflowsApi;
       readonly management: WorkflowsManagementApi;
       readonly reader: SourceReader;
@@ -56,13 +64,18 @@ export class ExtractionService {
     }
   ) {}
 
-  public start(
+  public async start(
     repository: string,
     revision: string,
     request: KibanaRequest,
     spaceId: string,
     catalogWriter: CatalogWriter
-  ): string {
+  ): Promise<string> {
+    for (const run of this.runs.values()) {
+      if (run.repository === repository && run.status === 'running') {
+        throw new ExtractionAlreadyRunningError(repository);
+      }
+    }
     this.prune();
     if (this.runs.size >= 100) {
       throw new Error('Extraction tracking capacity is full.');
@@ -79,9 +92,33 @@ export class ExtractionService {
       startedAt: new Date().toISOString(),
     };
     this.runs.set(id, run);
-    const promise = this.run(run, request, spaceId, catalogWriter).finally(() =>
-      this.promises.delete(id)
+    let signalAcquired: () => void = () => {};
+    const acquired = new Promise<void>((resolve) => {
+      signalAcquired = resolve;
+    });
+    const locked = this.dependencies.lockManager.withLock(
+      extractionLockId(repository),
+      async () => {
+        signalAcquired();
+        await this.run(run, request, spaceId, catalogWriter);
+      }
     );
+    try {
+      await Promise.race([acquired, locked]);
+    } catch (error) {
+      this.runs.delete(id);
+      if (isLockAcquisitionError(error)) throw new ExtractionAlreadyRunningError(repository);
+      throw error;
+    }
+    const promise = locked
+      .catch(() => {
+        if (run.status === 'running') {
+          run.status = 'failed';
+          run.errors = ['Extraction failed unexpectedly.'];
+          run.completedAt = new Date().toISOString();
+        }
+      })
+      .finally(() => this.promises.delete(id));
     this.promises.set(id, promise);
     return id;
   }
