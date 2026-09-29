@@ -57,11 +57,7 @@ jest.mock('./rule_summary_flyout', () => ({
 
 jest.mock('../../../loading_flyout', () => ({
   LoadingFlyout: ({ type, ownFocus }: { type?: string; ownFocus?: boolean }) => (
-    <div
-      data-test-subj="mockLoadingFlyout"
-      data-type={type}
-      data-own-focus={String(ownFocus)}
-    />
+    <div data-test-subj="mockLoadingFlyout" data-type={type} data-own-focus={String(ownFocus)} />
   ),
 }));
 
