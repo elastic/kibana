@@ -25,16 +25,17 @@ const ProcessParam = z.enum(['priority', 'nonPriority', 'both']).default('both')
 const bodySchema = z.object({
   entityTypes: z
     .array(EntityType)
+    .max(ALL_ENTITY_TYPES.length)
     .optional()
-    .default(ALL_ENTITY_TYPES)
-    .describe('Entity types to act on. Defaults to all installed types.'),
+    .describe('Entity types to act on. Defaults to every type the process applies to.'),
   process: ProcessParam.describe(
     'Which extraction process to act on. Defaults to both, matching the public start/stop APIs.'
   ),
 });
 
 type StartStopRequestBody = z.infer<typeof bodySchema>;
-type SingleProcess = Exclude<z.infer<typeof ProcessParam>, 'both'>;
+type Process = z.infer<typeof ProcessParam>;
+type SingleProcess = Exclude<Process, 'both'>;
 
 /**
  * The two processes track their state in separate descriptor fields, so which one decides
@@ -43,10 +44,25 @@ type SingleProcess = Exclude<z.infer<typeof ProcessParam>, 'both'>;
 const statusFor = (engine: EngineDescriptor, process: SingleProcess) =>
   process === EXTRACTION_MODE.nonPriority ? engine.nonPriorityStatus : engine.status;
 
+/**
+ * Resolves the types to act on. An explicit list is taken as-is so an impossible request is
+ * reported rather than silently narrowed; an omitted list expands to the types the requested
+ * process actually runs on, which for `nonPriority` is only the gated ones.
+ */
+const resolveEntityTypes = (
+  entityTypes: EntityType[] | undefined,
+  process: Process
+): EntityType[] => {
+  if (entityTypes !== undefined) return [...new Set(entityTypes)];
+  return process === EXTRACTION_MODE.nonPriority
+    ? ALL_ENTITY_TYPES.filter(hasPriorityExtractionGate)
+    : [...ALL_ENTITY_TYPES];
+};
+
 /** Types that have a non-priority variant at all. Others only ever run one process. */
 const rejectUngatedTypes = (
   entityTypes: EntityType[],
-  process: z.infer<typeof ProcessParam>,
+  process: Process,
   res: KibanaResponseFactory
 ): IKibanaResponse | null => {
   if (process !== EXTRACTION_MODE.nonPriority) return null;
@@ -66,8 +82,13 @@ export async function handleInternalStart(
   req: KibanaRequest<unknown, unknown, StartStopRequestBody>,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse> {
-  const { logger, assetManagerClient: assetManager } = await ctx.entityStore;
-  const { entityTypes, process } = req.body;
+  const {
+    logger,
+    assetManagerClient: assetManager,
+    entityMaintainersClient,
+  } = await ctx.entityStore;
+  const { process } = req.body;
+  const entityTypes = resolveEntityTypes(req.body.entityTypes, process);
 
   logger.debug(`Internal start API invoked for process: ${process}`);
 
@@ -78,10 +99,20 @@ export async function handleInternalStart(
   const installed = new Map(engines.map((engine) => [engine.type, engine]));
 
   if (process === 'both') {
-    const toStart = entityTypes.filter(
-      (type) => installed.get(type)?.status === ENGINE_STATUS.STOPPED
-    );
+    // Either status being stopped is enough: the two can diverge once the single-process routes
+    // have been used, and `both` has to end with both running.
+    const toStart = entityTypes.filter((type) => {
+      const engine = installed.get(type);
+      if (engine === undefined) return false;
+      return (
+        engine.status === ENGINE_STATUS.STOPPED ||
+        engine.nonPriorityStatus === ENGINE_STATUS.STOPPED
+      );
+    });
     await Promise.all(toStart.map((type) => assetManager.start(req, type)));
+    if (toStart.length > 0) {
+      await entityMaintainersClient.startAll(req);
+    }
     return res.ok({ body: { ok: true, started: toStart } });
   }
 
@@ -99,8 +130,13 @@ export async function handleInternalStop(
   req: KibanaRequest<unknown, unknown, StartStopRequestBody>,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse> {
-  const { logger, assetManagerClient: assetManager } = await ctx.entityStore;
-  const { entityTypes, process } = req.body;
+  const {
+    logger,
+    assetManagerClient: assetManager,
+    entityMaintainersClient,
+  } = await ctx.entityStore;
+  const { process } = req.body;
+  const entityTypes = resolveEntityTypes(req.body.entityTypes, process);
 
   logger.debug(`Internal stop API invoked for process: ${process}`);
 
@@ -111,10 +147,23 @@ export async function handleInternalStop(
   const installed = new Map(engines.map((engine) => [engine.type, engine]));
 
   if (process === 'both') {
-    const toStop = entityTypes.filter(
-      (type) => installed.get(type)?.status === ENGINE_STATUS.STARTED
-    );
+    // Either status being started is enough, otherwise stopping priority on its own first would
+    // make `both` skip the type and leave non-priority extraction running.
+    const toStop = entityTypes.filter((type) => {
+      const engine = installed.get(type);
+      if (engine === undefined) return false;
+      return (
+        engine.status === ENGINE_STATUS.STARTED ||
+        engine.nonPriorityStatus === ENGINE_STATUS.STARTED
+      );
+    });
     await Promise.all(toStop.map((type) => assetManager.stop(type)));
+    if (toStop.length > 0) {
+      const { engines: remaining } = await assetManager.getStatus();
+      if (!remaining.some((engine) => engine.status === ENGINE_STATUS.STARTED)) {
+        await entityMaintainersClient.stopAll(req);
+      }
+    }
     return res.ok({ body: { ok: true, stopped: toStop } });
   }
 

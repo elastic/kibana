@@ -29,15 +29,21 @@ const createCtx = (engines: EngineDescriptor[]) => {
     startProcess: jest.fn().mockResolvedValue(undefined),
     stopProcess: jest.fn().mockResolvedValue(undefined),
   };
+  const maintainers = {
+    startAll: jest.fn().mockResolvedValue(undefined),
+    stopAll: jest.fn().mockResolvedValue(undefined),
+  };
 
   return {
     ctx: {
       entityStore: Promise.resolve({
         logger: loggerMock.create(),
         assetManagerClient: assetManager as unknown as AssetManagerClient,
+        entityMaintainersClient: maintainers,
       }),
     } as unknown as EntityStoreRequestHandlerContext,
     assetManager,
+    maintainers,
   };
 };
 
@@ -107,6 +113,49 @@ describe('internal start/stop', () => {
       expect(result).toMatchObject({ status: 400 });
       expect(assetManager.stopProcess).not.toHaveBeenCalled();
     });
+
+    // An omitted list must not expand to types the process cannot run on, or the request that
+    // documents itself as "all eligible engines" would always be a 400.
+    it('defaults to the gated types when no entity types are given', async () => {
+      const { ctx, assetManager } = createCtx([engine({})]);
+
+      const result = await handleInternalStop(
+        ctx,
+        createReq({ process: 'nonPriority' }),
+        createRes()
+      );
+
+      expect(assetManager.stopProcess).toHaveBeenCalledWith('user', 'nonPriority');
+      expect(result).toEqual({ status: 200, payload: { ok: true, stopped: ['user'] } });
+    });
+
+    it('stops a type whose priority process is already stopped when process is both', async () => {
+      const { ctx, assetManager } = createCtx([engine({ status: ENGINE_STATUS.STOPPED })]);
+
+      const result = await handleInternalStop(
+        ctx,
+        createReq({ entityTypes: ['user'], process: 'both' }),
+        createRes()
+      );
+
+      expect(assetManager.stop).toHaveBeenCalledWith('user');
+      expect(result).toEqual({ status: 200, payload: { ok: true, stopped: ['user'] } });
+    });
+
+    it('stops the maintainers once no engine is left started', async () => {
+      const { ctx, maintainers, assetManager } = createCtx([engine({})]);
+      assetManager.getStatus
+        .mockResolvedValueOnce({ engines: [engine({})] })
+        .mockResolvedValueOnce({ engines: [engine({ status: ENGINE_STATUS.STOPPED })] });
+
+      await handleInternalStop(
+        ctx,
+        createReq({ entityTypes: ['user'], process: 'both' }),
+        createRes()
+      );
+
+      expect(maintainers.stopAll).toHaveBeenCalled();
+    });
   });
 
   describe('handleInternalStart', () => {
@@ -153,6 +202,22 @@ describe('internal start/stop', () => {
 
       expect(assetManager.startProcess).not.toHaveBeenCalled();
       expect(result).toEqual({ status: 200, payload: { ok: true, started: [] } });
+    });
+
+    it('starts a type whose non-priority process alone is stopped when process is both', async () => {
+      const { ctx, assetManager, maintainers } = createCtx([
+        engine({ nonPriorityStatus: ENGINE_STATUS.STOPPED }),
+      ]);
+
+      const result = await handleInternalStart(
+        ctx,
+        createReq({ entityTypes: ['user'], process: 'both' }),
+        createRes()
+      );
+
+      expect(assetManager.start).toHaveBeenCalledWith(expect.anything(), 'user');
+      expect(maintainers.startAll).toHaveBeenCalled();
+      expect(result).toEqual({ status: 200, payload: { ok: true, started: ['user'] } });
     });
   });
 });

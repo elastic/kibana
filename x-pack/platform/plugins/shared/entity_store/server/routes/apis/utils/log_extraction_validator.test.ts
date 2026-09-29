@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { LogExtractionInstallSchema } from './log_extraction_validator';
+import type { LogExtractionConfig } from '../../../domain/saved_objects';
+import { findEffectiveConfigError, LogExtractionInstallSchema } from './log_extraction_validator';
 
 const TestSchema = z.object({ logExtraction: LogExtractionInstallSchema });
 
@@ -58,5 +59,26 @@ describe('LogExtractionInstallParams additionalIndexPatterns', () => {
       const issue = result.error.issues.find((i) => Array.isArray(i.path) && i.path[2] === 1);
       expect(issue).toBeDefined();
     }
+  });
+});
+
+describe('findEffectiveConfigError', () => {
+  const config = (overrides: Partial<LogExtractionConfig>) =>
+    ({ frequency: '1m', delay: '1m', lookbackPeriod: '3h', ...overrides } as LogExtractionConfig);
+
+  it('accepts a config where delay is below the lookback period', () => {
+    expect(findEffectiveConfigError(config({}))).toBeNull();
+  });
+
+  // The per-block schema check compares against the built-in 3h default, so it passes a delay
+  // that only breaks once a shorter stored lookbackPeriod is merged in.
+  it('rejects a delay that is not below the merged lookback period', () => {
+    expect(findEffectiveConfigError(config({ delay: '5m', lookbackPeriod: '2m' }))).toContain(
+      'must be less than lookbackPeriod'
+    );
+  });
+
+  it('rejects a frequency below 30 seconds', () => {
+    expect(findEffectiveConfigError(config({ frequency: '10s' }))).toContain('30 seconds');
   });
 });

@@ -13,7 +13,7 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
+import { FF_ENABLE_ENTITY_STORE_V2, FF_DUAL_PROCESS_ENABLED } from '../../../../../common';
 import {
   getStatus,
   installAllEntityTypes,
@@ -57,9 +57,14 @@ apiTest.describe(
       };
     });
 
-    apiTest.beforeEach(async ({ kbnClient, apiClient }) => {
+    apiTest.beforeEach(async ({ kbnClient, apiClient, apiServices }) => {
       await kbnClient.uiSettings.update({
         [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+      // Set explicitly rather than relying on the default: the flag can already be on from a
+      // Cloud rollout or another suite, and two cases below assert the flag-off behaviour.
+      await apiServices.core.settings({
+        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false },
       });
 
       await uninstallAllEntityTypes(apiClient, defaultHeaders).catch(() => {});

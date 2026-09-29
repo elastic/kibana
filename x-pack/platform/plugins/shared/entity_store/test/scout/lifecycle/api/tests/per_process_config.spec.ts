@@ -22,6 +22,8 @@ import {
   type ApiClientFixture,
 } from '../../../common/fixtures/helpers';
 
+type SettingsFn = (settings: Record<string, unknown>) => Promise<unknown>;
+
 const NON_PRIORITY_TASK_ID = 'entity_store:v2:extract_entity_non_priority_task:user:default';
 const PRIORITY_TASK_ID = 'entity_store:v2:extract_entity_task:user:default';
 
@@ -47,6 +49,8 @@ apiTest.describe(
         body,
       });
 
+    // Only a verified 404 counts as absence. Treating any read failure as "task gone" would let
+    // the stop assertions pass on a transient error.
     const taskExists = async (
       kbnClient: { savedObjects: { get: (o: { type: string; id: string }) => Promise<unknown> } },
       id: string
@@ -54,8 +58,10 @@ apiTest.describe(
       try {
         await kbnClient.savedObjects.get({ type: 'task', id });
         return true;
-      } catch {
-        return false;
+      } catch (error) {
+        const { response, status } = error as { response?: { status?: number }; status?: number };
+        if ((response?.status ?? status) === 404) return false;
+        throw error;
       }
     };
 
@@ -186,5 +192,87 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'acts on the gated types when no entity types are given',
+      async ({ apiClient, kbnClient }) => {
+        const stop = await apiClient.put(ENTITY_STORE_ROUTES.internal.STOP, {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: { process: 'nonPriority' },
+        });
+
+        expect(stop.statusCode).toBe(200);
+        expect(await taskExists(kbnClient, NON_PRIORITY_TASK_ID)).toBe(false);
+        expect(await taskExists(kbnClient, PRIORITY_TASK_ID)).toBe(true);
+      }
+    );
+
+    apiTest(
+      'rejects an effective config whose delay exceeds the stored lookback period',
+      async ({ apiClient }) => {
+        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: publicHeaders,
+          responseType: 'json',
+          body: { logExtraction: { lookbackPeriod: '2m' } },
+        });
+
+        const response = await setEngineConfig(apiClient, {
+          nonPriorityOverride: { delay: '5m' },
+        });
+
+        expect(response.statusCode).toBe(400);
+      }
+    );
+
+    // The handler unit tests call the handlers directly and the middleware test calls the guard
+    // directly, so only an HTTP call proves these routes are still wired to the middleware.
+    const disableDualProcess = (apiServices: { core: { settings: SettingsFn } }) =>
+      apiServices.core.settings({
+        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false },
+      });
+
+    apiTest(
+      'does not serve start with the dual-process flag off',
+      async ({ apiClient, apiServices }) => {
+        await disableDualProcess(apiServices);
+
+        const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.START, {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: { entityTypes: ['user'], process: 'nonPriority' },
+        });
+
+        expect(response.statusCode).toBe(404);
+      }
+    );
+
+    apiTest(
+      'does not serve stop with the dual-process flag off',
+      async ({ apiClient, apiServices }) => {
+        await disableDualProcess(apiServices);
+
+        const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.STOP, {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: { entityTypes: ['user'], process: 'nonPriority' },
+        });
+
+        expect(response.statusCode).toBe(404);
+      }
+    );
+
+    // The config route is not gated: layer 5 is read in every extraction mode.
+    apiTest(
+      'still serves the per-type config route with the flag off',
+      async ({ apiClient, apiServices }) => {
+        await disableDualProcess(apiServices);
+
+        const response = await setEngineConfig(apiClient, {
+          logExtraction: { frequency: '10m' },
+        });
+
+        expect(response.statusCode).toBe(200);
+      }
+    );
   }
 );

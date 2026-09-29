@@ -31,15 +31,20 @@ const unauthorized = {
   },
 };
 
+/** A merged config that passes every effective-config check. */
+const VALID_EFFECTIVE_CONFIG = { frequency: '1m', delay: '1m', lookbackPeriod: '3h' };
+
 const createCtx = ({
   updateTypeConfig = jest.fn().mockResolvedValue({
     logExtractionConfig: {},
     nonPriorityLogExtractionConfig: {},
   }),
+  previewTypeConfig = jest.fn().mockResolvedValue([['single', VALID_EFFECTIVE_CONFIG]]),
   getPrivileges = jest.fn().mockResolvedValue(authorized),
   dualProcess = true,
 }: {
   updateTypeConfig?: jest.Mock;
+  previewTypeConfig?: jest.Mock;
   getPrivileges?: jest.Mock;
   dualProcess?: boolean;
 } = {}) => ({
@@ -47,11 +52,15 @@ const createCtx = ({
     entityStore: Promise.resolve({
       logger: loggerMock.create(),
       assetManagerClient: { getPrivileges } as unknown as AssetManagerClient,
-      logsExtractionClient: { updateTypeConfig } as unknown as LogsExtractionClient,
+      logsExtractionClient: {
+        updateTypeConfig,
+        previewTypeConfig,
+      } as unknown as LogsExtractionClient,
       isDualProcessEnabled: jest.fn().mockResolvedValue(dualProcess),
     }),
   } as unknown as EntityStoreRequestHandlerContext,
   updateTypeConfig,
+  previewTypeConfig,
   getPrivileges,
 });
 
@@ -65,8 +74,8 @@ const createRes = () =>
 
 type EngineConfigRequest = Parameters<typeof handleEngineConfig>[1];
 
-const createReq = (body: object) =>
-  ({ params: { entityType: 'user' }, body } as unknown as EngineConfigRequest);
+const createReq = (body: object, entityType = 'user') =>
+  ({ params: { entityType }, body } as unknown as EngineConfigRequest);
 
 describe('handleEngineConfig', () => {
   it('writes both override layers', async () => {
@@ -134,6 +143,39 @@ describe('handleEngineConfig', () => {
         message: 'nonPriorityOverride requires dual-process log extraction to be enabled',
       },
     });
+    expect(updateTypeConfig).not.toHaveBeenCalled();
+  });
+
+  it('rejects nonPriorityOverride for a type without a non-priority process', async () => {
+    const { ctx, updateTypeConfig } = createCtx();
+
+    const result = await handleEngineConfig(
+      ctx,
+      createReq({ nonPriorityOverride: { samplingRate: 0.5 } }, 'host'),
+      createRes()
+    );
+
+    expect(result).toMatchObject({ status: 400 });
+    expect(updateTypeConfig).not.toHaveBeenCalled();
+  });
+
+  // The block itself is valid; only merging it with the stored lookbackPeriod makes it broken.
+  it('rejects a write whose effective config is invalid', async () => {
+    const { ctx, updateTypeConfig } = createCtx({
+      previewTypeConfig: jest
+        .fn()
+        .mockResolvedValue([
+          ['nonPriority', { frequency: '1m', delay: '5m', lookbackPeriod: '2m' }],
+        ]),
+    });
+
+    const result = await handleEngineConfig(
+      ctx,
+      createReq({ nonPriorityOverride: { delay: '5m' } }),
+      createRes()
+    );
+
+    expect(result).toMatchObject({ status: 400 });
     expect(updateTypeConfig).not.toHaveBeenCalled();
   });
 

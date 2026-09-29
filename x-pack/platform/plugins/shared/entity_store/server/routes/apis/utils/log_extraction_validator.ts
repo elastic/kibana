@@ -10,6 +10,7 @@ import { validateDataView } from '@kbn/data-view-validation';
 import { LogExtractionInstallParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
 import type {
+  LogExtractionConfig,
   LogExtractionTypeOverride,
   NonPriorityLogExtractionTypeOverride,
 } from '../../../domain/saved_objects';
@@ -113,6 +114,23 @@ export function validateLogExtractionParams(
   validateIndexPatternList(patterns.additionalIndexPatterns, 'additionalIndexPatterns', ctx);
   validateIndexPatternList(patterns.excludedIndexPatterns, 'excludedIndexPatterns', ctx);
   validateDelayVsLookbackPeriod(data, ctx);
+}
+
+/**
+ * Checks a config where every layer has already been applied, so every field holds the value the
+ * process would actually run with. The schema refinements above see one layer at a time and fall
+ * back to built-in defaults for whatever that layer omits, so they cannot catch a combination that
+ * only breaks once the stored layers are merged in. Returns the reason, or null when the config is
+ * usable.
+ */
+export function findEffectiveConfigError(config: LogExtractionConfig): string | null {
+  if (!isValidFrequency(config.frequency)) {
+    return `frequency (${config.frequency}) must be a valid duration of at least 30 seconds`;
+  }
+  if (isDelayGteLookbackPeriod(config.delay, config.lookbackPeriod)) {
+    return `delay (${config.delay}) must be less than lookbackPeriod (${config.lookbackPeriod})`;
+  }
+  return null;
 }
 
 export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine(

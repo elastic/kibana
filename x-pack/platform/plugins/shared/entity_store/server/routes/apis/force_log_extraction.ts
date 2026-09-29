@@ -12,8 +12,15 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityType, ExtractionMode } from '../../../common/domain/definitions/entity_schema';
-import { resolveExtractionMode } from '../../../common/domain/definitions/registry';
+import {
+  EntityType,
+  ExtractionMode,
+  EXTRACTION_MODE,
+} from '../../../common/domain/definitions/entity_schema';
+import {
+  hasPriorityExtractionGate,
+  resolveExtractionMode,
+} from '../../../common/domain/definitions/registry';
 
 const paramsSchema = z.object({
   entityType: EntityType,
@@ -56,6 +63,21 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
         const { fromDateISO, toDateISO, process } = req.body;
 
         const logger = baseLogger.get('forceLogExtraction').get(entityType);
+
+        // Only gated types have the two-process split. Without this check the extraction throws
+        // inside the client, which answers 200 with a failed summary and writes an extraction
+        // error onto an otherwise healthy engine.
+        if (
+          process !== undefined &&
+          process !== EXTRACTION_MODE.single &&
+          !hasPriorityExtractionGate(entityType)
+        ) {
+          return res.badRequest({
+            body: {
+              message: `Entity type ${entityType} only runs the single extraction process`,
+            },
+          });
+        }
 
         // Without an explicit process, run as whichever mode this deployment actually uses:
         // `single` with the dual-process flag off, `priority` with it on.

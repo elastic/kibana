@@ -13,7 +13,11 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { validateLogExtractionParams } from './utils/log_extraction_validator';
+import {
+  findEffectiveConfigError,
+  validateLogExtractionParams,
+} from './utils/log_extraction_validator';
+import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 import { enforceEntityStorePrivileges } from './utils/check_entity_store_privileges';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import {
@@ -66,6 +70,15 @@ export async function handleEngineConfig(
     });
   }
 
+  // Same reasoning for types that have no non-priority process at all: nothing would ever read it.
+  if (nonPriorityOverride && !hasPriorityExtractionGate(entityType)) {
+    return res.badRequest({
+      body: {
+        message: `Entity type ${entityType} has no non-priority extraction process`,
+      },
+    });
+  }
+
   // Only `logExtraction` carries index patterns - NonPriorityLogExtractionTypeOverride has none.
   const forbidden = await enforceEntityStorePrivileges(
     assetManager,
@@ -76,6 +89,19 @@ export async function handleEngineConfig(
   if (forbidden) return forbidden;
 
   try {
+    const preview = await logsExtractionClient.previewTypeConfig(entityType, {
+      logExtraction,
+      nonPriorityOverride,
+    });
+    for (const [mode, config] of preview) {
+      const invalid = findEffectiveConfigError(config);
+      if (invalid) {
+        return res.badRequest({
+          body: { message: `Resulting ${mode} configuration is invalid: ${invalid}` },
+        });
+      }
+    }
+
     const config = await logsExtractionClient.updateTypeConfig(entityType, {
       logExtraction,
       nonPriorityOverride,
