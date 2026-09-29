@@ -127,7 +127,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
     isConnectorsLoading,
   ]);
 
-  const isAddDisabled = agentQuery.agent?.configuration?.connector_ids === undefined;
   const showCustomizeEmptyState = assignedConnectors.length === 0 && !searchQuery.trim();
 
   if (isLoading) {
@@ -148,7 +147,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
         <ConnectorsCustomizeEmptyState
           canEditAgent={canEditAgent}
           hasAllPrivileges={hasAllPrivileges}
-          isAddDisabled={isAddDisabled}
           onAddFromLibrary={openLibrary}
           onCreateNew={openCreateFlyout}
         />
@@ -195,7 +193,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="from-library"
                               icon="download"
-                              disabled={isAddDisabled}
                               data-test-subj="agentConnectorsAddFromLibraryMenuItem"
                               onClick={() => {
                                 setIsAddMenuOpen(false);

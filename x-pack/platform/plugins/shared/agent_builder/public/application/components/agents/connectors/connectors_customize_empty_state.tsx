@@ -23,7 +23,6 @@ import connectorsIllustration from '../overview/assets/handshake.svg';
 export interface ConnectorsCustomizeEmptyStateProps {
   canEditAgent: boolean;
   hasAllPrivileges: boolean;
-  isAddDisabled: boolean;
   onAddFromLibrary: () => void;
   onCreateNew: () => void;
 }
@@ -31,7 +30,6 @@ export interface ConnectorsCustomizeEmptyStateProps {
 export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptyStateProps> = ({
   canEditAgent,
   hasAllPrivileges,
-  isAddDisabled,
   onAddFromLibrary,
   onCreateNew,
 }) => {
@@ -72,7 +70,6 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
                 <EuiContextMenuItem
                   key="from-library"
                   icon="download"
-                  disabled={isAddDisabled}
                   data-test-subj="agentConnectorsAddFromLibraryMenuItem"
                   onClick={() => {
                     setIsMenuOpen(false);

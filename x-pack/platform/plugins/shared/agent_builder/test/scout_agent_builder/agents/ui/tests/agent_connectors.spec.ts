@@ -9,12 +9,13 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createAgentViaKbn,
-  deleteAgentsByIds,
+  deleteAgentViaKbn,
 } from '../../../../scout_agent_builder_shared/lib/agents_kbn';
 import { test } from '../fixtures';
 
+const agentId = `scout_connectors_test_agent_${Date.now()}`;
 const agent = {
-  id: 'scout_connectors_test_agent',
+  id: agentId,
   name: 'Scout Connectors Test Agent',
   labels: ['scout'],
 };
@@ -36,7 +37,7 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      await deleteAgentsByIds(kbnClient, [agent.id]);
+      await deleteAgentViaKbn(kbnClient, agent.id);
     });
 
     test('shows empty state when agent has no connectors', async ({ page }) => {
@@ -71,6 +72,23 @@ test.describe(
       await page.testSubj.click('agentConnectorsAddFromLibraryMenuItem');
 
       await expect(page.testSubj.locator('agentConnectorLibraryFlyout')).toBeVisible({
+        timeout: 30_000,
+      });
+    });
+
+    test('"Create new connector" menu item opens the connector creation flyout', async ({
+      page,
+    }) => {
+      await page.gotoApp(`agent_builder/agents/${agent.id}/connectors`);
+      await page.testSubj
+        .locator('agentConnectorsCustomizeEmptyState')
+        .waitFor({ state: 'visible', timeout: 60_000 });
+
+      await page.testSubj.click('agentConnectorsCustomizeEmptyStateAddButton');
+      await page.testSubj.locator('agentConnectorsCreateNewMenuItem').waitFor({ state: 'visible' });
+      await page.testSubj.click('agentConnectorsCreateNewMenuItem');
+
+      await expect(page.locator('[data-test-subj="create-connector-flyout"]')).toBeVisible({
         timeout: 30_000,
       });
     });
