@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiFlyoutMenuAction, IconType } from '@elastic/eui';
 import type {
   Conversation,
   ConversationWithoutRoundsWithPermissions,
@@ -84,6 +84,13 @@ export interface ConversationTemplateUIDefinition {
     header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
     /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
     footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+    /**
+     * Icon buttons rendered in the in-chat flyout's menu bar, before the close button. Flyouts opened
+     * with `openConversationDetails` take their actions from its `trailingActions` option instead.
+     */
+    trailingActions?: (
+      props: Pick<ConversationTemplateDetailsFlyoutRenderProps, 'conversation'>
+    ) => EuiFlyoutMenuAction[];
   };
 }
 

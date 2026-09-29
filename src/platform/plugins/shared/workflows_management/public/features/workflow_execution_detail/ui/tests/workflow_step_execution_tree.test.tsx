@@ -1519,7 +1519,7 @@ describe('WorkflowStepExecutionTree', () => {
   describe('foreach iteration pins and gaps', () => {
     const makeIteration = (index: number, stepExecId: string) => ({
       stepExecutionId: null as string | null,
-      stepId: String(index),
+      stepId: `iteration-${index}`,
       stepType: 'foreach-iteration',
       executionIndex: index,
       children: [
