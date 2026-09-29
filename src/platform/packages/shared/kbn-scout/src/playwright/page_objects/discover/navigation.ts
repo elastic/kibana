@@ -31,6 +31,12 @@ export abstract class NavigationMixin extends DiscoverAppBase {
   }
 
   protected async waitForDiscoverPage() {
+    // Chrome's own loading state (see core's `LoadingIndicator`) clears once the app bundle has
+    // taken over, ahead of Discover's route content mounting. Anchoring on it first turns a single
+    // blind race against the whole chrome+app bootstrap into two narrower, more predictable waits.
+    await expect(this.page.testSubj.locator('globalLoadingIndicator-hidden')).toBeVisible({
+      timeout: 30_000,
+    });
     // Discover initialization in serverless CI environments regularly exceeds the default 10s,
     // likely due to additional plugin overhead and root profile resolution.
     await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
