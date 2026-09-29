@@ -535,18 +535,43 @@ describe('resolveHuntScope', () => {
 
       expect(result.resolution).toBe('discovered:deterministic');
       expect(result.status).toBe('degraded');
-      // Still only Microsoft: an unmatched Okta stream, or a `microsoftx` vendor, stays out of the hit bar.
-      expect(result.required).toEqual(['logs-microsoft.*', 'logs-microsoft_*', 'logs-microsoft-*']);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('3 vendor wildcard(s)'));
+      // Still only the matched vendor token: an Okta stream, a `microsoftx` vendor, and a
+      // `microsoft_defender` sibling token all stay out of the hit bar.
+      expect(result.required).toEqual(['logs-microsoft.*', 'logs-microsoft-*']);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 vendor wildcard(s)'));
+    });
+
+    it('keeps the full vendor token when collapsing, so a cisco_asa match never reaches cisco_ise', async () => {
+      const esClient = createMockEsClient(new Set([alertsPattern]));
+      const asa: DiscoveredDataset[] = Array.from({ length: MAX_SCOPE_TARGETS + 1 }, (_, i) => ({
+        index_pattern: `logs-cisco_asa.s${i}-*`,
+        dataset: `cisco_asa.s${i}`,
+        vendor: 'cisco_asa',
+        data_streams: [`logs-cisco_asa.s${i}-default`],
+        search_patterns: [`logs-cisco_asa.s${i}-*`],
+      }));
+      mockDiscover.mockResolvedValue(asa);
+      mockDeterministic.mockReturnValue(asa);
+
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { vendor: 'Cisco ASA' },
+        logger,
+      });
+
+      expect(result.required).toEqual(['logs-cisco_asa.*', 'logs-cisco_asa-*']);
+      expect(result.required.some((p) => p.startsWith('logs-cisco_*'))).toBe(false);
     });
 
     it('bounds the serialized target list, not just the entry count', async () => {
       const esClient = createMockEsClient(new Set([alertsPattern]));
-      const longName = (i: number) => `microsoft_${'x'.repeat(200)}${i}.log`;
+      const longVendor = `microsoft_${'x'.repeat(200)}`;
+      const longName = (i: number) => `${longVendor}.log${i}`;
       const wide: DiscoveredDataset[] = Array.from({ length: 20 }, (_, i) => ({
         index_pattern: `logs-${longName(i)}-*`,
         dataset: longName(i),
-        vendor: `microsoft_${'x'.repeat(200)}${i}`,
+        vendor: longVendor,
         data_streams: [`logs-${longName(i)}-default`],
         search_patterns: [`logs-${longName(i)}-*`],
       }));
@@ -560,8 +585,8 @@ describe('resolveHuntScope', () => {
         logger,
       });
 
-      // 20 entries is under the count cap, but 20 patterns of ~220 chars is over 4 KB.
-      expect(result.required).toEqual(['logs-microsoft.*', 'logs-microsoft_*', 'logs-microsoft-*']);
+      // 20 entries is under the count cap, but 20 patterns of ~220 chars is over the byte cap.
+      expect(result.required).toEqual([`logs-${longVendor}.*`, `logs-${longVendor}-*`]);
       expect(result.status).toBe('degraded');
     });
 

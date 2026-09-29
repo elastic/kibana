@@ -294,20 +294,19 @@ const fitsRequestPath = (targets: string[]): boolean =>
   targets.length <= MAX_SCOPE_TARGETS && targets.join(',').length <= MAX_SCOPE_TARGET_CHARS;
 
 /**
- * Three wildcards per matched vendor prefix (`microsoft` for both `microsoft.dhcp`
- * and `microsoft_defender_endpoint.log`), one for each character that can follow a
- * vendor token in a dataset name: `logs-microsoft.*`, `logs-microsoft_*`,
- * `logs-microsoft-*`. That covers every dataset of the matched vendors without
- * reaching a vendor that merely shares the prefix (`microsoftx`). Far fewer targets
- * than the dataset list; sibling isolation within a vendor is given up, which is
- * why the scope reads as degraded.
+ * Two wildcards per matched vendor token, one for each character that can follow
+ * the token in a dataset name: `logs-cisco_asa.*` for its streams and
+ * `logs-cisco_asa-*` for a dataset that is the token alone. The full token is kept
+ * on purpose: cutting it at `_` would turn a `cisco_asa` match into `cisco_*` and
+ * pull unmatched `cisco_ise` streams (or `elastic_agent`, for an `elastic` match)
+ * into the hit bar. Far fewer targets than the dataset list; sibling isolation
+ * within a vendor token is given up, which is why the scope reads as degraded.
  */
 export const vendorWildcards = (matches: DiscoveredDataset[]): string[] =>
   uniq(
     matches.flatMap((match) => {
       const type = match.index_pattern.split('-')[0];
-      const vendorPrefix = match.vendor.split(/[._-]/)[0];
-      return ['.', '_', '-'].map((separator) => `${type}-${vendorPrefix}${separator}*`);
+      return ['.', '-'].map((separator) => `${type}-${match.vendor}${separator}*`);
     })
   );
 
@@ -360,8 +359,8 @@ const buildDiscoveredScope = async ({
   } else if (fitsRequestPath(matchedTargets)) {
     required = matchedTargets;
   } else {
-    // Too wide to name one by one. Fall back to one wildcard per matched vendor, which
-    // keeps unrelated vendors out of the hit bar, and only then to the broad target.
+    // Too wide to name one by one. Fall back to wildcards per matched vendor token, which
+    // keeps unmatched vendors out of the hit bar, and only then to the broad target.
     const byVendor = vendorWildcards(matches);
     const useVendor = fitsRequestPath(byVendor);
     required = useVendor ? byVendor : broadSearchPatterns();

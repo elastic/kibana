@@ -58,7 +58,16 @@ const literalPrefix = (pattern: string): string => pattern.split('*')[0];
  * refusal falls back to the matched indices, an acceptance would read excluded
  * streams.
  */
-const overlapsExclusion = (candidate: string, exclusion: string): boolean => {
+const stripBackingPrefix = (name: string): string =>
+  name.startsWith(DATA_STREAM_BACKING_PREFIX)
+    ? name.slice(DATA_STREAM_BACKING_PREFIX.length)
+    : name;
+
+const overlapsExclusion = (rawCandidate: string, exclusion: string): boolean => {
+  // The positive check strips `.ds-` so a backing index matches its stream's pattern;
+  // the exclusion check has to see the same name, or an explicitly named
+  // `.ds-logs-elastic_agent...` backing index would slip past `-logs-elastic_agent*`.
+  const candidate = stripBackingPrefix(rawCandidate);
   if (!candidate.includes('*')) return compileGlobs([exclusion])[0].test(candidate);
   const a = literalPrefix(candidate);
   const b = literalPrefix(exclusion);

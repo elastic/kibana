@@ -90,6 +90,17 @@ describe('exclusion entries', () => {
     expect(isIndexPatternAllowed('logs-elastic_agent.filebeat-default', broad)).toBe(false);
   });
 
+  it('refuses an explicitly named backing index of an excluded stream, normalizing .ds- the same way the positive check does', () => {
+    expect(
+      isIndexPatternAllowed('.ds-logs-elastic_agent.filebeat-default-2026.09.01-000001', broad)
+    ).toBe(false);
+    expect(isIndexPatternAllowed('.ds-logs-elastic_agent*', broad)).toBe(false);
+    // An allowed stream's backing index is still fine.
+    expect(isIndexPatternAllowed('.ds-logs-okta.system-default-2026.09.01-000001', broad)).toBe(
+      true
+    );
+  });
+
   it('never accepts an exclusion entry itself as a source', () => {
     expect(isIndexPatternAllowed('-logs-elastic_agent*', broad)).toBe(false);
   });
