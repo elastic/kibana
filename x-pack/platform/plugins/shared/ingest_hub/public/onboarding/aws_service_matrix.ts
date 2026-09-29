@@ -846,6 +846,9 @@ export function buildAwsServiceMatrix(
     const varDefsByDataStream: Record<string, DataStreamInfo> = {};
     const signalTypesSet = new Set<SignalType>();
     const dataStreams: string[] = [];
+    // Track which input types are used by data streams, independently of whether they carry vars.
+    // IDF derivation uses this set so that inputs with no vars still participate in the check.
+    const allDsInputTypesSet = new Set<string>();
 
     const packageInfo = packages[entry.packageName];
     const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
@@ -901,6 +904,11 @@ export function buildAwsServiceMatrix(
             for (const [varName, varDef] of Object.entries(byName)) {
               bucket[varName] ??= varDef;
             }
+          }
+
+          // Track all input types used by this DS (regardless of whether they carry vars).
+          for (const input of dsInfo.inputs) {
+            allDsInputTypesSet.add(input);
           }
 
           // Accumulate inputs union (only when not overridden by a static allowlist).
@@ -963,9 +971,9 @@ export function buildAwsServiceMatrix(
         }
 
         // Derive identityFederationSupported.
-        const allDsInputTypes = new Set(Object.keys(varDefsByInput));
-        if (ptInputs.length > 0 && allDsInputTypes.size > 0) {
-          const relevantInputs = ptInputs.filter((i: any) => allDsInputTypes.has(i.type));
+        // Use allDsInputTypesSet (not varDefsByInput keys) so inputs with no vars still count.
+        if (ptInputs.length > 0 && allDsInputTypesSet.size > 0) {
+          const relevantInputs = ptInputs.filter((i: any) => allDsInputTypesSet.has(i.type));
           if (relevantInputs.length > 0) {
             identityFederationSupported = relevantInputs.some(
               (i: any) =>

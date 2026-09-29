@@ -855,6 +855,37 @@ describe('AuthenticateAndDeployStep', () => {
       expect(mockSetDeploymentMethod).toHaveBeenCalledWith('agent_based');
     });
 
+    it('resets to managed_integration when the last agent-only service is deselected', () => {
+      const mockSetDeploymentMethod = jest.fn();
+
+      // First render: agent-only service selected, method starts as MI → auto-forced to agent_based.
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['awsfargate'] },
+        awsServicesMap: new Map([['awsfargate', agentService], ['guardduty', miService]]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: mockSetDeploymentMethod,
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+      });
+      const { rerender } = renderStep();
+      expect(mockSetDeploymentMethod).toHaveBeenCalledWith('agent_based');
+      mockSetDeploymentMethod.mockClear();
+
+      // Second render: agent-only service removed, method now agent_based (was auto-forced).
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'] },
+        awsServicesMap: new Map([['awsfargate', agentService], ['guardduty', miService]]),
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: mockSetDeploymentMethod,
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+      });
+      rerender(
+        <I18nProvider>
+          <AuthenticateAndDeployStep onContinue={jest.fn()} />
+        </I18nProvider>
+      );
+      expect(mockSetDeploymentMethod).toHaveBeenCalledWith('managed_integration');
+    });
+
     it('passes locked=true to DeploymentMethodCard', () => {
       renderStep();
       expect(MockDeploymentMethodCard).toHaveBeenCalledWith(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -99,9 +99,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const isAgentBased = deploymentMethod === 'agent_based';
 
+  // Track whether the current agent_based selection was auto-forced by this effect so that
+  // removing the last agent-only service resets the method rather than leaving it stuck.
+  const wasAutoForced = useRef(false);
   useEffect(() => {
     if (allAgentBasedOnly && deploymentMethod !== 'agent_based' && !isMethodLocked) {
+      wasAutoForced.current = true;
       setDeploymentMethod('agent_based');
+    } else if (!allAgentBasedOnly && wasAutoForced.current && !isMethodLocked) {
+      wasAutoForced.current = false;
+      setDeploymentMethod('managed_integration');
     }
   }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod, isMethodLocked]);
 
