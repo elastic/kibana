@@ -184,8 +184,12 @@ export function CasesTableServiceProvider(
     },
 
     async waitForNthToBeListed(numberOfCases: number) {
-      await this.refreshTable();
-      await this.validateCasesTableHasNthRows(numberOfCases);
+      await retry.try(async () => {
+        await this.refreshTable();
+        await this.validateCasesTableHasNthRows(numberOfCases);
+      });
+
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeDeleted() {
