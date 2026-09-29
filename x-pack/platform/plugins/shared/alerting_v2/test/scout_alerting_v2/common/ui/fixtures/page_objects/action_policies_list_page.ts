@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
  * Drives the Action Policies list page. Exposes the write affordances gated by
@@ -20,25 +21,35 @@ export class ActionPoliciesListPage {
   public readonly detailsFlyout: Locator;
   /** "Take action" button inside the details flyout footer; hidden for read-only users. */
   public readonly detailsFlyoutTakeActionButton: Locator;
+  /** Content list toolbar search box. */
+  private readonly searchBox: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
     this.detailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
     this.detailsFlyoutTakeActionButton = this.page.testSubj.locator(
       'detailsFlyoutTakeActionButton'
     );
+    this.searchBox = this.page.testSubj.locator('contentListToolbar-searchBox');
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/action_policies');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.actionPolicies}`);
   }
 
   async gotoEdit(policyId: string) {
-    await this.page.gotoApp(`management/alertingV2/action_policies/edit/${policyId}`);
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesEdit(policyId)}`
+    );
   }
 
   detailsLink(policyName: string) {
     return this.page.testSubj.locator(`content-list-table-item-link`, { hasText: policyName });
+  }
+
+  async search(value: string) {
+    await this.searchBox.fill(value);
+    await this.searchBox.press('Enter');
   }
 
   async openDetailsFlyout(policyName: string) {

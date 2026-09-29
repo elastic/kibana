@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 import type { DiscoverAppMenu } from './discover_app_menu';
 
 const RULE_FORM_ID = 'ruleV2Form';
@@ -30,7 +31,11 @@ export class RuleFormPage {
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
-  constructor(private readonly page: ScoutPage, private readonly discoverAppMenu: DiscoverAppMenu) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly discoverAppMenu: DiscoverAppMenu,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
 
     this.nameInput = this.page.testSubj.locator('ruleNameInput');
@@ -48,15 +53,17 @@ export class RuleFormPage {
   }
 
   async gotoCreate() {
-    await this.page.gotoApp('management/alertingV2/rules/create');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesCreate}`);
   }
 
   async gotoRulesList() {
-    await this.page.gotoApp('management/alertingV2/rules');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.rules}`);
   }
 
   async gotoRuleDetails(ruleId: string) {
-    await this.page.gotoApp(`management/alertingV2/rules/${ruleId}`);
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesDetail(ruleId)}`
+    );
   }
 
   async gotoDiscover() {

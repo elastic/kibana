@@ -10,6 +10,7 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 // compile-time coupling to the production id without pulling the barrel's
 // React/EUI action modules into the Node-side Playwright config load.
 import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions/open_in_discover';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
  * Drives the Alerts (episodes) list page. Episode row actions are rendered as
@@ -37,7 +38,7 @@ export class AlertEpisodesListPage {
    */
   public readonly rowActionsMenuButton: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.pageContainer = this.page.testSubj.locator('alertingV2EpisodesListPage');
     this.tableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
     this.itemCount = this.page.testSubj.locator('alertEpisodesItemCount');
@@ -56,7 +57,7 @@ export class AlertEpisodesListPage {
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/episodes');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.alerts}`);
   }
 
   async openTagsFilter(): Promise<void> {

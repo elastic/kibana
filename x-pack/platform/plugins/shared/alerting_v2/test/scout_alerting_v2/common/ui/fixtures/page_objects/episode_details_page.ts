@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
  * Drives the alert episode details page, focused on the "Policy history" tab
@@ -22,7 +23,11 @@ export class EpisodeDetailsPage {
   public readonly emptyPrompt: Locator;
   public readonly filteredEmptyPrompt: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.pageContainer = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
     this.actionPolicyHistoryTab = this.page.testSubj.locator(
       'alertingV2EpisodeDetailsMainTabActionPolicyHistory'
@@ -38,7 +43,9 @@ export class EpisodeDetailsPage {
   }
 
   async goto(episodeId: string, spaceId?: string) {
-    const appPath = `management/alertingV2/episodes/${encodeURIComponent(episodeId)}`;
+    const appPath = `${this.mountConfig.appRoute}${this.mountConfig.subPaths.episodeDetail(
+      episodeId
+    )}`;
     await this.page.goto(
       spaceId ? this.kbnUrl.app(appPath, { space: spaceId }) : this.kbnUrl.app(appPath)
     );
