@@ -19,11 +19,13 @@ import {
   MAX_FEATURE_ARRAY_ITEMS,
 } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type {
   KnowledgeIndicatorClient,
   RuleUnbackedFilter,
 } from '../../../lib/knowledge_indicators';
+import type { SourceCatalog } from '../../utils/resolve_source_slugs';
+import { presentSlug, toSourceRef } from '../../utils/resolve_source_slugs';
 
 export const KNOWLEDGE_INDICATOR_FEATURE_TYPES = [
   ...COMPUTED_FEATURE_TYPES,
@@ -67,6 +69,7 @@ interface KISearchEnvelope {
   total: number;
   has_more: boolean;
   next_page: number | null;
+  sources: Array<ReturnType<typeof toSourceRef>>;
 }
 
 export type KISearchOutput =
@@ -207,14 +210,54 @@ function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndi
   };
 }
 
+function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, indicator: T): T {
+  if (indicator.kind === 'feature') {
+    return {
+      ...indicator,
+      feature: {
+        ...indicator.feature,
+        stream_name: presentSlug(catalog, indicator.feature.stream_name),
+      },
+    };
+  }
+
+  return {
+    ...indicator,
+    stream_name: presentSlug(catalog, indicator.stream_name),
+  };
+}
+
+function storedSourceIdOf(indicator: KnowledgeIndicator): string {
+  return indicator.kind === 'feature' ? indicator.feature.stream_name : indicator.stream_name;
+}
+
+/**
+ * Sources owning the returned KIs. Grounding copies `view_name` from here into
+ * `FROM`, so an unscoped search must still report them. Ids missing from the
+ * catalog have no view to report and are skipped.
+ */
+function sourcesInResults(
+  catalog: SourceCatalog,
+  indicators: readonly KnowledgeIndicator[]
+): NightshiftSource[] {
+  const storedIds = new Set(indicators.map(storedSourceIdOf));
+  return [...storedIds].flatMap((storedId) => {
+    const source = catalog.byId.get(storedId);
+    return source ? [source] : [];
+  });
+}
+
 export async function searchKnowledgeIndicatorsToolHandler({
-  streamsClient,
+  catalog,
+  sources,
   kiClient,
   logger,
   params,
   view,
 }: {
-  streamsClient: StreamsClient;
+  catalog: SourceCatalog;
+  /** Sources the caller resolved from slugs. Omitted when the search covers the whole space. */
+  sources?: readonly NightshiftSource[];
   kiClient: KnowledgeIndicatorClient;
   logger: Logger;
   params: SearchKnowledgeIndicatorsInput;
@@ -229,10 +272,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
         `ki_search: failed to fetch features for stream "${streamName}": ${errorMessage}`
       );
     },
-    getStreamNames: async () => {
-      const streams = await streamsClient.listStreams();
-      return streams.map((stream) => stream.name);
-    },
+    getStreamNames: async () => [...catalog.byId.keys()],
     getFeatures: async (streamName, { searchText, featureTypes, featureIds }) => {
       if (searchText) {
         return (await kiClient.findFeatures(streamName, searchText, { featureTypes, featureIds }))
@@ -259,16 +299,21 @@ export async function searchKnowledgeIndicatorsToolHandler({
     total: output.total,
     has_more: output.has_more,
     next_page: output.next_page,
+    sources: (sources ?? sourcesInResults(catalog, output.knowledge_indicators)).map(toSourceRef),
   };
 
+  const knowledgeIndicators = output.knowledge_indicators.map((indicator) =>
+    presentIndicator(catalog, indicator)
+  );
+
   if (view === 'full') {
-    return { ...envelope, view: 'full', knowledge_indicators: output.knowledge_indicators };
+    return { ...envelope, view: 'full', knowledge_indicators: knowledgeIndicators };
   }
 
   return {
     ...envelope,
     view: 'compact',
-    knowledge_indicators: output.knowledge_indicators.map((ki) =>
+    knowledge_indicators: knowledgeIndicators.map((ki) =>
       ki.kind === 'feature' ? toCompactFeatureKI(ki) : ki
     ),
   };

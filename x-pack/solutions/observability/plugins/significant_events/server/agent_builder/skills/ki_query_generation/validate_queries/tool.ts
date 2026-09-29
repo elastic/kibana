@@ -9,6 +9,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import {
   createQueryValidationContext,
@@ -19,7 +20,12 @@ import {
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
-import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  toSourceRef,
+} from '../../../utils/resolve_source_slugs';
 
 export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
   'platform.sig_events.ki_queries_validate';
@@ -87,10 +93,7 @@ const candidateQuerySchema = z.object({
 });
 
 const validateQueriesSchema = z.object({
-  target_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe('Target identifier against which the candidate ES|QL queries must be validated.'),
+  slug: nightshiftSourceSlugField('Candidate ES|QL queries are validated against this source.'),
   queries: z
     .array(candidateQuerySchema)
     .max(MAX_QUERIES_PER_CALL)
@@ -112,27 +115,31 @@ export const createValidateQueriesTool = ({
     description:
       'Validate and finalize a complete KI query batch. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. A batch is finalized only when every query passes.',
     schema: validateQueriesSchema,
-    handler: async ({ target_id: targetId, queries }, context) => {
-      if (queries.length === 0) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                target_id: targetId,
-                queries: [],
-                finalized: true,
-                finalized_queries: [],
-              },
-            },
-          ],
-        };
-      }
-
+    handler: async ({ slug, queries }, context) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
-        const stream = await scopedClients.streamsClient.getStream(targetId);
-        const target = streamToAnalysisTarget(stream);
+        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const [source] = resolveSourcesBySlug(catalog, [slug]);
+
+        // Resolved even for an empty batch: the caller checks the finalized
+        // slug, and the model may have passed a source id or an unknown slug.
+        if (queries.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  ...toSourceRef(source),
+                  queries: [],
+                  finalized: true,
+                  finalized_queries: [],
+                },
+              },
+            ],
+          };
+        }
+
+        const target = sourceToAnalysisTarget(source);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const featureIds = [...new Set(queries.flatMap(({ feature_ids: ids }) => ids))];
         const [{ hits: features }, { [target.id]: existingLinks }] = await Promise.all([
@@ -183,7 +190,7 @@ export const createValidateQueriesTool = ({
             {
               type: ToolResultType.other,
               data: {
-                target_id: target.id,
+                ...toSourceRef(source),
                 queries: results,
                 finalized,
                 ...(finalized ? { finalized_queries: validatedQueries } : {}),

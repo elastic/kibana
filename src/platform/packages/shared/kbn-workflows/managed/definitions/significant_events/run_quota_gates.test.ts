@@ -208,7 +208,6 @@ describe('Significant Events run quota workflow contracts', () => {
     const orderedSteps = [
       'gate_investigatable_severity',
       'resolve_open_event',
-      'check_prior_investigation',
       'guard_resolved_event',
       'guard_missing_investigation',
       'trigger_investigation',

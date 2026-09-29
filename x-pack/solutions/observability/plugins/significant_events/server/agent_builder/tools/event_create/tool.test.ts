@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
 import type { SignificantEventsServer } from '../../../types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -55,6 +55,7 @@ describe('event_create tool', () => {
       getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: mockSourcesClient(['logs.a']),
     });
 
     const tool = createEventTool({
@@ -70,7 +71,7 @@ describe('event_create tool', () => {
         title: 'T',
         symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
         summary: 'S',
-        stream_names: ['logs.a'],
+        slugs: ['logs.a'],
         severity: '60-high',
         confidence: 0.8,
       },

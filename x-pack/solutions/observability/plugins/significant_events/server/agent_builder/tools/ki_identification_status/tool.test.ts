@@ -9,7 +9,7 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
-import { createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext, mockSourcesClient } from '../../utils/test_helpers';
 
 describe('createKiIdentificationStatusTool', () => {
   const setup = () => {
@@ -48,6 +48,9 @@ describe('createKiIdentificationStatusTool', () => {
 
     const tool = createKiIdentificationStatusTool({
       streamsKIsOnboardingClient,
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: mockSourcesClient(['logs.nginx']),
+      }) as never,
     });
     const context = createMockToolContext();
     return { tool, context, managementApi };
@@ -56,13 +59,13 @@ describe('createKiIdentificationStatusTool', () => {
   it('returns onboarding status for stream', async () => {
     const { tool, context } = setup();
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual(
         expect.objectContaining({
-          stream_name: 'logs.nginx',
+          slug: 'logs.nginx',
           status: SignificantEventsWorkflowStatus.Completed,
         })
       );
@@ -73,7 +76,7 @@ describe('createKiIdentificationStatusTool', () => {
     const { tool, context, managementApi } = setup();
     managementApi.getWorkflowExecutions.mockRejectedValueOnce(new Error('boom'));
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('error');

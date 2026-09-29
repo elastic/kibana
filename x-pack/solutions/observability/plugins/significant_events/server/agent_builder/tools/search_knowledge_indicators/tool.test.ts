@@ -53,7 +53,7 @@ describe('ki_search tool', () => {
     expect(
       tool.schema.safeParse({
         kind: ['query'],
-        stream_names: ['logs.test'],
+        slugs: ['logs.test'],
         query_types: ['match'],
         query_ids: ['query-1'],
         rule_ids: ['rule-1'],

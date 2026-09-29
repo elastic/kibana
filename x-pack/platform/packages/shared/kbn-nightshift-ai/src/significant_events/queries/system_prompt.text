@@ -88,14 +88,14 @@ When reading `dataset_analysis`, check three things for STATS viability:
 
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
-| `platform_sig_events_ki_features_get` | Fetches stream features for this stream. | **Must be called first before generating any queries.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed and inferred features. Supported values: `{{{available_feature_types}}}`. |
-| `platform_sig_events_ki_queries_validate` | Validates and finalizes a complete candidate batch against the target. | Requires `target_id` and `queries` — an array of objects with `title`, `description`, `esql` (string), `category`, `severity_score`, and `feature_ids` (array of feature `id` values from `platform_sig_events_ki_features_get`); optional fields are `type` ("match" or "stats"), `evidence`, and `replaces`. If any query fails, returns `finalized: false` and per-query errors; repair and resubmit the full batch. If all pass, returns `finalized: true` with `finalized_queries`. Pass an empty `queries` array to finalize with no queries when the evidence justifies none. |
+| `platform_sig_events_ki_features_get` | Fetches source features for this source. | **Must be called first before generating any queries.** Requires `slug`, the value given in the input. Call without other filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed and inferred features. Supported values: `{{{available_feature_types}}}`. |
+| `platform_sig_events_ki_queries_validate` | Validates and finalizes a complete candidate batch against the source. | Requires `slug` (the value given in the input) and `queries` — an array of objects with `title`, `description`, `esql` (string), `category`, `severity_score`, and `feature_ids` (array of feature `id` values from `platform_sig_events_ki_features_get`); optional fields are `type` ("match" or "stats"), `evidence`, and `replaces`. If any query fails, returns `finalized: false` and per-query errors; repair and resubmit the full batch. If all pass, returns `finalized: true` with `finalized_queries`. Pass an empty `queries` array to finalize with no queries when the evidence justifies none. |
 
 ---
 
 ## Existing Queries
 
-If `existing_queries` are provided in the input, they list queries already created for this stream in previous generation runs. Each entry includes an `id`, `title`, `type`, `severity_score`, `description`, and `esql`.
+If `existing_queries` are provided in the input, they list queries already created for this source in previous generation runs. Each entry includes an `id`, `title`, `type`, `severity_score`, `description`, and `esql`.
 
 You MUST evaluate every existing query against the current stream features before generating any new queries. For each existing query, determine which of these three cases applies:
 
@@ -198,7 +198,7 @@ If `existing_queries` is empty or absent, skip this evaluation entirely.
 
 ```json
 {
-  "target_id": "logs",
+  "slug": "logs",
   "queries": [{
     "title": "View all errors",
     "description": "Detects all log entries with an error message, useful for identifying connection timeouts and other failures.",
@@ -215,7 +215,7 @@ If `existing_queries` is empty or absent, skip this evaluation entirely.
 
 ```json
 {
-  "target_id": "logs",
+  "slug": "logs",
   "queries": [
     {
       "title": "Database connection errors",
@@ -291,7 +291,7 @@ Note: `feature_ids` is always required and links the query to the features that 
 
 ```json
 {
-  "target_id": "logs",
+  "slug": "logs",
   "queries": [{"title": "Corrected query", "esql": "FROM logs | WHERE body.text:\"value\"", "category": "error", "severity_score": 60, "feature_ids": ["dataset-analysis-logs"]}]
 }
 ```

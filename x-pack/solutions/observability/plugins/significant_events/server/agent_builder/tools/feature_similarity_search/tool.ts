@@ -9,7 +9,7 @@ import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-com
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -21,12 +21,17 @@ import {
   searchFeaturesForCandidates,
 } from '../../../lib/significant_events/features/feature_similarity_search';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  toSourceRef,
+} from '../../utils/resolve_source_slugs';
 
 export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchSimilarFeatures;
 
 const featureSimilaritySearchSchema = z.object({
-  stream_name: z.string().max(MAX_ID_LENGTH).describe('Stream containing the known KI features.'),
+  slug: nightshiftSourceSlugField('Disabled sources are included.'),
   candidates: z
     .array(featureCandidateSchema)
     .max(MAX_SEARCH_CANDIDATES)
@@ -56,20 +61,29 @@ export const createFeatureSimilaritySearchTool = ({
     schema: featureSimilaritySearchSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
-    handler: async ({ stream_name: streamName, candidates }, context) => {
+    handler: async ({ slug, candidates }, context) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
         await assertSignificantEventsAccess({
           server,
           licensing: scopedClients.licensing,
         });
-        await scopedClients.streamsClient.getStream(streamName);
+        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const [source] = resolveSourcesBySlug(catalog, [slug]);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
-        const groups = await searchFeaturesForCandidates({ kiClient, streamName, candidates });
+        const groups = await searchFeaturesForCandidates({
+          kiClient,
+          streamName: source.id,
+          candidates,
+        });
+        const sourceRef = toSourceRef(source);
 
         return {
-          results: groups.map((group) => ({ type: ToolResultType.other, data: group })),
+          results: groups.map((group) => ({
+            type: ToolResultType.other,
+            data: { ...sourceRef, ...group },
+          })),
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);

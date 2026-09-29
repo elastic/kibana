@@ -43,7 +43,6 @@ describe('cancelKiIdentificationToolHandler', () => {
       request
     );
     expect(result).toEqual({
-      stream_name: 'logs.nginx',
       execution_id: 'exec-1',
       status: SignificantEventsWorkflowStatus.Canceled,
     });
@@ -70,7 +69,6 @@ describe('cancelKiIdentificationToolHandler', () => {
 
     expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
     expect(result).toEqual({
-      stream_name: 'logs.nginx',
       execution_id: null,
       status: SignificantEventsWorkflowStatus.Canceled,
     });

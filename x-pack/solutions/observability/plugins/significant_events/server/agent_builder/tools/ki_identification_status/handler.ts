@@ -25,7 +25,6 @@ export async function getKiIdentificationStatusToolHandler({
   });
 
   return {
-    stream_name: streamName,
     execution_id: executionId,
     ...statusResult,
   };

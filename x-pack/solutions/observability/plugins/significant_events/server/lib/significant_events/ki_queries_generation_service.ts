@@ -17,7 +17,6 @@ import type { EbtTelemetryClient } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
-import { sourceToAnalysisTarget } from './stream_to_analysis_target';
 
 export interface GenerateKIQueriesParams {
   source: NightshiftSource;
@@ -70,7 +69,7 @@ export async function generateKIQueries(
     request,
     connectorId,
     interactionId: runId,
-    target: sourceToAnalysisTarget(source),
+    source,
     existingQueries,
     signal,
     logger: logger.get('significant_events_queries_generation'),
