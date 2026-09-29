@@ -1743,7 +1743,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk restart agents`,
-      description: `Restart multiple Elastic Agents.`,
+      description: `Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
         availability: {
