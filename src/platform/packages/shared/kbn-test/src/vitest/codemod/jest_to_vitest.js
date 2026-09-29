@@ -11,12 +11,14 @@
  * Rewrites Jest test files to Vitest APIs:
  *
  *  - jest.<api>(...)             -> vi.<api>(...)
+ *  - jest.requireActual('pkg')   -> require('pkg') for npm packages (Node's require is never mocked)
  *  - jest.requireActual(x)       -> (await vi.importActual(x)), enclosing function made async
  *  - jest.requireMock(x)         -> (await vi.importMock(x)), enclosing function made async
+ *  - nested jest.mock()          -> vi.doMock() (Vitest 5 throws for nested vi.mock())
+ *  - vi.mock(p, () => ({...}))   -> also exposes the object as `default`, like Jest's interop
+ *  - (done) => {...} tests       -> Promise-returning tests
+ *  - un-awaited expect().rejects -> awaited
  *  - jest.Mocked<T> & co.        -> Mocked<T> & co. imported from 'vitest'
- *  - mockX.mockImplementation(() => v) on PascalCase mocks (likely classes)
- *                                -> function () { return v; }, since Vitest calls implementations
- *                                   with `new` and arrow functions are not constructible
  *  - adds `import { vi } from 'vitest'`
  *
  * Constructs without a mechanical translation are reported, not rewritten.
@@ -99,79 +101,6 @@ const makeEnclosingFunctionAsync = (node, report) => {
   }
   if (!isJestMockFactory(fn) && !isTestCallback(fn)) {
     report.push(`${location(node)} made a helper async; verify its callers await it`);
-  }
-};
-
-// `mockHttpServer`, `MockAgent`, `Agent` — names that conventionally hold class mocks.
-const CONSTRUCTOR_MOCK_NAME = /^(mock|Mock)?[A-Z][a-z0-9]\w*$/;
-const IMPLEMENTATION_METHODS = new Set(['mockImplementation', 'mockImplementationOnce']);
-
-const getReceiverRoot = (expression) => {
-  let current = expression;
-  while (Node.isCallExpression(current) || Node.isPropertyAccessExpression(current)) {
-    current = current.getExpression();
-  }
-  return Node.isIdentifier(current) ? current.getText() : undefined;
-};
-
-// Name the mock is bound to: the receiver of `.mockImplementation()`, or the property /
-// variable that a `vi.fn(...)` chain is assigned to.
-const getMockBindingName = (call) => {
-  const root = getReceiverRoot(call.getExpression());
-  if (root && root !== 'vi') {
-    return root;
-  }
-  let outer = call;
-  while (
-    Node.isCallExpression(outer.getParent()) ||
-    Node.isPropertyAccessExpression(outer.getParent())
-  ) {
-    outer = outer.getParent();
-  }
-  const binding = outer.getParent();
-  if (Node.isPropertyAssignment(binding) || Node.isVariableDeclaration(binding)) {
-    return binding.getName();
-  }
-  return undefined;
-};
-
-const isMockImplementationArg = (call) => {
-  const callee = call.getExpression();
-  if (Node.isPropertyAccessExpression(callee)) {
-    return (
-      IMPLEMENTATION_METHODS.has(callee.getName()) ||
-      (callee.getText() === 'vi.fn' && call.getArguments().length === 1)
-    );
-  }
-  return false;
-};
-
-const rewriteConstructorMockArrows = (sourceFile, report) => {
-  const arrows = sourceFile.getDescendantsOfKind(SyntaxKind.ArrowFunction).reverse();
-  for (const arrow of arrows) {
-    if (arrow.wasForgotten()) {
-      continue;
-    }
-    const call = arrow.getParentIfKind(SyntaxKind.CallExpression);
-    if (!call || call.getArguments()[0] !== arrow || !isMockImplementationArg(call)) {
-      continue;
-    }
-    const name = getMockBindingName(call);
-    if (!name || !CONSTRUCTOR_MOCK_NAME.test(name)) {
-      continue;
-    }
-    if (arrow.getDescendantsOfKind(SyntaxKind.ThisKeyword).length) {
-      continue;
-    }
-    const params = arrow
-      .getParameters()
-      .map((param) => param.getText())
-      .join(', ');
-    const body = arrow.getBody();
-    const asyncPrefix = arrow.isAsync() ? 'async ' : '';
-    const block = Node.isBlock(body) ? body.getText() : `{ return ${body.getText()}; }`;
-    arrow.replaceWithText(`${asyncPrefix}function (${params}) ${block}`);
-    report.push(`${location(call)} ${name} implementation converted to a constructible function`);
   }
 };
 
@@ -321,7 +250,6 @@ const transformFile = (sourceFile) => {
   }
 
   addDefaultToMockFactories(sourceFile);
-  rewriteConstructorMockArrows(sourceFile, report);
   awaitAsyncAssertions(sourceFile, report);
 
   const testCallbacks = sourceFile

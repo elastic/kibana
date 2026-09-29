@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 
 import { getFlags, FlagsReader } from '@kbn/dev-cli-runner';
@@ -16,9 +18,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { EsVersion } from '../../functional_test_runner';
 import { parseFlags, FLAG_OPTIONS } from './flags';
 
-jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'some-uuid' };
+      return { ...mocked, default: mocked };
+    });
 
-const cwdMock = (process.cwd = jest.fn().mockReturnValue(REPO_ROOT));
+const cwdMock = (process.cwd = vi.fn().mockReturnValue(REPO_ROOT));
 
 expect.addSnapshotSerializer(
   createAnyInstanceSerializer(EsVersion, (v: EsVersion) => `EsVersion ${v.toString()}`)

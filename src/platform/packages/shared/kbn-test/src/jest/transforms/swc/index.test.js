@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 import { SourceMap } from 'node:module';
 import vm from 'vm';
@@ -41,7 +43,7 @@ const evaluate = (source, { modules = {}, filename = '/repo/example.ts', jestObj
     `(function (exports, require, module, jest) {\n${getCode(source, filename)}\n})`,
     { filename }
   );
-  run(module.exports, requireModule, module, jestObject ?? { mock: jest.fn() });
+  run(module.exports, requireModule, module, jestObject ?? { mock: vi.fn() });
   return module.exports;
 };
 
@@ -266,7 +268,7 @@ export function boom() {
       }
 
       // Sinon wraps data properties whose value is a function; Jest spies work either way.
-      const spy = jest.spyOn(exports, 'useFetcher').mockReturnValue('mocked');
+      const spy = vi.spyOn(exports, 'useFetcher').mockReturnValue('mocked');
       expect(exports.useFetcher()).toBe('mocked');
       spy.mockRestore();
       expect(exports.useFetcher()).toBe('real');
@@ -349,7 +351,7 @@ export function boom() {
         modules: { './dependency': dependency },
       });
 
-      jest.spyOn(exports, 'helper').mockReturnValue('mocked');
+      vi.spyOn(exports, 'helper').mockReturnValue('mocked');
       expect(exports.helper()).toBe('mocked');
     });
 
@@ -515,9 +517,9 @@ export function boom() {
       expect(code).not.toContain('lazyObject)(');
     });
 
-    it('evaluates lazy properties on first access', () => {
-      const lazyObjectModule = jest.requireActual('@kbn/lazy-object');
-      const factory = jest.fn(() => 'computed');
+    it('evaluates lazy properties on first access', async () => {
+      const lazyObjectModule = (await vi.importActual('@kbn/lazy-object'));
+      const factory = vi.fn(() => 'computed');
       const exports = evaluate(
         `
           import { lazyObject } from '@kbn/lazy-object';

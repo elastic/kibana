@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { resolve } from 'path';
 
 describe('getJestConfigs', () => {
@@ -14,9 +16,9 @@ describe('getJestConfigs', () => {
   let mockExecResponder: (cmd: string) => { stdout: string };
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.doMock('child_process', () => {
-      const originalChildProcess = jest.requireActual('child_process');
+    vi.resetModules();
+    vi.doMock('child_process', () => {
+      const originalChildProcess = require('child_process');
       return {
         ...originalChildProcess,
         exec: (cmd: string, options: any, callback: any) => {
@@ -31,38 +33,47 @@ describe('getJestConfigs', () => {
     });
 
     // Mock REPO_ROOT
-    jest.doMock('@kbn/repo-info', () => ({
-      REPO_ROOT: '/repo',
-    }));
+    vi.doMock('@kbn/repo-info', () => {
+          const mocked = {
+              REPO_ROOT: '/repo',
+            };
+          return { ...mocked, default: mocked };
+        });
 
     // Mock Jest modules that are dynamically imported
-    jest.doMock('jest-config', () => ({
-      readConfig: jest.fn().mockResolvedValue({
-        projectConfig: {},
-        globalConfig: {},
-      }),
-    }));
+    vi.doMock('jest-config', () => {
+          const mocked = {
+              readConfig: vi.fn().mockResolvedValue({
+                projectConfig: {},
+                globalConfig: {},
+              }),
+            };
+          return { ...mocked, default: mocked };
+        });
 
-    jest.doMock('jest', () => ({
-      SearchSource: jest.fn().mockImplementation(() => ({
-        getTestPaths: jest.fn().mockResolvedValue({
-          tests: [], // We'll customize this per test
-        }),
-      })),
-    }));
+    vi.doMock('jest', () => {
+          const mocked = {
+              SearchSource: vi.fn().mockImplementation(() => ({
+                getTestPaths: vi.fn().mockResolvedValue({
+                  tests: [], // We'll customize this per test
+                }),
+              })),
+            };
+          return { ...mocked, default: mocked };
+        });
 
-    jest.doMock('jest-runtime', () => ({
+    vi.doMock('jest-runtime', () => ({
       default: {
-        createContext: jest.fn().mockResolvedValue({}),
+        createContext: vi.fn().mockResolvedValue({}),
       },
     }));
 
     // Mock fs.readFileSync for config parsing and existsSync for file existence
-    jest.doMock('fs', () => {
-      const originalFs = jest.requireActual('fs');
+    vi.doMock('fs', () => {
+      const originalFs = require('fs');
       return {
         ...originalFs,
-        readFileSync: jest.fn((path: string) => {
+        readFileSync: vi.fn((path: string) => {
           // Return simple Jest config content with proper roots based on the config path
           return `module.exports = {
             testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
@@ -70,7 +81,7 @@ describe('getJestConfigs', () => {
             testPathIgnorePatterns: ['/node_modules/']
           };`;
         }),
-        existsSync: jest.fn((path: string) => {
+        existsSync: vi.fn((path: string) => {
           // Mock all files as existing (since we're testing git-tracked files)
           return true;
         }),
@@ -79,7 +90,7 @@ describe('getJestConfigs', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should discover configs and tests using git ls-files', async () => {

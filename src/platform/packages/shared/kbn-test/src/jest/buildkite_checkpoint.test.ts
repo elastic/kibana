@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('child_process', () => ({
-  execFile: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('child_process', () => {
+      const mocked = {
+      execFile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { execFile } from 'child_process';
 import {
@@ -19,13 +25,13 @@ import {
   isConfigCompleted,
 } from './buildkite_checkpoint';
 
-const mockExecFile = execFile as unknown as jest.Mock;
+const mockExecFile = execFile as unknown as Mock;
 
 describe('buildkite_checkpoint', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env = { ...originalEnv };
   });
 

@@ -85,6 +85,23 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
       allTestFiles = allFiles.filter((file) => testPattern.test(file));
     }
 
+    // Vitest configs select .js/.mjs tests as well; only they get the full list, so orphan
+    // detection keeps its historical TypeScript-only scope.
+    const vitestTestFiles = configFiles.some(isVitestConfig)
+      ? [
+          ...allTestFiles,
+          ...(
+            await execAsync(`git ls-files -- '*.test.js' '*.test.mjs'`, {
+              cwd: REPO_ROOT,
+              maxBuffer: 1024 * 1024 * 10,
+            })
+          ).stdout
+            .split('\n')
+            .filter(Boolean)
+            .map((file) => resolve(REPO_ROOT, file)),
+        ]
+      : [];
+
     // Step 2: Parse all config files in parallel and apply Jest matching rules using fast heuristic
     const configTestResults = await Promise.all(
       configFiles.map(async (configPath) => {
@@ -92,7 +109,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
         if (isVitestConfig(configPath)) {
           return {
             config: configPath,
-            testFiles: getVitestConfigTestFiles(configPath, allTestFiles),
+            testFiles: getVitestConfigTestFiles(configPath, vitestTestFiles),
           };
         }
 

@@ -7,36 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+import { vi } from 'vitest';
 
-jest.mock('@kbn/dev-cli-errors', () => ({
-  createFailError: (message: string) => new Error(message),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-validation-runner', () => ({
-  buildValidationCliArgs: jest.fn(),
-  describeValidationNoTargetsScope: jest.fn(),
-  formatReproductionCommand: jest.fn(),
-  readValidationRunFlags: jest.fn(),
-  resolveValidationBaseContext: jest.fn(),
-  VALIDATION_RUN_HELP: [],
-  VALIDATION_RUN_STRING_FLAGS: [],
-}));
+vi.mock('@kbn/dev-cli-errors', () => {
+      const mocked = {
+      createFailError: (message: string) => new Error(message),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/repo',
-}));
+vi.mock('@kbn/dev-validation-runner', () => {
+      const mocked = {
+      buildValidationCliArgs: vi.fn(),
+      describeValidationNoTargetsScope: vi.fn(),
+      formatReproductionCommand: vi.fn(),
+      readValidationRunFlags: vi.fn(),
+      resolveValidationBaseContext: vi.fn(),
+      VALIDATION_RUN_HELP: [],
+      VALIDATION_RUN_STRING_FLAGS: [],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../jest-preset', () => ({
-  testMatch: ['**/*.test.ts'],
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/repo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./run', () => ({
-  findConfigInDirectoryTree: jest.fn(),
-  runJest: jest.fn(),
-}));
+vi.mock('../../jest-preset', () => {
+      const mocked = {
+      testMatch: ['**/*.test.ts'],
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./run', () => {
+      const mocked = {
+      findConfigInDirectoryTree: vi.fn(),
+      runJest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { planJestContractRuns } from './run_contract';
 

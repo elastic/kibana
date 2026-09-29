@@ -1685,3 +1685,5 @@ packages:
 
 # Keep a last field entry, because a trailing comment might be removed by some parsers.
 lockfile: true
+patchedDependencies:
+  vitest@5.0.2: patches/vitest@5.0.2.patch

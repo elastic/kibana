@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import fs from 'fs';
 import { join, resolve } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-jest.mock('fs');
-jest.mock('@kbn/repo-info', () => {
+vi.mock('fs');
+vi.mock('@kbn/repo-info', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 
@@ -48,7 +51,7 @@ describe('SuiteTracker', () => {
       process.env[env] = originalEnvs[env];
     }
 
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   let MOCKS: Record<string, Suite>;
@@ -115,7 +118,7 @@ describe('SuiteTracker', () => {
 
     const suites = suiteTracker.getAllFinishedSuites();
 
-    const call = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    const call = (fs.writeFileSync as Mock).mock.calls[0];
     expect(call[0]).toEqual(DEFAULT_TEST_METADATA_PATH);
     expect(call[1]).toEqual(JSON.stringify(suites, null, 2));
   });
@@ -125,7 +128,7 @@ describe('SuiteTracker', () => {
     const { lifecycle } = await runLifecycleWithMocks([MOCKS.WITH_TESTS]);
     await lifecycle.cleanup.trigger();
 
-    expect((fs.writeFileSync as jest.Mock).mock.calls[0][0]).toEqual(
+    expect((fs.writeFileSync as Mock).mock.calls[0][0]).toEqual(
       process.env.TEST_METADATA_PATH
     );
   });

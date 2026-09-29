@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 import { materialize, toArray } from 'rxjs';
 
@@ -15,7 +17,7 @@ import { LifecyclePhase } from './lifecycle_phase';
 describe('with randomness', () => {
   beforeEach(() => {
     const randomOrder = [0, 0.75, 0.5, 0.25, 1];
-    jest.spyOn(Math, 'random').mockImplementation(() => {
+    vi.spyOn(Math, 'random').mockImplementation(() => {
       const n = randomOrder.shift()!;
       randomOrder.push(n);
       return n;
@@ -23,7 +25,7 @@ describe('with randomness', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('calls handlers in random order', async () => {
@@ -31,19 +33,19 @@ describe('with randomness', () => {
     const order: string[] = [];
 
     phase.add(
-      jest.fn(() => {
+      vi.fn(() => {
         order.push('one');
       })
     );
 
     phase.add(
-      jest.fn(() => {
+      vi.fn(() => {
         order.push('two');
       })
     );
 
     phase.add(
-      jest.fn(() => {
+      vi.fn(() => {
         order.push('three');
       })
     );
@@ -66,20 +68,20 @@ describe('with randomness', () => {
 });
 
 describe('without randomness', () => {
-  beforeEach(() => jest.spyOn(Math, 'random').mockImplementation(() => 0));
-  afterEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.spyOn(Math, 'random').mockImplementation(() => 0));
+  afterEach(() => vi.restoreAllMocks());
 
   it('calls all handlers and throws first error', async () => {
     const phase = new LifecyclePhase(new Rx.Subscription());
-    const fn1 = jest.fn();
+    const fn1 = vi.fn();
     phase.add(fn1);
 
-    const fn2 = jest.fn(() => {
+    const fn2 = vi.fn(() => {
       throw new Error('foo');
     });
     phase.add(fn2);
 
-    const fn3 = jest.fn();
+    const fn3 = vi.fn();
     phase.add(fn3);
 
     await expect(phase.trigger()).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
@@ -92,13 +94,13 @@ describe('without randomness', () => {
     const phase = new LifecyclePhase(new Rx.Subscription());
     const order: string[] = [];
 
-    const beforeSub = jest.fn(() => order.push('before'));
+    const beforeSub = vi.fn(() => order.push('before'));
     phase.before$.subscribe(beforeSub);
 
-    const afterSub = jest.fn(() => order.push('after'));
+    const afterSub = vi.fn(() => order.push('after'));
     phase.after$.subscribe(afterSub);
 
-    const handler = jest.fn(async () => {
+    const handler = vi.fn(async () => {
       order.push('handler start');
       await new Promise((resolve) => setTimeout(resolve, 100));
       order.push('handler done');

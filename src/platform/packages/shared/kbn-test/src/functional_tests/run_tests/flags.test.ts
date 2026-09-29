@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
 import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
 
 import { EsVersion } from '../../functional_test_runner';
 import { parseFlags, FLAG_OPTIONS } from './flags';
 
-jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'some-uuid' };
+      return { ...mocked, default: mocked };
+    });
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(

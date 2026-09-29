@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import Os from 'os';
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/repo',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/repo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   parseMoonJestOutput,
@@ -252,15 +258,15 @@ describe('buildMoonJestWarnings', () => {
 });
 
 describe('computeJestParallelism', () => {
-  let cpusSpy: jest.SpyInstance;
-  let memSpy: jest.SpyInstance;
+  let cpusSpy: MockInstance;
+  let memSpy: MockInstance;
 
   const GB = 1024 * 1024 * 1024;
 
   beforeEach(() => {
-    cpusSpy = jest.spyOn(Os, 'cpus').mockReturnValue(new Array(8).fill({}) as any);
+    cpusSpy = vi.spyOn(Os, 'cpus').mockReturnValue(new Array(8).fill({}) as any);
     // Plenty of RAM by default so these tests exercise the CPU-bound path only.
-    memSpy = jest.spyOn(Os, 'totalmem').mockReturnValue(64 * GB);
+    memSpy = vi.spyOn(Os, 'totalmem').mockReturnValue(64 * GB);
   });
 
   afterEach(() => {

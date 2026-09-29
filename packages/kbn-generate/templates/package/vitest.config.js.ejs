@@ -1,0 +1,6 @@
+const { createKbnVitestConfig } = require(<%- js("@kbn/test/vitest/preset") %>);
+
+module.exports = createKbnVitestConfig({
+  environment: <%- js(pkg.web ? "jsdom" : "node") %>,
+  roots: [<%- js(pkg.normalizedRepoRelativeDir) %>],
+});

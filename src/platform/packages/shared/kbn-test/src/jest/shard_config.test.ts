@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo',
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      readFileSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { readFileSync } from 'fs';
 import {
@@ -25,11 +34,11 @@ import {
   getShardCountForConfig,
 } from './shard_config';
 
-const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
+const mockReadFileSync = readFileSync as MockedFunction<typeof readFileSync>;
 
 describe('shard_config', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetShardConfigCache();
   });
 

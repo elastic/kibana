@@ -1,0 +1,74 @@
+diff --git a/dist/chunks/index.hTNFpC24.js b/dist/chunks/index.hTNFpC24.js
+index 870b7240758fe81a2a8a84c7d81569245faef923..a2fd21187f5a6b2551f52dc34ad0ba425041ea9e 100644
+--- a/dist/chunks/index.hTNFpC24.js
++++ b/dist/chunks/index.hTNFpC24.js
+@@ -336,7 +336,8 @@ class VitestMocker extends BareModuleMocker {
+ 			if (prop === "then") {
+ 				if (target instanceof Promise) return target.then.bind(target);
+ 			} else if (!(prop in target)) {
+-				if (this.filterPublicKeys.includes(prop)) return;
++				// [kibana] Like Jest, reading an export a mock factory did not define yields undefined.
++				return;
+ 				throw this.createError(`[vitest] No "${String(prop)}" export is defined on the "${mock.raw}" mock. Did you forget to return it from "vi.mock"?
+ If you need to partially mock a module, you can use "importOriginal" helper inside:
+ `, `vi.mock(import("${mock.raw}"), async (importOriginal) => {
+diff --git a/dist/chunks/spy.KLHgXex_.js b/dist/chunks/spy.KLHgXex_.js
+index 3668d0a1947b33abda54597ecba7bad8781211c4..5f26c46d2934cb37e7b811147a114a1051cc7047 100644
+--- a/dist/chunks/spy.KLHgXex_.js
++++ b/dist/chunks/spy.KLHgXex_.js
+@@ -94,13 +94,11 @@ function createMockInstance(options = {}) {
+ 	};
+ 	mock.mockReturnValue = function mockReturnValue(value) {
+ 		return mock.mockImplementation(function() {
+-			if (new.target) throwConstructorError("mockReturnValue");
+ 			return value;
+ 		});
+ 	};
+ 	mock.mockReturnValueOnce = function mockReturnValueOnce(value) {
+ 		return mock.mockImplementationOnce(function() {
+-			if (new.target) throwConstructorError("mockReturnValueOnce");
+ 			return value;
+ 		});
+ 	};
+@@ -118,25 +116,21 @@ function createMockInstance(options = {}) {
+ 	};
+ 	mock.mockResolvedValue = function mockResolvedValue(value) {
+ 		return mock.mockImplementation(function() {
+-			if (new.target) throwConstructorError("mockResolvedValue");
+ 			return Promise.resolve(value);
+ 		});
+ 	};
+ 	mock.mockResolvedValueOnce = function mockResolvedValueOnce(value) {
+ 		return mock.mockImplementationOnce(function() {
+-			if (new.target) throwConstructorError("mockResolvedValueOnce");
+ 			return Promise.resolve(value);
+ 		});
+ 	};
+ 	mock.mockRejectedValue = function mockRejectedValue(value) {
+ 		return mock.mockImplementation(function() {
+-			if (new.target) throwConstructorError("mockRejectedValue");
+ 			return Promise.reject(value);
+ 		});
+ 	};
+ 	mock.mockRejectedValueOnce = function mockRejectedValueOnce(value) {
+ 		return mock.mockImplementationOnce(function() {
+-			if (new.target) throwConstructorError("mockRejectedValueOnce");
+ 			return Promise.reject(value);
+ 		});
+ 	};
+@@ -298,7 +292,14 @@ function createMock({ state, config, name: mockName, prototypeState, prototypeCo
+ 				if (prototypeMembers.length === 0)
+  // eslint-disable-next-line ts/no-use-before-define
+ 				reparentMockPrototype(mock, implementation === noopImplementation ? void 0 : implementation);
+-				returnValue = Reflect.construct(implementation, args, new.target);
++				// [kibana] Jest calls the implementation as a plain function with the new instance as
++				// `this` and uses its return value when it is an object, so arrow functions and
++				// mockReturnValue() work for mocked classes.
++				if (implementation.prototype === void 0) {
++					const instance = Object.create(new.target.prototype);
++					const implementationResult = implementation.apply(instance, args);
++					returnValue = implementationResult !== null && (typeof implementationResult === "object" || typeof implementationResult === "function") ? implementationResult : instance;
++				} else returnValue = Reflect.construct(implementation, args, new.target);
+ 				// jest calls this before the implementation, but we have to resolve this _after_
+ 				// because we cannot do it before the `Reflect.construct` called the custom implementation.
+ 				// fortunately, the constructor is always an empty function because `prototypeMethods`

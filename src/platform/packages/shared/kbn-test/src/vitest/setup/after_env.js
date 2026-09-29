@@ -20,18 +20,53 @@ import { matchers } from '@emotion/jest';
 import { createRequire } from 'module';
 import { i18n } from '@kbn/i18n';
 
-// Shared Kibana mock factories (coreMock, elasticsearchServiceMock, ...) still call `jest.*`.
-// Routing the global to `vi` lets migrated suites consume them while Jest suites still exist.
-// `requireActual` maps to Node's require: vi.mock() never intercepts it, so npm packages come
-// back unmocked, as with Jest. Kibana TS sources cannot be loaded this way.
+// Shared Kibana mock factories (coreMock, elasticsearchServiceMock, ...) are also used by the Jest
+// integration tests, so they keep calling `jest.*`; the global routes those calls to `vi`.
+//
+// `jest.requireActual()` must stay synchronous, so it maps to Node's require, resolved from the
+// calling file. vi.mock() never intercepts Node's require, so the module comes back unmocked as in
+// Jest; Kibana TS sources load through @kbn/swc-register as a separate module instance.
 const nodeRequire = createRequire(import.meta.url);
+
+const getCallerFile = () => {
+  const [, , callerFrame = ''] = new Error().stack.split('\n').slice(1);
+  const [, file] = /\(?(?:file:\/\/)?(\/[^():]+):\d+:\d+\)?$/.exec(callerFrame.trim()) ?? [];
+  return file ?? import.meta.url;
+};
+
+const requireActual = (id) => {
+  if (id.startsWith('.') || id.startsWith('@kbn/')) {
+    // no-op after the first call
+    nodeRequire('@kbn/swc-register').install();
+  }
+  return createRequire(getCallerFile())(id);
+};
+
 global.jest = new Proxy(vi, {
-  get: (target, key) => (key === 'requireActual' ? nodeRequire : Reflect.get(target, key)),
+  get: (target, key) => (key === 'requireActual' ? requireActual : Reflect.get(target, key)),
 });
 
 global.ReadableStream = ReadableStream;
 global.setImmediate = setImmediate;
 global.clearImmediate = clearImmediate;
+
+// polyfills.jsdom.js only defines matchMedia when `Worker` is missing, which holds in Jest's
+// sandbox but not in Vitest's jsdom environment.
+if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => {},
+    }),
+  });
+}
 
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
 expect.extend(matchers);

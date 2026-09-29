@@ -7,51 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // Mock all dependencies before importing anything else
 const mockLog = {
-  info: jest.fn(),
-  error: jest.fn(),
-  warning: jest.fn(),
-  write: jest.fn(),
-  debug: jest.fn(),
+  info: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn(),
+  write: vi.fn(),
+  debug: vi.fn(),
 };
 
-jest.mock('getopts', () => jest.fn());
+vi.mock('getopts', () => vi.fn());
 
-jest.mock('fs', () => ({
-  promises: {
-    mkdir: jest.fn().mockResolvedValue(undefined),
-    writeFile: jest.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      promises: {
+        mkdir: vi.fn().mockResolvedValue(undefined),
+        writeFile: vi.fn().mockResolvedValue(undefined),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/path/to',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/path/to',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('child_process', () => ({
-  spawn: jest.fn(),
-  execFile: jest.fn(),
-}));
+vi.mock('child_process', () => {
+      const mocked = {
+      spawn: vi.fn(),
+      execFile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/tooling-log', () => ({
-  ToolingLog: jest.fn().mockImplementation(() => mockLog),
-}));
+vi.mock('@kbn/tooling-log', () => {
+      const mocked = {
+      ToolingLog: vi.fn().mockImplementation(() => mockLog),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ci-stats-reporter', () => ({
-  getTimeReporter: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('@kbn/ci-stats-reporter', () => {
+      const mocked = {
+      getTimeReporter: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./configs/get_jest_configs', () => ({
-  getJestConfigs: jest.fn(),
-}));
+vi.mock('./configs/get_jest_configs', () => {
+      const mocked = {
+      getJestConfigs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./shard_config', () => {
-  return jest.requireActual('./shard_config');
+vi.mock('./shard_config', async () => {
+  return (await vi.importActual('./shard_config'));
 });
 
 // Mock process.exit to prevent tests from actually exiting
-const mockProcessExit = jest
+const mockProcessExit = vi
   .spyOn(process, 'exit')
   .mockImplementation((code?: string | number | null | undefined) => {
     throw new Error(`process.exit called with code ${code}`);
@@ -61,16 +82,16 @@ import { EventEmitter } from 'events';
 import { runJestAll } from './run_all';
 
 describe('run_all.ts', () => {
-  let mockGetopts: jest.Mock;
-  let mockSpawn: jest.Mock;
-  let mockExecFile: jest.Mock;
-  let mockGetJestConfigs: jest.Mock;
-  let mockGetTimeReporter: jest.Mock;
-  let mockReporter: jest.Mock;
+  let mockGetopts: Mock;
+  let mockSpawn: Mock;
+  let mockExecFile: Mock;
+  let mockGetJestConfigs: Mock;
+  let mockGetTimeReporter: Mock;
+  let mockReporter: Mock;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Clear all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLog.info.mockClear();
     mockLog.error.mockClear();
     mockLog.warning.mockClear();
@@ -83,12 +104,12 @@ describe('run_all.ts', () => {
     process.env.JEST_WARMUP_DELAY_MS = '0';
 
     // Set up mocks
-    mockGetopts = jest.mocked(jest.requireMock('getopts'));
-    mockSpawn = jest.mocked(jest.requireMock('child_process').spawn);
-    mockExecFile = jest.mocked(jest.requireMock('child_process').execFile);
-    mockGetJestConfigs = jest.mocked(jest.requireMock('./configs/get_jest_configs').getJestConfigs);
-    mockGetTimeReporter = jest.mocked(jest.requireMock('@kbn/ci-stats-reporter').getTimeReporter);
-    mockReporter = jest.fn();
+    mockGetopts = vi.mocked((await vi.importMock('getopts')));
+    mockSpawn = vi.mocked((await vi.importMock('child_process')).spawn);
+    mockExecFile = vi.mocked((await vi.importMock('child_process')).execFile);
+    mockGetJestConfigs = vi.mocked((await vi.importMock('./configs/get_jest_configs')).getJestConfigs);
+    mockGetTimeReporter = vi.mocked((await vi.importMock('@kbn/ci-stats-reporter')).getTimeReporter);
+    mockReporter = vi.fn();
     mockGetTimeReporter.mockReturnValue(mockReporter);
 
     // Default: execFile succeeds (used by checkpoint helpers)
@@ -281,7 +302,7 @@ describe('run_all.ts', () => {
 
   describe('Jest process execution', () => {
     // Increase timeout for this suite as it involves async process mocking
-    jest.setTimeout(15000);
+    vi.setConfig({ testTimeout: 15000 });
     it('should spawn Jest processes with correct arguments', async () => {
       mockGetopts.mockReturnValue({
         configs: 'config1.js',

@@ -7,51 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // Mock external dependencies
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-cli-errors', () => ({
-  createFailError: jest.fn(),
-}));
+vi.mock('@kbn/dev-cli-errors', () => {
+      const mocked = {
+      createFailError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./configs/get_jest_configs', () => ({
-  getJestConfigs: jest.fn(),
-}));
+vi.mock('./configs/get_jest_configs', () => {
+      const mocked = {
+      getJestConfigs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock performance.now for consistent timing
-const mockPerformanceNow = jest.fn();
+const mockPerformanceNow = vi.fn();
 
 import { runCheckJestConfigsCli } from './run_check_jest_configs_cli';
 
 describe('runCheckJestConfigsCli', () => {
-  let mockRun: jest.Mock;
-  let mockCreateFailError: jest.Mock;
-  let mockGetJestConfigs: jest.Mock;
+  let mockRun: Mock;
+  let mockCreateFailError: Mock;
+  let mockGetJestConfigs: Mock;
   let mockLog: {
-    info: jest.Mock;
-    error: jest.Mock;
-    success: jest.Mock;
+    info: Mock;
+    error: Mock;
+    success: Mock;
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Clear all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Set up mocks
-    mockRun = jest.mocked(jest.requireMock('@kbn/dev-cli-runner').run);
-    mockCreateFailError = jest.mocked(jest.requireMock('@kbn/dev-cli-errors').createFailError);
-    mockGetJestConfigs = jest.mocked(jest.requireMock('./configs/get_jest_configs').getJestConfigs);
+    mockRun = vi.mocked((await vi.importMock('@kbn/dev-cli-runner')).run);
+    mockCreateFailError = vi.mocked((await vi.importMock('@kbn/dev-cli-errors')).createFailError);
+    mockGetJestConfigs = vi.mocked((await vi.importMock('./configs/get_jest_configs')).getJestConfigs);
 
     mockLog = {
-      info: jest.fn(),
-      error: jest.fn(),
-      success: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
+      success: vi.fn(),
     };
 
     // Mock performance.now to return predictable values

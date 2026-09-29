@@ -91,7 +91,9 @@ const createKbnVitestConfig = ({
       fsModuleCache: true,
       // Jest defaults; Vitest 5 enables clearMocks by default.
       clearMocks,
+      // Jest's restoreMocks also resets every jest.fn(); Vitest's only restores vi.spyOn() spies.
       restoreMocks,
+      mockReset: restoreMocks,
       ...(testTimeout ? { testTimeout } : {}),
       retry: process.env.CI ? 3 : 0,
       setupFiles: [
