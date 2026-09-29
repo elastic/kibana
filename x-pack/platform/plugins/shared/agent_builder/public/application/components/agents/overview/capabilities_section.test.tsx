@@ -7,8 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { CapabilitiesSection } from './capabilities_section';
 
 const baseProps = {
@@ -52,8 +51,7 @@ describe('CapabilitiesSection', () => {
     expect(screen.getByTestId('agentOverviewCapabilityCardTools')).toBeInTheDocument();
   });
 
-  it('fires navigation handlers when non-loading cards are clicked', async () => {
-    const user = userEvent.setup();
+  it('fires navigation handlers when non-loading cards are clicked', () => {
     const onNavigateToSkills = jest.fn();
     const onNavigateToTools = jest.fn();
 
@@ -66,10 +64,10 @@ describe('CapabilitiesSection', () => {
       />
     );
 
-    await user.click(screen.getByTestId('agentOverviewCapabilityCardSkills'));
+    fireEvent.click(screen.getByTestId('agentOverviewCapabilityCardSkills'));
     expect(onNavigateToSkills).toHaveBeenCalled();
 
-    await user.click(screen.getByTestId('agentOverviewCapabilityCardTools'));
+    fireEvent.click(screen.getByTestId('agentOverviewCapabilityCardTools'));
     expect(onNavigateToTools).toHaveBeenCalled();
   });
 });
