@@ -57,11 +57,16 @@ export default function (providerContext: FtrProviderContext) {
     });
   }
 
+  const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+
   async function getActionResultsForAction(actionId: string) {
-    const res = await es.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      query: { term: { action_id: actionId } },
-    });
+    const res = await es.search(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        query: { term: { action_id: actionId } },
+      },
+      ES_INDEX_OPTIONS
+    );
     return res.hits.hits.map((h: any) => h._source);
   }
 
