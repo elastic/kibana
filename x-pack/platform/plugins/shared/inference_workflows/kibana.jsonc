@@ -10,7 +10,6 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "inferenceWorkflows"],
-    "requiredPlugins": ["inference", "workflowsExtensions"],
-    "optionalPlugins": ["searchInferenceEndpoints"]
+    "requiredPlugins": ["inference", "workflowsExtensions", "searchInferenceEndpoints"]
   }
 }
