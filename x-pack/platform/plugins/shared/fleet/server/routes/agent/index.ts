@@ -1770,6 +1770,21 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
         options: {
           oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkRestartAgentsRequest: {
+                      value: {
+                        agents: ['agent-1', 'agent-2'],
+                        batchSize: 100,
+                        includeInactive: false,
+                      },
+                    },
+                  },
+                },
+              },
+            },
             responses: {
               200: {
                 content: {

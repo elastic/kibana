@@ -84,6 +84,7 @@ export async function bulkRestartAgents(
       batchSize,
       total,
       spaceId: currentSpaceId,
+      showInactive: options.includeInactive ?? false,
     },
     { pitId: await openPointInTime(esClient) }
   );
