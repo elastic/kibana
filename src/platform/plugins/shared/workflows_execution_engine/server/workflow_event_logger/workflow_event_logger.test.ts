@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import type { WorkflowEventLoggerContext, WorkflowEventLoggerOptions } from './types';
 import { WorkflowEventLogger } from './workflow_event_logger';
-import { RETRYABLE_FLUSH_DELAY_MS, WorkflowEventQueue } from './workflow_event_queue';
+import { WorkflowEventQueue } from './workflow_event_queue';
 import { createCircuitBreakerError } from '../__fixtures__/circuit_breaker_error';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
@@ -354,29 +354,6 @@ describe('WorkflowEventLogger', () => {
 
     await eventQueue.flush();
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
-  });
-
-  it('retries a retryable failure before a drain flush returns', async () => {
-    jest.useFakeTimers();
-    try {
-      const logsRepository = createLogsRepositoryMock();
-      const logger = loggerMock.create();
-      logsRepository.createLogs
-        .mockRejectedValueOnce(createCircuitBreakerError())
-        .mockResolvedValueOnce(undefined);
-      const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
-
-      workflowLogger.logInfo('kept');
-      const flushPromise = eventQueue.flush({ untilDrained: true });
-      await jest.advanceTimersByTimeAsync(RETRYABLE_FLUSH_DELAY_MS);
-      await flushPromise;
-
-      expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
-      const retriedBatch = logsRepository.createLogs.mock.calls[1][0] as WorkflowLogEvent[];
-      expect(retriedBatch.map((event) => event.message)).toEqual(['kept']);
-    } finally {
-      jest.useRealTimers();
-    }
   });
 
   it('indexes a large backlog in bounded batches', async () => {

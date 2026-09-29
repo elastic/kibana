@@ -127,7 +127,6 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.eventQueue.flush({
     signal: params.signal,
-    untilDrained: true,
   });
   finalLogFlushSpan?.end();
   params.signal.removeEventListener('abort', onTaskAbort);
