@@ -46,3 +46,40 @@ export const toAlertDescriptor = (attachment: UnknownAttachment): FlyoutDescript
     ? { kind: FLYOUT_DESCRIPTOR_KIND.document, documentId, indexName }
     : null;
 };
+
+/**
+ * Maps a `security.rule` attachment onto the rule flyout it should open, or `null` when
+ * the payload identifies nothing (read-only row).
+ *
+ * Id resolution: `text.id` wins over `origin`.
+ * - `text.id` is present for resolved attachments (investigate-rule skill, workflow updates).
+ * - `origin` covers browser "Add to chat" producers that strip `id` from `text`.
+ */
+export const toRuleDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor | null => {
+  const text = (attachment.data as { text?: unknown })?.text;
+
+  let ruleId: string | undefined;
+
+  if (typeof text === 'string') {
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        const id = (parsed as Record<string, unknown>).id;
+        if (typeof id === 'string' && id) {
+          ruleId = id;
+        }
+      }
+    } catch {
+      // text is prose or malformed JSON — not identifiable
+    }
+  }
+
+  if (!ruleId) {
+    const origin = attachment.origin;
+    if (typeof origin === 'string' && origin) {
+      ruleId = origin;
+    }
+  }
+
+  return ruleId ? { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId } : null;
+};

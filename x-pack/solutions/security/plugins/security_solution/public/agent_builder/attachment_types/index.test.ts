@@ -19,12 +19,13 @@ describe('registerAttachmentUiDefinitions', () => {
   const getSpaceId = jest.fn().mockResolvedValue('default');
   const mockData = { search: { search: jest.fn() } };
 
-  const register = () =>
+  const register = (aiRuleCreationEnabled = false) =>
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       resolveSecurityCanvasContext,
       getSpaceId,
       data: mockData as never,
+      aiRuleCreationEnabled,
     });
 
   beforeEach(() => {
@@ -70,6 +71,68 @@ describe('registerAttachmentUiDefinitions', () => {
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity
     );
     expect(entityCall).toBeUndefined();
+  });
+
+  it('registers a baseline security.rule with renderConversationDetailsContent when aiRuleCreationEnabled is false', () => {
+    register(false);
+
+    const ruleCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+    );
+    expect(ruleCall).toBeDefined();
+    expect(ruleCall![1].renderConversationDetailsContent).toBeDefined();
+    expect(ruleCall![1].getIcon()).toBe('securityApp');
+  });
+
+  it('does not register baseline security.rule when aiRuleCreationEnabled is true', () => {
+    register(true);
+
+    const ruleCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+    );
+    expect(ruleCall).toBeUndefined();
+  });
+
+  it('baseline security.rule getLabel returns attachmentLabel when provided', () => {
+    register(false);
+
+    const ruleCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+    );
+    const label = ruleCall![1].getLabel({
+      id: 'att-1',
+      type: SecurityAgentBuilderAttachments.rule,
+      data: { text: JSON.stringify({ name: 'Parsed Name' }), attachmentLabel: 'My Label' },
+    });
+    expect(label).toBe('My Label');
+  });
+
+  it('baseline security.rule getLabel falls back to parsed rule name', () => {
+    register(false);
+
+    const ruleCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+    );
+    const label = ruleCall![1].getLabel({
+      id: 'att-1',
+      type: SecurityAgentBuilderAttachments.rule,
+      data: { text: JSON.stringify({ name: 'My Rule' }) },
+    });
+    expect(label).toBe('My Rule');
+  });
+
+  it('baseline security.rule getLabel falls back to "Security Rule" when unparseable', () => {
+    register(false);
+
+    const ruleCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+    );
+    const label = ruleCall![1].getLabel({
+      id: 'att-1',
+      type: SecurityAgentBuilderAttachments.rule,
+      data: { text: 'not json' },
+    });
+    expect(label).toBe('Security Rule');
   });
 
   it('registers a renderConversationDetailsContent for security.alert', () => {
