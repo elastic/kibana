@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
-  waitForViewToBeLoaded,
+  visitIndicatorsWithTimeRange,
 } from '../../../tasks/threat_intelligence/common';
+import { deleteCases } from '../../../tasks/api_calls/cases';
 import {
   createNewCaseFromTI,
   navigateToCaseViaToaster,
@@ -28,17 +28,6 @@ import {
 } from '../../../screens/threat_intelligence/cases';
 import { login } from '../../../tasks/login';
 
-const URL = '/app/security/threat_intelligence/indicators';
-
-// Navigating to a case is a full page load, which drops the global time range set by
-// visitWithTimeRange. Coming back through the navbar would land here with the default time range,
-// where the archived indicators fall outside of it and the table never renders. Re-visit with the
-// time range instead, as block_list.cy.ts does.
-const returnToIndicators = () => {
-  visitWithTimeRange(URL);
-  waitForViewToBeLoaded();
-};
-
 // Failing: See https://github.com/elastic/kibana/issues/244231
 describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
@@ -47,8 +36,7 @@ describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should disable the indicators table context menu items and flyout context menu items', () => {
@@ -71,8 +59,10 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    // this suite attaches to "the case I just created" by picking the first row of the existing
+    // cases modal, so it needs to start from a stack with no cases left over from a previous run
+    deleteCases();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should add to new case and to existing case from the indicators table and the flyout', () => {
@@ -90,7 +80,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    returnToIndicators();
+    visitIndicatorsWithTimeRange();
 
     cy.log('should add to existing case when clicking on the button in the indicators table');
 
@@ -106,7 +96,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    returnToIndicators();
+    visitIndicatorsWithTimeRange();
 
     cy.log('should add to new case when clicking on the button in the indicators flyout');
 
@@ -123,7 +113,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    returnToIndicators();
+    visitIndicatorsWithTimeRange();
 
     cy.log('should add to existing case when clicking on the button in the indicators flyout');
 
