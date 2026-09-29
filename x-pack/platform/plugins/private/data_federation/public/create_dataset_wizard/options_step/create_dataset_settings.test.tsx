@@ -156,7 +156,6 @@ describe('CreateDatasetSettings', () => {
     // format-specific fields are not in the DOM until a format is chosen
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
     // API-only fields are never in the DOM
-    expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
     expect(queryByTestId('createDatasetSettingsSegmentSize')).toBeNull();
   });
 
@@ -266,16 +265,6 @@ describe('CreateDatasetSettings', () => {
       expect(queryByTestId('createDatasetSettingsSegmentSize')).toBeNull();
     });
   });
-
-  describe('Parquet format', () => {
-    it('shows no parquet-specific advanced fields when parquet is selected', async () => {
-      const { getByTestId, queryByTestId } = renderSettings();
-      await selectFormat(getByTestId, 'parquet');
-
-      expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
-      expect(queryByTestId('createDatasetSettingsLateMaterialization')).toBeNull();
-    });
-  });
 });
 
 const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
@@ -342,8 +331,6 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
-    expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
-    expect(queryByTestId('createDatasetSettingsLateMaterialization')).toBeNull();
   });
 
   it('shows csv/tsv common and advanced settings when csv is selected', () => {

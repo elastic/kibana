@@ -103,6 +103,4 @@ export interface DatasetSettingsFile {
   file_sort_by?: Array<'list' | 'name' | 'mtime'>;
   file_order?: 'asc' | 'desc';
   region?: string;
-  optimized_reader?: boolean;
-  late_materialization?: boolean;
 }

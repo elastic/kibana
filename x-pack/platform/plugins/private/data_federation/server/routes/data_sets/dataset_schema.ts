@@ -110,9 +110,6 @@ export const datasetSchema = schema.object({
       column_prefix: optionalString,
       trim_spaces: schema.maybe(schema.boolean()),
 
-      // Parquet advanced
-      optimized_reader: schema.maybe(schema.boolean()),
-      late_materialization: schema.maybe(schema.boolean()),
       // API-only (not shown in the UI)
       file_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
       file_sort_by: schema.maybe(
