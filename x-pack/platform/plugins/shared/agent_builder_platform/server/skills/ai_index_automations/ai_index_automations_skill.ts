@@ -15,10 +15,8 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { kiShapesReference, strategyCatalogReference } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import content from './ai_index_automations.skill.md.text';
-import unitProfileTemplateYaml from './unit_profile_template.yaml.text';
 import targetedKiWriterTemplateYaml from './targeted_ki_writer_template.yaml.text';
 
-export const UNIT_PROFILE_TEMPLATE_NAME = 'unit-profile-template' as const;
 export const TARGETED_KI_WRITER_TEMPLATE_NAME = 'targeted-ki-writer' as const;
 
 export const aiIndexAutomationsSkill = defineSkillType({
@@ -36,11 +34,6 @@ export const aiIndexAutomationsSkill = defineSkillType({
   // already encodes. The KI shape and strategy catalog are the shared references the analysis
   // skill also reads, so the brief and the template speak the same vocabulary.
   referencedContent: [
-    {
-      name: UNIT_PROFILE_TEMPLATE_NAME,
-      relativePath: '.',
-      content: unitProfileTemplateYaml,
-    },
     {
       name: TARGETED_KI_WRITER_TEMPLATE_NAME,
       relativePath: '.',

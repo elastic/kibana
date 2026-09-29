@@ -50,9 +50,8 @@ Whatever the strategy, a generated workflow has to:
   `connector-id` to `.google-gemini-3.5-flash-chat_completion`. That is the default model for
   every prompt step in every automation this skill produces: the templates carry it, and a
   workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
-  step. Use a different connector only when the user names one, and look its id up with
-  `platform.workflows.get_connectors`; they can change it after the save, in the workflow editor,
-  without your involvement.
+  step. Use a different connector only when the user names one; they can change it after the save,
+  in the workflow editor, without your involvement.
 - **Retry every `ai.prompt`**: `on-failure.retry` with three attempts, exponential delay and
   jitter. Rate limits, transient connector errors and a structured output that failed to parse
   once are the ordinary failures of a model call, and without the retry each one costs the unit
@@ -69,11 +68,8 @@ Whatever the strategy, a generated workflow has to:
 
 Index metadata, bottom-up document and unit profile automations are installed by
 `platform.context_engine.install_automation_template`, and calling it again replaces the automation
-that template already attached. `unit-profile-template` is attached to this skill as the exact YAML
-that tool installs for the Cumulative strategy — read it as the reference for what a finished
-automation looks like, since the strategies with no template of their own start from its shape.
-`targeted-ki-writer` is attached too and has no install path: it is the writer you fill in and save
-yourself for individually authored KIs.
+that template already attached. `targeted-ki-writer` is attached to this skill and has no install
+path: it is the writer you fill in and save yourself for individually authored KIs.
 
 Two more references are attached and shared with `analyze-and-improve`: `ki_shapes`, the KI
 document shape with the fixed `type` vocabulary and the provenance references, and `strategy_catalog`,
@@ -277,7 +273,7 @@ Index metadata, bottom-up document and unit profile automations are installed by
 subagent for them. Calling the tool again replaces the workflow already attached to the AI index.
 Outlier, atomic facts, detection and connector automations have no template of their own. Do not
 look for one and do not invent a name; start from the shape of `unit-profile-template`, which is
-attached to this skill and is the YAML the tool installs for the Cumulative strategy. It is a
+the YAML the install tool provides for the Cumulative strategy. It is a
 complete workflow that runs as it stands, and it already carries the parts a fresh draft gets
 wrong: the grounding, the prompt's output schema, the single `data.set` that builds the indicator
 so verification and the write see the same document, the `verifyKi` gate, the `ki_id` scheme that
@@ -685,7 +681,7 @@ a run. Do not look for `run.started`. The document summary workflow is
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save
 with the user before writing anything. It returns `workflowId`. Save the YAML the subagent returned.
 
-**Running** — running an installed automation is handled by a separate tool (`platform.context_engine.run_automation`) that is not part of this skill. To run an automation, use `platform.core.execute_workflow` with the `workflowId` returned by the install or save tool, or open the workflow directly in the Workflows app via its URL.
+**Running** — running an installed automation is not part of this skill. To run an automation, use `platform.core.execute_workflow` with the `workflowId` returned by the install or save tool, or open the workflow directly in the Workflows app via its URL.
 
 ## Corpora larger than 10,000 documents
 
