@@ -8,11 +8,13 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { createEsqlViewsManagementClient } from '@kbn/esql-utils';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ManagementApp } from './management_app';
+import type { StartDependencies } from './plugin';
+import type { DiscoverEsqlLocatorParams } from './types';
 
 const LazyEsqlEditor = React.lazy(async () => {
   const { ESQLLangEditor } = await import('@kbn/esql/public');
@@ -21,7 +23,7 @@ const LazyEsqlEditor = React.lazy(async () => {
 
 export const mountManagementSection = (
   coreStart: CoreStart,
-  data: DataPublicPluginStart,
+  { data, share }: StartDependencies,
   { element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const { docTitle } = coreStart.chrome;
@@ -30,6 +32,8 @@ export const mountManagementSection = (
 
   const client = createEsqlViewsManagementClient(coreStart.http);
   const capabilities = coreStart.application.capabilities[PLUGIN_ID];
+  const discoverLocator = share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR);
+  const isDiscoverAvailable = Boolean(coreStart.application.capabilities.discover_v2?.show);
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(
@@ -37,6 +41,8 @@ export const mountManagementSection = (
         canCreate={capabilities?.[ESQL_VIEWS_CAPABILITIES.create] === true}
         canEdit={capabilities?.[ESQL_VIEWS_CAPABILITIES.edit] === true}
         client={client}
+        isDiscoverAvailable={isDiscoverAvailable}
+        discoverLocator={discoverLocator}
         documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
         EsqlEditor={LazyEsqlEditor}
         previewDependencies={{
@@ -44,6 +50,7 @@ export const mountManagementSection = (
           http: coreStart.http,
           search: data.search.search,
         }}
+        toasts={coreStart.notifications.toasts}
       />
     )
   );

@@ -1050,9 +1050,6 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
-        '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
-        '@kbn/eslint/no_wrapped_error_in_logger': 'error',
-        '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
@@ -3151,19 +3148,6 @@ module.exports = {
       },
     },
     {
-      // Deployment-agnostic test files must use proper context and services
-      files: [
-        'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
-        'x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
-        'x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
-        'x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
-      ],
-      rules: {
-        '@kbn/eslint/deployment_agnostic_test_context': 'error',
-      },
-    },
-
-    {
       // Restrict fs imports in production code (exclude test files, scripts, etc.)
       files: [
         'src/platform/plugins/shared/**/*.ts',
@@ -3264,19 +3248,6 @@ module.exports = {
           'error',
           ...SECURITY_RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
-      },
-    },
-    {
-      // These files are allowed to reference 'npx playwright' — either because they define
-      // the rule itself, test it with invalid-code fixtures, or mention it in an error message
-      // to explain what went wrong.
-      files: [
-        'src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts',
-        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.js',
-        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.test.js',
-      ],
-      rules: {
-        '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
     {

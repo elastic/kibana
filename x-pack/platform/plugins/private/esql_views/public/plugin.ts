@@ -8,6 +8,7 @@
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 
 interface EsqlViewsPublicConfig {
@@ -20,8 +21,9 @@ interface SetupDependencies {
   management: ManagementSetup;
 }
 
-interface StartDependencies {
+export interface StartDependencies {
   data: DataPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, StartDependencies> {
@@ -43,12 +45,12 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, St
       order: 2.1,
       keywords: ['esql', 'views'],
       async mount(params) {
-        const [{ mountManagementSection }, [coreStart, { data }]] = await Promise.all([
+        const [{ mountManagementSection }, [coreStart, startDependencies]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return mountManagementSection(coreStart, data, params);
+        return mountManagementSection(coreStart, startDependencies, params);
       },
     });
   }

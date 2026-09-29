@@ -19,7 +19,8 @@
       "data",
       "esql",
       "features",
-      "management"
+      "management",
+      "share"
     ],
     "requiredBundles": [
       "esqlDataGrid"

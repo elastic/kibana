@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 import { EsqlViewsPlugin } from './plugin';
 
@@ -23,6 +24,7 @@ jest.mock('@kbn/esql/public', () => ({
 jest.mock('@kbn/esql-utils', () => ({
   createEsqlViewsManagementClient: () => ({
     getViews: jest.fn().mockResolvedValue({ views: [] }),
+    deleteViews: jest.fn(),
   }),
 }));
 
@@ -47,7 +49,9 @@ describe('EsqlViewsPlugin', () => {
     const coreStart = coreMock.createStart();
     const data = dataPluginMock.createStartContract();
     const management = managementPluginMock.createSetupContract();
-    core.getStartServices.mockResolvedValue([coreStart, { data }, {}]);
+    const share = sharePluginMock.createStartContract();
+    const getLocator = jest.spyOn(share.url.locators, 'get');
+    core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
     createPlugin(true).setup(core, { management });
 
@@ -76,6 +80,7 @@ describe('EsqlViewsPlugin', () => {
     });
 
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
+    expect(getLocator).toHaveBeenCalledWith('DISCOVER_APP_LOCATOR');
     expect(mountParams.setBreadcrumbs).toHaveBeenCalledWith([{ text: PLUGIN_NAME }]);
     expect(
       mountParams.element.querySelector('[data-test-subj="esqlViewsManagementPage"]')
