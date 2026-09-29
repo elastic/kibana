@@ -11,6 +11,7 @@ import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -93,10 +94,13 @@ export const useDeleteTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: DeleteTransformsRequestSchema) =>
-      http.post<DeleteTransformsResponseSchema>(addInternalBasePath('delete_transforms'), {
-        body: JSON.stringify(reqBody),
-        version: '1',
-      }),
+      http.post<DeleteTransformsResponseSchema>(
+        buildPath(addInternalBasePath('delete_transforms')),
+        {
+          body: JSON.stringify(reqBody),
+          version: '1',
+        }
+      ),
     onError: (error) =>
       toastNotifications.addDanger({
         title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {

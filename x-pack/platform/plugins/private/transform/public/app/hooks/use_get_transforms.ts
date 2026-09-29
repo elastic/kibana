@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 import { isDefined } from '@kbn/ml-is-defined';
 
 import type { GetTransformsResponseSchema } from '../../../server/routes/api_schemas/transforms';
@@ -46,7 +47,7 @@ export const useGetTransforms = ({ enabled }: UseGetTransformsOptions = {}) => {
       const update = getInitialData();
 
       const transformConfigs = await http.get<GetTransformsResponseSchema>(
-        addInternalBasePath('transforms'),
+        buildPath(addInternalBasePath('transforms')),
         {
           version: '1',
           asSystemRequest: true,

@@ -9,6 +9,7 @@ import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
@@ -29,7 +30,7 @@ export const useResetTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: ResetTransformsRequestSchema) =>
-      http.post<ResetTransformsResponseSchema>(addInternalBasePath('reset_transforms'), {
+      http.post<ResetTransformsResponseSchema>(buildPath(addInternalBasePath('reset_transforms')), {
         body: JSON.stringify(reqBody),
         version: '1',
       }),

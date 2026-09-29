@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 
 import type {
   PostTransformsPreviewRequestSchema,
@@ -26,11 +27,14 @@ export const useGetTransformsPreview = (
   return useQuery<PostTransformsPreviewResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_PREVIEW, obj],
     ({ signal }) =>
-      http.post<PostTransformsPreviewResponseSchema>(addInternalBasePath('transforms/_preview'), {
-        body: JSON.stringify(obj),
-        version: '1',
-        signal,
-      }),
+      http.post<PostTransformsPreviewResponseSchema>(
+        buildPath(addInternalBasePath('transforms/_preview')),
+        {
+          body: JSON.stringify(obj),
+          version: '1',
+          signal,
+        }
+      ),
     { enabled }
   );
 };

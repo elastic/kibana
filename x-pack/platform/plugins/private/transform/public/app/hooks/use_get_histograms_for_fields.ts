@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import type { SavedSearchQuery } from '@kbn/ml-query-utils';
@@ -50,7 +51,7 @@ export const useGetHistogramsForFields = (
     ],
     ({ signal }) =>
       http.post<FieldHistogramsResponseSchema>(
-        addInternalBasePath(`field_histograms/${dataViewTitle}`),
+        buildPath(addInternalBasePath('field_histograms/{dataViewTitle}'), { dataViewTitle }),
         {
           body: JSON.stringify({
             query,

@@ -9,6 +9,7 @@ import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
@@ -29,7 +30,7 @@ export const useStopTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: StopTransformsRequestSchema) =>
-      http.post<StopTransformsResponseSchema>(addInternalBasePath('stop_transforms'), {
+      http.post<StopTransformsResponseSchema>(buildPath(addInternalBasePath('stop_transforms')), {
         body: JSON.stringify(reqBody),
         version: '1',
       }),

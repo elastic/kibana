@@ -6,6 +6,7 @@
  */
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
 
 import type { GetTransformNodesResponseSchema } from '../../../server/routes/api_schemas/transforms';
@@ -20,7 +21,7 @@ export const useGetTransformCpsEnabled = ({ enabled } = { enabled: true }) => {
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_CPS_ENABLED],
     async ({ signal }) => {
       const response = await http.get<GetTransformNodesResponseSchema>(
-        addInternalBasePath('transforms/_nodes'),
+        buildPath(addInternalBasePath('transforms/_nodes')),
         {
           version: '1',
           signal,

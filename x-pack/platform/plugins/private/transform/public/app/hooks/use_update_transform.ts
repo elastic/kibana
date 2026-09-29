@@ -7,6 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   PostTransformsUpdateRequestSchema,
   PostTransformsUpdateResponseSchema,
@@ -28,7 +29,7 @@ export const useUpdateTransform = (
   const mutation = useMutation({
     mutationFn: () =>
       http.post<PostTransformsUpdateResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}/_update`),
+        buildPath(addInternalBasePath('transforms/{transformId}/_update'), { transformId }),
         {
           body: JSON.stringify(transformConfig),
           version: '1',

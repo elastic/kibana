@@ -9,6 +9,7 @@ import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
@@ -55,7 +56,7 @@ export const useCreateTransform = () => {
       deferValidation,
     }: CreateTransformArgs) => {
       return http.put<PutTransformsResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}`),
+        buildPath(addInternalBasePath('transforms/{transformId}'), { transformId }),
         {
           query: { createDataView, timeFieldName, deferValidation },
           body: JSON.stringify(transformConfig),

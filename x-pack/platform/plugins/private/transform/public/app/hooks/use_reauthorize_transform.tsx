@@ -9,6 +9,7 @@ import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
@@ -30,7 +31,7 @@ export const useReauthorizeTransforms = () => {
   const mutation = useMutation({
     mutationFn: (reqBody: ReauthorizeTransformsRequestSchema) =>
       http.post<ReauthorizeTransformsResponseSchema>(
-        addInternalBasePath('reauthorize_transforms'),
+        buildPath(addInternalBasePath('reauthorize_transforms')),
         {
           body: JSON.stringify(reqBody),
           version: '1',

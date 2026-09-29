@@ -8,6 +8,7 @@
 import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   UpdateTransformsProjectScopeRequestSchema,
   UpdateTransformsProjectScopeResponseSchema,
@@ -29,7 +30,7 @@ export const useUpdateTransformsProjectScope = () => {
   const mutation = useMutation({
     mutationFn: (reqBody: UpdateTransformsProjectScopeRequestSchema) =>
       http.post<UpdateTransformsProjectScopeResponseSchema>(
-        addInternalBasePath('update_transforms_project_scope'),
+        buildPath(addInternalBasePath('update_transforms_project_scope')),
         {
           body: JSON.stringify(reqBody),
           version: '1',

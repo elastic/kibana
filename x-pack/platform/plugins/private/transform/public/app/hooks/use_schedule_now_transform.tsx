@@ -9,6 +9,7 @@ import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
@@ -30,7 +31,7 @@ export const useScheduleNowTransforms = () => {
   const mutation = useMutation({
     mutationFn: (reqBody: ScheduleNowTransformsRequestSchema) =>
       http.post<ScheduleNowTransformsResponseSchema>(
-        addInternalBasePath('schedule_now_transforms'),
+        buildPath(addInternalBasePath('schedule_now_transforms')),
         {
           body: JSON.stringify(reqBody),
           version: '1',
