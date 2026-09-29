@@ -176,6 +176,22 @@ describe('extractDiamond', () => {
     expect(result.adversary).toEqual(HIGH_VERTEX);
   });
 
+  it('keeps the full short article for per-vertex fallback on a non-overflow failure', async () => {
+    // Well under any overflow budget: a forced shrink would needlessly halve
+    // it and could drop evidence from the second half.
+    const text = `LATE_DIAMOND_EVIDENCE sits ${'past filler. '.repeat(5)}at the end.`;
+    const { model, vertexInvoke } = buildModel({
+      singleCall: fail('structured output parse failed'),
+      perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(result.context_mode).toBe('full');
+    expect(String(vertexInvoke.mock.calls[0][0])).toContain('LATE_DIAMOND_EVIDENCE');
+    expect(String(vertexInvoke.mock.calls[0][0])).toContain('at the end');
+  });
+
   it('shrinks context again for per-vertex fallback after overflow retry fails', async () => {
     const overflow = new InferenceTaskError(
       ChatCompletionErrorCode.ContextLengthExceededError,

@@ -14,7 +14,9 @@ import { logStageUsage, extractUsageFromMetadata } from '../lib/cost_tracker';
 import {
   furtherShrinkOverflowArticleContext,
   fullArticleContext,
+  selectDistributedArticleContext,
   selectOverflowRetryArticleContext,
+  OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET,
   type ArticleContext,
 } from './article_context';
 
@@ -372,11 +374,13 @@ export const extractDiamond = async (
     // Bound fallback prompts even when the single call failed for a non-overflow
     // reason (parse/schema). Resending the full article on four vertex calls can
     // blow a Reasoning window on long reports. If we already degraded for overflow,
-    // shrink again; otherwise select the standard overflow window first.
+    // shrink again; if the source is actually over budget, select the standard
+    // overflow window; otherwise a short report was never at risk and keeping the
+    // full text (rather than force-halving it) lets every vertex see all of it.
     if (context.mode === 'degraded_context') {
       context = furtherShrinkOverflowArticleContext(context);
     } else {
-      context = selectOverflowRetryArticleContext(text);
+      context = selectDistributedArticleContext(text, OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET);
     }
   }
 
