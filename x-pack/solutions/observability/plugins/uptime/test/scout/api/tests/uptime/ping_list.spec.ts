@@ -17,9 +17,18 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    // getPings uses heartbeat-*; UI/synthetics Scout leave browser archive docs
-    // (heartbeat-8.1.0-…, +4 in-window summary) that inflate total beyond 2000.
-    await esClient.indices.delete({ index: 'heartbeat-*', ignore_unavailable: true });
+    // getPings uses heartbeat-*; sibling Scout leaves browser-archive summary docs
+    // (+4 in this window). ES blocks wildcard deletes (destructive_requires_name).
+    const heartbeatIndices = Object.keys(
+      await esClient.indices.get({
+        index: 'heartbeat-*',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      })
+    );
+    if (heartbeatIndices.length > 0) {
+      await esClient.indices.delete({ index: heartbeatIndices, ignore_unavailable: true });
+    }
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
