@@ -536,26 +536,26 @@ export async function eventsWriteBulkHandler({
   // .rule-events failure cannot block a canonical write.
   let searchClientActiveEvents: SignificantEvent[];
   let canonicalActiveEvents: SignificantEvent[];
-  // Tracks whether the try block fell back to canonical due to a read-store failure. When true,
-  // `client` (RuleEventsClient) is known-down and subsequent fetches must use `eventClient`.
-  let dedupFellBack = false;
   try {
-    searchClientActiveEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
-    // When the flag-aware read client differs from the canonical write client, also scan the
-    // canonical store. A write succeeds with `wait_for` refresh on the legacy store, but the
-    // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
-    // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
-    canonicalActiveEvents =
-      client !== eventClient ? await fetchActiveEventsForDedup(eventClient, dedupCandidates) : [];
+    if (client !== eventClient) {
+      // Flag ON: canonical is the authoritative dedup source. Skip the rule-events scan entirely —
+      // its results would be discarded (see `activeEvents` below) and the extra scan adds latency
+      // plus failure risk without contributing to the dedup decision.
+      canonicalActiveEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
+      searchClientActiveEvents = []; // unused in this path
+    } else {
+      searchClientActiveEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
+      // When the flag-aware read client differs from the canonical write client, also scan the
+      // canonical store. A write succeeds with `wait_for` refresh on the legacy store, but the
+      // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
+      // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
+      canonicalActiveEvents = [];
+    }
   } catch (err) {
     if (client === eventClient) throw err;
-    // Either the rule-events scan (line above) or the canonical scan threw. We cannot distinguish
-    // which one without catching each await independently; log the raw error to preserve the
-    // actual cause rather than hard-coding a potentially wrong attribution.
-    logger?.warn(`Dedup scan failed; falling back to canonical store: ${err}`);
-    searchClientActiveEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
-    canonicalActiveEvents = searchClientActiveEvents;
-    dedupFellBack = true;
+    // Canonical scan threw in flag-ON mode — no fallback is possible since canonical is the only
+    // dedup source of truth here. Surface the failure.
+    throw err;
   }
   // When flag ON, canonical writes first with `wait_for` and is the authoritative source for
   // active state. Merging rule-events results risks including stale-active entries for recently-
@@ -564,11 +564,8 @@ export async function eventsWriteBulkHandler({
   const activeEvents = client !== eventClient ? canonicalActiveEvents : searchClientActiveEvents;
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  // If the dedup scan fell back, `client` (RuleEventsClient) is known-down — pass `eventClient`
-  // directly to avoid O(N) per-candidate failures inside fetchPriorDocsByEventId.
-  const resolvedSearchClient = dedupFellBack ? eventClient : client;
   const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =
-    await fetchPriorDocsByEventId(resolvedSearchClient, eventClient, toWrite);
+    await fetchPriorDocsByEventId(client, eventClient, toWrite);
   const calibrated = toWrite.map((candidate) => ({
     ...candidate,
     input: {

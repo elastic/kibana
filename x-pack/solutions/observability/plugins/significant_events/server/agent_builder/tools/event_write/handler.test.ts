@@ -1206,7 +1206,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
 });
 
 describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', () => {
-  it('uses eventSearchClient for dedup and current-state reads while eventClient supplies legacy lineage', async () => {
+  it('uses canonical eventClient for dedup and eventSearchClient for prior-doc reads while eventClient supplies legacy lineage', async () => {
     const eventSearchClient = makeEventSearchClient();
     const eventClient = makeEventClient();
 
@@ -1216,10 +1216,13 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
       inputs: [{ ...baseInput }, { ...baseInput, event_id: 'existing-event-id' }],
     });
 
-    expect(eventSearchClient.findLatestActive).toHaveBeenCalled();
-    expect(eventSearchClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
-    // The canonical dual scan also runs when client !== eventClient and dedupCandidates exist.
+    // When flag ON, canonical is the sole dedup source — rule-events scan is skipped to avoid
+    // stale-active entries from fire-and-forget lag suppressing valid new writes.
+    expect(eventSearchClient.findLatestActive).not.toHaveBeenCalled();
     expect(eventClient.findLatestActive).toHaveBeenCalled();
+    // fetchPriorDocsByEventId still uses eventSearchClient (client) for current-state reads.
+    expect(eventSearchClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
+    // eventClient supplies legacy lineage (previous_event_uuid, investigations).
     expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
   });
 

@@ -150,6 +150,28 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
+  it('skips investigation when the event already has investigations', () => {
+    const guard = requireStep(discovery, 'guard_missing_investigation');
+    // Condition must gate on the absence of prior investigations.
+    expect(guard.condition).toContain('investigations');
+    expect(guard.condition).toContain('== 0');
+
+    // Evaluate the Liquid expression for both shapes of the Kibana response.
+    const engine = createWorkflowLiquidEngine();
+    // Strip the ${{ }} wrapper so the expression can be used inside a Liquid {% if %} tag.
+    const inner = (guard.condition as string).replace(/^\s*\$\{\{(.+)\}\}\s*$/, '$1').trim();
+    const template = `{% if ${inner} %}true{% else %}false{% endif %}`;
+
+    const makeContext = (investigations: unknown[]) => ({
+      steps: { resolve_open_event: { output: { hits: [{ investigations }] } } },
+    });
+
+    // Empty investigations → condition is true → investigation should be triggered.
+    expect(engine.parseAndRenderSync(template, makeContext([]))).toBe('true');
+    // Populated investigations → condition is false → investigation should be skipped.
+    expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
+  });
+
   it('attaches completed investigations only to Significant Events', () => {
     expect(investigationCompleted.triggers).toEqual([
       {

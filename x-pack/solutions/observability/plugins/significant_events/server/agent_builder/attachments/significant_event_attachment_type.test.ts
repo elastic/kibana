@@ -36,12 +36,18 @@ const event: SignificantEvent = {
 const createGetScopedClients = (
   events: SignificantEvent[]
 ): jest.MockedFunction<GetScopedClients> => {
+  const findLatestByEventId = jest.fn().mockResolvedValue(events.at(-1));
   const getEventSearchClient = jest.fn(() => ({
-    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
+    findLatestByEventId,
+  }));
+  // Canonical client — used by isStale to compare against the authoritative write source.
+  const getEventClient = jest.fn(() => ({
+    findLatestByEventId,
   }));
 
   return jest.fn().mockResolvedValue({
     getEventSearchClient,
+    getEventClient,
   } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
 };
 
