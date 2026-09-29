@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 
 import {
+  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
@@ -59,5 +60,6 @@ export const getServiceAccountRolesSchema = ({
 export const getCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
   z.object({
     name: serviceAccountNameSchema,
+    description: z.string().max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH).optional(),
     roles: getServiceAccountRolesSchema(limits),
   });

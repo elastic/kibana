@@ -6,7 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { act, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -66,13 +66,41 @@ const renderApp = ({
 };
 
 const fillForm = async () => {
-  await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
   await user.type(screen.getByTestId('serviceAccountNameInput'), account.name);
-  await user.click(screen.getByRole('combobox'));
+  await user.click(screen.getByRole('button', { name: 'Select roles' }));
   await user.click(await screen.findByTestId('roleOption-workflow_reader'));
+  await user.click(screen.getByTestId('serviceAccountNameInput'));
 };
 
 describe('ServiceAccountsApp', () => {
+  it('keeps Create account disabled until name and roles are valid', async () => {
+    renderApp();
+    expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
+    await fillForm();
+    expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
+  });
+
+  it('creates an account with an optional description', async () => {
+    const { create } = renderApp();
+    await fillForm();
+    await user.type(
+      screen.getByTestId('createServiceAccountDescription'),
+      'Reads investigation events.'
+    );
+    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    expect(create).toHaveBeenCalledWith({
+      name: account.name,
+      roles: ['workflow_reader'],
+      description: 'Reads investigation events.',
+    });
+  });
+
+  it('does not offer descriptions on Serverless while UIAM does not support them', () => {
+    renderApp({ isServerless: true });
+    expect(screen.queryByTestId('createServiceAccountDescription')).not.toBeInTheDocument();
+  });
+
   it('opens the create flyout from the directory action', async () => {
     const { history } = renderApp({ pathname: '/' });
     expect(screen.queryByTestId('createServiceAccountFlyout')).not.toBeInTheDocument();
@@ -100,29 +128,51 @@ describe('ServiceAccountsApp', () => {
 
   it('requires a valid name and at least one selected role', async () => {
     const { create } = renderApp();
-    await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
     await user.type(screen.getByTestId('serviceAccountNameInput'), '../invalid');
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
+    fireEvent.submit(screen.getByRole('form', { name: 'Create account' }));
 
     expect(screen.getByText(/Enter a name of up to/)).toBeVisible();
     expect(screen.getByText('Select at least one role.')).toBeVisible();
-    expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByRole('button', { name: 'Select roles' })).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
     expect(create).not.toHaveBeenCalled();
   });
 
   it('shows custom and built-in roles without preselecting any role', async () => {
     const { getRoles } = renderApp();
-    await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
     expect(getRoles).toHaveBeenCalledWith({ includeReservedRoles: true });
-    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByRole('button', { name: 'Select roles' }));
 
     expect(screen.getByText('Custom roles')).toBeVisible();
     expect(screen.getByTestId('roleOption-workflow_reader')).toBeVisible();
-    expect(within(screen.getByTestId('roleOption-viewer')).getByText('built in')).toBeVisible();
+    expect(within(screen.getByTestId('roleOption-viewer')).getByText('built-in')).toBeVisible();
     expect(screen.getByRole('link', { name: /Create new role/ })).toHaveAttribute(
       'href',
       '/app/management/security/roles/edit'
     );
+  });
+
+  it('selects roles with the keyboard and returns focus when the menu closes', async () => {
+    renderApp();
+    const selector = screen.getByRole('button', { name: 'Select roles' });
+    await waitFor(() => expect(selector).toBeEnabled());
+    act(() => selector.focus());
+    await user.keyboard('{ArrowDown}');
+    const list = await screen.findByRole('listbox', { name: 'Select roles' });
+    await waitFor(() => expect(list).toHaveFocus());
+    await user.keyboard('{Enter}');
+    expect(screen.getByTestId('roleOption-workflow_reader')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(selector).toHaveFocus());
+    expect(selector).toHaveTextContent('workflow_reader');
   });
 
   it('retains form values after a server error and allows retrying', async () => {
@@ -182,12 +232,17 @@ describe('ServiceAccountsApp', () => {
     const { create, getRoles } = renderApp();
     await fillForm();
     getRoles.mockResolvedValue([availableRoles[1]]);
-    await user.click(screen.getByRole('button', { name: 'Refresh roles' }));
-    await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+    fireEvent.focus(window);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
     await user.click(screen.getByTestId('createServiceAccountSubmit'));
 
     expect(screen.getByText(/Remove roles that are no longer available/)).toBeVisible();
     expect(create).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Select roles' }));
+    await user.click(screen.getByTestId('roleOption-workflow_reader'));
+    await user.click(screen.getByTestId('roleOption-viewer'));
+    await user.click(screen.getByTestId('serviceAccountNameInput'));
+    expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
   });
 
   it('allows retrying role loading without losing the name', async () => {
@@ -200,7 +255,7 @@ describe('ServiceAccountsApp', () => {
 
     await user.click(screen.getByRole('button', { name: 'Refresh roles' }));
 
-    await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
     expect(screen.getByTestId('serviceAccountNameInput')).toHaveValue(account.name);
     expect(create).not.toHaveBeenCalled();
   });
@@ -227,8 +282,12 @@ describe('ServiceAccountsApp', () => {
     'explains cross-project role behavior only on serverless (%s)',
     async (isServerless) => {
       renderApp({ isServerless });
-      await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled()
+      );
 
+      await user.hover(screen.getByText('About role privileges'));
+      await screen.findByText(/An account can only use privileges/);
       const explanation = screen.queryByText(/For cross-project search/);
       if (isServerless) {
         expect(explanation).toBeVisible();
@@ -240,7 +299,8 @@ describe('ServiceAccountsApp', () => {
 
   it('hides create-role navigation without permission', async () => {
     renderApp({ canCreateRole: false });
-    await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
+    await user.click(screen.getByRole('button', { name: 'Select roles' }));
 
     expect(screen.queryByRole('link', { name: /Create new role/ })).not.toBeInTheDocument();
   });

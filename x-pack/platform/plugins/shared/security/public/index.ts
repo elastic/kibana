@@ -17,7 +17,12 @@ import { SecurityPlugin } from './plugin';
 
 export type { SecurityPluginStart, SecurityPluginSetup };
 export type { AuthenticatedUser, SecurityLicenseFeatures, SecurityLicense } from '../common';
-export type { UiApi, ChangePasswordProps, PersonalInfoProps } from './ui_api';
+export type {
+  UiApi,
+  ChangePasswordProps,
+  CreateServiceAccountProps,
+  PersonalInfoProps,
+} from './ui_api';
 
 export { ALL_SPACES_ID } from '../common/constants';
 

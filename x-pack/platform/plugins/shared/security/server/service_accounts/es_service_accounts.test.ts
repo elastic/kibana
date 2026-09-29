@@ -136,6 +136,27 @@ describe('EsServiceAccounts', () => {
   });
 
   describe('#create', () => {
+    it('persists the description in Elasticsearch and returns it to callers', async () => {
+      mockHappyPath();
+      const description = 'Reads events for investigation workflows.';
+      await expect(
+        serviceAccounts.create(request, { ...createParams, description })
+      ).resolves.toEqual({
+        ...createdAccount,
+        description,
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'PUT', body: { roles: createParams.roles, description } })
+      );
+    });
+
+    it('rejects an oversized description before creating an account', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, description: 'x'.repeat(1001) })
+      ).rejects.toThrow();
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it('creates the account, mints its token and stores the credential', async () => {
       mockHappyPath();
 
