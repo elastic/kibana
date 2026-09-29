@@ -15,6 +15,7 @@ import { QUOTE_CHARACTER_NONE } from '../../../../common';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   DEFAULT_COLUMN_PREFIX,
+  validateDistinctCsvCharacter,
   validateEscapeCharacter,
   validateQuoteCharacter,
   type CreateDatasetFormValues,
@@ -28,12 +29,21 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
   const { field: quoteField, fieldState: quoteState } = useController({
     name: 'settings.quote',
     control,
-    rules: { validate: validateQuoteCharacter },
+    rules: {
+      validate: { format: validateQuoteCharacter, distinct: validateDistinctCsvCharacter('quote') },
+      deps: ['settings.delimiter', 'settings.escape'],
+    },
   });
   const { field: escapeField, fieldState: escapeState } = useController({
     name: 'settings.escape',
     control,
-    rules: { validate: validateEscapeCharacter },
+    rules: {
+      validate: {
+        format: validateEscapeCharacter,
+        distinct: validateDistinctCsvCharacter('escape'),
+      },
+      deps: ['settings.delimiter', 'settings.quote'],
+    },
   });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
   const { field: trimSpacesField } = useController({ name: 'settings.trim_spaces', control });

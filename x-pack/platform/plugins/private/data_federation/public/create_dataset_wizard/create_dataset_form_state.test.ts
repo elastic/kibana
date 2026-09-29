@@ -11,6 +11,7 @@ import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
   validateDelimiter,
+  validateDistinctCsvCharacter,
   validateEscapeCharacter,
   validateQuoteCharacter,
   validateMaxErrors,
@@ -149,6 +150,47 @@ describe('create_dataset_form_state', () => {
       expect(validateQuoteCharacter('ab')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('\\a')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('\\abc')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+    });
+  });
+
+  describe('validateDistinctCsvCharacter', () => {
+    const formValues = (settings: { delimiter?: string; quote?: string; escape?: string }) => {
+      const values = emptyDatasetFormValues();
+      return { ...values, settings: { ...values.settings, ...settings } };
+    };
+    const conflict = createDatasetWizardStrings.settingsCsvCharactersNotDistinct;
+
+    it('accepts distinct and unset characters', () => {
+      const values = formValues({ delimiter: ',', quote: '"', escape: '' });
+      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(true);
+      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(true);
+      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(true);
+    });
+
+    it('flags only the fields that share a character', () => {
+      const values = formValues({ delimiter: '|', quote: '|', escape: '\\\\' });
+      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(conflict);
+      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(conflict);
+      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(true);
+    });
+
+    it('compares escape sequences by the character they represent', () => {
+      const values = formValues({ delimiter: '\t', quote: '\\t', escape: '\\' });
+      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(conflict);
+      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(conflict);
+      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(true);
+    });
+
+    it('flags an escape sequence that matches a literal character', () => {
+      const values = formValues({ delimiter: '\\\\', escape: '\\' });
+      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(conflict);
+      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(conflict);
+    });
+
+    it('ignores a quote of none', () => {
+      const values = formValues({ delimiter: 'n', quote: 'none', escape: '' });
+      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(true);
+      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(true);
     });
   });
 

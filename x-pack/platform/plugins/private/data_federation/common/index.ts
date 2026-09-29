@@ -72,6 +72,40 @@ export const isValidQuoteCharacter = (value: string): boolean =>
   VALID_QUOTE_SEQUENCES.includes(value) ||
   value.toLowerCase() === QUOTE_CHARACTER_NONE;
 
+const CHARACTER_SEQUENCES: Readonly<Record<string, string>> = {
+  '\\t': '\t',
+  '\\n': '\n',
+  '\\r': '\r',
+  '\\\\': '\\',
+};
+
+export type CsvCharacterSettingName = 'delimiter' | 'quote' | 'escape';
+
+export type CsvCharacterSettings = Partial<Record<CsvCharacterSettingName, string>>;
+
+const CSV_CHARACTER_SETTING_NAMES: readonly CsvCharacterSettingName[] = [
+  'delimiter',
+  'quote',
+  'escape',
+];
+
+const resolveCsvCharacter = (value: string | undefined): string | undefined => {
+  if (!value || value.toLowerCase() === QUOTE_CHARACTER_NONE) return undefined;
+  return CHARACTER_SEQUENCES[value] ?? value;
+};
+
+/** Returns the delimiter/quote/escape settings that resolve to the same character as another of them. */
+export const getConflictingCsvCharacterSettings = (
+  settings: CsvCharacterSettings
+): CsvCharacterSettingName[] =>
+  CSV_CHARACTER_SETTING_NAMES.filter((name) => {
+    const character = resolveCsvCharacter(settings[name]);
+    if (character === undefined) return false;
+    return CSV_CHARACTER_SETTING_NAMES.some(
+      (other) => other !== name && resolveCsvCharacter(settings[other]) === character
+    );
+  });
+
 export type { Dataset, DataSetWithName, DatasetSettings } from './dataset_types';
 export type {
   DatasetMappings,

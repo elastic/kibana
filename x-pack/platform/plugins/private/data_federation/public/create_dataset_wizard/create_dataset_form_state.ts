@@ -11,7 +11,11 @@ import type {
   DatasetSettingsFile,
   DatasetFormat,
 } from '../../common/dataset_types';
-import { isValidQuoteCharacter } from '../../common';
+import {
+  getConflictingCsvCharacterSettings,
+  isValidQuoteCharacter,
+  type CsvCharacterSettingName,
+} from '../../common';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from './mapping_step/mapping_editor';
@@ -204,6 +208,17 @@ export const validateQuoteCharacter = (value: string): true | string => {
   if (!isValidQuoteCharacter(value)) return createDatasetWizardStrings.settingsQuoteInvalid;
   return true;
 };
+
+/** Builds a validator that fails when `name` resolves to the same character as another CSV character setting. */
+export const validateDistinctCsvCharacter =
+  (name: CsvCharacterSettingName) =>
+  (_value: string, { settings }: CreateDatasetFormValues): true | string => {
+    const { delimiter, quote, escape } = settings;
+    if (!getConflictingCsvCharacterSettings({ delimiter, quote, escape }).includes(name)) {
+      return true;
+    }
+    return createDatasetWizardStrings.settingsCsvCharactersNotDistinct;
+  };
 
 export const validateEscapeCharacter = (value: string): true | string => {
   if (!value) return true;

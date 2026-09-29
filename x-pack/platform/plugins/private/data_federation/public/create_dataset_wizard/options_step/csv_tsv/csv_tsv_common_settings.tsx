@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   validateDelimiter,
+  validateDistinctCsvCharacter,
   type CreateDatasetFormValues,
   type DatasetFormatFormValue,
 } from '../../create_dataset_form_state';
@@ -31,7 +32,10 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
   const { field: delimiterField, fieldState: delimiterState } = useController({
     name: 'settings.delimiter',
     control,
-    rules: { validate: validateDelimiter },
+    rules: {
+      validate: { format: validateDelimiter, distinct: validateDistinctCsvCharacter('delimiter') },
+      deps: ['settings.quote', 'settings.escape'],
+    },
   });
   const { field: modeField } = useController({ name: 'settings.mode', control });
   const { field: headerRowField } = useController({ name: 'settings.header_row', control });
