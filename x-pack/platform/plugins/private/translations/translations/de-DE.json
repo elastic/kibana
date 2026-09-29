@@ -40870,7 +40870,6 @@
     "xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel": "Feld",
     "xpack.securitySolution.attackDetailsFlyout.table.filterPlaceholderLabel": "Nach Feld oder Wert filtern …",
     "xpack.securitySolution.attackDetailsFlyout.table.valueCellLabel": "Wert",
-    "xpack.securitySolution.attackDiscovery.agentBuilder.attachmentLabel": "Angriffserkennung",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "Senden Sie weniger Warnmeldungen, wenn das Kontextfenster des Modells klein ist, oder mehr, wenn es größer ist.",
     "xpack.securitySolution.attackDiscovery.anonymizationArialLabel": "Anonymisierung",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToDatasetButtonLabel": "Zum Datensatz hinzufügen",

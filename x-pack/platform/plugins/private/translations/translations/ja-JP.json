@@ -40984,7 +40984,6 @@
     "xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel": "フィールド",
     "xpack.securitySolution.attackDetailsFlyout.table.filterPlaceholderLabel": "フィールドまたは値でフィルタリング...",
     "xpack.securitySolution.attackDetailsFlyout.table.valueCellLabel": "値",
-    "xpack.securitySolution.attackDiscovery.agentBuilder.attachmentLabel": "Attack Discovery",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "モデルのコンテキストウィンドウが小さい場合は送信されるアラート数が少なくなり、大きい場合は送信されるアラート数が多くなります。",
     "xpack.securitySolution.attackDiscovery.anonymizationArialLabel": "匿名化",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToDatasetButtonLabel": "データセットに追加",
