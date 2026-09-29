@@ -71,9 +71,6 @@ dependsOn:
   - '@kbn/context-engine-plugin'
   - '@kbn/security-solution-plugin'
   - '@kbn/workflows-execution-engine'
-  - '@kbn/actions-plugin'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
