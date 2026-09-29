@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { MAX_TITLE_LENGTH } from '@kbn/proposals-common';
 import type { RuleTuningWorkerExtras } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
@@ -853,6 +854,21 @@ describe('detection rule workflows', () => {
         expect(comment).toContain('Approving still applies the proposed query');
         expect(comment).not.toContain('not previewed or applied automatically');
         expect(comment).not.toContain('marks these alerts acknowledged');
+      });
+
+      // The diagnosis schema leaves its title unbounded and the proposal step
+      // rejects anything longer, so an unbounded forward fails the whole review.
+      it('bounds the proposal title to what the proposal step accepts', async () => {
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const title = String((compose.with as Record<string, string>).title);
+
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(title, {
+          steps: {
+            diagnose_rule: { output: { structured_output: { title: 'T'.repeat(900) } } },
+          },
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
       });
 
       // A skipped step renders as nil, so `nil == 'succeeded'` is false and the

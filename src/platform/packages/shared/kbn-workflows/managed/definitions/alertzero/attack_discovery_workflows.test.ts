@@ -1369,6 +1369,18 @@ describe('Attack Discovery worker chain', () => {
       expect(rendered.trim()).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
     });
 
+    // This workflow's trigger allows 1024 characters, while the proposal step
+    // caps titles at 256: forwarding one unbounded fails the escalation for an
+    // otherwise valid discovery.
+    it('bounds the proposal title it forwards', async () => {
+      const rendered = await createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'escalation_gate')).title,
+        { inputs: { title: 'A'.repeat(1024) } }
+      );
+
+      expect(rendered.length).toBeLessThanOrEqual(256);
+    });
+
     it('installs the action it points at', () => {
       expect(ALERTZERO_ACTION_WORKFLOW_IDS).toContain(
         ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID

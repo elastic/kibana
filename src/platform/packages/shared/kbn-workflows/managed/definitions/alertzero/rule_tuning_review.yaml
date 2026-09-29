@@ -645,7 +645,9 @@ steps:
     with:
       # The same expression the comment's heading uses, lifted out so the
       # proposal carries it as a field the queue can render as plain text.
-      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}'
+      # Truncated because the diagnosis schema does not bound its title and the
+      # proposal step rejects anything longer; the comment below keeps it whole.
+      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" | truncate: 256, "" }}'
       comment: |-
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
