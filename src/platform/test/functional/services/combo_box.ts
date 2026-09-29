@@ -25,9 +25,6 @@ export class ComboBoxService extends FtrService {
 
   private readonly WAIT_FOR_EXISTS_TIME: number = this.config.get('timeouts.waitForExists');
 
-  private readonly OPTION_CLICK_ATTEMPTS: number = 2;
-  private readonly WAIT_FOR_SELECTION_TIME: number = 1500;
-
   /**
    * Finds combobox element and sets specified value
    *
@@ -70,65 +67,30 @@ export class ComboBoxService extends FtrService {
   }
 
   /**
-   * Clicks the option matching `trimmedValue` in the combobox dropdown, re-clicking it while the
-   * selection has not committed
+   * Clicks the option matching `trimmedValue` in the combobox dropdown
    *
-   * @param comboBoxElement element that wraps up EuiComboBox
    * @param isMouseClick if 'true', click will be done with mouse
    * @param trimmedValue normalized option text to match; when undefined, the first option is clicked
    */
-  private async clickOption(
-    comboBoxElement: WebElementWrapper,
-    isMouseClick: boolean,
-    trimmedValue?: string
-  ): Promise<void> {
-    for (let attempt = 1; attempt <= this.OPTION_CLICK_ATTEMPTS; attempt++) {
-      // Re-resolve the option element on each attempt: dynamic-options comboboxes re-render their
-      // option list, staling a captured element handle so that re-clicking a fixed reference can
-      // never recover. Finding the option inside the retry turns a stale element into a retryable error.
-      const clickedOption = await this.retry.try(async () => {
-        const option = await this.findOption(trimmedValue, attempt === 1);
-        if (!option) {
-          return undefined;
-        }
-        // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
-        if (isMouseClick) {
-          await option.element.clickMouseButton();
-        } else {
-          await option.element._webElement.click();
-        }
-        return option.formattedText;
-      });
-
-      // On a re-click the option is no longer offered because EuiComboBox drops selected options
-      // from the list, so the earlier click did commit after all.
-      if (clickedOption === undefined) {
-        return;
-      }
-
-      if (await this.waitForSelectedOption(comboBoxElement, clickedOption)) {
-        return;
-      }
-
-      this.log.warning(
-        `comboBox.clickOption - the click on option [${clickedOption}] did not commit (attempt ${attempt} of ${this.OPTION_CLICK_ATTEMPTS})`
-      );
-    }
+  private async clickOption(isMouseClick: boolean, trimmedValue?: string): Promise<void> {
+    // Re-resolve the option element on each attempt: dynamic-options comboboxes re-render their
+    // option list, staling a captured element handle so that re-clicking a fixed reference can
+    // never recover. Finding the option inside the retry turns a stale element into a retryable error.
+    await this.retry.try(async () => {
+      const element = await this.findOption(trimmedValue);
+      // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
+      return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
+    });
   }
 
   /**
    * Finds the option element matching `trimmedValue` in the currently open combobox dropdown
    *
    * @param trimmedValue normalized option text to match; when undefined, the first option is returned
-   * @param useFirstOptionWhenUnmatched when 'true', falls back to the first option instead of
-   *   returning undefined for a `trimmedValue` no option matches
    */
-  private async findOption(
-    trimmedValue: string | undefined,
-    useFirstOptionWhenUnmatched: boolean
-  ): Promise<{ element: WebElementWrapper; formattedText: string } | undefined> {
+  private async findOption(trimmedValue?: string): Promise<WebElementWrapper> {
     if (trimmedValue === undefined) {
-      return await this.describeOption(await this.find.byCssSelector('.euiComboBoxOption'));
+      return await this.find.byCssSelector('.euiComboBoxOption');
     }
 
     // Find options by visible text content.
@@ -143,7 +105,7 @@ export class ComboBoxService extends FtrService {
 
     const exactMatch = optionsWithText.find(({ formattedText }) => formattedText === trimmedValue);
     if (exactMatch) {
-      return exactMatch;
+      return exactMatch.element;
     }
 
     // Fall back to a case-insensitive match (any option whose text equals
@@ -156,73 +118,12 @@ export class ComboBoxService extends FtrService {
       this.log.warning(
         `comboBox.setElement - Found similar option [${alternate.text}] not [${trimmedValue}]`
       );
-      return alternate;
-    }
-
-    if (!useFirstOptionWhenUnmatched) {
-      return undefined;
+      return alternate.element;
     }
 
     // if it doesn't find the item which text starts with value, it will choose the first option
     this.log.warning(`comboBox.setElement - Could not find option [${trimmedValue}], using first`);
-    return await this.describeOption(await this.find.byCssSelector('.euiComboBoxOption', 5000));
-  }
-
-  private async describeOption(
-    element: WebElementWrapper
-  ): Promise<{ element: WebElementWrapper; formattedText: string }> {
-    const text = (await element.getVisibleText()) ?? '';
-    return { element, formattedText: text.toLowerCase().trim() };
-  }
-
-  /**
-   * Waits for `optionText` to show up among the combobox's selected options, resolving false when
-   * it does not
-   *
-   * @param comboBoxElement element that wraps up EuiComboBox
-   * @param optionText normalized text of the option that was clicked
-   */
-  private async waitForSelectedOption(
-    comboBoxElement: WebElementWrapper,
-    optionText: string
-  ): Promise<boolean> {
-    const deadline = Date.now() + this.WAIT_FOR_SELECTION_TIME;
-
-    do {
-      try {
-        if (await this.isOptionInSelection(comboBoxElement, optionText)) {
-          return true;
-        }
-      } catch {
-        // A combobox that unmounts on selection stales its element handle, which means the
-        // selection committed rather than that the click was dropped.
-        return true;
-      }
-      await this.common.sleep(100);
-    } while (Date.now() < deadline);
-
-    return false;
-  }
-
-  /**
-   * Checks whether `value` is among the combobox's selected options, unlike
-   * {@link isOptionSelected} which requires it to be the only selected one
-   *
-   * @param comboBoxElement element that wraps up EuiComboBox
-   * @param value normalized option text
-   */
-  private async isOptionInSelection(
-    comboBoxElement: WebElementWrapper,
-    value: string
-  ): Promise<boolean> {
-    if (await this.isSingleSelectionPlainText(comboBoxElement)) {
-      return await this.isOptionSelected(comboBoxElement, value);
-    }
-
-    const $ = await comboBoxElement.parseDomContent();
-    return $('.euiComboBoxPill')
-      .toArray()
-      .some((option) => $(option).text().toLowerCase().trim() === value);
+    return await this.find.byCssSelector('.euiComboBoxOption', 5000);
   }
 
   /**
@@ -260,7 +161,7 @@ export class ComboBoxService extends FtrService {
     await this.setFilterValue(comboBoxElement, value);
     await this.openOptionsList(comboBoxElement);
 
-    await this.clickOption(comboBoxElement, options.clickWithMouse, trimmedValue);
+    await this.clickOption(options.clickWithMouse, trimmedValue);
     await this.closeOptionsList(comboBoxElement);
   }
 
