@@ -333,6 +333,5 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
       });
     });
-
   });
 };
