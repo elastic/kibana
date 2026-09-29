@@ -1,5 +1,5 @@
 {
-  "sha1": "a11e465477c970626abcb4e10c96f30eda0b5d08",
+  "sha1": "d498804885fa62c1281873833f3ce7be4f6552fc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -408,8 +408,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
-        "line": 109,
-        "column": 20
+        "line": 118,
+        "column": 21
       }
     },
     {
@@ -812,8 +812,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/foreach_iterations.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 94,
+        "column": 9
       }
     },
     {

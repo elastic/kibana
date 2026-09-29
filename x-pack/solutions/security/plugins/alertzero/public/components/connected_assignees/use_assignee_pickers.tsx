@@ -40,6 +40,8 @@ export interface UseAssigneePickersOptions<T> {
   /** When true, renders the picker read-only regardless of `canManage`. Closed escalations. */
   isReadOnly?: (item: T) => boolean;
   labels: { assignSuccess: string; assignError: string };
+  /** Size of the button icon. */
+  buttonIconSize?: 'xs' | 's';
 }
 
 /**
@@ -67,6 +69,7 @@ export function useAssigneePickers<T>({
   canManage,
   isReadOnly,
   labels,
+  buttonIconSize,
 }: UseAssigneePickersOptions<T>): (item: T) => React.ReactNode {
   const {
     services: { notifications },
@@ -198,6 +201,7 @@ export function useAssigneePickers<T>({
           onChange={
             targetId ? (newSelected) => void handleChange(rowKey, targetId, newSelected) : () => {}
           }
+          buttonIconSize={buttonIconSize}
         />
       );
     },
@@ -209,6 +213,7 @@ export function useAssigneePickers<T>({
       suggestQuery.isLoading,
       canManage,
       handleChange,
+      buttonIconSize,
     ]
   );
 }
