@@ -19,7 +19,13 @@ const semanticIndicatorBasis = (basis: string): string =>
 
 /** Candidates per model call (matches approved_ioc_candidate_ids schema max). */
 export const MAX_SEMANTIC_CANDIDATES_PER_BATCH = 300;
-/** Hard cap on adjudication batches so IOC-rich reports cannot unbounded-call. */
+/**
+ * Hard cap on adjudication *batches* (candidate groups of MAX_SEMANTIC_CANDIDATES_PER_BATCH),
+ * not on model calls. `enrichReportCore` folds the first batch into the core
+ * extraction call, then re-chunks whatever is left over into up to this many more
+ * follow-up calls — so an IOC-rich report can reach 1 + MAX_SEMANTIC_REVIEW_BATCHES
+ * model calls in total, not MAX_SEMANTIC_REVIEW_BATCHES.
+ */
 export const MAX_SEMANTIC_REVIEW_BATCHES = 3;
 /** Cap for the first context-overflow retry so candidate JSON cannot re-overflow. */
 export const OVERFLOW_MAX_SEMANTIC_CANDIDATES = 50;
@@ -66,6 +72,13 @@ export interface IocAdjudicationCandidate {
   originalIndex: number;
   ioc: ExtractedIoc;
   context: string;
+  /**
+   * Set when this candidate's value/context were truncated by the second
+   * context-overflow retry (`boundIocAdjudicationForPayload`). A rejection
+   * verdict on degraded evidence gets a distinct `tier_basis` so it is not
+   * indistinguishable from a full-evidence `semantic_reference` rejection.
+   */
+  degraded?: boolean;
 }
 
 export interface PreparedIocAdjudication {
@@ -490,7 +503,7 @@ export const prepareIocAdjudication = (
   const deferredCount = Math.max(0, candidates.length - capacity);
   const inBudget = candidates.slice(0, capacity);
 
-  const reviewable = inBudget.map((candidate) => ({
+  const withContext = inBudget.map((candidate) => ({
     ...candidate,
     id: candidate.originalIndex,
     context: contextFor(
@@ -504,15 +517,22 @@ export const prepareIocAdjudication = (
     ),
   }));
 
+  // A candidate the matcher could not locate in the article cannot be judged.
+  // Sending it anyway produces a predictable model rejection that is stored as
+  // `semantic_reference`, indistinguishable from a real one, so defer it instead.
+  const reviewable = withContext.filter((candidate) => candidate.context.length > 0);
+  const unmatchedCount = withContext.length - reviewable.length;
+
   const { batches } = chunkIocAdjudicationBatches(reviewable);
   // Deferred candidates keep their heuristic tier. They are not a negative
-  // model verdict, just past the batch budget for this enrichment run.
+  // model verdict, just past the batch budget for this enrichment run (or, for
+  // unmatchedCount, never had a context window to send).
 
   return {
     output,
     reviewable: batches.flat(),
     deterministicReferences,
-    deferredUnreviewed: deferredCount,
+    deferredUnreviewed: deferredCount + unmatchedCount,
   };
 };
 
@@ -621,6 +641,7 @@ export const boundIocAdjudicationForPayload = (
       },
       // Center on the original value before truncating the prompt copy.
       context: shrinkContextAroundIoc(candidate.context, originalValue, maxContextChars),
+      degraded: true,
     };
   });
 
@@ -684,7 +705,10 @@ export const reconcileIocAdjudication = (
     const original = prepared.output[candidate.originalIndex] ?? candidate.ioc;
     output[candidate.originalIndex] = approvedIds.has(candidate.id)
       ? { ...original, tier_basis: semanticIndicatorBasis(original.tier_basis) }
-      : downgrade(original, 'semantic_reference');
+      : downgrade(
+          original,
+          candidate.degraded ? 'semantic_reference_degraded' : 'semantic_reference'
+        );
   }
 
   // Deferred URL/domain candidates keep heuristic tiers in `iocs`, but stay out

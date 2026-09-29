@@ -335,8 +335,9 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
       iocs: [candidate('https://evil.example/')],
     });
 
-    expect(prepared.reviewable[0].context).not.toContain('CDN hostname');
-    expect(prepared.reviewable[0].context).toBe('');
+    // No occurrence found → deferred rather than sent with an empty context.
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(prepared.deferredUnreviewed).toBe(1);
   });
 
   it('does not reuse path or port evidence for a bare-host candidate', () => {
@@ -347,7 +348,28 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
       iocs: [candidate('https://evil.example/')],
     });
 
-    expect(prepared.reviewable[0].context).toBe('');
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(prepared.deferredUnreviewed).toBe(1);
+  });
+
+  it('defers an unmatched candidate on reconcile instead of a semantic_reference verdict', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'Docs mention https://evil.example.other as a CDN hostname.',
+      iocs: [
+        candidate('https://evil.example/', {
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'url_path_entropy',
+        }),
+      ],
+    });
+
+    const adjudicated = reconcileIocAdjudication(prepared, new Set());
+
+    expect(adjudicated.iocs[0].tier).toBe('discriminating');
+    expect(adjudicated.iocs[0].deferred_unreviewed).toBe(true);
+    expect(adjudicated.anchor_iocs).toHaveLength(0);
+    expect(adjudicated.adjudication.deferred_unreviewed).toBe(1);
   });
 
   it('does not attribute a shorter path to a longer path suffix', () => {
@@ -430,7 +452,8 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
       ],
     });
 
-    expect(prepared.reviewable[0].context).toBe('');
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(prepared.deferredUnreviewed).toBe(1);
   });
 
   it('does not treat a different port as the same origin citation', () => {
@@ -497,6 +520,23 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
         }))
       ).length
     ).toBeLessThanOrEqual(OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS);
+  });
+
+  it('marks a retry-2 rejection with a degraded tier_basis, not semantic_reference', () => {
+    const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
+      candidate(`https://evil.example/${'a'.repeat(1_800)}-${index}`)
+    );
+    const text = iocs.map((ioc) => `Fetched ${ioc.value} from C2.`).join(' ');
+    const prepared = prepareIocAdjudication({ text, iocs });
+    const second = boundIocAdjudicationForPayload(boundIocAdjudicationForOverflow(prepared));
+
+    expect(second.reviewable.every((candidateEntry) => candidateEntry.degraded)).toBe(true);
+
+    const adjudicated = reconcileIocAdjudication(second, new Set());
+    const rejected = second.reviewable.map((candidateEntry) => candidateEntry.originalIndex);
+    for (const index of rejected) {
+      expect(adjudicated.iocs[index].tier_basis).toBe('semantic_reference_degraded');
+    }
   });
 
   it('keeps long URL suffixes distinguishable after payload truncation', () => {
