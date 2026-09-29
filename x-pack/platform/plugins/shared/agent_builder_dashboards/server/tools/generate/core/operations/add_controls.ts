@@ -21,7 +21,7 @@ import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { getErrorMessage, type OperationFailure, type OperationSkip } from '../utils';
+import { getErrorMessage, type OperationFailure } from '../utils';
 import { defineOperation } from './types';
 import type {
   AggregatableFieldTypes,
@@ -146,47 +146,33 @@ const describeAvailableFields = (
 };
 
 /**
- * Report an unresolved control as a failure when the user asked for it, otherwise
- * as a skip. Controls with the same message share one entry.
+ * Report an unresolved user-requested control as a failure. Controls with the
+ * same message share one entry.
  */
-const recordUnresolvedControl = ({
+const recordControlFailure = ({
   failures,
-  skipped,
   fieldName,
   message,
-  userRequested,
 }: {
   failures: OperationFailure[];
-  skipped: OperationSkip[];
   fieldName: string;
   message: string;
-  userRequested: boolean;
 }) => {
   const type = DASHBOARD_OPERATION_FAILURE_TYPES.addControls;
-  if (userRequested) {
-    const group = failures.find((failure) => failure.type === type && failure.error === message);
-    if (group) {
-      group.identifier = `${group.identifier}, ${fieldName}`;
-    } else {
-      failures.push({ type, identifier: fieldName, error: message });
-    }
-    return;
-  }
-
-  const group = skipped.find((skip) => skip.type === type && skip.reason === message);
+  const group = failures.find((failure) => failure.type === type && failure.error === message);
   if (group) {
     group.identifier = `${group.identifier}, ${fieldName}`;
   } else {
-    skipped.push({ type, identifier: fieldName, reason: message });
+    failures.push({ type, identifier: fieldName, error: message });
   }
 };
 
 /**
  * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
  * text fields to their `.keyword` sibling. Range sliders additionally require a
- * numeric field. Other data controls are reported with the mapped fields that
- * could back them instead. Controls on an index whose fields cannot be loaded
- * are kept unvalidated.
+ * numeric field. Other data controls are left out; user-requested ones are
+ * reported as failures with the mapped fields that could back them instead.
+ * Controls on an index whose fields cannot be loaded are kept unvalidated.
  */
 const resolveControlFields = async ({
   controls,
@@ -194,14 +180,12 @@ const resolveControlFields = async ({
   projectRouting,
   logger,
   failures,
-  skipped,
 }: {
   controls: ControlInput[];
   loadAggregatableFieldTypes?: LoadAggregatableFieldTypes;
   projectRouting?: string;
   logger: Logger;
   failures: OperationFailure[];
-  skipped: OperationSkip[];
 }): Promise<ControlInput[]> => {
   if (!loadAggregatableFieldTypes) {
     return controls;
@@ -241,12 +225,14 @@ const resolveControlFields = async ({
     }
 
     const skip = (reason: string): ControlInput[] => {
-      recordUnresolvedControl({
+      if (control.user_requested !== true) {
+        logger.debug(`Left out control on "${fieldName}": ${reason}`);
+        return [];
+      }
+      recordControlFailure({
         failures,
-        skipped,
         fieldName,
         message: `${reason}${describeAvailableFields(fieldTypes, control.type)}`,
-        userRequested: control.user_requested === true,
       });
       return [];
     };
@@ -344,7 +330,6 @@ export const addControlsOperation = defineOperation({
       projectRouting: dashboardData.project_routing,
       logger: context.logger,
       failures: context.failures,
-      skipped: context.skipped,
     });
 
     const newControls = controlsToAdd.map(buildStoredControl);

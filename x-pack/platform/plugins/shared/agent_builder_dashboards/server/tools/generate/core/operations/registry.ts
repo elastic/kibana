@@ -50,7 +50,6 @@ interface PrepareOperationExecutionParams {
   operations: DashboardOperation[];
   logger: OperationExecutionContext['logger'];
   failures: OperationExecutionContext['failures'];
-  skipped: OperationExecutionContext['skipped'];
   panelAuthoringNotes: OperationExecutionContext['panelAuthoringNotes'];
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
   resolveCustomContentTemplate?: OperationExecutionContext['resolveCustomContentTemplate'];
@@ -62,7 +61,6 @@ export const prepareOperationExecution = async ({
   operations,
   logger,
   failures,
-  skipped,
   panelAuthoringNotes,
   resolvePanelContent,
   resolveCustomContentTemplate,
@@ -77,7 +75,6 @@ export const prepareOperationExecution = async ({
   return {
     logger,
     failures,
-    skipped,
     panelAuthoringNotes,
     resolvedPanelCreationRequests,
     sectionIdsByKey: new Map(),

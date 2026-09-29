@@ -136,25 +136,24 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures, skipped, panelAuthoringNotes } =
-          await executeDashboardOperations({
-            dashboardData: latestVersion?.data,
-            operations,
+        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
+          dashboardData: latestVersion?.data,
+          operations,
+          logger,
+          resolvePanelContent: createVisPanelResolver({
             logger,
-            resolvePanelContent: createVisPanelResolver({
-              logger,
-              modelProvider,
-              events,
-              esClient,
-            }),
-            resolveCustomContentTemplate: createCustomContentTemplateResolver({
-              logger,
-              modelProvider,
-              esClient,
-            }),
-            resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
-            esClient: esClient.asCurrentUser,
-          });
+            modelProvider,
+            events,
+            esClient,
+          }),
+          resolveCustomContentTemplate: createCustomContentTemplateResolver({
+            logger,
+            modelProvider,
+            esClient,
+          }),
+          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          esClient: esClient.asCurrentUser,
+        });
 
         // Data-aware default time range computation
         const finalDashboardData = await applyDefaultDashboardTimeRange({
@@ -200,7 +199,6 @@ Use operations[] to:
                   )
                 ),
                 failures: failures.length > 0 ? failures : undefined,
-                skipped: skipped.length > 0 ? skipped : undefined,
               },
             },
           ],

@@ -10,7 +10,7 @@ import type { ResolvedCustomContentTemplate } from '@kbn/custom-content-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
-import type { OperationFailure, OperationSkip } from '../utils';
+import type { OperationFailure } from '../utils';
 import type {
   InlinePanelOperationType,
   PanelAuthoringNote,
@@ -39,7 +39,6 @@ export type ResolveAttachmentPanel = (
 export interface OperationExecutionContext {
   logger: Logger;
   failures: OperationFailure[];
-  skipped: OperationSkip[];
   panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   sectionIdsByKey: Map<string, string>;

@@ -19,7 +19,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
    - To put an existing visualization onto a dashboard, read that visualization attachment's content with \`${attachmentTools.read}\` and pass its configuration as a \`source: "config"\` panel input (with panel \`type: "vis"\` and \`config\`). The generation core never reads attachments itself, so the visualization config must be passed by value here.
 2. **Generate** (persists automatically):
    - Call ${dashboardTools.generateDashboard} with \`dashboardAttachmentId\` set to the dashboard you are editing (omit it for a new dashboard) and your batched \`operations\`. The tool reads the current payload from that reference, applies the operations, and persists the result as a \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment for you.
-   - It returns \`data.attachment_id\`, \`data.version\`, a compact \`data.dashboard\` summary whose panels carry a one-sentence \`authoring_note\` for the charts authored in this call, optional \`data.failures\`, and optional \`data.skipped\`. Do **not** pass the dashboard payload back into any tool — reference \`data.attachment_id\` instead.
+   - It returns \`data.attachment_id\`, \`data.version\`, a compact \`data.dashboard\` summary whose panels carry a one-sentence \`authoring_note\` for the charts authored in this call, and optional \`data.failures\`. Do **not** pass the dashboard payload back into any tool — reference \`data.attachment_id\` instead.
 3. **Render**:
    - Render the persisted attachment inline with a render-attachment tag using the returned \`attachment_id\` and \`version\`:
      \`<render_attachment id="{attachment_id}" version="{version}" />\`
@@ -38,7 +38,6 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
 - If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
-- \`data.skipped\` lists actions you took on your own initiative that the server left out. Do not mention them. Retry one only with a field its \`reason\` lists that clearly fits the same intent.
 
 ## Rendering Edge Cases
 

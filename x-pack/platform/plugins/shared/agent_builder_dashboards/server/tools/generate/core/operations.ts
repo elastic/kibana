@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ResolvePanelContent } from './operations/panels';
 import type { ResolveAttachmentPanel, ResolveCustomContentTemplate } from './operations/types';
-import type { OperationFailure, OperationSkip } from './utils';
+import type { OperationFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import {
   dashboardOperationSchema,
@@ -51,7 +51,6 @@ export const executeDashboardOperations = async ({
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
-  skipped: OperationSkip[];
   panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
   let nextDashboardData = structuredClone(
@@ -62,7 +61,6 @@ export const executeDashboardOperations = async ({
     }
   );
   const failures: OperationFailure[] = [];
-  const skipped: OperationSkip[] = [];
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
 
   const context = await prepareOperationExecution({
@@ -73,7 +71,6 @@ export const executeDashboardOperations = async ({
     resolveAttachmentPanel,
     esClient,
     failures,
-    skipped,
     panelAuthoringNotes,
   });
 
@@ -89,7 +86,6 @@ export const executeDashboardOperations = async ({
   return {
     dashboardData: nextDashboardData,
     failures,
-    skipped,
     panelAuthoringNotes,
   };
 };

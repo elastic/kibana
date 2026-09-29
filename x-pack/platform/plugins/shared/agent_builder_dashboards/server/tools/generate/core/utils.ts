@@ -18,15 +18,6 @@ export interface OperationFailure {
 }
 
 /**
- * Part of an operation the server intentionally left out, mirroring `OperationFailure`.
- */
-export interface OperationSkip {
-  type: DashboardOperationFailureType;
-  identifier: string;
-  reason: string;
-}
-
-/**
  * Type-safe extraction of error message from unknown error.
  */
 export const getErrorMessage = (error: unknown): string => {
