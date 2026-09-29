@@ -17,7 +17,7 @@ import {
   AttachmentsRtV2,
   UnifiedAttachmentPayloadRt,
 } from '../../domain/attachment/v2';
-import { UnifiedAttachmentPatchRequestRt } from './v2';
+import { UnifiedAttachmentPutRequestRt } from './v2';
 import { limitedArraySchema } from '../../../schema';
 
 export const AttachmentRequestRtV2 = rt.union([AttachmentRequestRt, UnifiedAttachmentPayloadRt]);
@@ -27,7 +27,7 @@ export const AttachmentRequestWithoutRefsRtV2 = rt.union([
 ]);
 export const AttachmentPatchRequestRtV2 = rt.union([
   AttachmentPatchRequestRt,
-  UnifiedAttachmentPatchRequestRt,
+  rt.intersection([UnifiedAttachmentPutRequestRt, rt.strict({ id: rt.string })]),
 ]);
 
 export const AttachmentsFindResponseRtV2 = rt.strict({

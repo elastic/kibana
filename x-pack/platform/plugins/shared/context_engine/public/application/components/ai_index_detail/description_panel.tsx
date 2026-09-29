@@ -22,6 +22,8 @@ import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { AiIndexDescriptionField } from '../ai_index_description_field';
 import { useSaveAiIndexDescription } from '../../hooks/use_save_ai_index_description';
 import { validateTextInput } from '../../utils/validate_text_input';
@@ -46,6 +48,8 @@ export const DescriptionPanel = ({
     value: draft,
     maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
   });
+  const hasDescription = Boolean(aiIndex?.description);
+  const isEditingActive = isEditing && !isSaving;
 
   const startEditing = () => {
     setDraft(aiIndex?.description ?? '');
@@ -75,32 +79,68 @@ export const DescriptionPanel = ({
               />
             </h2>
           </EuiTitle>
+          {!isLoading && !hasDescription && (
+            <AiIndexDetailPanelDescription>
+              {isManaged ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.descriptionEmptyManaged"
+                  defaultMessage="No description is configured for this AI index."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.descriptionEmpty"
+                  defaultMessage="Add a description to shape suggested automations and help agents decide when this AI index is relevant."
+                />
+              )}
+            </AiIndexDetailPanelDescription>
+          )}
         </EuiFlexItem>
-        {!isEditing && !isManaged && !isLoading && (
+        {!isEditingActive && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={startEditing}
-              isDisabled={aiIndex === undefined}
-              data-test-subj="contextEditDescriptionButton"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
-                action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.description.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
+            {hasDescription ? (
+              <EuiButtonEmpty
+                size="s"
+                iconType="pencil"
+                onClick={startEditing}
+                isLoading={isSaving}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextEditDescriptionButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.editButton"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                size="s"
+                iconType="plusCircle"
+                onClick={startEditing}
+                isLoading={isSaving}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextAddDescriptionButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.addButton"
+                  defaultMessage="Add description"
+                />
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} />
-      ) : isEditing ? (
+      ) : isEditingActive ? (
         <>
           <AiIndexDescriptionField
             value={draft}
@@ -114,7 +154,6 @@ export const DescriptionPanel = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={() => setIsEditing(false)}
-                isDisabled={isSaving}
                 data-test-subj="contextDescriptionCancelButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
@@ -148,23 +187,28 @@ export const DescriptionPanel = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
-      ) : (
-        <EuiText size="s" color={aiIndex?.description ? undefined : 'subdued'}>
-          <p>
-            {aiIndex?.description ??
-              (isManaged ? (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.description.emptyManaged"
-                  defaultMessage="No description yet."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.description.empty"
-                  defaultMessage="No description yet. Add one to help agents understand this AI index."
-                />
-              ))}
-          </p>
+      ) : aiIndex?.description ? (
+        <EuiText size="s">
+          <p>{aiIndex.description}</p>
         </EuiText>
+      ) : (
+        <AiIndexDetailPanelEmptyPrompt
+          iconType="text"
+          dataTestSubj="contextAiIndexDescriptionEmpty"
+          title={
+            isManaged ? (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.description.emptyManaged"
+                defaultMessage="No description yet."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.description.empty"
+                defaultMessage="No description yet"
+              />
+            )
+          }
+        />
       )}
     </EuiPanel>
   );
