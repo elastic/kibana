@@ -12,6 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERTZERO_FEATURE_ID } from '@kbn/alertzero-common';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
+import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import * as i18n from './translations';
 
@@ -26,6 +27,7 @@ export const OnboardingPage: React.FC = () => {
 
   return (
     <AlertZeroPageSection>
+      <ScanFailureCallout />
       <EuiEmptyPrompt
         iconType="watchesApp"
         title={<h2>{i18n.ONBOARDING_TITLE}</h2>}

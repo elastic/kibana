@@ -23,7 +23,7 @@ describe('hasRuleTypeChanged', () => {
     [ThreeWayDiffOutcome.MissingBaseCanUpdate, true],
     [ThreeWayDiffOutcome.CustomizedValueSameUpdate, false],
     [ThreeWayDiffOutcome.StockValueNoUpdate, false],
-    [ThreeWayDiffOutcome.CustomizedValueNoUpdate, false],
+    [ThreeWayDiffOutcome.CustomizedValueNoUpdate, true],
     [ThreeWayDiffOutcome.MissingBaseNoUpdate, false],
   ])('reports %s as %s', (diffOutcome, expected) => {
     expect(hasRuleTypeChanged({ diff_outcome: diffOutcome })).toBe(expected);

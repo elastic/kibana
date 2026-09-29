@@ -282,6 +282,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/agent-builder-browser",
+    "@kbn/agentic-investigations-common",
     "@kbn/mitre-attack-plugin",
     "@kbn/security-mitre-attack-common",
     "@kbn/lazy-object",
@@ -322,5 +323,6 @@
     "@kbn/core-execution-context-common",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
+    "@kbn/test-es-server",
   ]
 }
