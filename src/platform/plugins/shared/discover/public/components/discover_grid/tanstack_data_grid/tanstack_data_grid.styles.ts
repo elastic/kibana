@@ -373,7 +373,13 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     transformOrigin: 'right center',
   }),
 
+  cellActionsFixed: css({
+    position: 'fixed',
+    zIndex: euiTheme.levels.menu,
+  }),
+
   cellActionsOpen: css({
+    display: 'flex',
     gap: euiTheme.size.xxs,
     paddingInline: euiTheme.size.xxs,
     overflow: 'hidden',

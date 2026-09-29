@@ -616,6 +616,21 @@ const parseStatsByColumns = (
 };
 
 const CELL_ACTIONS_HOVER_OPEN_DELAY_MS = 350;
+const CELL_ACTION_ICON_WIDTH = 28;
+
+const estimateCellActionsOpenWidth = (actionCount: number, insetPx: number) =>
+  actionCount * CELL_ACTION_ICON_WIDTH + Math.max(0, actionCount - 1) * insetPx + insetPx * 2;
+
+const cellActionsNeedFixedLayer = (
+  cellElement: HTMLElement | null,
+  actionCount: number,
+  insetPx: number
+) => {
+  if (!cellElement) return false;
+  const cellWidth = cellElement.getBoundingClientRect().width;
+  const openWidth = estimateCellActionsOpenWidth(actionCount, insetPx);
+  return openWidth > cellWidth - insetPx;
+};
 
 // ── Cell Actions: filter in/out, copy (clippable), expand (always visible) ──
 const CellActions = React.memo(
@@ -626,6 +641,7 @@ const CellActions = React.memo(
     onFilter,
     onExpand,
     onDismiss,
+    anchorCellRef,
     styles,
   }: {
     fieldName: string;
@@ -634,14 +650,18 @@ const CellActions = React.memo(
     onFilter?: UnifiedDataTableProps['onFilter'];
     onExpand: (cellElement: HTMLElement) => void;
     onDismiss: () => void;
+    anchorCellRef: React.RefObject<HTMLDivElement | null>;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
   }) => {
     const { euiTheme } = useEuiTheme();
     const bubbleRef = useRef<HTMLDivElement>(null);
     const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [useFixedLayer, setUseFixedLayer] = useState(false);
+    const [fixedLayerStyle, setFixedLayerStyle] = useState<React.CSSProperties>();
     const collapsedRadius = euiTheme.border.radius.small;
     const openRadius = euiTheme.size.m;
+    const actionInsetPx = parseInt(euiTheme.size.xxs, 10) || 4;
 
     const clearOpenTimer = useCallback(() => {
       if (openTimerRef.current !== null) {
@@ -690,14 +710,45 @@ const CellActions = React.memo(
       [collapsedRadius, openRadius]
     );
 
+    const actionCount = onFilter ? 4 : 2;
+
+    const refreshFixedLayer = useCallback(() => {
+      const needsFixedLayer = cellActionsNeedFixedLayer(
+        anchorCellRef.current,
+        actionCount,
+        actionInsetPx
+      );
+      setUseFixedLayer(needsFixedLayer);
+      if (needsFixedLayer && anchorCellRef.current) {
+        const rect = anchorCellRef.current.getBoundingClientRect();
+        setFixedLayerStyle({
+          top: rect.top + actionInsetPx,
+          right: window.innerWidth - rect.right + actionInsetPx,
+        });
+      }
+      return needsFixedLayer;
+    }, [actionCount, actionInsetPx, anchorCellRef]);
+
     const scheduleOpen = useCallback(() => {
       if (isOpen) return;
       clearOpenTimer();
       openTimerRef.current = setTimeout(() => {
         openTimerRef.current = null;
+        refreshFixedLayer();
         playMorph(true);
       }, CELL_ACTIONS_HOVER_OPEN_DELAY_MS);
-    }, [clearOpenTimer, isOpen, playMorph]);
+    }, [clearOpenTimer, isOpen, playMorph, refreshFixedLayer]);
+
+    useEffect(() => {
+      if (!isOpen || !useFixedLayer) return;
+      const updateFixedLayer = () => refreshFixedLayer();
+      window.addEventListener('scroll', updateFixedLayer, true);
+      window.addEventListener('resize', updateFixedLayer);
+      return () => {
+        window.removeEventListener('scroll', updateFixedLayer, true);
+        window.removeEventListener('resize', updateFixedLayer);
+      };
+    }, [isOpen, refreshFixedLayer, useFixedLayer]);
 
     useEffect(() => () => clearOpenTimer(), [clearOpenTimer]);
 
@@ -710,6 +761,7 @@ const CellActions = React.memo(
     const handleBubbleMouseLeave = useCallback(() => {
       clearOpenTimer();
       if (isOpen) {
+        setUseFixedLayer(false);
         playMorph(false);
       }
     }, [clearOpenTimer, isOpen, playMorph]);
@@ -833,11 +885,16 @@ const CellActions = React.memo(
       </EuiToolTip>,
     ].filter((button): button is React.ReactElement => button != null);
 
-    return (
+    const bubble = (
       <div
         ref={bubbleRef}
         className="tsg-cellActions"
-        css={[styles.cellActions, isOpen && styles.cellActionsOpen]}
+        css={[
+          styles.cellActions,
+          isOpen && useFixedLayer && styles.cellActionsFixed,
+          isOpen && styles.cellActionsOpen,
+        ]}
+        style={isOpen && useFixedLayer ? fixedLayerStyle : undefined}
         onMouseEnter={handleBubbleMouseEnter}
         onMouseLeave={handleBubbleMouseLeave}
         onClick={(event) => event.stopPropagation()}
@@ -868,6 +925,12 @@ const CellActions = React.memo(
         )}
       </div>
     );
+
+    if (isOpen && useFixedLayer) {
+      return <EuiPortal>{bubble}</EuiPortal>;
+    }
+
+    return bubble;
   }
 );
 
@@ -1259,6 +1322,7 @@ const VirtualCell = React.memo(
       setActionsDismissed(false);
       setActionsSession((session) => session + 1);
     }, []);
+    const cellRef = useRef<HTMLDivElement>(null);
     const { meta } = cell.column.columnDef;
     const isControl = meta?.isControl;
     const isSelect = meta?.isSelect;
@@ -1363,6 +1427,7 @@ const VirtualCell = React.memo(
 
     return (
       <div
+        ref={cellRef}
         className={
           [
             isPinned ? 'tsg-pinnedCell' : undefined,
@@ -1444,6 +1509,7 @@ const VirtualCell = React.memo(
             onFilter={onFilter}
             onExpand={openCellPopover}
             onDismiss={dismissActions}
+            anchorCellRef={cellRef}
             styles={styles}
           />
         )}
