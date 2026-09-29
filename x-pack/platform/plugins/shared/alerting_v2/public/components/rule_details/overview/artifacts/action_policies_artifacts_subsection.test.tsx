@@ -148,7 +148,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('loads linked policies with an empty list when the rule has no routing tags', () => {
     renderSubsection({
       ...baseRule,
-      metadata: { name: 'Untagged Rule' },
+      metadata: { ...baseRule.metadata, name: 'Untagged Rule', tags: undefined },
     });
     expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith([]);
   });

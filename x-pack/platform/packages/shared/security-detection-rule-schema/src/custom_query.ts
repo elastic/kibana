@@ -90,7 +90,7 @@ const validateCustomQueryFields = (fields: CustomQueryBuilderFields): string[] =
 // ---------------------------------------------------------------------------
 // Compile function
 //
-// Builds a standalone breach query via the @elastic/esql AST builder.
+// Builds the rule's base query via the @elastic/esql AST builder.
 // User-supplied values are always AST literals — never spliced into query
 // source text.  Index names are emitted as quoted identifiers so that a
 // user-supplied entry cannot inject extra pipeline commands.
@@ -147,10 +147,7 @@ const generateCustomQuery = ({
   });
 
   return {
-    query: {
-      format: 'standalone' as const,
-      breach: { query: breachQuery },
-    },
+    query: { base: breachQuery },
   };
 };
 
@@ -162,8 +159,8 @@ const generateCustomQuery = ({
 //
 // kind is pinned to 'alert' so that every detection produces an episode
 // visible on the Alerting v2 Episodes surface.  The companion lifecycle
-// configuration (recovery_strategy: none, no_data_strategy: none,
-// state_transition: { pending_count: 0 }) is sent by the converter in the
+// configuration (recovery: { strategy: manual }, no_data: { strategy: ignore },
+// state_transition: { pending: { count: 0 } }) is sent by the converter in the
 // security_detections plugin, not here.  Together the combination is the
 // persistent-mode workaround described in alert-modes.md.
 //

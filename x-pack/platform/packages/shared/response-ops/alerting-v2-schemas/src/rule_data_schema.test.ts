@@ -2057,10 +2057,10 @@ describe('ruleOwnershipSchema (step 4.4)', () => {
 
   it('createRuleDataSchema rejects ownership in metadata (response-only, strict schema)', () => {
     const result = createRuleDataSchema.safeParse({
-      kind: 'alert',
+      kind: 'signal',
       metadata: { name: 'r', ownership: { managed: false } },
       schedule: { every: '5m' },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      query: { base: 'FROM logs-* | LIMIT 1' },
     });
     expect(result.success).toBe(false);
   });
@@ -2077,10 +2077,10 @@ describe('ruleOwnershipSchema (step 4.4)', () => {
   // it, the same guarantee ownership gets above.
   it('createRuleDataSchema rejects revision in metadata (response-only, strict schema)', () => {
     const result = createRuleDataSchema.safeParse({
-      kind: 'alert',
+      kind: 'signal',
       metadata: { name: 'r', revision: 0 },
       schedule: { every: '5m' },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      query: { base: 'FROM logs-* | LIMIT 1' },
     });
     expect(result.success).toBe(false);
   });

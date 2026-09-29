@@ -9,12 +9,12 @@ import { merge } from 'lodash';
 import type { BuilderTypeManifest, OpaqueBuilderFields } from '@kbn/alerting-v2-rule-builders';
 import { globalFoldedVersions } from '../../lib/builder_types/folded_versions';
 import {
-  ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV5,
-  ruleMetadataSchema as ruleMetadataSchemaV5,
-} from '../schemas/rule_saved_object_attributes/v5';
+  ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV6,
+  ruleMetadataSchema as ruleMetadataSchemaV6,
+} from '../schemas/rule_saved_object_attributes/v6';
 import {
   currentRuleSavedObjectAttributesSchema,
-  ruleSavedObjectAttributesSchemaV10 as latestV10,
+  ruleSavedObjectAttributesSchemaV11 as latestV11,
 } from '../schemas/rule_saved_object_attributes';
 import { fromBuilderManifest, assertBuilderFieldsIsOpenRecord } from './from_builder_manifest';
 
@@ -397,14 +397,14 @@ describe('fromBuilderManifest', () => {
   // ---------------------------------------------------------------------------
 
   describe('open-record assertion: metadata.builder_fields stays an open record', () => {
-    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v10)', () => {
+    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v11)', () => {
       // Pin the alias so that adding a vN+1 schema does not silently leave fold
       // lines on the wrong schema. Update this test when advancing the alias.
       // Updated from v7 to v8 by step 4.4: metadata.ownership was added to v8.
       // Updated from v8 to v9 by step 6.4: query made optional for execution-time rules.
       //
       // Ref: rule-data-migration.md "Rollback behavior"
-      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV10);
+      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV11);
     });
 
     // Production-function coverage: assertBuilderFieldsIsOpenRecord is called
@@ -414,11 +414,11 @@ describe('fromBuilderManifest', () => {
       expect(() => assertBuilderFieldsIsOpenRecord()).not.toThrow();
     });
 
-    it('the v5 ruleMetadataSchema accepts an object with arbitrary unknown keys in builder_fields', () => {
+    it('the v6 ruleMetadataSchema accepts an object with arbitrary unknown keys in builder_fields', () => {
       // schema.recordOf(schema.string(), schema.any()) is the expected shape.
       // If builder_fields were tightened to a fixed set of keys, this would throw.
       expect(() =>
-        ruleMetadataSchemaV5.validate({
+        ruleMetadataSchemaV6.validate({
           name: 'test rule',
           builder_fields: {
             unknown_key_1: 'some string',
@@ -436,7 +436,7 @@ describe('fromBuilderManifest', () => {
         nested: { x: 1 },
       };
 
-      const result = ruleMetadataSchemaV5.validate({
+      const result = ruleMetadataSchemaV6.validate({
         name: 'test rule',
         builder_fields: fields,
       });
@@ -444,20 +444,19 @@ describe('fromBuilderManifest', () => {
       expect(result.builder_fields).toEqual(fields);
     });
 
-    it('the full v5 attributes schema also keeps builder_fields open', () => {
+    it('the full v6 attributes schema also keeps builder_fields open', () => {
       // Validate using the composite schema (not just the metadata sub-schema).
       const fullFields = { arbitrary_key: 'value', num: 99 };
 
       expect(() =>
-        ruleSavedObjectAttributesSchemaV5.validate({
+        ruleSavedObjectAttributesSchemaV6.validate({
           kind: 'alert',
           metadata: { name: 'test rule', builder_fields: fullFields },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | LIMIT 1' },
-          },
+          query: { base: 'FROM logs-* | LIMIT 1' },
+          recovery: { strategy: 'manual' },
+          no_data: { strategy: 'ignore' },
           enabled: true,
           createdBy: { profile_uid: 'elastic' },
           updatedBy: { profile_uid: 'elastic' },

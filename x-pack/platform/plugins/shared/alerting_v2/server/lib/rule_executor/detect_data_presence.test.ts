@@ -177,10 +177,9 @@ describe('detectDataPresence', () => {
 
     const rule = createRuleResponse({
       kind: 'alert',
-      no_data_strategy: 'emit',
+      no_data: { strategy: 'alert' },
       grouping: { fields: groupingFields },
       query: {
-        format: 'composed',
         base: baseQuery,
         breach: { segment: 'WHERE AVG(cpu) > 0.9' },
       },
