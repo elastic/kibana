@@ -55,7 +55,12 @@ export const collectTelemetryData = async ({
 
         return undefined;
       }),
-      getWorkflowsTelemetryData({ savedObjectsClient, logger }),
+      getWorkflowsTelemetryData({ savedObjectsClient, logger }).catch((err) => {
+        logger.debug('Failed collecting Cases workflows telemetry data');
+        logger.debug(err);
+
+        return undefined;
+      }),
     ]);
 
     return {
@@ -69,7 +74,7 @@ export const collectTelemetryData = async ({
       casesSystemAction,
       ...(templates !== undefined ? { templates } : {}),
       ...(fieldLibrary !== undefined ? { fieldLibrary } : {}),
-      workflows,
+      ...(workflows !== undefined ? { workflows } : {}),
     };
   } catch (err) {
     logger.debug('Failed collecting Cases telemetry data');
@@ -79,8 +84,8 @@ export const collectTelemetryData = async ({
      * clusters that they do not use cases thus all counts will be zero
      * and clusters where an error occurred.
      *
-     * The isolation above is one-directional: a templates or field library failure costs
-     * only its own numbers, but a failure in any area collected here still discards the
+     * The isolation above is one-directional: a templates, field library, or workflows failure
+     * costs only its own numbers, but a failure in any area collected here still discards the
      * whole payload.
      */
 
