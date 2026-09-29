@@ -236,7 +236,8 @@ describe('detection rule workflows', () => {
 
       const gates = all.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(gates).toHaveLength(1);
       const inputs = gates[0].with?.inputs as Record<string, unknown>;

@@ -13,11 +13,11 @@ import {
   ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { CREATE_PROPOSAL_WORKFLOW } from '../proposals';
 
 /**
  * The verdicts the detection-coverage skill may return. Duplicated here as a literal on
@@ -451,7 +451,8 @@ describe('Detection Coverage review', () => {
     it('proposes through the investigation gate, one proposal per route', () => {
       const proposals = allReviewSteps.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW.id
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
 
@@ -527,7 +528,8 @@ describe('Detection Coverage review', () => {
       // against the ceiling here.
       const proposals = allReviewSteps.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW.id
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
       for (const proposal of proposals) {

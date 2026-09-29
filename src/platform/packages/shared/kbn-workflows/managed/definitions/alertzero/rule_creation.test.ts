@@ -12,11 +12,11 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { convertJsonSchemaToZod } from '../../../spec/lib/build_fields_zod_validator';
-import { CREATE_PROPOSAL_WORKFLOW } from '../proposals';
 
 interface YamlStep {
   name: string;
@@ -69,7 +69,7 @@ describe('Detection Rule Creation worker', () => {
     it('proposes the drafted rule through the create action', () => {
       const proposal = stepByName('propose_creation');
       expect(proposal?.type).toBe('workflow.execute');
-      expect(proposal?.with?.['workflow-id']).toBe(CREATE_PROPOSAL_WORKFLOW.id);
+      expect(proposal?.with?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
       const inputs = inputsOf(proposal);
       expect(inputs.actionWorkflowId).toBe(ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID);
       expect(inputs.actionInput).toBe('${{ steps.draft_creation.output.structured_output.rule }}');
@@ -216,7 +216,7 @@ describe('Detection Rule Creation worker', () => {
       // caller that starts passing its own deadline has to be checked against the
       // ceiling here.
       const proposal = stepByName('propose_creation');
-      expect(proposal?.with?.['workflow-id']).toBe(CREATE_PROPOSAL_WORKFLOW.id);
+      expect(proposal?.with?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
       expect(inputsOf(proposal).expiresIn).toBeUndefined();
 
       expect(String(worker.settings?.timeout)).toMatch(/^\d+h$/);

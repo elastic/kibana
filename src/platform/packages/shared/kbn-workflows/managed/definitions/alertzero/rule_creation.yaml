@@ -244,7 +244,7 @@ steps:
     type: workflow.execute
     if: "${{ steps.proposal_ready.output.ok == true }}"
     with:
-      workflow-id: system-create-proposal
+      workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "{{ inputs.investigation_id }}"
         comment: |-

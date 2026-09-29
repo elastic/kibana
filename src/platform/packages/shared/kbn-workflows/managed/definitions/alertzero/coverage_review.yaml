@@ -329,7 +329,7 @@ steps:
             type: workflow.execute
             if: "${{ steps.resolve_rule.output.id != null }}"
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -362,7 +362,7 @@ steps:
             type: workflow.execute
             if: "${{ steps.resolve_rule.output.id == null }}"
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -390,7 +390,7 @@ steps:
             type: workflow.execute
             if: "${{ steps.install_target.output.ready == true }}"
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -421,7 +421,7 @@ steps:
             type: workflow.execute
             if: "${{ steps.install_target.output.ready != true }}"
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -443,7 +443,7 @@ steps:
             type: workflow.execute
             if: "${{ steps.resolve_rule.output.enabled == true }}"
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -473,7 +473,7 @@ steps:
             type: workflow.execute
             if: "${{ steps.resolve_rule.output.enabled != true }}"
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -495,7 +495,7 @@ steps:
           ${{ steps.coverage_check.output.structured_output.verdict != null
             and steps.coverage_check.output.structured_output.verdict != '' }}
         with:
-          workflow-id: system-create-proposal
+          workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: |-
