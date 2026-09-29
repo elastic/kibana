@@ -22640,6 +22640,9 @@ paths:
                   maxLength: 256
                   minLength: 1
                   type: string
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
@@ -23776,6 +23779,9 @@ paths:
                       description: Which signals the analysis reads. A read filter only.
                   required:
                     - enabled
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
