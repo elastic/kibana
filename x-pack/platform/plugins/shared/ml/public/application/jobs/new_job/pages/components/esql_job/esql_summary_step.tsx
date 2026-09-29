@@ -18,9 +18,30 @@ const describeDetectorRow = (detector: EsqlDetectorConfig): string => {
   const base = describeDetector({ functionName: detector.function, field: detector.field });
   const parts: string[] = [];
 
-  if (detector.byField) parts.push(`by ${detector.byField}`);
-  if (detector.overField) parts.push(`over ${detector.overField}`);
-  if (detector.partitionField) parts.push(`partition ${detector.partitionField}`);
+  if (detector.byField) {
+    parts.push(
+      i18n.translate('xpack.ml.esqlJob.summary.byFieldFragment', {
+        defaultMessage: 'by {field}',
+        values: { field: detector.byField },
+      })
+    );
+  }
+  if (detector.overField) {
+    parts.push(
+      i18n.translate('xpack.ml.esqlJob.summary.overFieldFragment', {
+        defaultMessage: 'over {field}',
+        values: { field: detector.overField },
+      })
+    );
+  }
+  if (detector.partitionField) {
+    parts.push(
+      i18n.translate('xpack.ml.esqlJob.summary.partitionFieldFragment', {
+        defaultMessage: 'partition {field}',
+        values: { field: detector.partitionField },
+      })
+    );
+  }
 
   return parts.length === 0 ? base : `${base} ${parts.join(' ')}`;
 };
