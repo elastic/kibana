@@ -8,7 +8,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { TimelineEventType } from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { useConversation } from '../../../../hooks/use_conversation';
 import { useCurrentUser } from '../../../../hooks/use_current_user';
@@ -38,18 +37,10 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
   const { currentUser } = useCurrentUser();
   const inviteRef = useRef<HTMLButtonElement>(null);
 
-  const serverVote = useMemo(() => {
-    let vote: 'up' | 'down' | null = null;
-    for (const event of conversation?.events ?? []) {
-      if (event.type === TimelineEventType.roundFeedback) {
-        const data = event.data as { round_id: string; vote: 'up' | 'down' | null } | null;
-        if (data?.round_id === roundId) {
-          vote = data.vote;
-        }
-      }
-    }
-    return vote;
-  }, [conversation?.events, roundId]);
+  const serverVote = useMemo(
+    () => conversation?.feedback?.[roundId]?.vote ?? null,
+    [conversation?.feedback, roundId]
+  );
 
   const {
     vote,

@@ -884,32 +884,41 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access: 'owner',
       fields: (current) => {
-        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
+        const round = current.rounds.find((r) => r.id === roundId);
 
-        if (roundIndex === -1) {
+        if (!round) {
           throw createConversationNotFoundError({ conversationId });
         }
 
-        const round = current.rounds[roundIndex];
-        const { feedback: _removed, ...roundWithoutFeedback } = round;
+        const existing = current.feedback ?? {};
 
-        const updatedRound =
-          feedback.vote === null
-            ? roundWithoutFeedback
-            : {
-                ...round,
-                feedback: {
-                  vote: feedback.vote,
-                  chips: feedback.chips ?? [],
-                  comment: feedback.comment ?? '',
-                  submitted_at: new Date().toISOString(),
-                  connector_id: round.model_usage?.connector_id,
-                  model: round.model_usage?.model,
-                } satisfies ConversationRoundFeedback,
-              };
+        if (feedback.vote === null) {
+          const { [roundId]: _removed, ...rest } = existing;
+          // Old-format docs store feedback directly on conversation_rounds. Clearing it from the
+          // rounds array here ensures toEs doesn't write the stale vote back to conversation_rounds,
+          // which would otherwise resurface on next read via the roundsWithRefs fallback in fromEs.
+          if (round.feedback) {
+            const { feedback: _cleared, ...roundWithoutFeedback } = round;
+            return {
+              feedback: rest,
+              rounds: current.rounds.map((r) => (r.id === roundId ? roundWithoutFeedback : r)),
+            };
+          }
+          return { feedback: rest };
+        }
 
         return {
-          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+          feedback: {
+            ...existing,
+            [roundId]: {
+              vote: feedback.vote,
+              chips: feedback.chips ?? [],
+              comment: feedback.comment ?? '',
+              submitted_at: new Date().toISOString(),
+              connector_id: round.model_usage?.connector_id,
+              model: round.model_usage?.model,
+            } satisfies ConversationRoundFeedback,
+          },
         };
       },
     });

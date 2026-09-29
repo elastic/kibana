@@ -676,6 +676,8 @@ export interface Conversation {
   events?: ConversationEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
+  /** Per-round feedback submitted by the user. Keyed by round id. */
+  feedback?: Record<string, ConversationRoundFeedback>;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

@@ -64,7 +64,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { roundsToEvents, backfillRoundFeedbackEvents } from './rounds_to_events';
+import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 import { reconcileEvents } from './round_writes';
 
@@ -268,23 +268,31 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   const storedEvents = document._source!.events;
   const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
+  const storedFeedback = document._source!.feedback;
+  const roundsWithFeedback =
+    storedFeedback && Object.keys(storedFeedback).length > 0
+      ? roundsWithRefs.map((r) => {
+          const fb = storedFeedback[r.id];
+          return fb ? { ...r, feedback: fb } : r;
+        })
+      : roundsWithRefs;
+
   const conversation: NormalizedConversation = {
     ...base,
     ...perUserFlags,
-    rounds: roundsWithRefs,
+    rounds: roundsWithFeedback,
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
+    ...(storedFeedback ? { feedback: storedFeedback } : {}),
   };
 
-  const useStoredEvents = isEventsNative && storedEvents != null && storedEvents.length > 0;
-  const events = useStoredEvents ? storedEvents! : roundsToEvents(conversation);
-  const feedbackBackfill = useStoredEvents ? backfillRoundFeedbackEvents(conversation, events) : [];
+  const events =
+    isEventsNative && storedEvents != null && storedEvents.length > 0
+      ? storedEvents
+      : roundsToEvents(conversation);
 
-  return {
-    ...conversation,
-    events: feedbackBackfill.length > 0 ? [...events, ...feedbackBackfill] : events,
-  };
+  return { ...conversation, events };
 };
 
 const withPermissions = <T extends ConversationWithoutRounds>({
@@ -436,6 +444,7 @@ export const toEs = (
           schema_version: conversation.schema_version,
         }
       : {}),
+    ...(conversation.feedback ? { feedback: conversation.feedback } : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.

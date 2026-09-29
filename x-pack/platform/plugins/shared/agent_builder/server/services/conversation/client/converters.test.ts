@@ -22,7 +22,6 @@ import {
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   TimelineEventType,
   ToolOrigin,
-  feedbackEventId,
   isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import {
@@ -2312,133 +2311,6 @@ describe('conversation model converters', () => {
       expect(updated.events?.map((event) => event.id)).toEqual(['seed::user_message']);
     });
 
-    it('projects round_feedback events onto rounds across an appendEvents update', () => {
-      const base = eventsNativeStored();
-      const feedbackEvent: TimelineEvent = {
-        id: feedbackEventId('round-1'),
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-01T00:00:00.000Z',
-        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-        data: {
-          round_id: 'round-1',
-          vote: 'up' as const,
-          submitted_at: '2024-01-01T00:00:00.000Z',
-        },
-      };
-      const conversation: Conversation = {
-        ...base,
-        events: [...base.events!, feedbackEvent],
-      };
-
-      const appended: TimelineEvent = {
-        id: 'appended::user_message',
-        type: TimelineEventType.userMessage,
-        created_at: roundCreationDate,
-        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-        data: { message: 'follow-up question' },
-      };
-
-      const updated = updateConversation({
-        conversation,
-        update: {
-          id: conversation.id,
-          events: [...conversation.events!, appended],
-        } as Parameters<typeof updateConversation>[0]['update'] & {
-          events: TimelineEvent[];
-        },
-        space: 'space',
-        updateDate: new Date(updateDate),
-      });
-
-      const round = updated.rounds?.find((r) => r.id === 'round-1');
-      expect(round?.feedback).toEqual({ vote: 'up', submitted_at: '2024-01-01T00:00:00.000Z' });
-    });
-
-    it('uses last-event-wins when multiple round_feedback events exist for the same round', () => {
-      const base = eventsNativeStored();
-      const firstVote: TimelineEvent = {
-        id: 'feedback-vote-1',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-01T00:00:00.000Z',
-        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-        data: {
-          round_id: 'round-1',
-          vote: 'up' as const,
-          submitted_at: '2024-01-01T00:00:00.000Z',
-        },
-      };
-      const secondVote: TimelineEvent = {
-        id: 'feedback-vote-2',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-02T00:00:00.000Z',
-        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-        data: {
-          round_id: 'round-1',
-          vote: 'down' as const,
-          submitted_at: '2024-01-02T00:00:00.000Z',
-        },
-      };
-      const conversation: Conversation = {
-        ...base,
-        events: [...base.events!, firstVote, secondVote],
-      };
-
-      const updated = updateConversation({
-        conversation,
-        update: {
-          id: conversation.id,
-          events: conversation.events!,
-        } as Parameters<typeof updateConversation>[0]['update'] & {
-          events: TimelineEvent[];
-        },
-        space: 'space',
-        updateDate: new Date(updateDate),
-      });
-
-      const round = updated.rounds?.find((r) => r.id === 'round-1');
-      expect(round?.feedback?.vote).toBe('down');
-    });
-
-    it('clears round.feedback when the last round_feedback event is a null-vote tombstone', () => {
-      const base = eventsNativeStored();
-      const vote: TimelineEvent = {
-        id: 'feedback-vote-1',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-01T00:00:00.000Z',
-        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-        data: {
-          round_id: 'round-1',
-          vote: 'up' as const,
-          submitted_at: '2024-01-01T00:00:00.000Z',
-        },
-      };
-      const tombstone: TimelineEvent = {
-        id: 'feedback-retract-1',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-02T00:00:00.000Z',
-        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-        data: { round_id: 'round-1', vote: null, submitted_at: '2024-01-02T00:00:00.000Z' },
-      };
-      const conversation: Conversation = {
-        ...base,
-        events: [...base.events!, vote, tombstone],
-      };
-
-      const updated = updateConversation({
-        conversation,
-        update: {
-          id: conversation.id,
-          events: conversation.events!,
-        } as Parameters<typeof updateConversation>[0]['update'] & {
-          events: TimelineEvent[];
-        },
-        space: 'space',
-        updateDate: new Date(updateDate),
-      });
-
-      const round = updated.rounds?.find((r) => r.id === 'round-1');
-      expect(round?.feedback).toBeUndefined();
-    });
 
     it('keeps events-native docs stamped with the native marker on update', () => {
       const conversation = eventsNativeStored();
@@ -2481,14 +2353,14 @@ describe('conversation model converters', () => {
 
   describe('metadata, template_id, and template_version round-trips', () => {
     describe('fromEs', () => {
-      it('backfills round_feedback events for events-native docs that have feedback only in conversation_rounds', () => {
+      it('applies conversation.feedback map to populate round.feedback on read', () => {
         const doc: ConversationDocument = {
-          _id: 'conv-backfill',
+          _id: 'conv-feedback-map',
           _seq_no: 1,
           _primary_term: 1,
           _source: {
             agent_id: 'agent_id',
-            title: 'Backfill test',
+            title: 'Feedback map test',
             user_id: 'user_id',
             user_name: 'user_name',
             space: 'space',
@@ -2504,15 +2376,16 @@ describe('conversation model converters', () => {
                 time_to_first_token: 10,
                 time_to_last_token: 50,
                 model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 5, output_tokens: 5 },
-                feedback: {
-                  vote: 'up',
-                  chips: [],
-                  comment: '',
-                  submitted_at: '2025-01-01T00:00:00.000Z',
-                },
               },
             ],
-            // stored events have no round_feedback event
+            feedback: {
+              'round-1': {
+                vote: 'up',
+                chips: [],
+                comment: '',
+                submitted_at: '2025-01-01T00:00:00.000Z',
+              },
+            },
             events: [
               {
                 id: 'round-1::user_message',
@@ -2529,35 +2402,24 @@ describe('conversation model converters', () => {
 
         const result = fromEs(doc, requestingUser);
 
-        const backfilledEvent = result.events?.find(
-          (e) => e.type === TimelineEventType.roundFeedback
-        );
-        expect(backfilledEvent).toBeDefined();
-        expect((backfilledEvent!.data as { round_id: string; vote: string }).round_id).toBe(
-          'round-1'
-        );
-        expect((backfilledEvent!.data as { round_id: string; vote: string }).vote).toBe('up');
+        const round = result.rounds.find((r) => r.id === 'round-1');
+        expect(round?.feedback).toEqual({
+          vote: 'up',
+          chips: [],
+          comment: '',
+          submitted_at: '2025-01-01T00:00:00.000Z',
+        });
+        expect(result.feedback).toEqual({ 'round-1': round?.feedback });
       });
 
-      it('does not backfill when a round_feedback event already exists for the round', () => {
-        const existingFeedbackEvent: TimelineEvent = {
-          id: 'existing-feedback-uuid',
-          type: TimelineEventType.roundFeedback,
-          created_at: '2025-06-01T00:00:00.000Z',
-          actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-          data: {
-            round_id: 'round-1',
-            vote: 'down' as const,
-            submitted_at: '2025-06-01T00:00:00.000Z',
-          },
-        };
+      it('falls back to round.feedback from conversation_rounds for old docs without feedback map', () => {
         const doc: ConversationDocument = {
-          _id: 'conv-no-backfill',
+          _id: 'conv-legacy-feedback',
           _seq_no: 1,
           _primary_term: 1,
           _source: {
             agent_id: 'agent_id',
-            title: 'No-backfill test',
+            title: 'Legacy feedback test',
             user_id: 'user_id',
             user_name: 'user_name',
             space: 'space',
@@ -2574,7 +2436,7 @@ describe('conversation model converters', () => {
                 time_to_last_token: 50,
                 model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 5, output_tokens: 5 },
                 feedback: {
-                  vote: 'up',
+                  vote: 'down',
                   chips: [],
                   comment: '',
                   submitted_at: '2025-01-01T00:00:00.000Z',
@@ -2589,7 +2451,6 @@ describe('conversation model converters', () => {
                 actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
                 data: { message: 'q' },
               },
-              existingFeedbackEvent,
             ],
             created_at: creationDate,
             updated_at: updateDate,
@@ -2598,11 +2459,8 @@ describe('conversation model converters', () => {
 
         const result = fromEs(doc, requestingUser);
 
-        const feedbackEvents = result.events?.filter(
-          (e) => e.type === TimelineEventType.roundFeedback
-        );
-        expect(feedbackEvents).toHaveLength(1);
-        expect(feedbackEvents![0].id).toBe('existing-feedback-uuid');
+        const round = result.rounds.find((r) => r.id === 'round-1');
+        expect(round?.feedback?.vote).toBe('down');
       });
 
       it('deserializes metadata, template_id, and template_version when present in the document', () => {

@@ -1755,25 +1755,36 @@ describe('ConversationClient', () => {
           if_seq_no: 1,
           if_primary_term: 1,
           document: expect.objectContaining({
-            conversation_rounds: [
-              expect.objectContaining({
-                id: 'round-1',
-                feedback: expect.objectContaining({
-                  vote: 'up',
-                  chips: ['useful'],
-                  comment: 'great answer',
-                  connector_id: 'connector-abc',
-                  model: 'claude-4.6-sonnet',
-                }),
+            feedback: expect.objectContaining({
+              'round-1': expect.objectContaining({
+                vote: 'up',
+                chips: ['useful'],
+                comment: 'great answer',
+                connector_id: 'connector-abc',
+                model: 'claude-4.6-sonnet',
               }),
-            ],
+            }),
           }),
         })
       );
     });
 
-    it('removes the feedback sub-object entirely on retract (vote: null)', async () => {
-      const roundWithFeedback = {
+    it('removes the round key from conversation.feedback on retract (vote: null)', async () => {
+      const docWithFeedback = createConversationDocument({ rounds: [round] });
+      docWithFeedback._source!.feedback = {
+        'round-1': { vote: 'up', chips: [], comment: '', submitted_at: '2025-01-01T00:00:00.000Z' },
+      };
+      mockGetDocumentResponse(docWithFeedback);
+
+      await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
+
+      const persistedDoc = mockEsClient.index.mock.calls[0][0].document as Record<string, unknown>;
+      const feedbackMap = persistedDoc.feedback as Record<string, unknown> | undefined;
+      expect(feedbackMap?.['round-1']).toBeUndefined();
+    });
+
+    it('clears old-format round.feedback from conversation_rounds on retract', async () => {
+      const roundWithOldFeedback = {
         ...round,
         feedback: {
           vote: 'up' as const,
@@ -1782,12 +1793,13 @@ describe('ConversationClient', () => {
           submitted_at: '2025-01-01T00:00:00.000Z',
         },
       };
-      mockGetDocumentResponse(createConversationDocument({ rounds: [roundWithFeedback] }));
+      // Doc has feedback only on conversation_rounds, no top-level feedback map
+      mockGetDocumentResponse(createConversationDocument({ rounds: [roundWithOldFeedback] }));
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
-      const persistedRounds = mockEsClient.index.mock.calls[0][0].document
-        .conversation_rounds as Array<Record<string, unknown>>;
+      const persistedDoc = mockEsClient.index.mock.calls[0][0].document as Record<string, unknown>;
+      const persistedRounds = persistedDoc.conversation_rounds as Array<Record<string, unknown>>;
       expect(persistedRounds[0]).not.toHaveProperty('feedback');
     });
 
