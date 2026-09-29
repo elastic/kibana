@@ -43819,8 +43819,7 @@ paths:
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                 batchSize:
                   minimum: 1
                   type: number
