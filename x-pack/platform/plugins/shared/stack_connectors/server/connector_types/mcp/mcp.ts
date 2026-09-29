@@ -166,9 +166,14 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     });
   }
 
+  /**
+   * Runs `fn` against the pooled client. With `redactToolError`, tool-level failures (which embed
+   * the tool arguments in their message) are logged without the error message.
+   */
   private async withPooledClient<T>(
     operation: string,
-    fn: (client: McpClient) => Promise<T>
+    fn: (client: McpClient) => Promise<T>,
+    { redactToolError = false }: { redactToolError?: boolean } = {}
   ): Promise<T> {
     const key = this.getLeaseKey();
     const { promise, release } = this.pool.acquire(
@@ -182,19 +187,26 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     } catch (err) {
       // Release first: invalidate waits for every active use, including this one, to finish.
       release();
-      if (clientTypes.mcp.shouldInvalidateOnError?.(err)) {
+      const isConnectionError = clientTypes.mcp.shouldInvalidateOnError?.(err) ?? false;
+      if (isConnectionError) {
         await this.pool.invalidate(key, promise);
       }
 
-      this.throwClassified(operation, err);
+      this.throwClassified(operation, err, { redact: redactToolError && !isConnectionError });
     } finally {
       release();
     }
   }
 
-  private throwClassified(operation: string, err: unknown): never {
+  private throwClassified(
+    operation: string,
+    err: unknown,
+    { redact = false }: { redact?: boolean } = {}
+  ): never {
     const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
-    const message = `MCP ${operation} failed: ${err instanceof Error ? err.message : String(err)}`;
+    const detail = err instanceof Error ? err.message : String(err);
+    const message =
+      redact && !isUserError ? `MCP ${operation} failed` : `MCP ${operation} failed: ${detail}`;
     if (isUserError) {
       this.logger.warn(message);
     } else {
@@ -280,11 +292,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   ): Promise<CallToolResponse> {
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-    const result = await this.withPooledClient(`callTool(${params.name})`, (client) =>
-      client.callTool({
-        name: params.name,
-        arguments: params.arguments,
-      })
+    const result = await this.withPooledClient(
+      `callTool(${params.name})`,
+      (client) => client.callTool({ name: params.name, arguments: params.arguments }),
+      { redactToolError: true }
     );
     this.logger.debug(`Successfully called tool: ${params.name}`);
     return result;

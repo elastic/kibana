@@ -504,9 +504,10 @@ describe('McpConnector', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
 
-    it('logs non-user failures at error', async () => {
+    it('logs non-user connection failures at error with the message', async () => {
       fakeClient.callTool.mockRejectedValue(new Error('socket closed'));
       mcpClientType.isUserError.mockReturnValue(false);
+      mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
       const connector = createConnector();
 
       try {
@@ -517,8 +518,29 @@ describe('McpConnector', () => {
       }
 
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('MCP callTool(test-tool) failed:')
+        expect.stringContaining('MCP callTool(test-tool) failed: socket closed')
       );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('logs tool-level failures without the error message', async () => {
+      const toolError = new Error(
+        `Error calling tool 'test-tool' with arguments '${JSON.stringify({ token: 's3cr3t' })}'`
+      );
+      fakeClient.callTool.mockRejectedValue(toolError);
+      mcpClientType.isUserError.mockReturnValue(false);
+      mcpClientType.shouldInvalidateOnError.mockReturnValue(false);
+      const connector = createConnector();
+
+      await expect(
+        connector.callTool(
+          { name: 'test-tool', arguments: { token: 's3cr3t' } },
+          connectorUsageCollector
+        )
+      ).rejects.toBe(toolError);
+
+      expect(logger.error).toHaveBeenCalledWith('MCP callTool(test-tool) failed');
+      expect(logger.error).not.toHaveBeenCalledWith(expect.stringContaining('s3cr3t'));
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
