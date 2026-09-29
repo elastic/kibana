@@ -27,6 +27,7 @@ const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();
 const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
+const onAnnotationClick = jest.fn();
 
 const dataWithoutFormats: Datatable = {
   type: 'datatable',
@@ -73,6 +74,7 @@ const defaultProps: Omit<XYChartRenderProps, 'args'> = {
   onClickMultiValue,
   layerCellValueActions,
   onSelectRange,
+  onAnnotationClick,
   syncColors: false,
   syncTooltips: false,
   syncCursor: true,

@@ -304,12 +304,11 @@ describe('stepStepSelectAgentPolicy', () => {
       await act(async () => {
         result.getByTestId('comboBoxToggleListButton').click();
       });
-      expect(
-        result.getByText('Policy 2').closest('[data-test-subj="agentPolicyMultiItem"]')
-      ).toHaveAttribute('aria-disabled', 'true');
-      expect(
-        result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFill"]')
-      ).toBeInTheDocument();
+      const policy2Option = result
+        .getByText('Policy 2')
+        .closest('[data-test-subj="agentPolicyMultiItem"]');
+      expect(policy2Option).toHaveAttribute('aria-disabled', 'true');
+      expect(policy2Option?.querySelector('[data-euiicon-type="warningFill"]')).toBeInTheDocument();
     });
   });
 });

@@ -1,5 +1,5 @@
 {
-  "sha1": "4294f06fad2d7741f4162017d7f313a19d3b1e27",
+  "sha1": "aec26141c028051ff301ca943a98ff8fcd7d9988",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -143,8 +143,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_restore.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 56,
+        "column": 29
       }
     },
     {
@@ -156,7 +156,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_restore.spec.ts",
-        "line": 79,
+        "line": 78,
         "column": 56
       }
     },
@@ -169,7 +169,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_restore.spec.ts",
-        "line": 112,
+        "line": 111,
         "column": 29
       }
     },
@@ -195,8 +195,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_session.spec.ts",
-        "line": 47,
-        "column": 15
+        "line": 45,
+        "column": 7
       }
     }
   ]

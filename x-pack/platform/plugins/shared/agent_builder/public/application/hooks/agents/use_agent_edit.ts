@@ -8,9 +8,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
-  type AgentDefinition,
+  type AgentAccessControl,
   type AgentAccessControlEntry,
+  type AgentDefinition,
   AgentAccessControlMode,
+  getAccessControlEntryKey,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
@@ -50,15 +52,16 @@ const emptyState = (): AgentEditState => ({
     workflow_ids: [],
     post_execution_workflow_ids: [],
     plugin_ids: [],
+    connector_ids: [],
     subagent_ids: [],
   },
 });
 
-const accessControlEntriesSignature = (entries: AgentAccessControlEntry[] = []): string =>
+const accessControlEntriesSignature = (entries: AgentAccessControl['entries'] = []): string =>
   JSON.stringify(
     [...entries]
-      .map((entry) => ({ type: entry.type, name: entry.name, role: entry.role }))
-      .sort((a, b) => `${a.type}:${a.name}`.localeCompare(`${b.type}:${b.name}`))
+      .map((entry) => ({ key: getAccessControlEntryKey(entry), role: entry.role }))
+      .sort((a, b) => a.key.localeCompare(b.key))
   );
 
 export function useAgentEdit({
@@ -156,7 +159,9 @@ export function useAgentEdit({
             accessControlEntriesSignature(nextEntries);
 
         if (shouldUpdateAccessControl) {
-          await updateAccessControlMutation.mutateAsync(nextEntries);
+          await updateAccessControlMutation.mutateAsync(
+            nextEntries.map(({ added_at, ...entry }) => entry)
+          );
         }
 
         queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });

@@ -74,13 +74,6 @@ interface ArtifactListPageBaseProps {
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
   /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
   labels: ArtifactListPageLabels;
-  /**
-   * Define a callback to handle the submission of the form data instead of the internal one in
-   * `ArtifactListPage` being used.
-   * @param item
-   * @param mode
-   */
-  onFormSubmit?: Required<ArtifactFlyoutProps>['submitHandler'];
   /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
@@ -109,7 +102,15 @@ interface ArtifactListPageWithSimpleTableProps {
    *
    * Cannot be used in combination with `CardDecorator`.
    */
-  showAsSimpleTable?: boolean;
+  showAsSimpleTable: true;
+  /**
+   * When true, the simple table shows an Enabled column for toggling artifacts.
+   * Only applicable when `showAsSimpleTable` is true.
+   *
+   * Important: this just a UI flag - ManifestManager must also support enabling/disabling
+   * the given artifact type.
+   */
+  showEnabledColumn?: boolean;
 }
 
 export type ArtifactListPageProps = ArtifactListPageBaseProps &
@@ -129,7 +130,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     labels: _labels = {},
     secondaryPageInfo,
     callout,
-    onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
     allowCardEditAction = true,
@@ -138,6 +138,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     CardDecorator,
     additionalActions,
     showAsSimpleTable = false,
+    showEnabledColumn = false,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -320,6 +321,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForEdit(undefined);
     }, []);
 
+    const handleEnabledChangeSuccess = useCallback(async () => {
+      if (isMounted()) {
+        await refetchListData();
+      }
+    }, [isMounted, refetchListData]);
+
     const handleExport = useCallback(
       () =>
         exportExceptionList({
@@ -439,8 +446,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             FormComponent={ArtifactFormComponent}
             labels={labels}
             size={flyoutSize}
-            submitHandler={onFormSubmit}
             data-test-subj={getTestId('flyout')}
+            canCreateArtifactAsDisabled={showEnabledColumn}
           />
         )}
 
@@ -556,6 +563,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 error={(error?.body as ServerApiError)?.message || error?.message}
                 allowCardEditAction={allowCardEditAction}
                 allowCardDeleteAction={allowCardDeleteAction}
+                showEnabledColumn={showEnabledColumn}
+                apiClient={apiClient}
+                onEnabledChangeSuccess={handleEnabledChangeSuccess}
                 sortField={sortField}
                 sortOrder={sortOrder}
                 sortableFields={SORTABLE_FIELDS}

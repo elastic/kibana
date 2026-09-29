@@ -13,10 +13,9 @@ import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { extractAndAddObservables } from './extract_observables';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
@@ -38,7 +37,6 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
 
   try {
     const query = decodeWithExcessOrThrow(UnifiedAttachmentPayloadRt)(comment);
-    decodeCommentRequestV2(query, unifiedAttachmentTypeRegistry);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
@@ -53,7 +51,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       ],
     });
 
-    validateRegisteredAttachments({
+    validateUnifiedAttachments({
       query,
       unifiedAttachmentTypeRegistry,
     });

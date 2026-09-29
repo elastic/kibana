@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { groupingModeSchema, MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
+import {
+  groupingModeSchema,
+  MATCHER_CONTEXT_FIELDS,
+  POLICY_MATCHER_TAGS_MAX,
+} from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
@@ -18,6 +22,7 @@ import {
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
   generateStateTransitionDoc,
+  getDescribedVariants,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
   generateSeverityDoc,
@@ -269,6 +274,43 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  describe('getDescribedVariants', () => {
+    it('returns each discriminator value with its variant .describe() copy', () => {
+      const schema = z.discriminatedUnion('strategy', [
+        z.object({ strategy: z.literal('manual') }).describe('Never recovers automatically.'),
+        z
+          .object({ strategy: z.literal('query'), query: z.string() })
+          .describe('Recovers when the query returns the group.'),
+      ]);
+
+      expect(getDescribedVariants(schema, 'strategy', 'exampleRecoverySchema')).toEqual([
+        { value: 'manual', description: 'Never recovers automatically.' },
+        { value: 'query', description: 'Recovers when the query returns the group.' },
+      ]);
+    });
+
+    it('throws when a variant is missing .describe()', () => {
+      const schema = z.discriminatedUnion('strategy', [
+        z.object({ strategy: z.literal('manual') }).describe('Never recovers automatically.'),
+        z.object({ strategy: z.literal('query'), query: z.string() }),
+      ]);
+
+      expect(() => getDescribedVariants(schema, 'strategy', 'exampleRecoverySchema')).toThrow(
+        /Missing \.describe\(\) on exampleRecoverySchema variant\(s\): query/
+      );
+    });
+
+    it('throws when the schema is not a union', () => {
+      expect(() =>
+        getDescribedVariants(
+          z.object({ strategy: z.string() }),
+          'strategy',
+          'exampleRecoverySchema'
+        )
+      ).toThrow(/exampleRecoverySchema is not a discriminated union/);
+    });
+  });
+
   describe('generateRuleSchemaDoc', () => {
     it('matches the snapshot', () => {
       expect(generateRuleSchemaDoc()).toMatchSnapshot();
@@ -293,10 +335,24 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('validate');
     });
 
-    it('includes pending_count and recovering_count fields', () => {
+    it('expands the pending and recovering state transition phases into their own tables', () => {
       const doc = generateRuleOperationsDoc();
-      expect(doc).toContain('pending_count');
-      expect(doc).toContain('recovering_count');
+      expect(doc).toContain('##### `pending`');
+      expect(doc).toContain('##### `recovering`');
+      expect(doc).toContain(
+        '| `count` | integer | optional | Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
+      );
+      expect(doc).toContain(
+        '| `count` | integer | optional | Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
+      );
+    });
+
+    it('expands the query object so `base` and `breach` stay visible', () => {
+      const doc = generateRuleOperationsDoc();
+      expect(doc).toContain('##### `query`');
+      expect(doc).toContain(
+        '| `breach` | object | optional | Optional ES\\|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`. |'
+      );
     });
 
     it('describes each operation in terms of the user goal it solves', () => {
@@ -388,27 +444,46 @@ describe('schema_to_skill_docs', () => {
     });
 
     it('renders a referenced discriminated union as its variants', () => {
+      const recoveryVariants =
+        '{ strategy: "no_breach", ... } \\| { strategy: "condition", ... } \\| { strategy: "query", ... } \\| { strategy: "manual", ... }';
       expect(generateRuleSchemaDoc()).toContain(
-        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+        `| \`recovery\` | ${recoveryVariants} | optional |`
       );
       expect(generateRuleOperationsDoc()).toContain(
-        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+        `| \`recovery\` | ${recoveryVariants} | optional |`
       );
     });
 
     it('expands the variant tables of a referenced union', () => {
       const doc = generateRuleSchemaDoc();
-      expect(doc).toContain('## Query Formats');
-      expect(doc).toContain('#### `format: "composed"`');
-      expect(doc).toContain('#### `format: "standalone"`');
+      expect(doc).toContain('## Recovery Strategies');
+      expect(doc).toContain('#### `strategy: "no_breach"`');
+      expect(doc).toContain('#### `strategy: "condition"`');
+      expect(doc).toContain('#### `strategy: "query"`');
+      expect(doc).toContain('#### `strategy: "manual"`');
+      expect(doc).toContain('## No-Data Strategies');
+      expect(doc).toContain('#### `strategy: "ignore"`');
+      expect(doc).toContain('#### `strategy: "keep_last"`');
+      expect(doc).toContain('#### `strategy: "resolve"`');
+      expect(doc).toContain('#### `strategy: "alert"`');
+    });
+
+    it('renders the single query shape as an object with its own field table', () => {
+      const doc = generateRuleSchemaDoc();
       expect(doc).toContain(
-        '| `base` | string | required | Base ES\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |'
+        '| `query` | object | required | ES\\|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it. |'
       );
+      expect(doc).toContain('## Query');
+      expect(doc).toContain(
+        '| `base` | string | required | ES\\|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`. (min length: 1, max length: 10000) |'
+      );
+      expect(doc).not.toContain('format: "composed"');
+      expect(doc).not.toContain('format: "standalone"');
     });
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. (max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
@@ -507,9 +582,36 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  describe('generateStateTransitionDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateStateTransitionDoc()).toMatchSnapshot();
+    });
+
+    it('documents the count, timeframe, and operator of each phase', () => {
+      const doc = generateStateTransitionDoc();
+      for (const phase of ['pending', 'recovering']) {
+        expect(doc).toContain(`- \`${phase}\` —`);
+        for (const field of ['count', 'timeframe', 'operator']) {
+          expect(doc).toContain(`  - \`${phase}.${field}\` —`);
+        }
+      }
+    });
+  });
+
   describe('generateRecoveryStrategyDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateRecoveryStrategyDoc()).toMatchSnapshot();
+    });
+
+    it('documents every recovery strategy', () => {
+      const doc = generateRecoveryStrategyDoc();
+      for (const strategy of ['no_breach', 'condition', 'query', 'manual']) {
+        expect(doc).toContain(`- \`${strategy}\`:`);
+      }
+    });
+
+    it('states that the condition strategy requires a breach segment', () => {
+      expect(generateRecoveryStrategyDoc()).toContain('requires `query.breach`');
     });
 
     it('links sibling references without a ./references/ prefix', () => {
@@ -523,6 +625,13 @@ describe('schema_to_skill_docs', () => {
   describe('generateNoDataStrategyDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateNoDataStrategyDoc()).toMatchSnapshot();
+    });
+
+    it('documents every no-data strategy, including alert', () => {
+      const doc = generateNoDataStrategyDoc();
+      for (const strategy of ['ignore', 'keep_last', 'resolve', 'alert']) {
+        expect(doc).toContain(`| \`${strategy}\` |`);
+      }
     });
 
     it('links sibling references without a ./references/ prefix', () => {
@@ -579,6 +688,42 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`active`');
       expect(doc).toContain('`critical`');
     });
+
+    it('documents the matcher shape with tags and expression fields', () => {
+      const doc = generateMatcherContextDoc();
+      // The intro code block shows `matcher: { tags?: ..., expression?: ... }`
+      expect(doc).toContain('matcher.tags');
+      expect(doc).toContain('expression');
+      expect(doc).toContain('at least one');
+    });
+
+    it('explains AND combination and catch-all semantics', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('AND');
+      expect(doc).toContain('catch-all');
+    });
+
+    it('documents that set_matcher replaces the whole matcher', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('set_matcher');
+      expect(doc).toContain('replaces');
+    });
+
+    it('states that rule.id and rule.tags are not available as KQL expression fields', () => {
+      const doc = generateMatcherContextDoc();
+      // The doc mentions rule.id/rule.tags explicitly to say they are excluded;
+      // confirm they appear in an exclusion context and not as usable KQL operators.
+      expect(doc).toContain('rule.id');
+      expect(doc).toContain('**not** available');
+      // No KQL filter syntax using rule.* (colon = field: value syntax in KQL)
+      expect(doc).not.toContain('rule.id:');
+      expect(doc).not.toContain('rule.tags:');
+    });
+
+    it('renders the max-tags limit from the schema constant', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain(`Max ${POLICY_MATCHER_TAGS_MAX} tags`);
+    });
   });
 
   describe('generateThrottleGroupingCompatibilityDoc', () => {
@@ -632,15 +777,26 @@ describe('schema_to_skill_docs', () => {
       expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
     });
 
-    it('scopes with rule.id and defers shared policies to the multi-rule reference', () => {
+    it('instructs the link-tag flow and defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
+      expect(doc).toContain('manage_rule');
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
-      expect(doc).toContain('rule.id:');
+      expect(doc).toContain('set_matcher');
+      expect(doc).toContain('notify-');
+      expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
       expect(doc).toContain('(./action-policy-multi-rule.md)');
       expect(doc).not.toContain('./references/');
+    });
+
+    it('never tells the agent to omit the matcher or leave it as catch-all', () => {
+      const doc = generateSingleRuleActionPolicyDoc();
+      // Historically the doc said "omit (leave as catch-all)" — that is wrong
+      expect(doc).not.toContain('leave as catch-all');
+      expect(doc).not.toContain('omit set_matcher');
+      expect(doc).not.toContain('omit `set_matcher`');
     });
   });
 
@@ -653,7 +809,9 @@ describe('schema_to_skill_docs', () => {
       const doc = generateMultiRuleActionPolicyDoc();
       expect(doc).toContain('# Multi-rule Action Policies');
       expect(doc).toContain('Catch-all');
-      expect(doc).toContain('rule.tags');
+      expect(doc).not.toContain('rule.tags');
+      expect(doc).not.toContain('rule.id');
+      expect(doc).toContain('matcher: { tags: [');
       expect(doc).toContain('(./action-policy-matchers.md)');
       expect(doc).toContain('(./action-policy-single-rule.md)');
       expect(doc).not.toContain('./references/');

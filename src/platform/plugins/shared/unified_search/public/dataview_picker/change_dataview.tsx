@@ -34,7 +34,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
-import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
 
@@ -65,9 +64,12 @@ const dataViewLabelGhostCss = css`
   white-space: nowrap;
 `;
 
+// Disabled form controls set an inherited `-webkit-text-fill-color`, which would otherwise
+// override the transparent color EuiTextTruncate uses to hide its full-text overlay.
 const dataViewLabelVisibleCss = css`
   position: absolute;
   inset: 0;
+  -webkit-text-fill-color: currentColor;
 `;
 
 /**
@@ -183,7 +185,7 @@ export function ChangeDataView({
           css={{ maxWidth: '100%' }}
         >
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && <EuiIcon type={adhoc} color="primary" size="s" aria-hidden={true} />}
+          {isAdHocSelected && <EuiIcon type="tableTime" size="m" aria-hidden={true} />}
           <DataViewLabelTruncate text={label} />
         </EuiFlexGroup>
       </EuiFormControlButton>

@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '../queries/episodes_query';
 export interface EpisodeActionContext {
   episodes: AlertEpisode[];
   /** Optional hook for the caller to refresh their data layer after a successful execute. */
@@ -16,6 +16,11 @@ export interface EpisodeActionContext {
 export interface EpisodeActionMenuItemContext extends EpisodeActionContext {
   /** Closes the menu hosting the item, if the surface exposes a way to. */
   closeMenu?: () => void;
+}
+
+export interface EpisodeActionInlineControlContext extends EpisodeActionContext {
+  /** Disables the control, for instance while the hosting surface is still loading. */
+  isDisabled?: boolean;
 }
 
 export interface EpisodeAction {
@@ -32,4 +37,13 @@ export interface EpisodeAction {
    * the data table's bulk menu — fall back to `execute`.
    */
   renderMenuItem?: (ctx: EpisodeActionMenuItemContext) => ReactNode;
+  /**
+   * Optional renderer for surfaces that host the action as a standalone control
+   * rather than a menu entry, such as an info block in the details flyout header.
+   * The action owns both the anchor and the editing surface, so it can apply the
+   * change in place instead of routing through the modal `execute` opens.
+   */
+  renderInlineControl?: (ctx: EpisodeActionInlineControlContext) => ReactNode;
+  showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
+  disabledTooltip?: string;
 }

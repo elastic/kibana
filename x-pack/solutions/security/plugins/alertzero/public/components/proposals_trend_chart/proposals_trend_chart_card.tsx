@@ -52,7 +52,8 @@ export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = (
   const colorMap: Record<TrendChartPanelColor, string> = {
     danger: euiTheme.colors.vis.euiColorVisDanger0,
     warning: euiTheme.colors.vis.euiColorVisWarning0,
-    primary: euiTheme.colors.vis.euiColorVisBase0,
+    // euiColorVis2 = #61A2FF (blue). euiColorVisBase0 is not blue; euiColorVis0 is teal (#16C5C0).
+    primary: euiTheme.colors.vis.euiColorVis2,
   };
   const resolvedColor = colorMap[color];
   const sparklineHeight = euiTheme.size[SPARKLINE_HEIGHT_SIZE];

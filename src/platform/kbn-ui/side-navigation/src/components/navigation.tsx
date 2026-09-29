@@ -11,7 +11,7 @@ import React, { useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiButton, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -145,6 +145,13 @@ export const Navigation = ({
       <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
     ) : null;
 
+  const handleItemClick = (item: MenuItem | SecondaryMenuItem, closePopover?: () => void) => {
+    onItemClick?.(item);
+    if ('isExternal' in item && item.isExternal) return;
+    closePopover?.();
+    focusMainContent();
+  };
+
   return (
     <div
       css={navigationWrapperStyles}
@@ -181,7 +188,7 @@ export const Navigation = ({
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
                         isNew={getIsNewPrimary(item.id)}
-                        onClick={() => onItemClick?.(item)}
+                        onClick={() => handleItemClick(item)}
                         {...itemProps}
                       >
                         {item.label}
@@ -214,12 +221,7 @@ export const Navigation = ({
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
                                     isNew={getIsNewSecondary(subItem.id)}
-                                    onClick={() => {
-                                      onItemClick?.(subItem);
-                                      if (subItem.href) {
-                                        closePopover();
-                                      }
-                                    }}
+                                    onClick={() => handleItemClick(subItem, closePopover)}
                                     testSubjPrefix={popoverItemPrefix}
                                     {...subItem}
                                   >
@@ -277,6 +279,26 @@ export const Navigation = ({
                         title={i18n.translate('kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle', {
                           defaultMessage: 'More',
                         })}
+                        footer={
+                          onCustomizeNavigation && (
+                            <EuiButton
+                              iconType="controls"
+                              color="text"
+                              size="s"
+                              fullWidth
+                              onClick={() => {
+                                closePopover();
+                                onCustomizeNavigation();
+                              }}
+                              data-test-subj="customizeNavigationMoreMenuButton"
+                            >
+                              <FormattedMessage
+                                id="kbnUI.sideNavigation.customizeNavigationButton"
+                                defaultMessage="Customize navigation"
+                              />
+                            </EuiButton>
+                          )
+                        }
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
                           <>
@@ -304,76 +326,47 @@ export const Navigation = ({
                                     isHighlighted={item.id === visuallyActivePageId}
                                     isNew={getIsNewPrimary(item.id)}
                                     hasSubmenu={hasSubmenu}
-                                    onClick={() => {
-                                      onItemClick?.(item);
-                                      if (!hasSubmenu) {
-                                        closePopover();
-                                        focusMainContent();
-                                      }
-                                    }}
+                                    onClick={() => handleItemClick(item, closePopover)}
                                     {...itemProps}
                                   >
                                     {item.label}
                                   </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
                                 );
                               })}
-                              {onCustomizeNavigation && (
-                                <>
-                                  <EuiSpacer size="s" />
-                                  <EuiButton
-                                    iconType="controls"
-                                    color="text"
-                                    size="s"
-                                    onClick={() => {
-                                      closePopover();
-                                      onCustomizeNavigation();
-                                    }}
-                                    data-test-subj="customizeNavigationMoreMenuButton"
-                                  >
-                                    <FormattedMessage
-                                      id="kbnUI.sideNavigation.customizeNavigationButton"
-                                      defaultMessage="Customize navigation"
-                                    />
-                                  </EuiButton>
-                                </>
-                              )}
                             </SideNav.NestedSecondaryMenu.Section>
                           </>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
                       {allOverflowItems.filter(getHasMoreSubmenu).map((item) => (
-                        <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
-                          {({ panelNavigationInstructionsId }) => (
-                            <>
-                              <SideNav.NestedSecondaryMenu.Header
-                                title={item.secondaryMenuTitle ?? item.label}
-                                aria-describedby={panelNavigationInstructionsId}
-                              />
-                              {item.sections?.map((section) => (
-                                <SideNav.NestedSecondaryMenu.Section
-                                  key={section.id}
-                                  label={section.label}
-                                >
-                                  {section.items.map((subItem) => (
-                                    <SideNav.NestedSecondaryMenu.Item
-                                      key={subItem.id}
-                                      isHighlighted={subItem.id === visuallyActiveSubpageId}
-                                      isCurrent={actualActiveItemId === subItem.id}
-                                      isNew={getIsNewSecondary(subItem.id)}
-                                      onClick={() => {
-                                        onItemClick?.(subItem);
-                                        closePopover();
-                                        focusMainContent();
-                                      }}
-                                      {...subItem}
-                                    >
-                                      {subItem.label}
-                                    </SideNav.NestedSecondaryMenu.Item>
-                                  ))}
-                                </SideNav.NestedSecondaryMenu.Section>
-                              ))}
-                            </>
+                        <SideNav.NestedSecondaryMenu.Panel
+                          key={`submenu-${item.id}`}
+                          id={item.id}
+                          header={({ panelNavigationInstructionsId }) => (
+                            <SideNav.NestedSecondaryMenu.Header
+                              title={item.secondaryMenuTitle ?? item.label}
+                              aria-describedby={panelNavigationInstructionsId}
+                            />
                           )}
+                        >
+                          {item.sections?.map((section) => (
+                            <SideNav.NestedSecondaryMenu.Section
+                              key={section.id}
+                              label={section.label}
+                            >
+                              {section.items.map((subItem) => (
+                                <SideNav.NestedSecondaryMenu.Item
+                                  key={subItem.id}
+                                  isHighlighted={subItem.id === visuallyActiveSubpageId}
+                                  isCurrent={actualActiveItemId === subItem.id}
+                                  isNew={getIsNewSecondary(subItem.id)}
+                                  onClick={() => handleItemClick(subItem, closePopover)}
+                                  {...subItem}
+                                >
+                                  {subItem.label}
+                                </SideNav.NestedSecondaryMenu.Item>
+                              ))}
+                            </SideNav.NestedSecondaryMenu.Section>
+                          ))}
                         </SideNav.NestedSecondaryMenu.Panel>
                       ))}
                     </SideNav.NestedSecondaryMenu>
@@ -409,7 +402,7 @@ export const Navigation = ({
                         isCurrent={actualActiveItemId === item.id}
                         isNew={getIsNewPrimary(item.id)}
                         hasContent={getHasSubmenu(item)}
-                        onClick={() => onItemClick?.(item)}
+                        onClick={() => handleItemClick(item)}
                         {...itemProps}
                       />
                     }
@@ -440,12 +433,7 @@ export const Navigation = ({
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
                                     isNew={getIsNewSecondary(subItem.id)}
-                                    onClick={() => {
-                                      onItemClick?.(subItem);
-                                      if (subItem.href) {
-                                        closePopover();
-                                      }
-                                    }}
+                                    onClick={() => handleItemClick(subItem, closePopover)}
                                     {...subItem}
                                     testSubjPrefix={popoverFooterItemPrefix}
                                   >
@@ -496,7 +484,7 @@ export const Navigation = ({
                           isCurrent={actualActiveItemId === subItem.id}
                           isHighlighted={subItem.id === visuallyActiveSubpageId}
                           isNew={getIsNewSecondary(subItem.id)}
-                          onClick={() => onItemClick?.(subItem)}
+                          onClick={() => handleItemClick(subItem)}
                           testSubjPrefix={sidePanelItemPrefix}
                           {...subItem}
                         >

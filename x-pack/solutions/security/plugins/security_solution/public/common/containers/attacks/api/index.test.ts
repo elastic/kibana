@@ -42,6 +42,19 @@ describe('Attacks API', () => {
         version: ATTACKS_API_VERSION,
         body: JSON.stringify(query),
         signal,
+        context: undefined,
+      });
+    });
+
+    it('forwards the optional execution context to http.post', async () => {
+      const query = { query: { match_all: {} } };
+      const context = { name: 'entity-details', id: 'flyout-1' };
+      await api.searchAttacks({ query, signal, context });
+      expect(mockHttp.post).toHaveBeenCalledWith(DETECTION_ENGINE_ATTACKS_SEARCH_URL, {
+        version: ATTACKS_API_VERSION,
+        body: JSON.stringify(query),
+        signal,
+        context,
       });
     });
   });

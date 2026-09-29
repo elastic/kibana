@@ -15,7 +15,6 @@ import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mo
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createLogger = (): jest.Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
@@ -31,7 +30,9 @@ const createDeps = (
   logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
 ): ManageActionPolicyToolDeps => ({
   logger,
-  getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  getWorkflowClient: jest.fn(() => ({
+    getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  })),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
 });
 
@@ -69,6 +70,7 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
+      expect(deps.getWorkflowClient).toHaveBeenCalledWith(ctx.request);
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
       expect(ctx.attachments.update).not.toHaveBeenCalled();
       const { results } = result as {
@@ -132,12 +134,6 @@ describe('manageActionPolicyTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
-
-      // The agent-builder-assisted tag is stamped on the data persisted via update()
-      const updateCall = ctx.attachments.update.mock.calls[0][1] as {
-        data: { tags?: string[] };
-      };
-      expect(updateCall.data.tags).toContain(AGENT_BUILDER_TAG);
     });
 
     it('returns an error when creating a policy without a name', async () => {
