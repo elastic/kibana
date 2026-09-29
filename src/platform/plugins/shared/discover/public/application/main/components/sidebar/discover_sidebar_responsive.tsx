@@ -376,18 +376,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const onRemoveFieldsFromWorkspace = useCallback(
     (fields: DataViewField[]) => {
-      const fieldNames = fields.map((field) => field.name);
-
-      if (onRemoveFields) {
-        onRemoveFields(fieldNames);
-        return;
-      }
-
-      fieldNames.forEach((fieldName) => {
-        onRemoveField(fieldName);
-      });
+      onRemoveFields?.(fields.map((field) => field.name));
     },
-    [onRemoveField, onRemoveFields]
+    [onRemoveFields]
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -469,7 +460,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-            onRemoveFieldsFromWorkspace={onRemoveFieldsFromWorkspace}
+            onRemoveFieldsFromWorkspace={onRemoveFields ? onRemoveFieldsFromWorkspace : undefined}
             prependInFlyout={prependDataViewPickerForMobile}
             ref={initializeUnifiedFieldListSidebarContainerApi}
             services={services}

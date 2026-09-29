@@ -45,17 +45,24 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
+    // Single-column removal still records popularity. That behavior predates bulk removal.
+    popularizeField(dataView, columnName, dataViews, capabilities);
     onRemoveColumns([columnName]);
   }
 
-  function onRemoveColumns(columnNames: string[]) {
+  function onRemoveColumns(columnNames: string[]): string[] {
     const uniqueColumnNames = [...new Set(columnNames)];
-    uniqueColumnNames.forEach((columnName) => {
-      popularizeField(dataView, columnName, dataViews, capabilities);
-    });
+    if (uniqueColumnNames.length === 0) {
+      return [];
+    }
 
+    // Clearing many fields is not a usage signal, and popularizeField writes the data view
+    // saved object once per field. Keep that write on the single-column path only.
     const namesToRemove = new Set(uniqueColumnNames);
     const currentColumns = columns || [];
+    const removedColumnNames = uniqueColumnNames.filter((columnName) =>
+      currentColumns.includes(columnName)
+    );
     const nextColumns = currentColumns.filter((col) => !namesToRemove.has(col));
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort =
@@ -70,6 +77,7 @@ export function getStateColumnActions({
     }
 
     setAppState({ columns: nextColumns, sort: nextSort, settings: nextSettings });
+    return removedColumnNames;
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {

@@ -321,23 +321,24 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   );
 
   const onDeselectSelectedFields = useCallback(() => {
-    const fieldsToRemove = selectedFieldsState.selectedFields.filter(
+    if (!onRemoveFieldsFromWorkspace) {
+      return;
+    }
+
+    const removableSelectedFields = selectedFieldsState.selectedFields.filter(
       (field) => field.name !== '_source'
     );
 
-    if (!fieldsToRemove.length) {
+    if (removableSelectedFields.length === 0) {
       return;
     }
 
-    if (onRemoveFieldsFromWorkspace) {
-      onRemoveFieldsFromWorkspace(fieldsToRemove);
-      return;
-    }
+    onRemoveFieldsFromWorkspace(removableSelectedFields);
+  }, [onRemoveFieldsFromWorkspace, selectedFieldsState.selectedFields]);
 
-    fieldsToRemove.forEach((field) => {
-      onRemoveFieldFromWorkspace?.(field);
-    });
-  }, [onRemoveFieldFromWorkspace, onRemoveFieldsFromWorkspace, selectedFieldsState.selectedFields]);
+  const canDeselectSelectedFields =
+    Boolean(onRemoveFieldsFromWorkspace) &&
+    selectedFieldsState.selectedFields.some((field) => field.name !== '_source');
 
   if (!dataView) {
     return null;
@@ -439,7 +440,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
                 muteScreenReader={!isFieldNameSearchFocused}
-                onDeselectSelectedFields={onDeselectSelectedFields}
+                onDeselectSelectedFields={
+                  canDeselectSelectedFields ? onDeselectSelectedFields : undefined
+                }
               />
             ) : (
               <EuiFlexItem grow />

@@ -138,7 +138,11 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         </EuiNotificationBadge>
       );
 
-      if (groupName === FieldsGroupNames.SelectedFields && fieldsCount > 0) {
+      if (
+        groupName === FieldsGroupNames.SelectedFields &&
+        fieldsCount > 0 &&
+        onDeselectSelectedFields
+      ) {
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -213,7 +217,7 @@ export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerF
 export const getFieldKey = (field: FieldListItem): string =>
   `${field.name}-${field.displayName}-${field.type}`;
 
-const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick?: () => void }) => {
+const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick: () => void }) => {
   const buttonLabel = i18n.translate(
     'unifiedFieldList.fieldsAccordion.restartSelectedFieldsButtonLabel',
     {
@@ -232,7 +236,7 @@ const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick?: (
         onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
           event.preventDefault();
           event.stopPropagation();
-          onClick?.();
+          onClick();
         }}
       />
     </EuiToolTip>

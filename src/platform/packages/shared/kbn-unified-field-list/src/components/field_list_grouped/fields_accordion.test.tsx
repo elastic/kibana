@@ -152,14 +152,13 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
         label: 'Selected fields',
         fieldsCount: 2,
         paginatedFields: dataView.fields.slice(0, 2),
+        onDeselectSelectedFields: jest.fn(),
       });
 
       expect(
         screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
       ).toBeVisible();
-      expect(
-        screen.getByRole('button', { name: 'Restart selected fields' })
-      ).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Restart selected fields' })).toBeVisible();
       expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toBeVisible();
     });
 
@@ -171,6 +170,19 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
 
       expect(
         screen.queryByTestId('fieldListGroupedAvailableFields-deselectSelectedFields')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should not render when the deselect handler is missing', () => {
+      setup({
+        groupName: FieldsGroupNames.SelectedFields,
+        id: 'fieldListGroupedSelectedFields',
+        fieldsCount: 2,
+        paginatedFields: dataView.fields.slice(0, 2),
+      });
+
+      expect(
+        screen.queryByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
       ).not.toBeInTheDocument();
     });
 
@@ -189,6 +201,7 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
 
     it('should call onDeselectSelectedFields when clicked', async () => {
       const onDeselectSelectedFields = jest.fn();
+      const user = userEvent.setup();
 
       setup({
         groupName: FieldsGroupNames.SelectedFields,
@@ -199,9 +212,7 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
         onDeselectSelectedFields,
       });
 
-      await userEvent.click(
-        screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
-      );
+      await user.click(screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields'));
 
       expect(onDeselectSelectedFields).toHaveBeenCalledTimes(1);
     });

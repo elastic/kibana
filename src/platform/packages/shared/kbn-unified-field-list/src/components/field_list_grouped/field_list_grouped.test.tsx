@@ -211,6 +211,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        onDeselectSelectedFields: jest.fn(),
       },
       hookParams: {
         dataViewId: null,
