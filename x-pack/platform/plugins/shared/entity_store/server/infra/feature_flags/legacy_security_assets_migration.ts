@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-import type { FeatureFlagsStart } from '@kbn/core/server';
-import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
+import {
+  catchError,
+  concatMap,
+  distinctUntilChanged,
+  EMPTY,
+  filter,
+  firstValueFrom,
+  from,
+  takeUntil,
+} from 'rxjs';
+import type { Subject } from 'rxjs';
+import type { CoreStart, FeatureFlagsStart, Logger } from '@kbn/core/server';
+import { FF_MIGRATE_LEGACY_SECURITY_ASSETS, getErrorMessage } from '../../../common';
 
 /**
  * Reads the migration FF's current settled value without waiting for it to become true.
@@ -18,3 +28,35 @@ export const getLegacySecurityAssetsMigrationFlag = (
   featureFlags: FeatureFlagsStart
 ): Promise<boolean> =>
   firstValueFrom(featureFlags.getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false));
+
+/** Subscribes to migration flag updates and schedules the idempotent migration when enabled. */
+export const subscribeToLegacySecurityAssetsMigrationFlag = ({
+  coreStart,
+  logger,
+  stop$,
+  scheduleMigration,
+}: {
+  coreStart: CoreStart;
+  logger: Logger;
+  stop$: Subject<void>;
+  scheduleMigration: () => Promise<void>;
+}): void => {
+  coreStart.featureFlags
+    .getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false)
+    .pipe(
+      distinctUntilChanged(),
+      filter(Boolean),
+      takeUntil(stop$),
+      concatMap(() =>
+        from(scheduleMigration()).pipe(
+          catchError((error) => {
+            logger.error(
+              `Error scheduling legacy security assets migration: ${getErrorMessage(error)}`
+            );
+            return EMPTY;
+          })
+        )
+      )
+    )
+    .subscribe();
+};

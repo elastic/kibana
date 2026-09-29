@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  Subject,
-  filter,
-  distinctUntilChanged,
-  exhaustMap,
-  catchError,
-  EMPTY,
-  from,
-  takeUntil,
-} from 'rxjs';
+import { Subject } from 'rxjs';
 import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import type {
@@ -26,7 +17,7 @@ import type {
   EntityStoreSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
-import { PLUGIN_ID, FF_MIGRATE_LEGACY_SECURITY_ASSETS, getErrorMessage } from '../common';
+import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
 import { registerTriggers } from './workflow/triggers';
@@ -51,7 +42,10 @@ import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
-import { subscribeToDualProcessFlag } from './infra/feature_flags';
+import {
+  subscribeToDualProcessFlag,
+  subscribeToLegacySecurityAssetsMigrationFlag,
+} from './infra/feature_flags';
 
 export class EntityStorePlugin
   implements
@@ -147,35 +141,17 @@ export class EntityStorePlugin
       plugins.security?.authc.apiKeys.invalidateAsInternalUser
     );
 
-    // Upgrade path: migrate Security-scoped `.entities.v2.*.security_*` assets for spaces
-    // that already have the store enabled, without waiting for a human to re-run install.
-    // Gated by FF so the cutover can be verified on a large env before customer traffic.
-    // Uses the observable API so the migration is scheduled the moment the flag is enabled
-    // in LaunchDarkly, with no Kibana restart required.
-    core.featureFlags
-      .getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false)
-      .pipe(
-        distinctUntilChanged(),
-        filter(Boolean),
-        takeUntil(this.stop$),
-        exhaustMap(() =>
-          from(
-            scheduleLegacySecurityAssetsMigrationIfNeeded({
-              coreStart: core,
-              taskManager: plugins.taskManager,
-              logger: this.logger,
-            })
-          ).pipe(
-            catchError((err) => {
-              this.logger.error(
-                `Error scheduling legacy security assets migration: ${getErrorMessage(err)}`
-              );
-              return EMPTY;
-            })
-          )
-        )
-      )
-      .subscribe();
+    subscribeToLegacySecurityAssetsMigrationFlag({
+      coreStart: core,
+      logger: this.logger,
+      stop$: this.stop$,
+      scheduleMigration: () =>
+        scheduleLegacySecurityAssetsMigrationIfNeeded({
+          coreStart: core,
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+        }),
+    });
 
     subscribeToDualProcessFlag({
       coreStart: core,
