@@ -580,6 +580,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:apiDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
+    },
+  },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
     _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
@@ -719,6 +726,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Maximum number of services shown in the APM Services Inventory.' },
   },
   'observability:apmEnableTransactionProfiling': {
     type: 'boolean',

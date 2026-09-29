@@ -54,6 +54,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-feature-flags-server'
   - '@kbn/usage-collection-plugin'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-execution-context-common'
 tags:
   - plugin
   - prod

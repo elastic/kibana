@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -60,6 +60,7 @@ import {
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
@@ -85,6 +86,7 @@ import {
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -136,7 +138,7 @@ const TABLE_ROW_LINE_HEIGHT = '24px';
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
-  border-radius: ${euiTheme.border.radius.medium};
+  border-radius: ${euiTheme.border.radius.panel};
   border: ${euiTheme.border.thin};
   overflow: hidden;
 
@@ -164,11 +166,20 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export const AlertEpisodesListPage = () => (
-  <EpisodeDataSourceProvider dataSource={CLASSIC_EPISODES_DATA_SOURCE}>
-    <AlertEpisodesListPageContent />
-  </EpisodeDataSourceProvider>
-);
+export interface AlertEpisodesListPageProps {
+  dataSource?: EpisodeDataSource;
+}
+
+export const AlertEpisodesListPage = ({
+  dataSource = CLASSIC_EPISODES_DATA_SOURCE,
+}: AlertEpisodesListPageProps = {}) => {
+  const queryV2Source = useService(UserCapabilities).canRead('alerts');
+  return (
+    <EpisodeDataSourceProvider dataSource={dataSource} queryV2Source={queryV2Source}>
+      <AlertEpisodesListPageContent />
+    </EpisodeDataSourceProvider>
+  );
+};
 
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
@@ -215,6 +226,9 @@ const AlertEpisodesListPageContent = () => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
   const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const [sourceRuleInfoToView, setSourceRuleInfoToView] = useState<
+    { category?: string } | undefined
+  >();
   const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
   const {
     flyout: composeFlyout,
@@ -225,9 +239,10 @@ const AlertEpisodesListPageContent = () => {
 
   // The rule and the episode flyout occupy the same edge of the screen, so only one of them
   // can be open at a time.
-  const openRuleFlyout = useCallback((ruleId: string) => {
+  const openRuleFlyout = useCallback((ruleId: string, sourceRuleInfo?: { category?: string }) => {
     setExpandedDoc(undefined);
     setRuleIdToView(ruleId);
+    setSourceRuleInfoToView(sourceRuleInfo);
   }, []);
 
   const expandDoc = useCallback((doc?: DataTableRecord) => {
@@ -402,8 +417,14 @@ const AlertEpisodesListPageContent = () => {
   );
 
   const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
-    [rulesLocators]
+    (ruleId: string, isSourceRule?: boolean): string | undefined => {
+      if (isSourceRule) {
+        const sourceHref = additionalDataSource?.getRuleDetailsHref?.(ruleId);
+        return sourceHref ? services.http.basePath.prepend(sourceHref) : undefined;
+      }
+      return rulesLocators.getRedirectUrl({ ruleId });
+    },
+    [rulesLocators, additionalDataSource, services.http.basePath]
   );
   const getEpisodeDetailsHref = useCallback(
     (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
@@ -418,6 +439,8 @@ const AlertEpisodesListPageContent = () => {
             alertId={hit.flattened['episode.id'] as string}
             onClose={closeFlyout}
             services={{ http: services.http }}
+            actions={episodeActions}
+            onSuccess={invalidateEpisodeQueries}
           />
         );
       }
@@ -427,7 +450,7 @@ const AlertEpisodesListPageContent = () => {
           groupHash={hit.flattened.group_hash as string | undefined}
           onClose={closeFlyout}
           actions={episodeActions}
-          getRuleDetailsHref={getRuleDetailsHref}
+          getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
             data: services.data,
@@ -442,7 +465,14 @@ const AlertEpisodesListPageContent = () => {
         />
       );
     },
-    [closeFlyout, episodeActions, getEpisodeDetailsHref, getRuleDetailsHref, services]
+    [
+      closeFlyout,
+      episodeActions,
+      getEpisodeDetailsHref,
+      getRuleDetailsHref,
+      invalidateEpisodeQueries,
+      services,
+    ]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
@@ -455,6 +485,13 @@ const AlertEpisodesListPageContent = () => {
         },
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
+          if (action.renderMenuItem) {
+            return (
+              <Fragment key={action.id}>
+                {action.renderMenuItem({ episodes, onSuccess: invalidateEpisodeQueries })}
+              </Fragment>
+            );
+          }
           const compatible = action.isCompatible({ episodes });
           const disabled = !compatible;
           const control = (
@@ -505,7 +542,9 @@ const AlertEpisodesListPageContent = () => {
     [setVisibleColumns]
   );
 
-  const manageRulesHref = rulesLocators.useUrl({});
+  const locatorHref = rulesLocators.useUrl({});
+  const manageRulesHrefOverride = useManageRulesHref();
+  const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
@@ -676,6 +715,8 @@ const AlertEpisodesListPageContent = () => {
       {ruleIdToView ? (
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
+          sourceRuleInfo={sourceRuleInfoToView}
+          cachedRule={rulesCache[ruleIdToView]}
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);
