@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { estimateTokens, truncateTokens } from '@kbn/agent-builder-genai-utils';
+import {
+  estimateTokens,
+  truncateTokens,
+} from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
