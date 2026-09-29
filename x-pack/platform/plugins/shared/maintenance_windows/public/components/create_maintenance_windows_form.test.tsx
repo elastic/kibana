@@ -375,7 +375,7 @@ describe('CreateMaintenanceWindowForm', () => {
       body: { statusCode: 400, message },
     });
 
-    it('shows "Invalid episode filter." under the Episodes field (v2) when attributes name alertingV2', async () => {
+    it('shows "Invalid alert filter." under the ES|QL alerting field (v2) when attributes name alertingV2', async () => {
       appMockRenderer.render(
         <CreateMaintenanceWindowForm
           {...formProps}
@@ -398,7 +398,7 @@ describe('CreateMaintenanceWindowForm', () => {
       capturedOnError!(buildError([{ scope: 'alertingV2', message: 'parse error' }]));
 
       await waitFor(() => {
-        expect(screen.getByText('Invalid episode filter.')).toBeInTheDocument();
+        expect(screen.getByText('Invalid alert filter.')).toBeInTheDocument();
       });
       // v1 field must NOT show an error.
       expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
@@ -413,7 +413,7 @@ describe('CreateMaintenanceWindowForm', () => {
       await waitFor(() => {
         expect(screen.getByText('Invalid scoped query.')).toBeInTheDocument();
       });
-      expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+      expect(screen.queryByText('Invalid alert filter.')).not.toBeInTheDocument();
     });
 
     it('does not show any inline error when attributes are absent', async () => {
@@ -426,7 +426,7 @@ describe('CreateMaintenanceWindowForm', () => {
       // Give React a tick to settle; neither error string should be rendered.
       await waitFor(() => {
         expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
-        expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+        expect(screen.queryByText('Invalid alert filter.')).not.toBeInTheDocument();
       });
     });
   });

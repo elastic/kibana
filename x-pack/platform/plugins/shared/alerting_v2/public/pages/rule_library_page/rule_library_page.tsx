@@ -10,6 +10,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { experimentalBadge } from '../../components/experimental_badge';
+import { esqlRulesOnlyBadge } from '../../components/esql_rules_only_badge';
+import { EsqlRulesOnlyCallout } from '../../components/esql_rules_only_callout';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
@@ -29,10 +31,11 @@ export const RuleLibraryPage = () => {
       <AppHeader
         sticky={false}
         title={RULE_LIBRARY_PAGE_TITLE}
-        badges={[experimentalBadge]}
+        badges={[esqlRulesOnlyBadge, experimentalBadge]}
         spacing="bleed"
       />
       <EuiSpacer size="m" />
+      <EsqlRulesOnlyCallout page="ruleLibrary" />
       <RuleLibraryList />
       {flyout}
     </div>

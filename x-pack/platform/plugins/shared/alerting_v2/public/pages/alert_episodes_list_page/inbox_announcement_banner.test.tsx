@@ -33,7 +33,7 @@ describe('InboxAnnouncementBanner', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "We've improved the alerts experience to work across alerting frameworks. This new alerts page includes alerts from ES|QL native rules, classic rules, and external sources so you can triage them in one place."
+        "We've improved the alerts experience to work across alerting frameworks. This new alerts page includes alerts from Kibana ES|QL alerting, Kibana standard alerting, and external sources so you can triage them in one place."
       )
     ).toBeInTheDocument();
   });

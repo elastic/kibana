@@ -262,6 +262,21 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
   });
 
+  test('should render the ES|QL rules migration banner on the management page', () => {
+    setup({} as EsQueryRuleParams<SearchType.esQuery>);
+    expect(screen.getByTestId('esQueryEsqlRulesMigrationBanner')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryEsqlRulesMigrationBannerEsqlRulesLink')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryEsqlRulesMigrationBannerLearnMoreLink')).toHaveAttribute(
+      'href',
+      '#'
+    );
+  });
+
+  test('should hide the ES|QL rules migration banner outside the management page', () => {
+    setup({} as EsQueryRuleParams<SearchType.esQuery>, { isManagementPage: false });
+    expect(screen.queryByTestId('esQueryEsqlRulesMigrationBanner')).not.toBeInTheDocument();
+  });
+
   test('should hide ESQL option when not enabled', () => {
     uiSettingsMock.get.mockReturnValueOnce(false);
     setup({} as EsQueryRuleParams<SearchType.esQuery>);

@@ -29,7 +29,7 @@ export const getV1RulesPageTabs = ({
   {
     id: 'v1Rules',
     label: i18n.translate('xpack.triggersActionsUI.rulesPage.v1RulesTabTitle', {
-      defaultMessage: 'Name A',
+      defaultMessage: 'Standard rules',
     }),
     isSelected: true,
     href: v1Href,
@@ -38,7 +38,7 @@ export const getV1RulesPageTabs = ({
   {
     id: 'v2Rules',
     label: i18n.translate('xpack.triggersActionsUI.rulesPage.v2RulesTabTitle', {
-      defaultMessage: 'Name B',
+      defaultMessage: 'ES|QL rules',
     }),
     isSelected: false,
     href: v2Href,

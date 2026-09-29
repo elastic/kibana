@@ -19,6 +19,7 @@ import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isEsqlQueryRule, isSearchSourceRule } from '../util';
 import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
 import { EsqlQueryExpression } from './esql_query_expression';
+import { EsqlRulesMigrationBanner } from './esql_rules_migration_banner';
 
 function areSearchSourceExpressionPropsEqual(
   prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
@@ -96,6 +97,8 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
     // @ts-expect-error upgrade typescript v5.9.3
     <>
       {expressionError}
+
+      {isManagementPage && <EsqlRulesMigrationBanner />}
 
       {/* Showing the selected type */}
       {isManagementPage && (

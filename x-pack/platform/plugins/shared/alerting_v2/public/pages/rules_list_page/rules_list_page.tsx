@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
-import { useService } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -17,8 +17,12 @@ import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
+import {
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
-import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
+import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 import {
   KindFilter,
@@ -30,6 +34,8 @@ import { useAlertingLocators } from '../../application/locator_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
+import { EsqlRulesIntroBanner } from './esql_rules_intro_banner';
+import { EsqlRulesEmptyState } from './esql_rules_empty_state';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -65,10 +71,16 @@ export const RulesListPage = () => {
 
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  const documentationHref = useService(CoreStart('docLinks')).links.alerting.guide;
   const { rulesLocators } = useAlertingLocators();
   const navigateToSequenceBuilder = useCallback(() => {
     rulesLocators.navigateSync({ page: 'sequence_create' });
   }, [rulesLocators]);
+  // We always render the "Create with agent" entry points; when the skill is unavailable they
+  // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
   const handleCloseCreateOptionsFlyout = useCallback(() => {
     // Closing the picker exits the whole create session — also dismiss any form on top.
@@ -89,10 +101,12 @@ export const RulesListPage = () => {
   };
 
   const emptyState = canWrite ? (
-    <RuleCreateOptionsPanel
-      onCreateEsqlRule={openCreateFlyout}
+    <EsqlRulesEmptyState
+      onCreateRule={openCreateOptionsFlyout}
       onCreateWithAgent={navigateToAgentBuilder}
-      onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+      createWithAgentTooltipText={createWithAgentTooltipText}
+      documentationHref={documentationHref}
     />
   ) : (
     <EuiEmptyPrompt
@@ -173,6 +187,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={navigateToAgentBuilder}
           onBuildSequence={navigateToSequenceBuilder}
         />
+        <EsqlRulesIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>
