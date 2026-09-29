@@ -264,7 +264,7 @@ export default function (providerContext: FtrProviderContext) {
             active: false,
             enrolled_at: new Date().toISOString(),
             last_checkin: new Date().toISOString(),
-            policy_id: policy1.id,
+            policy_id: ARCHIVE_POLICY_ID,
             policy_revision: 1,
             policy_revision_idx: 1,
             namespaces: ['default'],
