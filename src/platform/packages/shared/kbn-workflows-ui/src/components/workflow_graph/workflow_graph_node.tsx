@@ -37,7 +37,12 @@ import { resolveNodeChipStyle } from './resolve_node_chip_style';
 /** Inset from the node's right edge where spec 07's fork port (failure anchor) sits. */
 const FAILURE_PORT_RIGHT_INSET = 24;
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
-import type { RenderStepIcon, WorkflowGraphEditActions } from './workflow_graph_actions_context';
+import type {
+  NodeConfigWarningReason,
+  RenderStepIcon,
+  WorkflowGraphEditActions,
+} from './workflow_graph_actions_context';
+import { FORK_BUS_TRUNK } from './compute_edge_path';
 import {
   handleAlongStyle,
   IF_PORT_FALSE,
@@ -525,30 +530,57 @@ function NodeRunActions({
   );
 }
 
-function NodeIncompleteIndicator() {
+function nodeConfigWarningMessage(reason: NodeConfigWarningReason): string {
+  switch (reason) {
+    case 'misconfigured':
+      return i18n.translate('workflowsUi.graphNode.misconfiguredTooltip', {
+        defaultMessage: 'Misconfigured — some fields have invalid values',
+      });
+    case 'both':
+      return i18n.translate('workflowsUi.graphNode.incompleteAndMisconfiguredTooltip', {
+        defaultMessage: 'Incomplete — required fields are missing or invalid',
+      });
+    case 'incomplete':
+    default:
+      return i18n.translate('workflowsUi.graphNode.incompleteTooltip', {
+        defaultMessage: 'Incomplete — required fields are missing',
+      });
+  }
+}
+
+function NodeConfigWarningIndicator({ reason }: { readonly reason: NodeConfigWarningReason }) {
   const { euiTheme } = useEuiTheme();
-  const message = i18n.translate('workflowsUi.graphNode.incompleteTooltip', {
-    defaultMessage: 'Incomplete — required fields are missing',
-  });
+  const message = nodeConfigWarningMessage(reason);
   return (
-    <EuiToolTip content={message} disableScreenReaderOutput>
+    <EuiToolTip
+      content={message}
+      position="top"
+      display="inlineBlock"
+      disableScreenReaderOutput
+      // Position the tooltip *anchor* on the corner — not an absolutely
+      // positioned child inside a collapsed in-flow wrapper (that left the
+      // tooltip caret floating over the label / play controls).
+      anchorProps={{
+        css: {
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          zIndex: 2,
+          lineHeight: 0,
+          transform: 'translate(50%, -50%)',
+        },
+      }}
+    >
       <span
         tabIndex={0}
         role="img"
         aria-label={message}
         data-test-subj="workflowGraphNodeIncomplete"
         css={{
-          position: 'absolute',
-          top: euiTheme.size.xs,
-          right: euiTheme.size.xs,
-          zIndex: 2,
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 16,
-          height: 16,
-          borderRadius: 2,
-          background: euiTheme.colors.backgroundBasePlain,
+          lineHeight: 0,
           '&:focus-visible': { outline: `2px solid ${euiTheme.colors.primary}` },
         }}
       >
@@ -746,8 +778,15 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const [isFocusWithin, setIsFocusWithin] = useState(false);
   const [menu, setMenu] = useState<NodeMenuState>({ open: false });
   const isMenuOpen = menu.open;
-  const { onStepRun, canRunSteps, renderStepIcon, onStepSelect, edit, incompleteNodeIds, portTargetsByNodeId } =
-    useWorkflowGraphActions();
+  const {
+    onStepRun,
+    canRunSteps,
+    renderStepIcon,
+    onStepSelect,
+    edit,
+    nodeConfigWarnings,
+    portTargetsByNodeId,
+  } = useWorkflowGraphActions();
 
   const execState = resolveExecutionState(stepExecution?.status);
   const colors = resolveNodeColors(euiTheme, stepType, isTriggerNode, execState);
@@ -757,7 +796,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     Boolean(canRunSteps && onStepRun) && !isTrigger && !colors.hasStatusIcon;
   const isFallback = Boolean(fallbackOf);
   const nodeKind: NodeKind = isTriggerNode ? 'trigger' : isFallback ? 'fallback' : 'step';
-  const isIncomplete = Boolean(incompleteNodeIds?.has(node.id));
+  const configWarningReason = nodeConfigWarnings?.get(node.id);
   const editMode = edit !== undefined && !preview;
   const isIfNode = stepType === 'if';
   const portTargets = editMode ? portTargetsByNodeId?.get(node.id) : undefined;
@@ -911,7 +950,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           </span>
         </div>
 
-        {isIncomplete && <NodeIncompleteIndicator />}
+        {configWarningReason ? (
+          <NodeConfigWarningIndicator reason={configWarningReason} />
+        ) : null}
 
         {colors.hasStatusIcon && (
           <NodeStatusIcon

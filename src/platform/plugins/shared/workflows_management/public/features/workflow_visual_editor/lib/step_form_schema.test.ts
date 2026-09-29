@@ -13,6 +13,7 @@ import {
   buildDefaultStep,
   fieldLabelDivergesFromKey,
   findUnclosedTemplateExpression,
+  getStepConfigWarningReason,
   getStepFormSchema,
   isFieldValueRepresentable,
   isStepIncomplete,
@@ -346,6 +347,51 @@ describe('step_form_schema', () => {
 
     it('never flags unknown types', () => {
       expect(isStepIncomplete({ name: 'a', type: 'mystery' }, connectors)).toBe(false);
+    });
+  });
+
+  describe('getStepConfigWarningReason', () => {
+    it('returns incomplete for missing required fields', () => {
+      expect(getStepConfigWarningReason({ name: 'a', type: 'slack', with: {} }, connectors)).toBe(
+        'incomplete'
+      );
+    });
+
+    it('returns misconfigured for invalid populated values', () => {
+      expect(
+        getStepConfigWarningReason(
+          {
+            name: 'a',
+            type: 'slack',
+            'connector-id': 'x',
+            with: { message: 'Hi {{ inputs.x' },
+          },
+          connectors
+        )
+      ).toBe('misconfigured');
+    });
+
+    it('returns both when required fields are missing and others are invalid', () => {
+      expect(
+        getStepConfigWarningReason(
+          {
+            name: 'a',
+            type: 'slack',
+            'connector-id': '',
+            with: { message: 'Hi {{ inputs.x' },
+          },
+          connectors
+        )
+      ).toBe('both');
+    });
+
+    it('returns undefined when the applied state is valid', () => {
+      expect(
+        getStepConfigWarningReason(
+          { name: 'a', type: 'slack', 'connector-id': 'x', with: { message: 'hi' } },
+          connectors
+        )
+      ).toBeUndefined();
     });
   });
 

@@ -8,290 +8,64 @@
  */
 
 import {
-  EuiAccordion,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiConfirmModal,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
   EuiEmptyPrompt,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
-  euiDragDropReorder,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  type DropResult,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  SchemaListDragClone,
-  validateSchemaPropertyName,
-  type SchemaPropertyField,
-} from '../../../shared/ui/schema_property_builder';
+  SettingsEntryListHost,
+  SettingsEntryRow,
+} from './settings_entry_row';
 import {
-  coerceConstantValue,
   createEmptyConstant,
   type ConstantField,
-  type ConstantType,
 } from './workflow_settings_fields_model';
 
-const TYPE_OPTIONS: Array<{ value: ConstantType; text: string }> = [
-  { value: 'string', text: 'string' },
-  { value: 'number', text: 'number' },
-  { value: 'boolean', text: 'boolean' },
-  { value: 'object', text: 'object' },
-  { value: 'array', text: 'array' },
-];
+export interface SettingsEditorAddControls {
+  readonly onAdd: () => void;
+  readonly disabled: boolean;
+}
 
 export interface WorkflowConstantsEditorProps {
   readonly fields: readonly ConstantField[];
   readonly onChange: (next: readonly ConstantField[]) => void;
   readonly findReferencingSteps?: (name: string) => string[];
   readonly readOnly?: boolean;
+  /**
+   * When this value changes, any uncommitted draft row is discarded silently
+   * (e.g. Option C popover collapse).
+   */
+  readonly discardDraftSignal?: number;
+  /**
+   * Hide the in-content Add CTA (and empty-state action). Use with
+   * {@link onAddControlsChange} to place Add on an accordion header row.
+   */
+  readonly hideInlineAddButton?: boolean;
+  /** Publishes Add controls for an external CTA (accordion `extraAction`). */
+  readonly onAddControlsChange?: (controls: SettingsEditorAddControls | null) => void;
 }
-
-const ConstantCard = ({
-  field,
-  siblings,
-  onUpdate,
-  onRequestDelete,
-  dragHandleProps,
-  readOnly,
-}: {
-  readonly field: ConstantField;
-  readonly siblings: readonly ConstantField[];
-  readonly onUpdate: (next: ConstantField) => void;
-  readonly onRequestDelete: () => void;
-  readonly dragHandleProps?: object;
-  readonly readOnly?: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const accordionId = useGeneratedHtmlId({ prefix: 'workflowConstAcc' });
-  const nameError = validateSchemaPropertyName(
-    field.name,
-    siblings as unknown as SchemaPropertyField[],
-    field.id
-  );
-  const coerced = coerceConstantValue(field.type, field.value);
-  const valueError =
-    coerced.ok === false
-      ? coerced.error === 'expression'
-        ? i18n.translate('workflows.workflowSettingsFlyout.constExpressionError', {
-            defaultMessage:
-              'Constants cannot use {braces} expressions — they are fixed for every run.',
-            values: { braces: '{{ }}' },
-          })
-        : i18n.translate('workflows.workflowSettingsFlyout.constValueError', {
-            defaultMessage: 'Enter a valid {type} value.',
-            values: { type: field.type },
-          })
-      : undefined;
-  const displayName = field.name.trim() || '—';
-
-  return (
-    <EuiPanel hasBorder paddingSize="none" css={{ marginBottom: euiTheme.size.s }}>
-      <EuiAccordion
-        id={accordionId}
-        initialIsOpen
-        paddingSize="m"
-        buttonContent={
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <span
-                {...dragHandleProps}
-                data-drag-grip
-                css={{
-                  cursor: 'grab',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  // Collapsed until the accordion trigger is hovered / focused —
-                  // same reveal as the expression-builder catalog rows.
-                  width: 0,
-                  minWidth: 0,
-                  opacity: 0,
-                  overflow: 'hidden',
-                  marginInlineEnd: 0,
-                  transition: 'width 140ms ease, opacity 140ms ease, margin 140ms ease',
-                  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-                }}
-              >
-                <EuiIcon type="drag" color="subdued" size="s" />
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <code>{displayName}</code>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                · {field.type}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          readOnly ? undefined : (
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={i18n.translate('workflows.workflowSettingsFlyout.removeConstant', {
-                defaultMessage: 'Remove constant',
-              })}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                onRequestDelete();
-              }}
-              data-test-subj={`workflowSettingsConstRemove-${field.id}`}
-            />
-          )
-        }
-        css={{
-          '.euiAccordion__triggerWrapper': {
-            alignItems: 'center',
-            paddingInline: euiTheme.size.m,
-            '&:hover [data-drag-grip], &:focus-within [data-drag-grip]': {
-              width: 16,
-              minWidth: 16,
-              opacity: 1,
-              marginInlineEnd: 6,
-            },
-          },
-          '.euiAccordion__button': {
-            paddingInline: 0,
-            paddingBlock: euiTheme.size.s,
-          },
-        }}
-        data-test-subj={`workflowSettingsConstRow-${field.id}`}
-      >
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="flexStart">
-          <EuiFlexItem grow={2}>
-            <EuiFormRow
-              label={i18n.translate('workflows.workflowSettingsFlyout.constName', {
-                defaultMessage: 'Name',
-              })}
-              helpText={
-                field.name.trim()
-                  ? i18n.translate('workflows.workflowSettingsFlyout.constNameHelp', {
-                      defaultMessage: 'Reference as consts.{name}',
-                      values: { name: field.name.trim() },
-                    })
-                  : undefined
-              }
-              isInvalid={nameError != null && field.name.length > 0}
-              error={
-                nameError === 'empty'
-                  ? i18n.translate('workflows.schemaPropertyBuilder.nameEmpty', {
-                      defaultMessage: 'Name is required.',
-                    })
-                  : nameError === 'invalid'
-                    ? i18n.translate('workflows.schemaPropertyBuilder.nameInvalid', {
-                        defaultMessage:
-                          'Use letters, digits, or underscore; cannot start with a digit.',
-                      })
-                    : nameError === 'duplicate'
-                      ? i18n.translate('workflows.schemaPropertyBuilder.nameDuplicate', {
-                          defaultMessage: 'Name must be unique among siblings.',
-                        })
-                      : undefined
-              }
-              fullWidth
-              compressed
-            >
-              <EuiFieldText
-                compressed
-                fullWidth
-                value={field.name}
-                disabled={readOnly}
-                onChange={(e) => onUpdate({ ...field, name: e.target.value })}
-                data-test-subj={`workflowSettingsConstName-${field.id}`}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiFormRow
-              label={i18n.translate('workflows.workflowSettingsFlyout.constType', {
-                defaultMessage: 'Type',
-              })}
-              fullWidth
-              compressed
-            >
-              <EuiSelect
-                compressed
-                fullWidth
-                options={TYPE_OPTIONS}
-                value={field.type}
-                disabled={readOnly}
-                onChange={(e) =>
-                  onUpdate({
-                    ...field,
-                    type: e.target.value as ConstantType,
-                    value: '',
-                  })
-                }
-                data-test-subj={`workflowSettingsConstType-${field.id}`}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('workflows.workflowSettingsFlyout.constValue', {
-            defaultMessage: 'Value',
-          })}
-          helpText={i18n.translate('workflows.workflowSettingsFlyout.constValueHelp', {
-            defaultMessage:
-              "Constants don't accept {braces} expressions — they're the same on every run.",
-            values: { braces: '{{ }}' },
-          })}
-          isInvalid={Boolean(valueError)}
-          error={valueError}
-          fullWidth
-          compressed
-        >
-          {field.type === 'object' || field.type === 'array' ? (
-            <EuiTextArea
-              compressed
-              fullWidth
-              rows={4}
-              value={field.value}
-              disabled={readOnly}
-              onChange={(e) => onUpdate({ ...field, value: e.target.value })}
-              data-test-subj={`workflowSettingsConstValue-${field.id}`}
-            />
-          ) : (
-            <EuiFieldText
-              compressed
-              fullWidth
-              value={field.value}
-              disabled={readOnly}
-              onChange={(e) => onUpdate({ ...field, value: e.target.value })}
-              data-test-subj={`workflowSettingsConstValue-${field.id}`}
-            />
-          )}
-        </EuiFormRow>
-      </EuiAccordion>
-    </EuiPanel>
-  );
-};
 
 export function WorkflowConstantsEditor({
   fields,
   onChange,
   findReferencingSteps,
   readOnly = false,
+  discardDraftSignal,
+  hideInlineAddButton = false,
+  onAddControlsChange,
 }: WorkflowConstantsEditorProps) {
-  const droppableId = useGeneratedHtmlId({ prefix: 'workflowConstsDrop' });
+  const [draftField, setDraftField] = useState<ConstantField | null>(null);
+
+  useEffect(() => {
+    if (discardDraftSignal === undefined) return;
+    setDraftField(null);
+  }, [discardDraftSignal]);
   const [pendingDelete, setPendingDelete] = useState<{
     field: ConstantField;
     steps: string[];
@@ -303,17 +77,18 @@ export function WorkflowConstantsEditor({
   } | null>(null);
 
   const handleAdd = useCallback(() => {
+    if (draftField || readOnly) return;
     const nextIndex = fields.length + 1;
-    onChange([...fields, createEmptyConstant({ name: `constant_${nextIndex}` })]);
-  }, [fields, onChange]);
+    setDraftField(createEmptyConstant({ name: `constant_${nextIndex}` }));
+  }, [draftField, fields.length, readOnly]);
 
-  const onDragEnd = useCallback(
-    ({ source, destination }: DropResult) => {
-      if (!source || !destination || source.index === destination.index) return;
-      onChange(euiDragDropReorder([...fields], source.index, destination.index));
-    },
-    [fields, onChange]
-  );
+  useEffect(() => {
+    if (!onAddControlsChange) return undefined;
+    onAddControlsChange(
+      readOnly ? null : { onAdd: handleAdd, disabled: draftField != null }
+    );
+    return () => onAddControlsChange(null);
+  }, [onAddControlsChange, readOnly, handleAdd, draftField]);
 
   const commitDelete = useCallback(
     (field: ConstantField) => {
@@ -357,7 +132,36 @@ export function WorkflowConstantsEditor({
     [fields, findReferencingSteps, onChange]
   );
 
-  if (fields.length === 0) {
+  const commitDraft = useCallback(
+    (next: ConstantField) => {
+      onChange([...fields, next]);
+      setDraftField(null);
+    },
+    [fields, onChange]
+  );
+
+  const addButton =
+    readOnly || hideInlineAddButton ? null : (
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            flush="both"
+            color="primary"
+            iconType="plusCircle"
+            onClick={handleAdd}
+            isDisabled={draftField != null}
+            data-test-subj="workflowSettingsConstAdd"
+          >
+            {i18n.translate('workflows.workflowSettingsFlyout.addConstant', {
+              defaultMessage: 'Add constant',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+
+  if (fields.length === 0 && !draftField) {
     return (
       <EuiEmptyPrompt
         title={
@@ -377,7 +181,7 @@ export function WorkflowConstantsEditor({
           </p>
         }
         actions={
-          readOnly ? undefined : (
+          readOnly || hideInlineAddButton ? undefined : (
             <EuiButtonEmpty
               size="s"
               iconType="plusCircle"
@@ -402,64 +206,35 @@ export function WorkflowConstantsEditor({
 
   return (
     <>
-      {!readOnly ? (
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              flush="both"
-              color="primary"
-              iconType="plusCircle"
-              onClick={handleAdd}
-              data-test-subj="workflowSettingsConstAdd"
-            >
-              {i18n.translate('workflows.workflowSettingsFlyout.addConstant', {
-                defaultMessage: 'Add constant',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
-      <EuiSpacer size="s" />
-      <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable
-          droppableId={droppableId}
-          spacing="none"
-          renderClone={(provided, _snapshot, rubric) => {
-            const field = fields[rubric.source.index];
-            return (
-              <SchemaListDragClone
-                name={field?.name ?? ''}
-                typeLabel={field?.type ?? 'string'}
-                provided={provided}
-              />
-            );
-          }}
-        >
-          {fields.map((field, index) => (
-            <EuiDraggable
-              key={field.id}
-              index={index}
-              draggableId={field.id}
-              spacing="none"
-              customDragHandle
-              hasInteractiveChildren
-              isDragDisabled={readOnly}
-            >
-              {(provided) => (
-                <ConstantCard
-                  field={field}
-                  siblings={fields}
-                  onUpdate={handleUpdate}
-                  onRequestDelete={() => requestDelete(field)}
-                  dragHandleProps={provided.dragHandleProps ?? undefined}
-                  readOnly={readOnly}
-                />
-              )}
-            </EuiDraggable>
-          ))}
-        </EuiDroppable>
-      </EuiDragDropContext>
+      {addButton}
+      {addButton ? <EuiSpacer size="s" /> : null}
+      <SettingsEntryListHost
+        fields={fields}
+        draftRow={
+          draftField ? (
+            <SettingsEntryRow
+              kind="constant"
+              mode="draft"
+              field={draftField}
+              siblings={fields}
+              readOnly={readOnly}
+              onCommit={commitDraft}
+              onDiscard={() => setDraftField(null)}
+            />
+          ) : null
+        }
+        renderRow={(field) => (
+          <SettingsEntryRow
+            kind="constant"
+            mode="committed"
+            field={field}
+            siblings={fields}
+            readOnly={readOnly}
+            onChange={handleUpdate}
+            onRequestDelete={() => requestDelete(field)}
+          />
+        )}
+      />
 
       {pendingDelete ? (
         <EuiConfirmModal

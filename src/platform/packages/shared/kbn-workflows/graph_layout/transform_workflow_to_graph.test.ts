@@ -494,6 +494,36 @@ describe('transformWorkflowToGraph', () => {
     );
   });
 
+  it('synthesizes labeled bypass lanes for empty switch cases', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'sw',
+            type: 'switch',
+            expression: '{{ steps.x.output.v }}',
+            cases: [
+              { match: 'draft', steps: [] },
+              { match: 'ready', steps: [{ name: 'on_ready', type: 'http' }] },
+            ],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    const fromGate = r.edges.filter((e) => e.source === 'sw');
+    expect(fromGate.map((e) => e.label).sort()).toEqual(['default', 'draft', 'ready']);
+    expect(r.bypassLaneNodes.length).toBeGreaterThanOrEqual(2);
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        branchType: 'switch',
+        label: 'draft',
+      })
+    );
+  });
+
   it('chains multiple steps inside a switch case sequentially', () => {
     const r = transformWorkflowToGraph(
       minimal({

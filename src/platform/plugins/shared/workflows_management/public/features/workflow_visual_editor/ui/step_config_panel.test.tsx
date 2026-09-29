@@ -164,7 +164,7 @@ with:
 const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPanel>> = {}) => {
   const onSave = jest.fn();
   const onCancel = jest.fn();
-  render(
+  const view = render(
     <I18nProvider>
       <StepConfigPanel
         mode="edit"
@@ -177,7 +177,7 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPa
       />
     </I18nProvider>
   );
-  return { onSave, onCancel };
+  return { onSave, onCancel, unmount: view.unmount };
 };
 
 const expandSettingsAccordion = () => {
@@ -534,34 +534,42 @@ with:
     expect(screen.getByText('Defined in YAML')).toBeInTheDocument();
   });
 
-  it('validates on blur; Save is disabled while the form has errors', () => {
+  it('validates on blur; Done stays enabled so incomplete/misconfigured state can be applied', () => {
     const { onSave } = renderPanel({
       initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith: {}\n',
     });
     const messageInput = screen.getByTestId('workflowStepConfigField-with.message');
     expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeDisabled();
+    // Empty required is apply-able (incomplete badge covers applied state).
+    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
 
-    // Mid-typing an empty required field does not accuse, but Save stays disabled.
+    // Mid-typing an empty required field does not accuse; Done stays enabled.
     fireEvent.change(messageInput, { target: { value: '' } });
     expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
     expect(screen.queryByText('Message is required')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeDisabled();
+    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
 
     fireEvent.blur(messageInput);
     expect(messageInput).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText('Message is required')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
 
-    // Fast forgiveness once already invalid — Save re-enables when valid.
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
+    expect(onSave).toHaveBeenCalled();
+    onSave.mockClear();
+
+    // Fast forgiveness once already invalid.
     fireEvent.change(messageInput, { target: { value: 'hello' } });
     expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
     expect(screen.queryByText('Message is required')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
 
+    // Misconfigured values (e.g. unclosed template) are still apply-able —
+    // the canvas badge reflects them after Done.
     fireEvent.change(messageInput, { target: { value: 'Hi {{ inputs.x' } });
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeDisabled();
+    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
-    expect(onSave).not.toHaveBeenCalled();
+    expect(onSave).toHaveBeenCalled();
   });
 
   it('renders compact boolean rows with label and switch on one line', () => {
@@ -612,7 +620,63 @@ with:
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('renamed');
     expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue('yo');
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+    // Dirty draft → discard confirm; Confirm closes without applying.
+    expect(onCancel).not.toHaveBeenCalled();
+    expect(screen.getByTestId('workflowStepConfigPanelDiscardModal')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Discard'));
     expect(onCancel).toHaveBeenCalled();
+  });
+
+  it('closes Cancel/X immediately when the draft matches applied state', () => {
+    const { onCancel, unmount } = renderPanel();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelCancel'));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
+    unmount();
+
+    const { onCancel: onCancelClose } = renderPanel();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+    expect(onCancelClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
+  });
+
+  it('prompts to discard dirty edits; Keep editing preserves the draft', () => {
+    const { onCancel } = renderPanel();
+    fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
+      target: { value: 'Edited locally' },
+    });
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelCancel'));
+    expect(onCancel).not.toHaveBeenCalled();
+    expect(screen.getByTestId('workflowStepConfigPanelDiscardModal')).toBeInTheDocument();
+    expect(screen.getByText('Discard changes to this step?')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "These edits haven't been applied to the step yet. Closing now will discard them."
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Keep editing'));
+    expect(onCancel).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue('Edited locally');
+
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+    fireEvent.click(screen.getByText('Discard'));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports draft dirty state for canvas navigation gating', () => {
+    const onDraftDirtyChange = jest.fn();
+    const { unmount } = renderPanel({ onDraftDirtyChange });
+    expect(onDraftDirtyChange).toHaveBeenLastCalledWith(false);
+
+    fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
+      target: { value: 'Edited locally' },
+    });
+    expect(onDraftDirtyChange).toHaveBeenLastCalledWith(true);
+
+    unmount();
+    expect(onDraftDirtyChange).toHaveBeenLastCalledWith(false);
   });
 
   it('wires the shared reference affordance on text and code fields, not name/switches/selects', () => {

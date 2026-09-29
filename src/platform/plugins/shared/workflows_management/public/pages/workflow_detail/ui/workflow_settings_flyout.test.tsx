@@ -125,10 +125,11 @@ describe('WorkflowSettingsFlyout', () => {
 
     fireEvent.click(screen.getByTestId('workflowSettingsTab-constants'));
     expect(screen.getByTestId('workflowSettingsConstAdd')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('region')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('us-east-1')).toBeInTheDocument();
+    expect(screen.getByText('region')).toBeInTheDocument();
+    expect(screen.getByText('· string')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('workflowSettingsConstAdd'));
+    expect(screen.getByTestId(/workflowSettingsConstDone-/)).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('workflowSettingsFlyoutDone'));
     expect(selectYamlString(store.getState())).toContain('region');
   });

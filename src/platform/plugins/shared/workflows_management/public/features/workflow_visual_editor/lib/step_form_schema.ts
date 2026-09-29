@@ -468,6 +468,14 @@ export const validateStepField = (
   return undefined;
 };
 
+const stepNameField = (): StepFormField => ({
+  key: 'name',
+  path: ['name'],
+  label: prettifyFieldKey('name'),
+  required: true,
+  kind: 'text',
+});
+
 /** Required schema fields (plus `name`) that are currently empty. */
 export const getMissingRequiredFields = (
   step: Record<string, unknown>,
@@ -476,14 +484,7 @@ export const getMissingRequiredFields = (
   const type = step.type;
   if (typeof type !== 'string') return [];
   const schema = getStepFormSchema(type, connectors);
-  const nameField: StepFormField = {
-    key: 'name',
-    path: ['name'],
-    label: prettifyFieldKey('name'),
-    required: true,
-    kind: 'text',
-  };
-  const fields = [nameField, ...(schema?.fields ?? [])];
+  const fields = [stepNameField(), ...(schema?.fields ?? [])];
   return fields.filter((f) => f.required && isEmptyFieldValue(readPath(step, f.path)));
 };
 
@@ -492,6 +493,43 @@ export const isStepIncomplete = (
   step: Record<string, unknown>,
   connectors: readonly ConnectorContractUnion[]
 ): boolean => getMissingRequiredFields(step, connectors).length > 0;
+
+/**
+ * Applied-state config warning for the canvas badge.
+ * - `incomplete`: a required field (or name) is empty
+ * - `misconfigured`: a populated field fails validation (type, template, etc.)
+ * - `both`: both conditions apply
+ */
+export type StepConfigWarningReason = 'incomplete' | 'misconfigured' | 'both';
+
+export const getStepConfigWarningReason = (
+  step: Record<string, unknown>,
+  connectors: readonly ConnectorContractUnion[]
+): StepConfigWarningReason | undefined => {
+  const type = step.type;
+  if (typeof type !== 'string') return undefined;
+  const schema = getStepFormSchema(type, connectors);
+  const fields = [stepNameField(), ...(schema?.fields ?? [])];
+
+  let incomplete = false;
+  let misconfigured = false;
+  for (const field of fields) {
+    const value = readPath(step, field.path);
+    if (!isFieldValueRepresentable(field, value)) continue;
+    if (isEmptyFieldValue(value)) {
+      if (field.required) incomplete = true;
+      continue;
+    }
+    if (validateStepField(field, value) !== undefined) {
+      misconfigured = true;
+    }
+  }
+
+  if (incomplete && misconfigured) return 'both';
+  if (incomplete) return 'incomplete';
+  if (misconfigured) return 'misconfigured';
+  return undefined;
+};
 
 /** Whether the form can edit `value` with the control implied by `field.kind`. */
 export const isFieldValueRepresentable = (field: StepFormField, value: unknown): boolean => {

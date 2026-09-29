@@ -9,7 +9,7 @@
 
 import { EuiButtonIcon, EuiPageTemplate, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -21,6 +21,11 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
+import {
+  getWorkflowSettingsSurfaceVariant,
+  subscribeWorkflowSettingsSurfaceVariant,
+  type WorkflowSettingsSurfaceVariant,
+} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -135,8 +140,19 @@ export const WorkflowDetailHeader = React.memo(
     const isManagedWorkflow = workflow?.managed === true;
     const isEditorReadOnly = useWorkflowEditorReadOnly();
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [settingsSurfaceVariant, setSettingsSurfaceVariant] =
+      useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
+    const showHeaderSettingsGear = settingsSurfaceVariant === 'a';
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
+
+    useEffect(
+      () =>
+        subscribeWorkflowSettingsSurfaceVariant(() => {
+          setSettingsSurfaceVariant(getWorkflowSettingsSurfaceVariant());
+        }),
+      []
+    );
     const executionsTabDisabledTooltip = isManagedWorkflow
       ? executionsTabReadManagedExecutionDisabledTooltip
       : executionsTabReadExecutionDisabledTooltip;
@@ -303,8 +319,11 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
-      const result: AppHeaderBadge[] = [
-        {
+      const result: AppHeaderBadge[] = [];
+
+      // Variant A keeps the header flyout. B/C open settings from the canvas.
+      if (showHeaderSettingsGear) {
+        result.push({
           label: settingsAriaLabel,
           // Custom gear control sits beside the title; AppHeader has no public titleAppend.
           renderCustomBadge: () => (
@@ -318,8 +337,8 @@ export const WorkflowDetailHeader = React.memo(
               />
             </EuiToolTip>
           ),
-        },
-      ];
+        });
+      }
 
       if (isManagedWorkflow) {
         result.push({
@@ -354,6 +373,7 @@ export const WorkflowDetailHeader = React.memo(
 
       return result;
     }, [
+      showHeaderSettingsGear,
       settingsAriaLabel,
       openSettings,
       isManagedWorkflow,
@@ -429,11 +449,13 @@ export const WorkflowDetailHeader = React.memo(
             spacing="compact"
           />
         </EuiPageTemplate>
-        <WorkflowSettingsFlyout
-          isOpen={isSettingsOpen}
-          onClose={closeSettings}
-          readOnly={isEditorReadOnly}
-        />
+        {showHeaderSettingsGear ? (
+          <WorkflowSettingsFlyout
+            isOpen={isSettingsOpen}
+            onClose={closeSettings}
+            readOnly={isEditorReadOnly}
+          />
+        ) : null}
       </>
     );
   }

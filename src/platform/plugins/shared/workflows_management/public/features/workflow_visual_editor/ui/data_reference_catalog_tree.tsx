@@ -386,23 +386,23 @@ export function DataReferenceCatalogTree({
             }}
           >
             <DataReferenceItemRowContent item={item} showOrigin={showOrigin} hideChevron />
-            {draggable ? (
-              <span
-                data-drag-grip
-                aria-hidden
-                css={{
-                  ...gripCollapsedCss,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  color: euiTheme.colors.textSubdued,
-                }}
-              >
-                <EuiIcon type="drag" size="s" />
-              </span>
-            ) : null}
           </span>
+          {draggable ? (
+            <span
+              data-drag-grip
+              aria-hidden
+              css={{
+                ...gripCollapsedCss,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                color: euiTheme.colors.textSubdued,
+              }}
+            >
+              <EuiIcon type="drag" size="s" />
+            </span>
+          ) : null}
         </button>
       </div>
     );

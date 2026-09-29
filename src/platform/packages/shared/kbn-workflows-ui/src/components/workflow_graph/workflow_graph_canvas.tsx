@@ -52,6 +52,10 @@ import type {
 import { TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
 import './ensure_eui_icons';
+import {
+  buildWorkflowSettingsNodes,
+  type WorkflowSettingsNodesInput,
+} from './build_settings_nodes';
 import { computeInsertionPoints } from './compute_insertion_points';
 import { computePendingErrorBranchPlacement, type PendingInsertVisual } from './pending_insert';
 import { resolveAppendInsertTarget } from './resolve_append_insert_target';
@@ -59,10 +63,12 @@ import { WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 import { useInsertLayoutAnimation } from './use_insert_layout_animation';
 import { useWorkflowLayout } from './use_workflow_layout';
 import {
+  type NodeConfigWarningReason,
   type RenderStepIcon,
   type WorkflowGraphActions,
   WorkflowGraphActionsContext,
   type WorkflowGraphEditActions,
+  type WorkflowSettingsNodeKind,
 } from './workflow_graph_actions_context';
 import { WorkflowGraphBypassLaneNode } from './workflow_graph_bypass_lane_node';
 import { WorkflowGraphEdge } from './workflow_graph_edge';
@@ -74,6 +80,8 @@ import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_no
 import { WorkflowGraphNode } from './workflow_graph_node';
 import { WorkflowGraphPendingNode } from './workflow_graph_pending_node';
 import { WorkflowSettingsPanel } from './workflow_graph_poc_toggles';
+import { WorkflowGraphSettingsGroupNode } from './workflow_graph_settings_group_node';
+import { WorkflowGraphSettingsNode } from './workflow_graph_settings_node';
 
 /** Subtle entrance when navigation chrome appears after the creation state. */
 const chromeAppear = keyframes({
@@ -127,6 +135,8 @@ class GraphErrorBoundary extends Component<
 const NODE_TYPES: NodeTypes = {
   step: WorkflowGraphNode,
   trigger: WorkflowGraphNode,
+  settings: WorkflowGraphSettingsNode,
+  settingsGroup: WorkflowGraphSettingsGroupNode,
   foreachGroup: WorkflowGraphForeachGroupNode,
   bypassLane: WorkflowGraphBypassLaneNode,
 };
@@ -174,12 +184,15 @@ const getResetViewTarget = (
     : { x: bounds.centerX, y: bounds.minY + wrapperHeight / 2 - topPadding };
 
 const boundsFromNodes = (nodes: readonly Node[]): GraphBounds | undefined => {
-  if (nodes.length === 0) return undefined;
+  // Parent-relative child positions are not canvas-absolute — only top-level
+  // nodes (and compound parents) contribute to the AABB.
+  const topLevel = nodes.filter((n) => !n.parentId);
+  if (topLevel.length === 0) return undefined;
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  for (const n of nodes) {
+  for (const n of topLevel) {
     const w = typeof n.width === 'number' ? n.width : 300;
     const h = typeof n.height === 'number' ? n.height : 56;
     if (n.position.x < minX) minX = n.position.x;
@@ -199,8 +212,11 @@ const getHomeFrameBounds = (
   nodes: readonly Node[],
   fallback: GraphBounds
 ): GraphBounds => {
-  const triggers = nodes.filter((n) => n.type === 'trigger');
-  return boundsFromNodes(triggers.length > 0 ? triggers : nodes) ?? fallback;
+  // Frame the leading rank: settings (when present) + triggers so the home
+  // view keeps both rows in view under TOP_PADDING.
+  // Prefer the settings group (absolute) over child cards (parent-relative).
+  const leading = nodes.filter((n) => n.type === 'trigger' || n.type === 'settingsGroup');
+  return boundsFromNodes(leading.length > 0 ? leading : nodes) ?? fallback;
 };
 
 const CORNER_CONTROLS_INSET = 12;
@@ -482,8 +498,11 @@ export interface WorkflowGraphCanvasProps {
    * node action clusters and the add-trigger affordances. Omit for read-only.
    */
   readonly edit?: WorkflowGraphEditActions;
-  /** Node ids whose step is missing a schema-required field (edit mode). */
-  readonly incompleteNodeIds?: ReadonlySet<string>;
+  /**
+   * Applied-state config warnings per node id (edit mode). Drives the
+   * top-right warning badge and its tooltip copy.
+   */
+  readonly nodeConfigWarnings?: ReadonlyMap<string, NodeConfigWarningReason>;
   /** Node id to briefly highlight (just inserted); cleared by the caller. */
   readonly flashNodeId?: string;
   /** Ephemeral insert placeholder (empty while choosing, filled while configuring). */
@@ -495,6 +514,13 @@ export interface WorkflowGraphCanvasProps {
    * in edit mode. When omitted, the default "Add trigger" card is shown.
    */
   readonly emptyState?: React.ReactNode;
+  /**
+   * When set, injects info / constants / outputs settings nodes one rank above
+   * the triggers (same footprint and spacing as step/trigger nodes).
+   */
+  readonly settingsNodes?: WorkflowSettingsNodesInput;
+  /** Opens / closes the settings panel when a settings node is activated. */
+  readonly onSettingsNodeSelect?: (kind: WorkflowSettingsNodeKind | undefined) => void;
 }
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
@@ -525,11 +551,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     defaultViewport,
     onViewportChange,
     edit,
-    incompleteNodeIds,
+    nodeConfigWarnings,
     flashNodeId,
     pendingInsert,
     suppressInsertionControls,
     emptyState,
+    settingsNodes,
+    onSettingsNodeSelect,
   } = props;
 
   const defaultEdgeOptions = useMemo(
@@ -546,7 +574,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const backgroundDotColor = transparentize(euiTheme.colors.borderBaseProminent, 0.4);
 
   const {
-    nodes,
+    nodes: layoutNodes,
     edges: layoutEdges,
     transformed: graphTransform,
   } = useWorkflowLayout({
@@ -557,6 +585,12 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     onPerfMark,
     onLayoutFailed,
   });
+
+  const nodes = useMemo(() => {
+    if (!settingsNodes) return layoutNodes;
+    const settingsRfNodes = buildWorkflowSettingsNodes(layoutNodes, direction, settingsNodes);
+    return settingsRfNodes.length > 0 ? [...settingsRfNodes, ...layoutNodes] : layoutNodes;
+  }, [layoutNodes, direction, settingsNodes]);
 
   // Node-anchored connection-point targets (edit mode mounts ports from these).
   const insertionPoints = useMemo(
@@ -570,8 +604,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       canRunSteps,
       renderStepIcon,
       onStepSelect,
+      onSettingsNodeSelect,
       edit,
-      incompleteNodeIds,
+      nodeConfigWarnings,
       // Ports stay mounted while the config/YAML panel is open; suppress only
       // applies to the empty-state / trigger overlay controls below.
       portTargetsByNodeId: edit ? insertionPoints.byNodeId : undefined,
@@ -582,8 +617,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       canRunSteps,
       renderStepIcon,
       onStepSelect,
+      onSettingsNodeSelect,
       edit,
-      incompleteNodeIds,
+      nodeConfigWarnings,
       insertionPoints.byNodeId,
       pendingInsert,
     ]
@@ -626,15 +662,21 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   }, [nodes, pendingErrorPlacement]);
 
   const decoratedNodes = useMemo(() => {
-    if (!selectedStepId) return nodesWithPendingLane;
+    const settingsSelectedId = settingsNodes?.selectedKind
+      ? `settings:${settingsNodes.selectedKind}`
+      : undefined;
+    if (!selectedStepId && !settingsSelectedId) return nodesWithPendingLane;
     return nodesWithPendingLane.map((n) => {
-      if (n.id !== selectedStepId) return n;
+      const selected =
+        (selectedStepId != null && n.id === selectedStepId) ||
+        (settingsSelectedId != null && n.id === settingsSelectedId);
+      if (!selected && !n.selected) return n;
       return {
         ...n,
-        selected: true,
+        selected,
       };
     });
-  }, [nodesWithPendingLane, selectedStepId]);
+  }, [nodesWithPendingLane, selectedStepId, settingsNodes?.selectedKind]);
 
   const {
     nodes: animatedNodes,
@@ -646,17 +688,28 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   });
 
   const handleNodeClick = useCallback(
-    (_evt: React.MouseEvent, node: { id: string; data: Record<string, unknown> }) => {
+    (
+      _evt: React.MouseEvent,
+      node: { id: string; type?: string; data: Record<string, unknown> }
+    ) => {
+      if (node.type === 'settings') {
+        const kind = node.data?.kind;
+        if (kind === 'info' || kind === 'constants' || kind === 'outputs') {
+          onSettingsNodeSelect?.(kind);
+        }
+        return;
+      }
       const stepType = typeof node.data?.stepType === 'string' ? node.data.stepType : '';
       onStepSelect(node.id);
       onNodeClick?.(node.id, stepType);
     },
-    [onStepSelect, onNodeClick]
+    [onStepSelect, onNodeClick, onSettingsNodeSelect]
   );
 
   const handlePaneClick = useCallback(() => {
     if (selectedStepId) onStepSelect(undefined);
-  }, [selectedStepId, onStepSelect]);
+    if (settingsNodes?.selectedKind) onSettingsNodeSelect?.(undefined);
+  }, [selectedStepId, onStepSelect, settingsNodes?.selectedKind, onSettingsNodeSelect]);
 
   const handleMoveEnd = useCallback(
     (_event: MouseEvent | TouchEvent | null, viewport: Viewport) => onViewportChange?.(viewport),
@@ -684,11 +737,14 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
 
   // Keep the selected node visible beside a floating config panel (right inset).
+  const panelFocusNodeId =
+    selectedStepId ??
+    (settingsNodes?.selectedKind ? `settings:${settingsNodes.selectedKind}` : undefined);
   useEffect(() => {
-    if (!selectedStepId || !selectedNodePanelInset || selectedNodePanelInset <= 0) return;
+    if (!panelFocusNodeId || !selectedNodePanelInset || selectedNodePanelInset <= 0) return;
     const instance = flowInstanceRef.current;
     if (!instance) return;
-    const node = instance.getNode(selectedStepId);
+    const node = instance.getNode(panelFocusNodeId);
     if (!node) return;
     const zoom = instance.getZoom();
     const w = node.measured?.width ?? (node.width as number | undefined) ?? 200;
@@ -698,7 +754,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     // Shift the viewport center so the node sits in the unobstructed left region.
     const panelFlowOffset = selectedNodePanelInset / (2 * zoom);
     instance.setCenter(centerX + panelFlowOffset, centerY, { zoom, duration: 220 });
-  }, [selectedStepId, selectedNodePanelInset]);
+  }, [panelFocusNodeId, selectedNodePanelInset]);
 
   // React Flow's `setCenter` derives the viewport from the store's container
   // `width`/`height`, which are 0 until its ResizeObserver measures the canvas

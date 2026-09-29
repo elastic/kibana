@@ -66,6 +66,12 @@ export interface WorkflowGraphEditActions {
   onDeleteNode: (nodeId: string) => void;
 }
 
+/** Applied-state reason for the node warning badge tooltip. */
+export type NodeConfigWarningReason = 'incomplete' | 'misconfigured' | 'both';
+
+/** Settings node kinds (Option B canvas row above triggers). */
+export type WorkflowSettingsNodeKind = 'info' | 'constants' | 'outputs';
+
 export interface WorkflowGraphActions {
   /** Called when the user clicks the Play icon on a node hover. */
   onStepRun?: (stepName: string) => void;
@@ -73,6 +79,11 @@ export interface WorkflowGraphActions {
   canRunSteps?: boolean;
   /** Called when the user keyboard-activates (Enter/Space) a node. */
   onStepSelect?: (nodeId: string) => void;
+  /**
+   * Called when the user activates a settings node (info / constants /
+   * outputs). `undefined` clears the settings selection (e.g. pane click).
+   */
+  onSettingsNodeSelect?: (kind: WorkflowSettingsNodeKind | undefined) => void;
   /**
    * Optional renderer for step icons inside graph nodes. When provided, the
    * canvas delegates icon resolution to the caller (e.g. the plugin's
@@ -82,8 +93,11 @@ export interface WorkflowGraphActions {
   renderStepIcon?: RenderStepIcon;
   /** Edit-mode callbacks; undefined renders the read-only canvas. */
   edit?: WorkflowGraphEditActions;
-  /** Node ids whose step is missing a schema-required field. */
-  incompleteNodeIds?: ReadonlySet<string>;
+  /**
+   * Applied-state config warnings per node id (edit mode). Drives the
+   * top-right warning badge and its tooltip copy.
+   */
+  nodeConfigWarnings?: ReadonlyMap<string, NodeConfigWarningReason>;
   /**
    * Connection-point targets per node id. Present only in edit mode when
    * insertion controls are not suppressed; read-only omits ports entirely.

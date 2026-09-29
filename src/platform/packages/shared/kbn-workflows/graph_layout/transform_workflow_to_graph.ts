@@ -467,8 +467,10 @@ function transformInternal(
 
       // Rule 1 — one labeled edge per case (label = match value).
       cases.forEach((caseItem, idx) => {
+        const matchLabel = String(caseItem.match ?? '');
         if (!Array.isArray(caseItem.steps) || caseItem.steps.length === 0) {
-          // Empty case — synthesize a bypass lane node so the labeled edge appears.
+          // Empty case — synthesize a bypass lane so the branch is visible
+          // while the author is still filling in steps on the canvas.
           const bypassId = ids.allocate(`${step.name}-case-${idx}-bypass`);
           bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
           edges.push({
@@ -476,7 +478,7 @@ function transformInternal(
             source: id,
             target: bypassId,
             branchType: 'switch',
-            label: String(caseItem.match ?? ''),
+            label: matchLabel,
           });
           branchExits.push(bypassId);
           return;
@@ -497,7 +499,7 @@ function transformInternal(
             source: id,
             target: firstId,
             branchType: 'switch',
-            label: String(caseItem.match),
+            label: matchLabel,
           });
         }
         branchExits.push(...inner.leafIds);

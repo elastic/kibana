@@ -13,7 +13,12 @@ import { SearchButton } from '../shared/search_button';
 import { AiButtonSlot } from '../shared/ai_button_slot';
 import { HelpButton } from '../shared/help_button';
 import { ChromeHeaderShell } from './header_shell';
-import { useContextSwitcher, useProjectPicker, useUserMenu } from '../shared/chrome_hooks';
+import {
+  useAppendRight,
+  useContextSwitcher,
+  useProjectPicker,
+  useUserMenu,
+} from '../shared/chrome_hooks';
 import { ChromeHeaderPageAnnouncer } from '../shared/header_page_announcer';
 
 export const ChromeHeader = React.memo(() => {
@@ -28,6 +33,7 @@ export const ChromeHeader = React.memo(() => {
         switcher={useContextSwitcher()}
         projectPicker={useProjectPicker()}
         userMenu={useUserMenu()}
+        appendRight={useAppendRight()}
       />
     </>
   );

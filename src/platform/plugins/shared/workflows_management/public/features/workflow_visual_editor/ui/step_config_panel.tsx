@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
@@ -34,6 +35,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
@@ -53,6 +55,7 @@ import {
   type StepFormField,
 } from '../lib/step_form_schema';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
+import { SwitchCasesField } from './switch_cases_field';
 import {
   FlyoutMonacoFrame,
   getFlyoutMonacoEditorOptions,
@@ -89,6 +92,11 @@ export interface StepConfigPanelProps {
    * widen to fill available canvas width.
    */
   readonly onExpandedChange?: (expanded: boolean) => void;
+  /**
+   * Fires whenever the panel draft diverges from (or returns to) the applied
+   * snapshot — used to gate canvas navigation (selecting another step).
+   */
+  readonly onDraftDirtyChange?: (dirty: boolean) => void;
 }
 
 const CODE_EDITOR_HEIGHT = 160;
@@ -182,6 +190,24 @@ const toJs = (value: unknown): unknown =>
 const fieldId = (field: StepFormField): string => field.path.join('.');
 
 /**
+ * True when the panel draft differs from the applied snapshot opened with.
+ * Compares parsed YAML values (not focus / "touched" state).
+ */
+const isDraftDirty = (draftYaml: string, appliedYaml: string): boolean => {
+  if (draftYaml === appliedYaml) return false;
+  try {
+    const draftDoc = parseDocument(draftYaml);
+    const appliedDoc = parseDocument(appliedYaml);
+    if (draftDoc.errors.length > 0 || appliedDoc.errors.length > 0) {
+      return draftYaml !== appliedYaml;
+    }
+    return !isEqual(draftDoc.toJS(), appliedDoc.toJS());
+  } catch {
+    return draftYaml !== appliedYaml;
+  }
+};
+
+/**
  * Settings accordion open state for the lifetime of this page. Survives panel
  * remounts when switching steps; resets when the document unloads.
  */
@@ -202,6 +228,7 @@ export function StepConfigPanel({
   onSave,
   isFallbackStep = false,
   onExpandedChange,
+  onDraftDirtyChange,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -220,10 +247,29 @@ export function StepConfigPanel({
   const [settingsOpen, setSettingsOpen] = useState(settingsAccordionOpenForPage);
   /** Field currently open in the expanded editor (depth ≤ 2). */
   const [expandedField, setExpandedField] = useState<StepFormField | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   useEffect(() => {
     onExpandedChange?.(expandedField != null);
   }, [expandedField, onExpandedChange]);
+
+  useEffect(
+    () => () => {
+      onExpandedChange?.(false);
+    },
+    [onExpandedChange]
+  );
+
+  useEffect(() => {
+    onDraftDirtyChange?.(isDraftDirty(fragment, initialFragment));
+  }, [fragment, initialFragment, onDraftDirtyChange]);
+
+  useEffect(
+    () => () => {
+      onDraftDirtyChange?.(false);
+    },
+    [onDraftDirtyChange]
+  );
 
   const handleSettingsToggle = useCallback((isOpen: boolean) => {
     settingsAccordionOpenForPage = isOpen;
@@ -251,6 +297,7 @@ export function StepConfigPanel({
     setIsEditingName(false);
     setNameError(undefined);
     setExpandedField(null);
+    setShowDiscardConfirm(false);
   }, [initialFragment]);
 
   const schema = useMemo(() => getStepFormSchema(stepType, connectors), [stepType, connectors]);
@@ -417,15 +464,13 @@ export function StepConfigPanel({
     setNameError(undefined);
   }, [nameDraft, siblingStepNames, indent]);
 
-  const hasFormErrors = useMemo(() => {
+  // Done may apply incomplete / misconfigured drafts (canvas badge reflects
+  // applied state). Block only empty name, unparseable mid-edit values, or
+  // invalid YAML — not advisory field validation.
+  const hasBlockingDraftErrors = useMemo(() => {
     if (draftErrors.size > 0) return true;
-    if (isEmptyFieldValue(committedStepName)) return true;
-    return fields.some((field) => {
-      const value = toJs(readFragmentValue(fragment, field.path));
-      if (!isFieldValueRepresentable(field, value)) return false;
-      return validateStepField(field, value) !== undefined;
-    });
-  }, [fields, fragment, draftErrors, committedStepName]);
+    return isEmptyFieldValue(committedStepName);
+  }, [draftErrors, committedStepName]);
 
   const closeLabel = i18n.translate('workflows.stepConfigPanel.close', {
     defaultMessage: 'Close',
@@ -438,17 +483,30 @@ export function StepConfigPanel({
   });
 
   const handleSave = useCallback(() => {
-    if (!parsed.valid || hasFormErrors) {
+    if (!parsed.valid || hasBlockingDraftErrors) {
       setShowValidation(true);
       return;
     }
     onSave(fragment);
-  }, [parsed.valid, hasFormErrors, onSave, fragment]);
+  }, [parsed.valid, hasBlockingDraftErrors, onSave, fragment]);
 
-  // Flyout Escape / mask close — skip while the step-name editor is active
-  // (Escape there reverts the name via the input handler instead).
-  const handleClose = useCallback(() => {
+  // Cancel / X / Escape share one close-attempt path: dirty draft → confirm, else close.
+  // Skip while the step-name editor is active (Escape there reverts the name instead).
+  const attemptClose = useCallback(() => {
     if (isEditingNameRef.current) return;
+    if (isDraftDirty(fragment, initialFragment)) {
+      setShowDiscardConfirm(true);
+      return;
+    }
+    onCancel();
+  }, [fragment, initialFragment, onCancel]);
+
+  const handleKeepEditing = useCallback(() => {
+    setShowDiscardConfirm(false);
+  }, []);
+
+  const handleDiscard = useCallback(() => {
+    setShowDiscardConfirm(false);
     onCancel();
   }, [onCancel]);
 
@@ -490,7 +548,8 @@ export function StepConfigPanel({
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           e.stopPropagation();
-          handleClose();
+          if (showDiscardConfirm) return;
+          attemptClose();
         }
       }}
       css={{
@@ -515,9 +574,9 @@ export function StepConfigPanel({
             display: 'flex',
             alignItems: 'center',
             gap: euiTheme.size.m,
-            // paddingSize="none" on the flyout clears header inset — restore
-            // 16px (size.base) so the step tile and close aren't edge-flush.
-            padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s}`,
+            // Leave room on the right for the absolutely positioned ✕.
+            // No bottom padding — tabs sit flush under the title row.
+            padding: `${euiTheme.size.base} ${euiTheme.size.xl} 0 ${euiTheme.size.base}`,
           }}
         >
           {/*
@@ -711,26 +770,22 @@ export function StepConfigPanel({
               )}
             </div>
           </div>
-          <div
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: euiTheme.size.s,
-              flex: '0 0 auto',
-            }}
-          >
-            <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                aria-label={closeLabel}
-                onClick={onCancel}
-                data-test-subj="workflowStepConfigPanelClose"
-                css={{ flex: '0 0 auto' }}
-              />
-            </EuiToolTip>
-          </div>
         </div>
+        <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="cross"
+            color="text"
+            aria-label={closeLabel}
+            onClick={attemptClose}
+            data-test-subj="workflowStepConfigPanelClose"
+            css={{
+              position: 'absolute',
+              top: euiTheme.size.s,
+              right: euiTheme.size.s,
+              zIndex: 1,
+            }}
+          />
+        </EuiToolTip>
         <EuiTabs
           size="s"
           bottomBorder={false}
@@ -738,7 +793,10 @@ export function StepConfigPanel({
           aria-label={i18n.translate('workflows.stepConfigPanel.editorModeLegend', {
             defaultMessage: 'Step editor mode',
           })}
-          css={{ paddingInline: euiTheme.size.base }}
+          css={{
+            paddingInline: euiTheme.size.base,
+            marginBlockStart: 0,
+          }}
         >
           {editorModeOptions.map((option) => (
             <EuiTab
@@ -808,6 +866,7 @@ export function StepConfigPanel({
                 {parsed.valid ? (
                   <StepForm
                     key={initialFragment}
+                    stepType={stepType}
                     fields={fields}
                     hasSchema={schema !== undefined}
                     fragment={fragment}
@@ -886,7 +945,7 @@ export function StepConfigPanel({
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={onCancel}
+                onClick={attemptClose}
                 data-test-subj="workflowStepConfigPanelCancel"
               >
                 {i18n.translate('workflows.stepConfigPanel.cancel', { defaultMessage: 'Cancel' })}
@@ -896,10 +955,10 @@ export function StepConfigPanel({
               <EuiButton
                 fill
                 onClick={handleSave}
-                isDisabled={!parsed.valid || hasFormErrors}
+                isDisabled={!parsed.valid || hasBlockingDraftErrors}
                 data-test-subj="workflowStepConfigPanelSave"
               >
-                {i18n.translate('workflows.stepConfigPanel.save', { defaultMessage: 'Save step' })}
+                {i18n.translate('workflows.stepConfigPanel.save', { defaultMessage: 'Done' })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -926,15 +985,42 @@ export function StepConfigPanel({
               expandedField.kind === 'code' ? expandedField.language : undefined
             }
             onBack={handleFieldEditorBack}
-            onCloseStack={onCancel}
+            onCloseStack={attemptClose}
           />
         </div>
+      ) : null}
+
+      {showDiscardConfirm ? (
+        <EuiConfirmModal
+          title={i18n.translate('workflows.stepConfigPanel.discardTitle', {
+            defaultMessage: 'Discard changes to this step?',
+          })}
+          onCancel={handleKeepEditing}
+          onConfirm={handleDiscard}
+          cancelButtonText={i18n.translate('workflows.stepConfigPanel.keepEditing', {
+            defaultMessage: 'Keep editing',
+          })}
+          confirmButtonText={i18n.translate('workflows.stepConfigPanel.discard', {
+            defaultMessage: 'Discard',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="workflowStepConfigPanelDiscardModal"
+        >
+          <EuiText size="s">
+            {i18n.translate('workflows.stepConfigPanel.discardBody', {
+              defaultMessage:
+                "These edits haven't been applied to the step yet. Closing now will discard them.",
+            })}
+          </EuiText>
+        </EuiConfirmModal>
       ) : null}
     </div>
   );
 }
 
 function StepForm({
+  stepType,
   fields,
   hasSchema,
   fragment,
@@ -944,6 +1030,7 @@ function StepForm({
   onDraftErrorChange,
   onExpandField,
 }: {
+  stepType: string;
   fields: readonly StepFormField[];
   /** False when no connector/built-in schema was resolved for this step type. */
   hasSchema: boolean;
@@ -1033,20 +1120,33 @@ function StepForm({
     [onChange, onDraftErrorChange]
   );
 
-  const renderField = (field: StepFormField, options: { removable: boolean }) => (
-    <StepFieldRow
-      key={fieldId(field)}
-      field={field}
-      value={toJs(readFragmentValue(fragment, field.path))}
-      showValidation={showValidation}
-      referenceCatalog={referenceCatalog}
-      showOptionalMarker={!field.required}
-      onRemove={options.removable ? () => removeOptionalField(field) : undefined}
-      onChange={(value) => onChange(field, value)}
-      onDraftErrorChange={(error) => onDraftErrorChange(fieldId(field), error)}
-      onExpand={() => onExpandField(field)}
-    />
-  );
+  const renderField = (field: StepFormField, options: { removable: boolean }) => {
+    if (stepType === 'switch' && field.key === 'cases') {
+      return (
+        <div key={fieldId(field)} className="workflowStepConfigFieldRow">
+          <SwitchCasesField
+            value={toJs(readFragmentValue(fragment, field.path))}
+            onChange={(next) => onChange(field, next)}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <StepFieldRow
+        key={fieldId(field)}
+        field={field}
+        value={toJs(readFragmentValue(fragment, field.path))}
+        showValidation={showValidation}
+        referenceCatalog={referenceCatalog}
+        showOptionalMarker={!field.required}
+        onRemove={options.removable ? () => removeOptionalField(field) : undefined}
+        onChange={(value) => onChange(field, value)}
+        onDraftErrorChange={(error) => onDraftErrorChange(fieldId(field), error)}
+        onExpand={() => onExpandField(field)}
+      />
+    );
+  };
 
   const addOptionalField = useCallback((field: StepFormField) => {
     const id = fieldId(field);
