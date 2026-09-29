@@ -254,13 +254,12 @@ describe('SavedObjectInvestigationRepository', () => {
         per_page: 20,
       });
 
-      await repository.find({ severities: ['80-critical', '60-high'] });
+      await repository.find({ severities: ['critical', 'high'] });
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter:
-            `(${TYPE}.attributes.severity: "80-critical"` +
-            ` OR ${TYPE}.attributes.severity: "60-high")`,
+            `(${TYPE}.attributes.severity: "critical"` + ` OR ${TYPE}.attributes.severity: "high")`,
         })
       );
     });

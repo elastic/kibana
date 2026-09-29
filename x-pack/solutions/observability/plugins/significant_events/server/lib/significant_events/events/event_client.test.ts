@@ -19,13 +19,12 @@ import { storedEventSchema, type SignificantEvent } from './data_stream';
 
 const createEvent = (): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-1',
   event_id: 'agent-event-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.8,
 });
 
@@ -228,14 +227,14 @@ describe('EventClient', () => {
       const latest = {
         ...createEvent(),
         '@timestamp': '2026-01-03T00:00:00.000Z',
-        status: 'closed' as const,
+        status: 'inactive' as const,
       };
       const { client, query } = createSearchClient({ hits: [latest], total: 1, createdAt });
 
       const result = await client.findLatestByCurrentStatePaginated({
         from: '2026-01-02T00:00:00.000Z',
         to: '2026-01-04T00:00:00.000Z',
-        status: ['closed'],
+        status: ['inactive'],
         stream: ['logs.test'],
       });
 
@@ -259,13 +258,13 @@ describe('EventClient', () => {
       expect(dataQuery).toContain('SORT @timestamp DESC, _id ASC');
     });
 
-    it('filters open state after latest-per-slug reduction', async () => {
+    it('filters active state after latest-per-slug reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],
         total: 0,
       });
 
-      const result = await client.findLatestByCurrentStatePaginated({ status: ['open'] });
+      const result = await client.findLatestByCurrentStatePaginated({ status: ['active'] });
 
       expect(result.hits).toEqual([]);
       const dataQuery = query.mock.calls
@@ -277,17 +276,17 @@ describe('EventClient', () => {
       );
     });
 
-    it('treats closed as latest status not in open set', async () => {
-      const closedLatest = { ...createEvent(), status: 'closed' as const };
+    it('treats inactive as the latest status outside the active set', async () => {
+      const inactiveLatest = { ...createEvent(), status: 'inactive' as const };
       const { client } = createSearchClient({
-        hits: [closedLatest],
+        hits: [inactiveLatest],
         total: 1,
       });
 
-      const result = await client.findLatestByCurrentStatePaginated({ status: ['closed'] });
+      const result = await client.findLatestByCurrentStatePaginated({ status: ['inactive'] });
 
       expect(result.hits).toHaveLength(1);
-      expect(result.hits[0].status).toBe('closed');
+      expect(result.hits[0].status).toBe('inactive');
       expect(result.total).toBe(1);
     });
 
@@ -298,7 +297,7 @@ describe('EventClient', () => {
       });
 
       await client.findLatestByCurrentStatePaginated({
-        severity: ['80-critical', '60-high'],
+        severity: ['critical', 'high'],
       });
 
       const dataQuery = query.mock.calls
@@ -361,7 +360,7 @@ describe('EventClient', () => {
 
       await expect(
         client.findLatestByCurrentStateBatch({
-          status: ['open'],
+          status: ['active'],
           afterEventId: 'agent-event-0',
           batchSize: 100,
         })
@@ -395,7 +394,7 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('status IN ("open")');
+      expect(dataQuery).toContain('status IN ("active")');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('status IN')
       );

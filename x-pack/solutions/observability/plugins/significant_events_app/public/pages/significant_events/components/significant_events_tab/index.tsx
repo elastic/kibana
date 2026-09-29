@@ -56,11 +56,10 @@ import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
-import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DismissEventModal } from './dismiss_event_modal';
 
-export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
+export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['critical', 'high'];
 
 const RUN_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.runInvestigationButton.ariaLabel',
@@ -69,17 +68,10 @@ const RUN_ARIA_LABEL = i18n.translate(
   }
 );
 
-const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.closeEventButton.ariaLabel',
-  {
-    defaultMessage: 'Close this significant event',
-  }
-);
-
-const DISMISS_EVENT_ARIA_LABEL = i18n.translate(
+const MARK_EVENT_INACTIVE_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.dismissEventButton.ariaLabel',
   {
-    defaultMessage: 'Dismiss this significant event',
+    defaultMessage: 'Mark this significant event inactive',
   }
 );
 
@@ -130,40 +122,6 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   );
 };
 
-const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
-  const {
-    core: {
-      application: {
-        capabilities: { nightshift },
-      },
-    },
-  } = useKibana();
-  const { canManage } = getNightshiftCapabilities(nightshift);
-  const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
-
-  if (!canManage || event.status !== 'open') {
-    return null;
-  }
-
-  return (
-    <EuiToolTip content={CLOSE_EVENT_ARIA_LABEL} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="cross"
-        aria-label={CLOSE_EVENT_ARIA_LABEL}
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
-        }}
-        isDisabled={isUpdating}
-        isLoading={isUpdating}
-        size="s"
-        color="danger"
-        data-test-subj="sigEventCloseIconButton"
-      />
-    </EuiToolTip>
-  );
-};
-
 const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
   const {
     core: {
@@ -175,16 +133,16 @@ const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
   const { canManage } = getNightshiftCapabilities(nightshift);
   const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
 
-  if (!canManage || event.status !== 'open') {
+  if (!canManage || event.status !== 'active') {
     return null;
   }
 
   return (
     <>
-      <EuiToolTip content={DISMISS_EVENT_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiToolTip content={MARK_EVENT_INACTIVE_ARIA_LABEL} disableScreenReaderOutput>
         <EuiButtonIcon
           iconType="eyeSlash"
-          aria-label={DISMISS_EVENT_ARIA_LABEL}
+          aria-label={MARK_EVENT_INACTIVE_ARIA_LABEL}
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             setIsDismissModalOpen(true);
@@ -375,9 +333,6 @@ export const getSignificantEventTableColumns = ({
         <EuiFlexItem grow={false}>
           <DismissEventCell event={item} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CloseEventCell event={item} />
-        </EuiFlexItem>
       </EuiFlexGroup>
     ),
   },
@@ -412,9 +367,9 @@ export const SignificantEventsTab = () => {
   const { updateTimeRange } = useTimeRangeUpdate();
 
   const { data: streamsData } = useFetchStreams();
-  // Closed events are hidden by default; users can opt back in via the Status filter.
+  // Inactive events are hidden by default; users can opt back in via the Status filter.
   const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
-    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
+    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'active')
   );
   const [severityFilter, setSeverityFilter] = useState<Severity[]>(() => [
     ...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
@@ -543,7 +498,7 @@ export const SignificantEventsTab = () => {
   );
 
   const handleResetFilters = useCallback(() => {
-    setStatusFilter(SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((s) => s === 'open'));
+    setStatusFilter(SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((s) => s === 'active'));
     setSeverityFilter([...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER]);
     setStreamFilter([]);
     clearSelectedEvent();
@@ -556,7 +511,7 @@ export const SignificantEventsTab = () => {
   const areFiltersAtDefault = useMemo(
     () =>
       statusFilter.length === 1 &&
-      statusFilter[0] === 'open' &&
+      statusFilter[0] === 'active' &&
       severityFilter.length === DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.length &&
       DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.every((s) => severityFilter.includes(s)) &&
       streamFilter.length === 0,

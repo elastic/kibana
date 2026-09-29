@@ -125,13 +125,12 @@ jest.mock('./filter_popover', () => ({
 const event: SignificantEventResponse = {
   '@timestamp': '2026-01-02T00:00:00.000Z',
   created_at: '2026-01-01T00:00:00.000Z',
-  event_uuid: 'version-2',
   event_id: 'event-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.8,
 };
 
@@ -182,43 +181,15 @@ describe('SignificantEventFlyout actions menu', () => {
 
     fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
 
-    expect(screen.getByText('Dismiss significant event')).toBeInTheDocument();
-    expect(screen.getByTestId('sigEventCloseButton')).toBeInTheDocument();
+    expect(screen.getByText('Mark significant event inactive')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Dismiss significant event'));
+    fireEvent.click(screen.getByText('Mark significant event inactive'));
 
     expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
-  it('keeps Dismiss and Close enabled even when lifecycle returns empty events (event_id is always known)', () => {
-    // The update route resolves via event_id (findLatestByEventId), not event_uuid —
-    // lifecycle data is not required for close/dismiss to work correctly.
-    lifecycleMock.mockReturnValue({
-      data: { events: [], detections: [] },
-      isLoading: false,
-      isSuccess: true,
-      isError: false,
-      refetch: jest.fn(),
-    });
-    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
-
-    fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
-
-    const dismissItem = screen.getByText('Dismiss significant event').closest('button');
-    const closeItem = screen.getByTestId('sigEventCloseButton');
-
-    expect(dismissItem).not.toBeDisabled();
-    expect(closeItem).not.toBeDisabled();
-
-    // Clicking dismiss must open the modal since the action is enabled.
-    fireEvent.click(screen.getByText('Dismiss significant event'));
-    expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
-  });
-
-  it('does not expose actions for an already dismissed event', () => {
-    render(
-      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />
-    );
+  it('does not expose actions for an inactive event', () => {
+    render(<SignificantEventFlyout event={{ ...event, status: 'inactive' }} onClose={jest.fn()} />);
 
     expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
   });

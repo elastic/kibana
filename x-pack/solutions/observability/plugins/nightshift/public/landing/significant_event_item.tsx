@@ -187,7 +187,7 @@ export function SignificantEventItem({
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              {onCloseClick && event.status === 'open' && (
+              {onCloseClick && event.status === 'active' && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={i18n.translate('xpack.nightshift.event.closeEventTooltip', {

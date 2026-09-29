@@ -16,8 +16,6 @@ import {
 import {
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
-  SIGNIFICANT_EVENTS_SEVERITY_MAP,
-  SIGNIFICANT_EVENTS_STATUS_MAP,
   type SignificantEvent,
   type SignificantEventResponse,
   type Severity,
@@ -44,54 +42,18 @@ import type {
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
 
-/**
- * Reverse of {@link SIGNIFICANT_EVENTS_STATUS_MAP}. Hand-typed rather than derived by inversion:
- * unlike the severity map, `SIGNIFICANT_EVENTS_STATUS_MAP` is a lossy 2:1 mapping (`closed` and
- * `dismissed` both write `inactive`), so `Object.fromEntries(Object.entries(map).map(...))` would
- * pick whichever of `closed`/`dismissed` happens to be inserted last — not necessarily `closed`.
- * This is a known limitation of `.rule-events` as a read source (see `SIGNIFICANT_EVENTS_STATUS_MAP`
- * doc comment): `dismissed` is indistinguishable from `closed` post-write, so `inactive` always
- * decodes to `closed` here by explicit choice, not by accident of iteration order.
- *
- * `AlertEventsClient.createAlertEvent` persists the `alert_status` *input* under the nested
- * `episode.status` field — there is no top-level `alert_status` column on `.rule-events`
- * (`alert_events.ts` mapping). `pending`/`recovering` are never written by Significant Events
- * (only `active`/`inactive` per `SIGNIFICANT_EVENTS_STATUS_MAP`), so they fall back to `open`.
- */
-const EPISODE_STATUS_TO_SIGNIFICANT_EVENT_STATUS: Record<
-  AlertEpisodeStatus,
-  SignificantEventStatus
-> = {
-  [ALERT_EPISODE_STATUS.ACTIVE]: 'open',
-  [ALERT_EPISODE_STATUS.INACTIVE]: 'closed',
-  [ALERT_EPISODE_STATUS.PENDING]: 'open',
-  [ALERT_EPISODE_STATUS.RECOVERING]: 'open',
-};
+const isSignificantEventStatus = (status: AlertEpisodeStatus): status is SignificantEventStatus =>
+  status === ALERT_EPISODE_STATUS.ACTIVE || status === ALERT_EPISODE_STATUS.INACTIVE;
 
-/**
- * Reverse of {@link SIGNIFICANT_EVENTS_SEVERITY_MAP}, keyed by the canonical
- * {@link AlertEventSeverity} vocabulary (`@kbn/alerting-v2-schemas`) rather than a hand-typed union.
- * Derived by inversion — safe because `SIGNIFICANT_EVENTS_SEVERITY_MAP` is a bijection onto the
- * 4 levels Significant Events writes. `info` is the one `AlertEventSeverity` Significant Events
- * never produces (see `SIGNIFICANT_EVENTS_SEVERITY_MAP`), so it isn't a key here; `decodeSignificantEvent`
- * falls back below rather than indexing it directly.
- */
-const RULE_EVENT_SEVERITY_TO_SIGNIFICANT_EVENT_SEVERITY: Partial<
-  Record<AlertEventSeverity, Severity>
-> = Object.fromEntries(
-  Object.entries(SIGNIFICANT_EVENTS_SEVERITY_MAP).map(([severity, ruleEventSeverity]) => [
-    ruleEventSeverity,
-    severity,
-  ])
-);
+const isSignificantEventSeverity = (severity: AlertEventSeverity): severity is Severity =>
+  severity === 'critical' || severity === 'high' || severity === 'medium' || severity === 'low';
 
 type RuleEventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
 export type RuleEventsBatchSearchOptions = RuleEventsCurrentStateSearchOptions & {
   // Named `afterGroupHash`, not `afterEventId` like `EventClient`'s equivalent cursor: the keyset
   // here is `group_hash` (the only stable per-series column `.rule-events` carries — see
-  // `GROUP_HASH_FIELD`), not `event_id`. Callers must pass `hits[last].event_uuid` (which holds
-  // `group_hash`, per `decodeSignificantEvent`), not `hits[last].event_id`.
+  // `GROUP_HASH_FIELD`), not `event_id`.
   afterGroupHash?: string;
   batchSize: number;
 };
@@ -118,27 +80,21 @@ const normalizeStreamNames = (value: unknown): string[] => {
 };
 
 /**
- * Decodes a `.rule-events` row into a `SignificantEvent`. `event_uuid` isn't persisted here, so
- * `group_hash` stands in for it; callers needing the real `event_uuid` must use `EventClient`.
+ * Decodes a `.rule-events` row into a `SignificantEvent`.
  */
 const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   const data = JSON.parse(row.data_json || '{}') as Omit<
     SignificantEvent,
-    '@timestamp' | 'event_uuid' | 'status' | 'severity'
+    '@timestamp' | 'status' | 'severity'
   >;
+  const episodeStatus = row.episode?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
+  const severity = row.severity ?? 'medium';
   return {
     ...data,
     stream_names: normalizeStreamNames(data.stream_names),
     '@timestamp': row['@timestamp'],
-    event_uuid: row[GROUP_HASH_FIELD],
-    status:
-      EPISODE_STATUS_TO_SIGNIFICANT_EVENT_STATUS[
-        row.episode?.status ?? ALERT_EPISODE_STATUS.ACTIVE
-      ],
-    // `RULE_EVENT_SEVERITY_TO_SIGNIFICANT_EVENT_SEVERITY` has no `info` entry (Significant Events
-    // never writes it) — fall back to `'40-medium'` for any row this reader wasn't built to expect.
-    severity:
-      RULE_EVENT_SEVERITY_TO_SIGNIFICANT_EVENT_SEVERITY[row.severity ?? 'medium'] ?? '40-medium',
+    status: isSignificantEventStatus(episodeStatus) ? episodeStatus : 'active',
+    severity: isSignificantEventSeverity(severity) ? severity : 'medium',
   };
 };
 
@@ -247,14 +203,8 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
  * before this client's output is trusted in production.
  *
  * Not implemented here:
- * - Lookup by `event_uuid` — that identifier is never written to `.rule-events`; callers needing
- *   it must keep using `EventClient` directly.
+ * - `findLatestActive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
  * - Writes (`bulkCreate`) and workflow triggers (`emitTrigger`) — this class is read-only.
- *
- * **`event_uuid` on every result is a stand-in, not a real identifier** (see `decodeSignificantEvent`):
- * it holds `group_hash`, which stays constant across every version of a series. Do not use it for
- * optimistic-concurrency checks or `previous_event_uuid` chaining (see `update_event_status.ts`) —
- * those require a value that changes per write, which `.rule-events` does not currently persist.
  */
 export class RuleEventsClient implements SignificantEventsReadClient {
   constructor(private readonly clients: { esClient: ElasticsearchClient; space: string }) {}
@@ -280,15 +230,13 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
     if (options.status?.length) {
-      // `episode.status` — the nested field `AlertEventsClient.createAlertEvent` persists the
-      // `alert_status` input under (see `EPISODE_STATUS_TO_SIGNIFICANT_EVENT_STATUS` doc comment).
       query = query.where`${esql.col('episode.status')} IN (${options.status.map((status) =>
-        esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
+        esql.str(status)
       )})`;
     }
     if (options.severity?.length) {
       query = query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
-        esql.str(SIGNIFICANT_EVENTS_SEVERITY_MAP[severity])
+        esql.str(severity)
       )})`;
     }
     if (options.stream?.length) {
@@ -407,9 +355,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
 
     query = query.where`${esql.col(
       'episode.status'
-    )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
-      esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
-    )})`;
+    )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`;
 
     if (options.streamNames?.length) {
       query = query.where`${streamNamesIntersects(options.streamNames)}`;

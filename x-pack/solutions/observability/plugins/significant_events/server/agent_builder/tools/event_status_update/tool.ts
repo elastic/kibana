@@ -25,7 +25,7 @@ export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
 
 const eventStatusUpdateSchema = significantEventSchema.pick({
   status: true,
-  event_uuid: true,
+  event_id: true,
 });
 
 export function createEventStatusUpdateTool({
@@ -68,7 +68,7 @@ export function createEventStatusUpdateTool({
 
         const data = await updateEventStatusToolHandler({
           eventClient: await getEventClient(),
-          eventUuid: toolParams.event_uuid,
+          eventId: toolParams.event_id,
           status: toolParams.status,
           alertEventsClient: await getAlertEventsClient(),
           logger,
@@ -76,7 +76,7 @@ export function createEventStatusUpdateTool({
 
         telemetry.trackAgentToolEventStatusUpdate({
           success: true,
-          event_uuid: toolParams.event_uuid,
+          event_id: toolParams.event_id,
           status: toolParams.status,
         });
 
@@ -86,7 +86,7 @@ export function createEventStatusUpdateTool({
         logger.error(`Error running event_status_update: ${message}`);
         telemetry.trackAgentToolEventStatusUpdate({
           success: false,
-          event_uuid: toolParams.event_uuid,
+          event_id: toolParams.event_id,
           status: toolParams.status,
           error_message: message,
         });

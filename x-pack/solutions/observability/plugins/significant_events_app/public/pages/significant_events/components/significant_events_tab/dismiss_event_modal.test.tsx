@@ -29,7 +29,7 @@ describe('DismissEventModal', () => {
     });
   });
 
-  it('disables confirm until a reason is entered', () => {
+  it('disables confirm until an assessment note is entered', () => {
     render(<DismissEventModal eventId="event-1" onClose={jest.fn()} />);
 
     const confirm = screen.getByTestId('sigEventDismissConfirmButton');
@@ -44,7 +44,7 @@ describe('DismissEventModal', () => {
     fireEvent.click(confirm);
     expect(updateEventStatus).toHaveBeenCalledWith({
       eventId: 'event-1',
-      status: 'dismissed',
+      status: 'inactive',
       assessmentNote: 'known rate limiter',
     });
   });

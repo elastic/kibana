@@ -14,12 +14,11 @@ import {
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'evt-1',
-  event_uuid: 'evt-uuid-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.app'],
   title: 'Latency spike',
   summary: 'Summary',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.9,
   ...overrides,
 });

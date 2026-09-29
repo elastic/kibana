@@ -364,7 +364,7 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
       description: 'Whether the event status update succeeded',
     },
   },
-  event_uuid: {
+  event_id: {
     type: 'keyword',
     _meta: {
       description: 'The identifier of the updated significant event',
@@ -567,20 +567,11 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
         description: 'Whether the investigation attachment succeeded',
       },
     },
-    event_uuid: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
-        optional: true,
-      },
-    },
     event_id: {
       type: 'keyword',
       _meta: {
         description:
           'The stable event id of the significant event the investigation was attached to',
-        optional: true,
       },
     },
     workflow_execution_id: {

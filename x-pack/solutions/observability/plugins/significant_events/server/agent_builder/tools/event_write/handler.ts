@@ -62,7 +62,6 @@ export type EventsWriteInput = Pick<
 
 export interface EventsWriteResult {
   index: number;
-  event_uuid: string;
   event_id: string;
   status: SignificantEvent['status'];
   written: true;
@@ -104,7 +103,6 @@ interface DedupCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
-  eventUuid: string;
   /** Retained separately so the dedup scan can narrow by rule identity. */
   ruleUuids: string[];
 }
@@ -114,7 +112,6 @@ interface SnapshotCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
-  eventUuid: string;
 }
 
 type WriteCandidate = DedupCandidate | SnapshotCandidate;
@@ -178,7 +175,6 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
         index,
         input: normalizedInput,
         eventId: uuidv4(),
-        eventUuid: uuidv4(),
         ruleUuids,
       };
     }
@@ -188,7 +184,6 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
       index,
       input: normalizedInput,
       eventId: normalizedEventId,
-      eventUuid: uuidv4(),
     };
   });
 
@@ -384,13 +379,11 @@ const buildPendingWrite = (
   candidate: WriteCandidate,
   timestamp: string,
   latestByEventId: Map<string, SignificantEvent>,
-  latestLegacyByEventId: Map<string, SignificantEvent>,
   priorDocsByEventId: Map<string, SignificantEvent[]>
 ) => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
   const latestEvent = latestByEventId.get(candidate.eventId);
-  const latestLegacyEvent = latestLegacyByEventId.get(candidate.eventId);
   const isContinuation = candidate.input.event_id !== undefined;
 
   const signals = isContinuation
@@ -434,10 +427,8 @@ const buildPendingWrite = (
           }
         : {}),
       '@timestamp': timestamp,
-      event_uuid: candidate.eventUuid,
       event_id: candidate.eventId,
-      previous_event_uuid: latestLegacyEvent?.event_uuid,
-      investigations: latestLegacyEvent?.investigations,
+      investigations: latestEvent?.investigations,
       signals,
       stream_names: episodeContext.streamNames,
       causal_features: episodeContext.causalFeatures,
@@ -468,7 +459,6 @@ const applyBulkResults = (
     } else {
       const result: EventsWriteResult = {
         index: candidate.index,
-        event_uuid: candidate.eventUuid,
         event_id: candidate.eventId,
         status,
         written: true,
@@ -606,13 +596,7 @@ export async function eventsWriteBulkHandler({
   }
 
   const pendingToWrite = remaining.map((candidate) =>
-    buildPendingWrite(
-      candidate,
-      timestamp,
-      latestByEventId,
-      latestLegacyByEventId,
-      priorDocsByEventId
-    )
+    buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
   );
 
   let response;

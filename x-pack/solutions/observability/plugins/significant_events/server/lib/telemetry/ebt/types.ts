@@ -69,20 +69,15 @@ interface AgentToolEventCreateProps {
 
 interface AgentToolEventStatusUpdateProps {
   success: boolean;
-  event_uuid: string;
+  event_id: string;
   status: SignificantEventStatus;
   error_message?: string;
 }
 
 interface AgentToolEventInvestigationAttachProps {
   success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
-   * events; new events populate `event_id` instead.
-   */
-  event_uuid?: string;
-  /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
-  event_id?: string;
+  /** Stable event_id slug of the Significant Event. */
+  event_id: string;
   workflow_execution_id: string;
   error_message?: string;
 }

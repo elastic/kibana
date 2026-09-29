@@ -374,11 +374,11 @@ const eventsUpdateRoute = createServerRoute({
         assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
       })
       .superRefine((val, ctx) => {
-        if (val.status === 'dismissed' && !val.assessment_note?.trim()) {
+        if (val.status === 'inactive' && !val.assessment_note?.trim()) {
           ctx.addIssue({
             code: 'custom',
             path: ['assessment_note'],
-            message: 'assessment_note is required when dismissing an event',
+            message: 'assessment_note is required when setting an event inactive',
           });
         }
       }),

@@ -27,25 +27,25 @@ import { useUpdateSignificantEvent } from '../../../../hooks/use_update_signific
 
 const MODAL_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.dismissModal.title',
-  { defaultMessage: 'Dismiss significant event' }
+  { defaultMessage: 'Mark significant event inactive' }
 );
 
 const MODAL_DESCRIPTION = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.dismissModal.description',
   {
     defaultMessage:
-      'Dismiss this event as known noise. A reason is required so Discovery can skip future recurrences of the same detection rules.',
+      'Mark this event inactive. An assessment note is required to record the operator rationale.',
   }
 );
 
 const REASON_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.dismissModal.reasonLabel',
-  { defaultMessage: 'Reason for dismissal' }
+  { defaultMessage: 'Assessment note' }
 );
 
 const CONFIRM_BUTTON_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.dismissModal.confirmButton',
-  { defaultMessage: 'Dismiss' }
+  { defaultMessage: 'Mark inactive' }
 );
 
 const CANCEL_BUTTON_LABEL = i18n.translate(
@@ -74,7 +74,7 @@ export const DismissEventModal = ({ eventId, onClose, onSuccess }: DismissEventM
     }
     updateEventStatus({
       eventId,
-      status: 'dismissed',
+      status: 'inactive',
       assessmentNote: trimmedReason,
     });
   };

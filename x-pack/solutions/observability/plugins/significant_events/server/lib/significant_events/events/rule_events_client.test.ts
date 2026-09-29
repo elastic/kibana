@@ -97,9 +97,8 @@ describe('RuleEventsClient', () => {
         {
           ...dataDoc,
           '@timestamp': '2026-01-02T00:00:00.000Z',
-          event_uuid: 'group-hash-1',
-          status: 'open',
-          severity: '40-medium',
+          status: 'active',
+          severity: 'medium',
         },
       ]);
     });
@@ -144,24 +143,24 @@ describe('RuleEventsClient', () => {
   });
 
   describe('findLatestByCurrentStatePaginated', () => {
-    it('filters status on episode.status (not top-level alert_status), translated from SIGNIFICANT_EVENTS_STATUS_MAP', async () => {
+    it('filters status on episode.status (not top-level alert_status)', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
-      await client.findLatestByCurrentStatePaginated({ status: ['open'] });
+      await client.findLatestByCurrentStatePaginated({ status: ['active'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
       expect(q).toContain('`episode.status` IN ("active")');
       expect(q).not.toContain('alert_status');
     });
 
-    it('filters severity on top-level severity, translated from SIGNIFICANT_EVENTS_SEVERITY_MAP', async () => {
+    it('filters severity on top-level severity', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
-      await client.findLatestByCurrentStatePaginated({ severity: ['80-critical'] });
+      await client.findLatestByCurrentStatePaginated({ severity: ['critical'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
       expect(q).toContain('severity IN ("critical")');
@@ -230,7 +229,7 @@ describe('RuleEventsClient', () => {
       await client.findLatestByCurrentStatePaginated({
         from: '2026-01-01T00:00:00.000Z',
         search: 'checkout',
-        status: ['open'],
+        status: ['active'],
       });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
@@ -265,9 +264,8 @@ describe('RuleEventsClient', () => {
           {
             ...dataDoc,
             '@timestamp': '2026-01-02T00:00:00.000Z',
-            event_uuid: 'group-hash-1',
-            status: 'open',
-            severity: '40-medium',
+            status: 'active',
+            severity: 'medium',
             created_at: createdAt,
           },
         ],
