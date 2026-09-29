@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 import { MAX_TITLE_LENGTH } from '@kbn/proposals-common';
-import type { RuleTuningWorkerExtras } from '@kbn/alertzero-common';
+import type { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -22,6 +22,7 @@ import {
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { projectSkillsFromDefinition } from '../services/utils';
@@ -29,6 +30,7 @@ import { workerRegistry } from './worker_registry';
 
 const DETECTION_WORKFLOW_IDS = [
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
@@ -63,6 +65,31 @@ const renderRuleTuningWorker = (extras: RuleTuningWorkerExtras): string => {
     extras,
   });
 };
+
+const renderRuleCoverageWorker = (extras: RuleCoverageWorkerExtras): string => {
+  const definition = getManagedWorkflowDefinition(
+    ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID
+  );
+  if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+    throw new Error('Rule Coverage worker definition has no YAML template');
+  }
+  return definition.yamlTemplate({
+    settingsVersion: 1,
+    autonomyLevel: 'assisted',
+    scheduleInterval: '6h',
+    extras,
+  });
+};
+
+const resolveExpression = (expression: unknown, context: Record<string, unknown>): unknown =>
+  createWorkflowLiquidEngine().evalValueSync(
+    String(expression)
+      .trim()
+      .replace(/^\$?\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim(),
+    context
+  );
 
 interface NestedStep {
   name: string;
@@ -159,6 +186,82 @@ describe('detection rule workflows', () => {
       // `${{ }}` keeps the number type the sweep's integer inputs require; `{{ }}` would not.
       for (const key of ['analysis_window_days', 'min_fp_count', 'min_fp_rate_pct']) {
         expect(inputs[key]).toMatch(/^\$\{\{/);
+      }
+    });
+  });
+
+  describe('rule coverage worker', () => {
+    const worker = parse(
+      getManagedYaml(ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID)
+    ) as WorkflowYaml;
+
+    it('schedules the per-space sweep every hour and keeps manual runs available', () => {
+      const triggers = worker.triggers as unknown as Array<{
+        type: string;
+        with?: Record<string, unknown>;
+      }>;
+
+      expect(triggers.map(({ type }) => type)).toEqual(['scheduled', 'manual']);
+      expect(triggers[0].with).toEqual({ every: '1h' });
+    });
+
+    // Sync, unlike Rule Tuning: the coverage sweep starts its reviews detached and
+    // returns in seconds, so waiting on it lets this run carry the sweep's result.
+    it('dispatches the coverage sweep synchronously', () => {
+      const calls = flattenSteps(worker.steps as unknown as NestedStep[]).filter(({ type }) =>
+        ['workflow.execute', 'workflow.executeAsync'].includes(String(type))
+      );
+
+      expect(calls.map(({ name, type }) => [name, type])).toEqual([
+        ['run_rule_coverage', 'workflow.execute'],
+      ]);
+      expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID);
+      expect(calls[0].with?.inputs).toEqual({
+        lookback_days: '${{ consts.worker_settings.extras.lookbackDays }}',
+        batch_size: '${{ consts.worker_settings.extras.maxGapsPerRun }}',
+      });
+    });
+
+    it('forwards the saved lookback and max gaps per run to the sweep', () => {
+      const saved = { lookbackDays: 30, maxGapsPerRun: 20 };
+      const rendered = parse(renderRuleCoverageWorker(saved)) as WorkflowYaml;
+      const [dispatch] = flattenSteps(rendered.steps as unknown as NestedStep[]);
+
+      expect((rendered.consts as Record<string, Record<string, unknown>>).worker_settings).toEqual({
+        settingsVersion: 1,
+        autonomy: 'assisted',
+        scheduleInterval: '6h',
+        extras: saved,
+      });
+
+      const inputs = dispatch.with?.inputs as Record<string, unknown>;
+      expect(resolveExpression(inputs.lookback_days, { consts: rendered.consts })).toBe(30);
+      expect(resolveExpression(inputs.batch_size, { consts: rendered.consts })).toBe(20);
+      for (const key of ['lookback_days', 'batch_size']) {
+        expect(inputs[key]).toMatch(/^\$\{\{/);
+      }
+    });
+
+    // The sweep reports read failures as flags instead of failing. Dropping them would
+    // make a failed sweep indistinguishable from an empty queue.
+    it('echoes the sweep counts and failure flags as its own output', () => {
+      const emit = flattenSteps(worker.steps as unknown as NestedStep[]).find(
+        ({ type }) => type === 'workflow.output'
+      );
+      const declared = (worker.outputs as Array<{ name: string }>).map(({ name }) => name);
+      const sweepOutput = {
+        pending: 3,
+        started: 1,
+        in_flight: 2,
+        search_failed: true,
+        lookup_failed: false,
+      };
+      const context = { steps: { run_rule_coverage: { output: sweepOutput } } };
+
+      expect(declared).toEqual(Object.keys(sweepOutput));
+      expect(Object.keys(emit?.with ?? {})).toEqual(Object.keys(sweepOutput));
+      for (const [key, value] of Object.entries(sweepOutput)) {
+        expect(resolveExpression(emit?.with?.[key], context)).toBe(value);
       }
     });
   });
