@@ -139,9 +139,7 @@ const buildGroundedEsqlHeader = (b: {
 }): string =>
   commentBlock([
     `// Generated from hunt.hunt_behavior — grounded in the report's extracted`,
-    `// IOCs/behaviors and validated against the target index mappings. This is`,
-    `// hunt evidence, not a rule proposal; Detection Watch decides separately,`,
-    `// from the coverage KI, whether this technique is worth a lasting rule.`,
+    `// IOCs/behaviors and validated against the target index mappings.`,
     `// hunt: ${b.title}`,
     `// severity: ${b.severity}  risk_score: ${b.risk_score}`,
     `// mitre_attack: ${b.technique_id}${

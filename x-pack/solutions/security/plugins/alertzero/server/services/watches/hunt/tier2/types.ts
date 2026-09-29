@@ -53,16 +53,7 @@ export interface HuntBehaviorParams {
   required_indices?: string[];
 }
 
-/**
- * A candidate behavior that passed ATT&CK catalog validation. No `finding_id` —
- * that is Hub surface, dropped on lift.
- *
- * `validated_esql` is the query Tier 2 generated and validated (and, when
- * grounded, executed) to hunt this technique — evidence of what was searched,
- * not a rule proposal. Whether a hunted technique is worth a lasting detection
- * rule is Detection Watch's call, made from the coverage KI after this run;
- * Tier 2's own job ends at reporting what it hunted and what it found.
- */
+/** A candidate behavior that passed ATT&CK catalog validation. */
 export interface ValidatedBehavior {
   technique_id: string;
   evidence_quote: string;
@@ -72,8 +63,9 @@ export interface ValidatedBehavior {
   reference: string;
   tactic_ids: string[];
   parent_technique_id?: string;
+  /** The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique. */
   validated_esql: string;
-  /** Display title for this hunted finding, e.g. `Hunt: Cloud Accounts (T1078.004) [abcd1234]`. */
+  /** Display title for this finding, e.g. `Hunt: Cloud Accounts (T1078.004) [abcd1234]`. */
   title: string;
   severity: SeverityLevel;
   risk_score: number;

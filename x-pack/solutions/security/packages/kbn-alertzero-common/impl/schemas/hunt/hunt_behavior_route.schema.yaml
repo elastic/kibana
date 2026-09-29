@@ -94,9 +94,8 @@ paths:
                         validated_esql:
                           type: string
                           description: >-
-                            The ES|QL query Tier 2 generated and validated (and, when
-                            grounded, executed) to hunt this technique. Evidence of what
-                            was searched, not a rule proposal.
+                            The query Tier 2 generated and validated (and, when grounded,
+                            executed) to hunt this technique.
                         title:
                           type: string
                           description: Display title for this hunted finding.

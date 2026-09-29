@@ -180,12 +180,7 @@ const huntResultTier2BehaviorSchema = z.object({
   confidence: z.number().min(0).max(1),
   /** Display title for this hunted finding. */
   title: z.string().min(1).max(256),
-  /**
-   * The ES|QL query Tier 2 generated and validated (and, when grounded, executed) to hunt
-   * this technique. Evidence of what was searched, not a rule proposal -- whether a hunted
-   * technique is worth a lasting detection rule is Detection Watch's call from the coverage
-   * KI, not Tier 2's. Present on every validated behavior, not only confirmed hits.
-   */
+  /** The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique. */
   validated_esql: z.string().min(1).max(32_000).optional(),
   execution: huntResultBehaviorExecutionSchema.optional(),
   affected_hosts: z.array(z.string().min(1).max(512)).max(20).optional(),

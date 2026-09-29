@@ -50,16 +50,11 @@ triggers:
           type: string
           description: >
             One of the HuntTechnology values, to pin the hunt to that technology's
-            index scope. Leave it unset and the coordinator resolves every
-            technology whose required indices exist in the space and hunts them
-            all. No enum here: a workflow trigger input cannot be omitted by its
-            caller, so an absent Worker dial renders this as "" (see
-            run_hunt_coordinator's comment below); an enum would reject that
-            empty string at this child's own input-validation boundary before
-            the coordinator ever sees it, aborting the branch with no conclusion
-            written. The coordinator route's own schema (plain string, nullable,
-            optional) already validates the real value and 400s on anything
-            that isn't a known technology, "", or null.
+            index scope. Leave it unset (renders as "") and the coordinator
+            resolves every technology whose required indices exist in the space
+            and hunts them all. No enum: a workflow trigger input can't be
+            omitted, so it must accept "" here; the coordinator route validates
+            the real value and 400s on anything else.
       required:
         - reportId
         - investigationConversationId
