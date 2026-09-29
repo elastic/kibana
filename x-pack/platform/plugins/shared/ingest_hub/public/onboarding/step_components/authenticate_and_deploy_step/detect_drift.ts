@@ -38,6 +38,11 @@ export function detectServiceVarsDrift(
   >;
   const dirty: string[] = [];
   for (const instanceId of Object.keys(soServiceVars)) {
+    // Skip instances outside the deployment scope (e.g. ECF-only services in a mixed
+    // MI+ECF deployment). Their serviceVars are stored in the SO but MI redeploy cannot
+    // update the running ECF stack — marking them dirty would clear the callout without
+    // actually applying the changes (4131800955).
+    if (deployedInstanceIds && !deployedInstanceIds.has(instanceId)) continue;
     if (!typedSession[instanceId]) {
       // No session entry for this instance. If it is still deployed (in deployedInstanceIds)
       // the user deselected and reselected the service — session vars were pruned. Compare the

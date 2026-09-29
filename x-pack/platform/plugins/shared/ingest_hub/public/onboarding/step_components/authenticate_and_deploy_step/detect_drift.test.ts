@@ -99,6 +99,22 @@ describe('detectServiceVarsDrift', () => {
     const deployed = new Set(['inst1']);
     expect(detectServiceVarsDrift(session, so, emptyServicesMap, deployed)).toEqual(['inst1']);
   });
+
+  it('ignores ECF-only instances in soServiceVars when deployedInstanceIds excludes them', () => {
+    // Mixed MI+ECF deployment: SO has serviceVars for both MI (inst1) and ECF (ecf1).
+    // User changed ecf1 settings in Step 2. MI redeploy cannot relaunch the ECF stack so
+    // ecf1 must not appear as drift — only inst1 (which is in deployedInstanceIds) is checked.
+    const session = {
+      inst1: makeVars(),
+      ecf1: makeVars({ enabledDataStreams: ['changed'] }),
+    };
+    const so = {
+      inst1: makeVars() as unknown as Record<string, unknown>,
+      ecf1: makeVars() as unknown as Record<string, unknown>,
+    };
+    const miDeployed = new Set(['inst1']); // ecf1 not in MI policyIdsByInstance
+    expect(detectServiceVarsDrift(session, so, emptyServicesMap, miDeployed)).toEqual([]);
+  });
 });
 
 describe('detectAuthDrift', () => {
