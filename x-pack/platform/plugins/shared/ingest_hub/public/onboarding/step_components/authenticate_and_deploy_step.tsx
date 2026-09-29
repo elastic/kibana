@@ -132,13 +132,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // changes auth (connector / auth method). serviceVars drift is checked at the same time.
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
   const { authMethod, connectorId } = authenticateAndDeployStep ?? {};
-  // Stable key for selectedAgentPolicyIds (from agentBasedDeployment, available via useOnboardingFlow
-  // before useAgentBasedDeploy is called) so the drift effect can re-run when policy selection
-  // changes in edit mode without referential-equality churn on every render (4123478517).
-  const selectedAgentPoliciesKey = agentBasedDeploymentFromFlow.selectedAgentPolicyIds
-    .slice()
-    .sort()
-    .join(',');
+  // Stable key for selectedAgentPolicyIds so the drift effect re-runs when policy selection
+  // changes in agent-based edit mode (4123478517). Gated to agent_based: MI SOs never store
+  // agentPolicyIds, so a leftover selection from a prior agent-based session would falsely mark
+  // an unchanged MI deployment dirty on every visit (4124128788).
+  const selectedAgentPoliciesKey =
+    deploymentMethod === 'agent_based'
+      ? agentBasedDeploymentFromFlow.selectedAgentPolicyIds.slice().sort().join(',')
+      : '';
   // Stores the SO-derived dirty result so the replace-form cancel handler can merge it without
   // re-fetching. Starts false; updated once the SO fetch resolves.
   const driftDirtyRef = useRef(false);
@@ -195,7 +196,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         );
         // Detect agent policy selection drift: if the user has changed which agent policies
         // are targeted, the existing policies must be re-attached to the new selection (4123478517).
+        // Only applicable in agent_based mode — MI SOs never write agentPolicyIds, so comparing
+        // against an MI SO would always report drift when a selection is held in session (4124128788).
         const agentPoliciesDirty = (() => {
+          if (deploymentMethod !== 'agent_based') return false;
           const selected = new Set(agentBasedDeploymentFromFlow.selectedAgentPolicyIds);
           if (selected.size === 0) return false; // no selection yet — not in agent edit mode
           const deployed = new Set(item.agentPolicyIds ?? []);

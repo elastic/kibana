@@ -928,6 +928,197 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     );
   });
 
+  test('agent-based policy-selection drift: changed selectedAgentPolicyIds triggers callout and PUT carries new policy', async ({
+    browserAuth,
+    page,
+  }) => {
+    // SO was deployed to 'old-agent-policy-id'. User changed agent policy selection to
+    // 'new-agent-policy-id' in session. Drift check detects the mismatch → callout shown.
+    // On Next, the Fleet PUT must carry policy_ids: ['new-agent-policy-id'] and SO PUT must
+    // persist agentPolicyIds: ['new-agent-policy-id'] so resume uses the correct policy.
+    const DEP_ID = 'dep-ab-policy-drift-001';
+    const OLD_AGENT_POLICY_ID = 'old-agent-policy-id';
+    const NEW_AGENT_POLICY_ID = 'new-agent-policy-id';
+    const AB_PKG_POLICY_ID = 'mock-ab-pkg-policy-id-2';
+
+    await page.route(
+      (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: {
+              id: DEP_ID,
+              provider: 'aws',
+              connectorId: null,
+              authMethod: 'assume_role',
+              mechanisms: ['agent_based'],
+              services: ['elb'],
+              serviceVars: {},
+              policyIdsByInstance: { elb: AB_PKG_POLICY_ID },
+              agentPolicyIds: [OLD_AGENT_POLICY_ID],
+              status: 'succeeded',
+              attemptCount: 1,
+              globalRegion: 'us-east-1',
+            },
+          }),
+        })
+    );
+
+    // Agent policies combobox — return both policies so the combobox loads and
+    // selectedAgentPolicyIds is preserved during reconciliation.
+    await page.route(
+      (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            items: [
+              { id: OLD_AGENT_POLICY_ID, name: 'Old Agent Policy' },
+              { id: NEW_AGENT_POLICY_ID, name: 'New Agent Policy' },
+            ],
+            total: 2,
+            page: 1,
+            perPage: 20,
+          }),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'authenticate-and-deploy',
+    });
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    // Seed detectAndReview so isAlreadyDeployed=true after drift settles.
+    await page.evaluate(
+      ({ key, depId }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            policyIdsByInstance: { elb: 'mock-ab-pkg-policy-id-2' },
+            serviceStatuses: { elb: 'receiving' },
+            onboardingDeploymentId: depId,
+            failedInstances: [],
+            deployErrors: {},
+          })
+        );
+      },
+      { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
+    );
+
+    // Seed auth step with the NEW policy selection — different from SO's agentPolicyIds.
+    await page.evaluate(
+      ({ key, newId }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            deploymentMethod: 'agent_based',
+            agentHostsMode: 'existing',
+            selectedAgentPolicyIds: [newId],
+            agentCredentialMethod: 'assume_role',
+            authMethod: 'assume_role',
+          })
+        );
+      },
+      { key: AUTHENTICATE_AND_DEPLOY_SESSION_KEY, newId: NEW_AGENT_POLICY_ID }
+    );
+
+    const soGetPromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
+    );
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+    await soGetPromise;
+
+    // Policy-selection drift detected: session ['new-agent-policy-id'] vs SO ['old-agent-policy-id'].
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
+
+    // Enter roleArn so the credential is ready for deploy.
+    await page.testSubj
+      .locator('agentBasedSection-roleArn')
+      .fill('arn:aws:iam::123456789012:role/MyRole');
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
+
+    // Mock Fleet package policy GET+PUT.
+    await page.route(
+      (url) => new RegExp(`/api/fleet/package_policies/${AB_PKG_POLICY_ID}$`).test(url.pathname),
+      async (route) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              item: {
+                name: 'mock-ab-pkg-policy-name',
+                namespace: 'default',
+                package: { name: 'aws', version: '7.1.1' },
+                policy_ids: [OLD_AGENT_POLICY_ID],
+                vars: {},
+              },
+            }),
+          });
+        } else if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: { id: AB_PKG_POLICY_ID } }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+
+    const pkgPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        new RegExp(`/api/fleet/package_policies/${AB_PKG_POLICY_ID}$`).test(
+          new URL(req.url()).pathname
+        )
+    );
+    const soPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(req.url()).pathname
+        )
+    );
+    await page.route(
+      (url) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) && true,
+      async (route) => {
+        if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: { id: DEP_ID } }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+
+    await page.testSubj.locator('authenticateAndDeployStep-nextButton').click();
+
+    // Fleet PUT must attach the policy to the NEW agent policy, not the old one.
+    const pkgPutRequest = await pkgPutPromise;
+    expect(pkgPutRequest.postData()).toContain(NEW_AGENT_POLICY_ID);
+    expect(pkgPutRequest.postData()).not.toContain(OLD_AGENT_POLICY_ID);
+    // SO PUT must persist the new agentPolicyIds so resume hydrates the correct selection.
+    const soRequest = await soPutPromise;
+    const soPutBody = JSON.parse(soRequest.postData() ?? '{}');
+    expect(soPutBody.agentPolicyIds).toEqual([NEW_AGENT_POLICY_ID]);
+  });
+
   test('drift check error: SO GET failure shows error callout, Retry re-fetches and recovers', async ({
     browserAuth,
     page,
