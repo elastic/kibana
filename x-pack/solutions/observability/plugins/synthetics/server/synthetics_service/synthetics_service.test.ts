@@ -155,7 +155,9 @@ describe('SyntheticsService', () => {
     service.locations = locations;
     service.isAllowed = true;
 
-    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    jest.spyOn(service, 'getOutput').mockResolvedValue({
+      output: { hosts: ['es'], api_key: 'i:k' },
+    });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
     service.getMaintenanceWindows = jest.fn();
@@ -570,7 +572,9 @@ describe('SyntheticsService', () => {
     });
     service.apiClient.locations = locations;
     service.locations = locations;
-    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    jest.spyOn(service, 'getOutput').mockResolvedValue({
+      output: { hosts: ['es'], api_key: 'i:k' },
+    });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
     service.getMaintenanceWindows = jest.fn();

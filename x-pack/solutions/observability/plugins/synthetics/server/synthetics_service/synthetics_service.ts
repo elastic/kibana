@@ -86,11 +86,6 @@ export class SyntheticsService {
 
   public invalidApiKeyError?: boolean;
 
-  public apiKeyInvalidDetails?: {
-    reason: ApiKeyInvalidReason;
-    missingPrivileges?: string[];
-  };
-
   constructor(server: SyntheticsServerSetup) {
     this.logger = server.logger;
     this.server = server;
@@ -362,7 +357,13 @@ export class SyntheticsService {
     return this.server.coreStart?.elasticsearch.client.asInternalUser;
   }
 
-  async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
+  async getOutput({ inspect }: { inspect: boolean } = { inspect: false }): Promise<{
+    output: ServiceData['output'] | null;
+    invalidDetails?: {
+      reason: ApiKeyInvalidReason;
+      missingPrivileges?: string[];
+    };
+  }> {
     const { apiKey, isValid, reason, missingPrivileges } = await getAPIKeyForSyntheticsService({
       server: this.server,
     });
@@ -372,18 +373,20 @@ export class SyntheticsService {
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;
-      this.apiKeyInvalidDetails = {
-        reason: reason ?? 'invalid',
-        missingPrivileges,
+      return {
+        output: null,
+        invalidDetails: {
+          reason: reason ?? 'invalid',
+          missingPrivileges,
+        },
       };
-      return null;
     }
 
-    this.apiKeyInvalidDetails = undefined;
-
     return {
-      hosts: this.esHosts,
-      api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
+      output: {
+        hosts: this.esHosts,
+        api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
+      },
     };
   }
 
@@ -394,7 +397,7 @@ export class SyntheticsService {
     const monitors = this.formatConfigs(config, mws);
     const license = await this.getLicense();
 
-    const output = await this.getOutput({ inspect: true });
+    const { output } = await this.getOutput({ inspect: true });
     if (output) {
       return await this.apiClient.inspect({
         monitors,
@@ -414,7 +417,7 @@ export class SyntheticsService {
       const monitors = this.formatConfigs(configs, mws);
       const license = await this.getLicense();
 
-      const output = await this.getOutput();
+      const { output } = await this.getOutput();
       if (output) {
         this.logger.debug(`1 monitor will be pushed to synthetics service.`);
 
@@ -445,7 +448,7 @@ export class SyntheticsService {
       const license = await this.getLicense();
       const monitors = this.formatConfigs(monitorConfig, mws);
 
-      const output = await this.getOutput();
+      const { output } = await this.getOutput();
       if (output) {
         const data = {
           monitors,
@@ -511,11 +514,12 @@ export class SyntheticsService {
       if (result.saved_objects.length > 0) {
         try {
           if (!output) {
-            output = await this.getOutput();
+            const outputResult = await this.getOutput();
+            output = outputResult.output;
             if (!output) {
               const { code, reason, message } = getApiKeyInvalidTelemetryPayload({
-                reason: service.apiKeyInvalidDetails?.reason ?? 'invalid',
-                missingPrivileges: service.apiKeyInvalidDetails?.missingPrivileges,
+                reason: outputResult.invalidDetails?.reason ?? 'invalid',
+                missingPrivileges: outputResult.invalidDetails?.missingPrivileges,
               });
               sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
                 type: 'invalidApiKey',
@@ -581,7 +585,7 @@ export class SyntheticsService {
     }
     const license = await this.getLicense();
 
-    const output = await this.getOutput();
+    const { output } = await this.getOutput();
     if (!output) {
       return;
     }
@@ -609,7 +613,7 @@ export class SyntheticsService {
       );
 
       if (hasPublicLocations) {
-        const output = await this.getOutput();
+        const { output } = await this.getOutput();
         if (!output) {
           return;
         }
@@ -629,7 +633,7 @@ export class SyntheticsService {
   async deleteAllConfigs() {
     const license = await this.getLicense();
     const finder = await this.getSOClientFinder({ pageSize: 100 });
-    const output = await this.getOutput();
+    const { output } = await this.getOutput();
     if (!output) {
       return;
     }

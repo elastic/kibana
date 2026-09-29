@@ -108,22 +108,22 @@ export const getAPIKeyForSyntheticsService = async ({
       return { isValid: false, reason: 'missing' };
     }
 
-    const [isValid, { index }] = await Promise.all([
-      server.security.authc.apiKeys.validate({
-        id: apiKey.id,
-        api_key: apiKey.apiKey,
-      }),
-      checkHasPrivileges(server, apiKey),
-    ]);
-
-    const indexPermissions = index[syntheticsIndex];
-    const missingPrivileges = REQUIRED_INDEX_PRIVILEGES.filter(
-      (privilege) => !indexPermissions?.[privilege]
-    );
+    // Validate before privilege checks — a revoked key makes hasPrivileges throw (e.g. 401),
+    // which would otherwise be reported as `error` instead of `invalid`.
+    const isValid = await server.security.authc.apiKeys.validate({
+      id: apiKey.id,
+      api_key: apiKey.apiKey,
+    });
 
     if (!isValid) {
       return { apiKey, isValid: false, reason: 'invalid' };
     }
+
+    const { index } = await checkHasPrivileges(server, apiKey);
+    const indexPermissions = index[syntheticsIndex];
+    const missingPrivileges = REQUIRED_INDEX_PRIVILEGES.filter(
+      (privilege) => !indexPermissions?.[privilege]
+    );
 
     if (missingPrivileges.length > 0) {
       return {

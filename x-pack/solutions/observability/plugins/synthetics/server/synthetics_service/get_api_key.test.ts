@@ -115,6 +115,9 @@ describe('getAPIKeyTest', function () {
 
   it('returns invalid reason when api key validation fails', async () => {
     security.authc.apiKeys.validate = jest.fn().mockResolvedValue(false);
+    const checkPrivilegesSpy = jest
+      .spyOn(authUtils, 'checkHasPrivileges')
+      .mockRejectedValue(new Error('Unauthorized'));
 
     const getObject = jest
       .fn()
@@ -131,6 +134,7 @@ describe('getAPIKeyTest', function () {
       isValid: false,
       reason: 'invalid',
     });
+    expect(checkPrivilegesSpy).not.toHaveBeenCalled();
   });
 
   it('invalidates api keys with missing read permissions', async () => {
