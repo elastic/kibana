@@ -211,48 +211,6 @@
       }
     },
     {
-      "id": "922b402067ac2c7-5a67f47b0f7f4f0",
-      "title": "Continuous KI onboarding per space installs the workflow document in the enabled space only",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/workflows/continuous_onboarding_per_space.spec.ts",
-        "line": 59,
-        "column": 37
-      }
-    },
-    {
-      "id": "922b402067ac2c7-7ad1f3574c34973",
-      "title": "Continuous KI onboarding per space keeps the workflow of another space when one space is disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/workflows/continuous_onboarding_per_space.spec.ts",
-        "line": 85,
-        "column": 5
-      }
-    },
-    {
-      "id": "922b402067ac2c7-ae938589ad3721e",
-      "title": "Continuous KI onboarding per space rejects the eligible sources request in a space where the setting is off",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/workflows/continuous_onboarding_per_space.spec.ts",
-        "line": 112,
-        "column": 45
-      }
-    },
-    {
       "id": "c6e32cc39c4c727-365722779727e4f",
       "title": "Managed workflows system-significant-events-discovery: is installed and valid",
       "expectedStatus": "passed",
