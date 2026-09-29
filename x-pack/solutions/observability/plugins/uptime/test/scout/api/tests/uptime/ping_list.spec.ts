@@ -17,18 +17,16 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    // getPings uses heartbeat-*; sibling Scout leaves browser-archive summary docs
-    // (+4 in this window). ES blocks wildcard deletes (destructive_requires_name).
-    const heartbeatIndices = Object.keys(
-      await esClient.indices.get({
-        index: 'heartbeat-*',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      })
-    );
-    if (heartbeatIndices.length > 0) {
-      await esClient.indices.delete({ index: heartbeatIndices, ignore_unavailable: true });
-    }
+    // getPings uses heartbeat-*; sibling Scout can leave archive indices that add
+    // in-window summary docs. Do not wipe GENERATED_INDEX (parallel suites use it).
+    await esClient.indices.delete({
+      index: [
+        'heartbeat-8-full-test',
+        'heartbeat-8.1.0-2021.11.21-000001', // browser archive (+4)
+        'heartbeat-8.0.0', // location/pings archives
+      ],
+      ignore_unavailable: true,
+    });
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
