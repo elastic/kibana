@@ -163,7 +163,7 @@ spaceTest.describe(
     spaceTest(
       'keeps a secondary layer bound to an identifier variable after the control changes',
       async ({ pageObjects }) => {
-        const { dashboard, lens } = pageObjects;
+        const { controls, dashboard, lens } = pageObjects;
         await openInlineEditorAndWaitVisible(pageObjects, RELATED_PANEL_ID);
         await lens.layers.activateLayerTab(1);
 
@@ -173,10 +173,10 @@ spaceTest.describe(
         await dashboard.waitForRenderComplete();
         await applyLensInlineEditorAndWaitClosed({ lens });
 
-        await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
-        const controlId = await dashboard.getOnlyControlId();
-        await dashboard.optionsListOpenPopover(controlId);
-        await dashboard.optionsListPopoverSelectOption('memory');
+        await expect(controls.frames).toHaveCount(1);
+        const controlId = await controls.getOnlyControlId();
+        await controls.optionsList.openPopover(controlId);
+        await controls.optionsList.selectOption('memory');
         await dashboard.waitForRenderComplete();
 
         const panel = dashboard.getPanelByEmbeddableId(RELATED_PANEL_ID);
