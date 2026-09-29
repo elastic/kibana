@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- we need to import monaco directly for this service
+import type { monaco } from '@kbn/monaco';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { PLUGIN_ID } from '../../../../../common';
+
+declare global {
+  interface Window {
+    MonacoEnvironment?: monaco.Environment;
+  }
+}
 
 export class WorkflowEditorPage {
   public yamlEditor: Locator;
@@ -348,7 +356,7 @@ export class WorkflowEditorPage {
   }
 
   async acceptYamlSuggestion(name: string): Promise<void> {
-    await this.getYamlEditorSuggestWidget().getByRole('option', { name, exact: true }).dblclick();
+    await this.getYamlEditorSuggestionItem(name).dblclick();
   }
 
   async dismissYamlSuggestions(): Promise<void> {
