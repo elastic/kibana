@@ -148,9 +148,9 @@ describe('cluster_settings validators', () => {
     });
 
     it('rethrows when profilingStatus throws', async () => {
-      const { setupOptions, profilingStatus } = createSetupOptions();
+      const { setupOptions, universalProfilingStatus } = createSetupOptions();
       const error = new Error('profilingStatus failed');
-      profilingStatus.mockRejectedValue(error);
+      universalProfilingStatus.mockRejectedValue(error);
 
       await expect(validateProfilingStatus(setupOptions)).rejects.toBe(error);
     });
