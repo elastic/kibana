@@ -10,6 +10,7 @@
     "@kbn/core",
     "@kbn/core-plugins-server",
     "@kbn/i18n",
+    "@kbn/lock-manager",
     "@kbn/react-kibana-context-render",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
