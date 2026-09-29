@@ -400,7 +400,9 @@ export class InventoryPage {
       state: 'visible',
       timeout: EXTENDED_TIMEOUT,
     });
-    await this.k8sPodWaffleContextMenu.getByRole('link', { name: 'Create inventory rule' }).click();
+    await this.k8sPodWaffleContextMenu
+      .getByRole('button', { name: 'Create inventory rule' })
+      .click();
     await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
