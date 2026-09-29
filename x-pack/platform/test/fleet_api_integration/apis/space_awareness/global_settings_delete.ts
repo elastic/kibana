@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
@@ -35,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
       await apiClient.postEnableSpaceAwareness();
       await apiClient.setup();
       await createTestSpace(providerContext, TEST_SPACE_1);
-      await setupTestUsers({ getService });
+      await setupTestUsers(getService('security'), true);
 
       defaultSpaceOnlyApiClient = new SpaceTestApiClient(supertestWithoutAuth, {
         username: testUsers.fleet_all_int_all_default_space_only.username,
@@ -91,7 +93,7 @@ export default function (providerContext: FtrProviderContext) {
         }
         try {
           await supertest
-            .delete(`/s/${TEST_SPACE_1}/api/fleet/agent_policies/delete`)
+            .post(`/s/${TEST_SPACE_1}/api/fleet/agent_policies/delete`)
             .send({ agentPolicyId })
             .set('kbn-xsrf', 'xxxx');
         } catch (_) {
@@ -100,45 +102,38 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('returns 403 when user lacks privileges in a space that references the output', async () => {
-        let err: Error | undefined;
-        try {
-          await defaultSpaceOnlyApiClient.deleteOutput(outputId);
-        } catch (_err) {
-          err = _err;
-        }
-        expect(err).toBeDefined();
-        expect(err?.message).toMatch(/403 "Forbidden"/);
+        const res = await supertestWithoutAuth
+          .delete(`/api/fleet/outputs/${outputId}`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx');
+        expect(res.status).to.eql(403);
 
         // Verify the output still exists (superuser can still get it)
-        const res = await supertest.get(`/api/fleet/outputs/${outputId}`);
-        expect(res.status).toBe(200);
+        const outputRes = await supertest.get(`/api/fleet/outputs/${outputId}`);
+        expect(outputRes.status).to.eql(200);
 
         // Verify the agent policy in TEST_SPACE_1 still has the output reference
         const policyRes = await supertest.get(
           `/s/${TEST_SPACE_1}/api/fleet/agent_policies/${agentPolicyId}`
         );
-        expect(policyRes.body.item.data_output_id).toBe(outputId);
+        expect(policyRes.body.item.data_output_id).to.eql(outputId);
       });
 
       it('allows delete when user has privileges in all affected spaces', async () => {
-        // All-spaces superuser client — can delete
-        let err: Error | undefined;
-        try {
-          await apiClient.deleteOutput(outputId);
-        } catch (_err) {
-          err = _err;
-        }
-        expect(err).toBeUndefined();
+        await apiClient.deleteOutput(outputId);
 
         // Output is gone
-        const res = await supertest.get(`/api/fleet/outputs/${outputId}`);
-        expect(res.status).toBe(404);
+        const outputRes = await supertest.get(`/api/fleet/outputs/${outputId}`);
+        expect(outputRes.status).to.eql(404);
 
         // The reference in the agent policy in TEST_SPACE_1 has been cleared
         const policyRes = await supertest.get(
           `/s/${TEST_SPACE_1}/api/fleet/agent_policies/${agentPolicyId}`
         );
-        expect(policyRes.body.item.data_output_id).toBeNull();
+        expect(policyRes.body.item.data_output_id).to.eql(null);
 
         // Prevent afterEach from trying to delete again
         outputId = '';
@@ -162,7 +157,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'https://artifacts.test.example',
             is_default: false,
           });
-        expect(dsRes.status).toBe(200);
+        expect(dsRes.status).to.eql(200);
         downloadSourceId = dsRes.body.item.id;
 
         // Create an agent policy in TEST_SPACE_1 and assign the download source
@@ -189,7 +184,7 @@ export default function (providerContext: FtrProviderContext) {
         }
         try {
           await supertest
-            .delete(`/s/${TEST_SPACE_1}/api/fleet/agent_policies/delete`)
+            .post(`/s/${TEST_SPACE_1}/api/fleet/agent_policies/delete`)
             .send({ agentPolicyId })
             .set('kbn-xsrf', 'xxxx');
         } catch (_) {
@@ -198,44 +193,38 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('returns 403 when user lacks privileges in a space that references the download source', async () => {
-        let err: Error | undefined;
-        try {
-          await defaultSpaceOnlyApiClient.deleteDownloadSource(downloadSourceId);
-        } catch (_err) {
-          err = _err;
-        }
-        expect(err).toBeDefined();
-        expect(err?.message).toMatch(/403 "Forbidden"/);
+        const res = await supertestWithoutAuth
+          .delete(`/api/fleet/agent_download_sources/${downloadSourceId}`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx');
+        expect(res.status).to.eql(403);
 
         // Download source still exists
-        const res = await supertest.get(`/api/fleet/agent_download_sources/${downloadSourceId}`);
-        expect(res.status).toBe(200);
+        const dsRes = await supertest.get(`/api/fleet/agent_download_sources/${downloadSourceId}`);
+        expect(dsRes.status).to.eql(200);
 
         // Agent policy in TEST_SPACE_1 still has the download_source_id
         const policyRes = await supertest.get(
           `/s/${TEST_SPACE_1}/api/fleet/agent_policies/${agentPolicyId}`
         );
-        expect(policyRes.body.item.download_source_id).toBe(downloadSourceId);
+        expect(policyRes.body.item.download_source_id).to.eql(downloadSourceId);
       });
 
       it('allows delete when user has privileges in all affected spaces', async () => {
-        let err: Error | undefined;
-        try {
-          await apiClient.deleteDownloadSource(downloadSourceId);
-        } catch (_err) {
-          err = _err;
-        }
-        expect(err).toBeUndefined();
+        await apiClient.deleteDownloadSource(downloadSourceId);
 
         // Download source is gone
-        const res = await supertest.get(`/api/fleet/agent_download_sources/${downloadSourceId}`);
-        expect(res.status).toBe(404);
+        const dsRes = await supertest.get(`/api/fleet/agent_download_sources/${downloadSourceId}`);
+        expect(dsRes.status).to.eql(404);
 
         // Reference in TEST_SPACE_1 policy cleared
         const policyRes = await supertest.get(
           `/s/${TEST_SPACE_1}/api/fleet/agent_policies/${agentPolicyId}`
         );
-        expect(policyRes.body.item.download_source_id).toBeNull();
+        expect(policyRes.body.item.download_source_id).to.eql(null);
 
         downloadSourceId = '';
       });
@@ -258,7 +247,7 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://fleet-server.test:8220'],
             is_default: false,
           });
-        expect(hostRes.status).toBe(200);
+        expect(hostRes.status).to.eql(200);
         fleetServerHostId = hostRes.body.item.id;
 
         // Create an agent policy in TEST_SPACE_1 and assign the Fleet Server host
@@ -285,7 +274,7 @@ export default function (providerContext: FtrProviderContext) {
         }
         try {
           await supertest
-            .delete(`/s/${TEST_SPACE_1}/api/fleet/agent_policies/delete`)
+            .post(`/s/${TEST_SPACE_1}/api/fleet/agent_policies/delete`)
             .send({ agentPolicyId })
             .set('kbn-xsrf', 'xxxx');
         } catch (_) {
@@ -294,44 +283,38 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('returns 403 when user lacks privileges in a space that references the Fleet Server host', async () => {
-        let err: Error | undefined;
-        try {
-          await defaultSpaceOnlyApiClient.deleteFleetServerHosts(fleetServerHostId);
-        } catch (_err) {
-          err = _err;
-        }
-        expect(err).toBeDefined();
-        expect(err?.message).toMatch(/403 "Forbidden"/);
+        const res = await supertestWithoutAuth
+          .delete(`/api/fleet/fleet_server_hosts/${fleetServerHostId}`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx');
+        expect(res.status).to.eql(403);
 
         // Fleet Server host still exists
-        const res = await supertest.get(`/api/fleet/fleet_server_hosts/${fleetServerHostId}`);
-        expect(res.status).toBe(200);
+        const hostRes = await supertest.get(`/api/fleet/fleet_server_hosts/${fleetServerHostId}`);
+        expect(hostRes.status).to.eql(200);
 
         // Agent policy in TEST_SPACE_1 still has the fleet_server_host_id
         const policyRes = await supertest.get(
           `/s/${TEST_SPACE_1}/api/fleet/agent_policies/${agentPolicyId}`
         );
-        expect(policyRes.body.item.fleet_server_host_id).toBe(fleetServerHostId);
+        expect(policyRes.body.item.fleet_server_host_id).to.eql(fleetServerHostId);
       });
 
       it('allows delete when user has privileges in all affected spaces', async () => {
-        let err: Error | undefined;
-        try {
-          await apiClient.deleteFleetServerHosts(fleetServerHostId);
-        } catch (_err) {
-          err = _err;
-        }
-        expect(err).toBeUndefined();
+        await apiClient.deleteFleetServerHosts(fleetServerHostId);
 
         // Fleet Server host is gone
-        const res = await supertest.get(`/api/fleet/fleet_server_hosts/${fleetServerHostId}`);
-        expect(res.status).toBe(404);
+        const hostRes = await supertest.get(`/api/fleet/fleet_server_hosts/${fleetServerHostId}`);
+        expect(hostRes.status).to.eql(404);
 
         // Reference in TEST_SPACE_1 policy cleared
         const policyRes = await supertest.get(
           `/s/${TEST_SPACE_1}/api/fleet/agent_policies/${agentPolicyId}`
         );
-        expect(policyRes.body.item.fleet_server_host_id).toBeNull();
+        expect(policyRes.body.item.fleet_server_host_id).to.eql(null);
 
         fleetServerHostId = '';
       });

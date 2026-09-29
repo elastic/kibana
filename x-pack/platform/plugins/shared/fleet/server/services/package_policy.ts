@@ -3350,8 +3350,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     const spaceIds = new Set<string>();
     for (const so of result.saved_objects) {
-      const policy = mapPackagePolicySavedObjectToPackagePolicy(so);
-      spaceIds.add(getSpaceForPackagePolicy(policy));
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
     }
     return { spaceIds, truncated: result.saved_objects.length < result.total };
   }

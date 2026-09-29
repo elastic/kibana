@@ -2449,8 +2449,9 @@ class AgentPolicyService {
       });
     const spaceIds = new Set<string>();
     for (const so of result.saved_objects) {
-      const policy = mapAgentPolicySavedObjectToAgentPolicy(so);
-      spaceIds.add(getSpaceForAgentPolicy(policy));
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
     }
     return { spaceIds, truncated: result.saved_objects.length < result.total };
   }
@@ -2476,8 +2477,9 @@ class AgentPolicyService {
       });
     const spaceIds = new Set<string>();
     for (const so of result.saved_objects) {
-      const policy = mapAgentPolicySavedObjectToAgentPolicy(so);
-      spaceIds.add(getSpaceForAgentPolicy(policy));
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
     }
     return { spaceIds, truncated: result.saved_objects.length < result.total };
   }
@@ -2503,8 +2505,9 @@ class AgentPolicyService {
       });
     const spaceIds = new Set<string>();
     for (const so of result.saved_objects) {
-      const policy = mapAgentPolicySavedObjectToAgentPolicy(so);
-      spaceIds.add(getSpaceForAgentPolicy(policy));
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
     }
     return { spaceIds, truncated: result.saved_objects.length < result.total };
   }

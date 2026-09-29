@@ -156,6 +156,14 @@ export async function assertUninstallAuthorizedForAffectedSpaces({
   // When provided (bulk handler), skip closure collection and use this set directly.
   precomputedSpaceIds?: Set<string>;
 }): Promise<void> {
+  const security = appContextService.getSecurity();
+  if (!security) {
+    return;
+  }
+  if (!security.authz.mode.useRbacForRequest(request)) {
+    return;
+  }
+
   let spaceIdsArray: string[];
 
   if (precomputedSpaceIds) {
