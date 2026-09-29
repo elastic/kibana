@@ -69,6 +69,7 @@ import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
 import { MatchActionPoliciesRoute } from '../routes/action_policies/match_action_policies_route';
 import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templates_route';
+import { GetRuleTemplateTagsRoute } from '../routes/rule_templates/get_rule_template_tags_route';
 import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
@@ -135,5 +136,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
   bind(Route).toConstantValue(MatchActionPoliciesRoute);
   bind(Route).toConstantValue(FindRuleTemplatesRoute);
+  bind(Route).toConstantValue(GetRuleTemplateTagsRoute);
   bind(Route).toConstantValue(GetRuleTemplateRoute);
 }
