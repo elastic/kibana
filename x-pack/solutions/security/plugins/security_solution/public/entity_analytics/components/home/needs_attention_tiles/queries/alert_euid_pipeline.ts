@@ -6,6 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
@@ -36,22 +37,7 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  // Build a multi-value EUID column so multi-entity alerts (user + host) contribute both EUIDs.
-  // MV_APPEND returns null when ANY argument is null (see maintainers/owns/configs.ts), so we
-  // use CASE to guard every MV_APPEND call — only invoking it when both operands are non-null.
-  parts.push(
-    [
-      '| EVAL _ea_entity_id = CASE(',
-      '  user_euid IS NOT NULL AND host_euid IS NOT NULL AND service_euid IS NOT NULL, MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid),',
-      '  user_euid IS NOT NULL AND host_euid IS NOT NULL, MV_APPEND(user_euid, host_euid),',
-      '  user_euid IS NOT NULL AND service_euid IS NOT NULL, MV_APPEND(user_euid, service_euid),',
-      '  host_euid IS NOT NULL AND service_euid IS NOT NULL, MV_APPEND(host_euid, service_euid),',
-      '  user_euid IS NOT NULL, user_euid,',
-      '  host_euid IS NOT NULL, host_euid,',
-      '  service_euid',
-      ')',
-    ].join('\n')
-  );
+  parts.push(evalGuardedTypedEuids('_ea_entity_id'));
   // Fast-path: kibana.alert.entity.id is stamped at enrichment time (#285223) and may already
   // be a multi-value array. Prefer it over our derived multi-value when it is present.
   parts.push('| EVAL _ea_entity_id = COALESCE(`kibana.alert.entity.id`, _ea_entity_id)');
