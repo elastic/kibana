@@ -17,6 +17,7 @@ import { EventInvestigation } from './event_investigation';
 const mockOpenChat = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
