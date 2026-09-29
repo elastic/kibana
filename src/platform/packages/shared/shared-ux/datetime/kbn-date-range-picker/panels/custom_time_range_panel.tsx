@@ -354,7 +354,7 @@ export function CustomTimeRangePanel() {
     [startState, endState]
   );
 
-  const isInternalChangeRef = useRef(false);
+  const syncedTextRef = useRef(timeRange.value);
   const isPanelDrivenChangeRef = useRef(false);
 
   const handleStartStateChange = useCallback((next: DatePartState) => {
@@ -368,10 +368,9 @@ export function CustomTimeRangePanel() {
   }, []);
 
   useEffect(() => {
-    if (isInternalChangeRef.current) {
-      isInternalChangeRef.current = false;
-      return;
-    }
+    // `timeRange.value` is the text it was parsed from, so a re-parse of unchanged text is a no-op.
+    if (timeRange.value === syncedTextRef.current) return;
+    syncedTextRef.current = timeRange.value;
     // Both bounds must be present; skip when input is partial or unparseable.
     if (!timeRange.start || !timeRange.end) return;
     setStartState(
@@ -380,19 +379,12 @@ export function CustomTimeRangePanel() {
     setEndState(
       deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1], absoluteFormat)
     );
-  }, [
-    timeRange.start,
-    timeRange.end,
-    timeRange.startDate,
-    timeRange.endDate,
-    timeRange.type,
-    absoluteFormat,
-  ]);
+  }, [timeRange, absoluteFormat]);
 
   useEffect(() => {
     if (!isPanelDrivenChangeRef.current) return;
     isPanelDrivenChangeRef.current = false;
-    isInternalChangeRef.current = true;
+    syncedTextRef.current = inputText;
     setText(inputText);
   }, [inputText, setText]);
 
