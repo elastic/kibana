@@ -169,7 +169,7 @@ describe('enrichReportCore', () => {
     const invoke = jest
       .fn()
       .mockRejectedValueOnce(overflow)
-      .mockResolvedValueOnce({
+      .mockResolvedValue({
         raw: { response_metadata: {} },
         parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
       });
@@ -191,5 +191,84 @@ describe('enrichReportCore', () => {
     const retryCandidates = JSON.parse(candidatesMatch![1]) as Array<{ context: string }>;
     expect(retryCandidates).toHaveLength(50);
     expect(retryCandidates.every((entry) => entry.context.length <= 120)).toBe(true);
+    // Overflow-skipped candidates are re-queued for a follow-up adjudication pass.
+    expect(invoke.mock.calls.length).toBeGreaterThan(2);
+  });
+
+  it('shrinks candidate payload again on a second overflow retry', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValue({
+        raw: { response_metadata: {} },
+        parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+      });
+    const manyIocs = Array.from({ length: 50 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/${'a'.repeat(1_800)}-${index}`,
+      defanged: `https://evil.example/${'a'.repeat(1_800)}-${index}`,
+      tier: 'uncertain' as const,
+      tier_heuristic: 'uncertain' as const,
+      tier_basis: 'uncertain_default',
+    }));
+    const text = manyIocs.map((ioc) => `Fetched ${ioc.value}.`).join(' ');
+
+    await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    expect(invoke.mock.calls.length).toBeGreaterThanOrEqual(3);
+    const secondRetryPrompt = String(invoke.mock.calls[2][0]);
+    const firstRetryPrompt = String(invoke.mock.calls[1][0]);
+    const secondMatch = /IOC candidates:\n(\[[\s\S]*?\])\n\nSource:/.exec(secondRetryPrompt);
+    const firstMatch = /IOC candidates:\n(\[[\s\S]*?\])\n\nSource:/.exec(firstRetryPrompt);
+    expect(secondMatch).not.toBeNull();
+    expect(firstMatch).not.toBeNull();
+    const secondRetryCandidates = JSON.parse(secondMatch![1]) as unknown[];
+    const firstRetryCandidates = JSON.parse(firstMatch![1]) as unknown[];
+    expect(secondRetryCandidates.length).toBeGreaterThan(0);
+    expect(secondRetryCandidates.length).toBeLessThanOrEqual(15);
+    expect(JSON.stringify(secondRetryCandidates).length).toBeLessThan(
+      JSON.stringify(firstRetryCandidates).length
+    );
+  });
+
+  it('adjudicates additional candidate batches after the core call', async () => {
+    const invoke = jest.fn().mockImplementation((prompt: string) => {
+      const isCore = String(prompt).includes('taxonomy');
+      if (isCore) {
+        return Promise.resolve({
+          raw: { response_metadata: {} },
+          parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+        });
+      }
+      return Promise.resolve({
+        raw: { response_metadata: {} },
+        parsed: { approved_ioc_candidate_ids: [300] },
+      });
+    });
+    const manyIocs = Array.from({ length: 320 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/payload-${index}`,
+      defanged: `https://evil.example/payload-${index}`,
+      tier: 'discriminating' as const,
+      tier_heuristic: 'discriminating' as const,
+      tier_basis: 'url_path_entropy',
+    }));
+    const text = manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
+
+    const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(result.adjudication.reviewed).toBe(320);
+    expect(result.iocs[0].tier_basis).toContain('semantic_indicator:');
+    expect(result.iocs[300].tier_basis).toContain('semantic_indicator:');
+    // Unreviewed mid-batch IDs from the first call are rejected only if that
+    // batch reviewed them. Index 1 was in batch 1 and not approved.
+    expect(result.iocs[1].tier).toBe('reference');
   });
 });

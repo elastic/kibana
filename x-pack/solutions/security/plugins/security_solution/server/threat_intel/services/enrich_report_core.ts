@@ -18,6 +18,8 @@ import {
 import type { ExtractedIoc } from './extract_iocs';
 import {
   boundIocAdjudicationForOverflow,
+  boundIocAdjudicationForPayload,
+  chunkIocAdjudicationBatches,
   prepareIocAdjudication,
   reconcileIocAdjudication,
   type AdjudicateIocsResult,
@@ -105,6 +107,10 @@ export const reportCoreModelOutputSchema = z.object({
   artifacts: z.array(artifactSchema).max(200),
 });
 
+const iocAdjudicationOnlySchema = z.object({
+  approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
+});
+
 export type ReportCoreModelOutput = z.infer<typeof reportCoreModelOutputSchema>;
 
 export interface EnrichReportCoreParams {
@@ -145,6 +151,12 @@ const candidatePayload = (candidates: IocAdjudicationCandidate[]) =>
     context,
   }));
 
+const iocCandidateInstructions = `IOC candidates were extracted deterministically from the complete source. Return IDs only for
+URLs or domains the source explicitly attributes to attacker-controlled or malicious
+infrastructure. Never approve citations, vendor/documentation links, researcher PoCs, navigation,
+shared-platform roots, examples, or same-origin article links. Candidate IDs preserve exact values;
+do not rewrite an IOC.`;
+
 const buildPrompt = (
   params: EnrichReportCoreParams,
   text: string,
@@ -180,11 +192,7 @@ Behaviors:
 Artifacts are literal host or campaign evidence that is not already an IOC. Supported artifact
 types: ${JSON.stringify(ARTIFACT_TYPES)}.
 
-IOC candidates were extracted deterministically from the complete source. Return IDs only for
-URLs or domains the source explicitly attributes to attacker-controlled or malicious
-infrastructure. Never approve citations, vendor/documentation links, researcher PoCs, navigation,
-shared-platform roots, examples, or same-origin article links. Candidate IDs preserve exact values;
-do not rewrite an IOC.
+${iocCandidateInstructions}
 
 Report id: ${params.report_id ?? ''}
 Report title: ${params.title ?? ''}
@@ -196,83 +204,194 @@ ${JSON.stringify(candidatePayload(candidates))}
 Source:
 ${text}`;
 
+const buildAdjudicationOnlyPrompt = (
+  params: EnrichReportCoreParams,
+  text: string,
+  candidates: IocAdjudicationCandidate[]
+): string => `You are adjudicating threat-intelligence IOC candidates.
+
+${iocCandidateInstructions}
+
+Report id: ${params.report_id ?? ''}
+Report title: ${params.title ?? ''}
+Report URL: ${params.article_url ?? ''}
+
+IOC candidates:
+${JSON.stringify(candidatePayload(candidates))}
+
+Source:
+${text}`;
+
+const withBatchPrepared = (
+  base: PreparedIocAdjudication,
+  reviewable: IocAdjudicationCandidate[]
+): PreparedIocAdjudication => ({
+  ...base,
+  reviewable,
+});
+
+/**
+ * Invoke a structured model call with two overflow retries. Candidate bounding is
+ * prompt-local: skipped IOCs keep heuristic tiers and are not treated as rejections.
+ */
+const invokeWithOverflowBounds = async <TParsed>({
+  invoke,
+  build,
+  articleText,
+  prepared,
+}: {
+  invoke: (prompt: string) => Promise<{
+    raw: { response_metadata: Record<string, unknown> };
+    parsed: TParsed;
+  }>;
+  build: (text: string, candidates: IocAdjudicationCandidate[]) => string;
+  articleText: string;
+  prepared: PreparedIocAdjudication;
+}): Promise<{
+  result: {
+    raw: { response_metadata: Record<string, unknown> };
+    parsed: TParsed;
+  };
+  context: ArticleContext;
+  reviewed: PreparedIocAdjudication;
+}> => {
+  let context = fullArticleContext(articleText);
+  let reviewed = prepared;
+  try {
+    const result = await invoke(build(context.text, reviewed.reviewable));
+    return { result, context, reviewed };
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    context = selectOverflowRetryArticleContext(articleText);
+    reviewed = boundIocAdjudicationForOverflow(prepared);
+    try {
+      const result = await invoke(build(context.text, reviewed.reviewable));
+      return { result, context, reviewed };
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      reviewed = boundIocAdjudicationForPayload(reviewed);
+      const result = await invoke(build(context.text, reviewed.reviewable));
+      return { result, context, reviewed };
+    }
+  }
+};
+
 export const enrichReportCore = async (
   model: ScopedModel,
   logger: Logger,
   params: EnrichReportCoreParams
 ): Promise<EnrichReportCoreResult> => {
-  let prepared: PreparedIocAdjudication = prepareIocAdjudication(params);
-  const structured = model.chatModel.withStructuredOutput(reportCoreModelOutputSchema, {
+  const prepared = prepareIocAdjudication(params);
+  const { batches } = chunkIocAdjudicationBatches(prepared.reviewable);
+  const [firstBatch = [], ...queuedBatches] = batches;
+
+  const coreStructured = model.chatModel.withStructuredOutput(reportCoreModelOutputSchema, {
+    includeRaw: true,
+  });
+  const adjudicationStructured = model.chatModel.withStructuredOutput(iocAdjudicationOnlySchema, {
     includeRaw: true,
   });
 
-  let context = fullArticleContext(params.text);
-  let result: {
-    raw: { response_metadata: Record<string, unknown> };
-    parsed: ReportCoreModelOutput;
-  };
   const startedAt = Date.now();
-  try {
-    result = (await structured.invoke(buildPrompt(params, context.text, prepared.reviewable))) as {
-      raw: { response_metadata: Record<string, unknown> };
-      parsed: ReportCoreModelOutput;
-    };
-  } catch (error) {
-    if (!isContextLengthExceededError(error as Error)) throw error;
-    // Article shrink alone is not enough: long candidate value/context JSON can
-    // re-overflow the window. Bound the payload before the retry.
-    context = selectOverflowRetryArticleContext(params.text);
-    prepared = boundIocAdjudicationForOverflow(prepared);
-    try {
-      result = (await structured.invoke(
-        buildPrompt(params, context.text, prepared.reviewable)
-      )) as {
+  const coreCall = await invokeWithOverflowBounds({
+    invoke: (prompt) =>
+      coreStructured.invoke(prompt) as Promise<{
         raw: { response_metadata: Record<string, unknown> };
         parsed: ReportCoreModelOutput;
-      };
-    } catch (retryError) {
-      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
-      context = furtherShrinkOverflowArticleContext(context);
-      result = (await structured.invoke(
-        buildPrompt(params, context.text, prepared.reviewable)
-      )) as {
-        raw: { response_metadata: Record<string, unknown> };
-        parsed: ReportCoreModelOutput;
-      };
+      }>,
+    build: (text, candidates) => buildPrompt(params, text, candidates),
+    articleText: params.text,
+    prepared: withBatchPrepared(prepared, firstBatch),
+  });
+
+  const approvedIds = new Set(
+    coreCall.result.parsed.approved_ioc_candidate_ids.filter((id) =>
+      coreCall.reviewed.reviewable.some((candidate) => candidate.id === id)
+    )
+  );
+  const reviewedCandidates = [...coreCall.reviewed.reviewable];
+  const reviewedIds = new Set(reviewedCandidates.map((candidate) => candidate.id));
+
+  // Overflow may shrink the first batch. Re-queue anything not yet reviewed so it
+  // still gets a later adjudication pass instead of a silent heuristic leave-behind.
+  const skippedFromFirst = firstBatch.filter((candidate) => !reviewedIds.has(candidate.id));
+  const pendingBatches = [
+    ...chunkIocAdjudicationBatches([...skippedFromFirst, ...queuedBatches.flat()]).batches,
+  ];
+
+  for (const batch of pendingBatches) {
+    if (batch.length === 0) continue;
+    const batchCall = await invokeWithOverflowBounds({
+      invoke: (prompt) =>
+        adjudicationStructured.invoke(prompt) as Promise<{
+          raw: { response_metadata: Record<string, unknown> };
+          parsed: z.infer<typeof iocAdjudicationOnlySchema>;
+        }>,
+      build: (text, candidates) => buildAdjudicationOnlyPrompt(params, text, candidates),
+      articleText: params.text,
+      prepared: withBatchPrepared(prepared, batch),
+    });
+    for (const id of batchCall.result.parsed.approved_ioc_candidate_ids) {
+      if (batchCall.reviewed.reviewable.some((candidate) => candidate.id === id)) {
+        approvedIds.add(id);
+      }
     }
+    for (const candidate of batchCall.reviewed.reviewable) {
+      if (!reviewedIds.has(candidate.id)) {
+        reviewedCandidates.push(candidate);
+        reviewedIds.add(candidate.id);
+      }
+    }
+    logStageUsage(
+      logger,
+      'enrich_report_core_ioc_batch',
+      model.connector.connectorId,
+      batchCall.result.raw.response_metadata ?? {},
+      Date.now() - startedAt
+    );
   }
 
   logStageUsage(
     logger,
     'enrich_report_core',
     model.connector.connectorId,
-    result.raw.response_metadata ?? {},
+    coreCall.result.raw.response_metadata ?? {},
     Date.now() - startedAt
   );
 
-  const validCandidateIds = new Set(prepared.reviewable.map((candidate) => candidate.id));
-  const approvedIds = new Set(
-    result.parsed.approved_ioc_candidate_ids.filter((id) => validCandidateIds.has(id))
-  );
-  const adjudicated = reconcileIocAdjudication(prepared, approvedIds, params.truncated);
-  const { text: _text, ...contextMetadata } = context;
+  // Anything still unreviewed after overflow-bounded follow-ups keeps its heuristic
+  // tier (deferred), rather than being labeled a model rejection.
+  const deferredUnreviewed =
+    prepared.deferredUnreviewed +
+    prepared.reviewable.filter((candidate) => !reviewedIds.has(candidate.id)).length;
+
+  const reviewedPrepared: PreparedIocAdjudication = {
+    output: prepared.output,
+    reviewable: reviewedCandidates,
+    deterministicReferences: prepared.deterministicReferences,
+    deferredUnreviewed,
+  };
+  const adjudicated = reconcileIocAdjudication(reviewedPrepared, approvedIds, params.truncated);
+  const { text: _text, ...contextMetadata } = coreCall.context;
+  const parsed = coreCall.result.parsed;
 
   return {
-    categories: result.parsed.categories,
-    regions: result.parsed.regions,
-    relevance: result.parsed.relevance,
-    diamond_suitable: result.parsed.diamond_suitable,
+    categories: parsed.categories,
+    regions: parsed.regions,
+    relevance: parsed.relevance,
+    diamond_suitable: parsed.diamond_suitable,
     severity: {
-      level: result.parsed.severity.level,
-      score: severityScore(result.parsed.severity.level),
-      ...(result.parsed.severity.rationale ? { rationale: result.parsed.severity.rationale } : {}),
+      level: parsed.severity.level,
+      score: severityScore(parsed.severity.level),
+      ...(parsed.severity.rationale ? { rationale: parsed.severity.rationale } : {}),
     },
-    behaviors: result.parsed.behaviors.map((behavior) => ({
+    behaviors: parsed.behaviors.map((behavior) => ({
       ...behavior,
       id: behaviorId(behavior),
       llm_confidence: behavior.confidence,
     })),
-    artifacts: result.parsed.artifacts,
+    artifacts: parsed.artifacts,
     ...adjudicated,
     context: contextMetadata,
     model_id: model.connector.connectorId,

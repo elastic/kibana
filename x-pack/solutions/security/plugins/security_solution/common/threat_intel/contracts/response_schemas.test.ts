@@ -95,7 +95,7 @@ const enrichReportCorePayload = {
     approved: 1,
     downgraded: 0,
     deterministic_references: 0,
-    overflow_references: 0,
+    deferred_unreviewed: 0,
   },
   behaviors: [
     {

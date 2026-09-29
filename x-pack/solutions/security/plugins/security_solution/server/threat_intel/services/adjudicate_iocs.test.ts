@@ -9,7 +9,13 @@ import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contract
 import type { ExtractedIoc } from './extract_iocs';
 import {
   boundIocAdjudicationForOverflow,
+  boundIocAdjudicationForPayload,
+  chunkIocAdjudicationBatches,
+  MAX_SEMANTIC_CANDIDATES_PER_BATCH,
+  MAX_SEMANTIC_REVIEW_BATCHES,
   OVERFLOW_MAX_SEMANTIC_CANDIDATES,
+  OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS,
+  OVERFLOW_RETRY2_MAX_SEMANTIC_CANDIDATES,
   prepareIocAdjudication,
   reconcileIocAdjudication,
 } from './adjudicate_iocs';
@@ -179,9 +185,13 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.iocs[0].tier_basis.length).toBe(MAX_IOC_TIER_BASIS_LENGTH);
   });
 
-  it('bounds candidate count and context for overflow retry', () => {
+  it('bounds candidate count and context for overflow retry without rejecting skipped IOCs', () => {
     const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES + 10 }, (_, index) =>
-      candidate(`https://evil.example/payload-${index}`)
+      candidate(`https://evil.example/payload-${index}`, {
+        tier: 'discriminating',
+        tier_heuristic: 'discriminating',
+        tier_basis: 'url_path_entropy',
+      })
     );
     const text = iocs.map((ioc) => `Fetched ${ioc.value} from C2.`).join(' ');
     const prepared = prepareIocAdjudication({ text, iocs });
@@ -189,11 +199,11 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     const result = reconcileIocAdjudication(bounded, new Set([0]));
 
     expect(bounded.reviewable).toHaveLength(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
-    expect(bounded.overflowReferences).toBe(10);
+    expect(bounded.deferredUnreviewed).toBe(10);
     expect(bounded.reviewable.every((entry) => entry.context.length <= 120)).toBe(true);
-    expect(result.iocs[OVERFLOW_MAX_SEMANTIC_CANDIDATES].tier_basis).toBe(
-      'semantic_reference_unreviewed_overflow'
-    );
+    // Skipped candidates keep their heuristic tier; only reviewed IDs are verdicted.
+    expect(result.iocs[OVERFLOW_MAX_SEMANTIC_CANDIDATES].tier).toBe('discriminating');
+    expect(result.adjudication.deferred_unreviewed).toBe(10);
   });
 
   it('centers overflow context on the IOC instead of taking a leading prefix', () => {
@@ -208,5 +218,56 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
 
     expect(bounded.reviewable[0].context.length).toBeLessThanOrEqual(120);
     expect(bounded.reviewable[0].context).toContain(url);
+  });
+
+  it('reviews candidates in bounded batches instead of discarding overflow as reference', () => {
+    const total =
+      MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES +
+      MAX_SEMANTIC_CANDIDATES_PER_BATCH;
+    const iocs = Array.from({ length: total }, (_, index) =>
+      candidate(`https://evil.example/payload-${index}`, {
+        tier: 'discriminating',
+        tier_heuristic: 'discriminating',
+        tier_basis: 'url_path_entropy',
+      })
+    );
+    const text = iocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
+    const prepared = prepareIocAdjudication({ text, iocs });
+    const { batches, deferred } = chunkIocAdjudicationBatches(prepared.reviewable);
+
+    expect(batches).toHaveLength(MAX_SEMANTIC_REVIEW_BATCHES);
+    expect(batches.every((batch) => batch.length <= MAX_SEMANTIC_CANDIDATES_PER_BATCH)).toBe(true);
+    expect(prepared.deferredUnreviewed).toBe(MAX_SEMANTIC_CANDIDATES_PER_BATCH);
+    expect(deferred).toHaveLength(0);
+    expect(prepared.reviewable).toHaveLength(
+      MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES
+    );
+    // Capacity leftovers keep heuristic tiers rather than becoming reference.
+    expect(iocs[prepared.reviewable.length].tier).toBe('discriminating');
+    expect(prepared.output[prepared.reviewable.length].tier).toBe('discriminating');
+  });
+
+  it('shrinks candidate payload by size on a second overflow retry', () => {
+    const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
+      candidate(`https://evil.example/${'a'.repeat(1_800)}-${index}`)
+    );
+    const text = iocs.map((ioc) => `Fetched ${ioc.value} from C2.`).join(' ');
+    const prepared = prepareIocAdjudication({ text, iocs });
+    const first = boundIocAdjudicationForOverflow(prepared);
+    const second = boundIocAdjudicationForPayload(first);
+
+    expect(first.reviewable).toHaveLength(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
+    expect(second.reviewable.length).toBeGreaterThan(0);
+    expect(second.reviewable.length).toBeLessThanOrEqual(OVERFLOW_RETRY2_MAX_SEMANTIC_CANDIDATES);
+    expect(
+      JSON.stringify(
+        second.reviewable.map(({ id, ioc, context }) => ({
+          id,
+          type: ioc.type,
+          value: ioc.value,
+          context,
+        }))
+      ).length
+    ).toBeLessThanOrEqual(OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS);
   });
 });

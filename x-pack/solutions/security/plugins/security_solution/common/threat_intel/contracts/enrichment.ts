@@ -123,7 +123,7 @@ export const enrichReportCoreResponseSchema = schema.object({
     approved: schema.number(),
     downgraded: schema.number(),
     deterministic_references: schema.number(),
-    overflow_references: schema.number(),
+    deferred_unreviewed: schema.number(),
   }),
   behaviors: schema.arrayOf(reportBehaviorSchema, { maxSize: 100 }),
   artifacts: schema.arrayOf(reportArtifactSchema, { maxSize: 200 }),

@@ -16,11 +16,22 @@ const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
 const semanticIndicatorBasis = (basis: string): string =>
   `${SEMANTIC_INDICATOR_PREFIX}${basis}`.slice(0, MAX_IOC_TIER_BASIS_LENGTH);
 
-const MAX_SEMANTIC_CANDIDATES = 300;
-/** Cap for the overflow-retry prompt so candidate values alone cannot re-overflow. */
+/** Candidates per model call (matches approved_ioc_candidate_ids schema max). */
+export const MAX_SEMANTIC_CANDIDATES_PER_BATCH = 300;
+/** Hard cap on adjudication batches so IOC-rich reports cannot unbounded-call. */
+export const MAX_SEMANTIC_REVIEW_BATCHES = 3;
+/** Cap for the first context-overflow retry so candidate JSON cannot re-overflow. */
 export const OVERFLOW_MAX_SEMANTIC_CANDIDATES = 50;
+/**
+ * Second overflow retry: count alone is not enough when values are near the URL
+ * length bound. Keep a small set and truncate value/context by payload budget.
+ */
+export const OVERFLOW_RETRY2_MAX_SEMANTIC_CANDIDATES = 15;
+export const OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS = 12_000;
+export const OVERFLOW_RETRY2_MAX_VALUE_CHARS = 256;
 const CONTEXT_CHARS = 240;
 const OVERFLOW_CONTEXT_CHARS = 120;
+const OVERFLOW_RETRY2_CONTEXT_CHARS = 40;
 const PROMOTABLE_TIERS: ReadonlySet<IocTier> = new Set([
   'discriminating',
   'contextual',
@@ -44,7 +55,8 @@ export interface AdjudicateIocsResult extends ExtractIocsResult {
     approved: number;
     downgraded: number;
     deterministic_references: number;
-    overflow_references: number;
+    /** Candidates held at heuristic tier because batch capacity was exhausted. */
+    deferred_unreviewed: number;
   };
 }
 
@@ -59,7 +71,7 @@ export interface PreparedIocAdjudication {
   output: ExtractedIoc[];
   reviewable: IocAdjudicationCandidate[];
   deterministicReferences: number;
-  overflowReferences: number;
+  deferredUnreviewed: number;
 }
 
 const iocSetHash = (iocs: ExtractedIoc[]): string | null =>
@@ -188,6 +200,21 @@ const downgrade = (ioc: ExtractedIoc, basis: string): ExtractedIoc => ({
   tier_basis: basis,
 });
 
+export const chunkIocAdjudicationBatches = (
+  reviewable: IocAdjudicationCandidate[],
+  batchSize: number = MAX_SEMANTIC_CANDIDATES_PER_BATCH,
+  maxBatches: number = MAX_SEMANTIC_REVIEW_BATCHES
+): { batches: IocAdjudicationCandidate[][]; deferred: IocAdjudicationCandidate[] } => {
+  const capacity = batchSize * maxBatches;
+  const inBudget = reviewable.slice(0, capacity);
+  const deferred = reviewable.slice(capacity);
+  const batches: IocAdjudicationCandidate[][] = [];
+  for (let index = 0; index < inBudget.length; index += batchSize) {
+    batches.push(inBudget.slice(index, index + batchSize));
+  }
+  return { batches, deferred };
+};
+
 export const prepareIocAdjudication = (
   params: Pick<AdjudicateIocsParams, 'text' | 'iocs' | 'article_url'>
 ): PreparedIocAdjudication => {
@@ -218,7 +245,7 @@ export const prepareIocAdjudication = (
         left.originalIndex - right.originalIndex
     );
 
-  const reviewable = candidates.slice(0, MAX_SEMANTIC_CANDIDATES).map((candidate) => ({
+  const reviewable = candidates.map((candidate) => ({
     ...candidate,
     id: candidate.originalIndex,
     context: contextFor(
@@ -230,19 +257,16 @@ export const prepareIocAdjudication = (
       contextCache
     ),
   }));
-  const overflow = candidates.slice(MAX_SEMANTIC_CANDIDATES);
-  for (const candidate of overflow) {
-    output[candidate.originalIndex] = downgrade(
-      candidate.ioc,
-      'semantic_reference_unreviewed_overflow'
-    );
-  }
+
+  const { batches, deferred } = chunkIocAdjudicationBatches(reviewable);
+  // Deferred candidates keep their heuristic tier. They are not a negative
+  // model verdict, just past the batch budget for this enrichment run.
 
   return {
     output,
-    reviewable,
+    reviewable: batches.flat(),
     deterministicReferences,
-    overflowReferences: overflow.length,
+    deferredUnreviewed: deferred.length,
   };
 };
 
@@ -264,34 +288,90 @@ const shrinkContextAroundIoc = (context: string, value: string, maxChars: number
   return context.slice(start, start + maxChars);
 };
 
+export const candidatePayloadChars = (candidates: IocAdjudicationCandidate[]): number =>
+  JSON.stringify(
+    candidates.map(({ id, ioc, context }) => ({
+      id,
+      type: ioc.type,
+      value: ioc.value,
+      context,
+    }))
+  ).length;
+
 /**
  * Shrink the candidate set and per-candidate context for a confirmed context
- * overflow retry. Candidates not sent are marked as unreviewed overflow so
- * reconcile cannot treat them as model rejections.
+ * overflow retry. Skipped candidates are omitted from `reviewable` only; their
+ * heuristic tiers stay intact so they are not treated as model rejections.
  */
 export const boundIocAdjudicationForOverflow = (
-  prepared: PreparedIocAdjudication
+  prepared: PreparedIocAdjudication,
+  maxCandidates: number = OVERFLOW_MAX_SEMANTIC_CANDIDATES,
+  maxContextChars: number = OVERFLOW_CONTEXT_CHARS
 ): PreparedIocAdjudication => {
-  const kept = prepared.reviewable.slice(0, OVERFLOW_MAX_SEMANTIC_CANDIDATES).map((candidate) => ({
+  const kept = prepared.reviewable.slice(0, maxCandidates).map((candidate) => ({
     ...candidate,
-    context: shrinkContextAroundIoc(candidate.context, candidate.ioc.value, OVERFLOW_CONTEXT_CHARS),
+    context: shrinkContextAroundIoc(candidate.context, candidate.ioc.value, maxContextChars),
   }));
-  const skipped = prepared.reviewable.slice(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
-  if (skipped.length === 0) {
-    return { ...prepared, reviewable: kept };
-  }
-  const output = [...prepared.output];
-  for (const candidate of skipped) {
-    output[candidate.originalIndex] = downgrade(
-      candidate.ioc,
-      'semantic_reference_unreviewed_overflow'
-    );
-  }
+  const skipped = prepared.reviewable.length - kept.length;
   return {
-    output,
+    output: prepared.output,
     reviewable: kept,
     deterministicReferences: prepared.deterministicReferences,
-    overflowReferences: prepared.overflowReferences + skipped.length,
+    deferredUnreviewed: prepared.deferredUnreviewed + skipped,
+  };
+};
+
+/**
+ * Further shrink an already overflow-bounded candidate set by truncating values
+ * and dropping candidates until the JSON payload fits a small reasoning window.
+ */
+export const boundIocAdjudicationForPayload = (
+  prepared: PreparedIocAdjudication,
+  maxPayloadChars: number = OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS,
+  maxCandidates: number = OVERFLOW_RETRY2_MAX_SEMANTIC_CANDIDATES,
+  maxValueChars: number = OVERFLOW_RETRY2_MAX_VALUE_CHARS,
+  maxContextChars: number = OVERFLOW_RETRY2_CONTEXT_CHARS
+): PreparedIocAdjudication => {
+  const truncated = prepared.reviewable.slice(0, maxCandidates).map((candidate) => {
+    const originalValue = candidate.ioc.value;
+    return {
+      ...candidate,
+      ioc: {
+        ...candidate.ioc,
+        value: originalValue.slice(0, maxValueChars),
+        defanged: candidate.ioc.defanged?.slice(0, maxValueChars),
+      },
+      // Center on the original value before truncating the prompt copy.
+      context: shrinkContextAroundIoc(candidate.context, originalValue, maxContextChars),
+    };
+  });
+
+  let kept = truncated;
+  while (kept.length > 1 && candidatePayloadChars(kept) > maxPayloadChars) {
+    kept = kept.slice(0, Math.max(1, Math.floor(kept.length / 2)));
+  }
+  if (candidatePayloadChars(kept) > maxPayloadChars && kept.length === 1) {
+    const [only] = kept;
+    const room = Math.max(32, maxPayloadChars - 80);
+    kept = [
+      {
+        ...only,
+        ioc: {
+          ...only.ioc,
+          value: only.ioc.value.slice(0, Math.min(only.ioc.value.length, room)),
+          defanged: only.ioc.defanged?.slice(0, Math.min(only.ioc.defanged.length, room)),
+        },
+        context: '',
+      },
+    ];
+  }
+
+  const skipped = prepared.reviewable.length - kept.length;
+  return {
+    output: prepared.output,
+    reviewable: kept,
+    deterministicReferences: prepared.deterministicReferences,
+    deferredUnreviewed: prepared.deferredUnreviewed + Math.max(0, skipped),
   };
 };
 
@@ -302,9 +382,12 @@ export const reconcileIocAdjudication = (
 ): AdjudicateIocsResult => {
   const output = [...prepared.output];
   for (const candidate of prepared.reviewable) {
+    // Truncated overflow values are prompt-only; approve/reject against the
+    // original IOC stored at originalIndex.
+    const original = prepared.output[candidate.originalIndex] ?? candidate.ioc;
     output[candidate.originalIndex] = approvedIds.has(candidate.id)
-      ? { ...candidate.ioc, tier_basis: semanticIndicatorBasis(candidate.ioc.tier_basis) }
-      : downgrade(candidate.ioc, 'semantic_reference');
+      ? { ...original, tier_basis: semanticIndicatorBasis(original.tier_basis) }
+      : downgrade(original, 'semantic_reference');
   }
 
   const anchorIocs = output.filter((ioc) => PROMOTABLE_TIERS.has(ioc.tier));
@@ -321,7 +404,7 @@ export const reconcileIocAdjudication = (
       approved: prepared.reviewable.filter((candidate) => approvedIds.has(candidate.id)).length,
       downgraded: prepared.reviewable.filter((candidate) => !approvedIds.has(candidate.id)).length,
       deterministic_references: prepared.deterministicReferences,
-      overflow_references: prepared.overflowReferences,
+      deferred_unreviewed: prepared.deferredUnreviewed,
     },
   };
 };
