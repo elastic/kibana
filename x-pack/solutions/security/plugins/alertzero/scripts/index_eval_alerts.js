@@ -47,6 +47,9 @@ const AUTH = `${ES_USERNAME}:${ES_PASSWORD}`;
 // Workers install lazily per space under `${workerId}-${spaceId}`, so the run route needs the
 // space-suffixed id. The bare registered id 404s even once the Worker is installed and enabled.
 const WORKER_ID = `system-security-floor-alert-triage-${SPACE}`;
+// Kibana routes outside the default space are prefixed `/s/<space>`; the default space has no
+// prefix at all (not even `/s/default`).
+const SPACE_PATH_PREFIX = SPACE === 'default' ? '' : `/s/${encodeURIComponent(SPACE)}`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -95,7 +98,7 @@ const noise = (id, timestamp) => ({
   'kibana.alert.original_time': timestamp,
   'kibana.alert.last_detected': timestamp,
   'kibana.alert.start': timestamp,
-  'kibana.alert.space_ids': ['default'],
+  'kibana.alert.space_ids': [SPACE],
   'kibana.alert.workflow_assignee_ids': [],
   'kibana.alert.rule.author': [],
   'kibana.alert.rule.enabled': true,
@@ -460,24 +463,27 @@ async function indexAlerts() {
     // Trigger directly via Node fetch — no curl, no quoting issues
     console.log('Triggering Worker runs via Kibana API…');
     for (const { label, body } of payloads) {
-      const runRes = await fetch(`${KB_URL}/api/workflows/workflow/${WORKER_ID}/run`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'kbn-xsrf': 'true',
-          'elastic-api-version': '2023-10-31',
-          Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
-        },
-        body: JSON.stringify(body),
-      });
+      const runRes = await fetch(
+        `${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/workflow/${WORKER_ID}/run`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'kbn-xsrf': 'true',
+            'elastic-api-version': '2023-10-31',
+            Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
+          },
+          body: JSON.stringify(body),
+        }
+      );
       const runJson = await runRes.json();
       if (!runRes.ok) throw new Error(`Run API ${runRes.status}: ${JSON.stringify(runJson)}`);
       const execId = runJson.workflowExecutionId;
-      console.log(`  ✓ ${label}: ${KB_URL}/app/workflows/executions/${execId}`);
+      console.log(`  ✓ ${label}: ${KB_URL}${SPACE_PATH_PREFIX}/app/workflows/executions/${execId}`);
     }
     console.log(`\n  Poll for result:`);
     console.log(
-      `  curl -u elastic:changeme '${KB_URL}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
+      `  curl -u elastic:changeme '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
     );
   } else {
     // Write payloads to temp files — avoids multiline -d quoting issues on paste.
@@ -495,7 +501,7 @@ async function indexAlerts() {
       console.log(`    UI Run body: ${uiPayloadFile}`);
     }
     console.log(`\ncurl -u elastic:changeme -XPOST \\`);
-    console.log(`  '${KB_URL}/api/workflows/workflow/${WORKER_ID}/run' \\`);
+    console.log(`  '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/workflow/${WORKER_ID}/run' \\`);
     console.log(`  -H 'kbn-xsrf: true' \\`);
     console.log(`  -H 'elastic-api-version: 2023-10-31' \\`);
     console.log(`  -H 'content-type: application/json' \\`);
