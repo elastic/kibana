@@ -87,8 +87,7 @@ below opens with the two lifecycle filters, so the query reads as what it return
 query that omits them, and on a data stream keeps only the newest revision per `id`. Naming a
 field switches off its default only: `WHERE governance.lifecycle.status == "deleted"` returns
 tombstones, `WHERE expires_at < NOW()` returns expired KIs, and `KEEP governance.provenance.created_by.uri`
-shows the writing automation while both filters still apply. `execute_esql` adds nothing: write
-both lines yourself, and on a data stream collapse to the newest revision per `id`.
+shows the writing automation while both filters still apply.
 
 ---
 

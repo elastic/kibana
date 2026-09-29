@@ -56,12 +56,7 @@ Work with AI Indices through their dedicated tools, in this order:
 
 - \`query_ai_indices\` is only for AI Indices: the \`FROM\` targets listed above or returned by \`list_ai_indices\`.
 - Query every other index, data stream, or alias with your other data tools, such as \`generate_esql\` and \`execute_esql\`, as you would without AI Indices. This includes sources a KI points you to.
-- \`query_ai_indices\` applies the space scoping below and returns only current, active, unexpired KIs. Reading an AI Index with \`execute_esql\` applies neither, so add the lifecycle filters yourself, and on a data stream keep only the newest document per \`id\`:
-
-\`\`\`esql
-| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
-| WHERE expires_at IS NULL OR expires_at > NOW()
-\`\`\`
+- Do not query AI Indices with \`execute_esql\`: only \`query_ai_indices\` applies the space scoping below.
 
 ### Space scoping
 
