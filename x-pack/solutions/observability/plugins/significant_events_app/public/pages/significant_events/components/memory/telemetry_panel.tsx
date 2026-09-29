@@ -62,6 +62,9 @@ export function MemoryTelemetryPanel({ page, usefulness, confidence }: MemoryTel
         <EuiFlexItem
           className={css`
             display: flex;
+            /* The surrounding group is a column, so set the row direction here
+               explicitly; otherwise each badge stretches to the full width. */
+            flex-direction: row;
             flex-wrap: wrap;
             gap: 4px;
           `}

@@ -108,16 +108,9 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
         </>
       )}
 
-      <EuiTitle size="xxs">
-        <h3>
-          <FormattedMessage
-            id="xpack.significantEventsApp.memory.recentlyUpdatedTitle"
-            defaultMessage="Recently updated"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       {recentlyUpdated.length === 0 ? (
+        // With nothing to list, the section heading would be a label with no
+        // section under it, so the empty message stands on its own.
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.significantEventsApp.memory.recentlyUpdatedEmpty"
@@ -125,12 +118,23 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
           />
         </EuiText>
       ) : (
-        recentlyUpdated.map((page, index) => (
-          <React.Fragment key={page.id}>
-            {index > 0 && <EuiHorizontalRule margin="s" />}
-            <MemoryPageRow page={page} onSelectPage={onSelectPage} />
-          </React.Fragment>
-        ))
+        <>
+          <EuiTitle size="xxs">
+            <h3>
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.recentlyUpdatedTitle"
+                defaultMessage="Recently updated"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {recentlyUpdated.map((page, index) => (
+            <React.Fragment key={page.id}>
+              {index > 0 && <EuiHorizontalRule margin="s" />}
+              <MemoryPageRow page={page} onSelectPage={onSelectPage} />
+            </React.Fragment>
+          ))}
+        </>
       )}
     </div>
   );

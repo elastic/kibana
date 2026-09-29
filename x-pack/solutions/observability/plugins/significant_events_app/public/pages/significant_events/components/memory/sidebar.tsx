@@ -52,6 +52,7 @@ export function MemorySidebar({ filter, onFilterChange, selection, onSelect }: M
     <EuiFlexGroup
       direction="column"
       gutterSize="m"
+      data-test-subj="nightshiftMemorySidebar"
       className={css`
         height: 100%;
         min-height: 0;

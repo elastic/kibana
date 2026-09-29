@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiBadge, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
@@ -38,14 +38,25 @@ const useLineage = (page: MemoryPage | undefined) => {
   const rootId = page?.id;
   const hasParents = (page?.merged_from?.length ?? 0) > 0;
 
+  // Hold the client in a ref rather than listing it as a dependency. The
+  // services object is rebuilt on every render, so depending on it directly
+  // re-runs this effect forever — a maximum-update-depth loop.
+  const clientRef = useRef(client);
+  clientRef.current = client;
+
   useEffect(() => {
-    if (!client || !rootId || !hasParents) {
+    if (!rootId || !hasParents) {
       setCrumbs([]);
       return;
     }
 
     let cancelled = false;
-    client
+    const activeClient = clientRef.current;
+    if (!activeClient) {
+      return;
+    }
+
+    activeClient
       .fetch('GET /internal/nightshift/memory/pages/{id}/lineage', {
         signal: null,
         params: { path: { id: rootId } },
@@ -61,7 +72,7 @@ const useLineage = (page: MemoryPage | undefined) => {
     return () => {
       cancelled = true;
     };
-  }, [client, rootId, hasParents]);
+  }, [rootId, hasParents]);
 
   return crumbs;
 };
