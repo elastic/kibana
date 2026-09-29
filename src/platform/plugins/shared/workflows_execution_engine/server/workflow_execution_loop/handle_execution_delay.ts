@@ -113,7 +113,7 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
   }
 }
 
-/** Arms the parent's wake task when the graph has no idle timeout */
+/** Arms the parent's wake task when the graph has no timeout to schedule one */
 async function armSyncParentWakeTask(
   params: WorkflowExecutionLoopParams,
   workflowExecution: EsWorkflowExecution
