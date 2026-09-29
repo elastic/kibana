@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type { z } from '@kbn/zod/v4';
 import type {
@@ -12,6 +13,7 @@ import type {
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../common/types/domain/attachment/v2';
+import type { AttachmentAttributesV2 } from '../../common/types/domain';
 
 /**
  * Unified attachment state for server-side persistence
@@ -50,6 +52,36 @@ export interface AttachmentWorkflowDefinition {
   validateTargets?: (context: WorkflowAttachmentValidationContext) => void;
 }
 
+export interface AttachmentDeleteTarget {
+  /** The attachment saved object id. */
+  id: string;
+  attributes: AttachmentAttributesV2;
+}
+
+export interface AttachmentDeleteContext {
+  caseId: string;
+  request: KibanaRequest;
+  /** The attachments of this type being deleted. */
+  attachments: readonly AttachmentDeleteTarget[];
+  /** The case's attachments that are not being deleted. */
+  remainingAttachments: readonly AttachmentDeleteTarget[];
+}
+
+export interface AttachmentDeleteResult {
+  /** Ids from `remainingAttachments` to delete in the same operation. */
+  relatedAttachmentIds: readonly string[];
+}
+
+/**
+ * Called before attachments of the type are deleted, whatever the caller (UI, API, agent or
+ * workflow), so a type can take attachments it depends on with it. Related attachments go through
+ * the same authorization, user actions and alert sync as the requested ones; their own `onDelete`
+ * is not called.
+ */
+export type AttachmentOnDelete = (
+  context: AttachmentDeleteContext
+) => Promise<AttachmentDeleteResult>;
+
 export interface UnifiedAttachmentType
   extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
   id: string;
@@ -61,6 +93,7 @@ export interface UnifiedAttachmentType
    */
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
+  onDelete?: AttachmentOnDelete;
 }
 
 export interface UnifiedAttachmentTypeSetup
@@ -73,6 +106,7 @@ export interface UnifiedAttachmentTypeSetup
   schema: z.ZodType;
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
+  onDelete?: AttachmentOnDelete;
 }
 
 export interface AttachmentFramework {

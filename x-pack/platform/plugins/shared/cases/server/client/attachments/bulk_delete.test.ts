@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { z } from '@kbn/zod/v4';
 import type { File } from '@kbn/files-plugin/common';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import {
@@ -201,6 +202,75 @@ describe('bulk_delete', () => {
       );
 
       expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalled();
+    });
+
+    describe('related attachments', () => {
+      const onDelete = jest.fn();
+      const argsWithHook = createCasesClientMockArgs();
+      argsWithHook.unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        schema: z.object({}),
+        onDelete,
+      });
+
+      beforeEach(() => {
+        onDelete.mockResolvedValue({ relatedAttachmentIds: [otherUserComment.id] });
+        argsWithHook.authorization.ensureAuthorized.mockResolvedValue(undefined);
+        argsWithHook.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [attackAttachment],
+        });
+        argsWithHook.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+          new Map()
+        );
+        argsWithHook.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [attackAttachment, otherUserComment].map((so) => ({ ...so, score: 0 })),
+          total: 2,
+          per_page: 100,
+          page: 1,
+        });
+      });
+
+      it('deletes the attachments the onDelete hook returns alongside the requested ones', async () => {
+        await bulkDeleteAttachments(
+          { caseId: 'mock-id-1', attachmentIds: [attackAttachment.id] },
+          argsWithHook
+        );
+
+        expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: [attackAttachment.id, otherUserComment.id],
+          refresh: true,
+        });
+        expect(
+          argsWithHook.services.userActionService.creator.bulkCreateAttachmentDeletion.mock.calls[0][0].attachments.map(
+            ({ id }: { id: string }) => id
+          )
+        ).toEqual([attackAttachment.id, otherUserComment.id]);
+      });
+
+      it('authorizes the related attachments before deleting them', async () => {
+        await bulkDeleteAttachments(
+          { caseId: 'mock-id-1', attachmentIds: [attackAttachment.id] },
+          argsWithHook
+        );
+
+        expect(argsWithHook.authorization.ensureAuthorized).toHaveBeenLastCalledWith({
+          entities: [{ id: otherUserComment.id, owner: otherUserComment.attributes.owner }],
+          operation: Operations.deleteComment,
+        });
+      });
+
+      it('skips the onDelete hook when includeRelated is false', async () => {
+        await bulkDeleteAttachments(
+          { caseId: 'mock-id-1', attachmentIds: [attackAttachment.id], includeRelated: false },
+          argsWithHook
+        );
+
+        expect(onDelete).not.toHaveBeenCalled();
+        expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: [attackAttachment.id],
+          refresh: true,
+        });
+      });
     });
 
     describe('errors', () => {

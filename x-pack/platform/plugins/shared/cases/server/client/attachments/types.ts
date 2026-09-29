@@ -77,6 +77,11 @@ export interface BulkDeleteArgs {
    * The saved object ids of the attachments to delete
    */
   attachmentIds: string[];
+  /**
+   * Whether to also delete the attachments the deleted types' `onDelete` hooks return.
+   * Defaults to true.
+   */
+  includeRelated?: boolean;
 }
 
 /**

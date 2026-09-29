@@ -561,7 +561,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures, {
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+    });
     plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {

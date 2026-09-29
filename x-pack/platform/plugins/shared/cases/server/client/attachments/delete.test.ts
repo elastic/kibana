@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { deleteComment, deleteAll } from './delete';
@@ -84,6 +85,65 @@ describe('delete', () => {
           full_name: 'Damaged Raccoon',
           profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
           username: 'damaged_raccoon',
+        });
+      });
+    });
+
+    describe('related attachments', () => {
+      const PARENT_TYPE = 'test.parent';
+      const parent = {
+        ...mockCaseComments[0],
+        attributes: {
+          ...mockCaseComments[0].attributes,
+          type: PARENT_TYPE,
+          attachmentId: 'parent-doc-1',
+        },
+      } as unknown as (typeof mockCaseComments)[number];
+      const relatedAlert = mockCaseComments[3];
+      const onDelete = jest.fn();
+      const argsWithHook = createCasesClientMockArgs();
+      argsWithHook.unifiedAttachmentTypeRegistry.register({
+        id: PARENT_TYPE,
+        schema: z.object({}),
+        onDelete,
+      });
+
+      beforeEach(() => {
+        onDelete.mockResolvedValue({ relatedAttachmentIds: [relatedAlert.id] });
+        argsWithHook.services.attachmentService.getter.get.mockResolvedValue(parent);
+        argsWithHook.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+          new Map()
+        );
+        argsWithHook.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [parent, relatedAlert].map((so) => ({ ...so, score: 0 })),
+          total: 2,
+          per_page: 100,
+          page: 1,
+        });
+      });
+
+      it('deletes the attachments the onDelete hook returns, whatever the caller', async () => {
+        await deleteComment({ caseID: 'mock-id-1', savedObjectId: parent.id }, argsWithHook);
+
+        expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: [parent.id, relatedAlert.id],
+          refresh: true,
+        });
+        expect(
+          argsWithHook.services.userActionService.creator.bulkCreateAttachmentDeletion
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachments: [expect.objectContaining({ id: relatedAlert.id })],
+          })
+        );
+      });
+
+      it('removes the case id from the related alerts', async () => {
+        await deleteComment({ caseID: 'mock-id-1', savedObjectId: parent.id }, argsWithHook);
+
+        expect(argsWithHook.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
+          alerts: [{ id: 'test-id', index: 'test-index' }],
+          caseId: 'mock-id-1',
         });
       });
     });
