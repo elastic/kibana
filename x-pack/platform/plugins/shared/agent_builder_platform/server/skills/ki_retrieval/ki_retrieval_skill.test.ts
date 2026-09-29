@@ -52,8 +52,8 @@ describe('kiRetrievalSkill', () => {
 
     expect(templates?.length).toBeGreaterThan(0);
     expect(withLifecycle?.length).toBe(templates?.length);
-    expect(kiRetrievalSkill.content).toContain('plus `DROP governance.*`');
-    expect(kiRetrievalSkill.content).toContain('names neither `governance` nor `expires_at`');
+    expect(kiRetrievalSkill.content).toContain('and `DROP governance.*`');
+    expect(kiRetrievalSkill.content).toContain('switches off its default only');
   });
 
   it('has no referencedContent', () => {

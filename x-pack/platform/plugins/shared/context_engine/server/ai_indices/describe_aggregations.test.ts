@@ -69,7 +69,7 @@ describe('describeAiIndexAggregations', () => {
     expect(Object.keys(aggs)).toEqual(['types', 'tags']);
   });
 
-  it('runs one space- and lifecycle-filtered, hit-free, non-partial search with a terms agg per field', async () => {
+  it('runs one filtered, hit-free, non-partial search with a terms agg per field', async () => {
     await describeAiIndexAggregations({
       ...params,
       fields: [field('type', true), field('tags', true)],

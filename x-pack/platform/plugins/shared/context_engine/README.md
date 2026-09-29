@@ -72,11 +72,12 @@ and cannot be overridden:
   knowledge indicator lifecycle pipeline inserted after `FROM`: only
   indicators whose `governance.lifecycle.status` is unset or `active` and
   whose `expires_at` is unset or in the future are returned, and
-  `governance.*` is dropped from the result. A query that names `governance`
-  or `expires_at` itself keeps its own lifecycle handling and gets none of
-  that. On a data stream, only the newest revision of each `id` is considered
-  in either case (`METADATA _id` is added when missing). Indices outside the
-  registry are read as-is.
+  `governance.*` is dropped from the result. Each lifecycle field the query
+  names itself switches off one default: `expires_at` the expiry filter,
+  `governance.lifecycle.status` the status filter, any `governance.*` the
+  drop. When a data stream is read, only the newest revision of each `id` per
+  target is considered in every case (`METADATA _id, _index` are added when
+  missing). Indices outside the registry are read as-is.
 - **Space filter.** Documents are visible when they carry no
   `permissions.kibana.privileges` element (public), or when one is scoped to
   the request's space or to `*`. The space comes from the request URL

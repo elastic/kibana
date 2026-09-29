@@ -38,12 +38,15 @@ const MAPPINGS = {
   },
 } as const;
 
-const ki = (id: string, extra: Record<string, unknown> = {}) => ({
+const ki = (id: string, { status, ...extra }: Record<string, unknown> = {}) => ({
   '@timestamp': '2026-09-01T00:00:00Z',
   id,
   type: 'index_metadata',
   title: id,
-  governance: { provenance: { created_by: { uri: 'workflow://scout' } } },
+  governance: {
+    provenance: { created_by: { uri: 'workflow://scout' } },
+    ...(status ? { lifecycle: { status } } : {}),
+  },
   ...extra,
 });
 
@@ -91,13 +94,15 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
         { index: { _index: DEST, _id: 'active' } },
         ki('active'),
         { index: { _index: DEST, _id: 'deleted' } },
-        ki('deleted', { governance: { lifecycle: { status: 'deleted' } } }),
+        ki('deleted', { status: 'deleted' }),
+        { index: { _index: DEST, _id: 'single' } },
+        ki('single'),
         { index: { _index: DEST, _id: 'expired' } },
         ki('expired', { expires_at: '2000-01-01T00:00:00Z' }),
         { index: { _index: DEST, _id: 'unexpired' } },
         ki('unexpired', { expires_at: '2100-01-01T00:00:00Z' }),
         { index: { _index: UNREGISTERED, _id: 'deleted' } },
-        ki('deleted', { governance: { lifecycle: { status: 'deleted' } } }),
+        ki('deleted', { status: 'deleted' }),
         { create: { _index: DS_DEST } },
         ki('revised', { '@timestamp': '2026-09-01T00:00:00Z', title: 'revised-v1' }),
         { create: { _index: DS_DEST } },
@@ -105,10 +110,7 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
         { create: { _index: DS_DEST } },
         ki('retired', { '@timestamp': '2026-09-01T00:00:00Z' }),
         { create: { _index: DS_DEST } },
-        ki('retired', {
-          '@timestamp': '2026-09-02T00:00:00Z',
-          governance: { lifecycle: { status: 'deleted' } },
-        }),
+        ki('retired', { '@timestamp': '2026-09-02T00:00:00Z', status: 'deleted' }),
         { create: { _index: DS_DEST } },
         ki('single'),
         { create: { _index: DS_DEST, _id: 'tied-a' } },
@@ -134,7 +136,19 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
   apiTest('returns only active, unexpired KIs from a registered index', async ({ apiClient }) => {
     const body = await run(apiClient, `FROM ${DEST} | KEEP id | SORT id`);
 
-    expect(columnValues(body, 'id')).toStrictEqual(['active', 'unexpired']);
+    expect(columnValues(body, 'id')).toStrictEqual(['active', 'single', 'unexpired']);
+  });
+
+  apiTest('keeps KIs that share an id across targets', async ({ apiClient }) => {
+    const body = await run(apiClient, `FROM ${DEST}, ${DS_DEST} | KEEP id | SORT id`);
+
+    expect(columnValues(body, 'id')).toStrictEqual([
+      'active',
+      'revised',
+      'single',
+      'single',
+      'unexpired',
+    ]);
   });
 
   apiTest('drops governance unless the query names it', async ({ apiClient }) => {

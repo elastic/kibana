@@ -83,12 +83,11 @@ below opens with the two lifecycle filters, so the query reads as what it return
 | WHERE expires_at IS NULL OR expires_at > NOW()
 ```
 
-`platform.context_engine.query_ai_indices` adds the same two filters plus `DROP governance.*` to
-any query on a registered target that names neither `governance` nor `expires_at`, and on a data
-stream target always keeps only the newest revision per `id`. Omitting the filters is therefore
-safe; writing them is not wrong. To read what the filters hide, name the field: a
-`WHERE governance.lifecycle.status == "deleted"` returns the tombstones, and a
-`KEEP ..., governance.provenance.created_by.uri` shows which automation wrote a KI.
+`platform.context_engine.query_ai_indices` adds these two filters and `DROP governance.*` to any
+query that omits them, and on a data stream keeps only the newest revision per `id`. Naming a
+field switches off its default only: `WHERE governance.lifecycle.status == "deleted"` returns
+tombstones, `WHERE expires_at < NOW()` returns expired KIs, and `KEEP governance.provenance.created_by.uri`
+shows the writing automation while both filters still apply.
 
 ---
 
