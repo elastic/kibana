@@ -117,6 +117,17 @@ describe('convertJsonSchemaToZod', () => {
     expect(zodSchema.safeParse(null).success).toBe(false);
   });
 
+  it('enforces typed additionalProperties when type is omitted', () => {
+    const jsonSchema: JSONSchema7 = {
+      properties: { known: { type: 'string' } },
+      additionalProperties: { type: 'number' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse({ known: 'ok', extra: 42 }).success).toBe(true);
+    expect(zodSchema.safeParse({ known: 'ok', extra: 'not a number' }).success).toBe(false);
+  });
+
   it('keeps anyOf composition when a branch is a typed map', () => {
     const jsonSchema: JSONSchema7 = {
       anyOf: [{ type: 'object', additionalProperties: { type: 'string' } }, { type: 'null' }],

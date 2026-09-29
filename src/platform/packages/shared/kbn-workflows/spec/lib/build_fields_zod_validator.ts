@@ -86,7 +86,10 @@ function applyAdditionalProperties(
   }
 
   const types = schemaTypeList(jsonSchema);
-  if (zodResult instanceof z.ZodUnknown && types.includes('object')) {
+  const impliedObject =
+    types.includes('object') ||
+    (types.length === 0 && (!!jsonSchema.properties || !!jsonSchema.additionalProperties));
+  if (zodResult instanceof z.ZodUnknown && impliedObject) {
     const branches = [
       compileTypedMapBranch(jsonSchema, valueSchema),
       ...types
