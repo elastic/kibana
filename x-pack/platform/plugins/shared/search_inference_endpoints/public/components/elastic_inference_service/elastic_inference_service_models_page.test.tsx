@@ -19,12 +19,12 @@ import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_m
 import { EIS_DISPLAY_OPTIONS_TOUR_STORAGE_KEY } from '../../hooks/use_display_options_tour';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
+import { useKibana } from '../../hooks/use_kibana';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 
 vi.mock('../../hooks/use_eis_models');
 vi.mock('../../hooks/use_kibana');
 
-const { useKibana } = await vi.importMock('../../hooks/use_kibana');
 const mockUseKibana = useKibana as Mock;
 
 const mockKibanaReturn = ({

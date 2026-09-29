@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
+exports[`DefaultEditorAgg component > should init with the default set of props 1`] = `
 <EuiAccordion
   aria-label="Toggle metric editor"
   buttonClassName="eui-textTruncate"

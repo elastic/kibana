@@ -7,10 +7,6 @@
 
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
-type AnyRecord = Record<string, unknown>;
-const actual = jest.requireActual('@kbn/code-editor') as AnyRecord;
-
-module.exports = {
-  ...actual,
-  CodeEditor: MockedCodeEditor,
-};
+// `@kbn/code-editor` is aliased to this file; the `/index` subpath resolves to the real package.
+export * from '@kbn/code-editor/index';
+export const CodeEditor = MockedCodeEditor;

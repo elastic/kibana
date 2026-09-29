@@ -64,40 +64,40 @@ describe('Enroll routes', () => {
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[hosts]: expected value of type [array] but got [undefined]"`
+        `[Error: [hosts]: expected value of type [array] but got [undefined]]`
       );
 
       expect(() => bodySchema.validate({ hosts: [] })).toThrowErrorMatchingInlineSnapshot(
-        `"[hosts]: array size is [0], but cannot be smaller than [1]"`
+        `[Error: [hosts]: array size is [0], but cannot be smaller than [1]]`
       );
       expect(() =>
         bodySchema.validate({ hosts: ['localhost:9200'] })
-      ).toThrowErrorMatchingInlineSnapshot(`"[hosts.0]: expected URI with scheme [https]."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [hosts.0]: expected URI with scheme [https].]`);
       expect(() =>
         bodySchema.validate({ hosts: ['http://localhost:9200'] })
-      ).toThrowErrorMatchingInlineSnapshot(`"[hosts.0]: expected URI with scheme [https]."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [hosts.0]: expected URI with scheme [https].]`);
       expect(() =>
         bodySchema.validate({
           apiKey: 'some-key',
           hosts: ['https://localhost:9200', 'http://localhost:9243'],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"[hosts.1]: expected URI with scheme [https]."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [hosts.1]: expected URI with scheme [https].]`);
 
       expect(() =>
         bodySchema.validate({ hosts: ['https://localhost:9200'] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[apiKey]: expected value of type [string] but got [undefined]"`
+        `[Error: [apiKey]: expected value of type [string] but got [undefined]]`
       );
       expect(() =>
         bodySchema.validate({ apiKey: '', hosts: ['https://localhost:9200'] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[apiKey]: value has length [0] but it must have a minimum length of [1]."`
+        `[Error: [apiKey]: value has length [0] but it must have a minimum length of [1].]`
       );
 
       expect(() =>
         bodySchema.validate({ apiKey: 'some-key', hosts: ['https://localhost:9200'] })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[caFingerprint]: expected value of type [string] but got [undefined]"`
+        `[Error: [caFingerprint]: expected value of type [string] but got [undefined]]`
       );
       expect(() =>
         bodySchema.validate({
@@ -106,7 +106,7 @@ describe('Enroll routes', () => {
           caFingerprint: '12345',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[caFingerprint]: value has length [5] but it must have a minimum length of [64]."`
+        `[Error: [caFingerprint]: value has length [5] but it must have a minimum length of [64].]`
       );
 
       expect(

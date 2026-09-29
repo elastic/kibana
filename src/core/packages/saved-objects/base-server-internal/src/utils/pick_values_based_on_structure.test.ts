@@ -131,7 +131,8 @@ describe('pickValuesBasedOnStructure', () => {
       }),
       { verbose: true, numRuns: 1_000 }
     );
-  });
+    // 1k property runs over deep objects are CPU-bound; unlike Jest, Vitest fails slow sync tests.
+  }, 30_000);
 });
 
 const arrayMerge = (targetArray: unknown[], sourceArray: unknown[]) => {

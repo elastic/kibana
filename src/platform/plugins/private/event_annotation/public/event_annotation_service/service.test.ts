@@ -489,7 +489,7 @@ describe('Event Annotation Service', () => {
   });
   describe('loadAnnotationGroup', () => {
     it('should throw error when loading group doesnt exist', async () => {
-      expect(() => eventAnnotationService.loadAnnotationGroup('nonExistingGroup')).rejects
+      await expect(() => eventAnnotationService.loadAnnotationGroup('nonExistingGroup')).rejects
         .toMatchInlineSnapshot(`
         Object {
           "error": "Saved object not found",

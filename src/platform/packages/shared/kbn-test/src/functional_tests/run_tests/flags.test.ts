@@ -70,7 +70,7 @@ describe('parse runTest flags', () => {
 
   it('allows combinations of config and journey', () => {
     expect(() => test({ config: undefined })).toThrowErrorMatchingInlineSnapshot(
-      `"At least one --config or --journey flag is required"`
+      `[Error: At least one --config or --journey flag is required]`
     );
 
     expect(test({ config: ['configFoo'], journey: 'journeyFoo' }).configs).toMatchInlineSnapshot(`
@@ -116,7 +116,7 @@ describe('parse runTest flags', () => {
 
   it('validates esFrom', () => {
     expect(() => test({ esFrom: 'foo' })).toThrowErrorMatchingInlineSnapshot(
-      `"invalid --esFrom, expected one of \\"snapshot\\", \\"source\\", \\"serverless\\""`
+      `[Error: invalid --esFrom, expected one of "snapshot", "source", "serverless"]`
     );
   });
 

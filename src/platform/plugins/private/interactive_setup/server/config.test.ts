@@ -37,7 +37,7 @@ describe('config schema', () => {
       expect(() =>
         ConfigSchema.validate({ connectionCheck: { interval: 100 } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[connectionCheck.interval]: the value must be greater or equal to 1 second."`
+        `[Error: [connectionCheck.interval]: the value must be greater or equal to 1 second.]`
       );
     });
   });

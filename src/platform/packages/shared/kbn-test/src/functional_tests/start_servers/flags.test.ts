@@ -66,13 +66,13 @@ it('respects the cwd of the script', () => {
 
 it('rejects zero configs', () => {
   expect(() => test({ config: [] })).toThrowErrorMatchingInlineSnapshot(
-    `"expected exactly one --config or --journey flag"`
+    `[Error: expected exactly one --config or --journey flag]`
   );
 });
 
 it('rejects two configs', () => {
   expect(() => test({ config: ['foo'], journey: ['bar'] })).toThrowErrorMatchingInlineSnapshot(
-    `"expected exactly one --config or --journey flag"`
+    `[Error: expected exactly one --config or --journey flag]`
   );
 });
 

@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
@@ -18,6 +19,9 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EsqlQueryExpression, getTimeFilter } from './esql_query_expression';
 import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
+import { hasExpressionValidationErrors as hasExpressionValidationErrorsImport } from '../validation';
+import * as esqlUtils from '@kbn/esql-utils';
+import * as triggersActionsCommon from '@kbn/triggers-actions-ui-plugin/public/common';
 
 vi.mock('../validation', () => {
   const mocked = {
@@ -25,7 +29,7 @@ vi.mock('../validation', () => {
   };
   return { ...mocked, default: mocked };
 });
-const { hasExpressionValidationErrors } = await vi.importMock('../validation');
+const hasExpressionValidationErrors = hasExpressionValidationErrorsImport as unknown as Mock;
 
 vi.mock('@kbn/data-plugin/public', async () => {
   const actual = await vi.importActual('@kbn/data-plugin/public');
@@ -73,10 +77,8 @@ vi.mock('@kbn/esql-utils', () => {
   };
 });
 
-const esqlUtilsMock = await vi.importMock('@kbn/esql-utils');
-const triggersActionsCommonMock = await vi.importMock(
-  '@kbn/triggers-actions-ui-plugin/public/common'
-);
+const esqlUtilsMock = esqlUtils as unknown as Record<string, Mock>;
+const triggersActionsCommonMock = triggersActionsCommon as unknown as Record<string, Mock>;
 const { getProjectRoutingFromEsqlQuery } = esqlUtilsMock;
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (

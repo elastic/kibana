@@ -41,7 +41,11 @@ describe('useGetCaseMetrics', () => {
     });
 
     await waitFor(() =>
-      expect(spyOnGetCaseMetrics).toHaveBeenCalledWith(basicCase.id, features, expect.any(AbortSignal))
+      expect(spyOnGetCaseMetrics).toHaveBeenCalledWith(
+        basicCase.id,
+        features,
+        expect.any(AbortSignal)
+      )
     );
   });
 

@@ -18,7 +18,6 @@ vi.mock('./api');
 vi.mock('../common/lib/kibana');
 
 describe('useGetActionLicense', () => {
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -29,7 +28,9 @@ describe('useGetActionLicense', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => expect(spyOnGetActionLicense).toHaveBeenCalledWith(expect.any(AbortSignal)));
+    await waitFor(() =>
+      expect(spyOnGetActionLicense).toHaveBeenCalledWith(expect.any(AbortSignal))
+    );
   });
 
   it('unhappy path', async () => {

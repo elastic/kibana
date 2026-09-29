@@ -406,9 +406,13 @@ describe('<UseField />', () => {
         validations: [
           {
             validator: () => {
+              // eslint-disable-next-line no-console
+              console.log('DBG validator called', vi.getTimerCount(), Date.now());
               // The validation will return its value after 5s
               return new Promise((resolve) => {
                 setTimeout(() => {
+                  // eslint-disable-next-line no-console
+                  console.log('DBG fired', new Error().stack);
                   resolve({ message: 'Invalid field' });
                 }, 5000);
               });
@@ -428,7 +432,11 @@ describe('<UseField />', () => {
         const setIinputValuePromise = setInputValue('myField', 'changedValue');
         await vi.advanceTimersToNextTimerAsync(0);
         await setIinputValuePromise;
+        // eslint-disable-next-line no-console
+        console.log('DBG after type', fieldHook?.isValidating, vi.getTimerCount(), Date.now(), fieldHook?.value);
       });
+      // eslint-disable-next-line no-console
+      console.log('DBG after act', fieldHook?.isValidating, fieldHook?.value);
 
       expect(fieldHook?.isValidating).toBe(true);
 

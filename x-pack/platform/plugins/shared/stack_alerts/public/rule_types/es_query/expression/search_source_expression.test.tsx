@@ -301,7 +301,7 @@ describe('SearchSourceAlertTypeExpression', () => {
       expect(result.getByTestId('searchSourceLoadingSpinner')).toBeInTheDocument()
     );
 
-    expect(result.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(await result.findByTestId('thresholdPopover')).toBeInTheDocument();
     expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
   });
 
@@ -313,7 +313,9 @@ describe('SearchSourceAlertTypeExpression', () => {
       })
     );
 
-    expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
+    await waitFor(() =>
+      expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0')
+    );
   });
 
   test('should disable Test Query button if data view is not selected yet', async () => {

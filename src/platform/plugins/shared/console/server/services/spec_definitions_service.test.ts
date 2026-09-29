@@ -9,12 +9,20 @@
 
 import { vi } from 'vitest';
 
-import fs from 'fs';
+import { globSync, readFileSync } from 'fs';
 import { SpecDefinitionsService } from '.';
 import type { EndpointDefinition, EndpointsAvailability } from '../../common/types';
 
-const mockReadFileSync = vi.spyOn(fs, 'readFileSync');
-const mockGlobbySync = vi.spyOn(fs, 'globSync');
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<{
+    readFileSync: typeof readFileSync;
+    globSync: typeof globSync;
+  }>();
+  return { ...actual, readFileSync: vi.fn(actual.readFileSync), globSync: vi.fn(actual.globSync) };
+});
+
+const mockReadFileSync = vi.mocked(readFileSync);
+const mockGlobbySync = vi.mocked(globSync);
 const mockJsLoadersGetter = vi.fn();
 
 vi.mock('../lib', async () => {

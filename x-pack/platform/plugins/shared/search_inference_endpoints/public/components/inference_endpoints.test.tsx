@@ -17,8 +17,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { InferenceEndpoints } from './inference_endpoints';
+import { useQueryInferenceEndpoints as useQueryInferenceEndpointsHook } from '../hooks/use_inference_endpoints';
 
 const mockRefetch = vi.fn();
 
@@ -57,9 +59,8 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
   };
 });
 
-const mockUseKibana = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
-
-const { useQueryInferenceEndpoints } = await vi.importMock('../hooks/use_inference_endpoints');
+const mockUseKibana = useKibana as Mock;
+const useQueryInferenceEndpoints = useQueryInferenceEndpointsHook as Mock;
 
 const mixedEndpoints: InferenceAPIConfigResponse[] = [
   {

@@ -64,14 +64,14 @@ describe('Configure routes', () => {
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[host]: expected value of type [string] but got [undefined]."`
+        `[Error: [host]: expected value of type [string] but got [undefined].]`
       );
       expect(() => bodySchema.validate({ host: '' })).toThrowErrorMatchingInlineSnapshot(
-        `"[host]: \\"host\\" is not allowed to be empty"`
+        `[Error: [host]: "host" is not allowed to be empty]`
       );
       expect(() =>
         bodySchema.validate({ host: 'localhost:9200' })
-      ).toThrowErrorMatchingInlineSnapshot(`"[host]: expected URI with scheme [http|https]."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [host]: expected URI with scheme [http|https].]`);
       expect(bodySchema.validate({ host: 'http://localhost:9200' })).toMatchInlineSnapshot(`
         Object {
           "host": "http://localhost:9200",
@@ -80,16 +80,16 @@ describe('Configure routes', () => {
       expect(() =>
         bodySchema.validate({ host: 'http://localhost:9200', username: 'elastic' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
+        `[Error: [username]: value of "elastic" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the "kibana_system" user instead.]`
       );
       expect(() =>
         bodySchema.validate({ host: 'http://localhost:9200', username: 'kibana_system' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[password]: expected value of type [string] but got [undefined]"`
+        `[Error: [password]: expected value of type [string] but got [undefined]]`
       );
       expect(() =>
         bodySchema.validate({ host: 'http://localhost:9200', password: 'password' })
-      ).toThrowErrorMatchingInlineSnapshot(`"[password]: a value wasn't expected to be present"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [password]: a value wasn't expected to be present]`);
       expect(
         bodySchema.validate({
           host: 'http://localhost:9200',
@@ -106,7 +106,7 @@ describe('Configure routes', () => {
       expect(() =>
         bodySchema.validate({ host: 'https://localhost:9200' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[caCert]: expected value of type [string] but got [undefined]"`
+        `[Error: [caCert]: expected value of type [string] but got [undefined]]`
       );
       expect(bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der' }))
         .toMatchInlineSnapshot(`

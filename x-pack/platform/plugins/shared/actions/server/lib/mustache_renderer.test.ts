@@ -405,9 +405,9 @@ describe('mustache_renderer', () => {
       `);
 
       const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
-      expect(
-        renderMustacheString(logger, '{{a}} - {{b}} -- {{e}}', deepVariables, 'none')
-      ).toEqual(expected);
+      expect(renderMustacheString(logger, '{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(
+        expected
+      );
 
       expect(renderMustacheString(logger, '{{e}}', deepVariables, 'none')).toEqual(
         '5,{"f":6,"g":7}'

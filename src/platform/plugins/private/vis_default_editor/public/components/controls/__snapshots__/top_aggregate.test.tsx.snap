@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TopAggregateParamEditor should init with the default set of props 1`] = `
+exports[`TopAggregateParamEditor > should init with the default set of props 1`] = `
 <EuiFormRow
   display="rowCompressed"
   fullWidth={true}

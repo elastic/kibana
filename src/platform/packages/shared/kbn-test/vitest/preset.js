@@ -101,6 +101,7 @@ const createKbnVitestConfig = ({
       setupFiles: [
         ...(isJsdom
           ? [
+              Path.join(SETUP_DIR, 'timers.jsdom.js'),
               'core-js/stable',
               Path.join(JEST_SETUP_DIR, 'polyfills.jsdom.js'),
               Path.join(SETUP_DIR, 'enzyme.js'),

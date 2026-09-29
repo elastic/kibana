@@ -2078,7 +2078,9 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrow(new Error('Cannot enable Agent Tamper Protection: reason'));
+      ).rejects.toThrow(
+        expect.objectContaining({ message: 'Cannot enable Agent Tamper Protection: reason' })
+      );
     });
 
     it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CollectorSet bulkFetch skips collectors that are not ready 1`] = `
+exports[`CollectorSet > bulkFetch > skips collectors that are not ready 1`] = `
 Object {
   "results": Array [
     Object {
@@ -55,7 +55,7 @@ Object {
 }
 `;
 
-exports[`CollectorSet bulkFetch skips collectors that have timed out 1`] = `
+exports[`CollectorSet > bulkFetch > skips collectors that have timed out 1`] = `
 Object {
   "results": Array [
     Object {

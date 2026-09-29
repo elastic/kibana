@@ -172,8 +172,8 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(result.getByTestId('indexSelectPopover')).toBeInTheDocument();
     expect(result.getByTestId('sizeValueExpression')).toBeInTheDocument();
     expect(result.getByTestId('queryJsonEditor')).toBeInTheDocument();
-    expect(result.getByTestId('thresholdPopover')).toBeInTheDocument();
-    expect(result.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(await result.findByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(await result.findByTestId('forLastExpression')).toBeInTheDocument();
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
 

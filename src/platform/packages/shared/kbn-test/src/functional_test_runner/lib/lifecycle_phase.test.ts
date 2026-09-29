@@ -86,7 +86,7 @@ describe('without randomness', () => {
     const fn3 = vi.fn();
     phase.add(fn3);
 
-    await expect(phase.trigger()).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
+    await expect(phase.trigger()).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: foo]`);
     expect(fn1).toHaveBeenCalled();
     expect(fn2).toHaveBeenCalled();
     expect(fn3).toHaveBeenCalled();

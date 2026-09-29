@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`input_control_vis toExpressionAst should build an expression based on vis.params 1`] = `
+exports[`input_control_vis toExpressionAst > should build an expression based on vis.params 1`] = `
 Object {
   "chain": Array [
     Object {

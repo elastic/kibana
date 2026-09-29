@@ -9,7 +9,8 @@ import React from 'react';
 
 type AnyRecord = Record<string, unknown>;
 
-const actual = jest.requireActual('@kbn/code-editor') as AnyRecord;
+// The `/index` subpath bypasses the exact-match alias that points `@kbn/code-editor` at this file.
+export * from '@kbn/code-editor';
 
 const getTestSubj = (props: AnyRecord) => {
   const testSubj = props['data-test-subj'];
@@ -47,7 +48,4 @@ const MockedCodeEditor = (props: AnyRecord) => {
   );
 };
 
-module.exports = {
-  ...actual,
-  CodeEditor: MockedCodeEditor,
-};
+export const CodeEditor = MockedCodeEditor;

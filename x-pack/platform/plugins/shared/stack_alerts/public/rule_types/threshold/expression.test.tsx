@@ -122,10 +122,10 @@ describe('IndexThresholdRuleTypeExpression', () => {
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
 
     await screen.findByTestId('whenExpression');
-    expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
+    expect(await screen.findByTestId('groupByExpression')).toBeInTheDocument();
     expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
-    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
-    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(await screen.findByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(await screen.findByTestId('forLastExpression')).toBeInTheDocument();
     expect(screen.getByTestId('visualizationPlaceholder')).toBeInTheDocument();
     expect(screen.queryByTestId('thresholdVisualization')).not.toBeInTheDocument();
     expect(screen.getByTestId('filterKuery')).toBeInTheDocument();
@@ -136,10 +136,10 @@ describe('IndexThresholdRuleTypeExpression', () => {
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
 
     await screen.findByTestId('whenExpression');
-    expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
-    expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
-    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
-    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(await screen.findByTestId('ofExpressionPopover')).toBeInTheDocument();
+    expect(await screen.findByTestId('groupByExpression')).toBeInTheDocument();
+    expect(await screen.findByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(await screen.findByTestId('forLastExpression')).toBeInTheDocument();
     expect(screen.getByTestId('visualizationPlaceholder')).toBeInTheDocument();
     expect(screen.queryByTestId('thresholdVisualization')).not.toBeInTheDocument();
     expect(screen.getByTestId('filterKuery')).toBeInTheDocument();

@@ -16,6 +16,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const inferenceEndpoints = [
   {
@@ -165,7 +166,7 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
   };
 });
 
-const mockUseKibana = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
+const mockUseKibana = useKibana as Mock;
 
 const renderTabularPageWithProviders = () => {
   return render(
