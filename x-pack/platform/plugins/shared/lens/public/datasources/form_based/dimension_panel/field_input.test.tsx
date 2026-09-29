@@ -205,14 +205,14 @@ describe('FieldInput', () => {
     ['reference-based operation', getReferenceBasedOperationColumn()],
     ['managed references operation', getManagedBasedOperationColumn()],
   ])(
-    'should mark the field as invalid but not show any error message for a %s when only an incomplete column is set',
+    'should mark the field as invalid and prompt to select a field for a %s when only an incomplete column is set',
     (_, col: ReferenceBasedIndexPatternColumn) => {
       const { container } = renderFieldInput({
         incompleteOperation: 'terms',
       });
 
       expect(getLabelElement()).toBeInvalid();
-      expect(getErrorElement(container)).not.toBeInTheDocument();
+      expect(getErrorElement(container)).toHaveTextContent('To use this function, select a field.');
     }
   );
 
@@ -417,6 +417,12 @@ describe('getErrorMessage', () => {
         true
       )
     ).not.toBe('Invalid field. Check your data view or pick another field.');
+  });
+
+  it('should tell the user to select a field when a new function needs one and no field is chosen yet', () => {
+    expect(getErrorMessage(undefined, true, undefined, false)).toBe(
+      'To use this function, select a field.'
+    );
   });
 
   it('should tell the user to change field if incomplete with an incompatible field', () => {
