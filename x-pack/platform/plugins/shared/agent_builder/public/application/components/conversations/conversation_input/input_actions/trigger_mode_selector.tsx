@@ -13,23 +13,23 @@ import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 
 const triggerModeLabels: Readonly<Record<ChatTriggerMode, string>> = {
   [ChatTriggerMode.Always]: i18n.translate(
-    'xpack.agentBuilder.conversationInput.triggerModeSelector.agentAndUsers',
-    { defaultMessage: 'Talk to agent and users' }
+    'xpack.agentBuilder.conversationInput.triggerModeSelector.includeAgent',
+    { defaultMessage: 'Include agent' }
   ),
   [ChatTriggerMode.Never]: i18n.translate(
-    'xpack.agentBuilder.conversationInput.triggerModeSelector.usersOnly',
-    { defaultMessage: 'Talk to users' }
+    'xpack.agentBuilder.conversationInput.triggerModeSelector.skipAgent',
+    { defaultMessage: 'Skip agent' }
   ),
 };
 
 const selectorAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.triggerModeSelector.ariaLabel',
-  { defaultMessage: 'Choose who to talk to' }
+  { defaultMessage: 'Include or skip the agent' }
 );
 
 const getButtonAriaLabel = (mode: string) =>
   i18n.translate('xpack.agentBuilder.conversationInput.triggerModeSelector.buttonAriaLabel', {
-    defaultMessage: 'Choose who to talk to, {mode}',
+    defaultMessage: 'Include or skip the agent, {mode}',
     values: { mode },
   });
 

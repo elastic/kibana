@@ -94,8 +94,8 @@ jest.mock('./input_actions', () => ({
         value={triggerMode}
         onChange={(event) => onTriggerModeChange(event.target.value)}
       >
-        <option value="always">Talk to agent and users</option>
-        <option value="never">Talk to users</option>
+        <option value="always">Include agent</option>
+        <option value="never">Skip agent</option>
       </select>
     ) : null,
 }));
@@ -572,7 +572,7 @@ describe('InputActions', () => {
     } as never);
   });
 
-  it('shows the connector selector when talking to the agent and users', () => {
+  it('shows the connector selector when the agent is included', () => {
     renderInput(
       <InputActions
         onSubmit={jest.fn()}
@@ -587,7 +587,7 @@ describe('InputActions', () => {
     expect(screen.getByTestId('mockConnectorSelector')).toBeInTheDocument();
   });
 
-  it('hides the connector selector when talking to users only', () => {
+  it('hides the connector selector when the agent is skipped', () => {
     renderInput(
       <InputActions
         onSubmit={jest.fn()}
