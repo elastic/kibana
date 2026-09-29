@@ -44,11 +44,7 @@ const KI_SEARCH_MAX_PER_PAGE_FULL = 10;
 const searchKnowledgeIndicatorsSchema = z.object({
   slugs: nightshiftSourceSlugsField(
     'Omit to search every source in this space, including disabled ones.'
-  )
-    .optional()
-    .describe(
-      'Nightshift source slugs, e.g. "nginx-errors". Not titles and not view names. Omit to search every source in this space, including disabled ones.'
-    ),
+  ).optional(),
   search_text: z
     .string()
     .max(MAX_TEXT_LENGTH)
