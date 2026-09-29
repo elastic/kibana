@@ -668,6 +668,53 @@ describe('promote task runner', () => {
     expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
   });
 
+  it('holds the cursor when a prior-citation PIT search 404s after open', async () => {
+    // A 404 after the indicators PIT opened means the PIT was lost mid-page, not
+    // a missing index. Swallowing it would leave unretracted orphans past the
+    // last successful page.
+    const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: { id?: string } }) => {
+      if (req?.pit?.id === 'indicator-pit-1') {
+        throw Object.assign(new Error('pit_expired'), { statusCode: 404 });
+      }
+      return { hits: { hits: [reportHit('r-1')] }, pit_id: 'pit-1' };
+    });
+
+    const result = await definition
+      .createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+        })
+      )
+      .run();
+
+    expect(esClient.bulk).not.toHaveBeenCalled();
+    expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
+  });
+
+  it('continues when the indicators index is missing on prior-citation open', async () => {
+    const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+    (esClient.openPointInTime as jest.Mock).mockImplementation(async (req: { index?: string }) => {
+      if (req.index === THREAT_INTEL_INDICATORS_INDEX) {
+        throw Object.assign(new Error('index_not_found_exception'), { statusCode: 404 });
+      }
+      return { id: 'pit-1' };
+    });
+
+    const result = await definition
+      .createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+        })
+      )
+      .run();
+
+    expect(esClient.bulk).toHaveBeenCalled();
+    expect(result.state).toEqual(
+      expect.objectContaining({ lastSyncedAt: EXTRACTED_AT, totalReportsProcessed: 1 })
+    );
+  });
+
   it('holds the cursor when the run is aborted mid-scan', async () => {
     const controller = new AbortController();
     controller.abort();

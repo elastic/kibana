@@ -304,6 +304,34 @@ describe('enrichReportCore', () => {
     expect(result.anchor_iocs.length).toBeLessThan(manyIocs.length);
   });
 
+  it('prefers extract_iocs ioc_set_hash over recomputing from a capped IOC array', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      raw: { response_metadata: {} },
+      parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+    });
+    const cappedIocs = [
+      {
+        type: 'url' as const,
+        value: 'https://evil.example/payload-0',
+        defanged: 'https://evil.example/payload-0',
+        tier: 'discriminating' as const,
+        tier_heuristic: 'discriminating' as const,
+        tier_basis: 'url_path_entropy',
+      },
+    ];
+    const extractHash = 'a'.repeat(64);
+
+    const result = await enrichReportCore(buildModel(invoke), logger, {
+      text: 'C2 fetched https://evil.example/payload-0.',
+      iocs: cappedIocs,
+      ioc_set_hash: extractHash,
+      truncated: true,
+    });
+
+    expect(result.ioc_set_hash).toBe(extractHash);
+    expect(result.ioc_set_hash).not.toBe(hashIocSet(cappedIocs));
+  });
+
   it('does not resend the full article on follow-up IOC batches', async () => {
     const invoke = jest.fn().mockImplementation((prompt: string) => {
       if (String(prompt).includes('taxonomy')) {

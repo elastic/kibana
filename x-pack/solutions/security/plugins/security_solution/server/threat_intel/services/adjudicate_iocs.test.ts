@@ -133,6 +133,19 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).toContain(canonical);
   });
 
+  it('matches an explicit default HTTPS port as the same URL for review context', () => {
+    // extract_iocs strips :443 via URL.toString(); source text often keeps it.
+    const canonical = 'https://evil.example/payload';
+    const prepared = prepareIocAdjudication({
+      text: `The attacker downloaded https://evil.example:443/payload during staging.`,
+      iocs: [candidate(canonical)],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
+    expect(prepared.reviewable[0].context).toContain('evil.example:443/payload');
+  });
+
   it('prefers an attributed later IOC occurrence over an earlier citation', () => {
     const url = 'https://evil.example/payload';
     const prepared = prepareIocAdjudication({
