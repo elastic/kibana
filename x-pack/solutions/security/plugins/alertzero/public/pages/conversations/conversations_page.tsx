@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
@@ -16,6 +17,7 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
+  impactPills,
 } from '@kbn/agentic-investigations-common';
 import {
   useApproveProposal,
@@ -31,6 +33,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
+import { useStatusSignal } from '../../components/connected_status/use_status_signal';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
@@ -48,6 +51,8 @@ import { EscalationModalBoundary } from './escalation_modal_boundary';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
+import { ConnectedCloseInvestigationModal } from '../../components/connected_status/connected_close_investigation_modal';
+import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 
 // Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
 // translations, and user-profile API) stays out of alertzero's main chunk.
@@ -57,7 +62,14 @@ const LazyConnectedEscalationModal = React.lazy(() =>
 
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const queryClient = useQueryClient();
   const { sections, proposalsById, investigations: conversations } = useQueueSections();
+
+  // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
+  // so this page's QueryClient invalidates its proposal queries and the queue refreshes.
+  useStatusSignal(() => {
+    void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+  });
 
   // FIXME: use hook methods to keep in-flight states
   const { mutateAsync: approveDecision } = useApproveProposal();
@@ -67,7 +79,20 @@ export const ConversationsPage: React.FC = () => {
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
+  const [entityFilter, setEntityFilter] = useState<string | null>(null);
+  const availableEntityIds = useMemo(
+    () => new Set(impactPills(conversations).map((pill) => pill.entityId)),
+    [conversations]
+  );
+  // A poll or a collapsed section can drop the selected entity from the loaded
+  // rows. Keep filtering only while that pill is still there to clear.
+  const effectiveEntityFilter =
+    entityFilter !== null && availableEntityIds.has(entityFilter) ? entityFilter : null;
+  useEffect(() => {
+    if (entityFilter !== effectiveEntityFilter) {
+      setEntityFilter(effectiveEntityFilter);
+    }
+  }, [entityFilter, effectiveEntityFilter]);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -87,6 +112,10 @@ export const ConversationsPage: React.FC = () => {
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
   }>({ type: null, recordId: null });
+
+  // Separate state for the dismiss-from-approval flow: when the user clicks "Dismiss" in
+  // the approval modal we only dismiss that one proposal, not the whole investigation.
+  const [dismissProposalId, setDismissProposalId] = useState<string | null>(null);
 
   // From chartsSummary rather than the pages: no page-size cap, and every
   // category. Shares the chart row's query key, so it costs no extra request.
@@ -159,6 +188,7 @@ export const ConversationsPage: React.FC = () => {
       assignSuccess: QUEUE_PAGE_INFO.assignSuccess,
       assignError: QUEUE_PAGE_INFO.assignError,
     },
+    buttonIconSize: 's',
   });
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
@@ -184,32 +214,46 @@ export const ConversationsPage: React.FC = () => {
   );
 
   // Dismissing is a decision with a reason, so the approval modal hands off to the dismiss
-  // modal the ⋮ menu already opens rather than growing a second form of its own.
+  // modal rather than growing a second form of its own. It uses its own separate state so that
+  // the ⋮ "Close investigation" action (which closes the whole investigation) is not confused
+  // with dismissing a single proposal from the approval flow.
   const dismissApproval = useCallback(
     (proposal: ProposalItem) => {
       closeApproval();
-      setModalState({ type: 'close', recordId: proposal.id });
+      setDismissProposalId(proposal.id);
     },
     [closeApproval]
   );
 
-  const renderDismissModal = useCallback(
-    ({ recordId, onClose }: { recordId: string; onClose: () => void }) => (
-      <DismissProposalModal
-        proposalId={recordId}
-        onClose={onClose}
-        onConfirm={async ({ dismissReason, rationale }) => {
-          try {
-            await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
-            void dropDecided(recordId);
-            onClose();
-          } catch (err) {
-            onDecisionError(err);
-            throw err;
-          }
-        }}
-      />
+  const closeDismissModal = useCallback(() => setDismissProposalId(null), []);
+
+  const renderCloseModal = useCallback(
+    ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
+      <ConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
     ),
+    []
+  );
+
+  const renderDismissModal = useCallback(
+    ({ recordId, onClose }: { recordId?: string | null; onClose: () => void }) => {
+      if (!recordId) return null;
+      return (
+        <DismissProposalModal
+          proposalId={recordId}
+          onClose={onClose}
+          onConfirm={async ({ dismissReason, rationale }) => {
+            try {
+              await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
+              void dropDecided(recordId);
+              onClose();
+            } catch (err) {
+              onDecisionError(err);
+              throw err;
+            }
+          }}
+        />
+      );
+    },
     [dismissDecision, dropDecided, onDecisionError]
   );
 
@@ -301,9 +345,28 @@ export const ConversationsPage: React.FC = () => {
         isSubmitting={isSubmittingSelected}
         currentActorName={currentActorName}
         onDismissApproval={dismissApproval}
+        renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
         renderDismissModal={renderDismissModal}
         renderEscalationModal={renderEscalationModal}
       />
+
+      {/* Dismiss a single proposal from the approval-modal "Dismiss" button. This is separate
+          from closing the full investigation via the ⋮ "Close" action. */}
+      {dismissProposalId ? (
+        <DismissProposalModal
+          proposalId={dismissProposalId}
+          onClose={closeDismissModal}
+          onConfirm={async ({ dismissReason, rationale }) => {
+            try {
+              await dismissDecision({ id: dismissProposalId, body: { dismissReason, rationale } });
+              void dropDecided(dismissProposalId);
+              closeDismissModal();
+            } catch (err) {
+              onDecisionError(err);
+            }
+          }}
+        />
+      ) : null}
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
@@ -318,6 +381,7 @@ export const ConversationsPage: React.FC = () => {
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
           />
+          <ScanFailureCallout />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
@@ -325,8 +389,8 @@ export const ConversationsPage: React.FC = () => {
         <EuiFlexItem>
           <Impact
             investigations={conversations}
-            surfaceFilter={surfaceFilter}
-            onSurfaceFilterChange={setSurfaceFilter}
+            entityFilter={effectiveEntityFilter}
+            onEntityFilterChange={setEntityFilter}
           />
         </EuiFlexItem>
 
@@ -336,7 +400,7 @@ export const ConversationsPage: React.FC = () => {
           <EuiFlexItem key={section.id} grow={false}>
             <QueueSection
               section={section}
-              surfaceFilter={surfaceFilter}
+              entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}
@@ -344,6 +408,7 @@ export const ConversationsPage: React.FC = () => {
               onOpenChat={openChatForProposal}
               getChatHref={getChatHrefForProposal}
               canManageEscalations={canManageEscalations}
+              canCloseInvestigation={canManageInvestigations}
               renderAssignees={renderAssignees}
             />
           </EuiFlexItem>

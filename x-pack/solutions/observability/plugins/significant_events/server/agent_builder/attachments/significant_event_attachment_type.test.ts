@@ -37,7 +37,7 @@ const createGetScopedClients = (
   events: SignificantEvent[]
 ): jest.MockedFunction<GetScopedClients> => {
   const getEventClient = jest.fn(() => ({
-    findByEventId: jest.fn().mockResolvedValue({ hits: events }),
+    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
   }));
 
   return jest.fn().mockResolvedValue({

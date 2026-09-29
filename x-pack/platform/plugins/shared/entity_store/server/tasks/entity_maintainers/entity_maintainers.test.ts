@@ -16,6 +16,7 @@ import {
 } from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
 import { EntityMaintainerTaskStatus } from './types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
 const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
@@ -636,11 +637,10 @@ describe('entity_maintainer task', () => {
       await runner.run();
 
       expect(withContextSpy).toHaveBeenCalledWith(
-        {
-          type: 'security_solution',
-          name: 'entity_analytics-entity_maintainers_task',
-          id: 'test-maintainer:default',
-        },
+        buildEaExecutionContext(
+          EA_EXECUTION_CONTEXT_NAMES.ENTITY_MAINTAINERS_TASK,
+          'test-maintainer:default'
+        ),
         expect.any(Function)
       );
     });
