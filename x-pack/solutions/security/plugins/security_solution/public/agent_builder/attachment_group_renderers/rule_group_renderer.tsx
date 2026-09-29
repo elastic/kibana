@@ -34,7 +34,7 @@ const RuleRow = memo<RuleRowProps>(({ label, descriptor, resolveSecurityCanvasCo
     <AttachmentRow
       label={label}
       typeName="Rule"
-      iconType="securityApp"
+      iconType="document"
       onClick={descriptor ? handleClick : undefined}
     >
       {isOpen && descriptor && (

@@ -104,12 +104,12 @@ describe('groupAttachments', () => {
     expect(ids).toEqual(['a2', 'a3', 'a1']);
   });
 
-  it('sorts ad-hoc groups by earliest attachment time, then type id', () => {
+  it('sorts all groups alphabetically by title then id', () => {
     const u1 = makeAttachment('u1', 'zzz.type', '2024-01-01T00:00:00.000Z');
     const u2 = makeAttachment('u2', 'aaa.type', '2024-01-02T00:00:00.000Z');
     const groups = groupAttachments([u1, u2], KNOWN_GROUPS);
-    expect(groups[0].id).toBe('zzz.type');
-    expect(groups[1].id).toBe('aaa.type');
+    expect(groups[0].id).toBe('aaa.type');
+    expect(groups[1].id).toBe('zzz.type');
   });
 
   it('uses group title for known groups and leaves title undefined for ad-hoc groups', () => {

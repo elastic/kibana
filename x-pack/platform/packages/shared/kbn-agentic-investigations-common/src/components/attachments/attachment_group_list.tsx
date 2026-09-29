@@ -8,6 +8,7 @@
 import React, { memo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiText,
@@ -19,7 +20,7 @@ import { ATTACHMENT_GROUP_SHOW_LESS, attachmentGroupShowMore } from './translati
 export const DEFAULT_COLLAPSED_COUNT = 4;
 
 export interface AttachmentGroupListProps {
-  /** The uppercase section header label. */
+  /** The group header label. */
   title: string;
   /** The rows to display in this group. */
   rows: React.ReactNode[];
@@ -52,30 +53,26 @@ export const AttachmentGroupList = memo<AttachmentGroupListProps>(
     const visibleRows = isCollapsible && !isExpanded ? rows.slice(0, collapsedCount) : rows;
 
     return (
-      <div data-test-subj="attachmentGroupList">
+      <div
+        css={css({
+          border: euiTheme.border.thin,
+          borderRadius: euiTheme.border.radius.medium,
+          overflow: 'hidden',
+        })}
+        data-test-subj="attachmentGroupList"
+      >
         <div
           css={css({
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-            borderBottom: euiTheme.border.thin,
+            backgroundColor: euiTheme.colors.lightestShade,
           })}
           data-test-subj="attachmentGroupListHeader"
         >
-          <div css={css({ display: 'flex', alignItems: 'baseline', gap: '8px' })}>
-            {[title, displayCount].map((part, i) => (
-              <EuiText
-                key={i}
-                size="xs"
-                css={css({
-                  fontWeight: euiTheme.font.weight.semiBold,
-                  textTransform: 'uppercase',
-                  color: euiTheme.colors.textSubdued,
-                  letterSpacing: '0.05em',
-                })}
-              >
-                {part}
-              </EuiText>
-            ))}
+          <div css={css({ display: 'flex', alignItems: 'center', gap: euiTheme.size.s })}>
+            <EuiText size="xs">
+              <strong>{title}</strong>
+            </EuiText>
+            <EuiBadge color="hollow">{displayCount}</EuiBadge>
           </div>
         </div>
 
@@ -89,6 +86,7 @@ export const AttachmentGroupList = memo<AttachmentGroupListProps>(
             margin: 0,
             padding: 0,
             listStyle: 'none',
+            borderTop: euiTheme.border.thin,
             '& > li + li': { borderTop: euiTheme.border.thin },
           })}
         >
@@ -107,6 +105,8 @@ export const AttachmentGroupList = memo<AttachmentGroupListProps>(
             <EuiButtonEmpty
               size="xs"
               flush="left"
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+              iconSide="left"
               aria-expanded={isExpanded}
               aria-controls={listId}
               onClick={() => setIsExpanded((expanded) => !expanded)}

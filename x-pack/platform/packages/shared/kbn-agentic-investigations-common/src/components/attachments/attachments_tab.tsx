@@ -6,8 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { groupAttachments } from './group_attachments';
@@ -25,8 +24,6 @@ export interface AttachmentsTabProps {
  * Known groups appear first; unknown types form their own ad-hoc group at the end.
  */
 export const AttachmentsTab = memo<AttachmentsTabProps>(({ attachments, attachmentsService }) => {
-  const { euiTheme } = useEuiTheme();
-
   const groups = useMemo(() => groupAttachments(attachments, ATTACHMENT_GROUPS), [attachments]);
 
   if (groups.length === 0) {
@@ -34,25 +31,18 @@ export const AttachmentsTab = memo<AttachmentsTabProps>(({ attachments, attachme
   }
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="none"
-      css={css({
-        borderRadius: euiTheme.size.s,
-        overflow: 'hidden',
-        '& > *:not(:first-child)': { borderTop: euiTheme.border.thin },
-      })}
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="m"
+      responsive={false}
       data-test-subj="attachmentsTabPanel"
     >
       {groups.map((group) => (
-        <RenderAttachmentGroupList
-          key={group.id}
-          group={group}
-          attachmentsService={attachmentsService}
-        />
+        <EuiFlexItem key={group.id} grow={false}>
+          <RenderAttachmentGroupList group={group} attachmentsService={attachmentsService} />
+        </EuiFlexItem>
       ))}
-    </EuiPanel>
+    </EuiFlexGroup>
   );
 });
 

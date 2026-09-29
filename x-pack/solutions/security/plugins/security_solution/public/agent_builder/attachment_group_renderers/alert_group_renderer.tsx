@@ -52,7 +52,7 @@ const AlertRow = memo<AlertRowProps>(({ label, descriptor, resolveSecurityCanvas
     <AttachmentRow
       label={label}
       typeName="Alert"
-      iconType="bell"
+      iconType="warning"
       onClick={descriptor ? handleClick : undefined}
     >
       {isOpen && descriptor && (
@@ -197,7 +197,7 @@ export const createAlertGroupRenderer = (
               key={`loading-${attachment.id}`}
               label="Loading…"
               typeName="Alert"
-              iconType="bell"
+              iconType="warning"
             >
               <EuiLoadingSpinner size="s" />
             </AttachmentRow>
@@ -228,7 +228,7 @@ export const createAlertGroupRenderer = (
           );
         } else {
           rows.push(
-            <AttachmentRow key={attachment.id} label={label} typeName="Alert" iconType="bell" />
+            <AttachmentRow key={attachment.id} label={label} typeName="Alert" iconType="warning" />
           );
         }
       }

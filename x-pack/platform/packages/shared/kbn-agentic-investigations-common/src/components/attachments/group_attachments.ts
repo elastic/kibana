@@ -123,5 +123,7 @@ export const groupAttachments = (
     })
   );
 
-  return [...knownPart, ...adHocPart];
+  return [...knownPart, ...adHocPart].sort((a, b) =>
+    (a.title ?? a.id).localeCompare(b.title ?? b.id)
+  );
 };

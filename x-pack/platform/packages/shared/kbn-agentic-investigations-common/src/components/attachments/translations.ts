@@ -31,9 +31,8 @@ export const attachmentRowAriaLabel = (typeName: string, label: string) =>
     values: { typeName, label },
   });
 
-/** The `+` is the expand affordance; collapsing has none, so "Show less" carries no counterpart. */
 export const attachmentGroupShowMore = (count: number) =>
   i18n.translate('xpack.alertzero.attachments.groupShowMore', {
-    defaultMessage: '+ Show more ({count})',
+    defaultMessage: 'Show more ({count})',
     values: { count },
   });
