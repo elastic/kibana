@@ -37,6 +37,7 @@ import type {
   SavedObjectsDeleteOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import {
   encodeHitVersion,
@@ -53,6 +54,7 @@ import {
   type GetFindRedactTypeMapParams,
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
 } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
@@ -512,7 +514,7 @@ export const getMockMgetResponse = (
 
 expect.extend({
   toBeDocumentWithoutError(received, type, id) {
-    if (received.type === type && received.id === id && !received.error) {
+    if (received.type === type && received.id === id && !isSavedObjectErrorResult(received)) {
       return { message: () => `expected type and id not to match without error`, pass: true };
     } else {
       return { message: () => `expected type and id to match without error`, pass: false };
@@ -657,7 +659,8 @@ export const bulkCreateSuccess = async (
   const mockResponse = getMockBulkCreateResponse(objects, options?.namespace, options?.managed);
   client.bulk.mockResponse(mockResponse);
   const result = await repository.bulkCreate(objects, options);
-  return result;
+  // bulkCreateSuccess only produces successful results; narrow for test assertions.
+  return { ...result, saved_objects: result.saved_objects as SavedObject[] };
 };
 
 export const expectCreateResult = (obj: {
@@ -730,7 +733,8 @@ export const bulkUpdateSuccess = async (
   client.bulk.mockResponseOnce(response);
   const result = await repository.bulkUpdate(objects, options);
   expect(client.mget).toHaveBeenCalledTimes(validObjects?.length ? 1 : 0);
-  return result;
+  // bulkUpdateSuccess only produces successful results; narrow for test assertions.
+  return { ...result, saved_objects: result.saved_objects as Array<SavedObjectsUpdateResponse> };
 };
 
 export const expectUpdateResult = ({

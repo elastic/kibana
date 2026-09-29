@@ -1,0 +1,18 @@
+version: "1"
+name: Rule Creation
+description: Detection Watch rule-creation worker stub.
+enabled: false
+tags:
+  - watch
+  - watch-detection
+triggers:
+  - type: manual
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+steps:
+  - name: stub
+    type: console
+    with:
+      message: "Rule Creation worker stub"

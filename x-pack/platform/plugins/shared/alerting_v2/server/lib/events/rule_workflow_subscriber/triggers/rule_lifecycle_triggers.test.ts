@@ -13,14 +13,32 @@ import {
   RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
 } from '../../rule_event_publisher/events';
+import { createRuleResponse } from '../../../test_utils';
 import type { RuleWorkflowTriggerBinding } from './types';
 import { ruleCreatedTrigger } from './rule_created';
 import { ruleUpdatedTrigger } from './rule_updated';
 import { ruleDeletedTrigger } from './rule_deleted';
 import { ruleEnabledTrigger } from './rule_enabled';
 import { ruleDisabledTrigger } from './rule_disabled';
+import { toLifecycleWorkflowPayload } from './to_lifecycle_payload';
 
-const payload = { rule: { ruleId: 'rule-1', spaceId: 'default' } } as const;
+const tags = ['critical', 'security'] as const;
+const ruleRef = { ruleId: 'rule-1', spaceId: 'default', tags: [...tags] };
+
+/**
+ * Internal event payload carries the full domain rule plus envelope fields. The
+ * bindings must project this down to the rule ref plus tags so the rest of the
+ * rule state never leaks into the workflow trigger payload.
+ */
+const enrichedPayload: RuleEvent['payload'] = {
+  ruleId: ruleRef.ruleId,
+  spaceId: ruleRef.spaceId,
+  rule: createRuleResponse({
+    id: ruleRef.ruleId,
+    metadata: { name: 'secret rule', tags: [...tags] },
+  }),
+  correlationId: 'bulk-1',
+};
 
 interface Case {
   name: string;
@@ -32,27 +50,27 @@ const cases: Case[] = [
   {
     name: 'ruleCreatedTrigger',
     trigger: ruleCreatedTrigger,
-    event: { type: RULE_CREATED_EVENT_TYPE, payload },
+    event: { type: RULE_CREATED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleUpdatedTrigger',
     trigger: ruleUpdatedTrigger,
-    event: { type: RULE_UPDATED_EVENT_TYPE, payload },
+    event: { type: RULE_UPDATED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleDeletedTrigger',
     trigger: ruleDeletedTrigger,
-    event: { type: RULE_DELETED_EVENT_TYPE, payload },
+    event: { type: RULE_DELETED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleEnabledTrigger',
     trigger: ruleEnabledTrigger,
-    event: { type: RULE_ENABLED_EVENT_TYPE, payload },
+    event: { type: RULE_ENABLED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleDisabledTrigger',
     trigger: ruleDisabledTrigger,
-    event: { type: RULE_DISABLED_EVENT_TYPE, payload },
+    event: { type: RULE_DISABLED_EVENT_TYPE, payload: enrichedPayload },
   },
 ];
 
@@ -63,8 +81,8 @@ describe('rule lifecycle workflow trigger bindings', () => {
       expect(trigger.definition.id).toBe(trigger.triggerId);
     });
 
-    it('forwards the publisher-shaped payload unchanged', () => {
-      expect(trigger.toPayload(event)).toEqual(event.payload);
+    it('projects the rule ref plus tags, dropping change-history fields (no snapshot/author/sequence leak)', () => {
+      expect(trigger.toPayload(event)).toEqual({ rule: ruleRef });
     });
 
     it('produces a payload that parses cleanly against the registered Zod schema', () => {
@@ -75,5 +93,46 @@ describe('rule lifecycle workflow trigger bindings', () => {
     it('rejects a payload missing the required `rule` field', () => {
       expect(() => trigger.definition.eventSchema.parse({})).toThrow();
     });
+  });
+});
+
+describe('toLifecycleWorkflowPayload', () => {
+  it('defaults tags to an empty array when the domain rule is missing (bulk-delete fallback)', () => {
+    const event: RuleEvent = {
+      type: RULE_DELETED_EVENT_TYPE,
+      payload: { ruleId: 'rule-1', spaceId: 'default' },
+    };
+
+    expect(toLifecycleWorkflowPayload(event)).toEqual({
+      rule: { ruleId: 'rule-1', spaceId: 'default', tags: [] },
+    });
+  });
+
+  it('defaults tags to an empty array when metadata.tags is absent', () => {
+    const event: RuleEvent = {
+      type: RULE_CREATED_EVENT_TYPE,
+      payload: {
+        ruleId: 'rule-1',
+        spaceId: 'default',
+        rule: createRuleResponse({ id: 'rule-1' }),
+      },
+    };
+
+    expect(toLifecycleWorkflowPayload(event).rule.tags).toEqual([]);
+  });
+
+  it('copies tags into a fresh array (does not alias the domain rule)', () => {
+    const rule = createRuleResponse({
+      id: 'rule-1',
+      metadata: { name: 'tagged', tags: ['critical'] },
+    });
+    const event: RuleEvent = {
+      type: RULE_UPDATED_EVENT_TYPE,
+      payload: { ruleId: 'rule-1', spaceId: 'default', rule },
+    };
+
+    const result = toLifecycleWorkflowPayload(event);
+    expect(result.rule.tags).toEqual(['critical']);
+    expect(result.rule.tags).not.toBe(rule.metadata.tags);
   });
 });

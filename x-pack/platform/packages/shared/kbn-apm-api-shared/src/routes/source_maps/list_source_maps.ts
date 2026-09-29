@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import type { ApmSourceMapArtifactBody } from './source_map_types';
 
@@ -28,12 +28,14 @@ export interface ListSourceMapArtifactsResponse {
 }
 export const listSourceMapsRoute = defineRoute<ListSourceMapArtifactsResponse | undefined>()({
   endpoint: 'GET /api/apm/sourcemaps 2023-10-31',
-  params: z.object({
-    query: z
-      .object({
-        page: z.coerce.number().optional(),
-        perPage: z.coerce.number().optional(),
-      })
-      .optional(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          page: z.coerce.number().optional(),
+          perPage: z.coerce.number().optional(),
+        })
+        .optional(),
+    })
+  ),
 });

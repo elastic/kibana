@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-
-import Boom from '@hapi/boom';
-
-import { isEqual } from 'lodash';
-
-import {
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  SERVERLESS_PRIVATE_OUTPUT_ID,
-  outputType,
-} from '../../../common/constants';
 
 import type {
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
+  GetOutputAgentPolicyCountRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
@@ -30,37 +20,14 @@ import type {
   DeleteOutputResponse,
   GetOneOutputResponse,
   GetOutputsResponse,
-  Output,
+  NewOutput,
   PostLogstashApiKeyResponse,
+  UpdateOutput,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
 import { FleetUnauthorizedError } from '../../errors';
-import { agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
-import { throwIfSslPathInvalid } from '../utils/ssl_utils';
-
-function validateOutputSslPaths(output: Partial<Output>) {
-  throwIfSslPathInvalid([
-    ...(output.ssl?.certificate_authorities ?? []),
-    output.ssl?.certificate,
-    output.ssl?.key,
-    output.secrets?.ssl?.key,
-  ]);
-}
-
-function ensureNoDuplicateSecrets(output: Partial<Output>) {
-  if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
-    throw Boom.badRequest('Cannot specify both password and secrets.password');
-  }
-  if (output.ssl?.key && output.secrets?.ssl?.key) {
-    throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
-  }
-  if (output.type === outputType.RemoteElasticsearch) {
-    if (output.service_token && output.secrets?.service_token) {
-      throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
-    }
-  }
-}
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const outputs = await outputService.list();
@@ -105,12 +72,21 @@ export const putOutputHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const outputUpdate = request.body;
   try {
-    await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
-    validateOutputSslPaths(outputUpdate);
-    ensureNoDuplicateSecrets(outputUpdate);
-    await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
+    const { id: bodyId, ...updateBody } = request.body as UpdateOutput & { id?: string };
+    if (bodyId !== undefined && bodyId !== request.params.outputId) {
+      return response.badRequest({
+        body: {
+          message: `Cannot change output ID: body id does not match path outputId "${request.params.outputId}"`,
+        },
+      });
+    }
+    await outputService.update(
+      soClient,
+      esClient,
+      request.params.outputId,
+      updateBody as UpdateOutput
+    );
     const output = await outputService.get(request.params.outputId);
     await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
       isDefault: output.is_default,
@@ -142,10 +118,7 @@ export const postOutputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { id, ...newOutput } = request.body;
-  await validateOutputServerless(newOutput, soClient);
-  validateOutputSslPaths(newOutput);
-  ensureNoDuplicateSecrets(newOutput);
-  const output = await outputService.create(soClient, esClient, newOutput, { id });
+  const output = await outputService.create(soClient, esClient, newOutput as NewOutput, { id });
   await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
     isDefault: output.is_default,
     isDefaultMonitoring: output.is_default_monitoring,
@@ -157,51 +130,6 @@ export const postOutputHandler: RequestHandler<
 
   return response.ok({ body });
 };
-
-async function validateOutputServerless(
-  output: Partial<Output>,
-  soClient: SavedObjectsClientContract,
-  outputId?: string
-): Promise<void> {
-  const cloudSetup = appContextService.getCloud();
-  if (!cloudSetup?.isServerlessEnabled) {
-    return;
-  }
-  // Elasticsearch outputs must have the default host URL in serverless.
-  // No need to validate on update if hosts are not passed.
-  if (outputId && !output.hosts) {
-    return;
-  }
-  const defaultOutput = await outputService.get(SERVERLESS_DEFAULT_OUTPUT_ID);
-  let originalOutput;
-  if (outputId) {
-    originalOutput = await outputService.get(outputId);
-  }
-  const type = output.type || originalOutput?.type;
-  if (type !== outputType.Elasticsearch) {
-    return;
-  }
-
-  if (isEqual(output.hosts, defaultOutput.hosts)) {
-    return;
-  }
-
-  try {
-    const privateOutput = await outputService.get(SERVERLESS_PRIVATE_OUTPUT_ID);
-    if (isEqual(output.hosts, privateOutput.hosts)) {
-      return;
-    }
-  } catch (e) {
-    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      throw e;
-    }
-    appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
-  }
-
-  throw Boom.badRequest(
-    `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
-  );
-}
 
 export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
@@ -248,4 +176,27 @@ export const getLatestOutputHealth: RequestHandler<
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const outputHealth = await outputService.getLatestOutputHealth(esClient, request.params.outputId);
   return response.ok({ body: outputHealth });
+};
+
+export const getOutputAgentPolicyCountHandler: RequestHandler<
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.params>,
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.query>
+> = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  try {
+    const output = await outputService.get(request.params.outputId);
+    // Apply pending flyout values so counts reflect state after save, not before.
+    const { isDefault, isDefaultMonitoring } = request.query;
+    if (isDefault !== undefined) output.is_default = isDefault;
+    if (isDefaultMonitoring !== undefined) output.is_default_monitoring = isDefaultMonitoring;
+    const counts = await outputService.getAgentAndPolicyCountForOutput(esClient, output);
+    return response.ok({ body: counts });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
+    }
+    throw error;
+  }
 };

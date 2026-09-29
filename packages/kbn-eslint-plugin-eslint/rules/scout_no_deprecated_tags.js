@@ -15,6 +15,21 @@ const DEPRECATED_TAGS = ['@ess', '@svlOblt', '@svlSecurity', '@svlSearch'];
 const ERROR_MSG =
   'Use the `tags` helper from @kbn/scout (e.g. `tags.stateful.classic`, `tags.serverless.observability.complete`) instead of deprecated string tags like `@ess` or `@svlOblt`.';
 
+// Kibana CI doesn't schedule stateful test runs for anything other than `classic` yet.
+const UNSUPPORTED_STATEFUL_DOMAIN_TAGS = [
+  '@local-stateful-search',
+  '@cloud-stateful-search',
+  '@local-stateful-observability_complete',
+  '@cloud-stateful-observability_complete',
+  '@local-stateful-security_complete',
+  '@cloud-stateful-security_complete',
+];
+
+const UNSUPPORTED_TAG_ERROR_MSG =
+  'Kibana CI only schedules stateful test runs tagged `classic`; per-solution stateful domain ' +
+  'tags (search, observability, security) are discovered but never run. Use `tags.stateful.classic` ' +
+  '(and set the solution view with `scoutSpace.setSolutionView()` if needed) instead.';
+
 /**
  * Checks if a node represents a method describe() call (e.g., test.describe, apiTest.describe)
  * @param {CallExpression} node
@@ -53,13 +68,16 @@ module.exports = {
     type: 'problem',
     docs: {
       description:
-        'Disallow deprecated Scout test tags (@ess, @svlOblt, @svlSecurity, @svlSearch). Use the `tags` helper from @kbn/scout instead.',
+        'Disallow deprecated Scout test tags (@ess, @svlOblt, @svlSecurity, @svlSearch) and ' +
+        'stateful domain tags unsupported by CI (e.g. @local-stateful-search). Use the `tags` ' +
+        'helper from @kbn/scout instead.',
       category: 'Best Practices',
     },
     fixable: null,
     schema: [],
     messages: {
       deprecatedTag: ERROR_MSG,
+      unsupportedTag: UNSUPPORTED_TAG_ERROR_MSG,
     },
   },
 
@@ -92,6 +110,14 @@ module.exports = {
             context.report({
               node: tagProperty,
               messageId: 'deprecatedTag',
+            });
+            return;
+          }
+
+          if (UNSUPPORTED_STATEFUL_DOMAIN_TAGS.includes(literal)) {
+            context.report({
+              node: tagProperty,
+              messageId: 'unsupportedTag',
             });
             return;
           }

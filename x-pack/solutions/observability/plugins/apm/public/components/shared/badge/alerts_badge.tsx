@@ -12,6 +12,11 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { Environment } from '@kbn/apm-types';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { isMobileAgentName } from '../../../../common/agent_name';
+import { APM_APP_LOCATOR_ID } from '../../../locator/service_detail_locator';
 
 const DEFAULT_DATA_TEST_SUBJ = 'apmAlertsBadge';
 
@@ -50,15 +55,29 @@ function getAriaLabel(count: number, serviceName: string) {
   });
 }
 
+export interface AlertsBadgeNavigationProps {
+  serviceName: string;
+  agentName: AgentName;
+  environment: Environment;
+  rangeFrom: string;
+  rangeTo: string;
+  locators: SharePluginStart['url']['locators'];
+}
+
 export interface AlertsBadgeProps {
   count: number;
   /** Used to build the accessible label (e.g. "3 active alerts for opbeans-java"). */
   serviceName: string;
+  /**
+   * When provided, the badge computes the alerts-tab href internally and renders as a link.
+   * Prefer this over `onClick` for standard navigation (supports right-click → open in new tab).
+   */
+  navigationProps?: AlertsBadgeNavigationProps;
   /** When provided, the badge becomes an interactive button (e.g. navigate to the Alerts tab). */
   onClick?: MouseEventHandler<HTMLButtonElement>;
   /** When true, no `EuiToolTip` is rendered (e.g. display-only service map nodes). */
   hideTooltip?: boolean;
-  /** EBT click attributes; only applied when `onClick` is provided. */
+  /** EBT click attributes; applied when the badge is interactive (navigationProps or onClick). */
   ebt?: EbtClickAttrs;
   'data-test-subj'?: string;
 }
@@ -77,15 +96,44 @@ export interface AlertsBadgeProps {
 export function AlertsBadge({
   count,
   serviceName,
+  navigationProps,
   onClick,
   hideTooltip = false,
   ebt,
   'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: AlertsBadgeProps) {
   const ariaLabel = getAriaLabel(count, serviceName);
-  const ebtProps = onClick && ebt ? getEbtProps(ebt) : {};
 
-  const badge = onClick ? (
+  const href = navigationProps
+    ? navigationProps.locators.get(APM_APP_LOCATOR_ID)?.getRedirectUrl({
+        serviceName: navigationProps.serviceName,
+        isMobileAgentName: isMobileAgentName(navigationProps.agentName),
+        serviceOverviewTab: 'alerts',
+        query: {
+          environment: navigationProps.environment,
+          rangeFrom: navigationProps.rangeFrom,
+          rangeTo: navigationProps.rangeTo,
+        },
+      })
+    : undefined;
+
+  const isInteractive = !!(href || onClick);
+  const ebtProps = ebt && isInteractive ? getEbtProps(ebt) : {};
+
+  const badge = href ? (
+    <EuiBadge
+      data-test-subj={dataTestSubj}
+      color="danger"
+      iconType="warning"
+      href={href}
+      aria-label={ariaLabel}
+      tabIndex={0}
+      css={clickableBadgeStyles}
+      {...ebtProps}
+    >
+      {count}
+    </EuiBadge>
+  ) : onClick ? (
     <EuiBadge
       data-test-subj={dataTestSubj}
       color="danger"
@@ -114,11 +162,11 @@ export function AlertsBadge({
     return badge;
   }
 
-  const tooltipContent = onClick ? getClickableTooltip(count) : getDisplayTooltip(count);
+  const tooltipContent = isInteractive ? getClickableTooltip(count) : getDisplayTooltip(count);
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
-      {onClick ? badge : <span tabIndex={0}>{badge}</span>}
+      {isInteractive ? badge : <span tabIndex={0}>{badge}</span>}
     </EuiToolTip>
   );
 }

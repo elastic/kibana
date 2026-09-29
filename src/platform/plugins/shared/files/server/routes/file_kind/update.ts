@@ -26,7 +26,7 @@ const rt = {
     meta: schema.maybe(commonSchemas.fileMeta),
   }),
   params: schema.object({
-    id: schema.string(),
+    id: commonSchemas.fileId,
   }),
 };
 

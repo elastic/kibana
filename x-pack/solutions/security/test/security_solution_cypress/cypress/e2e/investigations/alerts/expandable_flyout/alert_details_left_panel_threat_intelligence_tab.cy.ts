@@ -12,6 +12,7 @@ import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable
 import { INDICATOR_MATCH_ENRICHMENT_SECTION } from '../../../../screens/alerts_details';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -25,6 +26,7 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       login();
       createRule(getNewRule());

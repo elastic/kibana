@@ -16,6 +16,8 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { registerConversationEventTypes } from './conversation_events';
+import { registerConversationTemplates } from './conversation_templates';
 import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
@@ -48,11 +50,13 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+    registerConversationTemplates({ setupDeps });
+    registerConversationEventTypes({ setupDeps });
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;
     };
-    registerSkills(setupDeps.agentBuilder, getActionsStart);
+    registerSkills(setupDeps.agentBuilder, getActionsStart, this.logger);
 
     const connectorSmlType = createConnectorSmlType({
       getActionSavedObjectsClient: async (request) => {
@@ -61,7 +65,7 @@ export class AgentBuilderPlatformPlugin
       },
       logger: this.logger.get('sml-connector'),
     });
-    setupDeps.agentContextLayer.registerType(connectorSmlType);
+    setupDeps.agentBuilderSml.registerType(connectorSmlType);
 
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       logger: this.logger.get('connector-lifecycle'),

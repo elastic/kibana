@@ -6,14 +6,22 @@
  */
 
 import React from 'react';
-import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { CASES_TEMPLATE_DELETED_EVENT_TYPE } from '../../../../common/constants';
 import { AllTemplatesPage } from './all_templates_page';
-import { renderWithTestingProviders, createTestQueryClient } from '../../../common/mock';
+import {
+  createTestQueryClient,
+  mockedTestProvidersOwner,
+  renderWithTestingProviders,
+} from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
+import type { BulkDeleteTemplatesResponse } from '../types';
 import * as api from '../api/api';
 
 jest.mock('../api/api');
@@ -102,6 +110,9 @@ describe('AllTemplatesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     apiMock.getTemplates.mockResolvedValue(mockTemplatesResponse);
+    // clearAllMocks keeps implementations, so reset this one: the tests below install a promise they
+    // resolve by hand, which any later test would otherwise inherit as a delete that never settles.
+    apiMock.bulkDeleteTemplates.mockResolvedValue({ success: true, deleted: [], errors: [] });
     jest
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
@@ -157,6 +168,22 @@ describe('AllTemplatesPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('templates-info-panel')).toBeInTheDocument();
     });
+  });
+
+  it('hides the info panel when dismissed', async () => {
+    const queryClient = createTestQueryClient();
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-info-panel')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('templates-info-panel-dismiss'));
+
+    expect(screen.queryByTestId('templates-info-panel')).not.toBeInTheDocument();
   });
 
   it('renders the table filters', async () => {
@@ -390,5 +417,224 @@ describe('AllTemplatesPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('templates-table-selected-count')).not.toBeInTheDocument();
     });
+  });
+
+  it('reports no template management event on page load alone', async () => {
+    const queryClient = createTestQueryClient();
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient, coreStart },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    // Loading and listing templates is not a management action.
+    expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('reports exactly one deleted event for a confirmed row delete', async () => {
+    const queryClient = createTestQueryClient();
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    apiMock.bulkDeleteTemplates.mockResolvedValue({
+      success: true,
+      deleted: ['template-1'],
+      errors: [],
+    });
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient, coreStart },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('template-action-popover-button-template-1'));
+    await user.click(await screen.findByTestId('template-action-delete-template-1'));
+    await user.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    // This drives the real mutation, so every callback React Query runs for a success runs here.
+    // A report in more than one of them would show up as a second event.
+    await waitFor(() => {
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    });
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      CASES_TEMPLATE_DELETED_EVENT_TYPE,
+      {
+        owner: mockedTestProvidersOwner[0],
+        entry_point: 'templates_list',
+        delete_scope: 'single',
+      }
+    );
+  });
+
+  it('reports nothing when a confirmed row delete fails', async () => {
+    const queryClient = createTestQueryClient();
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    apiMock.bulkDeleteTemplates.mockRejectedValue(new Error('Delete failed'));
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient, coreStart },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('template-action-popover-button-template-1'));
+    await user.click(await screen.findByTestId('template-action-delete-template-1'));
+    await user.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(apiMock.bulkDeleteTemplates).toHaveBeenCalled();
+    });
+
+    expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('reports one bulk delete event and still clears the selection', async () => {
+    const queryClient = createTestQueryClient();
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    apiMock.bulkDeleteTemplates.mockResolvedValue({
+      success: true,
+      deleted: ['template-1', 'template-2'],
+      errors: [],
+    });
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient, coreStart },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    await user.click(checkboxes[1]);
+    await user.click(checkboxes[2]);
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+    await user.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    // The deselect and the report share one callback now, so neither may cancel the other. This
+    // test also passes on the old per-call wiring, because the component renders null on an empty
+    // selection rather than unmounting. The two tests below are the ones that pin the fix.
+    await waitFor(() => {
+      expect(screen.queryByTestId('templates-table-selected-count')).not.toBeInTheDocument();
+    });
+
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      CASES_TEMPLATE_DELETED_EVENT_TYPE,
+      {
+        owner: mockedTestProvidersOwner[0],
+        entry_point: 'templates_list',
+        delete_scope: 'bulk',
+      }
+    );
+  });
+
+  it('reports a row delete that the server confirms after the page unmounts', async () => {
+    const queryClient = createTestQueryClient();
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const deferred: { resolve: (value: BulkDeleteTemplatesResponse) => void } = {
+      resolve: () => {},
+    };
+    apiMock.bulkDeleteTemplates.mockReturnValue(
+      new Promise((resolve) => {
+        deferred.resolve = resolve;
+      })
+    );
+
+    const { unmount } = renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient, coreStart },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('template-action-popover-button-template-1'));
+    await user.click(await screen.findByTestId('template-action-delete-template-1'));
+    await user.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(apiMock.bulkDeleteTemplates).toHaveBeenCalled();
+    });
+
+    // The user leaves the page while the delete is still in flight.
+    unmount();
+
+    await act(async () => {
+      deferred.resolve({ success: true, deleted: ['template-1'], errors: [] });
+    });
+
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      CASES_TEMPLATE_DELETED_EVENT_TYPE,
+      {
+        owner: mockedTestProvidersOwner[0],
+        entry_point: 'templates_list',
+        delete_scope: 'single',
+      }
+    );
+  });
+
+  it('reports a bulk delete that the server confirms after the page unmounts', async () => {
+    const queryClient = createTestQueryClient();
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const deferred: { resolve: (value: BulkDeleteTemplatesResponse) => void } = {
+      resolve: () => {},
+    };
+    apiMock.bulkDeleteTemplates.mockReturnValue(
+      new Promise((resolve) => {
+        deferred.resolve = resolve;
+      })
+    );
+
+    const { unmount } = renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient, coreStart },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    await user.click(checkboxes[1]);
+    await user.click(checkboxes[2]);
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+    await user.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(apiMock.bulkDeleteTemplates).toHaveBeenCalled();
+    });
+
+    unmount();
+
+    await act(async () => {
+      deferred.resolve({ success: true, deleted: ['template-1', 'template-2'], errors: [] });
+    });
+
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      CASES_TEMPLATE_DELETED_EVENT_TYPE,
+      {
+        owner: mockedTestProvidersOwner[0],
+        entry_point: 'templates_list',
+        delete_scope: 'bulk',
+      }
+    );
   });
 });

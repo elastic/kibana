@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { spaceTest, tags, CUSTOM_QUERY_RULE, FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
+import {
+  euiSelectors,
+  spaceTest,
+  tags,
+  CUSTOM_QUERY_RULE,
+  FULL_KIBANA_SECURITY_ROLE,
+} from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 // Failing: See https://github.com/elastic/kibana/issues/261392
@@ -74,10 +80,12 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
 
         await expect(alertsTablePage.workflowPanel).toBeVisible();
 
-        // Select the created workflow from the list
-        await page
-          .getByTestId('workflowIdSelect')
-          .getByRole('option', { name: workflowName })
+        // Select the created workflow from the list. The workflow selector renders a
+        // secondary description alongside the name inside the option's label element,
+        // which breaks selectOption()'s exact-label match, so filter on options instead.
+        await page.components
+          .selectable('workflowIdSelect')
+          .options.filter({ hasText: workflowName })
           .click();
 
         await expect(alertsTablePage.executeWorkflowButton).toBeEnabled();
@@ -90,7 +98,7 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
 
         // Assert the "View workflow execution" link button is present in the toast
         const viewExecutionButton = page
-          .locator('.euiToast')
+          .locator(euiSelectors.toast.TOAST_SELECTOR)
           .getByRole('button', { name: 'View workflow execution' });
         await expect(viewExecutionButton).toBeVisible();
 

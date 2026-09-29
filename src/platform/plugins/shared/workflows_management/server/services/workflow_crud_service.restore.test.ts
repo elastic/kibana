@@ -8,8 +8,7 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
-import type { CoreStart } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { UpdatedWorkflowResponseDto } from '@kbn/workflows';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';
@@ -95,14 +94,12 @@ const makeFinalWorkflowProperties = (
 interface ApplyWorkflowUpdateResult {
   response: UpdatedWorkflowResponseDto;
   finalData: WorkflowProperties;
-  timestamp: Date;
 }
 
 const makeApplyWorkflowUpdateResult = (
   overrides: {
     response?: Partial<UpdatedWorkflowResponseDto>;
     finalData?: WorkflowProperties;
-    timestamp?: Date;
   } = {}
 ): ApplyWorkflowUpdateResult => ({
   response: {
@@ -115,7 +112,6 @@ const makeApplyWorkflowUpdateResult = (
     ...overrides.response,
   },
   finalData: overrides.finalData ?? makeFinalWorkflowProperties(),
-  timestamp: overrides.timestamp ?? new Date('2026-01-02T00:00:00.000Z'),
 });
 
 interface WorkflowCrudServiceWithApplyUpdate {
@@ -123,7 +119,9 @@ interface WorkflowCrudServiceWithApplyUpdate {
     id: string,
     workflow: Partial<{ yaml: string }>,
     spaceId: string,
-    request: ReturnType<typeof httpServerMock.createKibanaRequest>
+    request: ReturnType<typeof httpServerMock.createKibanaRequest>,
+    historyAction: string,
+    restoreMetadata?: { eventId: string; sequence?: number }
   ) => Promise<ApplyWorkflowUpdateResult>;
 }
 
@@ -144,16 +142,12 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     const applyWorkflowUpdate = jest
       .spyOn(service as unknown as WorkflowCrudServiceWithApplyUpdate, 'applyWorkflowUpdate')
       .mockResolvedValue(makeApplyWorkflowUpdateResult());
-    const logWorkflowChangesAfterWrite = jest
-      .spyOn(service, 'logWorkflowChangesAfterWrite')
-      .mockResolvedValue();
 
-    return { service, getHistory, applyWorkflowUpdate, logWorkflowChangesAfterWrite };
+    return { service, getHistory, applyWorkflowUpdate };
   };
 
-  it('restores snapshot yaml via applyWorkflowUpdate and logs restore change history', async () => {
-    const { service, getHistory, applyWorkflowUpdate, logWorkflowChangesAfterWrite } =
-      makeService();
+  it('restores snapshot yaml via applyWorkflowUpdate with restore history options', async () => {
+    const { service, getHistory, applyWorkflowUpdate } = makeService();
 
     const result = await service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request);
 
@@ -165,19 +159,13 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
       'wf-1',
       { yaml: 'name: Restored workflow' },
       'default',
-      request
-    );
-    expect(logWorkflowChangesAfterWrite).toHaveBeenCalledWith({
-      workflows: [{ id: 'wf-1', document: makeFinalWorkflowProperties() }],
-      action: WorkflowChangeHistoryAction.workflowRestore,
-      spaceId: 'default',
-      timestamp: new Date('2026-01-02T00:00:00.000Z'),
       request,
-      restoreMetadata: {
+      WorkflowChangeHistoryAction.workflowRestore,
+      {
         eventId: 'event-v3',
         sequence: 3,
-      },
-    });
+      }
+    );
     expect(result).toEqual(
       expect.objectContaining({
         id: 'wf-1',
@@ -333,8 +321,9 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
     } as unknown as WorkflowValidationService;
 
     const deps: WorkflowCrudDeps = {
+      getSpaceId: () => 'default',
+      getServiceAccountBindings: () => securityServiceMock.createStart().serviceAccounts,
       logger: loggerMock.create(),
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
       workflowStorage: { getClient: () => client } as any,
       getSecurity: () =>
         ({
@@ -348,8 +337,14 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
       } as unknown as WorkflowExecutionQueryService,
       validationService,
-      getCoreStart: () => ({} as CoreStart),
+      getCoreStart: () => coreMock.createStart(),
       changeHistoryService,
+      workflowExecutionsDataClient: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
+      stepExecutionsDataClient: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
     };
 
     client.search.mockResolvedValue({
@@ -415,6 +410,23 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
         document: expect.objectContaining({
           enabled: false,
           yaml: expect.stringContaining('enabled: false'),
+        }),
+      })
+    );
+  });
+
+  it('skips change history and version bump when restored YAML matches stored YAML', async () => {
+    const { service, client, scopedChangeHistory } = makeIntegrationService(workflowYamlV2);
+
+    const result = await service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request);
+
+    expect(result.version).toBe(7);
+    expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          yaml: workflowYamlV2,
+          version: 7,
         }),
       })
     );

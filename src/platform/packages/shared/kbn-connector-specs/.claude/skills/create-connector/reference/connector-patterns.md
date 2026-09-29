@@ -63,7 +63,10 @@ export const YourConnector: ConnectorSpec = {
       defaultMessage: 'Search items, list collections, and retrieve details from Your Service',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // A new connector type must reach Production-NonCanary before it can declare
+    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
+    // and others in a follow-up PR.
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -77,6 +80,7 @@ export const YourConnector: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search items by keyword. Returns a ranked list of matching results with IDs and summaries.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
@@ -86,10 +90,18 @@ export const YourConnector: ConnectorSpec = {
     },
     getItem: {
       isTool: true,
+      scope: 'read',
       description: 'Retrieve full details for a single item by ID. Use the IDs returned by the search action.',
       input: GetItemInputSchema,
       handler: async (ctx, input: GetItemInput) => {
-        const response = await ctx.request({ method: 'GET', url: `/items/${input.id}` });
+        // Always encodeURIComponent() a user-supplied value interpolated into a URL
+        // path segment — schemas typically only bound length, not character set, so
+        // an id/slug containing "/", "?", "#", or a space would otherwise corrupt
+        // the request path.
+        const response = await ctx.request({
+          method: 'GET',
+          url: `/items/${encodeURIComponent(input.id)}`,
+        });
         return response.data;
       },
     },
@@ -100,6 +112,17 @@ export const YourConnector: ConnectorSpec = {
     'The `search` action returns at most 20 results by default; use the `limit` parameter to request more.',
     'Item IDs are not stable across connector instances — always search before referencing an ID.',
   ].join('\n'),
+
+  test: {
+    // Must be true, or the "Test connector" button stays disabled in the UI
+    // even though a handler is defined.
+    enabled: true,
+    description: 'Verifies the connection by calling a cheap, read-only endpoint.',
+    handler: async (ctx) => {
+      await ctx.request({ method: 'GET', url: '/ping' });
+      return {};
+    },
+  },
 };
 ```
 
@@ -145,7 +168,10 @@ export const YourMcpConnector: ConnectorSpec = {
     displayName: 'Your MCP Connector',
     description: 'Search and retrieve data via Your Service MCP server',
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // A new connector type must reach Production-NonCanary before it can declare
+    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
+    // and others in a follow-up PR.
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -161,6 +187,7 @@ export const YourMcpConnector: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search Your Service by keyword using the underlying MCP tool.',
       input: z.object({
         query: z.string().describe('Keyword or natural-language search query'),
@@ -172,6 +199,7 @@ export const YourMcpConnector: ConnectorSpec = {
     // Escape hatches for dynamic tool discovery
     listTools: {
       isTool: true,
+      scope: 'read',
       description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
       input: z.object({}),
       handler: withMcpClient(async (client) => {
@@ -180,6 +208,7 @@ export const YourMcpConnector: ConnectorSpec = {
     },
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
       input: z.object({
         name: z.string().describe('The MCP tool name (from listTools)'),
@@ -221,6 +250,50 @@ schema: z.object({
 ```
 
 Available `.meta()` options: `label`, `widget`, `placeholder`, `helpText`, `hidden`, `sensitive`, `disabled`, `order`.
+
+**There is no widget for `z.number()` config fields — use a regex-validated string instead.** The
+form-generator's widget registry only has `text`, `password`, `select`, `formFieldset`, `hidden`, `object`,
+and `fileUpload`; there is no numeric widget. A config field typed `z.number()` (e.g. `z.int()`)
+throws `Error: No widget found for schema type: ZodNumberFormat. Please specify a widget in the schema
+metadata.` when the connector creation form renders it — and since this is a runtime UI error, not a type
+or lint error, it won't be caught by `node scripts/type_check` or unit tests. If a config value is
+conceptually numeric (an account ID, a port, a numeric tenant ID), define it as a `.regex()`-validated
+string with the `text` widget instead, and coerce it to a number in the handler where the underlying API
+needs a real number:
+
+```typescript
+schema: z.object({
+  accountId: z
+    .string()
+    .min(1)
+    .max(20)
+    .regex(/^\d+$/, 'Must be a numeric account ID.')
+    .describe('Numeric account ID this connector manages.')
+    .meta({ widget: 'text', label: 'Account ID', placeholder: '1234567' }),
+}),
+```
+
+```typescript
+const getAccountId = (ctx: ActionContext): number => {
+  const raw = ctx.config?.accountId as string | undefined;
+  const accountId = Number(raw);
+  if (!raw || Number.isNaN(accountId)) {
+    throw new Error('Connector is missing the required accountId configuration field.');
+  }
+  return accountId;
+};
+```
+
+This only applies to **connector-level `config` fields** (rendered by the form-generator). Action `input`
+schemas are never rendered as a form — `z.number()` is fine there since it's Agent Builder/Workflows that
+supplies the value, not a human typing into a UI widget.
+
+**ICU-unsafe characters in translated help text**: `metadata.description` and any `helpText`/label string
+that goes through `i18n.translate()` is parsed as an ICU message. A literal `<placeholder>` (e.g.
+`'found in the URL: example.com/<slug>/'`) is parsed as an unclosed XML tag and throws a `FORMAT_ERROR`
+when the spec is serialized to JSON schema for Agent Builder/Workflows — this only surfaces at runtime,
+not at compile time or in a quick manual glance at the UI. Write placeholders without angle brackets, e.g.
+`'found in the URL: example.com/your-slug/'`.
 
 For URL fields, use the `UISchemas.url()` helper from `connector_spec_ui.ts`:
 
@@ -423,6 +496,44 @@ Set `isTool: true` on actions that should be discoverable by AI agents in Agent 
 
 Set `isTool: false` (or omit it) for actions that exist for completeness but should not be invoked by an agent autonomously — for example, destructive operations, admin-only actions, or low-level helpers that are only useful as building blocks for other actions.
 
+### `scope` — classifying side effects for every `isTool: true` action
+
+Every `isTool: true` action **must** include an explicit `scope` field. This is an advisory signal to the LLM and orchestration layer about what side effects the action may have — it does not enforce access control at runtime.
+
+| Value | When to use |
+|---|---|
+| `'read'` | Action only reads data; no external state is modified. Pure lookups, searches, listings, downloads. |
+| `'write'` | Action creates or appends new data but does not overwrite or delete existing state. Examples: send a message, create a resource, add a comment, post an event. |
+| `'destroy'` | Action may overwrite, update, or delete existing data. Examples: resolve an issue, update a record, delete a resource, patch an entity, scale a workload. Also use for generic escape-hatch actions (`request`, `callTool`, `callRestApi`, `callGraphAPI`) since they can do anything. |
+
+**Decision rule**: if the action only sends GET requests (or equivalent read-only API calls), use `'read'`. If it creates new, distinct records without touching existing ones, use `'write'`. If it can overwrite, update, or remove, use `'destroy'`. When uncertain, prefer `'destroy'` — it's safer to over-classify than under-classify.
+
+```typescript
+// Read-only lookup
+listIssues: {
+  isTool: true,
+  scope: 'read',
+  description: '...',
+  ...
+},
+
+// Creates a new record
+createIssue: {
+  isTool: true,
+  scope: 'write',
+  description: '...',
+  ...
+},
+
+// Modifies existing state
+resolveIssue: {
+  isTool: true,
+  scope: 'destroy',
+  description: '...',
+  ...
+},
+```
+
 ### Action descriptions
 
 Every action should have a `description` that answers: "What does this do, and when should I call it?"
@@ -450,6 +561,33 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 - For ID fields, say where the value comes from (`'The sys_id of the incident, returned by searchIncidents'`).
 - For enum-like strings, list the accepted values inline (`'Filter by state: "new", "in_progress", or "resolved"'`).
 - **Bound user-input strings** — add `.max()` to string fields that accept free-form user input (search queries, AI prompts, natural-language descriptions). Use the service's documented API limit if available; otherwise 2000 for queries and 10000 for AI prompts are safe defaults. Do not bound ID fields or pagination tokens — those have fixed service-side formats.
+- **Bound `z.record()` key strings too** — `z.record(z.string(), z.unknown())` (used for flexible/dynamic
+  objects like alert-rule conditions or config maps) has the same unbounded-input DoS risk as a bare
+  `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
+  This also applies to string keys inside `z.array(z.record(...))`.
+- **Bound the collection size too, not just the string lengths inside it** — a `z.array()` needs `.max(N)`
+  on the array itself (e.g. `z.array(z.string().max(64)).max(50)` for a list of IDs), and a `z.record()`
+  needs an entry-count cap via `.refine()` since Zod has no built-in one:
+  `z.record(z.string().max(100), z.string().max(200)).refine((v) => Object.keys(v).length <= 50, { message: '...' })`.
+  Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
+  vector, and if the array is later joined into a query string, an oversized array also risks an oversized
+  upstream request.
+- **Require "at least one of" for optional-only update inputs** — if an action updates a resource and
+  every field is `.optional()`, an empty/no-op call is a silent bug. Add `.refine((v) => v.fieldA !== undefined || v.fieldB !== undefined, { message: '...' })`
+  to the schema.
+- **Regex-validate ID/GUID fields that flow into a query or filter string** — if a field's value gets
+  interpolated into a search/filter expression (not just used as a URL path segment or opaque body value),
+  constrain it to the expected character set (e.g. `.regex(/^[A-Za-z0-9+/=_-]+$/)` for a base64url GUID) so
+  it can't be used to inject query syntax.
+- **`encodeURIComponent()` every ID/slug used as a URL path segment** — this is a handler-side fix, not a
+  schema constraint (a `.max()`-bound string is still a valid path segment value; it just needs escaping
+  before interpolation). Any handler that builds a URL with `` `${baseUrl}/things/${input.id}/` `` must wrap
+  the interpolated value: `` `${baseUrl}/things/${encodeURIComponent(input.id)}/` ``. Apply this to every
+  id/slug in the URL, including a connector-config value like an org slug (encode it once at the point
+  it's read from config, so every handler that uses it is safe automatically). Without this, a value
+  containing `/`, `?`, `#`, or a space corrupts the request path instead of erroring — and it's easy to
+  miss because unit tests that hardcode a plain alphanumeric ID in both the input and the expected URL
+  never exercise the encoding path.
 
 ```typescript
 export const SearchInputSchema = z.object({

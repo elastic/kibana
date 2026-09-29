@@ -27,6 +27,7 @@ import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
 import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
@@ -66,6 +67,7 @@ import {
 import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
 import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
 import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
+import type { EntityToAttach } from '../../../cases/attachments/entity';
 
 const TIME_RANGE_PRESETS: TimeRangeBoundsOption[] = [
   { start: 'now-15m', end: 'now', label: ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES },
@@ -87,10 +89,11 @@ const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
 
 interface AnomaliesTabProps {
   entityId: string;
+  entityName: string;
   entityType: EntityType;
 }
 
-export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType }) => {
+export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName, entityType }) => {
   const [datePickerValue, setDatePickerValue] = useState<string>(DEFAULT_DATE_PICKER_VALUE);
   const [start, setStart] = useState<string>(DEFAULT_TIME_RANGE.from);
   const [end, setEnd] = useState<string>(DEFAULT_TIME_RANGE.to);
@@ -99,18 +102,25 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   );
   const [recentTimeRanges, setRecentTimeRanges] = useState<TimeRangeBoundsOption[]>([]);
 
-  const handleDatePickerChange = useCallback((args: DateRangePickerOnChangeProps) => {
-    if (args.isInvalid) return;
-    setStart(args.start);
-    setEnd(args.end);
-    setDatePickerValue(args.value);
-    setRecentTimeRanges((prev) => {
-      const key = `${args.start}|${args.end}`;
-      const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
-      return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
-    });
-    setTablePageIndex(0);
-  }, []);
+  const handleDatePickerChange = useCallback(
+    (args: DateRangePickerOnChangeProps) => {
+      if (args.isInvalid) return;
+      setStart(args.start);
+      setEnd(args.end);
+      setDatePickerValue(args.value);
+      setRecentTimeRanges((prev) => {
+        const key = `${args.start}|${args.end}`;
+        const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
+        return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
+      });
+      setTablePageIndex(0);
+      if (args.start !== start || args.end !== end) {
+        setIsOverviewFilterPending(true);
+        setIsSummaryFilterPending(true);
+      }
+    },
+    [start, end]
+  );
 
   const timeRangeMs = useMemo(
     () => ({
@@ -123,25 +133,31 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     [start, end]
   );
 
+  // Track filter-triggered refetches explicitly so the swimlane and table can
+  // show a loading state when the user clicks a tactic or a score range, not just on mount.
+  // Each is tracked independently so whichever query finishes first can render immediately,
+  // without waiting on the other.
+  const [isOverviewFilterPending, setIsOverviewFilterPending] = useState(false);
+  const [isSummaryFilterPending, setIsSummaryFilterPending] = useState(false);
+
   const severityOptions = useSeverityOptions();
   const [selectedSeverities, setSelectedSeverities] = useState<SeverityOption[]>(severityOptions);
   const handleSeverityChange = useCallback((next: SeverityOption[]) => {
     setSelectedSeverities(next);
     setTablePageIndex(0);
+    setIsOverviewFilterPending(true);
+    setIsSummaryFilterPending(true);
   }, []);
 
-  const scoreFilter = useMemo<{ min_score?: number; max_score?: number }>(() => {
-    if (selectedSeverities.length === severityOptions.length) return {};
-    const mins = selectedSeverities.map((s) => s.threshold.min);
-    const maxes = selectedSeverities
-      .map((s) => ('max' in s.threshold ? s.threshold.max : undefined))
-      .filter((m): m is number => m != null);
-    return {
-      min_score: Math.min(...mins),
-      // Only set an upper bound when every selected severity has a max (i.e. critical not included)
-      max_score: maxes.length === selectedSeverities.length ? Math.max(...maxes) : undefined,
-    };
-  }, [selectedSeverities, severityOptions.length]);
+  const scoreRanges = useMemo<AnomalyScoreRange[] | undefined>(() => {
+    if (selectedSeverities.length === severityOptions.length) return undefined;
+    // One range per selected severity bucket, so non-contiguous selections
+    // don't get collapsed into a single min/max span
+    return selectedSeverities.map((s) => ({
+      min_score: s.threshold.min,
+      max_score: 'max' in s.threshold ? s.threshold.max : undefined,
+    }));
+  }, [selectedSeverities, severityOptions]);
 
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(DEFAULT_TABLE_PAGE_SIZE);
@@ -150,10 +166,16 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     useState<TableSortDirection>(DEFAULT_SORT_DIRECTION);
 
   const [selectedTactic, setSelectedTactic] = useState<string | null>(null);
+  const entityToAttach = useMemo<EntityToAttach>(
+    () => ({ id: entityId, name: entityName, type: entityType }),
+    [entityId, entityName, entityType]
+  );
   const handleSelectTactic = useCallback(
     (tactic: string) => {
       setSelectedTactic((current) => (current === tactic ? null : tactic));
       setTablePageIndex(0);
+      setIsOverviewFilterPending(true);
+      setIsSummaryFilterPending(true);
     },
     [setSelectedTactic]
   );
@@ -175,8 +197,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     from: timeRangeMs.from,
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
-    minScore: scoreFilter.min_score,
-    maxScore: scoreFilter.max_score,
+    scoreRanges,
   });
 
   const uniqueTactics = useMemo(
@@ -197,13 +218,24 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       from: timeRangeMs.from,
       to: timeRangeMs.to,
       threat_tactics: selectedTactic ? [selectedTactic] : undefined,
-      min_score: scoreFilter.min_score,
-      max_score: scoreFilter.max_score,
+      score_ranges: scoreRanges,
       page: tablePageIndex + 1,
       page_size: tablePageSize,
       sort: [{ field: tableSortField, order: tableSortDirection }],
     },
   });
+  useEffect(() => {
+    if (!anomalyOverview.isFetching) {
+      setIsOverviewFilterPending(false);
+    }
+  }, [anomalyOverview.isFetching]);
+
+  useEffect(() => {
+    if (!anomalySummary.isFetching) {
+      setIsSummaryFilterPending(false);
+    }
+  }, [anomalySummary.isFetching]);
+
   const anomalySummaryAnomalies = useMemo(
     () => anomalySummary.data?.anomalies ?? [],
     [anomalySummary.data?.anomalies]
@@ -343,12 +375,13 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
             anomalies={anomalyByTimeBucket}
             selectedTactic={selectedTactic}
             timeRangeMs={timeRangeMs}
-            isLoading={anomalyOverview.isLoading}
+            isLoading={anomalyOverview.isLoading || isOverviewFilterPending}
             isEmpty={anomalyByTimeBucket.length === 0}
           />
           <EuiSpacer size="l" />
           <AnomalyTabTableSection
             anomalies={anomalySummaryAnomalies}
+            entityToAttach={entityToAttach}
             entityType={entityType}
             onTableChange={handleTableChange}
             page={anomalySummary.data?.page ?? tablePageIndex + 1}
@@ -357,7 +390,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
             sortDirection={tableSortDirection}
             timeRange={{ from: start, to: end }}
             total={anomalySummary.data?.total ?? 0}
-            isLoading={anomalySummary.isLoading}
+            isLoading={anomalySummary.isLoading || isSummaryFilterPending}
           />
         </>
       )}

@@ -73,8 +73,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Case view page', function () {
-      before(async () => {
+      before(async function () {
         await cases.navigation.navigateToSingleCase('cases', CASE_ID);
+        // These assertions validate the legacy case-view layout of a migrated 7.17.5 case; the
+        // redesigned case view restructures this UI and is covered by its own suites.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
       });
 
       it('does not show any error toasters', async () => {
@@ -289,8 +294,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Cases table', function () {
-      before(async () => {
+      before(async function () {
         await cases.navigation.navigateToApp();
+        // These assertions validate the legacy all-cases table columns for a migrated 7.17.5 case;
+        // the redesigned list restructures this UI and is covered by its own suites.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
         await testSubjects.click('superDatePickerToggleQuickMenuButton');
         await testSubjects.click('show-all-cases-link');
       });

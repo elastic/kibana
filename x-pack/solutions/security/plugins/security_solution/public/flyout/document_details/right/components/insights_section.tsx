@@ -35,7 +35,7 @@ const KEY = 'insights';
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
 export const InsightsSection = memo(() => {
-  const { getFieldsData, investigationFields, isPreviewMode, searchHit, scopeId, isRulePreview } =
+  const { getFieldsData, investigationFields, isPreviewMode, searchHit, scopeId } =
     useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
@@ -110,7 +110,6 @@ export const InsightsSection = memo(() => {
       <CorrelationsOverview
         hit={hit}
         scopeId={scopeId}
-        isRulePreview={isRulePreview}
         showIcon={!isPreviewMode}
         onShowCorrelationsDetails={goToCorrelationsTab}
       />

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiFilePickerProps } from '@elastic/eui';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -20,7 +19,7 @@ interface Props {
 }
 
 export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = false }) => {
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
+  const filePickerRef = useRef<EuiFilePickerRef>(null);
 
   const onFilePickerChange = useCallback(
     async (files: FileList | null) => {
@@ -54,7 +53,7 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
           })}
         >
           <EuiFilePicker
-            ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+            ref={filePickerRef}
             id="filePicker"
             fullWidth
             display={large ? 'large' : 'default'}

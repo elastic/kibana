@@ -14,11 +14,8 @@ export { createInMemoryContextAwarenessToolkit } from './in_memory_toolkit';
 export {
   createProfileStateAdapterFactory,
   type ProfileStateAdapter,
-  type ProfileStateDefinition,
-  type ProfileStateDescriptor,
-  ProfileStateRegistry,
-  ProfileStateType,
-} from './profile_state';
+  type ProfileStateMutationOptions,
+} from './profile_state_adapter';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
 export {

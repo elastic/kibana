@@ -9,6 +9,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   getRuleIdFromRuleState,
   isRuleError,
+  isRuleForbidden,
   isRuleLoaded,
   isRuleLoading,
   RuleStateStatus,
@@ -52,7 +53,21 @@ describe('toRuleState', () => {
     ).toEqual({ status: RuleStateStatus.not_found, ruleId: 'missing' });
   });
 
-  it('returns error for non-404 failures', () => {
+  it('returns forbidden for a 403 error', () => {
+    expect(
+      toRuleState('r1', {
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: {
+          response: { status: 403 },
+          body: { code: 'FORBIDDEN', error: 'Forbidden', message: 'Forbidden' },
+        },
+      })
+    ).toEqual({ status: RuleStateStatus.forbidden, ruleId: 'r1' });
+  });
+
+  it('returns error for non-403/404 failures', () => {
     const error = new Error('Server error');
     const state = toRuleState('r1', {
       data: undefined,
@@ -82,6 +97,12 @@ describe('rule state guards', () => {
     const error = new Error('boom');
     expect(isRuleError({ status: RuleStateStatus.error, ruleId: 'r1', error })).toBe(true);
     expect(isRuleError({ status: RuleStateStatus.not_found, ruleId: 'r1' })).toBe(false);
+    expect(isRuleError({ status: RuleStateStatus.forbidden, ruleId: 'r1' })).toBe(false);
+  });
+
+  it('isRuleForbidden is true only for forbidden state', () => {
+    expect(isRuleForbidden({ status: RuleStateStatus.forbidden, ruleId: 'r1' })).toBe(true);
+    expect(isRuleForbidden({ status: RuleStateStatus.not_found, ruleId: 'r1' })).toBe(false);
   });
 
   it('getRuleIdFromRuleState returns ruleId for non-idle states', () => {

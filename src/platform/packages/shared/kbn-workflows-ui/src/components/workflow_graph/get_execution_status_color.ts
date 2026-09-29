@@ -31,14 +31,14 @@ export function getExecutionStatusVisual(
       return {
         color: euiTheme.colors.vis.euiColorVisSuccess0,
         bg: euiTheme.colors.backgroundBaseSuccess,
-        iconType: 'checkInCircleFilled',
+        iconType: 'checkCircleFill',
       };
     case ExecutionStatus.FAILED:
     case ExecutionStatus.TIMED_OUT:
       return {
         color: euiTheme.colors.danger,
         bg: euiTheme.colors.backgroundBaseDanger,
-        iconType: 'crossInACircleFilled',
+        iconType: 'error',
       };
     case ExecutionStatus.RUNNING:
       return {
@@ -51,7 +51,7 @@ export function getExecutionStatusVisual(
       return {
         color: euiTheme.colors.textSubdued,
         bg: euiTheme.colors.backgroundBaseSubdued,
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
       };
     case ExecutionStatus.WAITING:
     case ExecutionStatus.WAITING_FOR_INPUT:
@@ -64,7 +64,7 @@ export function getExecutionStatusVisual(
       return {
         color: euiTheme.colors.textSubdued,
         bg: euiTheme.colors.backgroundBaseSubdued,
-        iconType: 'crossInACircleFilled',
+        iconType: 'error',
       };
     case ExecutionStatus.PENDING:
       return {

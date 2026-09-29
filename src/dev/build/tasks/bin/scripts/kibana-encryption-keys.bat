@@ -29,7 +29,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 )
 
 TITLE Kibana Encryption Keys
-"%NODE%" "%DIR%\src\cli\encryption_keys\dist" %*
+"%NODE%" "%DIR%\node_modules\@kbn\cli\encryption_keys\dist" %*
 
 :finally
 

@@ -10,86 +10,30 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
-import {
-  APP_FIXED_VIEWPORT_ID,
-  APP_MAIN_SCROLL_CONTAINER_ID,
-  layoutVar,
-} from '@kbn/ui-chrome-layout-constants';
-import { CommonGlobalAppStyles } from './global_app_styles';
-import type { ChromeStyle } from '../layout.types';
+import { APP_MAIN_SCROLL_CONTAINER_ID, layoutVar } from '../constants';
+import type { LayoutAppearance } from '../layout.types';
 
-export const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
+export const globalLayoutStyles = () => {
   return css`
     :root {
-      // TODO: these variables are legacy and we keep them for backward compatibility
-      // https://github.com/elastic/kibana/issues/225264
-
-      // there is no fixed header in the grid layout, so we want to set the offset to 0
+      // There is no fixed header in the grid layout.
       --euiFixedHeadersOffset: 0px;
-
-      // height of the header banner
-      --kbnHeaderBannerHeight: ${layoutVar('banner.height', '0px')};
-
-      // the current total height of all app-area headers, this variable can be used for sticky headers offset relative to the top of the application area
-      --kbnAppHeadersOffset: ${layoutVar('application.topBar.height', '0px')};
-
-      // backward compatible way to position sticky sub-headers
-      --kbn-application--sticky-headers-offset: ${layoutVar('application.topBar.height', '0px')};
-
-      // height of the project header app action menu which is part of the application area
-      --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};
     }
 
-    // disable document-level scroll, since the application area handles it, but only when not printing
+    // Disable document-level scroll; the application area handles it.
     @media screen {
       :root {
         overflow: hidden;
       }
     }
-
-    #kibana-body {
-      // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
-      // It will break the sticky navigation
-      min-height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    // Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
-    #${APP_FIXED_VIEWPORT_ID} {
-      pointer-events: none;
-      visibility: hidden;
-      position: fixed;
-      top: ${layoutVar('application.content.top', '0px')};
-      right: ${layoutVar('application.content.right', '0px')};
-      bottom: ${layoutVar('application.content.bottom', '0px')};
-      left: ${layoutVar('application.content.left', '0px')};
-    }
-
-    .kbnAppWrapper {
-      // DO NOT ADD ANY OTHER STYLES TO THIS SELECTOR
-      // This a very nested dependency happening in "all" apps
-      display: flex;
-      flex-flow: column nowrap;
-      flex-grow: 1;
-      z-index: 0; // This effectively puts every high z-index inside the scope of this wrapper to it doesn't interfere with the header and/or overlay mask
-      position: relative; // This is temporary for apps that relied on this being present on \`.application\`
-    }
-
-    // make data grid full screen mode respect the header banner and the sidebar
-    #kibana-body .euiDataGrid--fullScreen {
-      height: calc(100vh - var(--kbnHeaderBannerHeight));
-      top: var(--kbnHeaderBannerHeight);
-      right: ${layoutVar('sidebar.width', '0px')};
-    }
   `;
 };
 
 /**
- * Project mode background styles with gradient.
- * Only applied when chromeStyle is 'project' to differentiate from classic mode.
+ * Framed appearance background styles with gradient.
+ * Only applied when appearance is 'framed'.
  */
-export const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
+export const framedAppearanceBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
   const { colorMode } = euiThemeContext;
   const isDarkMode = colorMode === 'DARK';
 
@@ -116,10 +60,12 @@ export const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
-const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
-  body,
-  .kbnBody {
-    // adjust position of the classic side-navigation
+const globalTempHackStyles = (
+  _euiTheme: UseEuiTheme['euiTheme'],
+  appearance: LayoutAppearance
+) => css`
+  body {
+    // adjust position of the collapsible side-navigation flyout
     .euiFlyout.euiCollapsibleNav {
       ${logicalCSS('top', layoutVar('application.top', '0px'))};
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
@@ -132,13 +78,13 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-      ${chromeStyle === 'project' && `border-radius: ${_euiTheme.border.radius.medium};`}
+      ${appearance === 'framed' && `border-radius: ${_euiTheme.border.radius.medium};`}
     }
 
     .euiFlyout[class*='right'] {
       // match the application area border-radius on the right edge,
       // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
-      ${chromeStyle === 'project' &&
+      ${appearance === 'framed' &&
       `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
           border-top-right-radius: ${_euiTheme.border.radius.medium};
           border-bottom-right-radius: ${_euiTheme.border.radius.medium};
@@ -165,8 +111,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
     // application area should have bottom padding when bottom bar is present
     ${logicalCSS('padding-bottom', `var(--euiBottomBarOffset, 0px)`)};
   }
-  body,
-  .kbnBody {
+  body {
     // this is a temporary hack to override EUI's body padding with push flyout
     ${logicalCSS('padding-right', `0px !important`)};
     ${logicalCSS('padding-left', `0px !important`)};
@@ -189,26 +134,20 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
 `;
 
 export interface GridLayoutGlobalStylesProps {
-  chromeStyle?: ChromeStyle;
+  appearance?: LayoutAppearance;
 }
 
-export const GridLayoutGlobalStyles = ({
-  chromeStyle = 'classic',
-}: GridLayoutGlobalStylesProps) => {
+export const GridLayoutGlobalStyles = ({ appearance = 'plain' }: GridLayoutGlobalStylesProps) => {
   const euiTheme = useEuiTheme();
-  const isProjectStyle = chromeStyle === 'project';
+  const isFramedAppearance = appearance === 'framed';
 
   return (
-    <>
-      <Global
-        styles={[
-          globalLayoutStyles(euiTheme),
-          globalTempHackStyles(euiTheme.euiTheme, chromeStyle),
-          // Only apply the decorative background for project mode
-          isProjectStyle && projectModeBackgroundStyles(euiTheme),
-        ]}
-      />
-      <CommonGlobalAppStyles />
-    </>
+    <Global
+      styles={[
+        globalLayoutStyles(),
+        globalTempHackStyles(euiTheme.euiTheme, appearance),
+        isFramedAppearance && framedAppearanceBackgroundStyles(euiTheme),
+      ]}
+    />
   );
 };

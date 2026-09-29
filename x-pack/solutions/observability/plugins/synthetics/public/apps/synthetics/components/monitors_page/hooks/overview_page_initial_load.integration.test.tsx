@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
-import type { Store } from 'redux';
-import { applyMiddleware, createStore } from 'redux';
+import { Provider } from 'react-redux-v7';
+import type { Store } from 'redux-v4';
+import { applyMiddleware, createStore } from 'redux-v4';
 import createSagaMiddleware from 'redux-saga';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';

@@ -12,26 +12,16 @@ import React from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useApplyAttackAssignees } from './use_apply_attack_assignees';
-import { useSetUnifiedAlertsAssignees } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees';
 import { useSetAttacksAssignees } from '../../../../../common/containers/attacks/hooks/use_set_attacks_assignees';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees');
 jest.mock('../../../../../common/containers/attacks/hooks/use_set_attacks_assignees');
-jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../confirmation_modal/use_update_attacks_modal');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSetUnifiedAlertsAssignees = useSetUnifiedAlertsAssignees as jest.MockedFunction<
-  typeof useSetUnifiedAlertsAssignees
->;
 const mockUseSetAttacksAssignees = useSetAttacksAssignees as jest.MockedFunction<
   typeof useSetAttacksAssignees
->;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.MockedFunction<
-  typeof useIsExperimentalFeatureEnabled
 >;
 const mockUseUpdateAttacksModal = useUpdateAttacksModal as jest.MockedFunction<
   typeof useUpdateAttacksModal
@@ -44,7 +34,6 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useApplyAttackAssignees', () => {
-  const mockMutateAsync = jest.fn();
   const mockAttacksMutateAsync = jest.fn();
   const mockShowModal = jest.fn();
   const mockReportEvent = jest.fn();
@@ -61,12 +50,6 @@ describe('useApplyAttackAssignees', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    mockUseSetUnifiedAlertsAssignees.mockReturnValue({
-      mutateAsync: mockMutateAsync,
-    } as unknown as ReturnType<typeof useSetUnifiedAlertsAssignees>);
-
     mockUseSetAttacksAssignees.mockReturnValue({
       mutateAsync: mockAttacksMutateAsync,
     } as unknown as ReturnType<typeof useSetAttacksAssignees>);
@@ -76,7 +59,7 @@ describe('useApplyAttackAssignees', () => {
 
   it('should report telemetry with attack_only scope when user chooses attacks only', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 2 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
 
@@ -97,7 +80,7 @@ describe('useApplyAttackAssignees', () => {
 
   it('should report telemetry with attack_and_related_alerts scope when user chooses both', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: true });
-    mockMutateAsync.mockResolvedValue({ updated: 2 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
 
@@ -118,7 +101,7 @@ describe('useApplyAttackAssignees', () => {
 
   it('should show modal and update only attacks when user chooses attacks only', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 2 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
     const setIsLoading = jest.fn();
@@ -138,9 +121,10 @@ describe('useApplyAttackAssignees', () => {
       alertsCount: 2,
       attackDiscoveriesCount: 2,
     });
-    expect(mockMutateAsync).toHaveBeenCalledWith({
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
       ids: ['attack-1', 'attack-2'],
       assignees: { add: ['user1'], remove: [] },
+      update_related_alerts: false,
     });
     expect(setIsLoading).toHaveBeenCalledWith(true);
     expect(setIsLoading).toHaveBeenCalledWith(false);
@@ -149,7 +133,7 @@ describe('useApplyAttackAssignees', () => {
 
   it('should show modal and update both when user chooses attacks and alerts', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: true });
-    mockMutateAsync.mockResolvedValue({ updated: 4 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 4 });
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
     const setIsLoading = jest.fn();
@@ -169,9 +153,10 @@ describe('useApplyAttackAssignees', () => {
       alertsCount: 3,
       attackDiscoveriesCount: 1,
     });
-    expect(mockMutateAsync).toHaveBeenCalledWith({
-      ids: ['attack-1', 'alert-1', 'alert-2', 'alert-3'],
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+      ids: ['attack-1'],
       assignees: { add: ['user1'], remove: [] },
+      update_related_alerts: true,
     });
     expect(onSuccess).toHaveBeenCalled();
   });
@@ -194,14 +179,14 @@ describe('useApplyAttackAssignees', () => {
     });
 
     expect(mockShowModal).toHaveBeenCalled();
-    expect(mockMutateAsync).not.toHaveBeenCalled();
+    expect(mockAttacksMutateAsync).not.toHaveBeenCalled();
     expect(setIsLoading).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
   it('should handle missing optional callbacks', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 1 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 1 });
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
 
@@ -213,12 +198,12 @@ describe('useApplyAttackAssignees', () => {
       });
     });
 
-    expect(mockMutateAsync).toHaveBeenCalled();
+    expect(mockAttacksMutateAsync).toHaveBeenCalled();
   });
 
   it('should set loading to false even if mutation fails', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockRejectedValue(new Error('Mutation failed'));
+    mockAttacksMutateAsync.mockRejectedValue(new Error('Mutation failed'));
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
     const setIsLoading = jest.fn();
@@ -237,55 +222,5 @@ describe('useApplyAttackAssignees', () => {
     });
 
     expect(setIsLoading).toHaveBeenCalledWith(false);
-  });
-
-  describe('when publicAttacksApiEnabled is true', () => {
-    beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    });
-
-    it('should call attacks API with attack IDs only and update_related_alerts false', async () => {
-      mockShowModal.mockResolvedValue({ updateAlerts: false });
-      mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
-
-      const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
-
-      await act(async () => {
-        await result.current.applyAssignees({
-          assignees: { add: ['user1'], remove: [] },
-          attackIds: ['attack-1', 'attack-2'],
-          relatedAlertIds: ['alert-1', 'alert-2'],
-        });
-      });
-
-      expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
-        ids: ['attack-1', 'attack-2'],
-        assignees: { add: ['user1'], remove: [] },
-        update_related_alerts: false,
-      });
-      expect(mockMutateAsync).not.toHaveBeenCalled();
-    });
-
-    it('should call attacks API with update_related_alerts true when user chooses both', async () => {
-      mockShowModal.mockResolvedValue({ updateAlerts: true });
-      mockAttacksMutateAsync.mockResolvedValue({ updated: 4 });
-
-      const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
-
-      await act(async () => {
-        await result.current.applyAssignees({
-          assignees: { add: ['user1'], remove: [] },
-          attackIds: ['attack-1'],
-          relatedAlertIds: ['alert-1', 'alert-2', 'alert-3'],
-        });
-      });
-
-      expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
-        ids: ['attack-1'],
-        assignees: { add: ['user1'], remove: [] },
-        update_related_alerts: true,
-      });
-      expect(mockMutateAsync).not.toHaveBeenCalled();
-    });
   });
 });

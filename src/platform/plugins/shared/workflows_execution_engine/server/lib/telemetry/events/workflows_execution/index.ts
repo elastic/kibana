@@ -1051,6 +1051,13 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
       optional: false,
     },
   },
+  connectorIdMismatchCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of workflows filtered out because connector-id did not match',
+      optional: false,
+    },
+  },
   kqlFalseCount: {
     type: 'integer',
     _meta: { description: 'Number of workflows filtered out by KQL false result', optional: false },
@@ -1065,7 +1072,7 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
   matchedCount: {
     type: 'integer',
     _meta: {
-      description: 'Number of workflows matched after enabled + KQL checks',
+      description: 'Number of workflows matched after enabled, connector-id, and KQL checks',
       optional: false,
     },
   },

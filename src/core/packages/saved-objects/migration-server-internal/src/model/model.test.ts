@@ -1639,6 +1639,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
+          expect(newState.explainAllocation).toBe(true);
         });
 
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ if there are are existing documents that failed transformation', () => {
@@ -1754,6 +1755,7 @@ describe('migrations v2 model', () => {
         lastHitSortValue: [3, 4],
         hasTransformedDocs: false,
         progress: createInitialProgress(),
+        explainAllocation: true,
       };
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> TRANSFORMED_DOCUMENTS_BULK_INDEX and increments currentBatch if more batches are left', () => {
@@ -1765,6 +1767,7 @@ describe('migrations v2 model', () => {
         ) as TransformedDocumentsBulkIndex;
         expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
         expect(newState.currentBatch).toEqual(1);
+        expect(newState.explainAllocation).toBe(true);
       });
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> OUTDATED_DOCUMENTS_SEARCH_READ if all batches were written', () => {
@@ -1814,12 +1817,20 @@ describe('migrations v2 model', () => {
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX retries with exponential backoff on unavailable_shards_exception', () => {
         const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
           type: 'unavailable_shards_exception' as const,
-          message: 'Not enough active copies to meet shard count of [ALL]',
+          message:
+            '[.kibana] Not enough active copies. Shard allocation explain: [disk_threshold] NO on instance-0: watermark exceeded',
         });
-        const newState = model(transformedDocumentsBulkIndexState, res);
+        const newState = model(
+          transformedDocumentsBulkIndexState,
+          res
+        ) as TransformedDocumentsBulkIndex;
         expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.explainAllocation).toBe(false);
+        expect(newState.logs[newState.logs.length - 1].message).toContain(
+          'Shard allocation explain:'
+        );
       });
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX recovers after unavailable_shards_exception retry', () => {

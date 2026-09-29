@@ -6,10 +6,12 @@
  */
 
 import {
+  COMMENT_ATTACHMENT_TYPE,
   DASHBOARD_ATTACHMENT_TYPE,
   DISCOVER_SESSION_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
   LEGACY_ACTIONS_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
@@ -19,6 +21,8 @@ import {
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  OWNER_TO_PREFIX_MAP,
+  registerOwnerPrefix,
 } from '../../constants/attachments';
 import { AttachmentType, ExternalReferenceStorageType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
@@ -31,6 +35,7 @@ import {
   resolveUnifiedAttachmentType,
   isUnifiedOnlyAttachmentType,
   toLegacyAttachmentType,
+  toLegacyTypeMatches,
   toUnifiedAttachmentType,
 } from './migration_utils';
 
@@ -112,6 +117,24 @@ describe('migration_utils', () => {
     });
   });
 
+  describe('registerOwnerPrefix', () => {
+    const customOwner = 'customFixtureOwner';
+
+    afterEach(() => {
+      delete OWNER_TO_PREFIX_MAP[customOwner];
+    });
+
+    it('lets a dynamically registered owner resolve legacy alert/event to a unified type', () => {
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(AttachmentType.alert);
+
+      registerOwnerPrefix(customOwner, 'security');
+
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(
+        SECURITY_ALERT_ATTACHMENT_TYPE
+      );
+    });
+  });
+
   describe('toUnifiedAttachmentType - legacy actions', () => {
     it('maps the legacy top-level `actions` type to security.endpoint', () => {
       expect(toUnifiedAttachmentType(LEGACY_ACTIONS_TYPE, owner)).toBe(
@@ -129,6 +152,57 @@ describe('migration_utils', () => {
       expect(toLegacyAttachmentType(SECURITY_ENDPOINT_ATTACHMENT_TYPE)).toBe(
         AttachmentType.externalReference
       );
+    });
+  });
+
+  describe('toLegacyTypeMatches', () => {
+    it('maps comment to the user type on comments SO', () => {
+      expect(toLegacyTypeMatches(COMMENT_ATTACHMENT_TYPE)).toEqual([{ type: AttachmentType.user }]);
+    });
+
+    it('maps persistable types to persistableState plus subtype id', () => {
+      expect(toLegacyTypeMatches(LENS_ATTACHMENT_TYPE)).toEqual([
+        {
+          type: AttachmentType.persistableState,
+          field: 'persistableStateAttachmentTypeId',
+          values: [LEGACY_LENS_ATTACHMENT_TYPE],
+        },
+      ]);
+    });
+
+    it('maps file to externalReference plus subtype id', () => {
+      expect(toLegacyTypeMatches(FILE_ATTACHMENT_TYPE)).toEqual([
+        {
+          type: AttachmentType.externalReference,
+          field: 'externalReferenceAttachmentTypeId',
+          values: [LEGACY_FILE_ATTACHMENT_TYPE],
+        },
+      ]);
+    });
+
+    it('maps security.endpoint to the endpoint subtype and actions', () => {
+      expect(toLegacyTypeMatches(SECURITY_ENDPOINT_ATTACHMENT_TYPE)).toEqual([
+        {
+          type: AttachmentType.externalReference,
+          field: 'externalReferenceAttachmentTypeId',
+          values: ['endpoint'],
+        },
+        { type: LEGACY_ACTIONS_TYPE },
+      ]);
+    });
+
+    it('maps security.alert to alert rows of security owners', () => {
+      const matches = toLegacyTypeMatches(SECURITY_ALERT_ATTACHMENT_TYPE);
+      expect(matches).toHaveLength(1);
+      expect(matches[0].type).toBe(AttachmentType.alert);
+      expect(matches[0].field).toBe('owner');
+      expect(matches[0].values).toContain(SECURITY_SOLUTION_OWNER);
+      expect(matches[0].values).not.toContain(OBSERVABILITY_OWNER);
+    });
+
+    it('returns empty for unified-only types', () => {
+      expect(toLegacyTypeMatches(SECURITY_ENTITY_ATTACHMENT_TYPE)).toEqual([]);
+      expect(toLegacyTypeMatches(DASHBOARD_ATTACHMENT_TYPE)).toEqual([]);
     });
   });
 

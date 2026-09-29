@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { encode } from '@kbn/rison';
 import type { State } from '../../../common/store';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -23,6 +23,7 @@ import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';
+import { useRefetchOnTimelineClose } from '../../../common/hooks/timeline/use_refetch_on_timeline_close';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 import { useGetAllTimeline } from '../../containers/all';
 import { OpenTimeline } from './open_timeline';
@@ -158,7 +159,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataView } = useDataView(PageScope.timeline);
-    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+    const selectedPatterns = useSelectedPatterns(dataView);
     const dataViewId = useMemo(() => dataView.id || '', [dataView.id]);
 
     const {
@@ -208,6 +209,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelineStatus,
       onlyFavorites,
     ]);
+
+    useRefetchOnTimelineClose(refetch);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {

@@ -55,7 +55,7 @@ interface Dependencies {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
-  abortController: AbortController;
+  signal: AbortSignal;
 }
 
 const COMPOSITE_SLOS_PER_PAGE = 100;
@@ -68,7 +68,7 @@ export async function computeAndPersistCompositeSummaries({
   esClient,
   soClient,
   logger,
-  abortController,
+  signal,
 }: Dependencies): Promise<void> {
   const burnRatesClient = new DefaultBurnRatesClient(esClient);
   const summaryClient = new DefaultSummaryClient(esClient, burnRatesClient);
@@ -92,7 +92,7 @@ export async function computeAndPersistCompositeSummaries({
     for await (const response of finder.find()) {
       pagesFetched++;
 
-      if (abortController.signal.aborted) {
+      if (signal.aborted) {
         logger.debug('Task aborted, stopping');
         runOutcome = 'aborted';
         break;
@@ -149,7 +149,7 @@ export async function computeAndPersistCompositeSummaries({
             // when that path is added.
             const bulkResponse = await esClient.bulk(
               { operations: bulkOps, refresh: false },
-              { signal: abortController.signal }
+              { signal }
             );
             if (bulkResponse.errors) {
               const failed = bulkResponse.items.filter((item) => item.index?.error);
@@ -447,7 +447,12 @@ function decodeStoredSLO(
     groupBy: stored.groupBy ?? ALL_VALUE,
     version: stored.version ?? 1,
     settings: merge(
-      { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
+      {
+        preventInitialBackfill: false,
+        preventCrossProjectSearch: false,
+        syncDelay: '1m',
+        frequency: '1m',
+      },
       stored.settings
     ),
     createdBy: stored.createdBy ?? so.created_by,

@@ -17,6 +17,7 @@ import {
 import {
   fetchQueryAlerts,
   fetchQueryAttacks,
+  fetchQueryRuleRegistryAlerts,
   fetchQueryUnifiedAlerts,
   getSignalIndex,
   getUserPrivilege,
@@ -90,6 +91,19 @@ describe('Detections Alerts API', () => {
       });
       expect(signalsResp).toEqual(alertsMock);
     });
+
+    test('forwards the optional execution context to http.fetch', async () => {
+      const context = { name: 'unified-alerts-table', id: 'panel-a' };
+      await fetchQueryUnifiedAlerts({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+        context,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/unified_alerts/search',
+        expect.objectContaining({ context })
+      );
+    });
   });
 
   describe('fetchQueryAttacks', () => {
@@ -103,6 +117,7 @@ describe('Detections Alerts API', () => {
       expect(searchAttacks).toHaveBeenCalledWith({
         query: mockAlertsQuery,
         signal: abortCtrl.signal,
+        context: undefined,
       });
     });
 
@@ -112,6 +127,36 @@ describe('Detections Alerts API', () => {
         signal: abortCtrl.signal,
       });
       expect(attacksResp).toEqual(alertsMock);
+    });
+
+    test('forwards the optional execution context to searchAttacks', async () => {
+      const context = { name: 'attack-alerts-table', id: 'panel-b' };
+      await fetchQueryAttacks({ query: mockAlertsQuery, signal: abortCtrl.signal, context });
+      expect(searchAttacks).toHaveBeenCalledWith({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+        context,
+      });
+    });
+  });
+
+  describe('fetchQueryRuleRegistryAlerts', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(alertsMock);
+    });
+
+    test('forwards the optional execution context to http.fetch', async () => {
+      const context = { name: 'rule-registry-alerts-table', id: 'panel-c' };
+      await fetchQueryRuleRegistryAlerts({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+        context,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ context })
+      );
     });
   });
 

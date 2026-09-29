@@ -22,4 +22,7 @@ export const getAllLogsDataViewSpec = ({
   }),
   title: allLogsIndexPattern,
   timeFieldName: '@timestamp',
+  // This data view is recreated from this spec on every navigation, so user edits would be
+  // silently discarded. Marking it managed steers them to duplicate it instead.
+  managed: true,
 });

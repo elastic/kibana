@@ -8,42 +8,27 @@
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { fireEvent } from '@testing-library/react';
-import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
+import { screen, within } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
-import { TransformManagement, TransformManagementSection } from './transform_management_section';
+import { TransformManagementSection } from './transform_management_section';
 
 jest.mock('../../services/navigation');
 
 const queryClient = new QueryClient();
 
-const mockStorage = {
-  get: jest.fn(),
-  set: jest.fn(),
-};
-
-const mockUseAppDependencies = jest.fn();
-
-jest.mock('../../app_dependencies', () => ({
-  useAppDependencies: () => mockUseAppDependencies(),
-}));
+const mockUseTransformCapabilities = jest.fn();
+const mockUseGetTransformNodes = jest.fn();
+const mockUseGetTransforms = jest.fn();
 
 jest.mock('../../hooks', () => ({
   useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
-  useTransformCapabilities: () => ({ canStartStopTransform: true }),
-  useGetTransformNodes: () => ({
-    isInitialLoading: false,
-    error: null,
-    data: 0,
-  }),
-  useGetTransforms: () => ({
-    isInitialLoading: false,
-    isLoading: false,
-    error: null,
-    data: { transforms: [], transformIdsWithoutConfig: [] },
-  }),
+  useTransformCapabilities: () => mockUseTransformCapabilities(),
+  useGetTransformNodes: () => mockUseGetTransformNodes(),
+  useGetTransforms: () => mockUseGetTransforms(),
 }));
 
 jest.mock('../../hooks/use_get_transform_stats', () => ({
@@ -76,91 +61,128 @@ jest.mock('./components/dangling_task_warning/dangling_task_warning', () => ({
   DanglingTasksWarning: () => null,
 }));
 
+jest.mock('./components/transform_list', () => ({
+  TransformList: ({ transforms }: { transforms: Array<{ id: string }> }) =>
+    transforms.length === 0 ? (
+      <div data-test-subj="transformNoTransformsFound">
+        <button type="button" data-test-subj="transformButtonCreate">
+          Create your first transform
+        </button>
+      </div>
+    ) : (
+      <div data-test-subj="mockedTransformList" />
+    ),
+}));
+
+const renderSection = () => {
+  const history = createMemoryHistory();
+  return renderWithI18n(
+    <MockAppHeaderProvider>
+      <Router history={history}>
+        <QueryClientProvider client={queryClient}>
+          <TransformManagementSection />
+        </QueryClientProvider>
+      </Router>
+    </MockAppHeaderProvider>
+  );
+};
+
 describe('Transform: <TransformManagementSection />', () => {
   beforeEach(() => {
-    mockStorage.get.mockReset();
-    mockStorage.set.mockReset();
-    mockUseAppDependencies.mockReset();
-    mockUseAppDependencies.mockReturnValue({
-      dataViewEditor: undefined,
-      cps: { cpsManager: {} },
-      storage: mockStorage,
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: false,
+      error: null,
+      data: 0,
+    });
+    mockUseGetTransforms.mockReturnValue({
+      isInitialLoading: false,
+      isLoading: false,
+      error: null,
+      data: { transforms: [], transformIdsWithoutConfig: [] },
     });
   });
 
   test('Minimal initialization', () => {
-    const { container } = renderWithI18n(
-      <QueryClientProvider client={queryClient}>
-        <TransformManagementSection />
-      </QueryClientProvider>
-    );
+    mockUseTransformCapabilities.mockReturnValue({ canStartStopTransform: true });
+    const { container } = renderSection();
 
     expect(container.textContent).toContain('Missing permission');
   });
 
-  test('Shows CPS unsupported callout when CPS is enabled and allows dismissing it', () => {
-    mockStorage.get.mockReturnValue(false);
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-
-    const { container } = renderWithI18n(
-      <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <UrlStateProvider>
-            <TransformManagement />
-          </UrlStateProvider>
-        </Router>
-      </QueryClientProvider>
-    );
-
-    expect(
-      container.querySelector('[data-test-subj="transformCpsUnsupportedCallout"]')
-    ).not.toBeNull();
-
-    const dismissButton = container.querySelector(
-      '[data-test-subj="transformCpsUnsupportedCalloutDismiss"]'
-    ) as HTMLButtonElement | null;
-    expect(dismissButton).not.toBeNull();
-
-    fireEvent.click(dismissButton!);
-    expect(mockStorage.set).toHaveBeenCalledWith('transform.cpsUnsupportedCalloutDismissed', true);
-    expect(container.querySelector('[data-test-subj="transformCpsUnsupportedCallout"]')).toBeNull();
-  });
-
-  test('Does not show CPS unsupported callout when dismissed in storage', () => {
-    mockStorage.get.mockReturnValue(true);
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-
-    const { container } = renderWithI18n(
-      <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <UrlStateProvider>
-            <TransformManagement />
-          </UrlStateProvider>
-        </Router>
-      </QueryClientProvider>
-    );
-
-    expect(container.querySelector('[data-test-subj="transformCpsUnsupportedCallout"]')).toBeNull();
-  });
-
-  test('Does not show CPS unsupported callout when CPS is not enabled', () => {
-    mockUseAppDependencies.mockReturnValue({
-      dataViewEditor: undefined,
-      cps: undefined,
-      storage: mockStorage,
+  test('keeps AppHeader mounted while loading and hides Create', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
     });
-    const history = createMemoryHistory({ initialEntries: ['/'] });
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: true,
+      error: null,
+      data: 0,
+    });
+    mockUseGetTransforms.mockReturnValue({
+      isInitialLoading: true,
+      isLoading: true,
+      error: null,
+      data: { transforms: [], transformIdsWithoutConfig: [] },
+    });
 
-    const { container } = renderWithI18n(
-      <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <UrlStateProvider>
-            <TransformManagement />
-          </UrlStateProvider>
-        </Router>
-      </QueryClientProvider>
-    );
+    renderSection();
 
-    expect(container.querySelector('[data-test-subj="transformCpsUnsupportedCallout"]')).toBeNull();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(screen.queryByTestId('transformButtonCreate')).not.toBeInTheDocument();
+  });
+
+  test('keeps AppHeader mounted on an empty list and hides Create', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    });
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: false,
+      error: null,
+      data: 1,
+    });
+
+    renderSection();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(
+      within(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).queryByTestId(
+        'transformButtonCreate'
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('transformNoTransformsFound')).getByTestId('transformButtonCreate')
+    ).toBeInTheDocument();
+  });
+
+  test('shows Create as the AppHeader primary action when transforms exist', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    });
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: false,
+      error: null,
+      data: 1,
+    });
+    mockUseGetTransforms.mockReturnValue({
+      isInitialLoading: false,
+      isLoading: false,
+      error: null,
+      data: { transforms: [{ id: 'transform-1' }], transformIdsWithoutConfig: [] },
+    });
+
+    renderSection();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(screen.getByTestId('transformButtonCreate')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedTransformList')).toBeInTheDocument();
   });
 });

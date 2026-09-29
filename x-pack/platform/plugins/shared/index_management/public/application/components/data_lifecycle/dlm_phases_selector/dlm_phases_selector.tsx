@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
-import { usePhaseColors } from '@kbn/data-lifecycle-phases';
+import { getTimingBoundHelpText, usePhaseColors } from '@kbn/data-lifecycle-phases';
 import {
   getDurationLabel,
   mergeDefaultValue,
@@ -90,12 +90,22 @@ export const DlmPhasesSelector = ({
 
   const frozenHelpText =
     value.frozen.enabled && value.delete.enabled
-      ? strings.frozenMustOccurBeforeDeleteHelpText(getDurationLabel(value.delete))
+      ? getTimingBoundHelpText({
+          upper: {
+            neighbor: { type: 'phase', phase: 'delete' },
+            value: getDurationLabel(value.delete),
+          },
+        })
       : undefined;
 
   const deleteHelpText =
     value.frozen.enabled && value.delete.enabled
-      ? strings.deleteMustOccurAfterFrozenHelpText(getDurationLabel(value.frozen))
+      ? getTimingBoundHelpText({
+          lower: {
+            neighbor: { type: 'phase', phase: 'frozen' },
+            value: getDurationLabel(value.frozen),
+          },
+        })
       : maximumRetentionPeriod && value.delete.enabled
       ? strings.deleteMaximumRetentionText(maximumRetentionPeriod)
       : undefined;

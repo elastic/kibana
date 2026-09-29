@@ -13,11 +13,15 @@ import type { JobConfig } from './get_job_config';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
-    painless: {
-      getEuidRuntimeMapping: jest.fn().mockReturnValue({ type: 'keyword', script: { source: '' } }),
+    dsl: {
+      getEuidFilterBasedOnEntityRecord: jest
+        .fn()
+        .mockReturnValue({ bool: { filter: [{ term: { 'user.name': 'alice' } }] } }),
     },
   },
 }));
+
+const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
 
 const MOCK_CURRENT_TIME = 1778241600000; // 2026-05-08T12:00:00.000Z
 
@@ -53,6 +57,7 @@ describe('fetchBaselineBehavior', () => {
   const defaultOpts = {
     entityId: 'user:alice',
     entityType: 'user' as const,
+    entityRecord: mockEntityRecord,
     jobId: 'test-job',
     jobConfig: makeJobConfig(),
   };

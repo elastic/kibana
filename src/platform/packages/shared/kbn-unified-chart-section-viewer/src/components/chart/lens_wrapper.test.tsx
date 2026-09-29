@@ -96,6 +96,21 @@ describe('LensWrapper', () => {
       expect(embeddableElement).toHaveAttribute('data-title-highlight', 'cpu');
     });
 
+    it('passes multiple title highlights to EmbeddableComponent', () => {
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} titleHighlight={['system', 'usage']} />
+        </EuiThemeProvider>
+      );
+
+      expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          titleHighlight: ['system', 'usage'],
+        }),
+        expect.anything()
+      );
+    });
+
     it('passes titleHighlight when undefined', () => {
       render(
         <EuiThemeProvider>
@@ -194,6 +209,7 @@ describe('LensWrapper', () => {
           disabledActions: expect.arrayContaining([
             'ACTION_CUSTOMIZE_PANEL',
             'ACTION_EXPORT_CSV',
+            'ACTION_FILTERS_NOTIFICATION',
             'alertRule',
           ]),
         }),
@@ -322,11 +338,21 @@ describe('LensWrapper', () => {
             lensProps={{
               ...mockLensProps,
               esqlVariables: [{ key: 'event_type', value: 'Bad', type: ESQLVariableType.VALUES }],
+              isApproximate: true,
               attributes: {
                 ...mockLensProps.attributes,
                 state: {
                   ...mockLensProps.attributes.state,
-                  query: { esql: 'FROM traces-apm* | WHERE ?event_type == "Bad"' },
+                  datasourceStates: {
+                    textBased: {
+                      layers: {
+                        layer1: {
+                          query: { esql: 'FROM traces-apm* | WHERE ?event_type == "Bad"' },
+                          columns: [],
+                        },
+                      },
+                    },
+                  },
                 },
               },
             }}
@@ -342,6 +368,9 @@ describe('LensWrapper', () => {
       expect(onExploreInDiscoverTab).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { esql: 'FROM traces-apm* | WHERE "Bad" == "Bad"' },
+          tabLabel: mockLensProps.attributes.title,
+          timeRange: mockLensProps.timeRange,
+          isApproximate: true,
         })
       );
     });

@@ -43,7 +43,7 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { SkillReferencedContentFieldArray } from './skill_referenced_content_field_array';
-import type { SkillFormData } from './skill_form_validation';
+import { sanitizeSkillNameInput, type SkillFormData } from './skill_form_validation';
 
 export enum SkillFormMode {
   Create = 'create',
@@ -150,7 +150,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
   useEffect(() => {
     if (skill) {
       reset({
-        id: skill.id,
         name: skill.name,
         description: skill.description,
         content: skill.content,
@@ -182,7 +181,9 @@ export const SkillForm: React.FC<SkillFormProps> = ({
 
       if (mode === SkillFormMode.Create) {
         await (onSave as (d: CreateSkillPayload) => Promise<unknown>)({
-          id: data.id,
+          // Backend still requires `id`; the UI collapses to a single identifier so we
+          // reuse the (kebab-case-validated) `name` value. Follow-up ticket will drop `id`.
+          id: data.name,
           name: data.name,
           description: data.description,
           content: data.content,
@@ -206,8 +207,8 @@ export const SkillForm: React.FC<SkillFormProps> = ({
 
   const pageTitle = useMemo(() => {
     if (mode === SkillFormMode.Create) return labels.skills.newSkillTitle;
-    if (mode === SkillFormMode.Edit) return skill?.id ?? labels.skills.editSkillTitle;
-    return skill?.id ?? '';
+    if (mode === SkillFormMode.Edit) return skill?.name ?? labels.skills.editSkillTitle;
+    return skill?.name ?? '';
   }, [mode, skill]);
 
   return (
@@ -280,61 +281,36 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                 })}
                 description={i18n.translate('xpack.agentBuilder.skills.form.identityDescription', {
                   defaultMessage:
-                    "Define the skill's unique identifier and display name. The ID is used to reference the skill in configurations.",
+                    'Agents decide when to invoke this skill from its name and description, so make both specific. Names use kebab-case (lowercase with hyphens).',
                 })}
               >
                 <EuiSpacer size="s" />
                 {isCreateMode && (
                   <Controller
-                    name="id"
+                    name="name"
                     control={control}
                     render={({ field, fieldState: { error } }) => (
                       <EuiFormRow
-                        label={labels.skills.skillIdLabel}
+                        label={labels.skills.nameLabel}
                         isInvalid={!!error}
                         error={error?.message}
                         fullWidth
                       >
                         <EuiFieldText
                           {...field}
+                          onChange={(e) => field.onChange(sanitizeSkillNameInput(e.target.value))}
                           fullWidth
                           isInvalid={!!error}
-                          disabled={isViewMode}
-                          data-test-subj="agentBuilderSkillFormIdInput"
+                          data-test-subj="agentBuilderSkillFormNameInput"
                           placeholder={i18n.translate(
-                            'xpack.agentBuilder.skills.form.idPlaceholder',
-                            { defaultMessage: 'Enter skill ID' }
+                            'xpack.agentBuilder.skills.form.namePlaceholder',
+                            { defaultMessage: 'my-skill-name' }
                           )}
                         />
                       </EuiFormRow>
                     )}
                   />
                 )}
-
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <EuiFormRow
-                      label={labels.skills.nameLabel}
-                      isInvalid={!!error}
-                      error={error?.message}
-                      fullWidth
-                    >
-                      <EuiFieldText
-                        {...field}
-                        fullWidth
-                        isInvalid={!!error}
-                        disabled={isViewMode}
-                        data-test-subj="agentBuilderSkillFormNameInput"
-                        placeholder={i18n.translate(
-                          'xpack.agentBuilder.skills.form.namePlaceholder',
-                          { defaultMessage: 'Enter skill name' }
-                        )}
-                      />
-                    </EuiFormRow>
-                  )}
-                />
 
                 <Controller
                   name="description"

@@ -44,6 +44,20 @@ export const UnpartitionedWarnings = {
   name: 'Unpartitioned warnings',
 };
 
+export const UnpartitionedWarningsWithoutReasons = {
+  render: () => {
+    return (
+      <CategoryQualityWarnings
+        hasSetupCapabilities={true}
+        onRecreateMlJob={action('on-recreate-ml-job')}
+        qualityWarnings={unpartitionedQualityWarningsWithoutReasons}
+      />
+    );
+  },
+
+  name: 'Unpartitioned warnings without reasons',
+};
+
 const partitionedQualityWarnings: QualityWarning[] = [
   {
     type: 'categoryQualityWarning',
@@ -76,5 +90,14 @@ const unpartitionedQualityWarnings: QualityWarning[] = [
       { type: 'manyRareCategories', rareCategoriesRatio: 0.95 },
       { type: 'manyCategories', categoriesDocumentRatio: 0.7 },
     ],
+  },
+];
+
+const unpartitionedQualityWarningsWithoutReasons: QualityWarning[] = [
+  {
+    type: 'categoryQualityWarning',
+    jobId: 'theMlJobId',
+    dataset: '',
+    reasons: [],
   },
 ];

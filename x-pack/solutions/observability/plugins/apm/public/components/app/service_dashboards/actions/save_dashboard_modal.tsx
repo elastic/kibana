@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import { getServiceNameKuery } from '../../../../../common/utils/service_name_to_kuery';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import type { MergedServiceDashboard } from '..';
 import { getApmInternalServices } from '../../../../plugin';
@@ -105,7 +105,7 @@ export function SaveDashboardModal({
                 dashboardSavedObjectId: newDashboard.value,
                 serviceEnvironmentFilterEnabled: serviceFiltersEnabled,
                 serviceNameFilterEnabled: serviceFiltersEnabled,
-                kuery: `${SERVICE_NAME}: ${serviceName}`,
+                kuery: getServiceNameKuery(serviceName),
               },
             },
             signal: null,
@@ -155,7 +155,7 @@ export function SaveDashboardModal({
   return (
     <EuiModal
       onClose={onClose}
-      data-test-subj="apmSelectServiceDashboard"
+      data-test-subj="apmSelectServiceDashboardModal"
       aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
@@ -173,6 +173,7 @@ export function SaveDashboardModal({
       <EuiModalBody>
         <EuiFlexGroup direction="column" justifyContent="center">
           <EuiComboBox
+            data-test-subj="apmSelectServiceDashboard"
             isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
             placeholder={selectDashboardLabel}

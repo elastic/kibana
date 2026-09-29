@@ -6,7 +6,7 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useRouteMatch } from 'react-router-dom';
 import { indexStatusAction } from '../../../state/actions';
 import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';

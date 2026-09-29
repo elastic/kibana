@@ -8,10 +8,14 @@
  */
 
 import Fs from 'fs';
-import { expandAgentQueue } from '../agent_images';
-import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite';
-import { collectEnvFromLabels } from '../pr_labels';
-import type { ModuleDiscoveryInfo } from './pick_scout_test_group_run_order';
+import { expandAgentQueue } from '../agent_images.ts';
+import {
+  BuildkiteClient,
+  retryOnPreemption,
+  type BuildkiteCommandStep,
+} from '../buildkite/index.ts';
+import { collectEnvFromLabels } from '../pr_labels.ts';
+import type { ModuleDiscoveryInfo } from './pick_scout_test_group_run_order.ts';
 
 // Hard ceiling on total Buildkite jobs in a single build; mirrors the value in
 // .buildkite/pipelines/flaky_tests/pipeline.ts. Validated here AFTER fan-out across
@@ -125,9 +129,7 @@ const buildSteps = (
         agents: expandAgentQueue(entry.usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
         depends_on: options.dependsOn ?? ['build'],
         timeout_in_minutes: 60,
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
-        },
+        retry: retryOnPreemption(2),
       });
     }
   }

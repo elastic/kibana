@@ -89,6 +89,8 @@ export const createVisPanelResolver = ({
     chartType,
     esql,
     renderer: requestedRenderer,
+    preserveESQL,
+    applyChartRules,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
@@ -102,11 +104,15 @@ export const createVisPanelResolver = ({
       }
 
       if (renderer === 'vega') {
-        const { spec } = await buildVegaConfig({
+        if (applyChartRules) {
+          throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
+        }
+        const { spec, title, authoringNote } = await buildVegaConfig({
           nlQuery,
           index,
           esql,
           existingSpec: getExistingVegaSpec(existingPanel),
+          preserveESQL,
           chartType,
           modelProvider,
           logger,
@@ -122,8 +128,9 @@ export const createVisPanelResolver = ({
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec },
+            config: { spec, ...(title ? { title } : {}) },
           },
+          ...(authoringNote ? { authoringNote } : {}),
         };
       }
 
@@ -139,7 +146,8 @@ export const createVisPanelResolver = ({
         esql,
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
-        includeTimeRange: false,
+        preserveESQL,
+        applyChartRules,
         modelProvider,
         logger,
         events,
@@ -152,6 +160,7 @@ export const createVisPanelResolver = ({
           type: LENS_EMBEDDABLE_TYPE,
           config: result.validatedConfig,
         },
+        ...(result.authoringNote ? { authoringNote: result.authoringNote } : {}),
       };
     } catch (error) {
       return createPanelFailureResult(operationType, identifier, getErrorMessage(error));

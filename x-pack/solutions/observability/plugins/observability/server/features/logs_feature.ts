@@ -25,14 +25,14 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
     app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
     catalogue: ['infralogging', 'logs'],
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     alerting: logsAlertingFeatures,
     privileges: {
       all: {
         app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
         catalogue: ['infralogging', 'logs'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
           read: [],
@@ -49,14 +49,14 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show', 'configureSource', 'save'],
       },
       read: {
         app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
         catalogue: ['infralogging', 'logs'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         alerting: {
           rule: {
             read: logsAlertingFeatures,
@@ -66,7 +66,7 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],

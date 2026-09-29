@@ -33,6 +33,7 @@ export interface TaskRunResult {
   max_size_reached?: boolean;
   warnings?: string[];
   metrics?: TaskRunMetrics;
+  user_error?: boolean;
   /**
    * When running a report task we may finish with warnings that were triggered
    * by an error. We can pass the error code via the task run result to the

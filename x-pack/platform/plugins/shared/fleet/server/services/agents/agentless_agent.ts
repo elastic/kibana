@@ -44,17 +44,27 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
   SERVERLESS_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../constants';
+import {
+  canUseManagedBulk,
+  type AgentPolicyForOutputEligibility,
+} from '../../../common/services/output_helpers';
 
 import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
-import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
+import {
+  prependAgentlessApiBasePathToEndpoint,
+  isAgentlessEnabled,
+  isManagedBulkEnabled,
+} from '../utils/agentless';
 import {
   AGENTLESS_API_ERROR_CODES,
   MAXIMUM_RETRIES,
@@ -86,24 +96,42 @@ export interface AgentlessAgentService {
 }
 
 class AgentlessAgentServiceImpl implements AgentlessAgentService {
-  public getDefaultSettings() {
+  /** Fleet server host is chosen purely by cloud environment, independent of the policy. */
+  public getDefaultFleetServerId() {
     const cloudSetup = appContextService.getCloud();
     const isCloud = cloudSetup?.isCloudEnabled;
     const isServerless = cloudSetup?.isServerlessEnabled;
-    const outputId = isServerless
-      ? SERVERLESS_AGENTLESS_OUTPUT_ID
-      : isCloud
-      ? ECH_AGENTLESS_OUTPUT_ID
-      : undefined;
-    const fleetServerId = isServerless
+    return isServerless
       ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
       : isCloud
       ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
       : undefined;
+  }
 
+  /** Data output depends on the policy: connector and OTel policies stay on direct ES. */
+  public getDefaultOutputId(agentPolicy: AgentPolicyForOutputEligibility) {
+    const cloudSetup = appContextService.getCloud();
+    const isCloud = cloudSetup?.isCloudEnabled;
+    const isServerless = cloudSetup?.isServerlessEnabled;
+    // TODO(cursor-state): https://github.com/elastic/ingest-dev/issues/8636 — the managed bulk
+    // output has no usable direct-ES URL for the agentless state store; cursor state routing is
+    // unresolved and not wired up here.
+    const useManagedBulk = isManagedBulkEnabled() && canUseManagedBulk(agentPolicy);
+    return isServerless
+      ? useManagedBulk
+        ? SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID
+        : SERVERLESS_AGENTLESS_OUTPUT_ID
+      : isCloud
+      ? useManagedBulk
+        ? ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID
+        : ECH_AGENTLESS_OUTPUT_ID
+      : undefined;
+  }
+
+  public getDefaultSettings(agentPolicy: AgentPolicyForOutputEligibility) {
     return {
-      outputId,
-      fleetServerId,
+      outputId: this.getDefaultOutputId(agentPolicy),
+      fleetServerId: this.getDefaultFleetServerId(),
     };
   }
 

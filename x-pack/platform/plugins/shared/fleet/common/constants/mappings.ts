@@ -25,6 +25,7 @@ export const AGENT_POLICY_MAPPINGS = {
     data_output_id: { type: 'keyword' },
     description: { type: 'text' },
     download_source_id: { type: 'keyword' },
+    download_source_ids: { type: 'keyword', ignore_above: 1024 },
     fleet_server_host_id: { type: 'keyword' },
     inactivity_timeout: { type: 'integer' },
     is_default: { type: 'boolean' },
@@ -105,9 +106,6 @@ export const AGENT_MAPPINGS = {
           type: 'keyword',
         },
       },
-    },
-    default_api_key: {
-      type: 'keyword',
     },
     default_api_key_id: {
       type: 'keyword',
@@ -279,6 +277,9 @@ export const AGENT_MAPPINGS = {
       type: 'integer',
     },
     policy_id: {
+      type: 'keyword',
+    },
+    policy_base_id: {
       type: 'keyword',
     },
     policy_revision_idx: {

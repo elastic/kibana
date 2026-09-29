@@ -7,19 +7,19 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import type { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { RiskInputsTab } from '../../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
+import { RISK_INPUTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { RISK_INPUTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.riskInputs.title', {
-  defaultMessage: 'Risk score',
-});
+const TITLE = RISK_INPUTS_TITLE;
 
 const ICON_TYPE = EntityIconByType;
 
@@ -32,19 +32,23 @@ export interface RiskInputsProps {
   entityId?: string;
   /** Opens the originating entity flyout as a child. */
   onShowEntity?: () => void;
+  /** Initial sub-tab to display. Forwarded from the `openDetailsPanel` call in the entity flyout. */
+  subTab?: RiskScoreLeftPanelSubTab;
 }
 
 export const RiskInputs = memo(
-  ({ entityType, entityName, entityId, onShowEntity }: RiskInputsProps) => {
+  ({ entityType, entityName, entityId, onShowEntity, subTab }: RiskInputsProps) => {
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const onShowAlert = useCallback(
-      (id: string, indexName: string) => {
+      (id: string, indexName: string, title?: string) => {
         openDocumentFlyoutFromIndexAsChild({
           documentId: id,
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          origin: FLYOUT_ORIGIN.RISK_INPUTS_ALERT,
+          title,
         });
       },
       [openDocumentFlyoutFromIndexAsChild]
@@ -66,6 +70,7 @@ export const RiskInputs = memo(
             entityName={entityName}
             entityId={entityId}
             onShowAlert={onShowAlert}
+            subTab={subTab}
           />
         </EuiFlyoutBody>
       </>

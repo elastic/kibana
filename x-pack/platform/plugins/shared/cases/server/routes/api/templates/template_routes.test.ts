@@ -6,11 +6,16 @@
  */
 
 import type { schema } from '@kbn/config-schema';
+import Boom from '@hapi/boom';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import {
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
+  CASE_TEMPLATES_URL,
+  CASE_TEMPLATE_DETAILS_URL,
+  CASE_FIELDS_URL,
+  CASE_APPLICABLE_FIELDS_URL,
 } from '../../../../common/constants';
 import { mockTemplates } from './mock_data';
 import { getTemplatesRoute } from './get_templates_route';
@@ -19,6 +24,9 @@ import { getPublicTemplatesRoute } from './get_public_templates_route';
 import { getPublicTemplateRoute } from './get_public_template_route';
 import { postTemplateRoute } from './post_template_route';
 import { putTemplateRoute } from './put_template_route';
+import { postPublicTemplateRoute } from './post_public_template_route';
+import { putPublicTemplateRoute } from './put_public_template_route';
+import { deletePublicTemplateRoute } from './delete_public_template_route';
 import { patchTemplateRoute } from './patch_template_route';
 import { bulkDeleteTemplatesRoute } from './bulk_delete_templates_route';
 import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
@@ -78,6 +86,40 @@ const toSavedObject = (template: Template) => ({
   attributes: template,
 });
 
+const getLatestTemplatesForOwner = (owner: string): Template[] => {
+  const latestByTemplateId = new Map<string, Template>();
+
+  mockTemplates
+    .filter((template) => template.deletedAt === null && template.owner === owner)
+    .forEach((template) => {
+      const existing = latestByTemplateId.get(template.templateId);
+      if (!existing || template.templateVersion > existing.templateVersion) {
+        latestByTemplateId.set(template.templateId, template);
+      }
+    });
+
+  return Array.from(latestByTemplateId.values());
+};
+
+const hasTemplateNameConflict = ({
+  name,
+  owner,
+  excludeTemplateId,
+}: {
+  name: string;
+  owner: string;
+  excludeTemplateId?: string;
+}) => {
+  const normalizedName = name.trim().toLocaleLowerCase();
+  return getLatestTemplatesForOwner(owner).some((template) => {
+    if (excludeTemplateId != null && template.templateId === excludeTemplateId) {
+      return false;
+    }
+
+    return template.name.trim().toLocaleLowerCase() === normalizedName;
+  });
+};
+
 const createMockCasesClient = () => ({
   templates: {
     getAllTemplates: jest.fn(async () => {
@@ -124,6 +166,11 @@ const createMockCasesClient = () => ({
     createTemplate: jest.fn(async (input: { name?: string; owner: string; definition: string }) => {
       const parsedDefinition = yamlParse(input.definition) as { name: string };
       const templateName = input.name ?? parsedDefinition.name;
+      if (hasTemplateNameConflict({ name: templateName, owner: input.owner })) {
+        throw Boom.conflict(
+          `Template name "${templateName}" already exists for owner "${input.owner}"`
+        );
+      }
 
       const newTemplate: Template = {
         templateId: `template-${Date.now()}`,
@@ -152,6 +199,17 @@ const createMockCasesClient = () => ({
         const latestVersion = Math.max(...candidates.map((template) => template.templateVersion));
         const parsedDefinition = yamlParse(input.definition) as { name: string };
         const templateName = input.name ?? parsedDefinition.name;
+        if (
+          hasTemplateNameConflict({
+            name: templateName,
+            owner: input.owner,
+            excludeTemplateId: templateId,
+          })
+        ) {
+          throw Boom.conflict(
+            `Template name "${templateName}" already exists for owner "${input.owner}"`
+          );
+        }
 
         const updatedTemplate: Template = {
           templateId,
@@ -169,6 +227,13 @@ const createMockCasesClient = () => ({
       }
     ),
     deleteTemplate: jest.fn(async (templateId: string) => {
+      const exists = mockTemplates.some(
+        (template) => template.templateId === templateId && template.deletedAt === null
+      );
+      if (!exists) {
+        throw Boom.notFound(`Template with id ${templateId} not found`);
+      }
+
       const deletedAt = new Date().toISOString();
 
       mockTemplates.forEach((template) => {
@@ -177,6 +242,27 @@ const createMockCasesClient = () => ({
         }
       });
     }),
+    validateCreateTemplate: jest.fn(
+      async (input: { name?: string; owner: string; definition: string }) => {
+        const parsedDefinition = yamlParse(input.definition) as { name: string };
+        const templateName = input.name ?? parsedDefinition.name;
+        if (hasTemplateNameConflict({ name: templateName, owner: input.owner })) {
+          throw Boom.conflict(
+            `Template name "${templateName}" already exists for owner "${input.owner}"`
+          );
+        }
+      }
+    ),
+    validateUpdateTemplate: jest.fn(
+      async (templateId: string, input: { name?: string; owner: string; definition: string }) => {
+        const exists = mockTemplates.some(
+          (template) => template.templateId === templateId && template.deletedAt === null
+        );
+        if (!exists) {
+          throw Boom.notFound(`Template with id ${templateId} not found`);
+        }
+      }
+    ),
     getTags: jest.fn(async () => {
       const nonDeleted = mockTemplates.filter((t) => t.deletedAt === null);
       const tags = nonDeleted.flatMap((t) => t.tags ?? []);
@@ -199,6 +285,7 @@ const createMockContext = () => ({
 const createMockResponse = () => ({
   ok: jest.fn(),
   notFound: jest.fn(),
+  conflict: jest.fn(),
   badRequest: jest.fn(),
   noContent: jest.fn(),
 });
@@ -331,11 +418,11 @@ describe('Template Routes', () => {
       );
     });
 
-    it('coerces string isDeleted "true" to boolean true', async () => {
+    it('passes isDeleted boolean true to getAllTemplates', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
-        query: { page: 1, perPage: 10, isDeleted: 'true' },
+        query: { page: 1, perPage: 10, isDeleted: true },
       };
       const response = createMockResponse();
 
@@ -349,11 +436,11 @@ describe('Template Routes', () => {
       );
     });
 
-    it('coerces page and perPage from string to number', async () => {
+    it('passes page and perPage numbers to getAllTemplates', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
-        query: { page: '2', perPage: '25', isDeleted: false },
+        query: { page: 2, perPage: 25, isDeleted: false },
       };
       const response = createMockResponse();
 
@@ -503,7 +590,13 @@ describe('Template Routes', () => {
     });
 
     it('returns a specific version when version query param is provided', async () => {
-      // Add a second version of template-1
+      // Mark the existing v1 as not latest and add v2 as the tip.
+      const v1 = mockTemplates.find(
+        (template) => template.templateId === 'template-1' && template.templateVersion === 1
+      );
+      if (v1) {
+        v1.isLatest = false;
+      }
       mockTemplates.push({
         templateId: 'template-1',
         name: 'Template One v2',
@@ -512,6 +605,7 @@ describe('Template Routes', () => {
         templateVersion: 2,
         deletedAt: null,
         author: 'alice',
+        isLatest: true,
       });
 
       const context = createMockContext();
@@ -527,6 +621,8 @@ describe('Template Routes', () => {
             templateId: 'template-1',
             name: 'Template One',
             templateVersion: 1,
+            isLatest: false,
+            latestVersion: 2,
           }),
         })
       );
@@ -584,6 +680,28 @@ describe('Template Routes', () => {
           }),
         ],
       });
+    });
+
+    it('returns 409 when template metadata name already exists for the same owner', async () => {
+      const context = createMockContext();
+      const request = {
+        body: {
+          owner: 'securitySolution',
+          name: 'template one',
+          definition: buildDefinition('Case title can be anything'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postTemplateRoute.handler({ context, request, response });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: {
+          message: 'Template name "template one" already exists for owner "securitySolution"',
+        },
+      });
+      expect(response.ok).not.toHaveBeenCalled();
     });
   });
 
@@ -650,6 +768,29 @@ describe('Template Routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: 'Template with id template-3 not found' },
       });
+    });
+
+    it('returns 409 when renaming to a duplicate template metadata name', async () => {
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'template-1' },
+        body: {
+          owner: 'observability',
+          name: 'template two',
+          definition: buildDefinition('New case defaults title'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putTemplateRoute.handler({ context, request, response });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: {
+          message: 'Template name "template two" already exists for owner "observability"',
+        },
+      });
+      expect(response.ok).not.toHaveBeenCalled();
     });
   });
 
@@ -739,6 +880,25 @@ describe('Template Routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: 'Template with id non-existent not found' },
       });
+    });
+
+    it('returns 409 when patching name to an existing template metadata name', async () => {
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'template-1' },
+        body: { owner: 'observability', name: 'template two' },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await patchTemplateRoute.handler({ context, request, response });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: {
+          message: 'Template name "template two" already exists for owner "observability"',
+        },
+      });
+      expect(response.ok).not.toHaveBeenCalled();
     });
   });
 
@@ -1041,13 +1201,274 @@ describe('Template Routes', () => {
     });
   });
 
+  describe('POST /api/cases/templates (public)', () => {
+    it('creates a template from a valid strict body', async () => {
+      const context = createMockContext();
+      const request = {
+        query: { dry_run: false },
+        body: {
+          owner: 'securitySolution',
+          definition: buildDefinition('Public Template'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            name: 'Public Template',
+            owner: 'securitySolution',
+            templateVersion: 1,
+          }),
+        })
+      );
+    });
+
+    it('dry_run validates without creating and returns {valid: true}', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { dry_run: true },
+        body: {
+          owner: 'securitySolution',
+          definition: buildDefinition('Dry Run Template'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { valid: true } });
+      expect(casesClient.templates.validateCreateTemplate).toHaveBeenCalled();
+      expect(casesClient.templates.createTemplate).not.toHaveBeenCalled();
+    });
+
+    it('rejects a body with server-managed attributes (strict schema) with 400', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { dry_run: false },
+        body: {
+          owner: 'securitySolution',
+          definition: buildDefinition('Sneaky Template'),
+          usageCount: 9000,
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('Invalid request body'),
+          }),
+        })
+      );
+      expect(casesClient.templates.createTemplate).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid YAML with 400', async () => {
+      const context = createMockContext();
+      const request = {
+        query: { dry_run: false },
+        body: {
+          name: 'Bad Template',
+          owner: 'securitySolution',
+          definition: ': {not valid yaml',
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('Invalid YAML definition'),
+          }),
+        })
+      );
+    });
+
+    it('maps a duplicate name to 409', async () => {
+      const context = createMockContext();
+      const request = {
+        query: { dry_run: false },
+        body: {
+          name: 'template one',
+          owner: 'securitySolution',
+          definition: buildDefinition('Whatever title'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.conflict).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('already exists'),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('PUT /api/cases/templates/{template_id} (public)', () => {
+    it('updates a template and returns the new version', async () => {
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'template-1' },
+        query: { dry_run: false },
+        body: {
+          owner: 'securitySolution',
+          definition: buildDefinition('Renamed Template'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            templateId: 'template-1',
+            name: 'Renamed Template',
+            templateVersion: 2,
+          }),
+        })
+      );
+    });
+
+    it('dry_run validates without writing and returns {valid: true}', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        params: { template_id: 'template-1' },
+        query: { dry_run: true },
+        body: {
+          owner: 'securitySolution',
+          definition: buildDefinition('Renamed Template'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { valid: true } });
+      expect(casesClient.templates.validateUpdateTemplate).toHaveBeenCalledWith(
+        'template-1',
+        expect.anything()
+      );
+      expect(casesClient.templates.updateTemplate).not.toHaveBeenCalled();
+    });
+
+    it('maps a not-found Boom from the client to 404 (dry_run and real write)', async () => {
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'non-existent' },
+        query: { dry_run: true },
+        body: {
+          owner: 'securitySolution',
+          definition: buildDefinition('Whatever'),
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.notFound).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('not found'),
+          }),
+        })
+      );
+    });
+
+    it('rejects a strict-body violation with 400 before touching the client', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        params: { template_id: 'template-1' },
+        query: { dry_run: false },
+        body: {
+          owner: 'securitySolution',
+          definition: buildDefinition('Whatever'),
+          isLatest: false,
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(casesClient.templates.updateTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('DELETE /api/cases/templates/{template_id} (public)', () => {
+    it('soft-deletes and returns 204', async () => {
+      const context = createMockContext();
+      const request = { params: { template_id: 'template-1' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await deletePublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.noContent).toHaveBeenCalled();
+      expect(
+        mockTemplates.filter((t) => t.templateId === 'template-1').every((t) => t.deletedAt != null)
+      ).toBe(true);
+    });
+
+    it('maps a not-found Boom from the client to 404', async () => {
+      const context = createMockContext();
+      const request = { params: { template_id: 'non-existent' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await deletePublicTemplateRoute.handler({ context, request, response });
+
+      expect(response.notFound).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('not found'),
+          }),
+        })
+      );
+      expect(response.noContent).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getPublicTemplateRoutes feature flag gating', () => {
-    it('returns both public routes when templates.enabled is true', () => {
+    it('returns all public routes when templates.enabled is true', () => {
       const config = { templates: { enabled: true } } as unknown as Parameters<
         typeof getPublicTemplateRoutes
       >[0];
       const routes = getPublicTemplateRoutes(config);
-      expect(routes).toHaveLength(2);
+      expect(routes).toHaveLength(7);
+      expect(routes.map((route) => `${route.method.toUpperCase()} ${route.path}`)).toEqual([
+        `GET ${CASE_TEMPLATES_URL}`,
+        `GET ${CASE_TEMPLATE_DETAILS_URL}`,
+        `POST ${CASE_TEMPLATES_URL}`,
+        `PUT ${CASE_TEMPLATE_DETAILS_URL}`,
+        `DELETE ${CASE_TEMPLATE_DETAILS_URL}`,
+        `GET ${CASE_FIELDS_URL}`,
+        `GET ${CASE_APPLICABLE_FIELDS_URL}`,
+      ]);
     });
 
     it('returns empty array when templates.enabled is false', () => {

@@ -7,10 +7,11 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import { EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
 import type { Ast } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ArgOptions } from '../components/arg_add_popover';
 import { ArgAddPopover } from '../components/arg_add_popover';
 // @ts-expect-error unconverted components
@@ -281,11 +282,7 @@ export class FunctionForm extends BaseForm {
         </SidebarSection>
       );
     } catch (e: any) {
-      return (
-        <EuiCallOut color="danger" iconType="cross" title="Expression rendering error">
-          <p>{e.message}</p>
-        </EuiCallOut>
-      );
+      return <KbnDangerCallout title="Expression rendering error" text={e.message} />;
     }
   }
 }

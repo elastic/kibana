@@ -207,6 +207,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           productFeaturesService,
           license: licensing.license,
           analytics: core.analytics,
+          userProfile: coreStart.userProfile,
           logger: options.logger,
         });
       }),
@@ -332,6 +333,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRulesAuthz: memoize(() => {
         return rulesAuthz;
       }),
+      getMitreDataClient: () => startPlugins.mitreAttack?.getMitreDataClient?.(),
     };
   }
 }

@@ -16,3 +16,20 @@ export interface BeforeAgentWorkflowOutput {
   abort_message?: string;
   new_prompt?: string;
 }
+
+/**
+ * Inputs passed to a post-execution workflow. The execution has already been returned to the user,
+ * so the workflow's output is ignored.
+ */
+export interface AfterExecutionWorkflowParams {
+  prompt: string;
+  response: string;
+  conversation_id?: string;
+  round_id: string;
+  agent_id?: string;
+  tool_calls: Array<{
+    tool_id: string;
+    tool_call_id: string;
+    params: Record<string, unknown>;
+  }>;
+}

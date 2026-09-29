@@ -75,6 +75,7 @@ interface UseSuggestFixParams {
   notifications: NotificationsStart;
   isEnabled: boolean;
   telemetryService?: ESQLEditorTelemetryService;
+  onAfterInsert?: () => void;
 }
 
 export const useSuggestFix = ({
@@ -84,6 +85,7 @@ export const useSuggestFix = ({
   notifications,
   isEnabled,
   telemetryService,
+  onAfterInsert,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
@@ -351,6 +353,7 @@ export const useSuggestFix = ({
             forceMoveMarkers: true,
           },
         ]);
+        onAfterInsert?.();
 
         const generatedLineStart = lastChangedOriginalLine + 1;
         const generatedLineEnd = lastChangedOriginalLine + changedFixedLines.length;
@@ -386,12 +389,13 @@ export const useSuggestFix = ({
       isEnabled,
       editorRef,
       editorModel,
-      http,
-      notifications.toasts,
       rejectFix,
-      showReview,
-      clearGeneratingDecoration,
+      http,
+      onAfterInsert,
       trackFixResult,
+      showReview,
+      notifications.toasts,
+      clearGeneratingDecoration,
     ]
   );
 

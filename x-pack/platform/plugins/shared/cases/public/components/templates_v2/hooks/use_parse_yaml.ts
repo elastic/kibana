@@ -11,7 +11,7 @@ import { FieldSchema } from '../../../../common/types/domain/template/fields';
 import { TemplateSettingsSchema } from '../../../../common/types/domain/template/v1';
 import { CaseSeveritySchema } from '../../../../common/types/domain_zod/case/v1';
 import { CaseConnectorWithoutNameSchema } from '../../../../common/types/domain_zod/connector/v1';
-import { CaseAssigneesSchema } from '../../../../common/types/domain_zod/user/v1';
+import { CaseUserProfilesSchema } from '../../../../common/types/domain_zod/user/v1';
 import { MAX_TEMPLATES_PER_FILE, MAX_TOTAL_IMPORT_TEMPLATES } from '../constants';
 import { checkTemplateExists } from '../utils';
 import type { ValidatedFile } from './use_validate_yaml';
@@ -20,7 +20,9 @@ import * as i18n from '../translations';
 const ImportedDefinitionSchema = z.object({
   fields: z.array(FieldSchema).refine(
     (fields) => {
-      const fieldNames = new Set(fields.map((field) => field.name));
+      const fieldNames = new Set(
+        fields.map((field) => ('$ref' in field ? field.name ?? field.$ref : field.name))
+      );
       return fieldNames.size === fields.length;
     },
     { message: 'Field names must be unique.' }
@@ -47,7 +49,7 @@ const ImportedTemplateSchema = z
     // Legacy top-level import shape support.
     severity: CaseSeveritySchema.optional(),
     category: z.string().nullable().optional(),
-    assignees: CaseAssigneesSchema.optional(),
+    assignees: CaseUserProfilesSchema.optional(),
     connector: CaseConnectorWithoutNameSchema.optional(),
     settings: TemplateSettingsSchema.optional(),
     author: z.string().optional(),
@@ -78,7 +80,7 @@ export interface ParsedTemplateEntry {
     tags?: string[];
     severity?: z.infer<typeof CaseSeveritySchema>;
     category?: string | null;
-    assignees?: z.infer<typeof CaseAssigneesSchema>;
+    assignees?: z.infer<typeof CaseUserProfilesSchema>;
   };
   severity?: z.infer<typeof CaseSeveritySchema>;
   category?: string | null;
@@ -148,14 +150,20 @@ export const useParseYaml = () => {
               templateId: result.data.templateId,
               name: result.data.template_name ?? result.data.templateName ?? result.data.name ?? '',
               owner: result.data.owner,
+              // Template identity description/tags come from the `template_*` keys. When those keys
+              // are present the top-level `description`/`tags` are CASE defaults (see caseDefaults
+              // above) and must NOT bleed into the template identity — otherwise a template whose
+              // only tags are case-default tags (e.g. a migrated/exported template with no template
+              // tags) would incorrectly copy them onto the template. The top-level fallback applies
+              // only to the legacy flat shape, where those keys are the template identity itself.
               description:
                 result.data.template_description ??
                 result.data.templateDescription ??
-                result.data.description,
+                (hasTemplateMetadataKeys ? undefined : result.data.description),
               tags:
                 result.data.template_tags ??
                 result.data.templateTags ??
-                result.data.tags ??
+                (hasTemplateMetadataKeys ? undefined : result.data.tags) ??
                 undefined,
               caseDefaults,
               severity: caseDefaults.severity,

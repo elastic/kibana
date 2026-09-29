@@ -129,7 +129,9 @@ describe('registerNLtoESQLRoute', () => {
     request.body = { nlInstruction: 'show me all flights' };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ executeQuery: false }));
+    expect(generateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: 'none', includeViews: true })
+    );
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: 'FROM kibana_sample_data_flights' },
     });
@@ -148,7 +150,9 @@ describe('registerNLtoESQLRoute', () => {
     request.body = { nlInstruction: 'show me all speedtests' };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ includeDatasets: true }));
+    expect(generateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ includeDatasets: true, includeViews: true })
+    );
   });
 
   it('does not call generateEsql for a completion request (uses generateEsqlCompletion instead)', async () => {

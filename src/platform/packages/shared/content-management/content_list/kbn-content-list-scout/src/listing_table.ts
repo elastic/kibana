@@ -15,6 +15,7 @@ import {
 
 // Legacy `TableListView` (`@kbn/content-management-table-list-view`) subjects.
 const LEGACY_TABLE_LOADED = 'listingTable-isLoaded';
+const LEGACY_TABLE_READY = 'table-is-ready';
 const LEGACY_SEARCH_BOX = 'tableListSearchBox';
 const LEGACY_TAGS_FILTER_BUTTON = 'tagFilterPopoverButton';
 
@@ -24,6 +25,11 @@ const CONTENT_LIST_TABLE_SKELETON = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton;
 const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
 const CONTENT_LIST_SEARCH_BOX = getContentListToolbarSubjects().searchBox;
 const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
+
+// Scout's own `actionTimeout` default (10s) is too tight for listing pages that
+// fetch their contents from a saved-objects find call under CI load; give this
+// wait a longer default so slow listing fetches don't race the page object.
+const DEFAULT_TABLE_LOAD_TIMEOUT = 20_000;
 
 /**
  * Page object for a listing page rendered by *either* the legacy
@@ -43,18 +49,21 @@ const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
  */
 export class ListingTable {
   /** Whichever framework's "loaded" table container is present. */
-  private readonly table: Locator;
+  private readonly tableReadySelector: string;
   /** Whichever framework's per-row item links are present. */
   private readonly itemLinks: Locator;
   /** Whichever framework's toolbar search box is present. */
   private readonly searchBox: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.table = page.testSubj
-      .locator(LEGACY_TABLE_LOADED)
-      .or(page.testSubj.locator(CONTENT_LIST_TABLE));
+    this.tableReadySelector = [LEGACY_TABLE_LOADED, LEGACY_TABLE_READY, CONTENT_LIST_TABLE]
+      .map((testSubj) => `[data-test-subj="${testSubj}"]`)
+      .join(',');
     this.itemLinks = page
-      .locator(`[data-test-subj="${LEGACY_TABLE_LOADED}"] .euiTableRow .euiLink`)
+      .locator(
+        `[data-test-subj="${LEGACY_TABLE_LOADED}"] .euiTableRow .euiLink,` +
+          `[data-test-subj="${LEGACY_TABLE_READY}"] .euiTableRow .euiLink`
+      )
       .or(page.testSubj.locator(CONTENT_LIST_ITEM_LINK));
     this.searchBox = page.testSubj
       .locator(LEGACY_SEARCH_BOX)
@@ -66,8 +75,8 @@ export class ListingTable {
   }
 
   async waitUntilTableIsLoaded(options?: { timeout?: number }) {
-    const { timeout } = options ?? {};
-    await this.table.waitFor({ state: 'visible', timeout });
+    const { timeout = DEFAULT_TABLE_LOAD_TIMEOUT } = options ?? {};
+    await this.page.waitForSelector(this.tableReadySelector, { state: 'visible', timeout });
     // Content List keeps the table container mounted behind a loading skeleton;
     // wait for that skeleton to clear before interacting. Legacy has no skeleton.
     const skeleton = this.page.testSubj.locator(CONTENT_LIST_TABLE_SKELETON);

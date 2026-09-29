@@ -9,10 +9,12 @@
 
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface SetupDeps {
   embeddable: EmbeddableSetup;
   contentManagement: ContentManagementServerSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

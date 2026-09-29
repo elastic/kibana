@@ -724,7 +724,7 @@ describe('SentinelOneActionsClient class', () => {
     // tested the same
     describe.each`
       actionName             | requestData                                                         | responseOutputContent
-      ${'kill-process'}      | ${{ command: 'kill-process', parameters: { process_name: 'foo' } }} | ${{ code: 'ok', command: 'kill-process', process_name: 'foo' }}
+      ${'kill-process'}      | ${{ command: 'kill-process', parameters: { process_name: 'foo' } }} | ${{ code: 'ok', process_name: 'foo' }}
       ${'running-processes'} | ${{ command: 'running-processes', parameters: undefined }}          | ${{ code: '', entries: [] }}
     `('for $actionName response action', ({ actionName, requestData, responseOutputContent }) => {
       let actionRequestsSearchResponse: SearchResponse<LogsEndpointAction>;
@@ -1865,6 +1865,7 @@ describe('SentinelOneActionsClient class', () => {
               outputDestination: 'SentinelCloud',
               requiresApproval: false,
               scriptId: '1466645476786791838',
+              password: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
               taskDescription: expect.stringContaining(
                 'Action triggered from Elastic Security by user [foo] for action [runscript'
               ),

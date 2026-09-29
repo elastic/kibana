@@ -9,13 +9,29 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
+import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
-import { useFetchExecutionHistory } from './use_fetch_execution_history';
+import {
+  toListExecutionHistoryRequest,
+  useFetchExecutionHistory,
+} from './use_fetch_execution_history';
 
 jest.mock('@kbn/core-di-browser');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
+
+const item: PolicyExecutionHistoryItem = {
+  dispatched_at: '2026-05-05T10:00:00.000Z',
+  policy: { id: 'policy-1', name: 'My Policy' },
+  rules: [{ id: 'rule-1', name: 'My Rule' }],
+  total_rule_count: 1,
+  outcome: 'success',
+  episode_count: 1,
+  action_group_count: 1,
+  workflows: [],
+  error: null,
+};
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -28,53 +44,56 @@ const createWrapper = () => {
 };
 
 describe('useFetchExecutionHistory', () => {
-  const mockListExecutionHistory = jest.fn();
+  const mockListActionPolicyExecutions: jest.MockedFunction<
+    ExecutionHistoryApi['listActionPolicyExecutions']
+  > = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
       if (service === ExecutionHistoryApi) {
-        return { listExecutionHistory: mockListExecutionHistory } as any;
+        return { listActionPolicyExecutions: mockListActionPolicyExecutions } as any;
       }
       return undefined as any;
     });
   });
 
-  it('calls listExecutionHistory with the provided params (page, perPage, search, outcome)', async () => {
-    mockListExecutionHistory.mockResolvedValue({
+  it('calls listActionPolicyExecutions with the provided params (page, perPage, search, outcomes)', async () => {
+    mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 2,
-      perPage: 25,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 25,
+      total: 0,
+      search_matches: null,
     });
 
     renderHook(
-      () => useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: 'throttled' }),
+      () =>
+        useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcomes: ['throttled'] }),
       {
         wrapper: createWrapper(),
       }
     );
 
     await waitFor(() => {
-      expect(mockListExecutionHistory).toHaveBeenCalledWith({
+      expect(mockListActionPolicyExecutions).toHaveBeenCalledWith({
         page: 2,
-        perPage: 25,
+        per_page: 25,
         search: 'foo',
-        outcome: 'throttled',
+        outcomes: ['throttled'],
       });
     });
   });
 
   it('returns data from the API on success', async () => {
     const fakeResponse = {
-      items: [{ '@timestamp': '2026-05-05T10:00:00Z' }],
+      items: [item],
       page: 1,
-      perPage: 50,
-      totalEvents: 1,
-      searchMatches: null,
+      per_page: 50,
+      total: 1,
+      search_matches: null,
     };
-    mockListExecutionHistory.mockResolvedValue(fakeResponse);
+    mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 
     const { result } = renderHook(() => useFetchExecutionHistory({ page: 1, perPage: 50 }), {
       wrapper: createWrapper(),
@@ -86,7 +105,7 @@ describe('useFetchExecutionHistory', () => {
 
   it('exposes isError and the error when the API rejects', async () => {
     const error = new Error('boom');
-    mockListExecutionHistory.mockRejectedValue(error);
+    mockListActionPolicyExecutions.mockRejectedValue(error);
 
     const { result } = renderHook(() => useFetchExecutionHistory({ page: 1, perPage: 50 }), {
       wrapper: createWrapper(),
@@ -97,12 +116,12 @@ describe('useFetchExecutionHistory', () => {
   });
 
   it('uses a query key derived from page and perPage', async () => {
-    mockListExecutionHistory.mockResolvedValue({
+    mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 50,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 50,
+      total: 0,
+      search_matches: null,
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -110,33 +129,59 @@ describe('useFetchExecutionHistory', () => {
 
     renderHook(() => useFetchExecutionHistory({ page: 3, perPage: 25 }), { wrapper });
 
-    await waitFor(() => expect(mockListExecutionHistory).toHaveBeenCalled());
+    await waitFor(() => expect(mockListActionPolicyExecutions).toHaveBeenCalled());
     expect(queryClient.getQueryData(executionHistoryKeys.list({ page: 3, perPage: 25 }))).toEqual({
       items: [],
       page: 1,
-      perPage: 50,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 50,
+      total: 0,
+      search_matches: null,
     });
   });
 
   it('refetches when page or perPage change', async () => {
-    mockListExecutionHistory.mockResolvedValue({
+    mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 50,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 50,
+      total: 0,
+      search_matches: null,
     });
 
     const { rerender } = renderHook(
       ({ page, perPage }) => useFetchExecutionHistory({ page, perPage }),
       { wrapper: createWrapper(), initialProps: { page: 1, perPage: 50 } }
     );
-    await waitFor(() => expect(mockListExecutionHistory).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockListActionPolicyExecutions).toHaveBeenCalledTimes(1));
 
     rerender({ page: 2, perPage: 50 });
-    await waitFor(() => expect(mockListExecutionHistory).toHaveBeenCalledTimes(2));
-    expect(mockListExecutionHistory).toHaveBeenLastCalledWith({ page: 2, perPage: 50 });
+    await waitFor(() => expect(mockListActionPolicyExecutions).toHaveBeenCalledTimes(2));
+    expect(mockListActionPolicyExecutions).toHaveBeenLastCalledWith({ page: 2, per_page: 50 });
+  });
+});
+
+describe('toListExecutionHistoryRequest', () => {
+  it('maps camelCase view state to the snake_case request', () => {
+    expect(
+      toListExecutionHistoryRequest({
+        page: 1,
+        perPage: 100,
+        search: 'foo',
+        ruleIds: ['rule-1', 'rule-2'],
+        outcomes: ['success'],
+        episodeIds: ['ep-1'],
+        sortField: 'dispatchedAt',
+        sortOrder: 'asc',
+      })
+    ).toEqual({
+      page: 1,
+      per_page: 100,
+      search: 'foo',
+      rule_ids: ['rule-1', 'rule-2'],
+      outcomes: ['success'],
+      episode_ids: ['ep-1'],
+      sort_field: 'dispatched_at',
+      sort_order: 'asc',
+    });
   });
 });

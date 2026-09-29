@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/github/download_pr_list_cli').downloadPullRequests();
+require('@kbn/dev/github/download_pr_list_cli').downloadPullRequests();

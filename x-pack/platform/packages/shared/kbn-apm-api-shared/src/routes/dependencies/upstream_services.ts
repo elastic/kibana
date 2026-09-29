@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectionStats, Node } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -20,13 +20,15 @@ export interface UpstreamServicesForDependencyResponse {
 
 export const upstreamServicesRoute = defineRoute<UpstreamServicesForDependencyResponse>()({
   endpoint: 'GET /internal/apm/dependencies/upstream_services',
-  params: z.object({
-    query: z
-      .object({ dependencyName: z.string() })
-      .merge(rangeSchema)
-      .merge(z.object({ numBuckets: z.coerce.number() }))
-      .merge(environmentSchema)
-      .merge(offsetSchema)
-      .merge(kuerySchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({ dependencyName: z.string() })
+        .merge(rangeSchema)
+        .merge(z.object({ numBuckets: z.coerce.number() }))
+        .merge(environmentSchema)
+        .merge(offsetSchema)
+        .merge(kuerySchema),
+    })
+  ),
 });

@@ -10,9 +10,11 @@ import type {
   PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
 } from './package_policy';
-export type CloudProvider = 'aws' | 'azure' | 'gcp';
+export const AWS_CLOUD_PROVIDER = 'aws' as const;
 
-const CLOUD_PROVIDERS: readonly CloudProvider[] = ['aws', 'azure', 'gcp'];
+export type CloudProvider = typeof AWS_CLOUD_PROVIDER | 'azure' | 'gcp';
+
+const CLOUD_PROVIDERS: readonly CloudProvider[] = [AWS_CLOUD_PROVIDER, 'azure', 'gcp'];
 
 /**
  * Type guard to check if a value is a valid CloudProvider.
@@ -59,7 +61,7 @@ export interface CloudConnectorNewSecretVar {
 
 export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
-  external_id: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
+  external_id?: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
 }
 
 export interface AzureCloudConnectorVars {
@@ -81,6 +83,27 @@ export type CloudConnectorVars =
 
 export type VerificationStatus = 'pending' | 'success' | 'failed';
 
+export type IacUpgradeStatus = 'up_to_date' | 'upgrade_available';
+
+export const CLOUD_CONNECTOR_IAC_REQUEST_KEYS = [
+  'iac_key',
+  'iac_blueprint_id',
+  'iac_blueprint_version',
+  'iac_deployment_id',
+] as const;
+
+/**
+ * IaC provenance written on create/update, then stored on the cloud connector
+ * saved object. Never written on render. After a static-template fallback,
+ * `iac_key` is null.
+ */
+export interface CloudConnectorIacState {
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  iac_deployment_id?: string;
+}
+
 export interface CloudConnector {
   id: string;
   name: string;
@@ -94,6 +117,12 @@ export interface CloudConnector {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  iac_deployment_id?: string;
+  iac_upgrade_status?: IacUpgradeStatus;
+  iac_upgrade_checked_at?: string;
 }
 
 export interface CloudConnectorListOptions {

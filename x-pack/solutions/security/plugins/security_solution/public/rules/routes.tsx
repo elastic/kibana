@@ -140,7 +140,7 @@ const getRulesSubRoutes = (
           main: withSecurityRoutePageWrapper(
             AlertAnalysisWorkflowPage,
             SecurityPageName.alertAnalysisWorkflow,
-            { omitSpyRoute: true }
+            { omitSpyRoute: true, skipLinkAuthorization: true }
           ),
           exact: true,
         },
@@ -204,8 +204,7 @@ const RulesContainerComponent: React.FC = () => {
   );
   const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
   const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
-    ENABLE_RULE_CHANGES_HISTORY_SETTING,
-    false
+    ENABLE_RULE_CHANGES_HISTORY_SETTING
   );
   const isRuleChangesHistoryEnabled =
     ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CommandMatchResult, ActiveCommand, CommandDefinition } from './types';
+import type { TextMatch, ActiveCommand, CommandDefinition } from './types';
 
 /**
  * Determines if the character at the given position is at a word boundary.
@@ -19,22 +19,23 @@ const isAtWordBoundary = (text: string, offset: number): boolean => {
   return /\s/.test(precedingChar);
 };
 
-const INACTIVE_RESULT: CommandMatchResult = {
+const INACTIVE_RESULT: TextMatch = {
   isActive: false,
   activeCommand: null,
 };
 
 /**
- * Given the text preceding the cursor, checks if any registered command
- * is active. Returns the command whose sequence appears closest to the cursor.
+ * Given the text preceding the cursor, finds the command whose trigger
+ * sequence (e.g. "@", "/") is closest to the cursor at a word boundary.
  *
- * The algorithm checks every registered command, finds the last word-boundary
- * occurrence of each sequence, and picks the one nearest to the cursor position.
+ * A sequence inside another command's query (e.g. the "/" in
+ * "@connector/workday") is never a word boundary, so it's never mistaken
+ * for a new trigger — no extra bookkeeping needed for that case.
  */
 export const matchCommand = (
   textBeforeCursor: string,
   definitions: readonly CommandDefinition[]
-): CommandMatchResult => {
+): TextMatch => {
   let best: ActiveCommand | null = null;
 
   for (const command of definitions) {

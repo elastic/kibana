@@ -8,6 +8,7 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 
 import { mapWorkflowHistoryItem } from './map_workflow_history_item';
 import { WORKFLOW_CHANGE_HISTORY_SYSTEM_USER } from '../../common/lib/workflow_change_history/constants';
@@ -85,6 +86,40 @@ describe('mapWorkflowHistoryItem', () => {
       })
     );
     expect(result).not.toHaveProperty('restoredFromSequence');
+  });
+
+  it('resolves `name` to the profile `full_name` when the profile is known', () => {
+    const userProfilesById = new Map<string, UserProfile>([
+      [
+        'profile-1',
+        {
+          uid: 'profile-1',
+          enabled: true,
+          user: { username: 'alice', full_name: 'Alice Smith' },
+          data: {},
+        },
+      ],
+    ]);
+
+    const result = mapWorkflowHistoryItem(createDocument(), userProfilesById);
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'Alice Smith' });
+  });
+
+  it('falls back to the raw `name` when the profile has no `full_name`', () => {
+    const userProfilesById = new Map<string, UserProfile>([
+      ['profile-1', { uid: 'profile-1', enabled: true, user: { username: 'alice' }, data: {} }],
+    ]);
+
+    const result = mapWorkflowHistoryItem(createDocument(), userProfilesById);
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice' });
+  });
+
+  it('falls back to the raw `name` when no matching profile is present', () => {
+    const result = mapWorkflowHistoryItem(createDocument(), new Map());
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice' });
   });
 
   it('omits optional fields when absent', () => {

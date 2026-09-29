@@ -8,9 +8,15 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { MouseEvent } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getEbtProps } from '@kbn/ebt-click';
+
+function isPlainLeftClick(e: MouseEvent) {
+  return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+}
 
 export interface ActionSubItem {
   id: string;
@@ -123,7 +129,17 @@ export function ActionsContextMenu({
           mainPanelItems.push({
             name: action.name,
             icon: action.icon,
-            ...(action.href
+            ...(action.href && action.onClick
+              ? {
+                  href: action.href,
+                  onClick: (e: MouseEvent) => {
+                    if (!isPlainLeftClick(e)) return;
+                    e.preventDefault();
+                    action.onClick!();
+                    closePopover();
+                  },
+                }
+              : action.href
               ? { href: action.href, target: '_self' as const }
               : {
                   onClick: () => {

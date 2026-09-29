@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @kbn/babel-register is installed by the calling process (@kbn/setup-node-env).
+// @kbn/swc-register is installed by the calling process (@kbn/setup-node-env).
 // This file is a plain .js module so webpack can require() it directly without
 // additional transpilation; TypeScript is handled by babel-loader for source files.
 
 const path = require('path');
+const webpack = require('webpack');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 const entry = path.resolve(__dirname, 'browser_entry.tsx');
@@ -92,7 +93,14 @@ module.exports = function buildWebpackConfig(outputPath) {
         'react-dom/server': path.resolve(__dirname, 'stub_empty.js'),
       },
     },
-    plugins: [new NodeLibsBrowserPlugin()],
+    plugins: [
+      new NodeLibsBrowserPlugin(),
+      // Connector-spec icons (e.g. AbuseIPDB) are `React.lazy(() => import(...))`,
+      // which webpack would otherwise split into separate async chunks. Force
+      // everything into bundle.js so icons are already loaded on first paint —
+      // no async chunk fetch racing the settle-ms wait before the screenshot.
+      new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+    ],
     optimization: {
       minimize: false, // keeps build fast; screenshots are a dev-time tool
       splitChunks: false,

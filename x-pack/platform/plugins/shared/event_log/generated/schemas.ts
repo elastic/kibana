@@ -115,6 +115,7 @@ export const EventSchema = schema.maybe(
                 uuid: ecsString(),
               })
             ),
+            data: ecsFlattened(),
           })
         ),
         alerting: schema.maybe(
@@ -327,6 +328,7 @@ export const EventSchema = schema.maybe(
           schema.object({
             dispatcher: schema.maybe(
               schema.object({
+                failure_reason: ecsString(),
                 episode_count: ecsStringOrNumber(),
                 episode_ids: ecsStringMulti(),
                 rule_count: ecsStringOrNumber(),

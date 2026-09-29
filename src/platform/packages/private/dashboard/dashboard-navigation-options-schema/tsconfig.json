@@ -10,7 +10,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/dashboard-navigation-options-common"
   ]
 }

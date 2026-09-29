@@ -10,6 +10,7 @@ export * from './column_header';
 export * from './empty_migration';
 export * from './copy_query';
 export * from './details_flyout';
+export * from './memoized_basic_table';
 export * from './empty_migration';
 export * from './filters';
 export * from './header_buttons';

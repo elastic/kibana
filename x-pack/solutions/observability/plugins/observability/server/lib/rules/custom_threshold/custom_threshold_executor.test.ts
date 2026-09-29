@@ -27,6 +27,7 @@ import type {
 } from '../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
@@ -45,7 +46,7 @@ const initialRuleState: TestRuleState = {
 };
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
-const MOCKED_SPACE_ID = 'mocked-space-id';
+const MOCKED_SPACE_ID = asSpaceId('mocked-space-id');
 
 const logger = {
   trace: fakeLogger,
@@ -1850,8 +1851,8 @@ describe('The custom threshold alert type', () => {
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-        expect(services.alertsClient.setAlertData).toBeCalledTimes(1);
-        expect(services.alertsClient.setAlertData).toBeCalledWith({
+        expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
+        expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
           context: {
             alertDetailsUrl: `http://localhost:5601/s/${MOCKED_SPACE_ID}/app/observability/alerts/uuid-a`,
             viewInAppUrl: 'mockedViewInApp',
@@ -1877,7 +1878,7 @@ describe('The custom threshold alert type', () => {
           },
           id: 'a',
         });
-        expect(getViewInAppUrl).lastCalledWith({
+        expect(getViewInAppUrl).toHaveBeenLastCalledWith({
           dataViewId: 'valid-index-name',
           spaceId: MOCKED_SPACE_ID,
           groups: [
@@ -1940,8 +1941,8 @@ describe('The custom threshold alert type', () => {
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-        expect(getViewInAppUrl).toBeCalledTimes(1);
-        expect(getViewInAppUrl).toBeCalledWith({
+        expect(getViewInAppUrl).toHaveBeenCalledTimes(1);
+        expect(getViewInAppUrl).toHaveBeenCalledWith({
           dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
           groups: [
             {
@@ -1996,7 +1997,7 @@ describe('The custom threshold alert type', () => {
           };
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
-        expect(services.alertsClient.setAlertData).toBeCalledWith(
+        expect(services.alertsClient.setAlertData).toHaveBeenCalledWith(
           expect.objectContaining({
             context: expect.objectContaining({
               reason: 'This is reason msg for the alert',
@@ -3104,6 +3105,65 @@ describe('The custom threshold alert type', () => {
 
           // Reset mock
           services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+      });
+
+      describe('legacy alertOnGroupDisappear: false with noDataBehavior', () => {
+        const runWith = async (params: Record<string, unknown>) => {
+          setEvaluationResults([{}]);
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              ...params,
+            },
+          });
+        };
+
+        const trackedMissingGroups = () =>
+          jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6];
+
+        test('remainActive still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'remainActive',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('alertOnNoData still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'alertOnNoData',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('recover does not track missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'recover',
+            alertOnGroupDisappear: true,
+          });
+          expect(trackedMissingGroups()).toBe(false);
+        });
+
+        test('legacy alertOnGroupDisappear: false without noDataBehavior does not track', async () => {
+          await runWith({
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(false);
         });
       });
 
@@ -4728,7 +4788,7 @@ describe('The custom threshold alert type', () => {
       const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
         executor({
           ...mockOptions,
-          spaceId: '',
+          spaceId: DEFAULT_SPACE_ID,
           services,
           params: {
             ...mockOptions.params,

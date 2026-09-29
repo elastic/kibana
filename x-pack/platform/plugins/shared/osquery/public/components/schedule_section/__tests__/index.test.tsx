@@ -17,6 +17,7 @@ import { createDefaultScheduleFormData } from '../types';
 import type { ScheduleFormData } from '../types';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { renderWithProviders } from './test_helpers';
+import { roundUpTo30Min, floorTo30Min } from '../slot_utils';
 
 const flagOn = { ...allowedExperimentalValues, rruleScheduling: true };
 
@@ -135,14 +136,98 @@ describe('ScheduleSection', () => {
   });
 
   describe('change propagation', () => {
-    it('switches scheduleType when the user picks the other card', () => {
-      const onChange = jest.fn();
-      const state = intervalState();
-      renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
+    describe('switching from interval to rrule', () => {
+      const NOW = new Date('2026-06-19T12:00:00.000Z');
 
-      fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
+      beforeEach(() => {
+        jest.useFakeTimers().setSystemTime(NOW);
+      });
 
-      expect(onChange).toHaveBeenCalledWith({ ...state, scheduleType: 'rrule' });
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('re-seeds startDate to a fresh valid slot instead of carrying the interval-era value', () => {
+        const onChange = jest.fn();
+        const staleStartDate = new Date('2024-01-01T00:00:00.000Z');
+        const state = intervalState({ startDate: staleStartDate });
+        renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
+
+        fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
+
+        const expectedStartDate = roundUpTo30Min(NOW);
+        expect(onChange).toHaveBeenCalledWith({
+          ...state,
+          scheduleType: 'rrule',
+          startDate: expectedStartDate,
+          stopAfter: {
+            ...state.stopAfter,
+            date: new Date(expectedStartDate.getTime() + 24 * 60 * 60 * 1000),
+          },
+        });
+
+        const [[calledWith]] = onChange.mock.calls;
+        expect(calledWith.startDate.getTime()).toBeGreaterThanOrEqual(floorTo30Min(NOW).getTime());
+      });
+
+      it('does not re-seed when already in rrule mode (clicking the selected card is a no-op)', () => {
+        // Same-mode click never fires onChange, so handleTypeChange never runs.
+        const onChange = jest.fn();
+        const chosenStartDate = new Date('2026-06-25T00:00:00.000Z');
+        const state = recurrenceState({ startDate: chosenStartDate });
+        renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
+
+        fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
+
+        expect(onChange).not.toHaveBeenCalled();
+      });
+
+      // Regression (PR #276996 review, @szwarckonrad): round-tripping through
+      // Interval must not clobber a still-valid custom rrule startDate/stopAfter.
+      it('preserves a still-valid custom startDate/stopAfter across a round trip through Interval mode', () => {
+        const onChange = jest.fn();
+        const customStartDate = new Date('2026-06-25T00:00:00.000Z'); // in the future relative to NOW
+        const customStopAfter = new Date('2026-06-26T00:00:00.000Z');
+        const rruleState = recurrenceState({
+          startDate: customStartDate,
+          stopAfter: { enabled: true, date: customStopAfter },
+        });
+
+        const intervalAfterRoundTrip = { ...rruleState, scheduleType: 'interval' as const };
+        renderFlagOn(<ScheduleSection value={intervalAfterRoundTrip} onChange={onChange} />);
+
+        fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
+
+        expect(onChange).toHaveBeenCalledWith({
+          ...intervalAfterRoundTrip,
+          scheduleType: 'rrule',
+        });
+      });
+
+      it('still re-seeds when the custom startDate has gone stale while dwelling in Interval mode', () => {
+        const onChange = jest.fn();
+        const customStartDate = new Date('2026-06-19T13:00:00.000Z'); // valid when picked...
+        const rruleState = recurrenceState({ startDate: customStartDate });
+        const intervalAfterRoundTrip = { ...rruleState, scheduleType: 'interval' as const };
+
+        renderFlagOn(<ScheduleSection value={intervalAfterRoundTrip} onChange={onChange} />);
+
+        // Time passes while dwelling in Interval mode; startDate goes stale.
+        jest.setSystemTime(new Date('2026-06-19T14:00:00.000Z'));
+
+        fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
+
+        const expectedStartDate = roundUpTo30Min(new Date('2026-06-19T14:00:00.000Z'));
+        expect(onChange).toHaveBeenCalledWith({
+          ...intervalAfterRoundTrip,
+          scheduleType: 'rrule',
+          startDate: expectedStartDate,
+          stopAfter: {
+            ...intervalAfterRoundTrip.stopAfter,
+            date: new Date(expectedStartDate.getTime() + 24 * 60 * 60 * 1000),
+          },
+        });
+      });
     });
 
     it('propagates an interval change in interval mode', () => {

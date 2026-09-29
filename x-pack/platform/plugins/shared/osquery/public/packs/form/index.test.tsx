@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
@@ -93,6 +93,7 @@ const renderWithContext = (Element: React.ReactElement) =>
 describe('PackForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
   });
 
   it('should target the Packs list for cancel button navigation in edit mode', async () => {
@@ -403,6 +404,79 @@ describe('PackForm', () => {
       expect(submitted).toHaveProperty('schedule_type');
     });
 
+    it('legacy pack (schedule_type: undefined) — saving without touching schedule emits no schedule fields', async () => {
+      // Blocker #1: a legacy/prebuilt pack saved without touching the schedule
+      // section must NOT emit schedule_type/interval/rrule_schedule. Without the
+      // dirty-gate, the client synthesizes { schedule_type:'interval', interval:3600 }
+      // even though the user never touched the schedule, which triggers a server-side
+      // legacy→interval transition that strips every bare per-query interval.
+      const defaultValue = {
+        id: 'legacy-pack-id',
+        saved_object_id: 'legacy-so-id',
+        name: 'legacy-pack',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        // No schedule_type: this is a legacy pack.
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      // Click save without touching the schedule section.
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      // The dirty-gate must suppress all schedule fields.
+      expect(submitted).not.toHaveProperty('schedule_type');
+      expect(submitted).not.toHaveProperty('interval');
+      expect(submitted).not.toHaveProperty('rrule_schedule');
+    });
+
+    it('explicit-schedule pack (schedule_type set) — saving without touching schedule still emits schedule fields', async () => {
+      // A pack that already has an explicit schedule_type must keep emitting
+      // schedule fields even when the schedule section is not touched, so that
+      // the server can preserve the current mode.
+      const defaultValue = {
+        id: 'explicit-pack-id',
+        saved_object_id: 'explicit-so-id',
+        name: 'explicit-pack',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'interval' as const,
+        interval: 3600,
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      // packHasExplicitSchedule is true → schedule fields must be present.
+      expect(submitted.schedule_type).toBe('interval');
+      expect(typeof submitted.interval).toBe('number');
+    });
+
     it('should call updateAsync with pack saved_object_id in edit mode', async () => {
       const savedObjectId = 'saved-object-id-b5';
       const defaultValue = {
@@ -443,6 +517,81 @@ describe('PackForm', () => {
       // referenced in the local variable so eslint doesn't flag it.
       expect(savedObjectId).toBe('saved-object-id-b5');
     });
+  });
+
+  describe('interval → rrule edit transition (issue #276903)', () => {
+    // Regression: a stale interval-era startDate tripped a false
+    // START_DATE_IN_PAST_ERROR and silently blocked the save.
+    const NOW = new Date('2026-06-19T12:00:00.000Z');
+
+    beforeEach(() => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockAddDanger.mockClear();
+      jest.useFakeTimers().setSystemTime(NOW);
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    const enabledIntervalPack = {
+      id: 'pack-transition',
+      saved_object_id: 'saved-transition',
+      name: 'interval-to-rrule-pack',
+      description: '',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      schedule_type: 'interval' as const,
+      interval: 3600,
+    };
+
+    it('persists the rrule schedule and preserves enabled when an enabled interval pack switches to Date & time and saves', async () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={enabledIntervalPack} />
+      );
+
+      fireEvent.click(getByTestId('osquery-schedule-type-rrule'));
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted.schedule_type).toBe('rrule');
+      expect(submitted.rrule_schedule).toBeDefined();
+      expect(submitted.enabled).toBe(true);
+      // The false past-start error must never fire for an unedited transition.
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('does not block submit or show an error for the unedited interval-to-recurrence transition', async () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={enabledIntervalPack} />
+      );
+
+      fireEvent.click(getByTestId('osquery-schedule-type-rrule'));
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    // The genuinely-blocked-submit path isn't reproducible via this UI (the
+    // date picker can't select a past slot) — covered in `validation.test.ts`.
   });
 
   describe('schedule submit-gate UX (toast on click)', () => {
@@ -667,6 +816,381 @@ describe('PackForm', () => {
       expect(submitted).not.toHaveProperty('schedule_type');
       expect(submitted).not.toHaveProperty('interval');
       expect(submitted).not.toHaveProperty('rrule_schedule');
+    });
+  });
+
+  // Regression for elastic/kibana#277700: the `packHasExplicitSchedule`
+  // computation (`!editMode || defaultValue?.schedule_type !== undefined`) and
+  // its threading through QueriesField → the queries table are only observable
+  // end-to-end. An inverted guard would break production while the hook-level
+  // units stay green, so assert the two branches via the rendered Schedule
+  // column: edit-legacy (not explicit → query own interval) vs edit-explicit
+  // (explicit → inherited pack interval).
+  describe('packHasExplicitSchedule threading to the queries table', () => {
+    beforeEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    const packWithQuery = (overrides: Record<string, unknown>) => ({
+      id: 'threaded-pack',
+      saved_object_id: 'threaded-pack-so',
+      name: 'threaded-pack',
+      description: '',
+      enabled: true,
+      queries: {
+        'q-legacy': {
+          query: 'select * from uptime;',
+          interval: 80,
+          ecs_mapping: {},
+        },
+      },
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      ...overrides,
+    });
+
+    it('shows the query own interval for an edited legacy pack (no schedule_type → not explicit)', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithQuery({})} />
+      );
+
+      const table = within(getByTestId('packQueriesTable'));
+      expect(table.getByText('80s')).toBeInTheDocument();
+      expect(table.queryByText('3600s')).not.toBeInTheDocument();
+    });
+
+    it('shows the pack interval for a non-override query on an edited explicit pack', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          defaultValue={packWithQuery({ schedule_type: 'interval', interval: 3600 })}
+        />
+      );
+
+      const table = within(getByTestId('packQueriesTable'));
+      expect(table.getByText('3600s')).toBeInTheDocument();
+      expect(table.queryByText('80s')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('V5: pack-level execution defaults UI', () => {
+    const basePackValue = {
+      id: 'v5-pack',
+      saved_object_id: 'v5-pack-so',
+      name: 'v5-pack',
+      description: '',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+    };
+
+    it('renders PackVersionField with data-test-subj "pack-version-field"', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('pack-version-field')).toBeInTheDocument();
+    });
+
+    it('renders PackResultTypeField with data-test-subj "pack-result-type-field"', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('pack-result-type-field')).toBeInTheDocument();
+    });
+
+    it('defaults a new pack result type to no pack default', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('pack-result-type-field')).toHaveTextContent('No pack default');
+    });
+
+    it('does not show migration advisory for a new pack (editMode=false)', () => {
+      const { queryByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+    });
+
+    it('does not show migration advisory for a pack with uniform per-query settings', () => {
+      const uniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, snapshot: true, removed: false, ecs_mapping: {} },
+          q2: { query: 'SELECT 2;', interval: 60, snapshot: true, removed: false, ecs_mapping: {} },
+        },
+      };
+      const { queryByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={uniformPack} />
+      );
+      expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+    });
+
+    it('shows migration advisory for a pack with non-uniform per-query result types', () => {
+      const nonUniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+            ecs_mapping: {},
+          },
+          q2: {
+            query: 'SELECT 2;',
+            interval: 60,
+            snapshot: false,
+            removed: true,
+            ecs_mapping: {},
+          },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={nonUniformPack} />
+      );
+      expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+    });
+
+    it('shows migration advisory for non-uniform per-query version strings from the API', () => {
+      const nonUniformVersions = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, version: '5.10.0', ecs_mapping: {} },
+          q2: { query: 'SELECT 2;', interval: 60, version: '5.12.0', ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={nonUniformVersions} />
+      );
+      expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+    });
+
+    // Platform is now an editable pack-level *default* that fans out onto
+    // queries which do not set their own, replacing the earlier read-only
+    // badge group derived from the queries' union.
+    it('renders the pack-level Operating systems field', () => {
+      const packWithQuery = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithQuery} />
+      );
+      expect(getByTestId('pack-platform-field')).toBeInTheDocument();
+    });
+
+    it('deserializes an existing pack-level platform default into the field', () => {
+      const packWithPlatform = {
+        ...basePackValue,
+        platform: 'linux',
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithPlatform} />
+      );
+      expect(getByTestId('pack-platform-field')).toHaveTextContent('Linux');
+    });
+
+    it('renders no OS selection when the pack has no platform default', () => {
+      const packWithQuery = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, platform: 'linux', ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithQuery} />
+      );
+      // A per-query platform must not be reflected as a pack-level default.
+      expect(getByTestId('pack-platform-field')).not.toHaveTextContent('Linux');
+    });
+
+    it('emits min_osquery_version and result_type in serializer on create', async () => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      // Fill in required name field via native input selector
+      const nameInput = document.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
+
+      fireEvent.click(getByTestId('save-pack-button'));
+
+      await waitFor(() => expect(mockCreateAsync).toHaveBeenCalled());
+
+      const submitted = mockCreateAsync.mock.calls[0][0];
+      // Untouched optional fields are absent rather than empty strings.
+      expect(submitted).not.toHaveProperty('min_osquery_version');
+      // Pack-level defaults are opt-in. Persisting 'snapshot' on every new pack
+      // made `packHasDefaults` true everywhere, forcing the query flyout's
+      // "Override pack defaults" toggle on for a value the curator never chose.
+      expect(submitted).not.toHaveProperty('result_type');
+    });
+
+    it('does not force a result_type onto an existing pack that has none', async () => {
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'legacy-pack' } });
+      const legacyPack = {
+        ...basePackValue,
+        name: 'legacy-pack',
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      // `basePackValue` carries no `result_type`, mirroring a pre-V5 pack.
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={legacyPack} />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      // Defaulting this to 'snapshot' on open would silently convert the
+      // pack's differential queries the first time a user saved it.
+      expect(submitted).not.toHaveProperty('result_type');
+    });
+
+    it('emits selected min_osquery_version and result_type on create', async () => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const { getByTestId, container } = renderWithContext(<PackForm editMode={false} />);
+
+      const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
+
+      fireEvent.click(within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput'));
+      fireEvent.click(
+        within(getByTestId('comboBoxOptionsList pack-version-field-optionsList')).getByText('5.0.1')
+      );
+
+      fireEvent.click(getByTestId('pack-result-type-field'));
+      fireEvent.click(getByTestId('result-type-option-differential'));
+
+      fireEvent.click(getByTestId('save-pack-button'));
+
+      await waitFor(() => expect(mockCreateAsync).toHaveBeenCalled());
+
+      const submitted = mockCreateAsync.mock.calls[0][0];
+      expect(submitted.min_osquery_version).toBe('5.0.1');
+      expect(submitted.result_type).toBe('differential');
+    });
+
+    it('emits null when a previously stored pack default is cleared', async () => {
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const packWithDefaults = {
+        ...basePackValue,
+        min_osquery_version: '5.0.1',
+        result_type: 'snapshot' as const,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithDefaults} />
+      );
+
+      fireEvent.click(getByTestId('comboBoxClearButton'));
+
+      fireEvent.click(getByTestId('pack-result-type-field'));
+      fireEvent.click(getByTestId('result-type-option-none'));
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted.min_osquery_version).toBeNull();
+      expect(submitted.result_type).toBeNull();
+    });
+
+    it('hides the migration advisory after dismiss and records sessionStorage', () => {
+      const nonUniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+            ecs_mapping: {},
+          },
+          q2: {
+            query: 'SELECT 2;',
+            interval: 60,
+            snapshot: false,
+            removed: true,
+            ecs_mapping: {},
+          },
+        },
+      };
+      const { getByTestId, getByRole, queryByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={nonUniformPack} />
+      );
+
+      expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+      fireEvent.click(getByRole('button', { name: /dismiss/i }));
+      expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+      expect(sessionStorage.getItem('osquery.pack.migration-advisory-dismissed.v5-pack-so')).toBe(
+        'true'
+      );
+    });
+
+    it('still renders the migration advisory when sessionStorage throws', () => {
+      const getItemSpy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+        throw new DOMException('The operation is insecure.', 'SecurityError');
+      });
+      const nonUniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+            ecs_mapping: {},
+          },
+          q2: {
+            query: 'SELECT 2;',
+            interval: 60,
+            snapshot: false,
+            removed: true,
+            ecs_mapping: {},
+          },
+        },
+      };
+
+      try {
+        const { getByTestId, getByRole, queryByTestId } = renderWithContext(
+          <PackForm editMode={true} defaultValue={nonUniformPack} />
+        );
+
+        expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+
+        const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+          throw new DOMException('The operation is insecure.', 'SecurityError');
+        });
+        try {
+          fireEvent.click(getByRole('button', { name: /dismiss/i }));
+          expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+        } finally {
+          setItemSpy.mockRestore();
+        }
+      } finally {
+        getItemSpy.mockRestore();
+      }
     });
   });
 });

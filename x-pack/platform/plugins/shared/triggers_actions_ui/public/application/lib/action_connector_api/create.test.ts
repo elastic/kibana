@@ -108,4 +108,39 @@ describe('createActionConnector', () => {
     const result = await createActionConnector({ http, connector });
     expect(result).toMatchObject({ authMode: 'shared' });
   });
+
+  test('should map is_inbound_events_enabled on the request and response', async () => {
+    const apiResponse = {
+      connector_type_id: '.dual',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      id: '123',
+      is_inbound_events_enabled: true,
+    };
+    http.post.mockResolvedValueOnce(apiResponse);
+
+    const result = await createActionConnector({
+      http,
+      connector: {
+        actionTypeId: '.dual',
+        name: 'My dual',
+        config: {},
+        secrets: {},
+        isInboundEventsEnabled: true,
+      },
+    });
+
+    expect(result).toMatchObject({ isInboundEventsEnabled: true });
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/actions/connector",
+        Object {
+          "body": "{\\"name\\":\\"My dual\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\".dual\\",\\"is_inbound_events_enabled\\":true}",
+        },
+      ]
+    `);
+  });
 });

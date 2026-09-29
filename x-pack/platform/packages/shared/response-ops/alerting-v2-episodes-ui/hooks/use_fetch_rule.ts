@@ -15,11 +15,13 @@ import { isRuleNotFoundError } from '../utils/is_rule_not_found_error';
 import { FETCH_RULE_ERROR } from '../components/translations';
 import { queryKeys } from '../query_keys';
 import { toRuleState } from '../types/rule_state';
+import { isRuleForbiddenError } from '../utils/is_rule_forbidden_error';
 
 export type { RuleState, LoadedRuleState } from '../types/rule_state';
 export {
   getRuleIdFromRuleState,
   isRuleError,
+  isRuleForbidden,
   isRuleLoaded,
   isRuleLoading,
   isRuleNotFound,
@@ -36,7 +38,9 @@ export const useFetchRule = ({ id, http, notifications }: UseFetchRuleOptions) =
   const query = useQuery({
     queryKey: queryKeys.fetchRule(id ?? ''),
     queryFn: ({ signal }) =>
-      http.get<RuleResponse>(buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}`, { id }), { signal }),
+      http.get<RuleResponse>(buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}`, { id }), {
+        signal,
+      }),
     enabled: Boolean(id),
     retry: false,
     refetchOnWindowFocus: false,
@@ -44,7 +48,7 @@ export const useFetchRule = ({ id, http, notifications }: UseFetchRuleOptions) =
     // 5 minutes prevents unnecessary refetches when flyout panes remount.
     staleTime: 5 * 60_000,
     onError: (error: unknown) => {
-      if (isRuleNotFoundError(error)) {
+      if (isRuleNotFoundError(error) || isRuleForbiddenError(error)) {
         return;
       }
       notifications?.toasts.addDanger(FETCH_RULE_ERROR);

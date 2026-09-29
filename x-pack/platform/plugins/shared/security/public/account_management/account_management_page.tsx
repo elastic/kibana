@@ -10,12 +10,12 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
+import { canUserHaveProfile } from '@kbn/core-security-common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { UserProfile } from './user_profile';
 import type { UserProfileData } from '../../common';
-import { canUserHaveProfile } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
 

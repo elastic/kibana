@@ -10,8 +10,6 @@ import { useCallback } from 'react';
 import type { AlertAssignees } from '../../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSetUnifiedAlertsAssignees } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees';
 import { useSetAttacksAssignees } from '../../../../../common/containers/attacks/hooks/use_set_attacks_assignees';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
@@ -31,8 +29,6 @@ interface ApplyAttackAssigneesReturn {
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
 export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
-  const isPublicAttacksApiEnabled = useIsExperimentalFeatureEnabled('publicAttacksApiEnabled');
-  const { mutateAsync: setUnifiedAlertsAssignees } = useSetUnifiedAlertsAssignees();
   const { mutateAsync: setAttacksAssignees } = useSetAttacksAssignees();
   const showModalIfNeeded = useUpdateAttacksModal();
   const {
@@ -67,29 +63,17 @@ export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
 
       setIsLoading?.(true);
       try {
-        if (isPublicAttacksApiEnabled) {
-          await setAttacksAssignees({
-            ids: attackIds,
-            assignees,
-            update_related_alerts: result.updateAlerts,
-          });
-        } else {
-          const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
-
-          await setUnifiedAlertsAssignees({ ids: allIds, assignees });
-        }
+        await setAttacksAssignees({
+          ids: attackIds,
+          assignees,
+          update_related_alerts: result.updateAlerts,
+        });
         onSuccess?.();
       } finally {
         setIsLoading?.(false);
       }
     },
-    [
-      isPublicAttacksApiEnabled,
-      setAttacksAssignees,
-      setUnifiedAlertsAssignees,
-      showModalIfNeeded,
-      telemetry,
-    ]
+    [setAttacksAssignees, showModalIfNeeded, telemetry]
   );
 
   return { applyAssignees };

@@ -18,12 +18,23 @@ import {
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../types';
 import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
+import { isValidEnrollmentKeyExpiration } from '../../common/services';
 
 function validatePolicyId(value: string) {
   if (value === '') {
     return [
       i18n.translate('xpack.fleet.newEnrollmentKeyForm.policyIdRequireErrorMessage', {
         defaultMessage: 'Policy is required',
+      }),
+    ];
+  }
+}
+
+function validateExpiration(value: string) {
+  if (value !== '' && !isValidEnrollmentKeyExpiration(value)) {
+    return [
+      i18n.translate('xpack.fleet.newEnrollmentKeyForm.expirationInvalidErrorMessage', {
+        defaultMessage: 'Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)',
       }),
     ];
   }
@@ -36,11 +47,12 @@ function useCreateApiKeyForm(
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
+  const expirationInput = useInput('', validateExpiration);
   const policyIdInput = useInput(policyIdDefaultValue, validatePolicyId);
 
-  const onSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!policyIdInput.validate() || !apiKeyNameInput.validate()) {
+  const onSubmit = async (event?: React.FormEvent) => {
+    event?.preventDefault();
+    if (!policyIdInput.validate() || !apiKeyNameInput.validate() || !expirationInput.validate()) {
       return;
     }
     setIsLoading(true);
@@ -48,6 +60,7 @@ function useCreateApiKeyForm(
       const res = await sendCreateEnrollmentAPIKey({
         name: apiKeyNameInput.value,
         policy_id: policyIdInput.value,
+        ...(expirationInput.value ? { expiration: expirationInput.value } : {}),
       });
 
       if (res.error) {
@@ -55,6 +68,7 @@ function useCreateApiKeyForm(
       }
       policyIdInput.clear();
       apiKeyNameInput.clear();
+      expirationInput.clear();
       setIsLoading(false);
       if (res.data?.item) {
         onSuccess(res.data.item);
@@ -70,6 +84,7 @@ function useCreateApiKeyForm(
     onSubmit,
     policyIdInput,
     apiKeyNameInput,
+    expirationInput,
   };
 }
 
@@ -88,7 +103,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
 
   const selectPolicyOptions = useMemo(() => {
     return agentPolicies
-      .filter((agentPolicy) => !agentPolicy.is_managed)
+      .filter((agentPolicy) => !agentPolicy.is_managed && !agentPolicy.supports_agentless)
       .map((agentPolicy) => ({
         key: agentPolicy.id,
         label: agentPolicy.name,
@@ -131,6 +146,27 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
               defaultMessage: 'Enter a token name',
             })}
             {...form.apiKeyNameInput.props}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={i18n.translate('xpack.fleet.newEnrollmentKey.expirationLabel', {
+            defaultMessage: 'Expiration',
+          })}
+          helpText={i18n.translate('xpack.fleet.newEnrollmentKey.expirationHelpText', {
+            defaultMessage:
+              'Optional. How long until the token expires (for example, 30d, 24h, 90m). Leave empty for a token that never expires.',
+          })}
+          {...form.expirationInput.formRowProps}
+        >
+          <EuiFieldText
+            data-test-subj="createEnrollmentTokenExpirationField"
+            name="expiration"
+            autoComplete="off"
+            placeholder={i18n.translate('xpack.fleet.newEnrollmentKey.expirationPlaceholder', {
+              defaultMessage: 'For example, 30d',
+            })}
+            {...form.expirationInput.props}
           />
         </EuiFormRow>
 

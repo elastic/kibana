@@ -77,6 +77,20 @@ export { RuleDeletedTriggerId, ruleDeletedTriggerCommonDefinition } from './rule
 export { RuleEnabledTriggerId, ruleEnabledTriggerCommonDefinition } from './rule_enabled';
 export { RuleDisabledTriggerId, ruleDisabledTriggerCommonDefinition } from './rule_disabled';
 export {
+  RuleEventsGeneratedTriggerId,
+  ruleEventsGeneratedRuleSchema,
+  ruleEventsGeneratedEventSchema,
+  ruleEventsGeneratedTriggerCommonDefinition,
+} from './rule_events_generated';
+export type { RuleEventsGeneratedTriggerPayload } from './rule_events_generated';
+export {
+  RuleExecutionFailedTriggerId,
+  RULE_EXECUTION_FAILED_ERROR_MAX_LENGTH,
+  ruleExecutionFailedEventSchema,
+  ruleExecutionFailedTriggerCommonDefinition,
+} from './rule_execution_failed';
+export type { RuleExecutionFailedTriggerPayload } from './rule_execution_failed';
+export {
   ruleSnapshotSchema,
   ruleLifecycleEventSchema,
   type RuleSnapshot,

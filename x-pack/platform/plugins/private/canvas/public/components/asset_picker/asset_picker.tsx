@@ -5,17 +5,66 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
+import React, { PureComponent, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiLink,
+  EuiImage,
+  EuiIcon,
+  transparentize,
+  useEuiScrollBar,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { CanvasAsset } from '../../../types';
+import { useCanvasCheckeredStyles } from '../../lib/use_canvas_checkered_styles';
 
 const strings = {
   getAssetAltText: () =>
     i18n.translate('xpack.canvas.assetpicker.assetAltText', {
       defaultMessage: 'Asset thumbnail',
     }),
+};
+
+const AssetPickerGrid: FC<PropsWithChildren<{}>> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
+  const scrollBar = useEuiScrollBar();
+  const styles = useMemo(
+    () => css`
+      ${scrollBar}
+
+      & .canvasAssetPicker__link:hover {
+        outline: solid ${euiTheme.size.xs} ${transparentize(euiTheme.colors.primary, 0.1)};
+      }
+    `,
+    [euiTheme, scrollBar]
+  );
+
+  return (
+    <EuiFlexGrid
+      id="canvasAssetPicker"
+      className="canvasAssetPicker"
+      css={styles}
+      gutterSize="s"
+      columns={4}
+    >
+      {children}
+    </EuiFlexGrid>
+  );
+};
+
+const CheckeredFlexItem: FC<PropsWithChildren<{ id?: string }>> = ({ children, id }) => {
+  const checkeredStyles = useCanvasCheckeredStyles();
+
+  return (
+    <EuiFlexItem id={id} className="canvasCheckered" css={checkeredStyles}>
+      {children}
+    </EuiFlexItem>
+  );
 };
 
 interface Props {
@@ -36,12 +85,11 @@ export class AssetPicker extends PureComponent<Props> {
     const { assets, selected, onChange } = this.props;
 
     return (
-      <EuiFlexGrid id="canvasAssetPicker" className="canvasAssetPicker" gutterSize="s" columns={4}>
+      <AssetPickerGrid>
         {assets.map((asset) => (
-          <EuiFlexItem
+          <CheckeredFlexItem
             key={asset.id}
             id={asset.id === selected ? 'canvasAssetPicker__selectedAsset' : ''}
-            className="canvasCheckered"
           >
             <EuiLink
               className={`canvasAssetPicker__link`}
@@ -59,9 +107,9 @@ export class AssetPicker extends PureComponent<Props> {
                 />
               )}
             </EuiLink>
-          </EuiFlexItem>
+          </CheckeredFlexItem>
         ))}
-      </EuiFlexGrid>
+      </AssetPickerGrid>
     );
   }
 }

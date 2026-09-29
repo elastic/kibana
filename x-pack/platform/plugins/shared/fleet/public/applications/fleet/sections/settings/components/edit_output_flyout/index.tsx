@@ -23,7 +23,6 @@ import {
   EuiFieldText,
   EuiSelect,
   EuiSwitch,
-  EuiCallOut,
   EuiSpacer,
   EuiLink,
   EuiComboBox,
@@ -35,6 +34,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { OutputType, ValueOf } from '../../../../../../../common/types';
 
@@ -112,8 +112,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+  const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
   const supportsPresets = inputs.typeInput.value
-    ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
+    ? outputTypeSupportPresets({ type: inputs.typeInput.value as ValueOf<OutputType> })
     : false;
   const supportsOtelExporter = outputTypeSupportsOtelExporter(
     inputs.typeInput.value as ValueOf<OutputType> | undefined
@@ -212,12 +213,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         {isESOutput && !isServerless ? (
           <>
             <EuiSpacer size="xs" />
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
               title={warningMessage}
-              iconType="warning"
-              color="warning"
               size="s"
               heading="p"
             />
@@ -271,22 +270,22 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
       <EuiFlyoutBody>
         {output?.is_preconfigured && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
-              iconType="lock"
               title={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.preconfiguredOutputCalloutTitle"
                   defaultMessage="This output is managed outside of Fleet"
                 />
               }
-            >
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.preconfiguredOutputCalloutDescription"
-                defaultMessage="Most actions related to this output are unavailable. Refer to your kibana config for more
-                detail."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.preconfiguredOutputCalloutDescription"
+                  defaultMessage="Most actions related to this output are unavailable. Refer to your kibana config for more
+                  detail."
+                />
+              }
+            />
             <EuiSpacer size="m" />
           </>
         )}
@@ -339,7 +338,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           </EuiFormRow>
 
           {renderOutputTypeSection(inputs.typeInput.value)}
-          {isRemoteESOutput ? null : (
+          {isRemoteESOutput || isKafkaOutput ? null : (
             <EuiFormRow
               fullWidth
               label={
@@ -526,10 +525,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             ) && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
-                  color="warning"
-                  iconType="warning"
                   size="s"
                   title={
                     <FormattedMessage
@@ -555,7 +552,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                       ))}
                     </ul>
                   </EuiAccordion>
-                </EuiCallOut>
+                </KbnWarningCallout>
               </>
             )}
           <EuiFormRow

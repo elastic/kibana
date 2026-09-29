@@ -130,6 +130,7 @@ export const useTimeRange = ({
             color="warning"
             title={toolTipTitle}
             content={toolTipContent}
+            iconProps={{ 'data-test-subj': 'unifiedHistogramIntervalWarning' }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

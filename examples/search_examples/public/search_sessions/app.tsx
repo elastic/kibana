@@ -14,7 +14,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiComboBox,
@@ -27,6 +26,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
@@ -785,31 +785,32 @@ function isShardDelayEnabled(data: DataPublicPluginStart): boolean {
 
 function NoShardDelayCallout() {
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       title={
         <>
           <EuiCode>shardDelay</EuiCode> is missing!
         </>
       }
-      color="warning"
-      iconType="question"
+      text={
+        <p>
+          This demo works best with <EuiCode>shardDelay</EuiCode> aggregation which simulates slow
+          queries. <br />
+          We recommend to enable it in your <EuiCode>kibana.dev.yml</EuiCode>:
+        </p>
+      }
     >
-      <p>
-        This demo works best with <EuiCode>shardDelay</EuiCode> aggregation which simulates slow
-        queries. <br />
-        We recommend to enable it in your <EuiCode>kibana.dev.yml</EuiCode>:
-      </p>
       <EuiCodeBlock isCopyable={true} language="yaml">
         data.search.aggs.shardDelay.enabled: true
       </EuiCodeBlock>
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 }
 
 function NoDataViewsCallout() {
   return (
-    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="question">
-      <p>This demo requires at least one data view.</p>
-    </EuiCallOut>
+    <KbnWarningCallout
+      title={<>Missing data views!</>}
+      text="This demo requires at least one data view."
+    />
   );
 }

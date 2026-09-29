@@ -23,7 +23,7 @@ steps:
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
       machineType: n2-standard-8
-      diskSizeGb: 100
+      diskSizeGb: 130
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     depends_on: pre-build
@@ -37,12 +37,13 @@ steps:
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 115
+      diskSizeGb: 130
     key: build_scout_tests
     timeout_in_minutes: 30
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
       UIAM_DOCKER_IMAGE: $UIAM_IMAGE
       SERVERLESS_TESTS_ONLY: 'true'
     retry:

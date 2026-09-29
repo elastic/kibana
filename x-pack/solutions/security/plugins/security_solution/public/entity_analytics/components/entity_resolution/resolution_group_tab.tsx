@@ -7,13 +7,16 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '@kbn/entity-store/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -60,7 +63,9 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
 }) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId);
   const linkEntities = useLinkEntities();
   const createGroup = useLinkEntities({
@@ -105,24 +110,28 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
         return;
       }
 
-      const panelKey = EntityPanelKeyByType[entityType as SecurityEntityType];
-      const panelParam = EntityPanelParamByType[entityType as SecurityEntityType];
+      const secEntityType = entityType as SecurityEntityType;
+      const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
 
-      if (!panelKey || !panelParam) return;
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: secEntityType,
+          entityName: clickedEntityName,
+          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
+          ...sharedParams,
+        });
+        return;
+      }
 
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: clickedEntityName,
-            entityId: clickedEntityId,
-            contextID: scopeId,
-            scopeId,
-          },
-        },
-      });
+      const panelKey = EntityPanelKeyByType[secEntityType];
+      const paramName = EntityPanelParamByType[secEntityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: clickedEntityName, ...sharedParams } },
+        });
+      }
     },
-    [onShowEntity, openFlyout, entityType, scopeId]
+    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
   );
 
   const handleRemoveEntity = useCallback(

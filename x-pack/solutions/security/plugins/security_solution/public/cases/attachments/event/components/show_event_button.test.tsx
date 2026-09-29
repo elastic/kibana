@@ -13,6 +13,7 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const props = {
   id: 'action-id',
@@ -92,6 +93,8 @@ describe('ShowEventButton', () => {
       documentId: 'event-id',
       indexName: 'event-index',
       renderCellActions: casesCellActionRenderer,
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+      title: 'Event',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();

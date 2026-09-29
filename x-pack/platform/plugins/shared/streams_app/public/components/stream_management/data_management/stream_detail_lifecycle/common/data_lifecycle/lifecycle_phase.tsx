@@ -298,17 +298,20 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
         </EuiFlexGroup>
       </EuiPopoverTitle>
       <div
-        style={{ width: '300px' }}
+        style={{ width: '360px' }}
         data-test-subj={`${prefix}lifecyclePhase-${label}-popoverContent`}
       >
-        {!isDelete && phaseId === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
-          <FrozenEnterpriseRequiredCallout
-            onUpgradeEnterprise={onUpgradeEnterprise}
-            calloutTestSubj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
-            upgradeButtonTestSubj={`${prefix}lifecyclePhase-${label}-upgradeEnterpriseButton`}
-          />
-        )}
         <div css={{ padding: euiTheme.size.m }}>
+          {!isDelete && phaseId === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
+            <>
+              <FrozenEnterpriseRequiredCallout
+                onUpgradeEnterprise={onUpgradeEnterprise}
+                calloutTestSubj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
+                upgradeButtonTestSubj={`${prefix}lifecyclePhase-${label}-upgradeEnterpriseButton`}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiText size="s" data-test-subj={`${prefix}lifecyclePhase-${label}-description`}>
             <p>{description}</p>
           </EuiText>

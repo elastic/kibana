@@ -1,7 +1,6 @@
 {
   "indices.put_index_template": {
     "data_autocomplete_rules": {
-      "composed_of":  [],
       "index_patterns":  [],
       "data_stream":  {
         "__template": {
@@ -22,7 +21,6 @@
           "__scope_link": "put_mapping"
         }
       },
-      "_meta": {},
       "priority": 0,
       "version": 0
     }

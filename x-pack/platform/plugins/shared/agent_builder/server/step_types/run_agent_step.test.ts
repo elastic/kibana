@@ -5,19 +5,67 @@
  * 2.0.
  */
 
+jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
+  esManifest: [
+    { id: 'indices.create' },
+    { id: 'indices.delete' },
+    { id: 'indices.update_aliases' },
+    { id: 'bulk' },
+  ],
+}));
+
+jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
+  kibanaManifest: [{ id: 'alerting.delete-alerting-rule-id' }],
+}));
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
+import { z } from '@kbn/zod/v4';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
+  InputSchema,
+  runAgentStepCommonDefinition,
 } from '../../common/step_types/run_agent_step';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
 } from '../../common/resolve_connector_or_inference_id';
-import { getRunAgentStepDefinition } from './run_agent_step';
+import { getRunAgentStepDefinition, parseMaxStepSize } from './run_agent_step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+
+describe('parseMaxStepSize', () => {
+  it('parses byte units into bytes', () => {
+    expect(parseMaxStepSize('1b')).toBe(1);
+    expect(parseMaxStepSize('1kb')).toBe(1024);
+    expect(parseMaxStepSize('1mb')).toBe(1024 ** 2);
+    expect(parseMaxStepSize('10mb')).toBe(10 * 1024 ** 2);
+    expect(parseMaxStepSize('1gb')).toBe(1024 ** 3);
+  });
+
+  it('is case-insensitive and tolerates surrounding whitespace', () => {
+    expect(parseMaxStepSize('  10MB ')).toBe(10 * 1024 ** 2);
+    expect(parseMaxStepSize('1GB')).toBe(1024 ** 3);
+  });
+
+  it('treats a bare number as a byte count', () => {
+    expect(parseMaxStepSize('10')).toBe(10);
+    expect(parseMaxStepSize('2048')).toBe(2048);
+  });
+
+  it('returns undefined for empty or malformed values', () => {
+    expect(parseMaxStepSize('')).toBeUndefined();
+    expect(parseMaxStepSize('   ')).toBeUndefined();
+    expect(parseMaxStepSize('10tb')).toBeUndefined();
+    expect(parseMaxStepSize('abc')).toBeUndefined();
+    expect(parseMaxStepSize('mb')).toBeUndefined();
+    expect(parseMaxStepSize('-5mb')).toBeUndefined();
+    // Fractions and inner spaces are intentionally unsupported (ByteSizeValue semantics).
+    expect(parseMaxStepSize('1.5kb')).toBeUndefined();
+    expect(parseMaxStepSize('10 mb')).toBeUndefined();
+  });
+});
 
 describe('ai.agent workflow step (Agent Builder)', () => {
   const createContext = (overrides: Partial<any> = {}) => {
@@ -28,7 +76,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       rawInput: {},
       contextManager: {
         getFakeRequest: jest.fn().mockReturnValue(fakeRequest),
-        getContext: jest.fn(),
+        getContext: jest.fn().mockReturnValue({ execution: { id: 'exec-1' } }),
         getScopedEsClient: jest.fn(),
         renderInputTemplate: jest.fn(),
         callKibanaApi: jest.fn(),
@@ -85,8 +133,57 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     const res = await step.handler(context);
 
     expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent.mock.calls[0][0].params.accessControl).toBeUndefined();
     expect(res).toHaveProperty('output.conversation_id');
     expect(res.output?.conversation_id).toBe('c-1');
+  });
+
+  it('passes public access control when public-conversation is true', async () => {
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-public', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: { execution },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+        },
+        config: {
+          'create-conversation': true,
+          'public-conversation': true,
+        },
+      })
+    );
+
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          accessControl: { access_mode: 'public' },
+          storeConversation: true,
+          autoCreateConversationWithId: true,
+        }),
+      })
+    );
+    expect(res.output?.conversation_id).toBe('c-public');
   });
 
   it('uses conversation_id from input (with:) and create-conversation from config (static)', async () => {
@@ -326,6 +423,211 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(res.output?.message).toBe('ok');
   });
 
+  describe('approvals', () => {
+    const runStep = async (input: Record<string, unknown>) => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(createContext({ input }));
+
+      return execution;
+    };
+
+    it('flattens the per-target map without ever enabling interactivity', async () => {
+      const execution = await runStep({
+        message: 'hello',
+        approvals: {
+          auto_approved_apis: {
+            elasticsearch: ['indices.create', 'indices.update_aliases'],
+            kibana: ['alerting.delete-alerting-rule-id'],
+          },
+        },
+      });
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          interactive: {
+            enabled: false,
+            auto_approved_apis: [
+              { target: 'elasticsearch', api: 'indices.create' },
+              { target: 'elasticsearch', api: 'indices.update_aliases' },
+              { target: 'kibana', api: 'alerting.delete-alerting-rule-id' },
+            ],
+          },
+        })
+      );
+    });
+
+    it.each<{ description: string; input: Record<string, unknown> }>([
+      { description: 'omitted', input: { message: 'hello' } },
+      { description: 'an empty object', input: { message: 'hello', approvals: {} } },
+      {
+        description: 'an empty map',
+        input: { message: 'hello', approvals: { auto_approved_apis: {} } },
+      },
+      {
+        description: 'an empty list for a target',
+        input: { message: 'hello', approvals: { auto_approved_apis: { elasticsearch: [] } } },
+      },
+    ])(
+      'runs non-interactively with no grants when the field is $description',
+      async ({ input }) => {
+        const execution = await runStep(input);
+
+        expect(execution.executeAgent.mock.calls[0][0].interactive).toEqual({ enabled: false });
+      }
+    );
+
+    it('emits a per-target selector enum, which is what drives editor autocomplete', () => {
+      const jsonSchema = z.toJSONSchema(InputSchema, {
+        unrepresentable: 'any',
+        io: 'input',
+      }) as Record<string, any>;
+
+      const byTarget = jsonSchema.properties.approvals.properties.auto_approved_apis.properties;
+
+      expect(byTarget.elasticsearch.items.enum).toContain('indices.create');
+      expect(byTarget.elasticsearch.items.enum).not.toContain('alerting.delete-alerting-rule-id');
+      expect(byTarget.kibana.items.enum).toContain('alerting.delete-alerting-rule-id');
+      expect(byTarget.kibana.items.enum).not.toContain('indices.create');
+    });
+
+    it('offers the wildcards through that same enum', () => {
+      const jsonSchema = z.toJSONSchema(InputSchema, {
+        unrepresentable: 'any',
+        io: 'input',
+      }) as Record<string, any>;
+
+      const byTarget = jsonSchema.properties.approvals.properties.auto_approved_apis.properties;
+
+      expect(byTarget.elasticsearch.items.enum).toEqual(expect.arrayContaining(['*', 'indices.*']));
+      expect(byTarget.kibana.items.enum).toEqual(expect.arrayContaining(['*', 'alerting.*']));
+      expect(byTarget.kibana.items.enum).not.toContain('indices.*');
+    });
+
+    it('accepts a well-formed map, including wildcards', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        approvals: {
+          auto_approved_apis: {
+            elasticsearch: ['indices.create', 'indices.*', 'bulk', '*'],
+            kibana: ['alerting.delete-alerting-rule-id', 'alerting.*'],
+          },
+        },
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it.each<{ description: string; autoApprovedApis: unknown }>([
+      {
+        description: 'an identifier that names no real API',
+        autoApprovedApis: { elasticsearch: ['indices.crate'] },
+      },
+      {
+        description: 'an identifier that only exists on the other target',
+        autoApprovedApis: { kibana: ['indices.create'] },
+      },
+      {
+        description: 'a namespace wildcard that only exists on the other target',
+        autoApprovedApis: { kibana: ['indices.*'] },
+      },
+      {
+        description: 'a bare namespace instead of a full identifier or wildcard',
+        autoApprovedApis: { elasticsearch: ['indices'] },
+      },
+      {
+        description: 'a wildcard on an identifier that has no namespace',
+        autoApprovedApis: { elasticsearch: ['bulk.*'] },
+      },
+      {
+        description: 'an unknown target',
+        autoApprovedApis: { postgres: ['indices.create'] },
+      },
+      {
+        description: 'a flat list, which was the previous shape',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
+      },
+      {
+        description: 'a list exceeding 100 entries for one target',
+        autoApprovedApis: {
+          elasticsearch: Array.from({ length: 101 }, () => 'indices.create'),
+        },
+      },
+    ])('rejects $description', ({ autoApprovedApis }) => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        approvals: { auto_approved_apis: autoApprovedApis },
+      });
+      expect(parsed.success).toBe(false);
+    });
+  });
+
+  describe('configuration_overrides (InputSchema)', () => {
+    it('accepts configuration_overrides with all optional fields', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: {
+          instructions: 'Custom instructions.',
+          tools: [{ tool_ids: ['tool-a', 'tool-b'] }],
+          skill_ids: ['skill-a'],
+        },
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('accepts configuration_overrides with a subset of fields', () => {
+      expect(
+        InputSchema.safeParse({ message: 'hi', configuration_overrides: { skill_ids: ['s1'] } })
+          .success
+      ).toBe(true);
+      expect(
+        InputSchema.safeParse({
+          message: 'hi',
+          configuration_overrides: { instructions: 'override' },
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an omitted configuration_overrides field', () => {
+      const parsed = InputSchema.safeParse({ message: 'hello' });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.configuration_overrides).toBeUndefined();
+      }
+    });
+
+    it('rejects instructions exceeding 2048 characters', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: { instructions: 'a'.repeat(2049) },
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('rejects skill_ids list exceeding 50 entries', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: { skill_ids: Array.from({ length: 51 }, (_, i) => `s-${i}`) },
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('rejects tools list exceeding 50 entries', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: {
+          tools: Array.from({ length: 51 }, (_, i) => ({ tool_ids: [`t-${i}`] })),
+        },
+      });
+      expect(parsed.success).toBe(false);
+    });
+  });
+
   describe('connector-id / inference-id', () => {
     it('ConfigSchema rejects when both ids are meaningful', () => {
       const parsed = ConfigSchema.safeParse({
@@ -530,7 +832,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
-  describe('telemetry attribution (plugin-id / aggregate-by)', () => {
+  describe('telemetry attribution', () => {
     const roundCompleteEvents = () =>
       of({
         type: ChatEventType.roundComplete,
@@ -562,7 +864,17 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       ).toBe(true);
     });
 
-    it('forwards plugin-id and aggregate-by as telemetryMetadata to executeAgent', async () => {
+    it('declares product attribution keys in the attached config schema', () => {
+      expect(runAgentStepCommonDefinition.configSchema).toBeDefined();
+      expect(runAgentStepCommonDefinition.configSchema?.shape).toEqual(
+        expect.objectContaining({
+          'product-solution': expect.anything(),
+          'product-feature': expect.anything(),
+        })
+      );
+    });
+
+    it('forwards telemetry attribution to executeAgent', async () => {
       const execution = createExecutionMock(roundCompleteEvents());
       const serviceManager = { internalStart: { execution } } as any;
       const step = getRunAgentStepDefinition(serviceManager);
@@ -573,6 +885,8 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           config: {
             'plugin-id': 'streams_significant_events_discovery',
             'aggregate-by': 'streams_significant_events',
+            'product-solution': 'observability',
+            'product-feature': 'nightshift',
           },
         })
       );
@@ -583,18 +897,29 @@ describe('ai.agent workflow step (Agent Builder)', () => {
             telemetryMetadata: {
               pluginId: 'streams_significant_events_discovery',
               aggregateBy: 'streams_significant_events',
+              productSolution: 'observability',
+              productFeature: 'nightshift',
+              interactionId: 'exec-1',
             },
           }),
         })
       );
     });
 
-    it('omits telemetryMetadata when no plugin-id is configured', async () => {
+    it('ignores product attribution when no plugin-id is configured', async () => {
       const execution = createExecutionMock(roundCompleteEvents());
       const serviceManager = { internalStart: { execution } } as any;
       const step = getRunAgentStepDefinition(serviceManager);
 
-      await step.handler(createContext({ input: { message: 'hello' } }));
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'product-solution': 'observability',
+            'product-feature': 'nightshift',
+          },
+        })
+      );
 
       const callArg = execution.executeAgent.mock.calls[0][0];
       expect(callArg.params).not.toHaveProperty('telemetryMetadata');

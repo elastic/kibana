@@ -8,7 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import type { IlmPolicyForFlyout } from '@kbn/data-lifecycle-phases';
 import {
+  type IngestStreamEffectiveLifecycle,
   type IngestStreamLifecycle,
   type IngestStreamLifecycleDSL,
   type PhaseName,
@@ -17,6 +19,7 @@ import {
 import {
   Streams as StreamsSchema,
   effectiveToIngestLifecycle,
+  isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
@@ -42,6 +45,12 @@ import {
 import { useOverrideSettingsConfirmation } from '../common/hooks/use_override_settings_confirmation';
 import { SectionPanel } from '../common/section_panel';
 import { buildDlmPreviewModel, type IlmPhasesMap } from '../common/data_lifecycle/preview_models';
+import { previewFromLifecycle } from '../common/data_lifecycle/compute_successful_lifecycle_flyout_preview';
+import {
+  type EditFlyoutPreviewModel,
+  useEditFlyoutPreviewSyncFromModel,
+} from '../common/hooks/use_edit_flyout_preview_sync';
+import { getImportedLifecycle } from '../import_from_stream/get_imported_lifecycle';
 import type { EditDeletePhaseFlyoutValue } from '../data_phases/edit_delete_phase_flyout';
 import { EditDeletePhaseFlyout } from '../data_phases/edit_delete_phase_flyout';
 import { EditDlmPhasesFlyout } from '../data_phases/edit_dlm_phases_flyout';
@@ -60,10 +69,16 @@ const StreamDetailGeneralDataInner = ({
   definition,
   refreshDefinition,
   data,
+  isImportFlyoutOpen = false,
+  importPreviewLifecycle = null,
+  importPreviewIlmPolicies = [],
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
+  isImportFlyoutOpen?: boolean;
+  importPreviewLifecycle?: IngestStreamEffectiveLifecycle | null;
+  importPreviewIlmPolicies?: IlmPolicyForFlyout[];
 }) => {
   const kibana = useKibana();
   const {
@@ -91,8 +106,17 @@ const StreamDetailGeneralDataInner = ({
     setRetentionPeriod: setPreviewRetentionPeriod,
     setTimelineModel: setPreviewTimelineModel,
     clearPreview: clearLifecyclePreview,
+    releaseHoldAfterRefresh,
     isDslDownsampleFlyoutOpen,
   } = useLifecyclePreview();
+
+  // DSL phases are derived synchronously, so release the held preview as soon as the refreshed
+  // definition lands. ILM phases load asynchronously, so `IlmLifecycleSummary` releases the hold
+  // itself once its stats are ready - releasing here would flash a loading skeleton.
+  useEffect(() => {
+    if (isIlmLifecycle(definition.effective_lifecycle)) return;
+    releaseHoldAfterRefresh();
+  }, [definition, releaseHoldAfterRefresh]);
   const { notifyAfterSave } = useLifecycleAfterSave();
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
@@ -501,7 +525,7 @@ const StreamDetailGeneralDataInner = ({
       return;
     }
 
-    if (isDslDownsampleFlyoutOpen) {
+    if (isDslDownsampleFlyoutOpen || isImportFlyoutOpen) {
       return;
     }
 
@@ -510,6 +534,7 @@ const StreamDetailGeneralDataInner = ({
     isEditSuccessfulDeletePhaseFlyoutOpen,
     isEditDataPhasesFlyoutOpen,
     isDslDownsampleFlyoutOpen,
+    isImportFlyoutOpen,
     clearLifecyclePreview,
     setDeletePhasePreview,
     setDataPhasesPreview,
@@ -517,6 +542,76 @@ const StreamDetailGeneralDataInner = ({
     successfulDeletePhaseInitialPreviewValue,
   ]);
 
+  const importPreviewModel = useMemo<EditFlyoutPreviewModel>(() => {
+    if (!isImportFlyoutOpen) {
+      return null;
+    }
+
+    // With no stream selected yet, prime the preview with the target stream's own lifecycle so the
+    // first selection animates from the current state instead of snapping the bars into place.
+    const effectiveLifecycle =
+      importPreviewLifecycle ??
+      (isDslLifecycle(definition.effective_lifecycle) ||
+      isIlmLifecycle(definition.effective_lifecycle)
+        ? definition.effective_lifecycle
+        : null);
+
+    if (!effectiveLifecycle) {
+      return { action: 'clear', hasUnsavedChanges: false };
+    }
+
+    const nextLifecycle = getImportedLifecycle({
+      effectiveLifecycle,
+      targetIsTimeSeries: definition.index_mode === 'time_series',
+    });
+    const importHasUnsavedChanges =
+      importPreviewLifecycle && nextLifecycle
+        ? !isEqual(definition.stream.ingest.lifecycle, nextLifecycle)
+        : false;
+
+    if (
+      isIlmLifecycle(effectiveLifecycle) &&
+      !importPreviewIlmPolicies.some(
+        (policy) => policy.name === effectiveLifecycle.ilm.policy && policy.serializedPolicy
+      )
+    ) {
+      return { action: 'clear', hasUnsavedChanges: importHasUnsavedChanges };
+    }
+
+    const preview = previewFromLifecycle({
+      lifecycle: effectiveLifecycle,
+      ilmPolicies: importPreviewIlmPolicies,
+      isServerless,
+      ilmPhases,
+      hotColor: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
+      indexMode: definition.index_mode,
+    });
+
+    return {
+      action: 'apply',
+      timelineModel: preview.timelineModel,
+      retentionPeriod: preview.retentionPeriod,
+      dataPhasesCount: preview.dataPhasesCount,
+      downsampleStepsCount: preview.downsampleStepsCount,
+      hasUnsavedChanges: importHasUnsavedChanges,
+    };
+  }, [
+    definition.effective_lifecycle,
+    definition.index_mode,
+    definition.stream.ingest.lifecycle,
+    euiTheme.colors.severity.success,
+    ilmPhases,
+    importPreviewIlmPolicies,
+    importPreviewLifecycle,
+    isImportFlyoutOpen,
+    isServerless,
+  ]);
+
+  useEditFlyoutPreviewSyncFromModel({
+    isFlyoutOpen: isImportFlyoutOpen,
+    isExternalFlyoutOpen: isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.importLifecycle),
+    preview: importPreviewModel,
+  });
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m" css={{ flexGrow: 0 }}>
@@ -532,7 +627,6 @@ const StreamDetailGeneralDataInner = ({
           </EuiFlexGroup>
         </EuiTitle>
 
-        {/* Retention Section */}
         <SectionPanel
           topCard={<RetentionCard definition={definition} />}
           bottomCard={
@@ -543,7 +637,7 @@ const StreamDetailGeneralDataInner = ({
               statsError={data.error}
             />
           }
-          isHighlighted={successfulLifecycleFlyout.isOpen}
+          isHighlighted={successfulLifecycleFlyout.isOpen || isImportFlyoutOpen}
         >
           {definition.privileges.lifecycle ? (
             <LifecycleSummary
@@ -577,7 +671,6 @@ const StreamDetailGeneralDataInner = ({
           ) : null}
         </SectionPanel>
 
-        {/* Ingestion Section */}
         <SectionPanel
           topCard={
             <IngestionCard
@@ -649,18 +742,29 @@ export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
   data,
+  refreshSignal,
+  isImportFlyoutOpen,
+  importPreviewLifecycle,
+  importPreviewIlmPolicies,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
+  refreshSignal?: number;
+  isImportFlyoutOpen?: boolean;
+  importPreviewLifecycle?: IngestStreamEffectiveLifecycle | null;
+  importPreviewIlmPolicies?: IlmPolicyForFlyout[];
 }) => {
   return (
     <LifecycleAfterSaveProvider>
-      <LifecyclePreviewProvider>
+      <LifecyclePreviewProvider refreshSignal={refreshSignal}>
         <StreamDetailGeneralDataInner
           definition={definition}
           refreshDefinition={refreshDefinition}
           data={data}
+          isImportFlyoutOpen={isImportFlyoutOpen}
+          importPreviewLifecycle={importPreviewLifecycle}
+          importPreviewIlmPolicies={importPreviewIlmPolicies}
         />
       </LifecyclePreviewProvider>
     </LifecycleAfterSaveProvider>

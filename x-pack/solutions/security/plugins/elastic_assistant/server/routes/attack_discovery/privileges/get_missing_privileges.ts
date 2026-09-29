@@ -124,7 +124,7 @@ export const getMissingIndexPrivilegesInternalRoute = (
           // the workflows feature flag is ON (they are not required otherwise).
           const workflowsEnabled = await core.featureFlags.getBooleanValue(
             ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
-            false
+            true
           );
 
           const missingFeaturePrivileges = workflowsEnabled

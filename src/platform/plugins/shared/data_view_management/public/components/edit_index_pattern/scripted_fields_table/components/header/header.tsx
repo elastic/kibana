@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IndexPatternManagmentContext } from '../../../../../types';
@@ -22,37 +23,36 @@ export const Header = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiCallOut
+        <KbnWarningCallout
           title={i18n.translate('indexPatternManagement.editIndexPattern.deprecation.title', {
             defaultMessage: 'Scripted fields are deprecated',
           })}
-          color="warning"
-          iconType="warning"
-        >
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.deprecation.message"
-            tagName="span"
-            defaultMessage="Use {runtimeFieldsLink} instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the {esqlLink} to compute values directly at query time."
-            values={{
-              runtimeFieldsLink: (
-                <EuiLink target="_blank" href={links.indexPatterns.runtimeFields}>
-                  <FormattedMessage
-                    id="indexPatternManagement.header.runtimeLink"
-                    defaultMessage="runtime fields"
-                  />
-                </EuiLink>
-              ),
-              esqlLink: (
-                <EuiLink target="_blank" href={links.query.queryESQL}>
-                  <FormattedMessage
-                    id="indexPatternManagement.header.esqlLink"
-                    defaultMessage="Elasticsearch Query Language (ES|QL)"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="indexPatternManagement.editIndexPattern.deprecation.message"
+              tagName="span"
+              defaultMessage="Use {runtimeFieldsLink} instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the {esqlLink} to compute values directly at query time."
+              values={{
+                runtimeFieldsLink: (
+                  <EuiLink target="_blank" href={links.indexPatterns.runtimeFields}>
+                    <FormattedMessage
+                      id="indexPatternManagement.header.runtimeLink"
+                      defaultMessage="runtime fields"
+                    />
+                  </EuiLink>
+                ),
+                esqlLink: (
+                  <EuiLink target="_blank" href={links.query.queryESQL}>
+                    <FormattedMessage
+                      id="indexPatternManagement.header.esqlLink"
+                      defaultMessage="Elasticsearch Query Language (ES|QL)"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
         <EuiSpacer size="m" />
         <EuiText size="s">
           <p>

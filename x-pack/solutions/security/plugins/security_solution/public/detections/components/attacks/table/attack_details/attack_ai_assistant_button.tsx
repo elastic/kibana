@@ -44,7 +44,7 @@ export const AttackAiAssistantButton = React.memo<Props>(({ attack, pathway }) =
         onClick={openAgentBuilderFlyout}
         telemetry={{
           pathway,
-          attachments: ['alert'],
+          attachments: ['attack_discovery'],
         }}
       />
     );

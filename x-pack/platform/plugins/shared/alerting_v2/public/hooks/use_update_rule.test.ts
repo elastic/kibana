@@ -25,16 +25,17 @@ const mockRuleResponse: RuleResponse = {
   enabled: true,
   metadata: {
     name: 'My CPU Alert',
+    version: 1,
     description: '',
     tags: [],
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  createdBy: 'test-user',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'test-user',
-  updatedAt: '2026-01-01T00:00:00.000Z',
+  query: { base: 'FROM logs-*' },
+  created_by: { profile_uid: 'test-user' },
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: { profile_uid: 'test-user' },
+  updated_at: '2026-01-01T00:00:00.000Z',
 };
 
 const createWrapper = () => {

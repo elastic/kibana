@@ -50,6 +50,17 @@ Files that test multiple roles or unrelated flows and should become separate spe
 
 - `<file>`: blocked by <specific missing capability with detail>
 
+### Scenario parity map
+
+Include one row for every FTR `it(...)` block. Do not group away or omit individual blocks.
+
+| FTR file | FTR `it()` title | Behavior and assertions | Scout destination | Disposition | Rationale |
+|----------|------------------|-------------------------|-------------------|-------------|-----------|
+| `layers.ts` | `adds a layer` | Creates a layer and verifies its label | `ui/tests/layers.spec.ts` → `test.step('adds a layer')` | `test.step` | Preserves one step in the original sequential journey |
+| `data_counts.ts` | `shows document count` | Verifies the exact document count | `api/tests/data_counts.spec.ts` → `test('returns document count')` | API test | Data correctness does not require browser coverage |
+
+Allowed dispositions: Scout `test`, `test.step`, API test, RTL/Jest test, drop, or defer. Justify every move, drop, or defer in the rationale column.
+
 ---
 
 ## 2. Test type routing
@@ -222,6 +233,14 @@ FTR helpers that contain assertions internally (page objects should return state
 |--------------|--------------------|-----------| 
 | `feature_controls_viewer.spec.ts` | everywhere | Feature exists in stateful and all serverless projects |
 | `cluster_settings.spec.ts` | stateful only | Cluster-level settings API not available in serverless |
+
+### Stateful/serverless mirror FTR files
+
+Duplicate or near-duplicate FTR files found outside the primary source directory. If none were found, write `None found after searching by basename, test titles, comments, and loadTestFile references.`
+
+| Primary FTR file | Mirror FTR file | Similarity | Current tags/skips | Decision | Notes |
+|------------------|-----------------|------------|--------------------|----------|-------|
+| `<stateful-or-primary FTR file>` | `<serverless-or-mirror FTR file>` | `<identical / near-identical / divergent>` | `<tags/skips on either side>` | `<merge / keep separate / drop one side>` | `<tagging and cleanup notes>` |
 
 ### Coverage gaps (omit if none)
 

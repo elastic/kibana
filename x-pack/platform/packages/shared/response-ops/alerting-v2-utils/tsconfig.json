@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/alerting-v2-constants",
+    "@kbn/alerting-v2-schemas",
     "@kbn/core",
     "@kbn/core-chrome-browser",
     "@kbn/core-lifecycle-browser",

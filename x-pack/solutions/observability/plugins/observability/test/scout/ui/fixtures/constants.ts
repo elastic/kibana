@@ -59,7 +59,7 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
 export const LOGS_TAB_TEST_SUBJECTS = {
   LOGS_TAB: 'logsTab',
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
-  RULE_DETAILS: 'ruleDetailsTitle',
+  RULE_DETAILS: 'appHeaderTitle',
 } as const;
 
 /**
@@ -176,14 +176,14 @@ export const ALERTS_TABLE_TEST_SUBJECTS = {
  */
 export const RULE_DETAILS_TEST_SUBJECTS = {
   // Page elements
-  RULE_DETAILS: 'ruleDetailsTitle',
-  RULE_NAME: 'ruleName',
+  RULE_DETAILS: 'appHeaderTitle',
+  RULE_NAME: 'appHeaderTitle',
   RULE_TYPE: 'ruleSummaryRuleType',
   RULE_STATUS_PANEL: 'ruleStatusPanel',
   RULE_DEFINITION: 'ruleSummaryRuleDefinition',
 
   // Actions
-  ACTIONS_BUTTON: 'ruleActionsButton',
+  ACTIONS_BUTTON: 'app-menu-overflow-button',
   EDIT_RULE_BUTTON: 'openEditRuleFlyoutButton',
   DELETE_RULE_BUTTON: 'deleteRuleButton',
 

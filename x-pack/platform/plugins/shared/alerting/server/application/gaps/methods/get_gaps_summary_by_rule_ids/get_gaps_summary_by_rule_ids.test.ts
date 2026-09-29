@@ -5,75 +5,17 @@
  * 2.0.
  */
 
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
 import { fromKueryExpression } from '@kbn/es-query';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 
-const kibanaVersion = 'v8.0.0';
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const backfillClient = backfillClientMock.create();
-const logger = loggingSystemMock.create().get();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
 
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
-  taskManager,
-  ruleTypeRegistry,
-  unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  cloneAPIKey: jest.fn(),
-  logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-  auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient,
-  isSystemAction: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  eventLogger,
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+const { rulesClientParams, unsecuredSavedObjectsClient, authorization, auditLogger } =
+  getRulesClientMockParams({ kibanaVersion: 'v8.0.0', eventLogger });
 
 const filter = fromKueryExpression(
   '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp))'

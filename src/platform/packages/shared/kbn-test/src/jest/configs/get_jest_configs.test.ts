@@ -89,12 +89,12 @@ describe('getJestConfigs', () => {
       if (cmd.includes('*.test.ts') && cmd.includes('jest.config')) {
         return {
           stdout:
-            'pkg/a/foo.test.ts\npkg/b/bar.test.tsx\npkg/a/jest.config.js\npkg/b/jest.config.js',
+            'pkg/a/foo.test.ts\npkg/b/bar.test.tsx\npkg/a/jest.config.js\npkg/b/jest.config.cjs',
         };
       }
       // Fallback for separate commands (in case of provided config paths)
       else if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
-        return { stdout: 'pkg/a/jest.config.js\npkg/b/jest.config.js' };
+        return { stdout: 'pkg/a/jest.config.js\npkg/b/jest.config.cjs' };
       } else if (cmd.includes('*.test.ts') || cmd.includes('*.test.tsx')) {
         return { stdout: 'pkg/a/foo.test.ts\npkg/b/bar.test.tsx' };
       }
@@ -108,6 +108,23 @@ describe('getJestConfigs', () => {
     expect(result.emptyConfigs).toHaveLength(0);
     expect(result.orphanedTestFiles).toHaveLength(0);
     expect(result.duplicateTestFiles).toHaveLength(0);
+  });
+
+  it('excludes __fixtures__ from auto-discovery', async () => {
+    let capturedCmd = '';
+    mockExecResponder = (cmd: string) => {
+      capturedCmd = cmd;
+      if (cmd.includes('*.test.ts') && cmd.includes('jest.config')) {
+        return { stdout: 'pkg/a/foo.test.ts\npkg/a/jest.config.js' };
+      }
+      return { stdout: '' };
+    };
+
+    const { getJestConfigs } = await import('./get_jest_configs');
+    await getJestConfigs();
+
+    expect(capturedCmd).toContain(':(glob,exclude)**/__fixtures__/**');
+    expect(capturedCmd).toContain("'**/jest.config.cjs'");
   });
 
   it('should handle provided config paths', async () => {

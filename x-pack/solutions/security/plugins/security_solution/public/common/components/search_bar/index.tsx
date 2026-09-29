@@ -8,9 +8,9 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
+import type { Dispatch } from 'redux-v4';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -46,7 +46,6 @@ interface SiemSearchBarProps {
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
   id: InputsModelId.global | InputsModelId.timeline;
-  pollForSignalIndex?: () => void;
   timelineId?: string;
   /**
    * Allows to hide the query menu button displayed to the left of the query input.
@@ -72,7 +71,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     hideDatePicker = false,
     id,
     isLoading = false,
-    pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
@@ -118,11 +116,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        // if the function is there, call it to check if the signals index exists yet
-        // in order to update the index fields
-        if (pollForSignalIndex != null) {
-          pollForSignalIndex();
-        }
         const isQuickSelection =
           payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
         let updateSearchBar: UpdateReduxSearchBar = {
@@ -170,7 +163,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       },
       [
         id,
-        pollForSignalIndex,
         toStr,
         end,
         fromStr,
@@ -493,7 +485,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type DispatchProps = ReturnType<typeof mapDispatchToProps>;
+export const connector = connect<StateProps, DispatchProps, SiemSearchBarProps, State>(
+  makeMapStateToProps,
+  mapDispatchToProps
+);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

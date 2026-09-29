@@ -8,14 +8,16 @@
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
 import { registerInternalToolsRoutes } from './internal/tools';
+import { registerInternalConnectorRoutes } from './internal/connectors';
 import { registerInternalSkillsRoutes } from './internal/skills';
+import { registerInternalAgentRoutes } from './internal/agents';
 import { registerInternalConversationRoutes } from './internal/conversations';
 import { registerConsumptionRoutes } from './consumption';
-import { registerInternalUserPromptsRoutes } from './internal/user_prompts';
 import { registerInternalSmlRoutes } from './internal/sml';
 import { registerInternalInferenceEndpointsRoute } from './internal/inference_endpoints';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
+import { registerChatApiRoutes } from './chat_api';
 import { registerConversationRoutes } from './conversations';
 import { registerAttachmentRoutes } from './attachments';
 import { registerMCPRoutes } from './mcp';
@@ -25,18 +27,21 @@ import { registerPluginsRoutes } from './plugins';
 import { registerInternalExecutionRoutes } from './internal/executions';
 import { registerAccessPrincipalsRoutes } from './internal/access_principals';
 import { registerWorkspaceFileRoutes } from './internal/workspace_files';
+import { registerSpaceSettingsRoutes } from './internal/space_settings';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
   registerInternalToolsRoutes(dependencies);
+  registerInternalConnectorRoutes(dependencies);
   registerInternalSkillsRoutes(dependencies);
+  registerInternalAgentRoutes(dependencies);
   registerInternalConversationRoutes(dependencies);
   registerConsumptionRoutes(dependencies);
-  registerInternalUserPromptsRoutes(dependencies);
   registerInternalSmlRoutes(dependencies);
   registerInternalInferenceEndpointsRoute(dependencies);
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
+  registerChatApiRoutes(dependencies);
   registerConversationRoutes(dependencies);
   registerAttachmentRoutes(dependencies);
   registerMCPRoutes(dependencies);
@@ -46,4 +51,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerInternalExecutionRoutes(dependencies);
   registerAccessPrincipalsRoutes(dependencies);
   registerWorkspaceFileRoutes(dependencies);
+  registerSpaceSettingsRoutes(dependencies);
 };

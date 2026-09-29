@@ -14,6 +14,8 @@ import type { LocationDescriptorObject } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { setUiMetricService, httpService } from '../../../public/application/services/http';
@@ -115,18 +117,22 @@ export const WithAppDependencies =
     ) as unknown as AppDependencies;
 
     return (
-      <I18nProvider>
-        <AuthorizationContext.Provider
-          value={createAuthorizationContextValue(privileges as Privileges)}
-        >
-          <KibanaContextProvider services={kibanaContextDependencies}>
-            <AppContextProvider value={appContextValue}>
-              <GlobalFlyoutProvider>
-                <Comp {...props} />
-              </GlobalFlyoutProvider>
-            </AppContextProvider>
-          </KibanaContextProvider>
-        </AuthorizationContext.Provider>
-      </I18nProvider>
+      <KibanaRenderContextProvider {...core}>
+        <MockAppHeaderProvider>
+          <I18nProvider>
+            <AuthorizationContext.Provider
+              value={createAuthorizationContextValue(privileges as Privileges)}
+            >
+              <KibanaContextProvider services={kibanaContextDependencies}>
+                <AppContextProvider value={appContextValue}>
+                  <GlobalFlyoutProvider>
+                    <Comp {...props} />
+                  </GlobalFlyoutProvider>
+                </AppContextProvider>
+              </KibanaContextProvider>
+            </AuthorizationContext.Provider>
+          </I18nProvider>
+        </MockAppHeaderProvider>
+      </KibanaRenderContextProvider>
     );
   };

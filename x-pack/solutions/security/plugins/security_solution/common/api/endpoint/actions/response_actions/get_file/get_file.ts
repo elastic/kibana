@@ -14,7 +14,7 @@ export const EndpointActionGetFileSchema = {
     ...BaseActionRequestSchema,
 
     parameters: schema.object({
-      path: schema.string({ minLength: 1 }),
+      path: schema.string({ minLength: 1, maxLength: 4096 }),
     }),
   }),
 };

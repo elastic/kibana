@@ -857,6 +857,7 @@ describe('MonitorIntegrationHealthApi', () => {
       // Any other space that has monitors must be included so cross-space
       // package policies are discoverable.
       expect(args.additionalSpaceIds).toEqual(expect.arrayContaining(['space-two']));
+      expect(args.fields).toEqual(['name']);
 
       // The monitor's package policy was created in a different space, but the
       // wrapper finds it — so the location is reported as healthy.

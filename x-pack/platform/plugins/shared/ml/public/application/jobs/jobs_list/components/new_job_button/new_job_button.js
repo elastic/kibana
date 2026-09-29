@@ -8,26 +8,20 @@
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlManagementLocator } from '../../../../contexts/kibana';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 
 export function NewJobButton({ size = 's' }) {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const buttonEnabled = canCreateJob && mlNodesAvailable();
-  const mlLocator = useMlManagementLocator();
-
-  const redirectToCreateJobSelectIndexPage = useCallback(async () => {
-    if (!mlLocator || !canCreateJob) return;
-
-    await mlLocator.navigate({
-      sectionId: 'ml',
-      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
-    });
-  }, [mlLocator, canCreateJob]);
+  const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    'anomaly_detection'
+  );
 
   return (
     <EuiButton

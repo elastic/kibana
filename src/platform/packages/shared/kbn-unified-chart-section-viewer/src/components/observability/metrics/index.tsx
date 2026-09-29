@@ -22,9 +22,7 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
     <PerformanceContextProvider>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
         <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
-          <ExternalServicesProvider externalServices={props.externalServices}>
-            <MetricsExperienceGrid {...props} />
-          </ExternalServicesProvider>
+          <MetricsExperienceGrid {...props} />
         </ChartSectionInspectorProvider>
       </EventBasedTelemetryProvider>
     </PerformanceContextProvider>
@@ -33,13 +31,20 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
 
 const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
   return (
-    <MetricsExperienceStateProvider
-      profileId={props.profileId}
-      gridSettings={props.gridSettings}
-      onGridSettingsChange={props.onGridSettingsChange}
-    >
-      <InternalUnifiedMetricsExperienceGrid {...props} />
-    </MetricsExperienceStateProvider>
+    <ExternalServicesProvider externalServices={props.externalServices}>
+      <MetricsExperienceStateProvider
+        profileId={props.profileId}
+        gridSettings={props.gridSettings}
+        onGridSettingsChange={props.onGridSettingsChange}
+        metricsSort={props.metricsSort}
+        onMetricsSortChange={props.onMetricsSortChange}
+        getRecentlyExploredMetrics={props.getRecentlyExploredMetrics}
+        discoverFetch$={props.fetch$}
+        onMetricExplored={props.onMetricExplored}
+      >
+        <InternalUnifiedMetricsExperienceGrid {...props} />
+      </MetricsExperienceStateProvider>
+    </ExternalServicesProvider>
   );
 };
 

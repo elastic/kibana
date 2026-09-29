@@ -85,7 +85,7 @@ export interface QueryRuleListItemContentProps {
   order?: React.ReactNode;
   isDraggable?: boolean;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
-  tourTargetRef?: React.RefObject<HTMLDivElement>;
+  tourTargetRef?: React.Ref<HTMLDivElement>;
 }
 
 export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> = ({

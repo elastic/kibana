@@ -26,6 +26,16 @@ class Duration {
     }
   }
 
+  /**
+   * Parses a wire-form duration string such as `30d`. The value part goes
+   * through `parseInt`, so a fractional input such as `1.5h` parses to
+   * `Duration(1, 'h')` — a long-standing quirk that both the io-ts and zod
+   * codecs rely on for wire-format compatibility. Throws on invalid input.
+   */
+  static fromString(value: string): Duration {
+    return new Duration(parseInt(value.slice(0, -1), 10), value.slice(-1) as DurationUnit);
+  }
+
   add(other: Duration): Duration {
     const currentDurationMoment = moment.duration(this.value, toMomentUnitOfTime(this.unit));
     const otherDurationMoment = moment.duration(other.value, toMomentUnitOfTime(other.unit));

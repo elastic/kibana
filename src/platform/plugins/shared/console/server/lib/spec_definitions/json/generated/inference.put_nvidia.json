@@ -19,6 +19,52 @@
         "text_embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "nvidia"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "url": "",
+        "model_id": "",
+        "max_input_tokens": "",
+        "similarity": {
+          "__one_of": [
+            "cosine",
+            "dot_product",
+            "l2_norm"
+          ]
+        },
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      },
+      "task_settings": {
+        "input_type": {
+          "__one_of": [
+            "ingest",
+            "search"
+          ]
+        },
+        "truncate": {
+          "__one_of": [
+            "END",
+            "NONE",
+            "START"
+          ]
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

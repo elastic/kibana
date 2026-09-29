@@ -64,6 +64,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should have the properties provided by the "display language" context provider', () => {
+      expect(event.context).to.have.property('display_language');
+      expect(event.context.display_language).to.be.a('string');
+      expect(event.context).to.have.property('display_language_source');
+      expect(event.context.display_language_source).to.be.a('string');
+      expect(event.context).to.have.property('display_language_config_default');
+      expect(event.context.display_language_config_default).to.be.a('string');
+    });
+
     it('should have the properties provided by the "execution_context" context provider', () => {
       expect(event.context).to.have.property('pageName');
       expect(event.context.pageName).to.be.a('string');

@@ -6,11 +6,19 @@
  */
 
 import { spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout-security';
-import type { SecurityTestFixtures, SecurityPageObjects, ScoutPage } from '@kbn/scout-security';
+import type {
+  SecurityTestFixtures,
+  SecurityPageObjects,
+  SecurityApiServicesFixture,
+  ScoutPage,
+} from '@kbn/scout-security';
 import { EntityCasesPage } from './page_objects/entity_cases_page';
+import { createEntityCasesApi } from './entity_cases_api';
+import type { EntityCasesApiFixture } from './entity_cases_api';
 
 interface SecuritySolutionTestFixtures extends SecurityTestFixtures {
   pageObjects: SecurityPageObjects & { entityCases: EntityCasesPage };
+  entityCasesApi: EntityCasesApiFixture;
 }
 
 export const spaceTest = baseSpaceTest.extend<SecuritySolutionTestFixtures>({
@@ -28,6 +36,18 @@ export const spaceTest = baseSpaceTest.extend<SecuritySolutionTestFixtures>({
       ...pageObjects,
       entityCases: createLazyPageObject(EntityCasesPage, page),
     });
+  },
+  entityCasesApi: async (
+    {
+      apiServices,
+      scoutSpace,
+    }: {
+      apiServices: SecurityApiServicesFixture;
+      scoutSpace: { id: string };
+    },
+    use: (entityCasesApi: EntityCasesApiFixture) => Promise<void>
+  ) => {
+    await use(createEntityCasesApi(apiServices.cases, scoutSpace.id));
   },
 });
 

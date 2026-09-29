@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
-import type { Store, StoreEnhancer } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux-v4';
+import thunk from 'redux-thunk-v2';
+import type { Store, StoreEnhancer } from 'redux-v4';
 import type { AppDependencies } from '../app_context';
 import { defaultTableState } from './reducers/table_state';
 
