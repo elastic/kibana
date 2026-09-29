@@ -81,11 +81,31 @@ describe('SyncWorkflowService', () => {
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
-  it('does not update when the workflow is not installed yet', async () => {
+  it('installs the space workflow on first use and enables it', async () => {
+    (managementApi.getWorkflow as jest.Mock)
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ enabled: false });
+
+    await createService().ensureEnabled({ request, spaceId });
+
+    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      { spaceId, workflowIdSuffix: spaceId }
+    );
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      workflowDocumentId,
+      { enabled: true },
+      spaceId,
+      request
+    );
+  });
+
+  it('warns and skips enablement when the install produces no document', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue(undefined);
 
     await createService().ensureEnabled({ request, spaceId });
 
+    expect(managedWorkflowsClient.install).toHaveBeenCalledTimes(1);
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
   });
