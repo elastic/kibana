@@ -13,6 +13,7 @@ import { EscalationQueue } from './escalation_queue';
 
 const openItem: EscalationQueueItem = {
   id: 'esc-1',
+  agentId: 'agent-1',
   title: 'Unusual admin activity',
   status: 'open',
   createdAt: '2024-01-01T00:00:00Z',

@@ -29,10 +29,10 @@ interface EscalationCardProps {
   renderAssignees: (escalation: EscalationQueueItem) => React.ReactNode;
   /**
    * When provided the row becomes interactive (keyboard and pointer): clicking or pressing Enter/
-   * Space calls this callback with the escalation id. This is used to open the escalation details
-   * flyout. The assignee widget captures pointer events so it does not trigger the card click.
+   * Space calls this callback with the full escalation item. The assignee widget captures pointer
+   * events so it does not trigger the card click.
    */
-  onClickCard?: (id: string) => void;
+  onClickCard?: (escalation: EscalationQueueItem) => void;
   /** Renders with a highlighted background when true (e.g. the flyout for this row is open). */
   isSelected?: boolean;
 }
@@ -47,17 +47,17 @@ export const EscalationCard = memo<EscalationCardProps>(
     const isClickable = onClickCard !== undefined;
 
     const handleClick = useCallback(() => {
-      onClickCard?.(escalation.id);
-    }, [onClickCard, escalation.id]);
+      onClickCard?.(escalation);
+    }, [onClickCard, escalation]);
 
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          onClickCard?.(escalation.id);
+          onClickCard?.(escalation);
         }
       },
-      [onClickCard, escalation.id]
+      [onClickCard, escalation]
     );
 
     return (

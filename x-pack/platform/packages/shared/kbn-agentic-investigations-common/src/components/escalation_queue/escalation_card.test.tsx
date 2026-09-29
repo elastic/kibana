@@ -13,6 +13,7 @@ import { EscalationCard } from './escalation_card';
 
 const openEscalation: EscalationQueueItem = {
   id: 'esc-open-1',
+  agentId: 'agent-1',
   title: 'Suspicious login from new country',
   status: 'open',
   createdAt: '2024-01-01T00:00:00Z',

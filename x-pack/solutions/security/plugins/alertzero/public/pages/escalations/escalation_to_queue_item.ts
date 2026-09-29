@@ -48,6 +48,7 @@ export const escalationToQueueItem = (
 
   return {
     id: escalation.id,
+    agentId: escalation.agent_id,
     title: escalation.title,
     status,
     createdAt: escalation.created_at,

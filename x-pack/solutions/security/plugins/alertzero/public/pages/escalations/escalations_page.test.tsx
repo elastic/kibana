@@ -20,16 +20,11 @@ import {
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useInvestigationDetails } from '../conversations/use_investigation_details';
-import { useConversationsUrlParams } from '../conversations/conversations_url_params';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { EscalationsPage } from './escalations_page';
 
-// These hooks open the Agent Builder flyout and manage the URL; stub them out here.
-jest.mock('../conversations/use_investigation_details', () => ({
-  useInvestigationDetails: jest.fn(),
-}));
-jest.mock('../conversations/conversations_url_params', () => ({
-  useConversationsUrlParams: jest.fn(),
+jest.mock('../../hooks/use_open_in_chat', () => ({
+  useOpenInChat: jest.fn(),
 }));
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
@@ -82,15 +77,13 @@ const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
-const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
-const mockUseConversationsUrlParams = useConversationsUrlParams as jest.Mock;
+const mockUseOpenInChat = useOpenInChat as jest.Mock;
 
-// Stable URL-param spies — recreated in beforeEach so jest.clearAllMocks() can track calls.
-let selectConversation: jest.Mock;
-let clearSelectedConversation: jest.Mock;
+let openChat: jest.Mock;
 
 const openEscalation = {
   id: 'esc-open-1',
+  agent_id: 'agent-1',
   title: 'Suspicious login',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-02T00:00:00Z',
@@ -99,6 +92,7 @@ const openEscalation = {
 
 const closedEscalation = {
   id: 'esc-closed-1',
+  agent_id: 'agent-1',
   title: 'Resolved threat',
   created_at: '2024-01-03T00:00:00Z',
   updated_at: '2024-01-04T00:00:00Z',
@@ -140,14 +134,8 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
 };
 
 beforeEach(() => {
-  selectConversation = jest.fn();
-  clearSelectedConversation = jest.fn();
-  mockUseConversationsUrlParams.mockReturnValue({
-    selectedConversationId: undefined,
-    selectConversation,
-    clearSelectedConversation,
-  });
-  mockUseInvestigationDetails.mockImplementation(() => undefined);
+  openChat = jest.fn();
+  mockUseOpenInChat.mockReturnValue({ getChatHref: jest.fn(), openChat });
   mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
@@ -352,30 +340,13 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Failed to load escalations')).toBeInTheDocument();
   });
 
-  it('opens the flyout when a row card is clicked', () => {
+  it('navigates to Agent Builder when a row card is clicked', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
     fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
 
-    expect(selectConversation).toHaveBeenCalledWith('esc-open-1');
-  });
-
-  it('clears the URL when the flyout closes', () => {
-    // Capture the onClose passed to the details hook so we can invoke it.
-    let capturedOnClose: (() => void) | undefined;
-    mockUseInvestigationDetails.mockImplementation(({ onClose }: { onClose: () => void }) => {
-      capturedOnClose = onClose;
-    });
-
-    mockBothQueues([openEscalation], []);
-    renderPage();
-
-    act(() => {
-      capturedOnClose?.();
-    });
-
-    expect(clearSelectedConversation).toHaveBeenCalled();
+    expect(openChat).toHaveBeenCalledWith('esc-open-1', 'agent-1');
   });
 
   it('does not duplicate rows when the same page 2 data is re-delivered (refetch regression)', async () => {
@@ -384,6 +355,7 @@ describe('EscalationsPage', () => {
     // The new page-keyed state replaces the entry instead, preventing duplication.
     const page2Item = {
       id: 'esc-p2',
+      agent_id: 'agent-1',
       title: 'Page 2 escalation',
       created_at: '2024-02-01T00:00:00Z',
       updated_at: '2024-02-02T00:00:00Z',
