@@ -414,4 +414,56 @@ describe('fetchNodesFromClusterStats', () => {
     const result = await fetchNodesFromClusterStats(esClient, clusters);
     expect(result).toEqual([]);
   });
+
+  it('does not throw when hits have missing or partial _source', async () => {
+    const partialSourceRes = {
+      aggregations: {
+        clusters: {
+          buckets: [
+            {
+              key: 'NG2d5jHiSBGPE6HLlUN2Bg',
+              doc_count: 2,
+              top: {
+                hits: {
+                  total: { value: 2, relation: 'eq' },
+                  max_score: null,
+                  hits: [
+                    {
+                      _index: '.ds-.monitoring-es-8-mb-2023.03.27-000001',
+                      _id: 'CUJ6I4cBwUW49K58n-b9',
+                      _score: null,
+                      // _source omitted entirely (e.g. source filtering matched nothing)
+                      sort: [1679927450602],
+                    },
+                    {
+                      _index: '.ds-.monitoring-es-8-mb-2023.03.27-000001',
+                      _id: '6kJ6I4cBwUW49K58KuXP',
+                      _score: null,
+                      // _source present but without the expected node paths
+                      _source: {},
+                      sort: [1679927420602],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    esClient.search.mockResponse(
+      // @ts-expect-error not full response interface
+      partialSourceRes
+    );
+
+    const result = await fetchNodesFromClusterStats(esClient, clusters);
+    expect(result).toEqual([
+      {
+        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
+        recentNodes: [],
+        priorNodes: [],
+      },
+    ]);
+  });
 });
