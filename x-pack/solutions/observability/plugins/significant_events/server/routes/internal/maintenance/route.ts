@@ -117,7 +117,7 @@ const resetRoute = createServerRoute({
     summary: 'Reset Significant Events activity and data',
     description:
       'Cancels Significant Events activity and permanently deletes generated data across every Kibana space. The operation is best-effort, irreversible, and idempotent. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Streams manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to reset the whole deployment. ' +
+      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Streams manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to reset the whole deployment. As with pause, the workflow and settings sweep covers the spaces visible to the caller. ' +
       'Data streams are wiped as the calling user, so the caller also needs Elasticsearch delete/create index privileges on `.significant_events-*`; missing privileges are reported in `partialFailures` rather than as an error status.',
   },
   security: {

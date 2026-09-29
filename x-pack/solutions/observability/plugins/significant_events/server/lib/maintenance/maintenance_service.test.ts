@@ -816,6 +816,7 @@ describe('SignificantEventsMaintenanceService', () => {
         dataStreams: {
           [DETECTIONS_DATA_STREAM]: 3,
           [EVENTS_DATA_STREAM]: 0,
+          [KNOWLEDGE_INDICATORS_DATA_STREAM]: 4,
           [DISCOVERIES_DATA_STREAM]: 4,
         },
         investigations: { deleted: 2, failures: [] },
@@ -834,7 +835,7 @@ describe('SignificantEventsMaintenanceService', () => {
             storedQueries: 2,
             rules: 3,
             investigations: 2,
-            dataStreams: 2,
+            dataStreams: 3,
           },
           partialFailures: [],
         })
@@ -975,6 +976,27 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
         esClient.count.mock.invocationCallOrder[0]
       );
+    });
+
+    it('does not report indicators or queries as deleted when their stream could not be wiped', async () => {
+      const { api } = makeManagementApi();
+      const { service, esClient } = makeService({
+        management: api,
+        indicatorStreams: ['logs.web'],
+        knowledgeIndicatorCounts: { [KI_TYPE_FEATURE]: 2, [KI_TYPE_QUERY]: 1 },
+        dataStreams: { [KNOWLEDGE_INDICATORS_DATA_STREAM]: 3 },
+      });
+      esClient.indices.deleteDataStream.mockRejectedValueOnce(new Error('delete failed'));
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.deleted).toEqual(
+        expect.objectContaining({ knowledgeIndicators: 0, storedQueries: 0, dataStreams: 0 })
+      );
+      expect(summary.partialFailures).toContainEqual({
+        target: `data-stream:${KNOWLEDGE_INDICATORS_DATA_STREAM}:delete`,
+        error: 'delete failed',
+      });
     });
 
     it('records a partial failure when the investigations plugin is unavailable', async () => {

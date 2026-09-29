@@ -30,8 +30,8 @@ interface ResetDataStreamsParams {
 
 /**
  * Wipe a registered stream by deleting and recreating it, leaving an empty
- * stream untouched so a repeated reset is a no-op. Returns true when documents
- * were deleted.
+ * stream untouched so a repeated reset is a no-op. Returns true when the
+ * stream was deleted.
  */
 const resetRegisteredDataStream = async (
   name: string,
@@ -84,7 +84,7 @@ const resetRegisteredDataStream = async (
     return false;
   }
   await createDataStream();
-  return documentCount !== undefined;
+  return true;
 };
 
 /** Delete the discoveries stream outright; its owning workflow recreates it. Returns true when deleted. */
@@ -107,16 +107,16 @@ const deleteDiscoveriesDataStream = async ({
   }
 };
 
-/** Wipe every Significant Events data stream; returns how many held data that was deleted. */
-export const resetDataStreams = async (params: ResetDataStreamsParams): Promise<number> => {
-  let deleted = 0;
+/** Wipe every Significant Events data stream; returns the names of streams whose data was deleted. */
+export const resetDataStreams = async (params: ResetDataStreamsParams): Promise<Set<string>> => {
+  const deleted = new Set<string>();
   for (const name of RESET_REGISTERED_DATA_STREAMS) {
     if (await resetRegisteredDataStream(name, params)) {
-      deleted += 1;
+      deleted.add(name);
     }
   }
   if (await deleteDiscoveriesDataStream(params)) {
-    deleted += 1;
+    deleted.add(DISCOVERIES_DATA_STREAM);
   }
   return deleted;
 };

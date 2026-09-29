@@ -24,6 +24,7 @@ import {
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
+import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -1159,11 +1160,14 @@ export const createSignificantEventsMaintenanceService = ({
           failures,
         });
         const investigations = await deleteInvestigations(failures);
-        const dataStreams = await resetDataStreams({
+        const wipedDataStreams = await resetDataStreams({
           esClient: server.core.elasticsearch.client.asScoped(request).asCurrentUser,
           dataStreams: server.core.dataStreams,
           failures,
         });
+        // Indicators and queries live in the knowledge-indicator stream; the snapshot
+        // counted them before the wipe, so only report them deleted if the wipe happened.
+        const indicatorsWiped = wipedDataStreams.has(KNOWLEDGE_INDICATORS_DATA_STREAM);
 
         const remainingWorkflows = await restoreWorkflowsAfterReset({
           mgmt,
@@ -1177,7 +1181,13 @@ export const createSignificantEventsMaintenanceService = ({
           executionsCancelled: 0,
           workflowsDisabled: remainingWorkflows.length,
           rulesDisabled: 0,
-          deleted: { knowledgeIndicators, storedQueries, rules, investigations, dataStreams },
+          deleted: {
+            knowledgeIndicators: indicatorsWiped ? knowledgeIndicators : 0,
+            storedQueries: indicatorsWiped ? storedQueries : 0,
+            rules,
+            investigations,
+            dataStreams: wipedDataStreams.size,
+          },
           partialFailures: failures,
         };
 
