@@ -299,7 +299,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                 fill
                 size="s"
                 color={primaryAction.color ?? defaultButtonColor}
-                iconType={primaryAction.iconType ?? iconType}
+                iconType="play"
                 isDisabled={primaryAction.isDisabled}
                 isLoading={primaryAction.isLoading}
                 onClick={handlePrimaryClick}
