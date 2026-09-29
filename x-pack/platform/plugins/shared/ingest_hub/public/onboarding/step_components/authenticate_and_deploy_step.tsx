@@ -814,28 +814,30 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         </>
       )}
 
-      {(showMiSection || showAgentSection) && isDirty && (deployGroups.length > 0 || agentTargets.length > 0) && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={
+      {(showMiSection || showAgentSection) &&
+        isDirty &&
+        (deployGroups.length > 0 || agentTargets.length > 0) && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                  defaultMessage="Settings changed since last deployment"
+                />
+              }
+              color="warning"
+              iconType="warning"
+              data-test-subj="authenticateAndDeployStep-driftCallout"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
-                defaultMessage="Settings changed since last deployment"
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
               />
-            }
-            color="warning"
-            iconType="warning"
-            data-test-subj="authenticateAndDeployStep-driftCallout"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
-              defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
-            />
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
 
       {showMiSection && (
         <ManagedIntegrationsSection

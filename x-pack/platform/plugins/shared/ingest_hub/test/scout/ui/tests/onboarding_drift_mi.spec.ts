@@ -101,7 +101,8 @@ test.describe(
       // session instances whose SO entry is missing.
       const DEP_ID = 'dep-svc-var-drift-001';
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,
@@ -243,7 +244,9 @@ test.describe(
       expect(miPutRequest.postData()).toContain('new-drift-bucket');
       // After dirty redeploy, SO must be written with the new serviceVars.
       const soRequest = await soPutPromise;
-      expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain('new-drift-bucket');
+      expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain(
+        'new-drift-bucket'
+      );
 
       // isDirty clears → isMiDone becomes true → section collapses, Next button enabled.
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
@@ -258,7 +261,8 @@ test.describe(
       // SO and session match — user returned to Step 3 without changing any settings.
       const DEP_ID = 'dep-no-drift-001';
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,
@@ -334,7 +338,8 @@ test.describe(
       // EC2 is a cleanup target — the drift loop must skip it, not flag it as changed.
       const DEP_ID = 'dep-remove-svc-001';
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,
@@ -378,7 +383,8 @@ test.describe(
       // SO uses static_keys auth — isStaticKeysEditMode renders the replace-keys form.
       const DEP_ID = 'dep-static-dirty-001';
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,
@@ -443,7 +449,9 @@ test.describe(
       await page.testSubj.locator('staticKeysReplace-accessKeyId-toggle').click();
       await page.testSubj.locator('staticKeysReplace-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
       await page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle').click();
-      await page.testSubj.locator('staticKeysReplace-secretAccessKey').fill('wJalrXUtnFEMI/K7MDENG');
+      await page.testSubj
+        .locator('staticKeysReplace-secretAccessKey')
+        .fill('wJalrXUtnFEMI/K7MDENG');
 
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
@@ -509,7 +517,8 @@ test.describe(
       // Same service-var drift setup as the first test, but the Fleet PUT returns 500.
       const DEP_ID = 'dep-fail-redeploy-001';
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,
@@ -684,7 +693,8 @@ test.describe(
       // (gated on deployGroups.length > 0 || agentTargets.length > 0) can render.
       const DEP_ID = 'dep-auth-drift-001';
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,

@@ -98,7 +98,8 @@ test.describe(
       let soCallCount = 0;
       let soShouldFail = true;
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) => {
           soCallCount++;
           if (soCallCount === 1) {

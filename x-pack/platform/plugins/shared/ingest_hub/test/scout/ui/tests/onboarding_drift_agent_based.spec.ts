@@ -77,7 +77,8 @@ test.describe(
 
       // SO GET: agent-based deployment, empty serviceVars, assume_role auth.
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,
@@ -317,7 +318,8 @@ test.describe(
       const AB_PKG_POLICY_ID = 'mock-ab-pkg-policy-id-2';
 
       await page.route(
-        (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
         (route) =>
           route.fulfill({
             status: 200,
