@@ -518,11 +518,18 @@ describe('ManagedIntegrationsSection', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('calls onDeploy when Retry clicked', () => {
+    it('calls onDeploy when Retry clicked and credentials are ready', () => {
+      setupMocks({ staticKeys: { access_key_id: 'AKIA', secret_access_key: 'secret' } });
       const onDeploy = jest.fn();
       renderSection({ hasFailed: true, onDeploy });
       fireEvent.click(screen.getByTestId('managedIntegrationsSection-retryButton'));
       expect(onDeploy).toHaveBeenCalledTimes(1);
+    });
+
+    it('disables Retry when credentials are absent', () => {
+      const onDeploy = jest.fn();
+      renderSection({ hasFailed: true, onDeploy });
+      expect(screen.getByTestId('managedIntegrationsSection-retryButton')).toBeDisabled();
     });
 
     it('hides callout while isDeploying (retry in flight)', () => {
