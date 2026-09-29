@@ -16,7 +16,6 @@ import {
   extractLogSignatures,
   generateLogTemplates,
   generateOtelTemplates,
-  renderQueryTemplate,
   semanticDigest,
   sha256Digest,
   validateClassificationCompleteness,
@@ -227,7 +226,7 @@ const catalogRequestsFor = ({
           extractorVersion: template.extractorVersion,
           id: template.id,
           ...(template.logLevel === undefined ? {} : { logLevel: template.logLevel }),
-          parameters: template.parameters,
+          query: template.query,
           repository: template.repository,
           revision: template.revision,
           ...(template.severityScore === undefined
@@ -235,7 +234,6 @@ const catalogRequestsFor = ({
             : { severityScore: template.severityScore }),
           signalType: template.signalType,
           sourceHash: `sha256:${sha256Digest(JSON.stringify(template.evidence))}`,
-          templatedQuery: template.query,
           title: template.title,
           updatedAt: timestamp,
         },
@@ -402,19 +400,18 @@ export const extractRepository = async (
 
   /** Merges identical deterministic templates before validation and persistence. */
   const templates = deduplicateTemplates([...loggingTemplates, ...otelTemplates]);
-  /** Retains validation results only for templates that safely render all declared placeholders. */
+  /** Retains validation results for every deduplicated template. */
   const validation = new Map<string, QueryValidationResult>();
   /** Explains invalid template exclusion without converting it into a required workflow failure. */
   const diagnostics: ExtractionDiagnostic[] = [];
   for (const template of templates) {
     try {
-      /** Validators receive rendered ES|QL only; raw Code Intelligence placeholders never cross the port. */
-      const outcome = await dependencies.validator.validate(renderQueryTemplate(template));
+      const outcome = await dependencies.validator.validate(template.query);
       validation.set(template.id, outcome);
       if (outcome.status === 'invalid') {
         diagnostics.push({
           code: 'invalid_template',
-          message: outcome.diagnostics.join(' ') || 'Sample-rendered query validation failed.',
+          message: outcome.diagnostics.join(' ') || 'Query validation failed.',
           templateId: template.id,
         });
       }
@@ -422,7 +419,7 @@ export const extractRepository = async (
       /** A validator exception excludes the template and remains visible to callers as a diagnostic. */
       diagnostics.push({
         code: 'template_validation_failure',
-        message: 'Sample-rendered query validation failed unexpectedly.',
+        message: 'Query validation failed unexpectedly.',
         templateId: template.id,
       });
     }

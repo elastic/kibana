@@ -27,7 +27,7 @@ export interface CatalogItem {
   repository?: string;
   signal_type?: string;
   title?: string;
-  templated_query?: string;
+  query?: string;
   evidence?: Array<{ path?: string; line?: number }>;
   validation?: { status?: string };
   [key: string]: unknown;

@@ -5,40 +5,18 @@
  * 2.0.
  */
 
-import {
-  renderQueryParameter,
-  type QueryParameter,
-  type QueryTemplate,
-} from '../models/query_codec';
+import { esqlFieldName, esqlStringLiteral, type QueryTemplate } from '../models/query_codec';
 import type { GeneratedTemplate } from '../templates/deduplicate_templates';
-import { semanticDigest, templateIdentity } from '../templates/template_identity';
+import { templateIdentity } from '../templates/template_identity';
 import type { TemplateGenerationContext } from '../logging/generate_log_templates';
 import type { OtelSignal } from '../models/otel_signal_codec';
 
-/** Parameterizes the target trace, log, or metrics source instead of selecting a deployment-specific stream. */
-const sourceParameter = (signalType: QueryTemplate['signalType']): QueryParameter => ({
-  description: `Source or index pattern containing OpenTelemetry ${signalType} records.`,
-  example:
-    signalType === 'metric'
-      ? 'metrics-application-*'
-      : signalType === 'trace'
-      ? 'traces-application-*'
-      : 'logs-application-*',
-  kind: 'source',
-  name: 'source',
-});
-
-/** Builds one identifier parameter whose example came from a static source literal and must be escaped. */
-const identifierParameter = (
-  name: string,
-  description: string,
-  example: string
-): QueryParameter => ({
-  description,
-  example,
-  kind: 'identifier',
-  name,
-});
+/** Conventional catch-all trace source; consuming agents narrow it to their deployment. */
+const TRACE_SOURCE = 'traces*';
+/** Conventional catch-all metrics source; consuming agents narrow it to their deployment. */
+const METRIC_SOURCE = 'metrics*';
+/** Default percentile used by latency, attribute, and histogram aggregations. */
+const PERCENTILE = 95;
 
 /** Constructs generated template metadata from a codec-compatible pure template. */
 const generatedTemplate = ({
@@ -59,19 +37,19 @@ const generatedTemplate = ({
   ...(severityScore === undefined ? {} : { severityScore }),
 });
 
-/** Returns the metric aggregation selected by the extracted instrument kind and its semantic field placeholder. */
+/** Returns the metric aggregation selected by the extracted instrument kind. */
 const metricStats = (
   metricKind: NonNullable<OtelSignal['metricKind']>,
   metricField: string
 ): string => {
   switch (metricKind) {
     case 'counter':
-      return `rate = SUM(RATE([[${metricField}]]))`;
+      return `rate = SUM(RATE(${metricField}))`;
     case 'histogram':
-      return `p95 = AVG(PERCENTILE_OVER_TIME([[${metricField}]], [[percentile]]))`;
+      return `p95 = AVG(PERCENTILE_OVER_TIME(${metricField}, ${PERCENTILE}))`;
     case 'gauge':
     case 'updown':
-      return `avg = AVG(AVG_OVER_TIME([[${metricField}]]))`;
+      return `avg = AVG(AVG_OVER_TIME(${metricField}))`;
   }
 };
 
@@ -92,30 +70,12 @@ export const generateOtelTemplates = ({
         /** Holds the source-derived static span name. */
         const value: string = signal.value;
         /** Renders the extracted operation name as an inline ES|QL string literal. */
-        const spanNameLiteral: string = renderQueryParameter({
-          description: 'Inline OpenTelemetry span operation name.',
-          example: value,
-          kind: 'string',
-          name: 'span_name',
-        });
+        const spanNameLiteral: string = esqlStringLiteral(value);
         /** Defines the span-name count and error template. */
         const counts: QueryTemplate = {
           description: 'Counts a source-instrumented span and its error outcomes.',
           evidence: signal.evidence,
-          parameters: {
-            source: sourceParameter('trace'),
-            span_name_field: identifierParameter(
-              'span_name_field',
-              'Field containing the OpenTelemetry span operation name.',
-              'name'
-            ),
-            status_field: identifierParameter(
-              'status_field',
-              'Field containing the OpenTelemetry status code.',
-              'status.code'
-            ),
-          },
-          query: `FROM [[source]]\n| WHERE [[span_name_field]] == ${spanNameLiteral}\n| STATS total = COUNT(*), errors = COUNT(*) WHERE [[status_field]] == "Error"`,
+          query: `FROM ${TRACE_SOURCE}\n| WHERE name == ${spanNameLiteral}\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == "Error"`,
           signalType: 'trace',
           title: `Span outcomes: ${value}`,
         };
@@ -123,26 +83,7 @@ export const generateOtelTemplates = ({
         const latency: QueryTemplate = {
           ...counts,
           description: 'Calculates latency for a source-instrumented span.',
-          query: `FROM [[source]]\n| WHERE [[span_name_field]] == ${spanNameLiteral}\n| STATS p95_latency = PERCENTILE([[duration_field]], [[percentile]])`,
-          parameters: {
-            source: sourceParameter('trace'),
-            span_name_field: identifierParameter(
-              'span_name_field',
-              'Field containing the OpenTelemetry span operation name.',
-              'name'
-            ),
-            duration_field: identifierParameter(
-              'duration_field',
-              'Field containing the OpenTelemetry span duration.',
-              'duration'
-            ),
-            percentile: {
-              description: 'Latency percentile to calculate.',
-              example: 95,
-              kind: 'number',
-              name: 'percentile',
-            },
-          },
+          query: `FROM ${TRACE_SOURCE}\n| WHERE name == ${spanNameLiteral}\n| STATS p95_latency = PERCENTILE(duration, ${PERCENTILE})`,
           title: `Span latency: ${value}`,
         };
         return [
@@ -162,13 +103,6 @@ export const generateOtelTemplates = ({
         if (signal.value === undefined || signal.value.length === 0) return [];
         /** Holds the source-derived static event name. */
         const value: string = signal.value;
-        /** Renders the extracted event name as an inline ES|QL string literal. */
-        const eventNameLiteral: string = renderQueryParameter({
-          description: 'Inline OpenTelemetry event name.',
-          example: value,
-          kind: 'string',
-          name: 'event_name',
-        });
         return [
           generatedTemplate({
             context,
@@ -176,15 +110,7 @@ export const generateOtelTemplates = ({
             template: {
               description: 'Finds a source-instrumented OpenTelemetry event by name.',
               evidence: signal.evidence,
-              parameters: {
-                event_name_field: identifierParameter(
-                  'event_name_field',
-                  'Field containing the OpenTelemetry event name.',
-                  'event.name'
-                ),
-                source: sourceParameter('trace'),
-              },
-              query: `FROM [[source]]\n| WHERE [[event_name_field]] == ${eventNameLiteral}`,
+              query: `FROM ${TRACE_SOURCE}\n| WHERE event.name == ${esqlStringLiteral(value)}`,
               signalType: 'trace',
               title: `Event: ${value}`,
             },
@@ -195,40 +121,15 @@ export const generateOtelTemplates = ({
         if (signal.value === undefined || signal.value.length === 0) return [];
         /** Holds the source-derived static attribute key. */
         const value: string = signal.value;
-        /** Makes the source-derived key part of query identity while retaining a configurable field parameter. */
-        const attributeFieldName: string = `attribute_field_${semanticDigest(value)}`;
+        /** Inlines the source-derived key as a field reference, quoted only when ES|QL requires it. */
+        const field: string = esqlFieldName(`attributes.${value}`);
         /** Builds a boolean, numeric, or grouping family from the extracted value hint. */
         const query: string =
           signal.valueHint === 'bool'
-            ? `FROM [[source]]\n| WHERE [[${attributeFieldName}]] == [[attribute_value]]`
+            ? `FROM ${TRACE_SOURCE}\n| WHERE ${field} == true`
             : signal.valueHint === 'number'
-            ? `FROM [[source]]\n| WHERE [[${attributeFieldName}]] IS NOT NULL\n| STATS avg = AVG([[${attributeFieldName}]]), max = MAX([[${attributeFieldName}]]), p95 = PERCENTILE([[${attributeFieldName}]], [[percentile]])`
-            : `FROM [[source]]\n| WHERE [[${attributeFieldName}]] IS NOT NULL\n| STATS count = COUNT(*) BY [[${attributeFieldName}]]`;
-        /** Provides only the parameters used by the selected attribute query family. */
-        const parameters: Record<string, QueryParameter> = {
-          [attributeFieldName]: identifierParameter(
-            attributeFieldName,
-            'Field containing the OpenTelemetry attribute.',
-            `attributes.${value}`
-          ),
-          source: sourceParameter('trace'),
-        };
-        if (signal.valueHint === 'bool') {
-          parameters.attribute_value = {
-            description: 'Boolean attribute value to match.',
-            example: false,
-            kind: 'boolean',
-            name: 'attribute_value',
-          };
-        }
-        if (signal.valueHint === 'number') {
-          parameters.percentile = {
-            description: 'Attribute percentile to calculate.',
-            example: 95,
-            kind: 'number',
-            name: 'percentile',
-          };
-        }
+            ? `FROM ${TRACE_SOURCE}\n| WHERE ${field} IS NOT NULL\n| STATS avg = AVG(${field}), max = MAX(${field}), p95 = PERCENTILE(${field}, ${PERCENTILE})`
+            : `FROM ${TRACE_SOURCE}\n| WHERE ${field} IS NOT NULL\n| STATS count = COUNT(*) BY ${field}`;
         return [
           generatedTemplate({
             context,
@@ -236,7 +137,6 @@ export const generateOtelTemplates = ({
             template: {
               description: 'Analyzes a source-instrumented OpenTelemetry attribute.',
               evidence: signal.evidence,
-              parameters,
               query,
               signalType: 'trace',
               title: `Attribute: ${value}`,
@@ -253,8 +153,8 @@ export const generateOtelTemplates = ({
           return [];
         /** Holds the source-derived static metric name. */
         const value: string = signal.value;
-        /** Makes the source-derived name part of query identity while retaining a configurable field parameter. */
-        const metricFieldName: string = `metric_field_${semanticDigest(value)}`;
+        /** Inlines the source-derived name as a field reference, quoted only when ES|QL requires it. */
+        const field: string = esqlFieldName(`metrics.${value}`);
         return [
           generatedTemplate({
             context,
@@ -263,27 +163,9 @@ export const generateOtelTemplates = ({
               description:
                 'Aggregates a source-instrumented OpenTelemetry metric using its instrument family.',
               evidence: signal.evidence,
-              parameters: {
-                [metricFieldName]: identifierParameter(
-                  metricFieldName,
-                  'Field containing the OpenTelemetry metric value.',
-                  `metrics.${value}`
-                ),
-                ...(signal.metricKind === 'histogram'
-                  ? {
-                      percentile: {
-                        description: 'Metric percentile to calculate.',
-                        example: 95,
-                        kind: 'number' as const,
-                        name: 'percentile',
-                      },
-                    }
-                  : {}),
-                source: sourceParameter('metric'),
-              },
-              query: `TS [[source]]\n| WHERE [[${metricFieldName}]] IS NOT NULL\n| STATS ${metricStats(
+              query: `TS ${METRIC_SOURCE}\n| WHERE ${field} IS NOT NULL\n| STATS ${metricStats(
                 signal.metricKind,
-                metricFieldName
+                field
               )}`,
               signalType: 'metric',
               title: `Metric: ${value}`,
@@ -299,21 +181,7 @@ export const generateOtelTemplates = ({
             template: {
               description: 'Counts OpenTelemetry trace records with an error status.',
               evidence: signal.evidence,
-              parameters: {
-                source: sourceParameter('trace'),
-                span_name_field: identifierParameter(
-                  'span_name_field',
-                  'Field containing the OpenTelemetry span operation name.',
-                  'name'
-                ),
-                status_field: identifierParameter(
-                  'status_field',
-                  'Field containing the OpenTelemetry status code.',
-                  'status.code'
-                ),
-              },
-              query:
-                'FROM [[source]]\n| WHERE [[status_field]] == "Error"\n| STATS count = COUNT(*) BY [[span_name_field]]',
+              query: `FROM ${TRACE_SOURCE}\n| WHERE status.code == "Error"\n| STATS count = COUNT(*) BY name`,
               signalType: 'trace',
               title: 'OpenTelemetry error status',
             },
@@ -327,16 +195,7 @@ export const generateOtelTemplates = ({
             template: {
               description: 'Groups recorded OpenTelemetry exceptions by exception type.',
               evidence: signal.evidence,
-              parameters: {
-                exception_type_field: identifierParameter(
-                  'exception_type_field',
-                  'Field containing the recorded exception type.',
-                  'attributes.exception.type'
-                ),
-                source: sourceParameter('trace'),
-              },
-              query:
-                'FROM [[source]]\n| WHERE [[exception_type_field]] IS NOT NULL\n| STATS count = COUNT(*) BY [[exception_type_field]]',
+              query: `FROM ${TRACE_SOURCE}\n| WHERE attributes.exception.type IS NOT NULL\n| STATS count = COUNT(*) BY attributes.exception.type`,
               signalType: 'trace',
               title: 'Recorded OpenTelemetry exceptions',
             },

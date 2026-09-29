@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { renderQueryTemplate } from '../models/query_codec';
 import { generateLogTemplates } from './generate_log_templates';
 import {
   decodeSourceLiteral,
@@ -59,10 +58,11 @@ describe('log signatures', () => {
     const source = String.raw`logger.error("say \"hi\"\\ path\nnext\u{1f600}")`;
     /** Extracts the cooked runtime message that the logger receives. */
     const sourceSignature = extractLogSignatures({ content: source, evidence })[0];
-    /** Renders the cooked static segment through the ES|QL string-parameter escaper. */
-    const sourceQuery = renderQueryTemplate(
-      generateLogTemplates({ context: templateContext, signatures: [sourceSignature] })[0]
-    ).query;
+    /** Renders the cooked static segment through the ES|QL string-literal escaper. */
+    const sourceQuery = generateLogTemplates({
+      context: templateContext,
+      signatures: [sourceSignature],
+    })[0].query;
     /** Exercises a classifier value with the same lexical characters, which is already a semantic value. */
     const classifiedSignature = extractLogSignatures({
       classified: { level: 'error', staticMessage: String.raw`say \"hi\"\\ path\nnext` },
@@ -94,9 +94,10 @@ describe('log signatures', () => {
       evidence,
     });
     /** Renders the positive case so the query literal proves the cooked C# value. */
-    const fourDigitQuery = renderQueryTemplate(
-      generateLogTemplates({ context: templateContext, signatures: [fourDigitSignature] })[0]
-    ).query;
+    const fourDigitQuery = generateLogTemplates({
+      context: templateContext,
+      signatures: [fourDigitSignature],
+    })[0].query;
 
     expect(fourDigitSignature.staticSegments).toEqual(['code ሴ']);
     expect(fourDigitQuery).toContain('"code ሴ"');

@@ -106,15 +106,13 @@ export {
   type PageResult,
 } from './models/operation_result';
 export {
-  queryParameterRt,
+  esqlFieldName,
+  esqlStringLiteral,
   queryTemplateRt,
   queryValidationResultRt,
-  renderQueryTemplate,
   signalTypeRt,
-  type QueryParameter,
   type QueryTemplate,
   type QueryValidationResult,
-  type RenderedQuery,
   type SignalType,
 } from './models/query_codec';
 export {

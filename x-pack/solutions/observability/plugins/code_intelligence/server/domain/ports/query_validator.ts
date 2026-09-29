@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { QueryValidationResult, RenderedQuery } from '../models/query_codec';
+import type { QueryValidationResult } from '../models/query_codec';
 
-/** Validates sample-rendered ES|QL only; it never receives an unrendered template. */
+/** Validates one concrete ES|QL query. */
 export interface QueryValidator {
   /** Returns explicit query validation state, including skipped validation. */
-  validate(query: RenderedQuery): Promise<QueryValidationResult>;
+  validate(query: string): Promise<QueryValidationResult>;
 }

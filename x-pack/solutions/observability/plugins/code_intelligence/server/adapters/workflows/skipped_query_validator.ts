@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryValidationResult, RenderedQuery } from '../../domain/models/query_codec';
+import type { QueryValidationResult } from '../../domain/models/query_codec';
 import type { QueryValidator } from '../../domain/ports/query_validator';
 
 /**
@@ -14,7 +14,7 @@ import type { QueryValidator } from '../../domain/ports/query_validator';
  */
 export class SkippedQueryValidator implements QueryValidator {
   /** Returns explicit query validation state, including skipped validation. */
-  public async validate(_query: RenderedQuery): Promise<QueryValidationResult> {
+  public async validate(_query: string): Promise<QueryValidationResult> {
     return {
       diagnostics: ['Validation was skipped because no standalone validator is configured.'],
       status: 'skipped',

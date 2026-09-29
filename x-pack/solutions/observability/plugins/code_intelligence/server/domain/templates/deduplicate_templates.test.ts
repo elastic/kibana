@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { renderQueryTemplate } from '../models/query_codec';
 import { deduplicateTemplates } from './deduplicate_templates';
 import { normalizeTemplateQuery, semanticDigest, templateIdentity } from './template_identity';
 
@@ -28,15 +27,7 @@ const template = ({
   extractorVersion: 'phase-3',
   id: 'ignored-by-deduplication',
   ...(logLevel === undefined ? {} : { logLevel }),
-  parameters: {
-    source: {
-      description: 'Log source.',
-      example: 'logs-app-*',
-      kind: 'source' as const,
-      name: 'source',
-    },
-  },
-  query: 'FROM [[source]]\n| WHERE message IS NOT NULL',
+  query: 'FROM logs*\n| WHERE message IS NOT NULL',
   repository: 'elastic/example',
   revision: 'a'.repeat(40),
   severityScore,
@@ -46,8 +37,8 @@ const template = ({
 
 describe('template identity and deduplication', () => {
   it('normalizes formatting without changing quoted literal contents', () => {
-    expect(normalizeTemplateQuery(' FROM  [[source]]  | WHERE note == "two  spaces" ')).toBe(
-      'FROM [[source]] | WHERE note == "two  spaces"'
+    expect(normalizeTemplateQuery(' FROM  logs*  | WHERE note == "two  spaces" ')).toBe(
+      'FROM logs* | WHERE note == "two  spaces"'
     );
   });
 
@@ -78,9 +69,9 @@ describe('template identity and deduplication', () => {
 
   it('preserves triple-quoted literal whitespace while normalizing surrounding formatting', () => {
     /** Queries differ only inside their triple-quoted literal values. */
-    const oneSpace = ' FROM [[source]]\n| WHERE note == """a " two spaces""" ';
+    const oneSpace = ' FROM logs*\n| WHERE note == """a " two spaces""" ';
     /** The second literal has an additional meaningful whitespace character. */
-    const twoSpaces = 'FROM [[source]] | WHERE note == """a " two  spaces"""';
+    const twoSpaces = 'FROM logs* | WHERE note == """a " two  spaces"""';
     /** The immutable scope makes the identity assertion independent of template fixtures. */
     const identityScope = {
       extractorVersion: 'phase-3',
@@ -90,7 +81,7 @@ describe('template identity and deduplication', () => {
     };
 
     expect(normalizeTemplateQuery(oneSpace)).toBe(
-      'FROM [[source]] | WHERE note == """a " two spaces"""'
+      'FROM logs* | WHERE note == """a " two spaces"""'
     );
     expect(normalizeTemplateQuery(twoSpaces)).toBe(twoSpaces);
     expect(templateIdentity({ ...identityScope, query: oneSpace })).not.toBe(
@@ -118,16 +109,16 @@ describe('template identity and deduplication', () => {
     /** Provides the common immutable identity scope. */
     const input = {
       extractorVersion: 'phase-3',
-      query: 'FROM [[source]] | WHERE message IS NOT NULL',
+      query: 'FROM logs* | WHERE message IS NOT NULL',
       repository: 'elastic/example',
       revision: 'a'.repeat(40),
       signalType: 'log' as const,
     };
     expect(templateIdentity(input)).toBe(
-      templateIdentity({ ...input, query: ' FROM [[source]]\n| WHERE message IS NOT NULL ' })
+      templateIdentity({ ...input, query: ' FROM logs*\n| WHERE message IS NOT NULL ' })
     );
     expect(templateIdentity(input)).toBe(
-      '241670a06792e991b18848ec3bc37a531493375e242293271285a0de59355864'
+      '4e5dc77f96f30dc55fd311d3a88315340076e0487095a35ef74100f50a76cc9f'
     );
     expect(templateIdentity(input)).not.toBe(
       templateIdentity({ ...input, extractorVersion: 'phase-4' })
@@ -155,9 +146,7 @@ describe('template identity and deduplication', () => {
       { excerpt: 'replacement', line: 9, path: 'src/a.ts' },
       { excerpt: 'other', line: 2, path: 'src/b.ts' },
     ]);
-    expect(renderQueryTemplate(merged[0]).query).toBe(
-      'FROM logs-app-*\n| WHERE message IS NOT NULL'
-    );
+    expect(merged[0].query).toBe('FROM logs*\n| WHERE message IS NOT NULL');
   });
 
   it('takes the log level from the unique highest-severity occurrence regardless of input order', () => {

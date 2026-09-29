@@ -142,7 +142,7 @@ describe('Phase 0 domain codecs', () => {
     ).toBe('Left');
   });
 
-  it('preserves template invariants in catalog documents', () => {
+  it('preserves the concrete-query invariant in catalog documents', () => {
     /** Supplies a catalog document fixture for invariant checks. */
     const document = {
       createdAt: 'now',
@@ -150,33 +150,17 @@ describe('Phase 0 domain codecs', () => {
       evidence: [],
       extractorVersion: '1',
       id: 'document-1',
-      parameters: {
-        source: { description: 'Source', kind: 'source', name: 'source', example: 'logs-*' },
-      },
+      query: 'FROM logs*',
       repository: 'elastic/demo',
       revision: '0123456789abcdef0123456789abcdef01234567',
       signalType: 'log',
       sourceHash: `sha256:${'a'.repeat(64)}`,
-      templatedQuery: 'FROM [[source]]',
       title: 'Title',
       updatedAt: 'now',
     };
     expect(catalogDocumentRt.decode(document)._tag).toBe('Right');
-    expect(
-      catalogDocumentRt.decode({
-        ...document,
-        parameters: {
-          ...document.parameters,
-          arbitrary: { description: 'Arbitrary', kind: 'string', name: 'arbitrary', example: 'x' },
-        },
-      })._tag
-    ).toBe('Left');
-    expect(
-      catalogDocumentRt.decode({
-        ...document,
-        parameters: { source: { ...document.parameters.source, name: 'other' } },
-      })._tag
-    ).toBe('Left');
+    expect(catalogDocumentRt.decode({ ...document, query: 'FROM [[source]]' })._tag).toBe('Left');
+    expect(catalogDocumentRt.decode({ ...document, query: '' })._tag).toBe('Left');
     expect(catalogDocumentRt.decode({ ...document, sourceHash: 'sha256:x' })._tag).toBe('Left');
   });
 
@@ -231,12 +215,11 @@ describe('Phase 0 domain codecs', () => {
         evidence: [],
         extractorVersion: '1',
         id: '',
-        parameters: {},
+        query: 'FROM logs*',
         repository: 'elastic/demo',
         revision: '0123456789abcdef0123456789abcdef01234567',
         signalType: 'log',
         sourceHash: 'sha256:x',
-        templatedQuery: 'FROM [[source]]',
         title: 'Title',
         updatedAt: 'now',
       })._tag
