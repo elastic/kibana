@@ -138,8 +138,12 @@ describe('create_dataset_form_state', () => {
       expect(validateQuoteCharacter(value)).toBe(true);
     });
 
-    it.each(['\\t', '\\n', '\\r', '\\\\'])('accepts the escape sequence %s', (value) => {
+    it.each(['\\t', '\\\\'])('accepts the escape sequence %s', (value) => {
       expect(validateQuoteCharacter(value)).toBe(true);
+    });
+
+    it.each(['\\n', '\\r'])('rejects the line terminator sequence %s', (value) => {
+      expect(validateQuoteCharacter(value)).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
     });
 
     it('rejects multi-character values', () => {

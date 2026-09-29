@@ -64,7 +64,7 @@ export function getDataSetByIdApiPath(id: string): string {
 /** Quote character value Elasticsearch reads (case-insensitively) as "quoting off". */
 export const QUOTE_CHARACTER_NONE = 'none';
 
-const VALID_QUOTE_SEQUENCES: readonly string[] = ['\\t', '\\n', '\\r', '\\\\'];
+const VALID_QUOTE_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
 
 /** Whether `value` is a single character, a supported escape sequence, or `none` (any case). */
 export const isValidQuoteCharacter = (value: string): boolean =>
