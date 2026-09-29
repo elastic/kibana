@@ -93,9 +93,7 @@ export const AccessControlForm = <Role extends string>({
   const profileById = new Map(
     [...profiles, ...suggestedProfiles].map((profile) => [profile.uid, profile])
   );
-  const isManagingAnotherOwner = Boolean(
-    isAdmin && ownerId && currentUserId && ownerId !== currentUserId
-  );
+  const isManagingAnotherOwner = Boolean(isAdmin && ownerId && ownerId !== currentUserId);
   const excludedIds = new Set([
     ownerId,
     ...(isManagingAnotherOwner ? [] : [currentUserId]),

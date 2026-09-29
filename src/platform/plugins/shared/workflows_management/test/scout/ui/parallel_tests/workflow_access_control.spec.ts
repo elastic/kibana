@@ -25,8 +25,11 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     workflowId = undefined;
   });
 
-  test.afterEach(async ({ apiClient, scoutSpace }) => {
+  test.afterEach(async ({ apiClient, scoutSpace, esClient }) => {
     if (workflowId) {
+      await esClient.indices.refresh({
+        index: ['.workflows-executions', '.workflows-step-executions'],
+      });
       const response = await apiClient.delete(
         `s/${scoutSpace.id}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
         {
@@ -134,7 +137,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       await editor.hoverDisabledAccessButton();
       await expect(page.testSubj.locator('workflowAccessButton')).toBeDisabled();
       await expect(
-        page.getByText('Only the workflow owner and administrators can manage access.', {
+        page.getByText('Only the workflow owner and superusers can manage access.', {
           exact: true,
         })
       ).toBeVisible();
