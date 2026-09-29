@@ -7,12 +7,13 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   ApprovalContent,
+  getProposalCaption,
   getProposalDecision,
   getProposalTone,
   isProposalExpired,
@@ -98,6 +99,7 @@ const MAX_SUPERSEDE_HOPS = 50;
 export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
   ({ proposalId, chainHops = 0 }) => {
     const { euiTheme } = useEuiTheme();
+    const titleId = useGeneratedHtmlId({ prefix: 'approvalChatHeader' });
     const [mode, setMode] = useState<CardMode>('view');
     const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
     const [rationale, setRationale] = useState('');
@@ -248,10 +250,11 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
         data-test-subj={`proposalCard-${proposalId}`}
       >
         <ApprovalContent
-          showHeader={false}
           title={actionName}
+          titleId={titleId}
           tone={getProposalTone(liveProposal)}
           comment={liveProposal.comment}
+          caption={getProposalCaption(liveProposal, { includeRiskDetails: true })}
           decision={decision}
           isSubmitting={isSubmitting}
           currentActorName={currentActorName}
