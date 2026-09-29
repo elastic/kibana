@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable dot-notation */
+
+import { vi } from 'vitest';
 
 import { URL } from 'url';
 

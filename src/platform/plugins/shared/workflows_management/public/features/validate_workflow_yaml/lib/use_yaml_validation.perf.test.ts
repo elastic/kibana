@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 /**
  * Self-calibrated YAML validation performance suite.  Fixes #261389.
  *
@@ -52,6 +50,7 @@ vi.mock('@kbn/esql-language', () => ({
 import fs from 'fs';
 // eslint-disable-next-line import/no-nodejs-modules
 import path from 'path';
+import { vi } from 'vitest';
 import YAML, { LineCounter } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import {

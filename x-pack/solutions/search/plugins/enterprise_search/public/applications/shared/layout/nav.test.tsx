@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 vi.mock('./nav_link_helpers', () => {
   const mocked = {
     generateNavLink: vi.fn(({ to, items }) => ({ href: to, items })),
@@ -17,6 +15,7 @@ vi.mock('./nav_link_helpers', () => {
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
 

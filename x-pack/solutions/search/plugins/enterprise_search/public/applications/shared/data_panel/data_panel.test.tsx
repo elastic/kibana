@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 vi.mock('@elastic/eui', async () => {
   const actual = await vi.importActual('@elastic/eui');
   return {
@@ -19,6 +17,8 @@ vi.mock('@elastic/eui', async () => {
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+
+import { vi } from 'vitest';
 
 import { EuiButton, EuiTitle } from '@elastic/eui';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';

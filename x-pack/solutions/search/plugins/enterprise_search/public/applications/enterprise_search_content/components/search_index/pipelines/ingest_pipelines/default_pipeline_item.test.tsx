@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import { mockPipelineState } from '../../../../__mocks__/pipeline.mock';
 import { indices } from '../../../../__mocks__/search_indices.mock';
@@ -21,6 +19,7 @@ vi.mock('../../components/curl_request/curl_request', () => {
 import React from 'react';
 
 import { fireEvent, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 

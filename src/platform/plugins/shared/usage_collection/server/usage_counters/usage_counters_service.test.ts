@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable dot-notation */
+
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
-
-/* eslint-disable dot-notation */
 import * as rxOp from 'rxjs';
 import moment from 'moment';
 import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';

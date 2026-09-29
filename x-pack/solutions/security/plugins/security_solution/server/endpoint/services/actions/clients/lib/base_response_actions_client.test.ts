@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-// eslint-disable-next-line max-classes-per-file
 import type { ResponseActionsClient } from './types';
 import type {
   ResponseActionsClientUpdateCasesOptions,

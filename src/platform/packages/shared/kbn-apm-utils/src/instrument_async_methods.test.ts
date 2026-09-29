@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
-
-/* eslint-disable max-classes-per-file */
 
 import { instrumentAsyncMethods } from './instrument_async_methods';
 import { withSpan } from './with_span';

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-shadow */
+
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-/* eslint-disable @typescript-eslint/no-shadow */
 
 import {
   pointInTimeFinderMock,

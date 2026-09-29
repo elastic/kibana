@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -25,6 +23,7 @@ vi.mock('./editing_column', () => {
 });
 
 import { render } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import type { Column } from '../reorderable_table/types';
 

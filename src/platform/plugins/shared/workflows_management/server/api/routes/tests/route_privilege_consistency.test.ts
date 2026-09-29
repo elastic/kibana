@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock, Mocked } from 'vitest';
-
 vi.mock('../utils/with_availability_check', () => {
   const mocked = {
     withAvailabilityCheck: (handler: any) => handler,
@@ -25,6 +22,8 @@ vi.mock('../utils/route_error_handlers', () => {
 vi.mock('../../../services/workflow_change_history_service');
 
 import { errors } from '@elastic/elasticsearch';
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';

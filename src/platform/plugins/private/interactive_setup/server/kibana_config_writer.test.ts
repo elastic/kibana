@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 vi.mock('fs/promises');
 vi.mock('crypto');
 import { constants } from 'fs';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 

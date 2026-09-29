@@ -7,9 +7,6 @@
 
 import React from 'react';
 
-import { vi } from 'vitest';
-import type { MockInstance } from 'vitest';
-
 const MockPrompt = vi.fn<null, [object]>(() => null);
 vi.mock('react-router-dom', () => {
   const mocked = {
@@ -19,6 +16,8 @@ vi.mock('react-router-dom', () => {
 });
 
 import { render } from '@testing-library/react';
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 import { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 

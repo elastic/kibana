@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Mocked } from 'vitest';
 /* eslint-disable max-classes-per-file */
+import type { Mocked } from 'vitest';
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';

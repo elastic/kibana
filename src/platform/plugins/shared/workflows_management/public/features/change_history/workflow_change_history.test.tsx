@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WORKFLOW_UNSAVED_CHANGE_ID } from './constants';

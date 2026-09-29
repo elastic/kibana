@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { vi } from 'vitest';
 
 import { SimpleMemCache } from './simple_mem_cache';
 

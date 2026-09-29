@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

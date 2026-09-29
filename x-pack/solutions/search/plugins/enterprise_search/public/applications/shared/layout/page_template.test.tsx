@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 vi.mock('@kbn/shared-ux-page-kibana-template', () => {
   const MockKibanaPageTemplate: any = vi.fn(({ children, solutionNav }: any) =>
     solutionNav?.footer ? [solutionNav.footer, children] : children
@@ -20,6 +18,7 @@ import { mockKibanaValues, setMockValues } from '../../__mocks__/kea_logic';
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';

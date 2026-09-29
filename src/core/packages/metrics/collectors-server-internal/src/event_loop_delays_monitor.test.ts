@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable dot-notation */
+
+import { vi } from 'vitest';
 vi.mock('perf_hooks');
 import { monitorEventLoopDelay } from 'perf_hooks';
 import { EventLoopDelaysMonitor, nsToMs } from './event_loop_delays_monitor';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable @typescript-eslint/naming-convention */
+
+import { vi } from 'vitest';
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';

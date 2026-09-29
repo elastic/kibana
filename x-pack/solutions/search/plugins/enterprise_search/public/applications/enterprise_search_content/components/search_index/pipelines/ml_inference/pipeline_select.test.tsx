@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 // EuiSelectable has complex internal state and uses ResizeObserver for height calculations.
@@ -41,6 +39,7 @@ vi.mock('@elastic/eui', async () => {
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 

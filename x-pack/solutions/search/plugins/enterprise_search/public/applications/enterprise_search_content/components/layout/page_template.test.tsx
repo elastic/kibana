@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
 vi.mock('../../../shared/layout/nav', () => {
@@ -27,6 +25,7 @@ vi.mock('../../../shared/kibana_chrome', () => {
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 

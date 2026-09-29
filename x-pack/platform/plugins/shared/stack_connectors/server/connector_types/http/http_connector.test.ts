@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';

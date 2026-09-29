@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock, Mocked, MockInstance } from 'vitest';
-
 vi.mock('./authenticator');
 
 import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
 import dedent from 'dedent';
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockInstance } from 'vitest';
 
 import type {
   AuthenticationHandler,

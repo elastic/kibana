@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable dot-notation */
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-/* eslint-disable dot-notation */
 vi.mock('node-fetch');
 import { AzureCloudService } from './azure';
 

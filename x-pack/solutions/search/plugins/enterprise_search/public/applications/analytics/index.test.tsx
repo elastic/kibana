@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import '../../../common/__mocks__';
 import '../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';

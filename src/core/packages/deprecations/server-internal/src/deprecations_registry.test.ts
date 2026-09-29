@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable dot-notation */
+
+import { vi } from 'vitest';
 import type {
   RegisterDeprecationsConfig,
   GetDeprecationsContext,

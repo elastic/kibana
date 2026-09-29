@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable no-console */
+
+import { vi } from 'vitest';
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';

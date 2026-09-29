@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 vi.mock('.', () => {
   const mocked = {
     generateReactRouterProps: ({ to }: { to: string }) => ({
@@ -20,6 +18,7 @@ vi.mock('.', () => {
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 

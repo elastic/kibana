@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 // eslint-disable-next-line max-classes-per-file
+import { vi } from 'vitest';
 import React from 'react';
 import { type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act, renderHook, waitFor } from '@testing-library/react';

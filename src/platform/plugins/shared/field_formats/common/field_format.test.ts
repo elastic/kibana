@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable max-classes-per-file -- needs TestFormat (generic test double) + ConvertOverrideFormat (tests textConvert override path, as used by AggsTermsFieldFormat) */
+
+import { vi } from 'vitest';
 
 import '@emotion/jest';
 import { EuiProvider, useEuiTheme } from '@elastic/eui';

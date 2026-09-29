@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable max-classes-per-file */
+
+import { vi } from 'vitest';
 
 vi.mock('../../../../../../kibana_services', () => {
   const mocked = {

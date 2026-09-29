@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { WorkflowsPageName } from '@kbn/deeplinks-workflows';
 import { setWorkflowsNavLinks } from './test_helpers';

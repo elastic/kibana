@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import React from 'react';
 
 vi.mock('@elastic/eui', async () => {
@@ -22,6 +20,8 @@ vi.mock('@elastic/eui', async () => {
 });
 
 import { screen } from '@testing-library/react';
+
+import { vi } from 'vitest';
 
 import { EuiDragDropContext } from '@elastic/eui';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';

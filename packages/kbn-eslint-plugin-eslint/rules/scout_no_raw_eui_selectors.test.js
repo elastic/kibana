@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 // Shape of the real package: one `Eui<Component>Selectors` object per Component
 // Object, `*_SELECTOR` entries are CSS classes, `*_TEST_SUBJ` entries are not.
 vi.mock('@elastic/eui-test-helpers', () => {

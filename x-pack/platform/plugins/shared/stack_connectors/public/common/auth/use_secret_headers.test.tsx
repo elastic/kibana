@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-/* eslint-disable no-console */
 
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';

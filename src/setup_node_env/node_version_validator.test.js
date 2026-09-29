@@ -14,10 +14,8 @@ var REQUIRED_NODE_JS_VERSION = 'v' + pkg.engines.node;
 var INVALID_NODE_JS_VERSION = 'v0.10.0';
 
 describe('NodeVersionValidator', function () {
-  it('should run the script WITH error', () =>
-    new Promise((resolve, reject) => {
-      const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
-
+  it('should run the script WITH error', function () {
+    return new Promise(function (resolve) {
       var processVersionOverwrite =
         "Object.defineProperty(process, 'version', { value: '" +
         INVALID_NODE_JS_VERSION +
@@ -29,14 +27,13 @@ describe('NodeVersionValidator', function () {
         expect(error.code).toBe(1);
         expect(stderr).toBeDefined();
         expect(stderr).not.toHaveLength(0);
-        done();
+        resolve();
       });
-    }));
+    });
+  });
 
-  it('should run the script WITHOUT error', () =>
-    new Promise((resolve, reject) => {
-      const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
-
+  it('should run the script WITHOUT error', function () {
+    return new Promise(function (resolve) {
       var processVersionOverwrite =
         "Object.defineProperty(process, 'version', { value: '" +
         REQUIRED_NODE_JS_VERSION +
@@ -48,7 +45,8 @@ describe('NodeVersionValidator', function () {
         expect(error).toBeNull();
         expect(stderr).toBeDefined();
         expect(stderr).toHaveLength(0);
-        done();
+        resolve();
       });
-    }));
+    });
+  });
 });

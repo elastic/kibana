@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
 

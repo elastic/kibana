@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-/* eslint-disable max-classes-per-file */
 
 import { McpConnector, listToolsCache } from './mcp';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';

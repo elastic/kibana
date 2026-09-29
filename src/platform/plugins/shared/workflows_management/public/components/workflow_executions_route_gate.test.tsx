@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter, Route, Routes } from '@kbn/shared-ux-router';

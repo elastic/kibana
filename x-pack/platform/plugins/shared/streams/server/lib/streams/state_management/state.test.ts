@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable max-classes-per-file */
+
+import { vi } from 'vitest';
 
 import { State } from './state';
 import { ClassicStream } from './streams/classic_stream';

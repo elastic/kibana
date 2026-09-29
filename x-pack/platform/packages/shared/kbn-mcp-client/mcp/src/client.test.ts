@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { vi } from 'vitest';
 import type { Mock, MockedClass, MockedFunction } from 'vitest';
-
-/* eslint-disable max-classes-per-file */
 import { McpClient } from './client';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import {

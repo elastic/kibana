@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 vi.mock('./multi_field_selector', () => {
@@ -20,6 +18,7 @@ vi.mock('./multi_field_selector', () => {
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 

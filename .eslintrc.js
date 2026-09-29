@@ -212,6 +212,9 @@ const DEV_FILE_PATTERNS = [
   'mock.{js,ts,tsx}',
   '_stubs.{js,ts,tsx}',
   '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
+  '{jest_setup,setup_test,setup_tests,test_setup}.{js,ts,tsx}',
+  'jest.setup.{js,ts,tsx}',
+  'jest_setup_*.{js,ts,tsx}',
   '{postcss,webpack,cypress,vitest}.config.{js,ts}',
 ];
 
@@ -1038,10 +1041,10 @@ module.exports = {
       },
     },
     /**
-     * Jest specific rules
+     * Jest specific rules (unit tests run on Vitest, which supports async describe callbacks)
      */
     {
-      files: ['**/*.test.{js,mjs,ts,tsx}'],
+      files: ['**/integration_tests/**/*.test.{js,mjs,ts,tsx}'],
       rules: {
         'jest/valid-describe-callback': 'error',
       },
@@ -2339,6 +2342,11 @@ module.exports = {
           },
         ],
       },
+    },
+    {
+      // Vitest runs with `globals: true`; CommonJS test files cannot import `vi`.
+      files: ['**/*.test.js'],
+      globals: { vi: 'readonly' },
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],

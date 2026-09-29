@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';

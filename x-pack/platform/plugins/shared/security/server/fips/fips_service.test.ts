@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 const mockGetFipsFn = vi.fn();
 vi.mock('crypto', () => {
   const mocked = {
@@ -22,6 +20,7 @@ vi.mock('crypto', () => {
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { LicenseType } from '@kbn/licensing-types';

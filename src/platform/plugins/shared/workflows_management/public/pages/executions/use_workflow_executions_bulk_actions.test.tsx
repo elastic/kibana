@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 const mockCopyToClipboard = vi.fn((_value: string) => true);
 vi.mock('@elastic/eui', async () => {
   const actual = await vi.importActual('@elastic/eui');
@@ -20,6 +18,7 @@ vi.mock('@elastic/eui', async () => {
 
 import { act, renderHook } from '@testing-library/react';
 import type React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { formatWorkflowExecutionsForCopy } from './format_workflow_executions_for_copy';
 import {

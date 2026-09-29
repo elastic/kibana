@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';

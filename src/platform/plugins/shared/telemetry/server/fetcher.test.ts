@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable dot-notation */
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-/* eslint-disable dot-notation */
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { Setup } from '@kbn/telemetry-collection-manager-plugin/server/mocks';

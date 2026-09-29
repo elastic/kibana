@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 // EuiStepsHorizontal uses complex DOM measurement. Capturing the steps prop lets us
@@ -55,6 +53,7 @@ vi.mock('./review_pipeline', () => {
 import React from 'react';
 
 import { fireEvent, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import type { TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';

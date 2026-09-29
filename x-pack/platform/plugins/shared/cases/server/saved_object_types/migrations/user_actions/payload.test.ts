@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Mocked } from 'vitest';
-
 /* eslint-disable @typescript-eslint/naming-convention */
+
+import type { Mocked } from 'vitest';
 
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';

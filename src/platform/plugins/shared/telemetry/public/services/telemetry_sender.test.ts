@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable dot-notation */
+
 import { vi } from 'vitest';
 import type { Mock, MockInstance } from 'vitest';
-
-/* eslint-disable dot-notation */
 import { TelemetrySender } from './telemetry_sender';
 import { mockTelemetryService } from '../mocks';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';

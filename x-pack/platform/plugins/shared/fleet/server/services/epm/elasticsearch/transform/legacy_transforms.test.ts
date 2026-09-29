@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/order
+
 import { vi } from 'vitest';
 import type { Mocked, MockedFunction } from 'vitest';
-
-// eslint-disable-next-line import/order
 import { createAppContextStartContractMock } from '../../../../mocks';
 
 vi.mock('../../packages/get', () => {

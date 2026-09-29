@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable max-classes-per-file */
+
+import { vi } from 'vitest';
 
 import type {
   AsyncProfileProvider,

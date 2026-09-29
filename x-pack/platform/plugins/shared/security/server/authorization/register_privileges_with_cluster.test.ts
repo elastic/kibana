@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';

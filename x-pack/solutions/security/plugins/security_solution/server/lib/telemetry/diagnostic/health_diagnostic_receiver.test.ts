@@ -444,10 +444,10 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         setupPointInTime(mockEsClient);
         mockEsClient.search.mockImplementation(
           () =>
-            new Promise((resolve) =>
+            new Promise((resolveSearch) =>
               setTimeout(
                 () =>
-                  resolve({
+                  resolveSearch({
                     took: 1,
                     timed_out: false,
                     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 vi.mock('net');
 vi.mock('tls');
 
@@ -15,6 +13,7 @@ import Boom from '@hapi/boom';
 import { Socket } from 'net';
 import type { PeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
+import { vi } from 'vitest';
 
 import type { KibanaRequest, ScopeableRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';

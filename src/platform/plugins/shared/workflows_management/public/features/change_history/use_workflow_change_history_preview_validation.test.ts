@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import './use_workflow_change_history_preview_validation.test_mocks';
 
 import { act, renderHook, type RenderHookResult, waitFor } from '@testing-library/react';
 import type { MutableRefObject } from 'react';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,

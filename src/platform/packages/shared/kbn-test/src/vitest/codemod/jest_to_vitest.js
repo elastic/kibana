@@ -286,12 +286,16 @@ const transformFile = (sourceFile) => {
     importLines.push(`import type { ${[...vitestTypes].sort().join(', ')} } from 'vitest';`);
   }
   if (importLines.length) {
-    // keep the license header first
+    // keep the license header and file-level eslint directives first
     const [firstStatement] = sourceFile.getStatements();
-    const [headerComment] = firstStatement ? firstStatement.getLeadingCommentRanges() : [];
+    const [headerComment, ...otherComments] = firstStatement
+      ? firstStatement.getLeadingCommentRanges()
+      : [];
+    const directives = otherComments.filter((comment) => /eslint-disable/.test(comment.getText()));
+    const anchor = directives.at(-1) ?? headerComment;
     const text = importLines.join('\n');
-    if (headerComment) {
-      sourceFile.insertText(headerComment.getEnd(), `\n\n${text}`);
+    if (anchor) {
+      sourceFile.insertText(anchor.getEnd(), `\n\n${text}`);
     } else {
       sourceFile.insertText(0, `${text}\n\n`);
     }

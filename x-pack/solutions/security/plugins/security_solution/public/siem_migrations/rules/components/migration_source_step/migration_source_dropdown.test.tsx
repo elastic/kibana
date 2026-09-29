@@ -16,10 +16,10 @@ import { mocked } from 'jest-mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-  const mocked = {
+  const mockedModule = {
     useIsExperimentalFeatureEnabled: vi.fn(),
   };
-  return { ...mocked, default: mocked };
+  return { ...mockedModule, default: mockedModule };
 });
 
 describe('MigrationSourceDropdown', () => {

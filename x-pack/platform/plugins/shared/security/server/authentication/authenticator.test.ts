@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
-
 vi.mock('./providers/basic');
 vi.mock('./providers/token');
 vi.mock('./providers/saml');
@@ -15,6 +12,8 @@ vi.mock('./providers/http');
 
 import { errors } from '@elastic/elasticsearch';
 import type { DetailedPeerCertificate } from 'tls';
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 
 import {
   elasticsearchServiceMock,

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 /* eslint-disable dot-notation */
+
+import { vi } from 'vitest';
 import { firstValueFrom, of } from 'rxjs';
 import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
 import { coreMock } from '@kbn/core/public/mocks';

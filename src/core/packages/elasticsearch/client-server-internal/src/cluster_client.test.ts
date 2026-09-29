@@ -1948,16 +1948,16 @@ describe('ClusterClient', () => {
         let closeScopedClient: () => void;
 
         internalClient.close.mockReturnValue(
-          new Promise<void>((resolve) => {
-            closeInternalClient = resolve;
+          new Promise<void>((resolveClose) => {
+            closeInternalClient = resolveClose;
           }).then(() => {
             expect(clusterClientClosed).toBe(false);
             internalClientClosed = true;
           })
         );
         scopedClient.close.mockReturnValue(
-          new Promise<void>((resolve) => {
-            closeScopedClient = resolve;
+          new Promise<void>((resolveClose) => {
+            closeScopedClient = resolveClose;
           }).then(() => {
             expect(clusterClientClosed).toBe(false);
             scopedClientClosed = true;

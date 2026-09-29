@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 // eslint-disable-next-line import/no-extraneous-dependencies
+
+import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 
 // context:
