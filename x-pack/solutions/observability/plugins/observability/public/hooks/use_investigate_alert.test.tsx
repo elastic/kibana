@@ -95,8 +95,7 @@ describe('useInvestigateAlert', () => {
   it('returns Investigate when the alert has no investigation', async () => {
     const { result } = renderInvestigateAlert();
 
-    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
-    expect(result.current.showInvestigateButton).toBe(true);
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
     expect(result.current.showViewInvestigation).toBe(false);
     expect(result.current.investigateActionLabel).toBe('Investigate');
     expect(result.current.isInvestigating).toBe(false);
@@ -115,6 +114,18 @@ describe('useInvestigateAlert', () => {
         },
       })
     );
+  });
+
+  it('hides Investigate until the alert investigation status has loaded', async () => {
+    fetchMock.mockImplementation((endpoint: string) =>
+      endpoint === 'GET /internal/nightshift/investigations/availability'
+        ? Promise.resolve({ available: true })
+        : new Promise(() => {})
+    );
+    const { result } = renderInvestigateAlert();
+
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+    expect(result.current.showInvestigateButton).toBe(false);
   });
 
   it('returns Investigating and disables starts for an ongoing running investigation', async () => {

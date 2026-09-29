@@ -126,6 +126,19 @@ test.describe(
       const investigateItem = page.testSubj.locator('investigateAlert');
       await expect(investigateItem).toBeVisible();
 
+      let releaseStart = () => {};
+      const startHeld = new Promise<void>((resolve) => {
+        releaseStart = resolve;
+      });
+      await page.route(
+        (url: URL) =>
+          url.pathname.endsWith('/internal/nightshift/investigations') &&
+          url.searchParams.size === 0,
+        async (route: any) => {
+          await startHeld;
+          await route.fulfill({ status: 200, json: { investigation_id: 'investigation-1' } });
+        }
+      );
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
@@ -136,6 +149,9 @@ test.describe(
       expect((await requestPromise).postDataJSON()).toMatchObject({
         subject: { type: 'alert', id: alertId },
       });
+      await expect(investigateItem).toHaveText('Investigating…');
+      await expect(investigateItem).toHaveAttribute('aria-disabled', 'true');
+      releaseStart();
     });
 
     test('triggers investigation from classic alert details flyout take action menu', async ({
@@ -231,6 +247,9 @@ test.describe(
       await expect(investigateItem).toBeHidden();
 
       await viewItem.click();
+      await expect
+        .poll(() => page.url())
+        .toContain('/app/nightshift?investigationId=investigation-1');
       await pageObjects.observabilityAlerting.gotoInboxFilteredByRule(ruleId);
       await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
       await expect(menuButton).toBeVisible({ timeout: 30_000 });

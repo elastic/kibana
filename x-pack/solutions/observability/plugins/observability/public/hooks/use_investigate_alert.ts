@@ -73,7 +73,7 @@ export const useInvestigateAlert = ({
   const queryClient = useQueryClient();
   const { data: availability } = useInvestigationAvailability();
   const canInvestigate = Boolean(enabled && alertId && investigationsClient);
-  const { data: investigations } = useQuery({
+  const { data: investigations, isSuccess: isStatusLoaded } = useQuery({
     queryKey: statusQueryKey,
     queryFn: ({ signal }) =>
       investigationsClient!.fetch('GET /internal/nightshift/investigations', {
@@ -124,6 +124,7 @@ export const useInvestigateAlert = ({
     Boolean(viewInvestigationUrl);
   const showInvestigateButton =
     showInvestigateAction &&
+    isStatusLoaded &&
     !isInvestigating &&
     (!latestInvestigation || (latestStatus === 'completed' && isOpened) || isFinished);
 
