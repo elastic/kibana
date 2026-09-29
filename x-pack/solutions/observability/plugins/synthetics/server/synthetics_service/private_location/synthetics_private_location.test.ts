@@ -1317,7 +1317,9 @@ describe('SyntheticsPrivateLocation', () => {
         ...serverMock,
         fleet: {
           ...serverMock.fleet,
-          agentService: { asInternalUser: { listAgents: jest.fn() } },
+          agentService: {
+            asInternalUser: { listAgents: jest.fn().mockResolvedValue({ agents: [], total: 0 }) },
+          },
           packagePolicyService: {
             ...serverMock.fleet.packagePolicyService,
             buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
