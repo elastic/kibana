@@ -13,7 +13,16 @@ import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
 import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
-import { RULE_NOT_FOUND_MESSAGE } from './utils';
+
+/**
+ * Returned for rule ids that could not be found while fetching rules for a bulk action.
+ */
+export class RuleNotFoundError extends Error {
+  constructor() {
+    super('Rule not found');
+    this.name = 'RuleNotFoundError';
+  }
+}
 
 export const fetchRulesByQueryOrIds = async ({
   query,
@@ -41,33 +50,25 @@ export const fetchRulesByQueryOrIds = async ({
           item: rule.id,
           result: rule,
         })),
-        errors: errors.map(({ id, error }) => {
-          let message = fallbackErrorMessage;
-          if (error.statusCode === 404) {
-            message = RULE_NOT_FOUND_MESSAGE;
-          }
-          return {
-            item: id,
-            error: new Error(message),
-          };
-        }),
+        errors: errors.map(({ id, error }) => ({
+          item: id,
+          error:
+            error.statusCode === 404 ? new RuleNotFoundError() : new Error(fallbackErrorMessage),
+        })),
       };
     } catch (error) {
       // When there is an authorization error or it doesn't resolve any rule,
       // bulkGetRules will not return a partial object but throw an error instead.
-      let message = error.message || fallbackErrorMessage;
-      if (error.message === 'No rules found for bulk get') {
-        message = RULE_NOT_FOUND_MESSAGE;
-      }
+      const isRuleNotFound = error.message === 'No rules found for bulk get';
       return {
         results: [],
-        errors: ids.map((id) => {
-          return {
-            item: id,
-            // We do this to remove any status code set by the bulkGetRules client
-            error: new Error(message),
-          };
-        }),
+        errors: ids.map((id) => ({
+          item: id,
+          // We do this to remove any status code set by the bulkGetRules client
+          error: isRuleNotFound
+            ? new RuleNotFoundError()
+            : new Error(error.message || fallbackErrorMessage),
+        })),
       };
     }
   }
