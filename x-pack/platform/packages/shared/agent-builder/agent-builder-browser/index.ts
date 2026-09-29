@@ -7,6 +7,11 @@
 
 export { formatAgentBuilderErrorMessage } from './base/errors';
 export type {
+  AddConversationEventsParams,
+  AddConversationEventsResult,
+  ConversationsServiceStartContract,
+} from './conversations';
+export type {
   ToolServiceStartContract,
   ExecuteToolParams,
   ExecuteToolReturn,
@@ -29,6 +34,13 @@ export type {
 } from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
 export type {
+  ConversationEventRenderContext,
+  ConversationEventHeaderData,
+  ConversationEventUIDefinition,
+  ValidatedConversationEventUIDefinition,
+  ConversationEventsServiceStartContract,
+} from './conversation_events';
+export type {
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
   ConversationTemplateBriefCardRenderProps,
@@ -36,7 +48,11 @@ export type {
   ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './templates';
-export { TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
+export {
+  TIMELINE_TAB_ID,
+  BUILTIN_TAB_IDS,
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+} from './templates';
 export type {
   EventsServiceStartContract,
   ChatUiEventsContract,

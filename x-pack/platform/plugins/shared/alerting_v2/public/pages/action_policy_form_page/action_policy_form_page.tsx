@@ -27,6 +27,8 @@ import { FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { ActionPolicyForm } from '../../components/action_policy/form/action_policy_form';
+import { ActionPoliciesLicenseCallout } from '../../components/action_policy/action_policies_license_callout';
+import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 import { toCreatePayload, toUpdatePayload } from '../../components/action_policy/form/form_utils';
 import type { ActionPolicyFormState } from '../../components/action_policy/form/types';
 import { useActionPolicyForm } from '../../components/action_policy/form/use_action_policy_form';
@@ -218,6 +220,7 @@ const ActionPolicyFormPageContent = ({
   });
 
   const isLoading = isCreating || isUpdating || isCreatingWorkflows;
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
 
   return (
     <EuiPageTemplate.Section
@@ -257,6 +260,7 @@ const ActionPolicyFormPageContent = ({
         data-test-subj="pageTitle"
       />
       <EuiSpacer size="m" />
+      <ActionPoliciesLicenseCallout />
 
       <FormProvider {...methods}>
         <ActionPolicyForm />
@@ -278,7 +282,7 @@ const ActionPolicyFormPageContent = ({
             fill
             onClick={handleSubmit}
             isLoading={isLoading}
-            disabled={!isSubmitEnabled}
+            disabled={!isSubmitEnabled || !isLicenseValid}
             data-test-subj="submitButton"
           >
             {isEditMode ? (

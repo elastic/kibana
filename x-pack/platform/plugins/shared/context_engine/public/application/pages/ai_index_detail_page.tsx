@@ -15,14 +15,19 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
+  AiIndexCreatedCallout,
   AutomationsPanel,
   DescriptionPanel,
+  TracesPanel,
   LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
@@ -66,10 +71,24 @@ const signalsLockedAriaLabel = i18n.translate(
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation<AiIndexCreatedLocationState | undefined>();
+  const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const [isEditingSources, setIsEditingSources] = useState(false);
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
+  const [showCreatedCallout, setShowCreatedCallout] = useState(
+    () => location.state?.aiIndexCreated === true
+  );
+
+  // Remove aiIndexCreated from location state after it has been shown
+  useEffect(() => {
+    if (!location.state?.aiIndexCreated) {
+      return;
+    }
+
+    history.replace({ ...location, state: undefined });
+  }, [location, history]);
 
   const { summary } = useKiList({
     aiIndexId: aiIndex?.id,
@@ -125,6 +144,10 @@ export const AiIndexDetailPage = () => {
           isSelected={selectedTab === 'overview'}
           onClick={() => setSelectedTab('overview')}
           data-test-subj="contextAiIndexDetailTab-overview"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+            action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_OVERVIEW,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.aiIndexDetail.tabs.overview"
@@ -140,6 +163,10 @@ export const AiIndexDetailPage = () => {
             ) : undefined
           }
           data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+            action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_KNOWLEDGE_INDICATORS,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
@@ -152,7 +179,17 @@ export const AiIndexDetailPage = () => {
 
       {selectedTab === 'overview' && (
         <>
+          {showCreatedCallout && (
+            <AiIndexCreatedCallout onDismiss={() => setShowCreatedCallout(false)} />
+          )}
           <DescriptionPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={!!aiIndex?.managed}
+          />
+          <EuiSpacer size="m" />
+          <TracesPanel
             isLoading={isLoading}
             aiIndex={aiIndex}
             onSaved={refetch}

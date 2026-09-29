@@ -25,10 +25,12 @@ import {
   defaultExportProfile,
   envFromDatasetsProfile,
   envFromExportProfile,
+  loadVaultConfig,
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
 } from './profiles';
+import { runScoutHook } from './scout_hook';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
 import {
@@ -133,7 +135,7 @@ export const ensureEvalInit = async (
     if (getAllAvailableConnectors(repoRoot).length === 0) {
       if (!isTTY()) {
         throw createFlagError(
-          'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
+          'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run with a TTY to use the setup wizard.'
         );
       }
     }
@@ -203,6 +205,8 @@ export interface ResolvedProfileEnv {
   datasetsProfile?: string;
   exportProfile?: string;
   profileEnvOverrides: Record<string, string>;
+  /** Output of the suite's `scoutHook`, for both Scout and the Playwright run. */
+  suiteScoutEnv: Record<string, string>;
 }
 
 export interface ResolveProfileEnvOverridesOptions {
@@ -210,13 +214,22 @@ export interface ResolveProfileEnvOverridesOptions {
   log: ToolingLog;
   flagsReader: FlagsReader;
   profile?: string;
+  suite?: EvalSuiteDefinition;
 }
+
+/**
+ * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
+ * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
+ */
+const loadScoutHookConfig = (repoRoot: string, datasetsProfile: string | undefined): object =>
+  loadVaultConfig(repoRoot, datasetsProfile) ?? {};
 
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
   log,
   flagsReader,
   profile,
+  suite,
 }: ResolveProfileEnvOverridesOptions): Promise<ResolvedProfileEnv> => {
   const datasetsProfile = flagsReader.string('datasets-profile') ?? profile;
   const exportProfile =
@@ -246,7 +259,11 @@ export const resolveProfileEnvOverrides = async ({
     }
   }
 
-  return { datasetsProfile, exportProfile, profileEnvOverrides };
+  const suiteScoutEnv = suite?.scoutHook
+    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile))
+    : {};
+
+  return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
 };
 
 export const resolveEvaluationConnectorId = async (
@@ -274,6 +291,7 @@ export interface EvalRunContext {
   evaluationConnectorId: string;
   projects: string[];
   profileEnvOverrides: Record<string, string>;
+  suiteScoutEnv: Record<string, string>;
   datasetsProfile?: string;
   exportProfile?: string;
   requiresEisCcm: boolean;
@@ -284,6 +302,7 @@ export interface ResolveEvalRunContextOptions {
   log: ToolingLog;
   flagsReader: FlagsReader;
   profile?: string;
+  suite?: EvalSuiteDefinition;
 }
 
 export const resolveEvalRunContext = async ({
@@ -291,6 +310,7 @@ export const resolveEvalRunContext = async ({
   log,
   flagsReader,
   profile,
+  suite,
 }: ResolveEvalRunContextOptions): Promise<EvalRunContext> => {
   const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
 
@@ -312,27 +332,30 @@ export const resolveEvalRunContext = async ({
       ? projects.some(isEisConnectorId)
       : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
-  if (requiresEisCcm && !process.env.KIBANA_TESTING_AI_CONNECTORS) {
+  if (requiresEisCcm && !process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS) {
     const cached = readCachedEisConnectors();
     if (cached) {
-      process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(JSON.stringify(cached)).toString(
+      process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(JSON.stringify(cached)).toString(
         'base64'
       );
       log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
     }
   }
 
-  const { datasetsProfile, exportProfile, profileEnvOverrides } = await resolveProfileEnvOverrides({
-    repoRoot,
-    log,
-    flagsReader,
-    profile,
-  });
+  const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
+    await resolveProfileEnvOverrides({
+      repoRoot,
+      log,
+      flagsReader,
+      profile,
+      suite,
+    });
 
   return {
     evaluationConnectorId,
     projects,
     profileEnvOverrides,
+    suiteScoutEnv,
     datasetsProfile,
     exportProfile,
     requiresEisCcm,
@@ -345,6 +368,7 @@ export const buildEvalRunEnv = ({
   skipServer,
   suite,
   profileEnvOverrides,
+  suiteScoutEnv,
   flagsReader,
   log,
 }: {
@@ -353,6 +377,7 @@ export const buildEvalRunEnv = ({
   skipServer: boolean;
   suite?: EvalSuiteDefinition;
   profileEnvOverrides: Record<string, string>;
+  suiteScoutEnv: Record<string, string>;
   flagsReader: FlagsReader;
   log: ToolingLog;
 }): Record<string, string> => {
@@ -368,7 +393,7 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_SUITE_ID = suite.id;
   }
 
-  Object.assign(envOverrides, profileEnvOverrides);
+  Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
   if (envOverrides.TRACING_ES_URL) {
     log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);

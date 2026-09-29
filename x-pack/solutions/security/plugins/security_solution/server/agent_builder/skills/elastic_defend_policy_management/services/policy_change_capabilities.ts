@@ -25,6 +25,10 @@ export const toPolicyChangeCapabilities = (
       ProductFeatureSecurityKey.endpointTrustedDevices
     ),
     trustedDevicesExperimental: experimentalFeatures.trustedDevices,
+    endpointCustomYaraSignatures: productFeatures.isEnabled(
+      ProductFeatureSecurityKey.endpointCustomYaraSignatures
+    ),
+    customYaraSignaturesExperimental: experimentalFeatures.customYaraSignaturesEnabled,
     endpointProtectionUpdates: productFeatures.isEnabled(
       ProductFeatureSecurityKey.endpointProtectionUpdates
     ),

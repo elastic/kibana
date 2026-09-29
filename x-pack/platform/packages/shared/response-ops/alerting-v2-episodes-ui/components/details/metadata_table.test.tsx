@@ -29,6 +29,47 @@ describe('AlertEpisodeMetadataTable', () => {
     expect(renderTable).toHaveBeenCalledWith({ hit: mockHit, dataView: mockDataView });
   });
 
+  it('makes the rendered document viewer fill the scrollable flex item', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => <div data-test-subj="mockTable" />}
+        isStale={false}
+      />
+    );
+
+    expect(screen.getByTestId('mockTable').parentElement).toHaveStyleRule('block-size', '100%', {
+      target: '>*',
+    });
+  });
+
+  it('pads the document viewer control rows selected by their accessible controls', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => <div data-test-subj="mockTable" />}
+        isStale={false}
+        controlsPaddingSize="m"
+      />
+    );
+
+    const tableContainer = screen.getByTestId('mockTable').parentElement;
+    expect(tableContainer).toHaveStyleRule('padding-inline', '12px', {
+      target: ">*>:has(input[type='search'])",
+    });
+    expect(tableContainer).toHaveStyleRule('padding-inline', '12px', {
+      target: ">*>:has([role='switch'])",
+    });
+    expect(tableContainer).toHaveStyleRule('box-sizing', 'border-box', {
+      target: ">*>:has(input[type='search'])",
+    });
+    expect(tableContainer).toHaveStyleRule('max-inline-size', '100%', {
+      target: ">*>:has(input[type='search'])",
+    });
+  });
+
   it('renders the stale-data callout when isStale is true', () => {
     render(
       <AlertEpisodeMetadataTable
@@ -41,5 +82,21 @@ describe('AlertEpisodeMetadataTable', () => {
       />
     );
     expect(screen.getByTestId('alertingV2EpisodeMetadataTabStaleCallout')).toBeInTheDocument();
+  });
+
+  it('applies the requested margin directly to the stale-data callout', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => null}
+        isStale
+        calloutMarginSize="m"
+      />
+    );
+
+    const callout = screen.getByTestId('alertingV2EpisodeMetadataTabStaleCallout');
+    expect(callout).toHaveStyleRule('margin-block-start', '12px');
+    expect(callout).toHaveStyleRule('margin-inline', '12px');
   });
 });

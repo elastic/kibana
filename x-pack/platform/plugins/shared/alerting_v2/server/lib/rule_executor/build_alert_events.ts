@@ -9,17 +9,10 @@ import { createHash } from 'crypto';
 import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type {
-  AlertEvent,
-  AlertEventSeverity,
-  AlertEventType,
-} from '../../resources/datastreams/alert_events';
-import {
-  alertEventSeverity,
-  alertEventType,
-  buildRuleEventDocument,
-} from '../../resources/datastreams/alert_events';
+import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEventSeverity, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { AlertEvent, AlertEventType } from '../../resources/datastreams/alert_events';
+import { alertEventType, buildRuleEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 
 /**
@@ -316,7 +309,7 @@ export interface BuildNoDataAlertEventsOpts {
 /**
  * Creates `no_data` alert events for the supplied group hashes.
  *
- * Used when no_data_strategy is configured on the rule.
+ * Used when the rule's `no_data.strategy` classifies absent groups.
  */
 export function buildNoDataAlertEvents({
   ruleId,
