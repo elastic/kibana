@@ -18,6 +18,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
+import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteDependencies } from '../register_routes';
 
@@ -105,31 +106,33 @@ export const registerHuntCoordinatorRoute = ({
                 });
           const model = modelOutcome?.ok ? modelOutcome.model : undefined;
 
-          const body: HuntCoordinatorResponse = await huntCoordinator(
-            { esClient, reportsEsClient },
-            model,
-            logger,
-            {
-              report_id,
-              spaceId,
-              text,
-              iocs,
-              techniques,
-              time_range,
-              size,
-              max_assets,
-              llm_confidence_threshold,
-              tier2_when,
-              max_tier2_sample_events,
-              trigger,
-              technology: technologyInput.technology,
-              // The Worker fan-out supplies a run id so one sweep's children share it,
-              // which is what the packaging barrier and conclusion dedupe key off. Only
-              // mint one when the caller has no sweep to tie the run to.
-              run_id: run_id ?? randomUUID(),
-            }
-          );
+          const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
+            report_id,
+            spaceId,
+            text,
+            iocs,
+            techniques,
+            time_range,
+            size,
+            max_assets,
+            llm_confidence_threshold,
+            tier2_when,
+            max_tier2_sample_events,
+            trigger,
+            technology: technologyInput.technology,
+            // The Worker fan-out supplies a run id so one sweep's children share it,
+            // which is what the packaging barrier and conclusion dedupe key off. Only
+            // mint one when the caller has no sweep to tie the run to.
+            run_id: run_id ?? randomUUID(),
+          });
 
+          // SSE entries ride the response only on a confirmed hit for a named
+          // report; the hunt child fans out over them with ai.attachment.add.
+          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone.
+          const body: HuntCoordinatorResponse =
+            result.has_confirmed_hit && report_id
+              ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
+              : result;
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {

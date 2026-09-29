@@ -71,6 +71,10 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
         deepLinkId: 'triggersActionsConnectors',
         absolute: true,
       }),
+      modelSettingsUrl: application.getUrlForApp('management', {
+        path: '/modelManagement/model_settings',
+        absolute: true,
+      }),
       workflows,
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
