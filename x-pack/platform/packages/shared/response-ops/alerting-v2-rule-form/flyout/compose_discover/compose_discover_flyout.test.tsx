@@ -1662,6 +1662,45 @@ describe('ComposeDiscoverFlyout', () => {
       }
     );
 
+    it('unlocks the form toggle once YAML no longer joins both delay thresholds', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          ...representableRule,
+          state_transition: { pending: { count: 3, timeframe: '5m', operator: 'and' } },
+        } as any,
+      });
+
+      screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button')
+        .forEach((btn) => expect(btn).toBeDisabled());
+
+      const representableValues: FormValues = {
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        recovery: { strategy: 'no_breach' },
+        noData: { strategy: 'ignore' },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+        stateTransition: { pendingCount: 3, pendingTimeframe: null, pendingOperator: null },
+        stateTransitionAlertDelayMode: 'breaches',
+      };
+      mockParseYamlToFormValues = () => ({ values: representableValues, error: null });
+      act(() => {
+        yamlRuleFormProps?.onBlurSync(representableValues);
+      });
+
+      screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button')
+        .forEach((btn) => expect(btn).not.toBeDisabled());
+
+      clickEditMode('form');
+
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
+    });
+
     it('opens in form mode for a single-dimension delay', () => {
       renderFlyout({
         mode: 'edit',
