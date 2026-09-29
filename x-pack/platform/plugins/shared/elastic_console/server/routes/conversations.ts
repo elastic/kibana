@@ -13,8 +13,9 @@ import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from 
 import { createConversationClient } from '../lib/conversation_storage';
 import {
   conversationSchemaVersion,
+  eventsForRoundsWrite,
   eventsFromRounds,
-  hydrateRounds,
+  roundsForDocument,
   serializeConversationRounds,
 } from '../lib/timeline';
 import { isElasticConsoleEnabled } from './is_enabled';
@@ -95,7 +96,7 @@ export const registerConversationRoutes = ({
             bool: { filter },
           },
           _source: {
-            excludes: ['conversation_rounds'],
+            excludes: ['conversation_rounds', 'events'],
           },
           sort: [{ updated_at: { order: 'desc' as const } }],
         });
@@ -167,7 +168,11 @@ export const registerConversationRoutes = ({
           body: {
             id: hit._id,
             ...source,
-            conversation_rounds: hydrateRounds(source.conversation_rounds, source.events),
+            conversation_rounds: roundsForDocument({
+              schemaVersion: source.schema_version,
+              storedRounds: source.conversation_rounds,
+              events: source.events,
+            }),
           },
         });
       } catch (error) {
@@ -327,10 +332,16 @@ export const registerConversationRoutes = ({
           ...(request.body.title !== undefined && { title: request.body.title }),
           ...(rounds !== undefined && {
             conversation_rounds: serializeConversationRounds(rounds),
-            events: eventsFromRounds(rounds, {
-              agentId: hit._source.agent_id,
-              username: user.username,
-              userId: user.userId,
+            events: eventsForRoundsWrite({
+              schemaVersion: hit._source.schema_version,
+              storedRounds: hit._source.conversation_rounds,
+              storedEvents: hit._source.events,
+              rounds,
+              ctx: {
+                agentId: hit._source.agent_id,
+                username: user.username,
+                userId: user.userId,
+              },
             }),
             schema_version: conversationSchemaVersion,
           }),

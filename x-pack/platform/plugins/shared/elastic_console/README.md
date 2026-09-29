@@ -142,8 +142,9 @@ CRUD endpoints for Agent Builder conversations. RAMEN (and older clients) still 
 
 These routes sit on the Agent Builder conversation index and keep both shapes in sync:
 
-- **Read:** `GET` returns `conversation_rounds`. If the document is events-native and the events timeline has more completed turns than the stored rounds (or rounds are empty), rounds are folded from `user_message` / `execution_step` / `execution_terminated` events before the response is sent.
-- **Write:** `POST` / `PUT` still accept only `conversation_rounds` in the request body. Unknown fields from newer RAMEN builds (`events`, `schema_version`) are stripped by the route schema. The handler then persists both the rounds and a matching events projection plus `schema_version`, so the Agent Builder UI does not keep a stale events transcript after a RAMEN sync.
+- **Read:** `GET` returns `conversation_rounds`. For an events-native document (`schema_version >= 1`) with events, the rounds are folded from the timeline (Agent Builder's live chat appends events without rewriting the stored rounds, so the events are authoritative). Each round id yields one round: HITL resume executions are merged into it, an unanswered pause is `awaiting_prompt` with its `pending_prompts`, a failed/aborted run carries `interruption`, and executions that are still running are omitted. The full round input (including `attachment_refs`) and stored round `feedback` are preserved. Legacy documents return their stored rounds unchanged.
+- **Write:** `POST` / `PUT` still accept only `conversation_rounds` in the request body. Unknown fields from newer RAMEN builds (`events`, `schema_version`) are stripped by the route schema. Each round is projected by status: `completed` → `responded` terminal, `awaiting_prompt` → `prompt_requested` terminal, `in_progress` → no terminal, `interruption` → `execution_failed` / `execution_aborted`. On `PUT` to an events-native document the submitted rounds are reconciled with the stored timeline rather than replacing it: additive/custom events are kept, rounds spanning a HITL resume keep their stored events, a terminated round is never regressed to in-progress, and running rounds the caller never saw are kept. Legacy documents get a fresh projection and are stamped with `schema_version`.
+- **Fidelity:** the fold is a simplified port of Agent Builder's converters. `ask_user_question` answers are not copied onto question steps when merging a resume, and HITL rounds cannot be edited from RAMEN (the stored timeline wins).
 - **Compatibility:** Older RAMEN clients that only send `conversation_rounds` keep working. Newer RAMEN (see [elastic-ramen#120](https://github.com/elastic/elastic-ramen/pull/120)) also hydrates rounds on the client so takeover works against Kibana versions that do not yet include this write-path change.
 
 #### List conversations
@@ -152,7 +153,7 @@ These routes sit on the Agent Builder conversation index and keep both shapes in
 GET /internal/elastic_ramen/conversations?agent_id=<optional>
 ```
 
-Returns conversations for the current space, sorted by `updated_at` descending (max 100). The `conversation_rounds` field is excluded from list results.
+Returns conversations for the current space, sorted by `updated_at` descending (max 100). The `conversation_rounds` and `events` fields are excluded from list results.
 
 #### Get conversation
 
@@ -193,7 +194,7 @@ Body (all fields optional):
 }
 ```
 
-Returns `{ "id": "conversation-id" }`. When `conversation_rounds` is present, `events` are rewritten from those rounds so Agent Builder stays in sync.
+Returns `{ "id": "conversation-id" }`. When `conversation_rounds` is present, `events` are reconciled with those rounds (see above) so Agent Builder stays in sync.
 
 ## Configuration for external tools
 
