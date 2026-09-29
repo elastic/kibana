@@ -982,11 +982,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "c9a9678350b9e52825a1d031191581fd1a5693659675280400db9aa9b156ffc6"
+      "sha256": "fca1c69b855d962dd241495e129c72a9932ddebf9085547f63f93d290b784d91"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "bb7cc6e29c2787163a1c3633d66ccfc5aaaf2c5b4c51c943548d1386bf935a7c"
+      "sha256": "50fb3cca457a8a3bcf2db9546bca8f0fdf72b4c530cb74ef26bda68bb4e3edae"
     }
   }
 }
