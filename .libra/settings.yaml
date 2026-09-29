@@ -12,3 +12,4 @@ paths:
     - '**/.meta/**'
     - '**/moon.yml'
     - 'oas_docs/output/**'
+    - 'src/platform/packages/private/kbn-workflow-step-schema-cli/generated/**'

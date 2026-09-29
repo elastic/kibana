@@ -63,8 +63,12 @@ export {
   type AttachmentSummarySectionProps,
   AttachmentSummaryList,
   type AttachmentSummaryListProps,
+  AttachmentSummaryGroup,
+  type AttachmentSummaryGroupProps,
+  DEFAULT_COLLAPSED_COUNT,
+  AttachmentSummaryRow,
+  type AttachmentSummaryRowProps,
   selectSummaryAttachments,
-  type SummaryAttachment,
   SUMMARY_ATTACHMENT_TYPES,
   type SummaryAttachmentType,
 } from './src/components/attachment_summary';
@@ -110,7 +114,6 @@ export {
 } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
-export { AssignActionModal } from './src/components/modals/assign_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
 export {
   InvestigationActionModals,

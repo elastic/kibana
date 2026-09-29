@@ -33,9 +33,7 @@ const nlToEsqlToolSchema = z.object({
   index: z
     .string()
     .optional()
-    .describe(
-      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
-    ),
+    .describe('(optional) Index, index-pattern, or ES|QL view to query. '),
   context: z
     .string()
     .optional()
@@ -114,6 +112,7 @@ export const generateEsqlTool = ({
         disableNamedParams,
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
+        includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,
         logger,
