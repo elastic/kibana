@@ -29,6 +29,7 @@ import {
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
+  isScanAction,
   isSuspendProcessAction,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
@@ -141,7 +142,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                     />
                   )}
 
-                  {command === 'scan' && (
+                  {isScanAction(action) && (
                     <ScanResults
                       action={action}
                       agentId={hostAgentId}
