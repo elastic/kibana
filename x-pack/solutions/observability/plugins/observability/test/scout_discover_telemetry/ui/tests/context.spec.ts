@@ -79,7 +79,7 @@ test.describe('Discover observability telemetry context', { tag: [...LOCAL_OBLT]
     await setEbtOptIn(page, true);
     await pageObjects.dashboard.addSavedSearch('A Saved Search');
     await pageObjects.dashboard.waitForRenderComplete();
-    await expect(page.locator('[data-test-subj="docTable"] .euiDataGridRow')).not.toHaveCount(0);
+    await expect(page.components.dataGrid('docTable').rows).not.toHaveCount(0);
     await pageObjects.dashboard.openAddPanelFlyout();
 
     const events = await getEbtEvents(page, ['click']);
