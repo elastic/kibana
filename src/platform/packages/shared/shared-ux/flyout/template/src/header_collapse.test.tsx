@@ -577,6 +577,8 @@ describe('FlyoutTemplate Header collapsed prop', () => {
       '#compact'
     );
     expect(heading).not.toHaveAttribute('title');
+    expect(heading).toHaveStyleRule('font-weight', 'inherit', { target: / a$/ });
+    expect(heading).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
   });
 
   it('keeps a decorative title icon beside the compact title', () => {

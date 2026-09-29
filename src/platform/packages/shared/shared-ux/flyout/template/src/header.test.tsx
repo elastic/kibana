@@ -82,6 +82,8 @@ describe('FlyoutTemplate header title icon and description', () => {
       'href',
       '#details'
     );
+    expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / a$/ });
+    expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
   });
 
   const body = (
