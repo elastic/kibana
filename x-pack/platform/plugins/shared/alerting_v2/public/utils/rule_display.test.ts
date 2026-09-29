@@ -28,7 +28,9 @@ describe('formatAlertDelay', () => {
 
   it('describes a pending count of zero ORed with a timeframe as immediate', () => {
     expect(
-      formatAlertDelay({ pending: { count: 0, timeframe: '5m', operator: 'or' } } as StateTransition)
+      formatAlertDelay({
+        pending: { count: 0, timeframe: '5m', operator: 'or' },
+      } as StateTransition)
     ).toBe('Immediate');
   });
 
