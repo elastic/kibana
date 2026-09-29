@@ -288,6 +288,22 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
     );
 
+    // Seed instances so buildDeployGroups returns a non-empty list; without it isAlreadyDeployed
+    // stays false (deployGroups.length === 0) and isMiDone never becomes true.
+    await page.evaluate(
+      ({ key }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            globalRegion: 'us-east-1',
+            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            serviceVars: {},
+          })
+        );
+      },
+      { key: SERVICE_SETTINGS_SESSION_KEY }
+    );
+
     // Await the drift effect's SO re-fetch so state settles before asserting.
     const soResponsePromise = page.waitForResponse(
       (resp) =>
@@ -375,6 +391,22 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       hash: 'authenticate-and-deploy',
     });
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    // Seed instances so applyDirtyPolicyUpdates finds an active instance in deployGroups and
+    // builds a non-empty byPolicy map, which triggers the Fleet MI policy PUT on deploy.
+    await page.evaluate(
+      ({ key }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            globalRegion: 'us-east-1',
+            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            serviceVars: {},
+          })
+        );
+      },
+      { key: SERVICE_SETTINGS_SESSION_KEY }
+    );
 
     // Await the drift effect's SO fetch before filling the form to prevent the effect's
     // updateDetectAndReviewStep({ isDirty: false }) from racing with the form's isDirty: true.
@@ -648,7 +680,6 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           contentType: 'application/json',
           body: JSON.stringify({
             item: makeSoItem(DEP_ID, {
-              connectorId: null,
               authMethod: 'identity_federation',
               policyIdsByInstance: {},
             }),
@@ -1027,6 +1058,22 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       { key: AUTHENTICATE_AND_DEPLOY_SESSION_KEY, newId: NEW_AGENT_POLICY_ID }
     );
 
+    // Seed instances so buildAgentBasedTargets returns a non-empty targets list; without it
+    // showAgentSection stays false and the drift callout never renders.
+    await page.evaluate(
+      ({ key }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            globalRegion: 'us-east-1',
+            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            serviceVars: {},
+          })
+        );
+      },
+      { key: SERVICE_SETTINGS_SESSION_KEY }
+    );
+
     const soGetPromise = page.waitForResponse(
       (resp) =>
         new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
@@ -1128,12 +1175,22 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // callout disappears and Next enables (isAlreadyDeployed=true from seeded statuses).
     const DEP_ID = 'dep-drift-so-error-001';
 
-    // Initially return 500 so the drift effect's SO fetch fails.
+    // Call #1 (hydration) must succeed so hydratedDeploymentId is set and onboardingDeploymentId
+    // populates the session, enabling the drift effect on the subsequent reload.
+    // Calls #2+ fail until soShouldFail is set to false (simulating a transient error).
+    let soCallCount = 0;
     let soShouldFail = true;
     await page.route(
       (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
       (route) => {
-        if (soShouldFail) {
+        soCallCount++;
+        if (soCallCount === 1) {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
+          });
+        } else if (soShouldFail) {
           route.fulfill({ status: 500, body: 'Internal Server Error' });
         } else {
           route.fulfill({
@@ -1153,6 +1210,8 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
     // Seed detectAndReview so isAlreadyDeployed=true once drift settles after retry.
+    // Seed must happen after the first gotoApp so hydration (call #1) has already run and set
+    // hydratedDeploymentId; the subsequent reload skips hydration and React reads our seeds.
     await page.evaluate(
       ({ key, depId }) => {
         sessionStorage.setItem(
@@ -1168,15 +1227,35 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       },
       { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
     );
+    // Seed instances so deployGroups is non-empty and isAlreadyDeployed evaluates against the
+    // seeded serviceStatuses rather than always returning false (deployGroups.length === 0).
+    await page.evaluate(
+      ({ key }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            globalRegion: 'us-east-1',
+            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            serviceVars: {},
+          })
+        );
+      },
+      { key: SERVICE_SETTINGS_SESSION_KEY }
+    );
 
-    // Wait for the initial SO GET to fail and the error callout to appear.
+    // Reload so React mounts with the seeded session (hydration is skipped because
+    // hydratedDeploymentId was set by call #1). The drift effect fires and hits call #2 → 500.
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    // Wait for the drift check to fail and the error callout to appear.
     await expect(
       page.testSubj.locator('authenticateAndDeployStep-driftCheckErrorCallout')
     ).toBeVisible();
     // Next must be disabled while drift check failed (driftSettled=false).
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
-    // Allow subsequent SO GETs to succeed.
+    // Allow subsequent SO GETs to succeed (simulates transient error resolved).
     soShouldFail = false;
     const retryResponsePromise = page.waitForResponse(
       (resp) =>

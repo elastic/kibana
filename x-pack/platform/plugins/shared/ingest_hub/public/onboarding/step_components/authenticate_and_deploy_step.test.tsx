@@ -445,7 +445,10 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['vpcflow', agentService]]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: { selectedAgentPolicyIds: [], agentHostsMode: 'new', agentCredentialMethod: 'assume_role' },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       MockAgentBasedSection.mockImplementation(({ hasFailed }: { hasFailed: boolean }) =>
         hasFailed ? <span data-test-subj="mock-agent-failed">Failed</span> : null
@@ -636,7 +639,7 @@ describe('AuthenticateAndDeployStep', () => {
           deploymentMethod: 'agent_based',
           setDeploymentMethod: jest.fn(),
           // agentBasedDeployment has agentPolicyId already set (flyout created it).
-          agentBasedDeployment: { agentPolicyId: 'existing-policy-id', agentHostsMode: 'new' },
+          agentBasedDeployment: { agentPolicyId: 'existing-policy-id', agentHostsMode: 'new', selectedAgentPolicyIds: [], agentCredentialMethod: 'assume_role' },
           detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
           updateDetectAndReviewStep: jest.fn(),
         });
