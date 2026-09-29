@@ -277,6 +277,44 @@ describe('enrichReportCore', () => {
     expect(result.iocs[1].tier).toBe('reference');
   });
 
+  it('keeps the core result when a follow-up adjudication batch fails', async () => {
+    const invoke = jest.fn().mockImplementation((prompt: string) => {
+      const isCore = String(prompt).includes('taxonomy');
+      if (isCore) {
+        return Promise.resolve({
+          raw: { response_metadata: {} },
+          parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+        });
+      }
+      // Not a context-length-exceeded error, so invokeAdjudicationBatch does
+      // not retry and rethrows immediately.
+      return Promise.reject(new Error('model returned an unparseable response'));
+    });
+    const manyIocs = Array.from({ length: 320 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/payload-${index}`,
+      defanged: `https://evil.example/payload-${index}`,
+      tier: 'discriminating' as const,
+      tier_heuristic: 'discriminating' as const,
+      tier_basis: 'url_path_entropy',
+      context: `C2 fetched https://evil.example/payload-${index}.`,
+    }));
+    const text = manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
+
+    const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    expect(result.severity.level).toBe('high');
+    expect(result.iocs[0].tier_basis).toContain('semantic_indicator:');
+    // The failed batch's candidates keep their heuristic tier, marked deferred,
+    // instead of the whole enrichment throwing and the report staying pending.
+    expect(result.iocs[300].tier).toBe('discriminating');
+    expect(result.iocs[300].deferred_unreviewed).toBe(true);
+    expect(result.adjudication.deferred_unreviewed).toBeGreaterThan(0);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('enrich_report_core_ioc_batch failed')
+    );
+  });
+
   it('keeps ioc_set_hash as the pre-adjudication extract fingerprint', async () => {
     const invoke = jest.fn().mockImplementation((prompt: string) => {
       if (String(prompt).includes('taxonomy')) {

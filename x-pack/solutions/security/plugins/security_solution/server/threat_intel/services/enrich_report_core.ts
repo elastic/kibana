@@ -380,36 +380,48 @@ export const enrichReportCore = async (
 
   for (const batch of pendingBatches.filter((entry) => entry.length > 0)) {
     const batchStartedAt = Date.now();
-    const batchCall = await invokeAdjudicationBatch({
-      invoke: async (prompt) => {
-        const invoked = (await adjudicationStructured.invoke(prompt)) as {
-          raw: { response_metadata: Record<string, unknown> };
-          parsed: unknown;
-        };
-        return { raw: invoked.raw, parsed: iocAdjudicationOnlySchema.parse(invoked.parsed) };
-      },
-      build: (candidates) => buildAdjudicationOnlyPrompt(params, candidates),
-      prepared: withBatchPrepared(prepared, batch),
-    });
-    const batchWallMs = Date.now() - batchStartedAt;
-    for (const id of batchCall.result.parsed.approved_ioc_candidate_ids) {
-      if (batchCall.reviewed.reviewable.some((candidate) => candidate.id === id)) {
-        approvedIds.add(id);
+    try {
+      const batchCall = await invokeAdjudicationBatch({
+        invoke: async (prompt) => {
+          const invoked = (await adjudicationStructured.invoke(prompt)) as {
+            raw: { response_metadata: Record<string, unknown> };
+            parsed: unknown;
+          };
+          return { raw: invoked.raw, parsed: iocAdjudicationOnlySchema.parse(invoked.parsed) };
+        },
+        build: (candidates) => buildAdjudicationOnlyPrompt(params, candidates),
+        prepared: withBatchPrepared(prepared, batch),
+      });
+      const batchWallMs = Date.now() - batchStartedAt;
+      for (const id of batchCall.result.parsed.approved_ioc_candidate_ids) {
+        if (batchCall.reviewed.reviewable.some((candidate) => candidate.id === id)) {
+          approvedIds.add(id);
+        }
       }
-    }
-    for (const candidate of batchCall.reviewed.reviewable) {
-      if (!reviewedIds.has(candidate.id)) {
-        reviewedCandidates.push(candidate);
-        reviewedIds.add(candidate.id);
+      for (const candidate of batchCall.reviewed.reviewable) {
+        if (!reviewedIds.has(candidate.id)) {
+          reviewedCandidates.push(candidate);
+          reviewedIds.add(candidate.id);
+        }
       }
+      logStageUsage(
+        logger,
+        'enrich_report_core_ioc_batch',
+        model.connector.connectorId,
+        batchCall.result.raw.response_metadata ?? {},
+        batchWallMs
+      );
+    } catch (error) {
+      // A follow-up batch is optional: the already-computed core result (taxonomy,
+      // severity, first-batch verdicts) must not be thrown away because one later
+      // batch could not produce valid structured output. Leave its candidates out
+      // of reviewedIds so they fall into deferredUnreviewed below, same as any
+      // other batch-budget deferral.
+      logger.warn(
+        `enrich_report_core_ioc_batch failed, deferring its ${batch.length} candidates: ` +
+          `${(error as Error).message}`
+      );
     }
-    logStageUsage(
-      logger,
-      'enrich_report_core_ioc_batch',
-      model.connector.connectorId,
-      batchCall.result.raw.response_metadata ?? {},
-      batchWallMs
-    );
   }
 
   logStageUsage(
