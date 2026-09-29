@@ -194,6 +194,7 @@ steps:
             executorHeaders
           );
           expect(execution.spaceId).toBe(sourceSpace);
+          expect(execution.context?.spaceId).toBe(sourceSpace);
           expect(execution.effectiveIdentity).toBeUndefined();
           const child = execution.stepExecutions?.find((step) => step.stepId === 'child');
           expect(child?.status).toBe('failed');
