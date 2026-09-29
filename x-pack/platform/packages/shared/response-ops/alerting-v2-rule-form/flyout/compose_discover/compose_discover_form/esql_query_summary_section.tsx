@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleKind, RuleQuery } from '../../../form/types';
 import { getBreachQuery } from '../../../form/utils/query_helpers';
 import { QueryBlock, QuerySummary } from '../query_summary';
-import { splitResultToRuleQuery } from '../use_heuristic_split';
 
 export type EsqlSummaryState =
   | 'before_apply'
@@ -24,21 +23,12 @@ export type EsqlSummaryState =
 /**
  * Derives the summary state from the committed query. Callout priority is
  * encoded by the branch order: empty → split failed → no alert condition.
- *
- * For standalone queries the outcome is derived by running the same heuristic
- * split on the breach query text. A standalone rule whose query already contains
- * an alert condition returns 'success' so that no false "No alert condition"
- * callout appears (e.g. a rule like `FROM ... | WHERE c > 3` stored as standalone).
  */
 export const getEsqlSummaryState = (
   queryCommitted: boolean,
   query: RuleQuery
 ): EsqlSummaryState => {
   if (!queryCommitted) return 'before_apply';
-
-  if (query.format === 'standalone') {
-    return splitResultToRuleQuery(query.breach.query).outcome;
-  }
 
   const hasBase = query.base.trim().length > 0;
   const hasSegment = query.breach.segment.trim().length > 0;
@@ -136,16 +126,19 @@ const getDescription = (state: EsqlSummaryState, kind: RuleKind): string | null 
 interface EsqlQuerySummarySectionProps {
   query: RuleQuery;
   queryCommitted: boolean;
-  /** Used to hide alert-condition guidance (subtitle + callout) for signal rules. */
+  /** Used to hide the alert-condition block, subtitle and callout for signal rules. */
   kind: RuleKind;
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
   onOpenEditor: () => void;
 }
 
-const QUERY_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.queryLabel', {
-  defaultMessage: 'Query',
-});
+const QUERY_LABEL = (
+  <FormattedMessage
+    id="xpack.alertingV2.composeDiscover.esqlSummary.queryLabel"
+    defaultMessage="Query"
+  />
+);
 
 const BASE_QUERY_LABEL = (
   <FormattedMessage
@@ -170,7 +163,9 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
   const showBlocks = state !== 'before_apply';
-  const showUnifiedBlock = query.format === 'standalone';
+  // A signal breaches on nothing, so a segment is part of the single query it
+  // runs rather than a condition to summarise on its own.
+  const showUnifiedBlock = kind === 'signal';
   const callout = getSummaryCallout(state, kind);
   const description = getDescription(state, kind);
 

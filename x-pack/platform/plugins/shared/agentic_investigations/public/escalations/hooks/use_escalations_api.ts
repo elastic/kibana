@@ -87,7 +87,7 @@ export const useCreateEscalation = () => {
   });
 };
 
-export const useAddToEscalation = () => {
+export const useAttachToEscalation = () => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
 

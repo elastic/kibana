@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { useFollowExecution } from '../../../../../hooks/use_follow_execution';
 import { EventSteps } from '../event_steps';
 import { JsonCodeBlock } from '../json_code_block';
@@ -67,6 +68,13 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
     streamingMessage,
     error,
   } = useFollowExecution(executionId);
+  const liveNestedStep = nestedStep
+    ? (executionSteps.find(
+        (s) =>
+          s.type === ConversationRoundStepType.toolCall &&
+          (s as ToolCallStep).tool_call_id === nestedStep.tool_call_id
+      ) as ToolCallStep | undefined) ?? nestedStep
+    : null;
   const { euiTheme } = useEuiTheme();
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
   const titleId = useGeneratedHtmlId({ prefix: 'subAgentExecutionFlyout' });
@@ -161,9 +169,9 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
           <EuiSteps headingElement="h3" titleSize="xxs" steps={euiSteps} css={stepsCss} />
         </EuiFlyoutBody>
       </EuiFlyout>
-      {nestedStep && (
+      {liveNestedStep && (
         <ToolResponseFlyout
-          step={nestedStep}
+          step={liveNestedStep}
           onClose={onClose}
           onBack={() => setNestedStep(null)}
         />
