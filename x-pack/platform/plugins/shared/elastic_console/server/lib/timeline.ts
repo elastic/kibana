@@ -8,6 +8,7 @@
 import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
+  isToolCallStep,
   type ConversationRound,
 } from '@kbn/agent-builder-common';
 
@@ -124,14 +125,40 @@ export const roundsFromEvents = (events: TimelineEvent[]): ConversationRound[] =
           : { connector_id: 'elastic-ramen', llm_calls: 1, input_tokens: 0, output_tokens: 0 },
     });
   }
-  return rounds;
+  // `groups` iterates in first-seen order of the underlying `events` array, which is not
+  // guaranteed to be chronological (e.g. events appended out of order, or re-synced from a
+  // different source). Sort explicitly so Ramen can rely on `rounds` being in round-start order
+  // instead of depending on incidental array/iteration order.
+  return rounds.sort((a, b) => new Date(a.started_at).getTime() - new Date(b.started_at).getTime());
 };
+
+/**
+ * Tool call `results` are JSON strings in storage (see `serializeConversationRounds`), but
+ * `roundsFromEvents` returns them as-parsed objects/arrays, since events are folded straight
+ * from in-memory rounds and never serialized. Without normalizing, callers that pick the
+ * `stored` branch of `hydrateRounds` would see stringified results while callers that pick the
+ * `folded` branch would see objects, for the same `ConversationRound['steps']` type.
+ */
+export const deserializeConversationRounds = (rounds: ConversationRound[]): ConversationRound[] =>
+  rounds.map((round) => ({
+    ...round,
+    steps: round.steps.map((step) => {
+      if (isToolCallStep(step) && typeof step.results === 'string') {
+        try {
+          return { ...step, results: JSON.parse(step.results) };
+        } catch {
+          return step;
+        }
+      }
+      return step;
+    }),
+  }));
 
 export const hydrateRounds = (
   stored: ConversationRound[] | undefined,
   events: TimelineEvent[] | undefined
 ): ConversationRound[] => {
-  const current = stored ?? [];
+  const current = deserializeConversationRounds(stored ?? []);
   const folded = roundsFromEvents(events ?? []);
   if (!current.length && folded.length) {
     return folded;
@@ -141,6 +168,22 @@ export const hydrateRounds = (
   }
   return current;
 };
+
+/**
+ * Tool call `results` are stored as JSON strings so the `conversation_rounds` field matches the
+ * shape agent_builder itself persists (see `PersistentConversationRoundStep`). The CLI/RAMEN
+ * client sends `results` as objects/arrays, so this must run before indexing.
+ */
+export const serializeConversationRounds = (rounds: ConversationRound[]): ConversationRound[] =>
+  rounds.map((round) => ({
+    ...round,
+    steps: round.steps.map((step) => {
+      if (isToolCallStep(step) && step.results !== undefined && typeof step.results !== 'string') {
+        return { ...step, results: JSON.stringify(step.results) };
+      }
+      return step;
+    }),
+  })) as ConversationRound[];
 
 export const eventsFromRounds = (
   rounds: ConversationRound[],

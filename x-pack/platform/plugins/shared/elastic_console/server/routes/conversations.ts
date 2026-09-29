@@ -8,28 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
-import { type ConversationRound, isToolCallStep } from '@kbn/agent-builder-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { createConversationClient } from '../lib/conversation_storage';
-import { conversationSchemaVersion, eventsFromRounds, hydrateRounds } from '../lib/timeline';
+import {
+  conversationSchemaVersion,
+  eventsFromRounds,
+  hydrateRounds,
+  serializeConversationRounds,
+} from '../lib/timeline';
 import { isElasticConsoleEnabled } from './is_enabled';
-
-/**
- * Agent_builder stores tool_call step results as JSON strings (via serializeStepResults).
- * The CLI sends them as objects/arrays. Serialize them so agent_builder can deserialize
- * with JSON.parse when reading conversations back.
- */
-const serializeConversationRounds = (rounds: ConversationRound[]): ConversationRound[] => {
-  return rounds.map((round) => ({
-    ...round,
-    steps: round.steps.map((step) => {
-      if (isToolCallStep(step) && step.results !== undefined && typeof step.results !== 'string') {
-        return { ...step, results: JSON.stringify(step.results) };
-      }
-      return step;
-    }),
-  })) as ConversationRound[];
-};
 
 const getSpace = (basePath: string): string => {
   const spaceMatch = basePath.match(/(?:^|\/)s\/([^/]+)/);
