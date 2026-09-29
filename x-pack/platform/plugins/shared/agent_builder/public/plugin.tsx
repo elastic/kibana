@@ -107,7 +107,7 @@ export class AgentBuilderPlugin
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private isEarsEnabled = false;
+  private isEarsEnabled = true;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
   private sidebarOpenSubscription?: Subscription;
