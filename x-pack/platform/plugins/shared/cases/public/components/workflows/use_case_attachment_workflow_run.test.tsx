@@ -29,9 +29,8 @@ jest.mock('./use_run_case_workflow', () => ({
 
 const mockReportWorkflowRunTriggered = jest.fn();
 jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  ...jest.requireActual('../../analytics/use_workflow_run_ebt'),
   useWorkflowRunTriggeredEBT: () => mockReportWorkflowRunTriggered,
-  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
-    .getWorkflowRunOriginType,
 }));
 
 const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
@@ -180,6 +179,7 @@ describe('useCaseAttachmentWorkflowRun', () => {
     expect(mockReportWorkflowRunTriggered).toHaveBeenCalledWith({
       originType: 'cases.attachment',
       caseCount: 1,
+      attachmentType: 'security.alert',
     });
   });
 

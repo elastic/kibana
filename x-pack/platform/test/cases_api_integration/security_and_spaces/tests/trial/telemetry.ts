@@ -9,6 +9,7 @@ import expect from 'expect';
 import { stringify as yamlStringify } from 'yaml';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import {
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
   CASES_URL,
   CASE_TELEMETRY_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
@@ -16,6 +17,7 @@ import {
   INTERNAL_FIELD_DEFINITIONS_URL,
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import {
@@ -648,6 +650,27 @@ steps:
           },
         });
 
+        await createComment({ supertest, caseId: detailCase.id, params: postCommentAlertReq });
+
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: {
+            caseIds: [detailCase.id],
+            inputs: {
+              event: {
+                alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
+              },
+            },
+            origin: {
+              type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+              caseId: detailCase.id,
+              attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+              attachmentId: postCommentAlertReq.alertId as string,
+            },
+          },
+        });
+
         // A cases-list run carries no origin and writes one activity record per case.
         await runCaseWorkflow({
           supertest,
@@ -677,26 +700,29 @@ steps:
           expect(casesTelemetry.workflows).toBeDefined();
 
           /**
-           * Asserted ahead of the payload comparison because it is the one figure a mocked
+           * Asserted ahead of the payload comparison because they are the figures a mocked
            * client cannot establish: the attributed buckets are only non-zero while
-           * `payload.origin.type` is mapped. Without the mapping every run collapses into
-           * `unattributed`.
+           * `payload.origin.type` and `payload.origin.attachmentType` are mapped. Without the
+           * mappings every run collapses into `unattributed` and every attachment run into
+           * `other`.
            */
           expect(casesTelemetry.workflows.byOriginType.case).toBe(1);
+          expect(casesTelemetry.workflows.byAttachmentType.alert).toBe(1);
 
           expect(casesTelemetry.workflows).toEqual({
-            // One activity record per case: 1 + 1 + 2.
-            runs: { total: 4, daily: 4, weekly: 4, monthly: 4 },
+            // One activity record per case: 1 + 1 + 1 + 2.
+            runs: { total: 5, daily: 5, weekly: 5, monthly: 5 },
             totalCasesWithRuns: 3,
             totalUniqueUsers: 1,
             byOriginType: {
               case: 1,
               observable: 1,
               observables: 0,
-              attachment: 0,
+              attachment: 1,
               attachments: 0,
               unattributed: 2,
             },
+            byAttachmentType: { alert: 1, event: 0, other: 0 },
             configurationsWithWorkflowTags: 1,
           });
         });

@@ -8,6 +8,10 @@
 import { useCallback } from 'react';
 import { CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE } from '../../common/constants';
 import type { CaseWorkflowRunOrigin } from '../../common/types/api';
+import {
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+} from '../../common/constants/workflow';
 import type { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../common/constants/workflow';
 import { useKibana } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
@@ -34,6 +38,8 @@ export interface WorkflowRunEbtParams {
   originType: WorkflowRunOriginType;
   /** Number of cases in this run (1 for single-case surfaces, ≥2 for list bulk). */
   caseCount: number;
+  /** Registered attachment type (such as `security.alert`), set only for attachment surfaces. */
+  attachmentType?: string;
 }
 
 /**
@@ -49,12 +55,13 @@ export const useWorkflowRunTriggeredEBT = (): ((params: WorkflowRunEbtParams) =>
   const { data: configuration } = useGetCaseConfiguration();
 
   return useCallback(
-    ({ originType, caseCount }: WorkflowRunEbtParams) => {
+    ({ originType, caseCount, attachmentType }: WorkflowRunEbtParams) => {
       analytics.reportEvent(CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE, {
         owner: getEbtOwner(owner),
         origin_type: originType,
         case_count: caseCount,
         tag_filter_active: (configuration?.workflowTags?.length ?? 0) > 0,
+        ...(attachmentType !== undefined ? { attachment_type: attachmentType } : {}),
       });
     },
     [analytics, configuration?.workflowTags?.length, owner]
@@ -68,3 +75,15 @@ export const useWorkflowRunTriggeredEBT = (): ((params: WorkflowRunEbtParams) =>
 export const getWorkflowRunOriginType = (
   origin: CaseWorkflowRunOrigin | undefined
 ): WorkflowRunOriginType => origin?.type ?? UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE;
+
+/**
+ * Returns the attachment type of an attachment-scoped origin, or `undefined` for every other
+ * origin (and for runs without one).
+ */
+export const getWorkflowRunAttachmentType = (
+  origin: CaseWorkflowRunOrigin | undefined
+): string | undefined =>
+  origin?.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
+  origin?.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE
+    ? origin.attachmentType
+    : undefined;

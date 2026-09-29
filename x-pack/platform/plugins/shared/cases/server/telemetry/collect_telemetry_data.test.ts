@@ -104,6 +104,7 @@ const expectedWorkflows = {
     attachments: 0,
     unattributed: 2,
   },
+  byAttachmentType: { alert: 0, event: 0, other: 0 },
   configurationsWithWorkflowTags: 1,
 };
 

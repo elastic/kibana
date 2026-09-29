@@ -490,6 +490,23 @@ export const casesSchema: CasesTelemetrySchema = {
         },
       },
     },
+    byAttachmentType: {
+      alert: {
+        type: 'long',
+        _meta: { description: 'Attachment-origin runs triggered from alert attachments' },
+      },
+      event: {
+        type: 'long',
+        _meta: { description: 'Attachment-origin runs triggered from event attachments' },
+      },
+      other: {
+        type: 'long',
+        _meta: {
+          description:
+            'Attachment-origin runs triggered from any other attachment type. Derived as max(0, attachment + attachments origin runs minus alert and event runs).',
+        },
+      },
+    },
     configurationsWithWorkflowTags: {
       type: 'long',
       _meta: {
