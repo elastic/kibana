@@ -31,9 +31,13 @@ describe('useKiList', () => {
     const requestError = new Error('Request timed out');
     (core.http.get as jest.Mock).mockRejectedValue(requestError);
 
-    renderUseKiList(core, {
+    const { result } = renderUseKiList(core, {
       aiIndexId: 'my-ai-index',
       notifyOnError: true,
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBeTruthy();
     });
 
     await waitFor(() => {
@@ -51,12 +55,12 @@ describe('useKiList', () => {
     const core = coreMock.createStart();
     (core.http.get as jest.Mock).mockRejectedValue(new Error('Request timed out'));
 
-    renderUseKiList(core, {
+    const { result } = renderUseKiList(core, {
       aiIndexId: 'my-ai-index',
     });
 
     await waitFor(() => {
-      expect(core.http.get).toHaveBeenCalled();
+      expect(result.current.error).toBeTruthy();
     });
 
     expect(core.notifications.toasts.addError).not.toHaveBeenCalled();
