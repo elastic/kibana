@@ -167,7 +167,12 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     description: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingDescription', {
       defaultMessage:
         'Limit the number of services shown in the Services Inventory (minimum: 1, maximum: 5 000). ' +
-        'Increasing this value beyond the default may slow down queries and increase memory usage on Elasticsearch.',
+        'Increasing this value beyond the default may slow down queries and increase memory usage on Elasticsearch. ' +
+        'The effective safe maximum also depends on how many transaction types and environments exist per service: ' +
+        'the Services Inventory query uses nested aggregations, and very high values combined with diverse service ' +
+        'configurations can exceed the Elasticsearch {maxBucketsSetting} limit (default 65 536). ' +
+        'If you raise this setting above 2 000, verify or increase {maxBucketsSetting} in your cluster settings.',
+      values: { maxBucketsSetting: 'search.max_buckets' },
     }),
     schema: schema.number({
       min: 1,
