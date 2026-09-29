@@ -43,4 +43,20 @@ describe('nightshift investigation saved object model version 4', () => {
       })
     ).not.toThrow();
   });
+
+  it('accepts the Slack thread fields', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate({
+        title: 'Checkout errors',
+        status: 'pending',
+        subject_type: 'manual',
+        subject_id: 'T1/C1/1700.0001',
+        trigger_type: 'manual',
+        created_at: '2026-09-28T00:00:00.000Z',
+        slack_channel: 'C1',
+        slack_thread_ts: '1700.0001',
+        slack_message_ts: '1700.0002',
+      })
+    ).not.toThrow();
+  });
 });

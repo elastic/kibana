@@ -31,6 +31,11 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   conversation_id?: string;
   /** The workflow execution of the latest run, when it is not the one the investigation is named after. */
   execution_id?: string;
+  /** Slack thread this investigation belongs to, when it was started from Slack. */
+  slack_channel?: string;
+  slack_thread_ts?: string;
+  /** The findings message posted into that thread; later runs edit it in place. */
+  slack_message_ts?: string;
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {
@@ -57,6 +62,7 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   error?: string | null;
   conversation_id?: string;
   execution_id?: string;
+  slack_message_ts?: string;
 }
 
 export interface FindInvestigationsQuery<

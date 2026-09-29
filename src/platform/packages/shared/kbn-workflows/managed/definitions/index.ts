@@ -55,6 +55,7 @@ import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW } from './nightshift_investigations
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investigations/decision_tree_hydrate';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW } from './nightshift_investigations/decision_tree_reinforce';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
+import { NIGHTSHIFT_SLACK_THREAD_WORKFLOW } from './nightshift_investigations/slack_thread';
 import { CREATE_PROPOSAL_WORKFLOW } from './proposals';
 import {
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW,
@@ -122,6 +123,7 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
 export { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
+export { NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID } from './nightshift_investigations/slack_thread';
 export { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/cortex_hydrate';
 export { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/cortex_optimize';
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
@@ -209,6 +211,7 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW,
   NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW,
+  NIGHTSHIFT_SLACK_THREAD_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW,

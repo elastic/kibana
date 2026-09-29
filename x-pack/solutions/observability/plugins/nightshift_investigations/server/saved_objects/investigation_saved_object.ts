@@ -97,6 +97,9 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
 
 const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
   execution_id: optionalKeyword,
+  slack_channel: optionalKeyword,
+  slack_thread_ts: optionalKeyword,
+  slack_message_ts: optionalKeyword,
 });
 
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {

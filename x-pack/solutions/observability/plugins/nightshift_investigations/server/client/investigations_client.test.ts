@@ -1649,3 +1649,81 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
     expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
   });
 });
+
+describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
+  const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1700.0001' };
+
+  it('creates a pending investigation with ids derived from the thread', async () => {
+    const result = await makeClient().findOrCreateSlackThread({
+      ...THREAD,
+      text: '<@U999> checkout is   failing\nsince the deploy',
+      create: true,
+    });
+
+    const { id, attributes } = repository.create.mock.calls[0][0];
+    expect(attributes).toMatchObject({
+      title: 'checkout is failing since the deploy',
+      status: 'pending',
+      subject_type: 'manual',
+      // The placeholder id, so the UI hides the subject rather than showing raw Slack ids.
+      subject_id: 'manual',
+      trigger_type: 'manual',
+      slack_channel: 'C1',
+      slack_thread_ts: '1700.0001',
+    });
+    expect(result).toEqual({
+      investigation_id: id,
+      conversation_id: attributes.conversation_id,
+      title: attributes.title,
+      slack_message_ts: undefined,
+    });
+
+    const again = await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
+    expect(repository.create.mock.calls[1][0].id).toBe(id);
+    expect(repository.create.mock.calls[1][0].attributes.conversation_id).toBe(
+      attributes.conversation_id
+    );
+    expect(again?.investigation_id).toBe(id);
+  });
+
+  it('returns the existing investigation and its findings message', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ conversation_id: 'conv-1', slack_message_ts: '1700.0002' }, { id: 'inv-9' })
+    );
+
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
+    ).resolves.toEqual({
+      investigation_id: 'inv-9',
+      conversation_id: 'conv-1',
+      title: 'Latency is too high',
+      slack_message_ts: '1700.0002',
+    });
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('records the status message on an existing investigation whatever its status', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'completed', conversation_id: 'conv-1' }, { id: 'inv-9' })
+    );
+
+    const result = await makeClient().findOrCreateSlackThread({
+      ...THREAD,
+      create: false,
+      slackMessageTs: '1700.0003',
+    });
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-9',
+      patch: { slack_message_ts: '1700.0003' },
+    });
+    expect(result?.slack_message_ts).toBe('1700.0003');
+  });
+
+  it('does not create an investigation for a thread without create', async () => {
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
+    ).resolves.toBeUndefined();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+});
