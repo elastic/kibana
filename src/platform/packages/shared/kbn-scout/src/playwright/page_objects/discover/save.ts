@@ -229,8 +229,10 @@ export abstract class SaveMixin extends NavigationMixin {
     const timeout = options?.timeout ?? 30_000;
 
     // Arm the response interceptor before clicking so we never miss it.
+    // Use an explicit timeout — the page default (10s) is too short for 3 button clicks + HTTP.
     const generateResponsePromise = this.page.waitForResponse(
-      (r) => r.url().includes('/internal/reporting/generate/') && r.request().method() === 'POST'
+      (r) => r.url().includes('/internal/reporting/generate/') && r.request().method() === 'POST',
+      { timeout: 30_000 }
     );
 
     // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
@@ -264,17 +266,15 @@ export abstract class SaveMixin extends NavigationMixin {
       }));
 
     const apiResult: Promise<JobStatusResult> = this.pollJobStatus(job.id, timeout);
-
     const result = await Promise.race([uiResult, apiResult]);
 
     const failed = result.source === 'api' ? result.status === 'failed' : result.failed;
     const errorText = result.source === 'api' ? result.errorText : result.errorText ?? undefined;
 
     if (failed) {
-      // version_conflict_engine_exception is a transient error caused by the ES client retrying
-      // a non-idempotent write after a connection hiccup. The job doc already exists from the
-      // first (successful) attempt. Retry once with a fresh generate request — the new job gets
-      // a new UUID so there is no possibility of a conflict.
+      // version_conflict_engine_exception is a transient error in the reporting/ES write path
+      // (tracked in https://github.com/elastic/kibana/issues/290053). Retry once with a fresh
+      // generate request — the new job gets a new UUID so there is no conflict possibility.
       if (errorText?.includes('version_conflict_engine_exception') && !options?._retried) {
         return this.exportAsCsv({ ...options, _retried: true });
       }
@@ -289,37 +289,30 @@ export abstract class SaveMixin extends NavigationMixin {
   }
 
   private async pollJobStatus(jobId: string, timeout: number): Promise<JobStatusResult> {
-    const deadline = Date.now() + timeout;
-    const pollInterval = 2_000;
+    let job: { status: string; error?: unknown } | undefined;
 
-    while (Date.now() < deadline) {
-      await this.page.waitForTimeout(pollInterval);
+    await expect
+      .poll(
+        async () => {
+          try {
+            const response = await this.page.request.get(`/internal/reporting/jobs/info/${jobId}`);
+            if (!response.ok()) return 'pending';
+            job = (await response.json()) as { status: string; error?: unknown };
+            return job.status;
+          } catch {
+            return 'pending';
+          }
+        },
+        { timeout, message: `CSV report ${jobId} did not reach a terminal status` }
+      )
+      .toMatch(/completed|warnings|failed/);
 
-      let response;
-      try {
-        response = await this.page.request.get(`/internal/reporting/jobs/info/${jobId}`);
-      } catch {
-        continue;
-      }
-
-      if (!response.ok()) continue;
-
-      const job = (await response.json()) as { status: string; error?: unknown };
-
-      if (job.status === 'completed' || job.status === 'warnings') {
-        return { source: 'api', terminal: true, status: 'completed' };
-      }
-
-      if (job.status === 'failed') {
-        return {
-          source: 'api',
-          terminal: true,
-          status: 'failed',
-          errorText: job.error ? JSON.stringify(job.error) : undefined,
-        };
-      }
-    }
-
-    throw new Error(`CSV report generation timed out after ${timeout}ms`);
+    const status = job?.status === 'failed' ? 'failed' : 'completed';
+    return {
+      source: 'api',
+      terminal: true,
+      status,
+      errorText: status === 'failed' && job?.error ? JSON.stringify(job.error) : undefined,
+    };
   }
 }
