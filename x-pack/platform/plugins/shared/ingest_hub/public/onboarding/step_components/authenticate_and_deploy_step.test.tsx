@@ -59,6 +59,7 @@ jest.mock('../use_aws_identity_federation_enabled', () => ({
 }));
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
@@ -91,20 +92,38 @@ function getLastMiSectionProps(): { showIdentityFederation: boolean } {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const miService = {
+const miService: AwsServiceMatrixEntry = {
   id: 'guardduty',
   name: 'AWS GuardDuty',
+  category: 'security_identity_compliance',
+  signalTypes: ['logs'],
+  dataStreams: [],
+  packageName: 'aws',
   deploymentMethods: [{ method: 'managed_integration', preferred: true }],
   identityFederationSupported: true,
+  defaultEnabled: true,
+  defaultEnabledInputs: [],
   showInUI: true,
+  isManifestLoaded: true,
+  isManifestError: false,
+  isStaticAgentBasedOnly: false,
 };
 
-const ecfService = {
+const ecfService: AwsServiceMatrixEntry = {
   id: 'cloudtrail',
   name: 'AWS CloudTrail',
+  category: 'management_governance',
+  signalTypes: ['logs'],
+  dataStreams: [],
+  packageName: 'aws',
   deploymentMethods: [{ method: 'ecf', preferred: true }],
   identityFederationSupported: false,
+  defaultEnabled: true,
+  defaultEnabledInputs: [],
   showInUI: true,
+  isManifestLoaded: true,
+  isManifestError: false,
+  isStaticAgentBasedOnly: false,
 };
 
 const awsServicesMapWithMI = new Map([['guardduty', miService]]);
@@ -178,6 +197,7 @@ describe('AuthenticateAndDeployStep', () => {
         onboardingDeploymentId: undefined,
       },
       updateDetectAndReviewStep: jest.fn(),
+      refetchAwsServiceMatrix: jest.fn(),
     });
     mockUseOnboardingSO.mockReturnValue({
       createDeployment: jest.fn().mockResolvedValue(null),
@@ -705,12 +725,20 @@ describe('AuthenticateAndDeployStep', () => {
 
   describe('mixed selection (MI + agent-based-only) — auto-switches all to agent-based', () => {
     // Julia's model: any agent-based-only service selected → lock everything to agent-based.
-    const agentService = {
+    const agentService: AwsServiceMatrixEntry = {
       id: 'awsfargate',
       name: 'AWS Fargate',
+      category: 'compute',
+      signalTypes: ['logs'],
+      dataStreams: [],
+      packageName: 'awsfargate',
       deploymentMethods: [{ method: 'agent_based', preferred: true }],
+      defaultEnabled: true,
+      defaultEnabledInputs: [],
       showInUI: true,
       isManifestLoaded: true,
+      isManifestError: false,
+      isStaticAgentBasedOnly: true,
     };
 
     beforeEach(() => {
@@ -784,12 +812,20 @@ describe('AuthenticateAndDeployStep', () => {
   });
 
   describe('agent-based-only services', () => {
-    const agentService = {
+    const agentService: AwsServiceMatrixEntry = {
       id: 'awsfargate',
       name: 'AWS Fargate',
+      category: 'compute',
+      signalTypes: ['logs'],
+      dataStreams: [],
+      packageName: 'awsfargate',
       deploymentMethods: [{ method: 'agent_based', preferred: true }],
+      defaultEnabled: true,
+      defaultEnabledInputs: [],
       showInUI: true,
       isManifestLoaded: true,
+      isManifestError: false,
+      isStaticAgentBasedOnly: true,
     };
 
     beforeEach(() => {

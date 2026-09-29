@@ -26,6 +26,8 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
     defaultEnabledInputs: [],
     showInUI: true,
     isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
     ...overrides,
   };
 }

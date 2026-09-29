@@ -63,6 +63,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     detectAndReviewStep,
     updateDetectAndReviewStep,
     removeDeployInstances,
+    refetchAwsServiceMatrix,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
@@ -85,10 +86,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Any agent-based-only service in the selection forces agent-based mode for all — lock the card.
   const allAgentBasedOnly = agentBasedOnlyServices.length > 0;
 
-  // True while any selected service's manifest hasn't loaded yet — prevents deploying with
-  // incomplete inputs before buildDeploymentMethods has resolved the final deployment methods.
-  const hasUnloadedSelectedManifests = selectedServiceIds.some(
-    (id) => awsServicesMap?.get(id)?.isManifestLoaded === false
+  // True while any selected service's manifest is still in-flight (not yet loaded or errored).
+  const hasUnloadedSelectedManifests = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry && !entry.isManifestLoaded && !entry.isManifestError;
+  });
+
+  // True when any selected service's manifest query has failed — blocks Next and surfaces a retry.
+  const hasSelectedManifestError = selectedServiceIds.some(
+    (id) => awsServicesMap?.get(id)?.isManifestError === true
   );
 
   const isAgentBased = deploymentMethod === 'agent_based';
@@ -514,6 +520,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // The section stays visible with the error callout if deploy fails.
   const isNextDisabled =
     hasUnloadedSelectedManifests ||
+    hasSelectedManifestError ||
     (showMiSection && !isMiDone) ||
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
@@ -528,6 +535,42 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         locked={allAgentBasedOnly && !isMethodLocked}
         disabled={isMethodLocked}
       />
+
+      {hasSelectedManifestError && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.title"
+                defaultMessage="Could not load service details"
+              />
+            }
+            iconType="warning"
+            color="danger"
+            data-test-subj="authenticateAndDeployStep-manifestErrorCallout"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.body"
+                defaultMessage="One or more integration packages could not be loaded. Retry to continue."
+              />
+            </p>
+            <EuiButton
+              size="s"
+              color="danger"
+              onClick={refetchAwsServiceMatrix}
+              data-test-subj="authenticateAndDeployStep-manifestRetryButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.retryButton"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
+          </EuiCallOut>
+        </>
+      )}
 
       {isAgentBased && allAgentBasedOnly && (
         <>

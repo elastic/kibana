@@ -100,6 +100,31 @@ export function AgentBasedSection({
     return false;
   });
 
+  // Sync isCredentialReady when requiresCredentials flips (e.g. a secondary manifest loads after
+  // mount and changes the service's credential requirements). useState initializer only runs once.
+  const requiresCredentialsPrev = useRef(requiresCredentials);
+  useEffect(() => {
+    if (requiresCredentials === requiresCredentialsPrev.current) return;
+    requiresCredentialsPrev.current = requiresCredentials;
+    if (!requiresCredentials) {
+      setIsCredentialReady(true);
+      return;
+    }
+    if (persistedCredentialMethod === 'shared_credentials') {
+      setIsCredentialReady(!!(persistedSharedCredentialFile || persistedCredentialProfileName));
+    } else if (persistedCredentialMethod === 'assume_role') {
+      setIsCredentialReady(!!persistedRoleArn);
+    } else {
+      setIsCredentialReady(false);
+    }
+  }, [
+    requiresCredentials,
+    persistedCredentialMethod,
+    persistedSharedCredentialFile,
+    persistedCredentialProfileName,
+    persistedRoleArn,
+  ]);
+
   // In-memory secrets — never persisted.
   const [staticKeyCreds, setStaticKeyCreds] = useState<AwsStaticKeyCredentials | undefined>(
     undefined

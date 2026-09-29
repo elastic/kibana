@@ -43,6 +43,8 @@ function makeService(
     defaultEnabledInputs: [],
     showInUI: true,
     isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
   };
 }
 

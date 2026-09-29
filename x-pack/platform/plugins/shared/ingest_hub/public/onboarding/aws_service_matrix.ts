@@ -126,8 +126,10 @@ export interface AwsServiceMatrixEntry {
   defaultEnabledInputs: string[];
   /** Whether this service should be shown in the AWS onboarding UI. */
   showInUI: boolean;
-  /** True when the package manifest for this entry has been fetched or the query has settled (success or error). False only while the query is still pending. */
+  /** True when the package manifest for this entry was fetched successfully. */
   isManifestLoaded: boolean;
+  /** True when the package manifest query has failed. The entry will have static/fallback metadata only. */
+  isManifestError: boolean;
   /** True when the static routing table explicitly declares only agent_based deployment methods.
    *  Does not depend on manifest load state — use this to show constraints immediately on selection. */
   isStaticAgentBasedOnly: boolean;
@@ -176,6 +178,7 @@ type AwsServiceStaticEntry = Omit<
   | 'defaultEnabledInputs'
   | 'showInUI'
   | 'isManifestLoaded'
+  | 'isManifestError'
   | 'isStaticAgentBasedOnly'
   | 'optionalConfig'
   | 'name'
@@ -841,8 +844,8 @@ function applyEcfOnlyConfig(
 export function buildAwsServiceMatrix(
   packages: Record<string, PackageInfo>,
   staticEntries: AwsServiceStaticEntry[],
-  /** Package names whose queries are still in-flight. Settled (success or error) names are absent. */
-  loadingPackageNames: Set<string> = new Set()
+  /** Package names whose queries have failed. Used to surface isManifestError on matrix entries. */
+  erroredPackageNames: Set<string> = new Set()
 ): AwsServiceMatrixEntry[] {
   return staticEntries.map((entry) => {
     const { deploymentMethods: staticMethods, excludedDataStreams, ...rest } = entry;
@@ -1070,7 +1073,8 @@ export function buildAwsServiceMatrix(
       defaultEnabledInputs,
       inputTitles: Object.keys(inputTitles).length > 0 ? inputTitles : undefined,
       showInUI,
-      isManifestLoaded: packageInfo !== undefined || !loadingPackageNames.has(entry.packageName),
+      isManifestLoaded: packageInfo !== undefined,
+      isManifestError: packageInfo === undefined && erroredPackageNames.has(entry.packageName),
       isStaticAgentBasedOnly:
         (staticMethods ?? []).length > 0 &&
         (staticMethods ?? []).every((m) => m.method === 'agent_based'),
@@ -1139,6 +1143,7 @@ export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
       deploymentMethods,
       showInUI: entry.showInUI ?? true,
       isManifestLoaded: false,
+      isManifestError: false,
       isStaticAgentBasedOnly: false,
       defaultEnabled: true,
       defaultEnabledInputs: [],
