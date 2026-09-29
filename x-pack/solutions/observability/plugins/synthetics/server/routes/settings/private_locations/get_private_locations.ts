@@ -7,6 +7,7 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { schema } from '@kbn/config-schema';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -59,14 +60,15 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 export const getPrivateLocationsAndAgentPolicies = async (
   savedObjectsClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient,
-  excludeAgentPolicies = false
+  excludeAgentPolicies = false,
+  spaceId: string = ALL_SPACES_ID
 ): Promise<SyntheticsPrivateLocationsAttributes & { agentPolicies: AgentPolicyInfo[] }> => {
   try {
     const [privateLocations, agentPolicies] = await Promise.all([
       getPrivateLocations(savedObjectsClient),
       excludeAgentPolicies
         ? new Promise<void>((resolve) => resolve())
-        : syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
+        : syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(spaceId),
     ]);
     return {
       locations: privateLocations || [],
