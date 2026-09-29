@@ -684,22 +684,11 @@ const executeEntityTypeRun = async ({
   let resolutionScoreDistribution: Awaited<ReturnType<typeof getRiskScoreResolutionDistribution>>;
 
   if (!skipRemainingStages) {
-    // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2,
-    // and so the distribution queries below see the base and resolution scoring docs.
+    // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2.
+    // Without this, the ES|QL query in reset may not see the new documents and could incorrectly
+    // zero out scores that were just written in this run.
     const { alias: riskScoreAlias } = getIndexPatternDataStream(runContext.namespace);
     await runContext.esClient.indices.refresh({ index: riskScoreAlias });
-
-    const distributionQuery = {
-      esClient: runContext.esClient,
-      namespace: runContext.namespace,
-      entityType,
-      calculationRunId,
-      logger: runLogger,
-    };
-    [baseScoreDistribution, resolutionScoreDistribution] = await Promise.all([
-      getRiskScoreBaseDistribution(distributionQuery),
-      getRiskScoreResolutionDistribution(distributionQuery),
-    ]);
 
     // Stage 3: reset stale positive scores not touched in this run.
     if (runConfig.configuration.enableResetToZero !== false) {
@@ -763,6 +752,20 @@ const executeEntityTypeRun = async ({
         skipReason: 'reset_to_zero_disabled',
       });
     }
+
+    // Refresh so the distribution queries see zero-score records written by reset-to-zero above.
+    await runContext.esClient.indices.refresh({ index: riskScoreAlias });
+    const distributionQuery = {
+      esClient: runContext.esClient,
+      namespace: runContext.namespace,
+      entityType,
+      calculationRunId,
+      logger: runLogger,
+    };
+    [baseScoreDistribution, resolutionScoreDistribution] = await Promise.all([
+      getRiskScoreBaseDistribution(distributionQuery),
+      getRiskScoreResolutionDistribution(distributionQuery),
+    ]);
   } else {
     frameworkTelemetryStages.push({
       name: 'reset_to_zero',

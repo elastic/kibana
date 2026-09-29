@@ -53,6 +53,11 @@ const makeEsqlResponse = (values: Array<Array<number | null>>) => ({
 });
 
 describe('getEntityRiskScoreDistribution', () => {
+  let logger: MockedLogger;
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
   it('counts every entity of the type, including entities with no risk band', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({
@@ -70,7 +75,13 @@ describe('getEntityRiskScoreDistribution', () => {
     } as never);
 
     const { signal } = new AbortController();
-    const result = await getEntityRiskScoreDistribution(esClient, 'my-index', 'host', signal);
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      signal
+    );
 
     expect(esClient.search).toHaveBeenCalledWith(
       {
@@ -120,6 +131,7 @@ describe('getEntityRiskScoreDistribution', () => {
       esClient,
       'my-index',
       'user',
+      logger,
       new AbortController().signal
     );
 
@@ -146,6 +158,7 @@ describe('getEntityRiskScoreDistribution', () => {
       esClient,
       'my-index',
       'user',
+      logger,
       signal,
       'resolution'
     );
@@ -190,6 +203,7 @@ describe('getEntityRiskScoreDistribution', () => {
         esClient,
         'my-index',
         'host',
+        logger,
         new AbortController().signal
       );
 
@@ -204,6 +218,7 @@ describe('getEntityRiskScoreDistribution', () => {
         esClient,
         'my-index',
         'host',
+        logger,
         new AbortController().signal
       );
 
@@ -220,6 +235,7 @@ describe('getEntityRiskScoreDistribution', () => {
         esClient,
         'my-index',
         'host',
+        logger,
         new AbortController().signal
       );
 
@@ -239,6 +255,7 @@ describe('getEntityRiskScoreDistribution', () => {
         esClient,
         'my-index',
         'host',
+        logger,
         new AbortController().signal
       );
 
@@ -264,6 +281,7 @@ describe('getEntityRiskScoreDistribution', () => {
         esClient,
         'my-index',
         'host',
+        logger,
         new AbortController().signal
       );
 
@@ -280,15 +298,54 @@ describe('getEntityRiskScoreDistribution', () => {
         esClient,
         'my-index',
         'host',
+        logger,
         new AbortController().signal
       );
 
       expect(result).toEqual({ critical: 0, high: 1, moderate: 0, low: 0, unknown: 0 });
     });
   });
+
+  it('returns all-zero distribution and logs a warning when the search rejects', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockRejectedValue(new Error('es_down'));
+
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      new AbortController().signal
+    );
+
+    expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
+  });
+
+  it('returns all-zero resolution distribution and logs a warning when the resolution search rejects', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockRejectedValue(new Error('es_down'));
+
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      new AbortController().signal,
+      'resolution'
+    );
+
+    expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
+  });
 });
 
 describe('getEntitySourceDistribution', () => {
+  let logger: MockedLogger;
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
   it('maps source buckets, the missing bucket, and the overflow count', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({
@@ -307,7 +364,7 @@ describe('getEntitySourceDistribution', () => {
     } as never);
 
     const { signal } = new AbortController();
-    const result = await getEntitySourceDistribution(esClient, 'my-index', 'host', signal);
+    const result = await getEntitySourceDistribution(esClient, 'my-index', 'host', logger, signal);
 
     expect(esClient.search).toHaveBeenCalledWith(
       {
@@ -347,6 +404,7 @@ describe('getEntitySourceDistribution', () => {
         esClient,
         'my-index',
         'user',
+        logger,
         new AbortController().signal
       );
 
@@ -361,6 +419,7 @@ describe('getEntitySourceDistribution', () => {
         esClient,
         'my-index',
         'user',
+        logger,
         new AbortController().signal
       );
 
@@ -377,6 +436,7 @@ describe('getEntitySourceDistribution', () => {
         esClient,
         'my-index',
         'user',
+        logger,
         new AbortController().signal
       );
 
@@ -398,6 +458,7 @@ describe('getEntitySourceDistribution', () => {
         esClient,
         'my-index',
         'user',
+        logger,
         new AbortController().signal
       );
 
@@ -423,11 +484,28 @@ describe('getEntitySourceDistribution', () => {
         esClient,
         'my-index',
         'user',
+        logger,
         new AbortController().signal
       );
 
       expect(result).toEqual({ sources: { azure: 7 } });
     });
+  });
+
+  it('returns an empty sources map and logs a warning when the search rejects', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockRejectedValue(new Error('es_down'));
+
+    const result = await getEntitySourceDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      new AbortController().signal
+    );
+
+    expect(result).toEqual({ sources: {} });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
   });
 });
 
@@ -896,7 +974,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     expect(usageCall?.[1]).not.toHaveProperty('riskScoreDistribution');
   });
 
-  it('skips usage and resolution for an entity type when the source query fails', async () => {
+  it('reports empty distributions and logs a warning when the search queries fail for an entity type', async () => {
     const [failingType] = ALL_ENTITY_TYPES;
     esClient.search.mockImplementation(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -912,22 +990,34 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       }) as any
     );
 
-    await expect(runStatusReportTask()).rejects.toThrow('source_boom');
+    // Task resolves — errors are caught inside each distribution function.
+    await expect(runStatusReportTask()).resolves.toBeDefined();
 
+    // Usage and resolution state events fire for every type, including the failing one.
     const usageTypes = reportEvent.mock.calls
       .filter(([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType)
       .map(([, payload]) => payload.entityType);
-    expect(usageTypes).not.toContain(failingType);
-    expect(new Set(usageTypes)).toEqual(
-      new Set(ALL_ENTITY_TYPES.filter((type) => type !== failingType))
-    );
+    expect(new Set(usageTypes)).toEqual(new Set(ALL_ENTITY_TYPES));
 
     const resolutionTypes = reportEvent.mock.calls
       .filter(([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType)
       .map(([, payload]) => payload.entityType);
-    expect(resolutionTypes).not.toContain(failingType);
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`Error reporting store usage for ${failingType}`)
+    expect(new Set(resolutionTypes)).toEqual(new Set(ALL_ENTITY_TYPES));
+
+    // The failing type emits empty distributions.
+    const failingUsageCall = reportEvent.mock.calls.find(
+      ([eventType, payload]) =>
+        eventType === ENTITY_STORE_USAGE_EVENT.eventType && payload.entityType === failingType
     );
+    expect(failingUsageCall?.[1].sources).toEqual({});
+    expect(failingUsageCall?.[1].baseScoreDistribution).toEqual({
+      critical: 0,
+      high: 0,
+      moderate: 0,
+      low: 0,
+      unknown: 0,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('source_boom'));
   });
 });
