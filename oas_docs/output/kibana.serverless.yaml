@@ -40152,6 +40152,7 @@ paths:
           name: agentId
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -41600,11 +41601,14 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 10000
+                      type: string
                 batchSize:
+                  minimum: 1
                   type: number
                 includeInactive:
                   default: false
