@@ -28,7 +28,7 @@ import type { DiscoverEsqlLocatorParams } from './types';
 type EsqlEditorProps = Omit<ESQLEditorProps, 'ref'>;
 
 const mockRunPreview = jest.fn().mockResolvedValue(undefined);
-const mockClearPreviewError = jest.fn();
+const mockResetPreview = jest.fn();
 const mockUseEsqlViewPreview = jest.fn();
 const mockEsqlDataGrid = jest.fn();
 
@@ -139,7 +139,7 @@ describe('ManagementApp', () => {
     jest.clearAllMocks();
     mockRunPreview.mockResolvedValue(undefined);
     mockUseEsqlViewPreview.mockReturnValue({
-      clearError: mockClearPreviewError,
+      resetPreview: mockResetPreview,
       error: undefined,
       hasRun: false,
       isLoading: false,
@@ -303,6 +303,7 @@ describe('ManagementApp', () => {
 
     fireEvent.click(screen.getByTestId('mockSelectHistoryQuery'));
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(historyQuery);
+    expect(mockResetPreview).toHaveBeenCalledTimes(1);
     expect(mockRunPreview).toHaveBeenLastCalledWith(
       { esql: historyQuery },
       expect.any(AbortController)
@@ -340,7 +341,7 @@ describe('ManagementApp', () => {
       rows: [['first'], ['second']],
     };
     mockUseEsqlViewPreview.mockReturnValue({
-      clearError: mockClearPreviewError,
+      resetPreview: mockResetPreview,
       error: undefined,
       hasRun: true,
       isLoading: false,
@@ -642,7 +643,7 @@ describe('ManagementApp', () => {
     });
     client.createView.mockResolvedValue({ acknowledged: true });
     mockUseEsqlViewPreview.mockReturnValue({
-      clearError: mockClearPreviewError,
+      resetPreview: mockResetPreview,
       error: new Error('Preview request failed'),
       hasRun: true,
       isLoading: false,

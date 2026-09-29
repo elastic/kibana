@@ -65,8 +65,12 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
     []
   );
 
-  const clearError = useCallback(() => {
-    setState((currentState) => ({ ...currentState, error: undefined }));
+  const resetPreview = useCallback(() => {
+    nextRequestIdRef.current += 1;
+    const activeRequest = activeRequestRef.current;
+    activeRequestRef.current = undefined;
+    activeRequest?.abortController.abort();
+    setState(initialState);
   }, []);
 
   const runPreview = useCallback(
@@ -161,7 +165,7 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
 
   return {
     ...state,
-    clearError,
+    resetPreview,
     runPreview,
   };
 };

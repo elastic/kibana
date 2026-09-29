@@ -151,6 +151,37 @@ describe('useEsqlViewPreview', () => {
     expect(result.current.result).toBeUndefined();
   });
 
+  it('resets and aborts the active query when the editor query changes', async () => {
+    let requestSignal: AbortSignal | undefined;
+    const deferred = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
+    mockGetESQLResults.mockImplementation(({ signal }) => {
+      requestSignal = signal;
+      return deferred.promise;
+    });
+    const { result } = renderHook(() => useEsqlViewPreview(dependencies));
+
+    let runPromise = Promise.resolve();
+    act(() => {
+      runPromise = result.current.runPreview(query('FROM logs-*'));
+    });
+
+    act(() => {
+      result.current.resetPreview();
+    });
+
+    expect(requestSignal?.aborted).toBe(true);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.hasRun).toBe(false);
+    expect(result.current.error).toBeUndefined();
+    expect(result.current.result).toBeUndefined();
+
+    deferred.resolve(createResponse() as never);
+    await act(async () => {
+      await runPromise;
+    });
+    expect(result.current.result).toBeUndefined();
+  });
+
   it('aborts the active query when unmounted', async () => {
     let requestSignal: AbortSignal | undefined;
     const deferred = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();

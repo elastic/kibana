@@ -317,7 +317,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
                   setQuery(nextQuery.esql);
                   setQueryError(undefined);
                   setSaveError(undefined);
-                  preview.clearError();
+                  preview.resetPreview();
                 }}
                 onTextLangQuerySubmit={async (submittedQuery, abortController) => {
                   setIsPreviewOpen(true);
