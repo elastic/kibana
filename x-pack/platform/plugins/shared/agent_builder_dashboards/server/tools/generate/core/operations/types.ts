@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ResolvedCustomContentTemplate } from '@kbn/custom-content-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
@@ -17,7 +18,6 @@ import type {
   PanelContentAttempt,
 } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
-import type { AggregatableFieldTypesLoader } from './aggregatable_field_types';
 
 export type ResolveCustomContentTemplate = (params: {
   prompt: string;
@@ -45,7 +45,7 @@ export interface OperationExecutionContext {
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
-  aggregatableFieldTypesLoader?: AggregatableFieldTypesLoader;
+  esClient?: ElasticsearchClient;
 }
 
 export interface OperationHandlerParams<TOperation> {

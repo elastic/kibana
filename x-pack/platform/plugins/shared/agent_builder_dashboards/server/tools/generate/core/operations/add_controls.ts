@@ -17,16 +17,17 @@ import {
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
 import { defineOperation } from './types';
-import type {
-  AggregatableFieldTypesLoader,
-  ControlFieldCapabilities,
-} from './aggregatable_field_types';
+import {
+  fetchControlFieldCapabilities,
+  type ControlFieldCapabilities,
+} from './control_field_capabilities';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -214,14 +215,14 @@ const recordControlFailure = ({
   }
 };
 
-const loadFieldTypesByIndex = async ({
+const loadCapabilitiesByIndex = async ({
   controls,
-  loader,
+  esClient,
   projectRouting,
   logger,
 }: {
   controls: DataControlInput[];
-  loader: AggregatableFieldTypesLoader;
+  esClient: ElasticsearchClient;
   projectRouting?: string;
   logger: Logger;
 }): Promise<Map<string, ControlFieldCapabilities | undefined>> => {
@@ -239,7 +240,12 @@ const loadFieldTypesByIndex = async ({
         async ([index, fieldNames]) =>
           [
             index,
-            await loader.loadFields({ index, projectRouting, fieldNames }).catch((error) => {
+            await fetchControlFieldCapabilities({
+              esClient,
+              index,
+              projectRouting,
+              fieldNames,
+            }).catch((error) => {
               logger.warn(
                 `Could not load fields for index "${index}", adding its controls unvalidated: ${getErrorMessage(
                   error
@@ -292,26 +298,26 @@ const resolveControlField = (
  */
 const resolveControlFields = async ({
   controls,
-  loader,
+  esClient,
   projectRouting,
   logger,
   failures,
 }: {
   controls: ControlInput[];
-  loader?: AggregatableFieldTypesLoader;
+  esClient?: ElasticsearchClient;
   projectRouting?: string;
   logger: Logger;
   failures: OperationFailure[];
 }): Promise<ControlInput[]> => {
-  if (!loader) {
+  if (!esClient) {
     return controls;
   }
 
-  const capabilitiesByIndex = await loadFieldTypesByIndex({
+  const capabilitiesByIndex = await loadCapabilitiesByIndex({
     controls: controls.filter(
       (control): control is DataControlInput => control.type !== TIME_SLIDER_CONTROL
     ),
-    loader,
+    esClient,
     projectRouting,
     logger,
   });
@@ -422,7 +428,7 @@ export const addControlsOperation = defineOperation({
         logger: context.logger,
         failures: context.failures,
       }),
-      loader: context.aggregatableFieldTypesLoader,
+      esClient: context.esClient,
       projectRouting: dashboardData.project_routing,
       logger: context.logger,
       failures: context.failures,

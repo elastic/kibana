@@ -3227,11 +3227,6 @@ describe('add_controls / remove_controls operations', () => {
           operation: 'add_controls',
           controls: [
             { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
-          ],
-        },
-        {
-          operation: 'add_controls',
-          controls: [
             { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
           ],
         },
