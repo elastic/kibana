@@ -852,7 +852,7 @@ const loadPriorCitationIdsByReport = async ({
     throw new PriorCitationLookupError(
       pitOpened
         ? `Prior-citation PIT search failed: ${(err as Error).message ?? String(err)}`
-        : ((err as Error).message ?? String(err))
+        : (err as Error).message ?? String(err)
     );
   } finally {
     if (pitId) {
