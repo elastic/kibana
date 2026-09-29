@@ -230,7 +230,6 @@ export function StepMapping() {
         <MappingEditor
           value={{ ...field.value, fields: splitFields.otherFields }}
           onChange={onEditorChange}
-          docLinks={docLinks}
           reservedFieldNames={isTimeseriesEnabled ? ['@timestamp'] : undefined}
         />
       </div>

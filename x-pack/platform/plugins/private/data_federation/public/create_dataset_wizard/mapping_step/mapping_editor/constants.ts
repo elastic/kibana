@@ -9,41 +9,39 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { DatasetMappingFieldType } from '../../../../common';
 import type { MappingEditorValue } from './mapping_editor';
+import { fieldTypeSelectStrings } from './field_type_select_i18n';
 
 export const emptyMappingEditorValue: MappingEditorValue = {
   dynamic: true,
   fields: [],
 };
 
-const TYPE_LABEL_BY_VALUE: Record<DatasetMappingFieldType, string> = {
-  boolean: 'Boolean',
-  date: 'Date',
-  date_nanos: 'Date nanos',
-  double: 'Double',
-  integer: 'Integer',
-  ip: 'IP',
-  keyword: 'Keyword',
-  long: 'Long',
-  unsigned_long: 'Unsigned long',
+export const TYPE_LABEL_BY_VALUE: Record<DatasetMappingFieldType, string> = {
+  boolean: fieldTypeSelectStrings.booleanOption,
+  date: fieldTypeSelectStrings.dateOption,
+  date_nanos: fieldTypeSelectStrings.dateNanosOption,
+  double: fieldTypeSelectStrings.doubleOption,
+  integer: fieldTypeSelectStrings.integerOption,
+  ip: fieldTypeSelectStrings.ipOption,
+  keyword: fieldTypeSelectStrings.keywordOption,
+  long: fieldTypeSelectStrings.longOption,
+  unsigned_long: fieldTypeSelectStrings.unsignedLongOption,
 };
 
-export const getTypeInfoByValue = (
+export const getTypeDocsByValue = (
   docLinks: DocLinksStart
-): Record<DatasetMappingFieldType, { label: string; docs: string }> => {
+): Record<DatasetMappingFieldType, string> => {
   const esLinks = docLinks.links.elasticsearch;
 
   return {
-    boolean: { label: TYPE_LABEL_BY_VALUE.boolean, docs: esLinks.mappingBoolean },
-    date: { label: TYPE_LABEL_BY_VALUE.date, docs: esLinks.mappingDate },
-    date_nanos: { label: TYPE_LABEL_BY_VALUE.date_nanos, docs: esLinks.mappingDate },
-    double: { label: TYPE_LABEL_BY_VALUE.double, docs: esLinks.mappingNumber },
-    integer: { label: TYPE_LABEL_BY_VALUE.integer, docs: esLinks.mappingNumber },
-    ip: { label: TYPE_LABEL_BY_VALUE.ip, docs: esLinks.mappingIp },
-    keyword: { label: TYPE_LABEL_BY_VALUE.keyword, docs: esLinks.mappingKeyword },
-    long: { label: TYPE_LABEL_BY_VALUE.long, docs: esLinks.mappingNumber },
-    unsigned_long: {
-      label: TYPE_LABEL_BY_VALUE.unsigned_long,
-      docs: esLinks.mappingUnsignedLong,
-    },
+    boolean: esLinks.mappingBoolean,
+    date: esLinks.mappingDate,
+    date_nanos: esLinks.mappingDate,
+    double: esLinks.mappingNumber,
+    integer: esLinks.mappingNumber,
+    ip: esLinks.mappingIp,
+    keyword: esLinks.mappingKeyword,
+    long: esLinks.mappingNumber,
+    unsigned_long: esLinks.mappingUnsignedLong,
   };
 };

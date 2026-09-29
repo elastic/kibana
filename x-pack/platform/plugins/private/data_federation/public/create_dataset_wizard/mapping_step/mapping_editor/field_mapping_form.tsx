@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,13 +13,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
-  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatasetMappingFieldType } from '../../../../common/dataset_types';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { DatetimeFormatComboBox } from '../../components/datetime_format_combo_box';
+import { FieldTypeSelect } from './field_type_select';
 
 export interface FieldMappingFormValue<TType extends string = string> {
   type: '' | TType;
@@ -42,24 +40,11 @@ export interface FieldMappingFormProps {
   onSubmit: (value: FieldMappingFormValue) => void;
   onCancel?: () => void;
   onDraftChange?: (value: FieldMappingFormValue) => void;
-  typeInfoByValue: Record<DatasetMappingFieldType, { label: string; docs: string }>;
 }
 
 const isDateLikeType = (type: DatasetMappingFieldType): boolean => {
   return type === 'date' || type === 'date_nanos';
 };
-
-const DEFAULT_TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: string }> = [
-  { value: 'boolean', text: 'Boolean' },
-  { value: 'date', text: 'Date' },
-  { value: 'date_nanos', text: 'Date nanos' },
-  { value: 'double', text: 'Double' },
-  { value: 'integer', text: 'Integer' },
-  { value: 'ip', text: 'IP' },
-  { value: 'keyword', text: 'Keyword' },
-  { value: 'long', text: 'Long' },
-  { value: 'unsigned_long', text: 'Unsigned long' },
-];
 
 const CreateButton = ({ onClick }: { onClick: () => void }) => {
   return (
@@ -107,23 +92,6 @@ const UpdateButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-export const getFieldTypeDocsHelpText = (
-  type: DatasetMappingFieldType,
-  infoByValue: Record<DatasetMappingFieldType, { label: string; docs: string }>
-): React.ReactNode => {
-  const info = infoByValue[type];
-  if (!info) return;
-
-  return (
-    <EuiLink href={info.docs} target="_blank" external>
-      {i18n.translate('xpack.dataFederation.mappingEditor.fieldTypeDocsLink', {
-        defaultMessage: '{type} field documentation',
-        values: { type: info.label },
-      })}
-    </EuiLink>
-  );
-};
-
 export function FieldMappingForm({
   value,
   errors,
@@ -131,19 +99,12 @@ export function FieldMappingForm({
   onSubmit,
   onCancel,
   onDraftChange,
-  typeInfoByValue,
 }: FieldMappingFormProps) {
   const [draft, setDraft] = useState<FieldMappingFormValue>(value);
 
   useEffect(() => {
     setDraft(value);
   }, [value]);
-
-  const typeHelpText: ReactNode = useMemo(() => {
-    const type = draft.type as DatasetMappingFieldType;
-    if (!type) return undefined;
-    return getFieldTypeDocsHelpText(type, typeInfoByValue);
-  }, [draft.type, typeInfoByValue]);
 
   const isDateType = Boolean(draft.type) && isDateLikeType(draft.type as DatasetMappingFieldType);
 
@@ -166,31 +127,15 @@ export function FieldMappingForm({
           style={{ width: '100%' }}
         >
           <EuiFlexItem grow={false} style={{ maxWidth: 200, minWidth: 200 }}>
-            <EuiFormRow
-              label={i18n.translate('xpack.dataFederation.mappingEditor.typeLabel', {
-                defaultMessage: 'Field type',
-              })}
-              helpText={typeHelpText}
-              isInvalid={Boolean(errors?.type)}
-              error={errors?.type}
-              fullWidth
-            >
-              <EuiSelect
-                isInvalid={Boolean(errors?.type)}
-                fullWidth
-                options={DEFAULT_TYPE_OPTIONS as unknown as Array<{ value: string; text: string }>}
-                value={draft.type}
-                onChange={(e) => {
-                  const nextType = e.target.value as DatasetMappingFieldType;
-                  const nextTypeIsDate = isDateLikeType(nextType);
-                  updateDraft({
-                    type: nextType,
-                    ...(nextTypeIsDate ? {} : { format: '' }),
-                  });
-                }}
-                data-test-subj="dataFederationMappingEditorFieldType"
-              />
-            </EuiFormRow>
+            <FieldTypeSelect
+              value={draft.type}
+              onChange={(nextType) => {
+                updateDraft({
+                  type: nextType,
+                  ...(isDateLikeType(nextType) ? {} : { format: '' }),
+                });
+              }}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem style={{ minWidth: 240 }}>

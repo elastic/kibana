@@ -10,6 +10,7 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, within } from '@testing-library/react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { MappingEditor } from './mapping_editor';
 import type { MappingEditorValue } from './mapping_editor';
@@ -36,12 +37,13 @@ describe('MappingEditor', () => {
       return (
         <I18nProvider>
           <EuiProvider>
-            <MappingEditor
-              value={value}
-              onChange={setValue}
-              docLinks={docLinksMock}
-              reservedFieldNames={['@timestamp']}
-            />
+            <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+              <MappingEditor
+                value={value}
+                onChange={setValue}
+                reservedFieldNames={['@timestamp']}
+              />
+            </KibanaContextProvider>
           </EuiProvider>
         </I18nProvider>
       );
@@ -83,18 +85,19 @@ describe('MappingEditor', () => {
       return (
         <I18nProvider>
           <EuiProvider>
-            <MappingEditor
-              value={value}
-              onChange={(next) =>
-                setValue((prev) =>
-                  typeof next === 'function'
-                    ? (next as (p: MappingEditorValue) => MappingEditorValue)(prev)
-                    : next
-                )
-              }
-              docLinks={docLinksMock}
-            />
-            <div data-test-subj="mappingEditorValueJson">{JSON.stringify(value)}</div>
+            <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+              <MappingEditor
+                value={value}
+                onChange={(next) =>
+                  setValue((prev) =>
+                    typeof next === 'function'
+                      ? (next as (p: MappingEditorValue) => MappingEditorValue)(prev)
+                      : next
+                  )
+                }
+              />
+              <div data-test-subj="mappingEditorValueJson">{JSON.stringify(value)}</div>
+            </KibanaContextProvider>
           </EuiProvider>
         </I18nProvider>
       );
@@ -125,7 +128,9 @@ describe('MappingEditor', () => {
       return (
         <I18nProvider>
           <EuiProvider>
-            <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />
+            <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+              <MappingEditor value={value} onChange={setValue} />
+            </KibanaContextProvider>
           </EuiProvider>
         </I18nProvider>
       );

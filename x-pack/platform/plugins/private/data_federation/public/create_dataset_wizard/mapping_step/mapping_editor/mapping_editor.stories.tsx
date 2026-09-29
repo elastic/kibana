@@ -9,6 +9,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { MappingEditorValue } from './mapping_editor';
 import { MappingEditor } from './mapping_editor';
@@ -69,14 +70,22 @@ const PopulatedStory = () => {
     ],
   }));
 
-  return <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />;
+  return (
+    <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+      <MappingEditor value={value} onChange={setValue} />
+    </KibanaContextProvider>
+  );
 };
 
 const EmptyStory = () => {
   const [value, setValue] = React.useState<MappingEditorValue>(() => ({
     ...emptyMappingEditorValue,
   }));
-  return <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />;
+  return (
+    <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+      <MappingEditor value={value} onChange={setValue} />
+    </KibanaContextProvider>
+  );
 };
 
 export const Empty: Story = {

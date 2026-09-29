@@ -21,13 +21,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../../common';
 import { FieldMappingForm } from './field_mapping_form';
 import type { FieldMappingFormValue } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
-import { emptyMappingEditorValue, getTypeInfoByValue } from './constants';
+import { emptyMappingEditorValue, TYPE_LABEL_BY_VALUE } from './constants';
 import { DeleteConfirmModal } from './delete_confirm_modal';
 import { validateMappingEditorValue } from './validate_mapping_editor_value';
 
@@ -63,7 +62,6 @@ export interface MappingEditorValidationResult {
 export interface MappingEditorProps {
   value: MappingEditorValue;
   onChange: (next: SetStateAction<MappingEditorValue>) => void;
-  docLinks: DocLinksStart;
   reservedFieldNames?: readonly string[];
 }
 
@@ -99,16 +97,10 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
 
 const generateFieldId = htmlIdGenerator('mapping-field');
 
-export const MappingEditor: FC<MappingEditorProps> = ({
-  value,
-  onChange,
-  docLinks,
-  reservedFieldNames,
-}) => {
+export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reservedFieldNames }) => {
   const { euiTheme } = useEuiTheme();
   const isDefineSchemaSelected = !value.dynamic;
   const isInferSchemaSelected = value.dynamic;
-  const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const validation = useMemo(
     () => validateMappingEditorValue(value, { reservedFieldNames }),
     [reservedFieldNames, value]
@@ -324,7 +316,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
             {value.fields.map((f) => {
-              const typeInfo = f.type ? typeInfoByValue[f.type] : undefined;
+              const typeLabel = f.type ? TYPE_LABEL_BY_VALUE[f.type] : undefined;
               const isEditing = editingFieldId === f.id;
               const rowErrors = validatedFieldIds.includes(f.id)
                 ? fieldErrorsById[f.id]
@@ -354,7 +346,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                       {isEditing ? (
                         <FieldMappingForm
                           value={f}
-                          typeInfoByValue={typeInfoByValue}
                           errors={rowErrors}
                           mode="edit"
                           onCancel={() => cancelEditingField(f.id)}
@@ -394,7 +385,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                       ) : (
                         <FieldMappingDisplayMode
                           field={f}
-                          typeLabel={typeInfo?.label}
+                          typeLabel={typeLabel}
                           onEdit={() => startEditingField(f.id)}
                           onRemove={() => requestRemoveField(f)}
                           areActionsDisabled={editingFieldId !== null}
@@ -436,7 +427,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             <FieldMappingForm
               key={draftFormKey}
               value={emptyDraftInitialValue}
-              typeInfoByValue={typeInfoByValue}
               errors={draftErrors}
               onDraftChange={() => {
                 if (Object.keys(draftErrors).length === 0) return;
