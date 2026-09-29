@@ -7,11 +7,10 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
 /** Whether a mapped field can back a `STATS BY` across the whole index, and why not. */
 export type ControlFieldCapability =
-  | { status: 'usable'; types: string[] }
+  | { status: 'usable'; type: string }
   | { status: 'conflicting' }
   | { status: 'not_aggregatable' };
 
@@ -31,21 +30,21 @@ export interface AggregatableFieldTypesLoader {
 }
 
 /**
- * A field spanning several indices is only usable when it is aggregatable in all of them and
- * its mappings share one Kibana field type; otherwise `STATS BY` can hit a conflicting mapping.
+ * A field is usable only with one ES type across the matching indices that is aggregatable in
+ * all of them. ES|QL rejects `STATS BY` on a field mapped as different types, even `long` and
+ * `integer`.
  */
-const isAggregatableEverywhere = (capabilities: FieldCapsFieldCapability[]): boolean =>
-  capabilities.every(({ aggregatable }) => aggregatable) &&
-  new Set(capabilities.map(({ type }) => castEsToKbnFieldTypeName(type))).size === 1;
-
-const toControlFieldCapability = (
-  capabilities: FieldCapsFieldCapability[]
-): ControlFieldCapability => {
-  if (isAggregatableEverywhere(capabilities)) {
-    return { status: 'usable', types: capabilities.map(({ type }) => type) };
+const toControlFieldCapability = ([
+  capability,
+  ...otherCapabilities
+]: FieldCapsFieldCapability[]): ControlFieldCapability => {
+  if (otherCapabilities.length > 0) {
+    return [capability, ...otherCapabilities].some(({ aggregatable }) => aggregatable)
+      ? { status: 'conflicting' }
+      : { status: 'not_aggregatable' };
   }
-  return capabilities.length > 1 && capabilities.some(({ aggregatable }) => aggregatable)
-    ? { status: 'conflicting' }
+  return capability.aggregatable
+    ? { status: 'usable', type: capability.type }
     : { status: 'not_aggregatable' };
 };
 

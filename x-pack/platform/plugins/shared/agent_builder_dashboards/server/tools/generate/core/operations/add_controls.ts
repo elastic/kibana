@@ -170,41 +170,26 @@ const OPTIONS_LIST_FIELD_TYPES: ReadonlySet<string> = new Set([
   ES_FIELD_TYPES.DATE_NANOS,
 ]);
 
-const hasOnlyAllowedTypes = (types: string[], allowedTypes: ReadonlySet<string>): boolean =>
-  types.length > 0 && types.every((type) => allowedTypes.has(type));
-
-const TEXT_FIELD_TYPES: ReadonlySet<string> = new Set([
-  ES_FIELD_TYPES.TEXT,
-  ES_FIELD_TYPES.MATCH_ONLY_TEXT,
-]);
-
-const getUsableFieldTypes = (
-  capabilities: ControlFieldCapabilities,
-  fieldName: string
-): string[] | undefined => {
-  const capability = capabilities.get(fieldName);
-  return capability?.status === 'usable' ? capability.types : undefined;
-};
+interface UsableField {
+  fieldName: string;
+  type: string;
+}
 
 /**
  * Pick the first usable candidate, but prefer the `.keyword` sibling over an analyzed
  * text field, which can be aggregatable through `fielddata` yet groups on tokens.
  */
-const pickFieldName = (
+const pickField = (
   candidates: string[],
   capabilities: ControlFieldCapabilities
-): string | undefined => {
-  const [firstCandidate, ...otherCandidates] = candidates.filter(
-    (candidate) => getUsableFieldTypes(capabilities, candidate) !== undefined
-  );
-  if (firstCandidate === undefined) {
-    return undefined;
-  }
-
-  const isTextField = (getUsableFieldTypes(capabilities, firstCandidate) ?? []).some((type) =>
-    TEXT_FIELD_TYPES.has(type)
-  );
-  return isTextField && otherCandidates.length > 0 ? otherCandidates[0] : firstCandidate;
+): UsableField | undefined => {
+  const [firstField, ...otherFields] = candidates.flatMap((fieldName): UsableField[] => {
+    const capability = capabilities.get(fieldName);
+    return capability?.status === 'usable' ? [{ fieldName, type: capability.type }] : [];
+  });
+  return firstField?.type === ES_FIELD_TYPES.TEXT && otherFields.length > 0
+    ? otherFields[0]
+    : firstField;
 };
 
 /**
@@ -273,8 +258,8 @@ const resolveControlField = (
   capabilities: ControlFieldCapabilities
 ): { resolvedFieldName: string } | { reason: string } => {
   const candidates = getFieldCandidates(control);
-  const resolvedFieldName = pickFieldName(candidates, capabilities);
-  if (resolvedFieldName === undefined) {
+  const field = pickField(candidates, capabilities);
+  if (field === undefined) {
     const statuses = candidates.map((candidate) => capabilities.get(candidate)?.status);
     if (statuses.includes('conflicting')) {
       return { reason: `Has conflicting mappings on index "${control.index}".` };
@@ -285,24 +270,17 @@ const resolveControlField = (
     return { reason: `Not mapped on index "${control.index}".` };
   }
 
-  const resolvedFieldTypes = getUsableFieldTypes(capabilities, resolvedFieldName) ?? [];
-  if (
-    control.type === RANGE_SLIDER_CONTROL &&
-    !hasOnlyAllowedTypes(resolvedFieldTypes, SCALAR_NUMERIC_FIELD_TYPES)
-  ) {
+  if (control.type === RANGE_SLIDER_CONTROL && !SCALAR_NUMERIC_FIELD_TYPES.has(field.type)) {
     return { reason: `range_slider_control needs a numeric field on index "${control.index}".` };
   }
 
-  if (
-    control.type === OPTIONS_LIST_CONTROL &&
-    !hasOnlyAllowedTypes(resolvedFieldTypes, OPTIONS_LIST_FIELD_TYPES)
-  ) {
+  if (control.type === OPTIONS_LIST_CONTROL && !OPTIONS_LIST_FIELD_TYPES.has(field.type)) {
     return {
       reason: `options_list_control needs a keyword, numeric, date, ip, boolean, or version field on index "${control.index}".`,
     };
   }
 
-  return { resolvedFieldName };
+  return { resolvedFieldName: field.fieldName };
 };
 
 /**

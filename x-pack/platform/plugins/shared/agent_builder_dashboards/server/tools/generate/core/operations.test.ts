@@ -3176,6 +3176,47 @@ describe('add_controls / remove_controls operations', () => {
     ]);
   });
 
+  it('add_controls reports conflicting mappings for a numeric field with different types', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockResolvedValue({
+      indices: ['logs-a', 'logs-b'],
+      fields: {
+        bytes: {
+          long: { type: 'long', aggregatable: true, searchable: true, metadata_field: false },
+          integer: { type: 'integer', aggregatable: true, searchable: true, metadata_field: false },
+        },
+      },
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'range_slider_control',
+              field_name: 'bytes',
+              index: 'logs-*',
+              user_requested: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
+    expect(failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: 'bytes',
+        error: 'Has conflicting mappings on index "logs-*".',
+      },
+    ]);
+  });
+
   it('add_controls loads fields once per index with the dashboard project routing', async () => {
     const esClient = createFieldCapsEsClient({ host: 'keyword' });
 
