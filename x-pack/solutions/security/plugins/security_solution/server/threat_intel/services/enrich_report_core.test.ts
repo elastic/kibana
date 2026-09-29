@@ -1,0 +1,195 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ScopedModel } from '@kbn/agent-builder-server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
+import type { ExtractedIoc } from './extract_iocs';
+import {
+  enrichReportCore,
+  reportCoreModelOutputSchema,
+  type ReportCoreModelOutput,
+} from './enrich_report_core';
+
+const URL = 'https://evil.example/PAYLOAD/Stage2.exe';
+const HASH = 'A'.repeat(64);
+const iocs: ExtractedIoc[] = [
+  {
+    type: 'url',
+    value: URL,
+    tier: 'contextual',
+    tier_heuristic: 'contextual',
+    tier_basis: 'test',
+  },
+  {
+    type: 'hash',
+    value: HASH,
+    tier: 'discriminating',
+    tier_heuristic: 'discriminating',
+    tier_basis: 'test',
+  },
+];
+
+const OUTPUT: ReportCoreModelOutput = {
+  categories: ['malware'],
+  regions: [],
+  relevance: 0.9,
+  diamond_suitable: true,
+  severity: { level: 'high', rationale: 'Concrete malware campaign.' },
+  approved_ioc_candidate_ids: [0],
+  behaviors: [
+    {
+      technique_id: 'T1059.001',
+      description: 'PowerShell launched the staged payload.',
+      telemetry_targets: ['process.command_line'],
+      confidence: 0.9,
+    },
+  ],
+  artifacts: [{ type: 'filename', value: 'Stage2.exe', context: 'staged payload' }],
+};
+
+const buildModel = (invoke: jest.Mock) => {
+  const withStructuredOutput = jest.fn().mockReturnValue({ invoke });
+  return {
+    connector: { connectorId: 'sonnet-test' },
+    chatModel: { withStructuredOutput },
+  } as unknown as ScopedModel;
+};
+
+describe('reportCoreModelOutputSchema', () => {
+  it('canonicalizes slash-separated and lowercase ATT&CK technique ids', () => {
+    const parsed = reportCoreModelOutputSchema.parse({
+      ...OUTPUT,
+      behaviors: [
+        { ...OUTPUT.behaviors[0], technique_id: 'T1053/005' },
+        { ...OUTPUT.behaviors[0], technique_id: 't1059.001' },
+      ],
+    });
+
+    expect(parsed.behaviors.map(({ technique_id }) => technique_id)).toEqual([
+      'T1053.005',
+      'T1059.001',
+    ]);
+  });
+
+  it('clears malformed ATT&CK technique ids', () => {
+    const parsed = reportCoreModelOutputSchema.parse({
+      ...OUTPUT,
+      behaviors: [{ ...OUTPUT.behaviors[0], technique_id: 'not-an-attack-id' }],
+    });
+
+    expect(parsed.behaviors[0].technique_id).toBe('');
+  });
+});
+
+describe('enrichReportCore', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  it('returns exact deterministic IOC values selected by candidate id', async () => {
+    const invoke = jest.fn().mockResolvedValue({ raw: { response_metadata: {} }, parsed: OUTPUT });
+    const result = await enrichReportCore(buildModel(invoke), logger, {
+      text: `The attacker downloaded ${URL}. Payload hash ${HASH}.`,
+      iocs,
+    });
+
+    expect(result.anchor_iocs.map(({ value }) => value)).toEqual([URL, HASH]);
+    expect(result.anchor_iocs[0].value).toBe(URL);
+    expect(result.severity).toEqual({
+      level: 'high',
+      score: 70,
+      rationale: 'Concrete malware campaign.',
+    });
+    expect(result.behaviors[0]).toEqual(
+      expect.objectContaining({
+        id: expect.stringMatching(/^[a-f0-9]{64}$/),
+        llm_confidence: 0.9,
+      })
+    );
+    expect(result.context.mode).toBe('full');
+  });
+
+  it('retries with evenly distributed degraded context only after overflow', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({ raw: { response_metadata: {} }, parsed: OUTPUT });
+    const text = `${'L'.repeat(200_000)}MIDDLE_EVIDENCE${'R'.repeat(200_000)}`;
+
+    const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(result.context.mode).toBe('degraded_context');
+    expect(result.context.coverage).toBeLessThan(1);
+    expect(result.context.selected_chars).toBeLessThanOrEqual(30_000);
+    expect(invoke.mock.calls[1][0]).toContain('MIDDLE_EVIDENCE');
+  });
+
+  it('shrinks context again when the first overflow retry still exceeds the window', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({ raw: { response_metadata: {} }, parsed: OUTPUT });
+    const text = `${'L'.repeat(200_000)}MIDDLE_EVIDENCE${'R'.repeat(200_000)}`;
+
+    const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs });
+
+    expect(invoke).toHaveBeenCalledTimes(3);
+    expect(result.context.mode).toBe('degraded_context');
+    expect(result.context.selected_chars).toBeLessThan(30_000);
+    expect(result.context.coverage).toBe(
+      result.context.selected_chars / result.context.original_chars
+    );
+    expect(String(invoke.mock.calls[2][0]).length).toBeLessThan(
+      String(invoke.mock.calls[1][0]).length
+    );
+    expect(invoke.mock.calls[2][0]).toContain('MIDDLE_EVIDENCE');
+  });
+
+  it('bounds the IOC candidate payload on overflow retry', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({
+        raw: { response_metadata: {} },
+        parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+      });
+    const manyIocs = Array.from({ length: 60 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/payload-${index}`,
+      defanged: `https://evil.example/payload-${index}`,
+      tier: 'uncertain' as const,
+      tier_heuristic: 'uncertain' as const,
+      tier_basis: 'uncertain_default',
+    }));
+    const text = manyIocs.map((ioc) => `Fetched ${ioc.value}.`).join(' ');
+
+    await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    const retryPrompt = String(invoke.mock.calls[1][0]);
+    const candidatesMatch = /IOC candidates:\n(\[[\s\S]*?\])\n\nSource:/.exec(retryPrompt);
+    expect(candidatesMatch).not.toBeNull();
+    const retryCandidates = JSON.parse(candidatesMatch![1]) as Array<{ context: string }>;
+    expect(retryCandidates).toHaveLength(50);
+    expect(retryCandidates.every((entry) => entry.context.length <= 120)).toBe(true);
+  });
+});

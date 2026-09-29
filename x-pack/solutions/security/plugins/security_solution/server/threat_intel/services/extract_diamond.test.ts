@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import { extractDiamond, extractDiamondLlmOutputSchema } from './extract_diamond';
 
 const NONE_VERTEX = { signal: 'NONE' as const, summary: '' };
@@ -116,6 +117,67 @@ describe('extractDiamond', () => {
 
     expect(result.extraction_mode).toBe('per_vertex_fallback');
     expect(result.signal_count).toBe(0);
+  });
+
+  it('retries the single call with degraded context on a typed context-length error', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
+    const { model, singleInvoke, vertexInvoke } = buildModel({
+      singleCall: jest
+        .fn()
+        .mockRejectedValueOnce(overflow)
+        .mockResolvedValueOnce({
+          raw: { response_metadata: {} },
+          parsed: {
+            adversary: HIGH_VERTEX,
+            capability: NONE_VERTEX,
+            infrastructure: NONE_VERTEX,
+            victim: NONE_VERTEX,
+          },
+        }),
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(singleInvoke).toHaveBeenCalledTimes(2);
+    expect(vertexInvoke).not.toHaveBeenCalled();
+    expect(result.extraction_mode).toBe('single_call');
+    expect(result.context_mode).toBe('degraded_context');
+    expect(result.context_coverage).toBeLessThan(1);
+    expect(result.context_chars).toBeLessThanOrEqual(30_000);
+    expect(result.context_chars).toBeLessThan(result.source_chars);
+    expect(String(singleInvoke.mock.calls[1][0])).toContain('MIDDLE_DIAMOND');
+    expect(String(singleInvoke.mock.calls[1][0]).length).toBeLessThan(
+      String(singleInvoke.mock.calls[0][0]).length
+    );
+  });
+
+  it('shrinks context again for per-vertex fallback after overflow retry fails', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
+    const { model, singleInvoke, vertexInvoke } = buildModel({
+      singleCall: jest.fn().mockRejectedValue(overflow),
+      perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(singleInvoke).toHaveBeenCalledTimes(2);
+    expect(vertexInvoke).toHaveBeenCalled();
+    expect(result.extraction_mode).toBe('per_vertex_fallback');
+    expect(result.context_mode).toBe('degraded_context');
+    expect(String(vertexInvoke.mock.calls[0][0]).length).toBeLessThan(
+      String(singleInvoke.mock.calls[1][0]).length
+    );
+    expect(result.adversary).toEqual(HIGH_VERTEX);
   });
 });
 

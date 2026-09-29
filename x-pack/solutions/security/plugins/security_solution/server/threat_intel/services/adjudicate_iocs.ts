@@ -1,0 +1,327 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'node:crypto';
+import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
+import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
+import { refang } from './extract_iocs';
+
+const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
+
+/** Prefix an approved candidate's basis without exceeding response schema bounds. */
+const semanticIndicatorBasis = (basis: string): string =>
+  `${SEMANTIC_INDICATOR_PREFIX}${basis}`.slice(0, MAX_IOC_TIER_BASIS_LENGTH);
+
+const MAX_SEMANTIC_CANDIDATES = 300;
+/** Cap for the overflow-retry prompt so candidate values alone cannot re-overflow. */
+export const OVERFLOW_MAX_SEMANTIC_CANDIDATES = 50;
+const CONTEXT_CHARS = 240;
+const OVERFLOW_CONTEXT_CHARS = 120;
+const PROMOTABLE_TIERS: ReadonlySet<IocTier> = new Set([
+  'discriminating',
+  'contextual',
+  'uncertain',
+]);
+
+export interface AdjudicateIocsParams {
+  text: string;
+  iocs: ExtractedIoc[];
+  title?: string;
+  article_url?: string;
+  truncated?: boolean;
+}
+
+export interface AdjudicateIocsResult extends ExtractIocsResult {
+  anchor_iocs: ExtractedIoc[];
+  promotable_count: number;
+  adjudication: {
+    provider: 'semantic_model';
+    reviewed: number;
+    approved: number;
+    downgraded: number;
+    deterministic_references: number;
+    overflow_references: number;
+  };
+}
+
+export interface IocAdjudicationCandidate {
+  id: number;
+  originalIndex: number;
+  ioc: ExtractedIoc;
+  context: string;
+}
+
+export interface PreparedIocAdjudication {
+  output: ExtractedIoc[];
+  reviewable: IocAdjudicationCandidate[];
+  deterministicReferences: number;
+  overflowReferences: number;
+}
+
+const iocSetHash = (iocs: ExtractedIoc[]): string | null =>
+  iocs.length === 0
+    ? null
+    : createHash('sha256')
+        .update(
+          iocs
+            .map((ioc) => ioc.value.toLowerCase())
+            .sort()
+            .join('\n')
+        )
+        .digest('hex');
+
+const sliceContext = (source: string, index: number, valueLength: number): string =>
+  source
+    .slice(
+      Math.max(0, index - CONTEXT_CHARS),
+      Math.min(source.length, index + valueLength + CONTEXT_CHARS)
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/**
+ * Prefer an occurrence whose surrounding prose looks like attacker attribution
+ * over a bare first hit (often a citation). When scores tie, keep the later
+ * occurrence so mid/late campaign write-ups win over an early docs link.
+ *
+ * Cap scored occurrences per value and cache by value so a pathological article
+ * with millions of repeats cannot multiply work across hundreds of candidates.
+ */
+const ATTRIBUTION_CONTEXT_CUE =
+  /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
+const MAX_OCCURRENCES_TO_SCORE = 32;
+
+interface ScoredOccurrence {
+  source: string;
+  index: number;
+  score: number;
+}
+
+const scoreOccurrences = (
+  source: string,
+  lowerSource: string,
+  lowerValue: string
+): ScoredOccurrence[] => {
+  const scored: ScoredOccurrence[] = [];
+  let from = 0;
+  while (from < lowerSource.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
+    const index = lowerSource.indexOf(lowerValue, from);
+    if (index < 0) break;
+    const window = source.slice(
+      Math.max(0, index - CONTEXT_CHARS),
+      Math.min(source.length, index + lowerValue.length + CONTEXT_CHARS)
+    );
+    scored.push({
+      source,
+      index,
+      score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+    });
+    from = index + Math.max(lowerValue.length, 1);
+  }
+  return scored;
+};
+
+/**
+ * Pick review context from the best-scoring occurrence across both the original
+ * article and its refanged copy. Canonical citations and later defanged attacker
+ * mentions must compete in one pass so we do not lock onto the first spelling.
+ */
+const contextFor = (
+  originalText: string,
+  lowerOriginal: string,
+  refangedText: string,
+  lowerRefanged: string,
+  value: string,
+  cache: Map<string, string>
+): string => {
+  const lowerValue = value.toLowerCase();
+  const cached = cache.get(lowerValue);
+  if (cached !== undefined) return cached;
+
+  const scored = [
+    ...scoreOccurrences(originalText, lowerOriginal, lowerValue),
+    ...scoreOccurrences(refangedText, lowerRefanged, lowerValue),
+  ];
+  const best = scored.reduce<ScoredOccurrence | undefined>((winner, candidate) => {
+    if (!winner || candidate.score > winner.score) return candidate;
+    if (candidate.score === winner.score && candidate.index > winner.index) return candidate;
+    return winner;
+  }, undefined);
+
+  const context = best === undefined ? '' : sliceContext(best.source, best.index, value.length);
+  cache.set(lowerValue, context);
+  return context;
+};
+
+const hostnameFor = (value: string): string | undefined => {
+  try {
+    return new URL(value).hostname.toLowerCase();
+  } catch {
+    return undefined;
+  }
+};
+
+const isSameOrigin = (ioc: ExtractedIoc, articleUrl?: string): boolean => {
+  if (!articleUrl) return false;
+  const articleHost = hostnameFor(articleUrl);
+  if (!articleHost) return false;
+  if (ioc.type === 'url') return hostnameFor(ioc.value) === articleHost;
+  return ioc.type === 'domain' && ioc.value.toLowerCase() === articleHost;
+};
+
+const isSemanticCandidate = (ioc: ExtractedIoc): boolean =>
+  (ioc.type === 'url' || ioc.type === 'domain') && PROMOTABLE_TIERS.has(ioc.tier);
+
+const tierPriority = (tier: IocTier): number => {
+  if (tier === 'discriminating') return 0;
+  if (tier === 'contextual') return 1;
+  return 2;
+};
+
+const downgrade = (ioc: ExtractedIoc, basis: string): ExtractedIoc => ({
+  ...ioc,
+  tier: 'reference',
+  tier_basis: basis,
+});
+
+export const prepareIocAdjudication = (
+  params: Pick<AdjudicateIocsParams, 'text' | 'iocs' | 'article_url'>
+): PreparedIocAdjudication => {
+  const output = [...params.iocs];
+  const lowerOriginal = params.text.toLowerCase();
+  const refangedText = refang(params.text);
+  const lowerRefanged = refangedText.toLowerCase();
+  const contextCache = new Map<string, string>();
+  let deterministicReferences = 0;
+
+  const candidates = params.iocs
+    .map((ioc, originalIndex) => ({ ioc, originalIndex }))
+    .filter(({ ioc }) => isSemanticCandidate(ioc))
+    .filter(({ ioc, originalIndex }) => {
+      // Same-origin article links are citations. Markdown link destinations are
+      // not: rendered pages also use `[label](url)` for payload URLs, so leave those for
+      // semantic review instead of discarding them before the model sees them.
+      if (isSameOrigin(ioc, params.article_url)) {
+        output[originalIndex] = downgrade(ioc, 'semantic_reference_deterministic');
+        deterministicReferences += 1;
+        return false;
+      }
+      return true;
+    })
+    .sort(
+      (left, right) =>
+        tierPriority(left.ioc.tier) - tierPriority(right.ioc.tier) ||
+        left.originalIndex - right.originalIndex
+    );
+
+  const reviewable = candidates.slice(0, MAX_SEMANTIC_CANDIDATES).map((candidate) => ({
+    ...candidate,
+    id: candidate.originalIndex,
+    context: contextFor(
+      params.text,
+      lowerOriginal,
+      refangedText,
+      lowerRefanged,
+      candidate.ioc.value,
+      contextCache
+    ),
+  }));
+  const overflow = candidates.slice(MAX_SEMANTIC_CANDIDATES);
+  for (const candidate of overflow) {
+    output[candidate.originalIndex] = downgrade(
+      candidate.ioc,
+      'semantic_reference_unreviewed_overflow'
+    );
+  }
+
+  return {
+    output,
+    reviewable,
+    deterministicReferences,
+    overflowReferences: overflow.length,
+  };
+};
+
+/**
+ * Keep a maxChars window centered on the IOC mention. A leading prefix slice
+ * would drop the URL/domain when `contextFor` already spent its budget on
+ * preceding prose.
+ */
+const shrinkContextAroundIoc = (context: string, value: string, maxChars: number): string => {
+  if (context.length <= maxChars) return context;
+  const index = context.toLowerCase().indexOf(value.toLowerCase());
+  if (index < 0) {
+    const start = Math.max(0, Math.floor((context.length - maxChars) / 2));
+    return context.slice(start, start + maxChars);
+  }
+  if (value.length >= maxChars) return context.slice(index, index + maxChars);
+  const before = Math.floor((maxChars - value.length) / 2);
+  const start = Math.max(0, Math.min(index - before, context.length - maxChars));
+  return context.slice(start, start + maxChars);
+};
+
+/**
+ * Shrink the candidate set and per-candidate context for a confirmed context
+ * overflow retry. Candidates not sent are marked as unreviewed overflow so
+ * reconcile cannot treat them as model rejections.
+ */
+export const boundIocAdjudicationForOverflow = (
+  prepared: PreparedIocAdjudication
+): PreparedIocAdjudication => {
+  const kept = prepared.reviewable.slice(0, OVERFLOW_MAX_SEMANTIC_CANDIDATES).map((candidate) => ({
+    ...candidate,
+    context: shrinkContextAroundIoc(candidate.context, candidate.ioc.value, OVERFLOW_CONTEXT_CHARS),
+  }));
+  const skipped = prepared.reviewable.slice(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
+  if (skipped.length === 0) {
+    return { ...prepared, reviewable: kept };
+  }
+  const output = [...prepared.output];
+  for (const candidate of skipped) {
+    output[candidate.originalIndex] = downgrade(
+      candidate.ioc,
+      'semantic_reference_unreviewed_overflow'
+    );
+  }
+  return {
+    output,
+    reviewable: kept,
+    deterministicReferences: prepared.deterministicReferences,
+    overflowReferences: prepared.overflowReferences + skipped.length,
+  };
+};
+
+export const reconcileIocAdjudication = (
+  prepared: PreparedIocAdjudication,
+  approvedIds: ReadonlySet<number>,
+  truncated?: boolean
+): AdjudicateIocsResult => {
+  const output = [...prepared.output];
+  for (const candidate of prepared.reviewable) {
+    output[candidate.originalIndex] = approvedIds.has(candidate.id)
+      ? { ...candidate.ioc, tier_basis: semanticIndicatorBasis(candidate.ioc.tier_basis) }
+      : downgrade(candidate.ioc, 'semantic_reference');
+  }
+
+  const anchorIocs = output.filter((ioc) => PROMOTABLE_TIERS.has(ioc.tier));
+  return {
+    count: output.length,
+    iocs: output,
+    ioc_set_hash: iocSetHash(anchorIocs),
+    anchor_iocs: anchorIocs,
+    promotable_count: anchorIocs.length,
+    ...(truncated ? { truncated: true as const } : {}),
+    adjudication: {
+      provider: 'semantic_model',
+      reviewed: prepared.reviewable.length,
+      approved: prepared.reviewable.filter((candidate) => approvedIds.has(candidate.id)).length,
+      downgraded: prepared.reviewable.filter((candidate) => !approvedIds.has(candidate.id)).length,
+      deterministic_references: prepared.deterministicReferences,
+      overflow_references: prepared.overflowReferences,
+    },
+  };
+};

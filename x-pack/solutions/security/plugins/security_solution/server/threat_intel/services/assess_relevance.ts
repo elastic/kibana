@@ -7,11 +7,16 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import { logStageUsage } from '../lib/cost_tracker';
 import { MAX_URL_LENGTH } from '../../../common/threat_intel';
-
-const RELEVANCE_BODY_CHAR_LIMIT = 30_000;
+import {
+  fullArticleContext,
+  furtherShrinkOverflowArticleContext,
+  selectOverflowRetryArticleContext,
+  type ArticleContext,
+} from './article_context';
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -37,6 +42,7 @@ export const relevanceOutputSchema = z.object({
 });
 
 export type RelevanceOutput = z.infer<typeof relevanceOutputSchema>;
+export type RelevanceResult = RelevanceOutput & { context: Omit<ArticleContext, 'text'> };
 
 export interface AssessRelevanceParams {
   url?: string;
@@ -44,8 +50,7 @@ export interface AssessRelevanceParams {
   text: string;
 }
 
-const buildRelevancePrompt = (params: AssessRelevanceParams): string => {
-  const truncated = params.text.slice(0, RELEVANCE_BODY_CHAR_LIMIT);
+const buildRelevancePrompt = (params: AssessRelevanceParams, text: string): string => {
   const urlLine = params.url ? `Article URL: ${params.url}\n` : '';
   const titleLine = params.title ? `Article title: ${params.title}\n` : '';
 
@@ -104,7 +109,7 @@ reason (string):
   "Weekly newsletter linking CrowdStrike, Mandiant reports", "Needs render: navigation only, JS gate").
 
 ${urlLine}${titleLine}Article text:
-${truncated}`;
+${text}`;
 };
 
 /**
@@ -118,24 +123,48 @@ export const assessRelevance = async (
   model: ScopedModel,
   logger: Logger,
   params: AssessRelevanceParams
-): Promise<RelevanceOutput> => {
-  const prompt = buildRelevancePrompt(params);
+): Promise<RelevanceResult> => {
   const inferenceEndpointId = model.connector.connectorId;
 
   const structured = model.chatModel.withStructuredOutput(relevanceOutputSchema, {
     includeRaw: true,
   });
 
-  const result = (await structured.invoke(prompt)) as {
+  let context = fullArticleContext(params.text);
+  let result: {
     raw: { response_metadata: Record<string, unknown> };
     parsed: RelevanceOutput;
   };
+  const startedAt = Date.now();
+  try {
+    result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: RelevanceOutput;
+    };
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    context = selectOverflowRetryArticleContext(params.text);
+    try {
+      result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: RelevanceOutput;
+      };
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: RelevanceOutput;
+      };
+    }
+  }
 
   logStageUsage(
     logger,
     'assess_relevance',
     inferenceEndpointId,
-    result.raw.response_metadata ?? {}
+    result.raw.response_metadata ?? {},
+    Date.now() - startedAt
   );
 
   logger.debug(
@@ -144,5 +173,6 @@ export const assessRelevance = async (
       `needs_render=${result.parsed.needs_render}`
   );
 
-  return result.parsed;
+  const { text: _text, ...contextMetadata } = context;
+  return { ...result.parsed, context: contextMetadata };
 };
