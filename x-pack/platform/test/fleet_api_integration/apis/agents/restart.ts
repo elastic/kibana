@@ -274,7 +274,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
 
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_restart`)
           .set('kbn-xsrf', 'xxx')
           .send({

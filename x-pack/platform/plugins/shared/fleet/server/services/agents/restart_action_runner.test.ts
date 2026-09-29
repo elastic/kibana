@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { appContextService } from '../app_context';
-import * as commonServices from '../../../../common/services';
+import * as commonServices from '../../../common/services';
 
 import { createAgentAction, createErrorActionResults } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
@@ -31,8 +31,8 @@ jest.mock('../app_context', () => ({
   },
 }));
 
-jest.mock('../../../../common/services', () => ({
-  ...jest.requireActual('../../../../common/services'),
+jest.mock('../../../common/services', () => ({
+  ...jest.requireActual('../../../common/services'),
   isAgentRestartSupported: jest.fn(),
 }));
 
@@ -183,7 +183,7 @@ describe('restartBatch', () => {
     it('excludes agents below minimum version and writes error results', async () => {
       const unsupported = makeAgent('old-agent');
       const supported = makeAgent('new-agent');
-      mockIsAgentRestartSupported.mockImplementation((agent) => agent.id === 'new-agent');
+      mockIsAgentRestartSupported.mockImplementation((agent: { id: string }) => agent.id === 'new-agent');
 
       await restartBatch(esClient, soClient, [unsupported, supported], { spaceId: 'default' });
 
