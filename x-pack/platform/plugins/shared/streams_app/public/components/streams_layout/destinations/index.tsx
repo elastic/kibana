@@ -42,6 +42,7 @@ export const DestinationsTab = () => {
     closeCreateModal,
     openDestinationFlyout,
     closeDestinationFlyout,
+    isUnitSaving,
   } = destinationsController;
 
   const filteredDestinations = React.useMemo(() => {
@@ -93,6 +94,7 @@ export const DestinationsTab = () => {
             onSelectedTypesChange={setSelectedTypes}
             onRefresh={refreshUnit}
             onAddDestination={openCreateModal}
+            isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>
@@ -128,6 +130,7 @@ export const DestinationsTab = () => {
           footer={
             <DestinationDeleteFooter
               destinationName={selectedDestination.name}
+              isDisabled={isUnitSaving}
               onDelete={() => {
                 destinationsController.deleteDestination(selectedDestination.id);
                 closeDestinationFlyout();

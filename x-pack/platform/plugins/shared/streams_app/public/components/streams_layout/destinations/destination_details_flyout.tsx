@@ -37,9 +37,11 @@ interface DestinationDetailsFlyoutProps {
 export const DestinationDeleteFooter = ({
   destinationName,
   onDelete,
+  isDisabled = false,
 }: {
   destinationName: string;
   onDelete: () => void;
+  isDisabled?: boolean;
 }) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
@@ -47,6 +49,7 @@ export const DestinationDeleteFooter = ({
     <>
       <EuiButton
         color="danger"
+        isDisabled={isDisabled}
         onClick={() => setIsConfirmingDelete(true)}
         data-test-subj="streamsDeleteDestinationButton"
       >

@@ -203,6 +203,14 @@ export const destinationsTableStateMachine = setup({
       visibleColumnIds: ({ context, event }) =>
         event.type === 'visibleColumns.change' ? event.columnIds : context.visibleColumnIds,
     }),
+    notifyUnitSaveStarted: sendTo(
+      ({ context }) => context.destinationsRef,
+      () => ({ type: 'unit.save.started' as const })
+    ),
+    notifyUnitSaveFinished: sendTo(
+      ({ context }) => context.destinationsRef,
+      () => ({ type: 'unit.save.finished' as const })
+    ),
   },
 }).createMachine({
   id: 'streamsDestinationsTable',
@@ -265,6 +273,7 @@ export const destinationsTableStateMachine = setup({
       },
     },
     ready: {
+      entry: 'notifyUnitSaveFinished',
       on: {
         'unit.changed': {
           target: 'persisting',
@@ -289,13 +298,7 @@ export const destinationsTableStateMachine = setup({
       },
     },
     persisting: {
-      on: {
-        'unit.changed': {
-          target: 'persisting',
-          reenter: true,
-          actions: ['storePendingUnitDefinition'],
-        },
-      },
+      entry: 'notifyUnitSaveStarted',
       invoke: {
         id: 'persistUnitDefinition',
         src: 'persistUnitDefinition',
@@ -315,6 +318,7 @@ export const destinationsTableStateMachine = setup({
       },
     },
     failed: {
+      entry: 'notifyUnitSaveFinished',
       on: {
         'unit.changed': {
           target: 'persisting',

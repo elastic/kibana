@@ -32,6 +32,7 @@ interface DestinationsToolbarProps {
   onSelectedTypesChange: (types: DestinationType[]) => void;
   onRefresh: () => void;
   onAddDestination: () => void;
+  isAddDisabled?: boolean;
 }
 
 const TYPE_OPTIONS: Array<SourceFilterOption<DestinationType>> = [
@@ -46,6 +47,7 @@ export const DestinationsToolbar = ({
   onSelectedTypesChange,
   onRefresh,
   onAddDestination,
+  isAddDisabled = false,
 }: DestinationsToolbarProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -108,7 +110,12 @@ export const DestinationsToolbar = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onAddDestination} data-test-subj="streamsAddDestinationButton">
+        <EuiButton
+          fill
+          onClick={onAddDestination}
+          isDisabled={isAddDisabled}
+          data-test-subj="streamsAddDestinationButton"
+        >
           <FormattedMessage
             id="xpack.streams.destinations.addDestinationButtonLabel"
             defaultMessage="Add destination"

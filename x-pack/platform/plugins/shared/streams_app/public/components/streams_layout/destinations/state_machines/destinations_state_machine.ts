@@ -8,7 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { assign, sendTo, setup } from 'xstate';
+import { and, assign, sendTo, setup, stateIn } from 'xstate';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import { collectUnitComponentIds } from '@kbn/streams-schema';
 import { notifyUnitUpdated } from '../../notify_unit_updated';
@@ -69,6 +69,8 @@ export interface DestinationsStateContext {
 
 export type DestinationsStateEvent =
   | { type: 'unit.loaded'; unitDefinition: Unit }
+  | { type: 'unit.save.started' }
+  | { type: 'unit.save.finished' }
   | { type: 'unit.persisted'; destinationId: string; unitDefinition: Unit }
   | {
       type: 'unit.persistenceFailed';
@@ -395,6 +397,7 @@ export const destinationsStateMachine = setup({
       ),
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
+    unitSaveIsIdle: stateIn('#destinationsUnitSaveIdle'),
   },
 }).createMachine({
   id: 'streamsDestinations',
@@ -413,7 +416,10 @@ export const destinationsStateMachine = setup({
       guard: 'isDeletePersistenceFailure',
       actions: 'restoreUnitAfterPersistenceFailure',
     },
-    'destination.delete': { actions: ['deleteDestination', 'notifyParentDelete', 'closeFlyout'] },
+    'destination.delete': {
+      guard: 'unitSaveIsIdle',
+      actions: ['deleteDestination', 'notifyParentDelete', 'closeFlyout'],
+    },
   },
   states: {
     configuring: {
@@ -422,6 +428,7 @@ export const destinationsStateMachine = setup({
         idle: {
           on: {
             'modal.openCreate': {
+              guard: 'unitSaveIsIdle',
               target: 'supplyingConfiguration',
               actions: 'startFreshCreate',
             },
@@ -436,7 +443,7 @@ export const destinationsStateMachine = setup({
             'destination.create': [
               {
                 target: 'persisting',
-                guard: 'canCreateDestination',
+                guard: and(['canCreateDestination', 'unitSaveIsIdle']),
                 actions: ['stageCreatedDestination', 'notifyParentCreate'],
               },
               { actions: 'validateCreationForm' },
@@ -461,6 +468,22 @@ export const destinationsStateMachine = setup({
         failed: {
           on: {
             'modal.closeCreate': { target: 'idle', actions: 'clearCreate' },
+          },
+        },
+      },
+    },
+    unitSave: {
+      initial: 'idle',
+      states: {
+        idle: {
+          id: 'destinationsUnitSaveIdle',
+          on: {
+            'unit.save.started': { target: 'saving' },
+          },
+        },
+        saving: {
+          on: {
+            'unit.save.finished': { target: 'idle' },
           },
         },
       },

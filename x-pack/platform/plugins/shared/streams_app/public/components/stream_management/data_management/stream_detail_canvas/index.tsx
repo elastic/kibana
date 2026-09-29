@@ -678,8 +678,8 @@ function StreamsCanvasInner() {
           onReconnect={onReconnect}
           onReconnectEnd={onReconnectEnd}
           isValidConnection={isValidConnection}
-          nodesConnectable
-          edgesReconnectable
+          nodesConnectable={!isSaving}
+          edgesReconnectable={!isSaving}
           connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}
@@ -718,6 +718,7 @@ function StreamsCanvasInner() {
                 flyoutDestination ? (
                   <DestinationDeleteFooter
                     destinationName={flyoutDestination.name}
+                    isDisabled={isSaving}
                     onDelete={() => {
                       destinationsController.deleteDestination(flyoutDestination.id);
                       closeFlyout();
@@ -758,6 +759,7 @@ function StreamsCanvasInner() {
             onAddDestination={openCreateDestinationModal}
             canUndo={canUndo}
             canRedo={canRedo}
+            canAdd={!isSaving}
           />
           <CanvasContextMenu
             position={contextMenu?.position ?? null}

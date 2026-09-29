@@ -37,6 +37,7 @@ export interface SourcesController {
   sourceName: string;
   sourceNameError?: SourceNameValidationError;
   canCreateSource: boolean;
+  isUnitSaving: boolean;
   createdSource?: SourceViewModel;
   unconfiguredNodeIds: string[];
   refreshUnit: () => void;
@@ -283,6 +284,9 @@ export const useSources = ({
         state.context.availableSourceTypes.includes(creation.formData.sourceType)
     );
   });
+  const isUnitSaving = useSelector(sourcesActorRef, (state) =>
+    state.matches({ unitSave: 'saving' })
+  );
   const query = tableState?.query ?? '';
   const selectedSourceIds = useMemo(
     () => tableState?.selectedSourceIds ?? [],
@@ -353,7 +357,8 @@ export const useSources = ({
       availableSourceTypes,
       sourceName,
       sourceNameError,
-      canCreateSource,
+      canCreateSource: canCreateSource && !isUnitSaving,
+      isUnitSaving,
       createdSource,
       unconfiguredNodeIds,
       refreshUnit: () => {
@@ -390,6 +395,7 @@ export const useSources = ({
     [
       availableSourceTypes,
       canCreateSource,
+      isUnitSaving,
       createSource,
       createdSource,
       deleteApiKey,

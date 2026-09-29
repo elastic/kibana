@@ -47,6 +47,7 @@ export const SourcesTab = () => {
     closeCreateModal,
     openSourceFlyout,
     closeSourceFlyout,
+    isUnitSaving,
   } = sourcesController;
 
   const [sourcesPendingDeletion, setSourcesPendingDeletion] = React.useState<SourceViewModel[]>([]);
@@ -124,6 +125,7 @@ export const SourcesTab = () => {
             onSelectedStatusesChange={setSelectedStatuses}
             onRefresh={refreshUnit}
             onAddSource={openCreateModal}
+            isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>

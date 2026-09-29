@@ -8,7 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
 import type { ActionArgs, ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
   createSourceApiKeyServices,
@@ -120,6 +120,8 @@ export interface SourcesStateContext {
 
 export type SourcesStateEvent =
   | { type: 'unit.loaded'; unitDefinition: Unit }
+  | { type: 'unit.save.started' }
+  | { type: 'unit.save.finished' }
   | { type: 'unit.persisted'; sourceId: string; unitDefinition: Unit }
   | {
       type: 'unit.persistenceFailed';
@@ -805,6 +807,7 @@ export const sourcesStateMachine = setup({
       event.type === 'source.delete' && event.sourceId === context.selectedSourceId,
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
+    unitSaveIsIdle: stateIn('#sourcesUnitSaveIdle'),
   },
 }).createMachine({
   id: 'streamsSources',
@@ -828,9 +831,28 @@ export const sourcesStateMachine = setup({
       guard: 'isDeletePersistenceFailure',
       actions: 'restoreUnitAfterPersistenceFailure',
     },
-    'source.delete': { actions: ['deleteSource', 'notifyParentDelete'] },
+    'source.delete': {
+      guard: 'unitSaveIsIdle',
+      actions: ['deleteSource', 'notifyParentDelete'],
+    },
   },
   states: {
+    unitSave: {
+      initial: 'idle',
+      states: {
+        idle: {
+          id: 'sourcesUnitSaveIdle',
+          on: {
+            'unit.save.started': { target: 'saving' },
+          },
+        },
+        saving: {
+          on: {
+            'unit.save.finished': { target: 'idle' },
+          },
+        },
+      },
+    },
     environment: {
       initial: 'loading',
       states: {
@@ -863,6 +885,7 @@ export const sourcesStateMachine = setup({
           id: 'configuringIdle',
           on: {
             'modal.openCreate': {
+              guard: 'unitSaveIsIdle',
               target: 'supplyingConfiguration',
               actions: 'startFreshCreate',
             },
@@ -876,7 +899,7 @@ export const sourcesStateMachine = setup({
             'source.create': [
               {
                 target: 'persisting',
-                guard: 'canCreateSource',
+                guard: and(['canCreateSource', 'unitSaveIsIdle']),
                 actions: ['stageCreatedSource', 'notifyParentCreate'],
               },
               { actions: 'validateSourceName' },
@@ -947,7 +970,7 @@ export const sourcesStateMachine = setup({
         'flyout.close': { target: '.closed', actions: 'closeFlyout' },
         'modal.openCreate': { target: '.closed', actions: 'closeFlyout' },
         'source.delete': {
-          guard: 'deletesViewedSource',
+          guard: and(['deletesViewedSource', 'unitSaveIsIdle']),
           target: '.closed',
           actions: ['deleteSource', 'notifyParentDelete', 'closeFlyout'],
         },

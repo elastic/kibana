@@ -10,13 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   type ActionArgs,
+  and,
   assign,
   fromCallback,
   fromPromise,
   type MachineImplementationsFrom,
+  not,
   raise,
   sendTo,
   setup,
+  stateIn,
 } from 'xstate';
 import {
   createDestinationsMachineImplementations,
@@ -146,10 +149,9 @@ export const canvasStateMachine = setup({
       if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
         return {};
       }
-      const hasSubsequentChanges = context.nextUnit !== context.savingUnit;
       return {
         unit: event.output.unitDefinition,
-        nextUnit: hasSubsequentChanges ? context.nextUnit : event.output.unitDefinition,
+        nextUnit: event.output.unitDefinition,
         savingUnit: undefined,
         savingComponentId: undefined,
         savingComponentKind: undefined,
@@ -165,16 +167,28 @@ export const canvasStateMachine = setup({
           ? getFormattedError(event.error)
           : undefined,
     }),
-    rollbackFailedComponentSave: assign(({ context }) =>
-      context.savingComponentId || context.savingComponentIntent === 'connect'
-        ? {
-            nextUnit: context.unit,
-            savingUnit: undefined,
-          }
-        : {}
-    ),
+    rollbackToPersistedUnit: assign({
+      nextUnit: ({ context }) => context.unit,
+      savingUnit: undefined,
+    }),
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
     notifyUnitSaved: getPlaceholderFor(createNotifyUnitSavedAction),
+    notifySourcesUnitSaveStarted: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.started' as const })
+    ),
+    notifyDestinationsUnitSaveStarted: sendTo(
+      ({ context }) => context.destinationsRef,
+      () => ({ type: 'unit.save.started' as const })
+    ),
+    notifySourcesUnitSaveFinished: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.finished' as const })
+    ),
+    notifyDestinationsUnitSaveFinished: sendTo(
+      ({ context }) => context.destinationsRef,
+      () => ({ type: 'unit.save.finished' as const })
+    ),
     syncLoadedUnitToSources: sendTo(
       ({ context }) => context.sourcesRef,
       ({ event }) => {
@@ -289,6 +303,10 @@ export const canvasStateMachine = setup({
   },
   guards: {
     hasUnsavedUnitChanges: ({ context }) => context.unit !== context.nextUnit,
+    canEditUnit: and([
+      not(stateIn({ ready: { unit: 'validating' } })),
+      not(stateIn({ ready: { unit: 'persisting' } })),
+    ]),
     isSavingComponentChange: ({ context }) => context.savingComponentId !== undefined,
     isSavingConnection: ({ context }) => context.savingComponentIntent === 'connect',
   },
@@ -321,6 +339,7 @@ export const canvasStateMachine = setup({
           actions: 'storeNodePositions',
         },
         'unit.stage': {
+          guard: 'canEditUnit',
           actions: ['storeNextUnit', 'syncStagedUnitToSources', 'syncStagedUnitToDestinations'],
         },
         'flyout.open': {
@@ -396,6 +415,7 @@ export const canvasStateMachine = setup({
               },
             },
             ready: {
+              entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
                 'unit.changed': {
                   target: 'validating',
@@ -437,13 +457,7 @@ export const canvasStateMachine = setup({
               },
             },
             validating: {
-              on: {
-                'unit.changed': {
-                  target: 'validating',
-                  reenter: true,
-                  actions: 'prepareChangedUnitSave',
-                },
-              },
+              entry: ['notifySourcesUnitSaveStarted', 'notifyDestinationsUnitSaveStarted'],
               invoke: {
                 id: 'validateUnitDefinition',
                 src: 'validateUnitDefinition',
@@ -457,19 +471,15 @@ export const canvasStateMachine = setup({
                     target: 'saveFailed',
                     actions: [
                       'storeUnitFailure',
+                      'rollbackToPersistedUnit',
                       'syncComponentSaveFailure',
-                      'rollbackFailedComponentSave',
                       'notifyUnitFailure',
                     ],
                   },
                   {
                     guard: 'isSavingConnection',
                     target: 'saveFailed',
-                    actions: [
-                      'storeUnitFailure',
-                      'rollbackFailedComponentSave',
-                      'notifyUnitFailure',
-                    ],
+                    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
                   },
                   {
                     target: 'saveFailed',
@@ -479,13 +489,6 @@ export const canvasStateMachine = setup({
               },
             },
             persisting: {
-              on: {
-                'unit.changed': {
-                  target: 'validating',
-                  reenter: true,
-                  actions: 'prepareChangedUnitSave',
-                },
-              },
               invoke: {
                 id: 'persistUnitDefinition',
                 src: 'persistUnitDefinition',
@@ -508,19 +511,15 @@ export const canvasStateMachine = setup({
                     target: 'saveFailed',
                     actions: [
                       'storeUnitFailure',
+                      'rollbackToPersistedUnit',
                       'syncComponentSaveFailure',
-                      'rollbackFailedComponentSave',
                       'notifyUnitFailure',
                     ],
                   },
                   {
                     guard: 'isSavingConnection',
                     target: 'saveFailed',
-                    actions: [
-                      'storeUnitFailure',
-                      'rollbackFailedComponentSave',
-                      'notifyUnitFailure',
-                    ],
+                    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
                   },
                   {
                     target: 'saveFailed',
@@ -530,6 +529,7 @@ export const canvasStateMachine = setup({
               },
             },
             saveFailed: {
+              entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
                 'unit.changed': {
                   target: 'validating',

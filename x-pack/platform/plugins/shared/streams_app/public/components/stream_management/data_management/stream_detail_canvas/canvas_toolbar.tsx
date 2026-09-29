@@ -51,12 +51,16 @@ interface AddResourceButtonProps {
   tooltip: string;
   dataTestSubj: string;
   onClick: () => void;
+  isDisabled?: boolean;
 }
 
-// Non-functional labeled action (e.g. "+ Source") styled as a bordered chip with
-// a plus icon and label, matching the prototype's palette buttons. Its real
-// behaviour will be wired up when canvas editing lands.
-function AddResourceButton({ label, tooltip, dataTestSubj, onClick }: AddResourceButtonProps) {
+function AddResourceButton({
+  label,
+  tooltip,
+  dataTestSubj,
+  onClick,
+  isDisabled,
+}: AddResourceButtonProps) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiToolTip content={tooltip} disableScreenReaderOutput>
@@ -66,6 +70,7 @@ function AddResourceButton({ label, tooltip, dataTestSubj, onClick }: AddResourc
         hasBorder
         paddingSize="s"
         onClick={onClick}
+        disabled={isDisabled}
         data-test-subj={dataTestSubj}
         css={css`
           border-radius: ${euiTheme.border.radius.medium};
@@ -99,6 +104,7 @@ export interface CanvasToolbarProps {
   onAddDestination: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  canAdd: boolean;
 }
 
 /**
@@ -112,6 +118,7 @@ export function CanvasToolbar({
   onAddDestination,
   canUndo,
   canRedo,
+  canAdd,
 }: CanvasToolbarProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -175,6 +182,7 @@ export function CanvasToolbar({
               defaultMessage: 'Add source',
             })}`}
             onClick={onAddSource}
+            isDisabled={!canAdd}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -187,6 +195,7 @@ export function CanvasToolbar({
               defaultMessage: 'Add destination',
             })}
             onClick={onAddDestination}
+            isDisabled={!canAdd}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -42,6 +42,7 @@ export interface DestinationsController {
   indexError?: 'required';
   indexPatternsError?: 'required' | 'invalid';
   canCreateDestination: boolean;
+  isUnitSaving: boolean;
   unconfiguredNodeIds: string[];
   persistenceError?: string;
   isCreatingDestination: boolean;
@@ -219,6 +220,9 @@ export const useDestinations = ({
         })
     );
   });
+  const isUnitSaving = useSelector(destinationsActorRef, (state) =>
+    state.matches({ unitSave: 'saving' })
+  );
   const query = tableState?.query ?? '';
   const isRefreshingUnit = tableState?.isRefreshingUnit ?? false;
   const destinationViews = useSelector(destinationsActorRef, (state) =>
@@ -280,7 +284,8 @@ export const useDestinations = ({
       elasticsearchIndexPatterns,
       indexError,
       indexPatternsError,
-      canCreateDestination,
+      canCreateDestination: canCreateDestination && !isUnitSaving,
+      isUnitSaving,
       unconfiguredNodeIds,
       persistenceError,
       isCreatingDestination,
@@ -306,6 +311,7 @@ export const useDestinations = ({
     }),
     [
       canCreateDestination,
+      isUnitSaving,
       createDestination,
       deleteDestination,
       destinationName,

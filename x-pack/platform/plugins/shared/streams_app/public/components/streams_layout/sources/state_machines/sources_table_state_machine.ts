@@ -231,6 +231,14 @@ export const sourcesTableStateMachine = setup({
       visibleColumnIds: ({ context, event }) =>
         event.type === 'visibleColumns.change' ? event.columnIds : context.visibleColumnIds,
     }),
+    notifyUnitSaveStarted: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.started' as const })
+    ),
+    notifyUnitSaveFinished: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.finished' as const })
+    ),
   },
 }).createMachine({
   id: 'streamsSourcesTable',
@@ -302,6 +310,7 @@ export const sourcesTableStateMachine = setup({
       },
     },
     ready: {
+      entry: 'notifyUnitSaveFinished',
       on: {
         'unit.changed': {
           target: 'persisting',
@@ -326,13 +335,7 @@ export const sourcesTableStateMachine = setup({
       },
     },
     persisting: {
-      on: {
-        'unit.changed': {
-          target: 'persisting',
-          reenter: true,
-          actions: ['storePendingUnitDefinition'],
-        },
-      },
+      entry: 'notifyUnitSaveStarted',
       invoke: {
         id: 'persistUnitDefinition',
         src: 'persistUnitDefinition',
@@ -352,6 +355,7 @@ export const sourcesTableStateMachine = setup({
       },
     },
     failed: {
+      entry: 'notifyUnitSaveFinished',
       on: {
         'unit.changed': {
           target: 'persisting',
