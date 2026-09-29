@@ -88,7 +88,7 @@ export const describeAiIndex = async ({
   });
   const { kiTypeCounts, tagCounts } = await describeAiIndexAggregations({
     esClient,
-    target,
+    dest: aiIndex.dest,
     spaceId,
     fields: allFields,
   });

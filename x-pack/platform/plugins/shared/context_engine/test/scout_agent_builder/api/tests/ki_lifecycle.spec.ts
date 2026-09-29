@@ -188,6 +188,29 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
     }
   );
 
+  apiTest('scores a full text match after the revision collapse', async ({ apiClient }) => {
+    const body = await run(
+      apiClient,
+      `FROM ${DS_DEST} METADATA _score | WHERE title:"revised-v2" | KEEP id, _score`
+    );
+
+    expect(columnValues(body, 'id')).toStrictEqual(['revised']);
+    expect(typeof columnValues(body, '_score')[0]).toBe('number');
+  });
+
+  apiTest('describe counts only the newest active revisions', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      `${AI_INDEX_COLLECTION_PATH}/${DS_AI_INDEX_ID}/_describe`,
+      {
+        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.response).toContain('Knowledge item types\n"index_metadata": 2\n');
+  });
+
   apiTest('reads an unregistered index as-is', async ({ apiClient }) => {
     const body = await run(apiClient, `FROM ${UNREGISTERED} | KEEP id`);
 

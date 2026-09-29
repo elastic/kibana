@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Parser, Walker, WrappingPrettyPrinter, mutate } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
@@ -34,28 +33,6 @@ const LATEST_REVISION = [
 /** The commands after `FROM` that select the current, active, unexpired KIs. */
 export const kiLifecyclePipeline = (type: AiIndexDest['type']): string[] =>
   type === 'data_stream' ? [...LATEST_REVISION, ...LIFECYCLE_FILTERS] : LIFECYCLE_FILTERS;
-
-/** Unset or `active` status, and not yet expired: the DSL form of the lifecycle filters. */
-export const activeKiFilters: QueryDslQueryContainer[] = [
-  {
-    bool: {
-      should: [
-        { bool: { must_not: { exists: { field: KI_LIFECYCLE_STATUS_FIELD } } } },
-        { term: { [KI_LIFECYCLE_STATUS_FIELD]: 'active' } },
-      ],
-      minimum_should_match: 1,
-    },
-  },
-  {
-    bool: {
-      should: [
-        { bool: { must_not: { exists: { field: KI_EXPIRES_AT_FIELD } } } },
-        { range: { [KI_EXPIRES_AT_FIELD]: { gt: 'now' } } },
-      ],
-      minimum_should_match: 1,
-    },
-  },
-];
 
 const globToRegExp = (pattern: string): RegExp =>
   new RegExp(

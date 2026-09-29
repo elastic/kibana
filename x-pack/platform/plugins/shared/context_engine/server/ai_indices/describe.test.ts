@@ -73,7 +73,7 @@ describe('describeAiIndex', () => {
     });
     expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith({
       esClient,
-      target: 'ai-index-idx-support*',
+      dest: aiIndex.dest,
       spaceId: 'marketing',
       fields,
     });

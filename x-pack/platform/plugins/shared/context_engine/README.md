@@ -153,10 +153,10 @@ Count by type
   `"value": count` per line. Each
   section is omitted unless its field is an aggregatable `keyword` — always the
   case on canonical KI indices, but a custom index that maps `type` / `tags` as
-  `text`, or inconsistently across a pattern, gets no counts. One `terms`
-  aggregation backs both; it errors rather than return undercounts if a shard
-  fails. Both sections are also omitted when the caller lacks `read` on the
-  backing indices; the rest of the block still renders.
+  `text`, or inconsistently across a pattern, gets no counts. One ES|QL query
+  per field backs both, through the same lifecycle pipeline as `_query`. Both
+  sections are also omitted when the caller lacks `read` on the backing
+  indices; the rest of the block still renders.
 - `Example queries` are three fixed ES|QL shapes written for the canonical KI
   schema (`title`, `description`, `content`, their `.semantic` multi-fields,
   `type`, `tags`) with only the `FROM` target substituted. Each opens with the
@@ -166,11 +166,11 @@ Count by type
   run as-is on canonical indices; for other mappings the agent adapts field
   names from `Fields`.
 
-Describe runs no ES|QL. It issues `_mapping` and `_field_caps` (both needed:
-`_field_caps` reports `semantic_text` as `text`) plus the one aggregation, all
+Describe issues `_mapping` and `_field_caps` (both needed:
+`_field_caps` reports `semantic_text` as `text`) plus the count queries, all
 as the current user. 404 when the AI Index is not registered; Elasticsearch 4xx
 from `_mapping` / `_field_caps` (missing `view_index_metadata`) is returned
-with its status. The aggregation is the exception: its 403 (missing `read`)
+with its status. The count queries are the exception: their 403 (missing `read`)
 drops the counts sections instead. Each `_mapping` /
 `_field_caps` response is capped at 20 MB before the field cap applies; a
 target broad enough to exceed it returns 400.
