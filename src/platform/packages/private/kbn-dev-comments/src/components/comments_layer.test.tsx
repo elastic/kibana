@@ -150,6 +150,8 @@ describe('CommentsLayer', () => {
         fireEvent.mouseDown(menuItem);
         fireEvent.mouseUp(menuItem);
         expect(outsideClick).not.toHaveBeenCalled();
+        // Not the button EuiPanel makes of anything with an onClick: buttons cannot nest.
+        expect(menuItem.closest('[data-popover-panel]')?.tagName).toBe('DIV');
         act(() => menuItem.focus());
         escape();
         await waitFor(() => expect(screen.queryByTestId(item)).toBeNull());

@@ -144,8 +144,9 @@ const ActionsMenu = ({
       anchorPosition="downRight"
       // EUI renders the menu outside of the layer's containers; it is marked as the layer's all the same.
       // Portalled like the threads: clicks in it stay out of the page, whose popovers and
-      // flyouts would close on them as clicks outside.
-      panelProps={{ ...menuPanelProps, ...containProps, onKeyDown }}
+      // flyouts would close on them as clicks outside. `element`: with an onClick, EuiPanel
+      // would render a button.
+      panelProps={{ ...menuPanelProps, ...containProps, onKeyDown, element: 'div' }}
       panelRef={panelRef}
       zIndex={zIndex}
       button={
@@ -163,6 +164,7 @@ const ActionsMenu = ({
         </EuiToolTip>
       }
     >
+      {/* Not to be wrapped: EuiContextMenuPanel finds its popover by DOM position. */}
       <EuiContextMenuPanel items={items(close)} />
     </EuiPopover>
   );
