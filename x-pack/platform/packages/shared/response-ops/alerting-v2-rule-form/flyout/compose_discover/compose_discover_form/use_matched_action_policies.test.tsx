@@ -98,6 +98,46 @@ describe('useMatchedActionPolicies', () => {
     expect(http.fetch).toHaveBeenCalledTimes(2);
   });
 
+  it('reports previous matches while the query for new tags is still in flight', async () => {
+    const http = httpServiceMock.createStartContract();
+    let resolveNext: (value: unknown) => void = () => {};
+    http.fetch.mockResolvedValueOnce({
+      items: [{ action_policy: { id: 'ap-1' }, category: 'tags' }],
+      total: 1,
+      evaluated_count: 1,
+      is_truncated: false,
+    } as any);
+    http.fetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveNext = resolve;
+        })
+    );
+
+    const { result, rerender } = renderHook(
+      ({ tags }: { tags: string[] }) => useMatchedActionPolicies({ http, tags }),
+      { wrapper: createWrapper(), initialProps: { tags: ['env:prod'] } }
+    );
+
+    await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-1'));
+
+    rerender({ tags: ['env:staging'] });
+
+    await waitFor(() => expect(result.current.isPreviousData).toBe(true));
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.items[0].action_policy.id).toBe('ap-1');
+
+    resolveNext({
+      items: [{ action_policy: { id: 'ap-2' }, category: 'catch_all' }],
+      total: 1,
+      evaluated_count: 1,
+      is_truncated: false,
+    });
+
+    await waitFor(() => expect(result.current.isPreviousData).toBe(false));
+    expect(result.current.items[0].action_policy.id).toBe('ap-2');
+  });
+
   it('fires a request with an empty rule body when no tags are provided', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
