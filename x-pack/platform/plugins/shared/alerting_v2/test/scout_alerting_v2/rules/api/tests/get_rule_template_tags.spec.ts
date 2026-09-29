@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
@@ -21,30 +23,39 @@ import {
 
 apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic }, () => {
   let adminHeaders: Record<string, string>;
+  const createdTemplateIds = new Set<string>();
+  const templateNamespace = `rule-template-tags-${randomUUID()}`;
+  const templateId = (suffix: string) => `${templateNamespace}-${suffix}`;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminHeaders = { ...cookieHeader, ...testData.COMMON_HEADERS };
   });
 
-  apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.ruleTemplates.cleanUp();
+  apiTest.beforeEach(() => {
+    createdTemplateIds.clear();
   });
 
-  apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.ruleTemplates.cleanUp();
+  apiTest.afterEach(async ({ kbnClient }) => {
+    await Promise.all(
+      [...createdTemplateIds].map((id) =>
+        kbnClient.savedObjects.delete({ type: RULE_TEMPLATE_SAVED_OBJECT_TYPE, id })
+      )
+    );
   });
 
   apiTest(
     'returns tags from all v2 templates independently of list pagination',
     async ({ apiClient, apiServices }) => {
-      for (const { name, templateTags } of [
-        { name: 'a-template', templateTags: ['first-page'] },
-        { name: 'b-template', templateTags: ['second-page'] },
+      for (const { suffix, templateTags } of [
+        { suffix: 'a-template', templateTags: ['first-page'] },
+        { suffix: 'b-template', templateTags: ['second-page'] },
       ]) {
+        const id = templateId(suffix);
+        createdTemplateIds.add(id);
         await apiServices.alertingV2.ruleTemplates.create({
-          id: name,
-          attributes: buildRuleTemplateData({ metadata: { name, tags: templateTags } }),
+          id,
+          attributes: buildRuleTemplateData({ metadata: { name: id, tags: templateTags } }),
         });
       }
 
@@ -65,11 +76,12 @@ apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic },
 
   apiTest('returns at most 20 tags ordered by usage', async ({ apiClient, apiServices }) => {
     for (let i = 0; i < TAGS_RESPONSE_LIMIT + 1; i++) {
-      const name = `template-${i}`;
+      const id = templateId(`template-${i}`);
+      createdTemplateIds.add(id);
       await apiServices.alertingV2.ruleTemplates.create({
-        id: name,
+        id,
         attributes: buildRuleTemplateData({
-          metadata: { name, tags: [`tag-${i}`, ...(i < 2 ? ['frequent'] : [])] },
+          metadata: { name: id, tags: [`tag-${i}`, ...(i < 2 ? ['frequent'] : [])] },
         }),
       });
     }
@@ -84,15 +96,19 @@ apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic },
   apiTest(
     'filters tags by prefix and excludes v1 templates',
     async ({ apiClient, apiServices }) => {
+      const v2TemplateId = templateId('v2-template');
+      createdTemplateIds.add(v2TemplateId);
       await apiServices.alertingV2.ruleTemplates.create({
-        id: 'v2-template',
+        id: v2TemplateId,
         attributes: buildRuleTemplateData({
-          metadata: { name: 'v2-template', tags: ['production', 'staging'] },
+          metadata: { name: v2TemplateId, tags: ['production', 'staging'] },
         }),
       });
+      const v1TemplateId = templateId('v1-template');
+      createdTemplateIds.add(v1TemplateId);
       await apiServices.alertingV2.ruleTemplates.create({
-        id: 'v1-template',
-        attributes: buildV1RuleTemplateAttributes({ tags: ['prototype'] }),
+        id: v1TemplateId,
+        attributes: buildV1RuleTemplateAttributes({ name: v1TemplateId, tags: ['prototype'] }),
       });
 
       const response = await apiClient.get(getRuleTemplateTagsUrl('pro'), {
@@ -116,10 +132,12 @@ apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic },
   apiTest(
     'allows users with read-only rules privileges',
     async ({ apiClient, apiServices, samlAuth }) => {
+      const visibleTemplateId = templateId('visible-template');
+      createdTemplateIds.add(visibleTemplateId);
       await apiServices.alertingV2.ruleTemplates.create({
-        id: 'visible-template',
+        id: visibleTemplateId,
         attributes: buildRuleTemplateData({
-          metadata: { name: 'visible-template', tags: ['visible'] },
+          metadata: { name: visibleTemplateId, tags: ['visible'] },
         }),
       });
       const { cookieHeader } = await samlAuth.asInteractiveUser(ALERTING_V2_RULES_READ_ROLE);
