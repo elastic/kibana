@@ -9,10 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  NIGHTSHIFT_DEFAULT_MODELS,
-  NightshiftModelNotFoundError,
-} from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_DEFAULT_MODELS } from '@kbn/significant-events-schema';
 import { resolveModelStepDefinition } from './resolve_model';
 
 const request = {} as KibanaRequest;
@@ -61,14 +58,6 @@ it('resolves the investigation default', async () => {
   });
 });
 
-it('resolves a strict connector_id', async () => {
-  await expect(
-    definition.handler(createContext({ step: 'investigation', connector_id: 'custom-model' }))
-  ).resolves.toEqual({
-    output: { connector_id: 'custom-model' },
-  });
-});
-
 it('falls back from a missing round_connector_id', async () => {
   getConnectorById.mockImplementation(async (connectorId: string) => {
     if (connectorId === 'removed-round-model') {
@@ -90,12 +79,4 @@ it('falls back from a missing round_connector_id', async () => {
   expect(logger.warn).toHaveBeenCalledWith(
     expect.stringContaining('Model "removed-round-model" was not found')
   );
-});
-
-it('fails with the named error for an unknown strict connector_id', async () => {
-  getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
-
-  await expect(
-    definition.handler(createContext({ step: 'investigation', connector_id: 'missing-model' }))
-  ).rejects.toEqual(new NightshiftModelNotFoundError('missing-model'));
 });

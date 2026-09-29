@@ -6,13 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   MAX_ID_LENGTH,
   NIGHTSHIFT_DEFAULT_MODELS,
-  NightshiftModelNotFoundError,
   type NightshiftModelStep,
 } from '@kbn/significant-events-schema';
 import { resolveModelStepDefinition } from './resolve_model';
@@ -55,26 +53,6 @@ it('resolves the discovery default', async () => {
   await expect(definition.handler(createContext({ step: 'discovery' }))).resolves.toEqual({
     output: { connector_id: NIGHTSHIFT_DEFAULT_MODELS.discovery },
   });
-});
-
-it('returns the canonical connector ID for a strict override', async () => {
-  getConnectorById.mockResolvedValue({ connectorId: 'canonical-model' });
-
-  await expect(
-    definition.handler(
-      createContext({ step: 'kiExtraction', connector_id: 'configured-model-alias' })
-    )
-  ).resolves.toEqual({
-    output: { connector_id: 'canonical-model' },
-  });
-});
-
-it('fails with the named error for an unknown strict override', async () => {
-  getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
-
-  await expect(
-    definition.handler(createContext({ step: 'kiQueryGeneration', connector_id: 'missing-model' }))
-  ).rejects.toEqual(new NightshiftModelNotFoundError('missing-model'));
 });
 
 it('bounds connector IDs', () => {

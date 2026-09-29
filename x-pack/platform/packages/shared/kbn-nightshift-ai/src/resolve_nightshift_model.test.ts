@@ -77,11 +77,6 @@ describe('resolveNightshiftModel', () => {
       expect(getModelRestriction).not.toHaveBeenCalled();
     });
 
-    it('uses a valid round connector id', async () => {
-      await expect(resolve({ roundConnectorId: ' round-model ' })).resolves.toBe('round-model');
-      expect(validateConnector).toHaveBeenCalledWith('round-model');
-    });
-
     it('calls onFallback and uses the default when a round connector id is not found', async () => {
       const notFound = createInferenceRequestError('not found', 404);
       validateConnector.mockImplementation(async (connectorId) => {

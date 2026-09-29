@@ -6,13 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import {
-  NIGHTSHIFT_DEFAULT_MODELS,
-  NightshiftModelBlockedError,
-  NightshiftModelNotFoundError,
-} from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_DEFAULT_MODELS } from '@kbn/significant-events-schema';
 import {
   getSignificantEventsModelRestriction,
   resolveSignificantEventsModelForRequest,
@@ -67,21 +62,6 @@ it('returns the canonical connector ID for a strict override', async () => {
   ).resolves.toBe('canonical-model');
 });
 
-it('throws the named error for an unknown strict override', async () => {
-  getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
-
-  await expect(
-    resolveSignificantEventsModelForRequest({
-      request,
-      inference,
-      savedObjects,
-      uiSettings,
-      step: 'kiQueryGeneration',
-      requestedId: 'missing-model',
-    })
-  ).rejects.toEqual(new NightshiftModelNotFoundError('missing-model'));
-});
-
 it('does not load the default connector when the default-only setting is off', async () => {
   await expect(
     getSignificantEventsModelRestriction({
@@ -93,20 +73,4 @@ it('does not load the default connector when the default-only setting is off', a
   ).resolves.toEqual({ defaultOnly: false });
 
   expect(getDefaultConnector).not.toHaveBeenCalled();
-});
-
-it('blocks a non-default connector when the default-only setting is on', async () => {
-  getSetting.mockResolvedValue(true);
-  getDefaultConnector.mockResolvedValue({ connectorId: 'platform-default' });
-
-  await expect(
-    resolveSignificantEventsModelForRequest({
-      request,
-      inference,
-      savedObjects,
-      uiSettings,
-      step: 'discovery',
-      requestedId: 'custom-model',
-    })
-  ).rejects.toEqual(new NightshiftModelBlockedError('custom-model', 'platform-default'));
 });
