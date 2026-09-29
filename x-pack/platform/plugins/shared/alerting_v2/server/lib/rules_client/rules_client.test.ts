@@ -213,6 +213,37 @@ describe('RulesClient', () => {
       );
     });
 
+    it('creates a disabled rule SO and does not schedule a task when options.enabled is false', async () => {
+      const client = createClient();
+
+      const res = await client.createRule({
+        data: baseCreateData,
+        options: { id: 'rule-id-disabled', enabled: false },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'rule-id-disabled',
+          attrs: expect.objectContaining({ enabled: false }),
+        }),
+      ]);
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-disabled', enabled: false }));
+    });
+
+    it('defaults to an enabled rule when options.enabled is omitted', async () => {
+      const client = createClient();
+
+      const res = await client.createRule({
+        data: baseCreateData,
+        options: { id: 'rule-id-default-enabled' },
+      });
+
+      expect(res).toEqual(
+        expect.objectContaining({ id: 'rule-id-default-enabled', enabled: true })
+      );
+    });
+
     it('writes dashboard artifact references and rejects invalid registered artifact data', async () => {
       const client = createClient();
 

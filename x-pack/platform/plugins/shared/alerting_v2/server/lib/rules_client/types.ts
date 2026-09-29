@@ -51,7 +51,7 @@ export interface RotationCandidate {
 
 export interface CreateRuleParams {
   data: CreateRuleData;
-  options?: { id?: string };
+  options?: { id?: string; enabled?: boolean };
 }
 
 export interface FindRulesArgs {
