@@ -472,10 +472,12 @@ const normalizeReferences = <T extends LensAttributes>(
           (filterRefNames.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
         );
       })
-      // The 7.10 SO migration created an `indexpattern-datasource-current-indexpattern` reference
-      // from `currentIndexPatternId`. Nothing consumes it: `injectReferences` only looks up
-      // `indexpattern-datasource-layer-*` refs, and `loadInitialState` recomputes
-      // `currentIndexPatternId` from scratch. The transform never emits it either.
+      // `indexpattern-datasource-current-indexpattern` is not read by name. The 7.10 migration
+      // and by-value builders emit it. `extractReferences` and the transform do not.
+      // `getUsedDataViews` and the XY first-`index-pattern` fallback use the id. On every
+      // integration panel this reference is first and the next one has the same id, so dropping
+      // it changes neither.`toAPIFormat` does not apply that annotation fallback.
+      // The editor always writes `xy-visualization-layer-*`, so it is not reproducible from the UI.
       .filter((reference) => {
         return !(
           reference.type === 'index-pattern' &&
