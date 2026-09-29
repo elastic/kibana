@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 
 /** Public agent_builder route that returns a conversation, including each round's `trace_id`. */
@@ -29,7 +30,9 @@ const buildConversationApiPath = (conversationId: string): string =>
 
 /**
  * agent_builder OTel traces land in a space-scoped index. Mirrors
- * `buildAgentBuilderTracesIndexPattern` in agent_builder's `common/traces.ts` (not exported).
+ * `buildAgentBuilderTracesIndexPattern` in agent_builder's `common/traces.ts`, which cannot be
+ * imported cross-plugin from browser code (its `extraPublicDirs` does not expose `common`); the
+ * context_engine plugin mirrors the same one-liner for the same reason.
  */
 const buildTracesIndexPattern = (spaceId: string): string => `traces-agent_builder.otel-${spaceId}`;
 
@@ -112,6 +115,8 @@ export function InvestigationTraceFlyout({
       http.get<ConversationTraceResponse>(buildConversationApiPath(conversationId), {
         signal: signal ?? undefined,
       }),
+    // Match the rest of Nightshift: don't retry client (4xx) errors.
+    retry: (failureCount, error) => !isHttpClientError(error) && failureCount < 3,
   });
 
   const traceId = useMemo(() => resolveTraceId(conversation?.rounds), [conversation]);
