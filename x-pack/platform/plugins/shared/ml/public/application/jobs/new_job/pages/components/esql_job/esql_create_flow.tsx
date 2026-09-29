@@ -19,6 +19,7 @@ import { extractEsqlErrorReason } from './esql_error_reason';
 import { useEsqlWizardContext } from './esql_wizard_context';
 import { NUMERIC_ESQL_TYPES } from './esql_numeric_types';
 import { detectorFieldRequirement } from './esql_detector_functions';
+import { isDetectorPartitioningValid } from './esql_detector_partitioning';
 
 type CreatePhase =
   | 'idle'
@@ -58,6 +59,10 @@ export const EsqlCreateFlow = () => {
   const jobIdInvalid = state.jobId !== '' && !isJobIdValid(state.jobId);
   const detectorsAreValid = state.detectors.every((detector) => {
     const requirement = detectorFieldRequirement(detector.function);
+
+    if (!isDetectorPartitioningValid(detector, state.columns, state.emittedTimeField)) {
+      return false;
+    }
 
     if (requirement === 'none') return true;
     if (!detector.field) return false;

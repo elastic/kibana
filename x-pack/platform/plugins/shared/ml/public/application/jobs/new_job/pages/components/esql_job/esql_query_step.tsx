@@ -282,6 +282,7 @@ const EsqlQueryStepContent = () => {
       <EsqlDetectorsEditor
         detectors={state.detectors}
         columns={state.columns}
+        emittedTimeField={state.emittedTimeField}
         onChange={(detectors) => setQueryState({ detectors })}
         isDisabled={isLoading || state.columns.length === 0}
       />

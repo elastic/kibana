@@ -28,11 +28,18 @@ import {
   describeDetector,
   detectorFieldRequirement,
   detectorFunctionSelectOptions,
+  requiresByField,
 } from './esql_detector_functions';
+import {
+  byOverPartitionOptions,
+  validateDetectorPartitioning,
+  type EsqlPartitioningFieldKey,
+} from './esql_detector_partitioning';
 
 export interface EsqlDetectorsEditorProps {
   detectors: EsqlDetectorConfig[];
   columns: ESQLFieldWithMetadata[];
+  emittedTimeField: string;
   onChange: (detectors: EsqlDetectorConfig[]) => void;
   isDisabled?: boolean;
 }
@@ -50,15 +57,26 @@ const fieldOptionsFor = (
     .map(({ name, type }) => ({ label: name, append: type }));
 };
 
+const partitioningFieldLabels: Record<EsqlPartitioningFieldKey, string> = {
+  byField: i18n.translate('xpack.ml.esqlJob.query.byFieldLabel', { defaultMessage: 'By field' }),
+  overField: i18n.translate('xpack.ml.esqlJob.query.overFieldLabel', {
+    defaultMessage: 'Over field',
+  }),
+  partitionField: i18n.translate('xpack.ml.esqlJob.query.partitionFieldLabel', {
+    defaultMessage: 'Partition field',
+  }),
+};
+
 /**
- * Editor for `EsqlQueryStepState.detectors`: rows of {function, field} with
- * add/remove. Standalone (props-in, onChange-out) so it can be reused by the
- * staged PICK_FIELDS wizard step (g2sz.10), which will add byField/overField/
- * partitionField UI on top of the same `EsqlDetectorConfig` rows.
+ * Editor for `EsqlQueryStepState.detectors`: rows of
+ * {function, field, byField, overField, partitionField} with add/remove.
+ * Standalone (props-in, onChange-out) so it is reusable by the staged
+ * PICK_FIELDS wizard step (g2sz.10).
  */
 export const EsqlDetectorsEditor = ({
   detectors,
   columns,
+  emittedTimeField,
   onChange,
   isDisabled,
 }: EsqlDetectorsEditorProps) => {
@@ -83,6 +101,7 @@ export const EsqlDetectorsEditor = ({
             index={index}
             detector={detector}
             columns={columns}
+            emittedTimeField={emittedTimeField}
             isDisabled={isDisabled}
             canRemove={detectors.length > 1}
             onChange={(next) => updateDetector(index, next)}
@@ -109,6 +128,7 @@ const DetectorRow = ({
   index,
   detector,
   columns,
+  emittedTimeField,
   isDisabled,
   canRemove,
   onChange,
@@ -117,6 +137,7 @@ const DetectorRow = ({
   index: number;
   detector: EsqlDetectorConfig;
   columns: ESQLFieldWithMetadata[];
+  emittedTimeField: string;
   isDisabled?: boolean;
   canRemove: boolean;
   onChange: (next: EsqlDetectorConfig) => void;
@@ -131,7 +152,49 @@ const DetectorRow = ({
     () => fieldOptions.filter(({ label }) => label === detector.field),
     [fieldOptions, detector.field]
   );
+  const partitioningOptions = useMemo(
+    () => byOverPartitionOptions(columns, emittedTimeField),
+    [columns, emittedTimeField]
+  );
+  const partitioningErrors = useMemo(
+    () => validateDetectorPartitioning(detector, columns, emittedTimeField),
+    [detector, columns, emittedTimeField]
+  );
   const summary = describeDetector({ functionName: detector.function, field: detector.field });
+  const needsByField = requiresByField(detector.function);
+
+  const partitioningField = (key: EsqlPartitioningFieldKey) => {
+    const value = detector[key];
+    const selected = partitioningOptions.filter(({ label }) => label === value);
+    const error = partitioningErrors[key];
+    const isInvalid = error !== undefined;
+
+    return (
+      <EuiFlexItem key={key}>
+        <EuiFormRow
+          label={partitioningFieldLabels[key]}
+          isInvalid={isInvalid}
+          error={partitioningErrorMessage(error, key)}
+          fullWidth
+        >
+          <EuiComboBox
+            aria-label={i18n.translate('xpack.ml.esqlJob.query.partitioningFieldAriaLabel', {
+              defaultMessage: 'Detector {index} {fieldLabel}',
+              values: { index: index + 1, fieldLabel: partitioningFieldLabels[key] },
+            })}
+            singleSelection
+            isClearable
+            isInvalid={isInvalid}
+            options={partitioningOptions}
+            selectedOptions={selected}
+            onChange={(options) => onChange({ ...detector, [key]: options[0]?.label })}
+            isDisabled={isDisabled}
+            data-test-subj={`mlEsqlDetector${capitalize(key)}-${index}`}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    );
+  };
 
   return (
     <React.Fragment>
@@ -205,7 +268,50 @@ const DetectorRow = ({
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {needsByField ? (
+        <EuiText
+          size="xs"
+          color={detector.byField ? 'subdued' : 'danger'}
+          data-test-subj={`mlEsqlDetectorByFieldHint-${index}`}
+        >
+          {i18n.translate('xpack.ml.esqlJob.query.rareRequiresByFieldHint', {
+            defaultMessage: '{functionName} requires a by field.',
+            values: { functionName: detector.function },
+          })}
+        </EuiText>
+      ) : null}
+      <EuiFlexGroup gutterSize="s" data-test-subj={`mlEsqlDetectorPartitioningRow-${index}`}>
+        {(['byField', 'overField', 'partitionField'] as const).map(partitioningField)}
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
     </React.Fragment>
   );
+};
+
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+const partitioningErrorMessage = (
+  error: ReturnType<typeof validateDetectorPartitioning>[EsqlPartitioningFieldKey],
+  key: EsqlPartitioningFieldKey
+): string | undefined => {
+  switch (error) {
+    case 'byFieldRequiredForFunction':
+      return i18n.translate('xpack.ml.esqlJob.query.byFieldRequiredError', {
+        defaultMessage: 'Required for rare/freq_rare detectors.',
+      });
+    case 'duplicateField':
+      return i18n.translate('xpack.ml.esqlJob.query.partitioningDuplicateFieldError', {
+        defaultMessage: 'A field can only be used once per detector.',
+      });
+    case 'unknownField':
+      return i18n.translate('xpack.ml.esqlJob.query.partitioningUnknownFieldError', {
+        defaultMessage: 'This column is no longer part of the query output.',
+      });
+    case 'timeColumnUsed':
+      return i18n.translate('xpack.ml.esqlJob.query.partitioningTimeColumnError', {
+        defaultMessage: 'The emitted time column cannot be used here.',
+      });
+    default:
+      return undefined;
+  }
 };

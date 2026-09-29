@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
  * ES|QL output column it accepts:
  *  - 'none': event-rate style functions (count family, rare family) — no
  *    field_name. `rare`/`freq_rare` are event-rate w.r.t. `by_field_name`,
- *    which the staged wizard step (g2sz.10) will add UI for; until then they
- *    behave like the rest of the no-field functions here.
+ *    which must be set (see `requiresByField` below) — enforced by the
+ *    detectors editor's by-field selector.
  *  - 'numeric': metric-style functions — field_name must be a numeric ES|QL
  *    output column.
  *  - 'any': `distinct_count` — field_name can be any output column.
@@ -53,6 +53,18 @@ export const detectorFunctionByValue = (value: string): EsqlDetectorFunctionOpti
 
 export const detectorFieldRequirement = (functionName: string): EsqlDetectorFieldRequirement =>
   detectorFunctionByValue(functionName)?.fieldRequirement ?? 'numeric';
+
+/**
+ * `rare`/`freq_rare` are meaningless without a `by_field_name` (they detect
+ * rare *values of the by field*, not a rare event rate overall) — ES itself
+ * rejects them at PUT time without one. Enforced client-side here so the
+ * staged wizard's PICK_FIELDS step (g2sz.10) can block Next before the
+ * server round-trip.
+ */
+export const REQUIRES_BY_FIELD_FUNCTIONS = new Set(['rare', 'freq_rare']);
+
+export const requiresByField = (functionName: string): boolean =>
+  REQUIRES_BY_FIELD_FUNCTIONS.has(functionName);
 
 export const detectorFunctionSelectOptions = ESQL_DETECTOR_FUNCTIONS.map(({ value, label }) => ({
   value,
