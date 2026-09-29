@@ -3101,6 +3101,37 @@ describe('add_controls / remove_controls operations', () => {
     );
   });
 
+  it('add_controls keeps controls unvalidated when field loading fails', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockRejectedValue(new Error('field caps unavailable'));
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'host',
+              index: 'kibana_sample_data_logs',
+              user_requested: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(failures).toEqual([]);
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect((kept.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY host'
+    );
+  });
+
   it('remove_controls removes by id and leaves others intact', async () => {
     const { dashboardData: withControls } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
