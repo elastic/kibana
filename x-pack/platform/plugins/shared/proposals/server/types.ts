@@ -14,7 +14,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './services/proposals_service';
 import type { ProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import type { ResolveProposalUser } from './services/resolve_proposal_user';
@@ -43,6 +43,8 @@ export interface ProposalsStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  /** Writes the conversation attachment that surfaces a new proposal in the chat. */
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 /**

@@ -15,6 +15,7 @@ import {
   EuiFocusTrap,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiText,
   EuiTitle,
   useEuiShadow,
@@ -299,13 +300,11 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     }),
     // 16px between the info card and the description (Figma "Details" gap).
     details: css({ gap: euiTheme.size.base }),
-    // Bordered, rounded metadata card: 12px/16px padding, 16px between columns.
+    // Bordered, rounded metadata card: 16px padding, 16px between columns.
     infoCard: css({
       display: 'flex',
       gap: euiTheme.size.base,
-      padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      borderRadius: euiTheme.border.radius.medium,
+      borderRadius: euiTheme.border.radius.control,
     }),
     infoBlock: css({
       display: 'flex',
@@ -357,7 +356,9 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     panel: css({
       position: 'relative',
       minHeight: 0,
+      overflow: 'hidden',
       border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      borderRadius: euiTheme.border.radius.control,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     }),
     // "Preview" pill floats centered over the top of the editor (16px down).
@@ -468,7 +469,12 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup direction="column" gutterSize="none" css={styles.details}>
                         <EuiFlexItem grow={false}>
-                          <div css={styles.infoCard}>
+                          <EuiPanel
+                            hasBorder
+                            hasShadow={false}
+                            paddingSize="m"
+                            css={styles.infoCard}
+                          >
                             <div
                               css={styles.infoBlock}
                               data-test-subj="workflowLibraryTemplateDetail-solutions"
@@ -515,7 +521,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                               </span>
                               <span css={styles.infoValue}>{metadata.version}</span>
                             </div>
-                          </div>
+                          </EuiPanel>
                         </EuiFlexItem>
 
                         <EuiFlexItem grow={false}>

@@ -20,7 +20,8 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
-import { PROPOSALS_RESUME_CHANNEL } from '@kbn/proposals-common';
+import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import { PROPOSAL_ATTACHMENT_TYPE, PROPOSALS_RESUME_CHANNEL } from '@kbn/proposals-common';
 import type {
   CreateProposalRequest,
   DismissReason,
@@ -93,6 +94,7 @@ export interface ProposalsServiceDeps {
   storage: ProposalsStorageClient;
   logger: Logger;
   getWorkflowsApi: () => WorkflowsManagementApi;
+  getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
 }
 
 /**
@@ -116,7 +118,7 @@ export class ProposalsService {
    */
   async create(
     params: CreateProposalRequest,
-    { spaceId, user }: { spaceId: string; user?: ProposalUser }
+    { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
   ): Promise<ProposalWithMetadata> {
     const id = uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
@@ -130,7 +132,7 @@ export class ProposalsService {
     // that produced it), and rejecting an `actionInput` the action could not
     // accept — before an analyst is asked to approve something that cannot run.
     const metadata = actionWorkflowId
-      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId)
+      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId, request)
       : undefined;
 
     // Caller first in both: it knows the situation the proposal came out of,
@@ -174,13 +176,60 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
+    // The action's name, since a proposal has no title of its own yet; the
+    // workflow id is the last resort so an unnamed action still reads as
+    // something more specific than the generic fallback.
+    await this.attachToConversation(
+      id,
+      params.conversationId,
+      metadata?.name ?? actionWorkflowId,
+      request
+    );
+
     const proposal = toProposal(id, document);
     return { ...proposal, action: metadata, expired: isExpired(proposal) };
   }
 
-  async get(id: string, spaceId: string): Promise<ProposalWithMetadata> {
+  /**
+   * Surfaces the proposal in its conversation, so an analyst meets the decision
+   * in the chat rather than only in the queue.
+   *
+   * Best-effort: the proposal is the record, and the attachment is a view of it.
+   * Losing the card is worth a warning, not the loss of the proposal that the
+   * gate workflow is already parked on.
+   */
+  private async attachToConversation(
+    proposalId: string,
+    conversationId: string,
+    title: string | undefined,
+    request: KibanaRequest
+  ): Promise<void> {
+    try {
+      const client = await this.deps.getAttachmentsClient(request);
+      await client.create({
+        conversationId,
+        type: PROPOSAL_ATTACHMENT_TYPE,
+        // Both: `origin` is what the card reads to look the proposal up, and a
+        // payload is required because this type declares no `resolve()` hook.
+        origin: proposalId,
+        // The title rides along because the card's label is rendered
+        // synchronously and so cannot read the proposal; everything else the
+        // card shows is read live.
+        data: { proposalId, title },
+        // The analyst has to see the decision on opening the conversation; the
+        // agent referencing it first would make the card conditional on chat.
+        render_inline: true,
+      });
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to attach proposal ${proposalId} to conversation ${conversationId}: ${error}`
+      );
+    }
+  }
+
+  async get(id: string, spaceId: string, request: KibanaRequest): Promise<ProposalWithMetadata> {
     const { proposal } = await this.load(id, spaceId);
-    return this.withMetadata(stripRanks(proposal), spaceId);
+    return this.withMetadata(stripRanks(proposal), spaceId, request);
   }
 
   /**
@@ -197,6 +246,7 @@ export class ProposalsService {
   async list(
     query: ListProposalsQuery,
     spaceId: string,
+    request: KibanaRequest,
     /** Replaces the default priority sort; the queues page by recency instead. */
     sort?: SortCombinations[]
   ): Promise<ListProposalsResponse> {
@@ -219,7 +269,8 @@ export class ProposalsService {
       response.hits.hits
         .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
         .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
-      spaceId
+      spaceId,
+      request
     );
 
     return {
@@ -575,7 +626,8 @@ export class ProposalsService {
    */
   async revise(
     { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<{ proposalId: string; revision: number }> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
@@ -615,7 +667,12 @@ export class ProposalsService {
         : { ...original.actionInput, ...actionInput };
 
     if (mergedActionInput !== undefined && original.actionWorkflowId !== undefined) {
-      await this.resolveAndValidateAction(original.actionWorkflowId, mergedActionInput, spaceId);
+      await this.resolveAndValidateAction(
+        original.actionWorkflowId,
+        mergedActionInput,
+        spaceId,
+        request
+      );
     }
 
     // Resolved once, so the enums and the ranks derived from them cannot drift.
@@ -818,9 +875,10 @@ export class ProposalsService {
    */
   async resolveActionMetadata(
     actionWorkflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionMetadata | undefined> {
-    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
     return definition && this.readActionMetadata(actionWorkflowId, definition);
   }
 
@@ -832,9 +890,10 @@ export class ProposalsService {
   private async resolveAndValidateAction(
     actionWorkflowId: string,
     actionInput: Record<string, unknown> | undefined,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionMetadata | undefined> {
-    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
     if (!definition) {
       return undefined;
     }
@@ -875,10 +934,13 @@ export class ProposalsService {
 
   private async fetchActionDefinition(
     actionWorkflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionWorkflowDefinition | undefined> {
     try {
-      const workflow = await this.deps.getWorkflowsApi().getWorkflow(actionWorkflowId, spaceId);
+      const workflow = await this.deps
+        .getWorkflowsApi()
+        .getWorkflow(actionWorkflowId, spaceId, request);
       return workflow?.definition as ActionWorkflowDefinition | undefined;
     } catch (error) {
       this.deps.logger.warn(
@@ -1016,7 +1078,9 @@ export class ProposalsService {
     }
 
     const api = this.deps.getWorkflowsApi();
-    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId);
+    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId, {
+      request,
+    });
     if (!execution) {
       throw new ProposalConflictError(
         `Execution [${proposal.workflowExecutionId}] for proposal [${proposal.id}] not found`
@@ -1039,9 +1103,13 @@ export class ProposalsService {
     );
   }
 
-  private async withMetadata(proposal: Proposal, spaceId: string): Promise<ProposalWithMetadata> {
+  private async withMetadata(
+    proposal: Proposal,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ProposalWithMetadata> {
     const action = proposal.actionWorkflowId
-      ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId)
+      ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
       : undefined;
 
     return { ...proposal, action, expired: isExpired(proposal) };
@@ -1056,7 +1124,8 @@ export class ProposalsService {
    */
   private async withMetadataBatch(
     proposals: Proposal[],
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ProposalWithMetadata[]> {
     const uniqueWorkflowIds = [
       ...new Set(
@@ -1065,7 +1134,7 @@ export class ProposalsService {
     ];
 
     const metaEntries = await asyncMapWithLimit(uniqueWorkflowIds, 10, async (id) => {
-      const meta = await this.resolveActionMetadata(id, spaceId);
+      const meta = await this.resolveActionMetadata(id, spaceId, request);
       return [id, meta] as [string, ActionMetadata | undefined];
     });
 

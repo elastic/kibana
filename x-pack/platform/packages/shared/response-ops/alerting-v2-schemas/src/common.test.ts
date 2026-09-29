@@ -5,9 +5,74 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, durationSchema, optionalWithDescription } from './common';
-import { MAX_DURATION_LENGTH } from './constants';
+import {
+  arrayOrSingleSchema,
+  durationSchema,
+  entityIdSchema,
+  groupHashSchema,
+  optionalWithDescription,
+} from './common';
+import { ID_MAX_LENGTH, MAX_DURATION_LENGTH } from './constants';
+
+describe('entityIdSchema', () => {
+  it.each([
+    ['a UUID v4, the server-generated default', '0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff'],
+    ['a Terraform-style name', 'prod-cpu-high_v2'],
+    ['a single character', 'a'],
+    [`${ID_MAX_LENGTH} characters`, 'a'.repeat(ID_MAX_LENGTH)],
+  ])('accepts %s', (_label, id) => {
+    expect(entityIdSchema.safeParse(id).success).toBe(true);
+  });
+
+  it.each([
+    ['a space', 'prod cpu high'],
+    ['a path separator', 'team/prod-cpu'],
+    ['a query delimiter', 'prod?cpu'],
+    ['a fragment delimiter', 'prod#cpu'],
+    ['an emoji', 'prod-🔥'],
+    ['a non-ASCII letter', 'café'],
+    ['a dot', 'prod.cpu.high'],
+    ['empty after trimming', '   '],
+    [`${ID_MAX_LENGTH + 1} characters`, 'a'.repeat(ID_MAX_LENGTH + 1)],
+  ])('rejects %s', (_label, id) => {
+    expect(entityIdSchema.safeParse(id).success).toBe(false);
+  });
+
+  it('treats canonically-equivalent Unicode spellings as equally invalid', () => {
+    const nfc = 'caf\u00e9';
+    const nfd = 'cafe\u0301';
+
+    expect(nfc).not.toBe(nfd);
+    expect(entityIdSchema.safeParse(nfc).success).toBe(false);
+    expect(entityIdSchema.safeParse(nfd).success).toBe(false);
+  });
+
+  it('rejects surrounding whitespace rather than resolving to the trimmed id', () => {
+    expect(entityIdSchema.safeParse('  prod-cpu  ').success).toBe(false);
+  });
+});
+
+describe('groupHashSchema', () => {
+  it('accepts a SHA-256 digest, the only value the server ever produces', () => {
+    const digest = createHash('sha256').update('rule-1|host.name|web-1').digest('hex');
+
+    expect(groupHashSchema.safeParse(digest).success).toBe(true);
+  });
+
+  it.each([
+    ['a placeholder label', 'group-1'],
+    ['an uppercase digest', 'A'.repeat(64)],
+    ['an MD5-length digest', 'a'.repeat(32)],
+    ['one character short', 'a'.repeat(63)],
+    ['one character long', 'a'.repeat(65)],
+    ['a non-hex character', `${'a'.repeat(63)}z`],
+    ['empty', ''],
+  ])('rejects %s', (_label, value) => {
+    expect(groupHashSchema.safeParse(value).success).toBe(false);
+  });
+});
 
 describe('durationSchema', () => {
   it.each(['250ms', '30s', '5m', '1h', '7d', '52w', '365d'])('accepts "%s"', (value) => {

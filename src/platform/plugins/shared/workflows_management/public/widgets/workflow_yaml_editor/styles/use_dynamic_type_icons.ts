@@ -10,9 +10,11 @@
 import { type EuiThemeColorModeStandard, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
 import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -133,6 +135,55 @@ export const predefinedStepTypes = [
 /** Inline bolt SVG as data URL so icons work even when async/asset loading fails */
 export const FALLBACK_BOLT_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEzIDFMOS45OTkwNSA1SDEzQzEzLjQxNTIgNSAxMy43ODcgNS4yNTY1MiAxMy45MzQ2IDUuNjQ0NTNDMTQuMDgyMSA2LjAzMjYxIDEzLjk3NDQgNi40NzEyNCAxMy42NjQxIDYuNzQ3MDdMNC42NjQwOCAxNC43NDcxQzQuMzA1ODEgMTUuMDY1NSAzLjc3MjEgMTUuMDg1NSAzLjM5MTYyIDE0Ljc5MzlDMy4wMTExNCAxNC41MDI0IDIuODkxMTEgMTMuOTgxNSAzLjEwNTQ5IDEzLjU1MjdMNS4zODE4NiA5SDMuMDAwMDJDMi42MzEyMyA5IDIuMjkyMjEgOC43OTY4NCAyLjExODE5IDguNDcxNjhDMS45NDQyOSA4LjE0NjU2IDEuOTYzNDYgNy43NTIxIDIuMTY3OTkgNy40NDUzMUw2LjQ2NDg3IDFIMTMWk0zLjAwMDAyIDhINy4wMDAwMkw0LjAwMDAyIDE0TDEzIDZIOi4wMDAwMkwxMSAySDcuMDAwMDJMMy4wMDAwMiA4WiIvPgo8L3N2Zz4=';
+
+function isValidDataUrl(url: string): boolean {
+  return url.length > 50 && url.startsWith('data:') && url.includes('base64,');
+}
+
+function isFallbackBoltDataUrl(url: string, boltUrl: string): boolean {
+  return (
+    url === boltUrl || url === FALLBACK_BOLT_DATA_URL || url === getTriggerBoltFallbackDataUrl()
+  );
+}
+
+/** Bolt fallback and connector events with no brand icon (the plugs glyph) stay masked. */
+function keepsTriggerGlyphMask(actionTypeId: string, iconBase64: string, boltUrl: string): boolean {
+  if (isMonochromeActionType(actionTypeId) || isFallbackBoltDataUrl(iconBase64, boltUrl)) {
+    return true;
+  }
+  const connectorTypeId = getConnectorTypeIdForTriggerEventId(actionTypeId);
+  return connectorTypeId !== undefined && !ConnectorIconsMap.has(connectorTypeId);
+}
+
+/**
+ * Background declarations for a custom trigger inline icon. A branded mark clears
+ * the shared bolt mask. Fallback and unbranded glyphs keep the currentColor mask.
+ */
+function getTriggerInlineIconBackground({
+  iconBase64,
+  monochromeBackground,
+  boltUrl,
+  isMonochrome,
+}: {
+  iconBase64: string;
+  monochromeBackground: string;
+  boltUrl: string;
+  isMonochrome: boolean;
+}): string {
+  const hasBrandIcon = isValidDataUrl(iconBase64) && !isMonochrome;
+  if (isMonochrome && isValidDataUrl(iconBase64)) {
+    return monochromeBackground;
+  }
+  if (hasBrandIcon) {
+    return `
+    background-image: url("${iconBase64}") !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    background-color: transparent !important;
+  `;
+  }
+  return `background-image: url("${boltUrl || FALLBACK_BOLT_DATA_URL}") !important;`;
+}
 
 function appendStyleToEditorScope(
   style: HTMLStyleElement,
@@ -526,12 +577,6 @@ async function injectDynamicShadowIcons(
   `;
   }
 
-  const isValidDataUrl = (url: string) =>
-    typeof url === 'string' &&
-    url.length > 50 &&
-    url.startsWith('data:') &&
-    url.includes('base64,');
-
   for (const connector of connectorTypes) {
     const isTriggerConnector = 'isTrigger' in connector && connector.isTrigger;
     const isBuiltInTriggerId = TriggerTypes.includes(connector.actionTypeId as TriggerType);
@@ -574,25 +619,24 @@ async function injectDynamicShadowIcons(
         className = connectorType;
       }
 
-      let bgProp: string;
-      if (isMonochromeActionType(connector.actionTypeId)) {
-        bgProp = `
+      const keepGlyphMask = isTriggerConnector
+        ? keepsTriggerGlyphMask(connector.actionTypeId, iconBase64, boltUrl)
+        : isMonochromeActionType(connector.actionTypeId);
+      const bgProp = keepGlyphMask
+        ? `
         mask-image: url("${iconBase64}");
         mask-size: contain;
         background-color: currentColor;
-      `;
-      } else {
-        bgProp = `background-image: url("${iconBase64}") !important;`;
-      }
+      `
+        : `background-image: url("${iconBase64}") !important;`;
 
       if (isTriggerConnector) {
-        const triggerIconUrl = isValidDataUrl(iconBase64)
-          ? iconBase64
-          : boltUrl || FALLBACK_BOLT_DATA_URL;
-        const triggerBgProp =
-          isMonochromeActionType(connector.actionTypeId) && isValidDataUrl(iconBase64)
-            ? bgProp
-            : `background-image: url("${triggerIconUrl}") !important;`;
+        const triggerBgProp = getTriggerInlineIconBackground({
+          iconBase64,
+          monochromeBackground: bgProp,
+          boltUrl,
+          isMonochrome: keepGlyphMask,
+        });
         cssToInject += `
   .monaco-editor .type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}.${className}::after,
   ${inlineScope}.type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}.${className}::after,
