@@ -17,7 +17,10 @@ import type { SignificantEventsServer } from '../../types';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import type { GetScopedClients } from '../../routes/types';
 import type { MaintenanceAccess } from './maintenance_access';
-import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from './managed_workflow_targets';
+import {
+  SCHEDULED_DISCOVERY_WORKFLOW_IDS,
+  type MaintenanceWorkflowTarget,
+} from './managed_workflow_targets';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -47,6 +50,12 @@ const scheduledSettingTarget = (spaceId: SpaceId): string =>
 /** Matches the per-space continuous onboarding documents (`<id>-<spaceId>`). */
 export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
   workflowId.startsWith(`${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-`);
+
+/** The per-space continuous onboarding document of a space. */
+const continuousOnboardingWorkflowTarget = (spaceId: SpaceId): MaintenanceWorkflowTarget => ({
+  id: `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`,
+  spaceId,
+});
 
 export const isScheduledDiscoveryWorkflowId = (workflowId: string): boolean =>
   SCHEDULED_DISCOVERY_WORKFLOW_IDS.some(
@@ -122,6 +131,12 @@ export const createFeatureSettingsController = ({
    * recording which scheduled discovery spaces were previously on. Idempotent
    * across re-pause: prior restore flags are kept when settings are already
    * false from an earlier pause.
+   *
+   * Also returns the continuous onboarding document of every space whose setting
+   * read on. The caller records them as the restore record even when the sweep
+   * could not disable them (a failed disable, a document that was already off, or
+   * workflows being unavailable), since Resume restores the setting from them.
+   * An unreadable setting falls back to the sweep's own record.
    */
   const pauseFeatureSettings = async ({
     request,
@@ -135,7 +150,10 @@ export const createFeatureSettingsController = ({
     spaceIds: SpaceId[];
     previous: PausedFeatureSettings | undefined;
     failures: SignificantEventsMaintenanceFailure[];
-  }): Promise<PausedFeatureSettings> => {
+  }): Promise<{
+    pausedSettings: PausedFeatureSettings;
+    continuousOnboardingTargets: MaintenanceWorkflowTarget[];
+  }> => {
     const uiSettingsClients = getUiSettingsClients({ request, access });
     const next: PausedFeatureSettings = {
       continuousOnboardingWasEnabled: false,
@@ -143,6 +161,7 @@ export const createFeatureSettingsController = ({
         ...new Set(previous?.scheduledDiscoveryEnabledSpaceIds ?? []),
       ],
     };
+    const continuousOnboardingTargets: MaintenanceWorkflowTarget[] = [];
 
     for (const spaceId of spaceIds) {
       try {
@@ -151,6 +170,8 @@ export const createFeatureSettingsController = ({
           if (
             await spaceClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
           ) {
+            // Recorded before the write, so a failed write still restores on Resume.
+            continuousOnboardingTargets.push(continuousOnboardingWorkflowTarget(spaceId));
             await spaceClient.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, false);
           }
         } catch (error) {
@@ -200,7 +221,7 @@ export const createFeatureSettingsController = ({
       }
     }
 
-    return next;
+    return { pausedSettings: next, continuousOnboardingTargets };
   };
 
   /**

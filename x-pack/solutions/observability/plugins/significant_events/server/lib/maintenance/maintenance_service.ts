@@ -139,6 +139,13 @@ const toMessage = (error: unknown): string =>
 
 const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${id}@${spaceId}`;
 
+/** Unions workflow targets by document and space; a later list wins on a shared key. */
+const mergeWorkflowTargets = (
+  ...lists: MaintenanceWorkflowTarget[][]
+): MaintenanceWorkflowTarget[] => [
+  ...new Map(lists.flat().map((target) => [workflowKey(target), target])).values(),
+];
+
 /** Normalise a persisted (possibly newer/unknown) state string to a known state. */
 const normalizeState = (raw: string | undefined): SignificantEventsMaintenanceState =>
   // Fail-open: unknown values from a newer node are treated as enabled so
@@ -264,8 +271,10 @@ export const createSignificantEventsMaintenanceService = ({
 
   /**
    * Brand SO-loaded workflow targets once at the SO → domain boundary. Targets
-   * recorded for the pre-per-space default space documents are dropped: those
-   * documents are deleted at startup and would only produce "not found" failures.
+   * recorded for the pre-per-space continuous onboarding documents of the default
+   * space are dropped: those documents are deleted at startup and would only
+   * produce "not found" failures. The legacy sync document is kept, since startup
+   * only removes it once its per-space replacement is enabled.
    */
   const brandDisabledWorkflows = (
     workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
@@ -639,18 +648,10 @@ export const createSignificantEventsMaintenanceService = ({
     const newlyDisabledRuleIds =
       access === 'user' ? await disableBackedRules(request, failures) : [];
 
-    const workflowByKey = new Map<string, MaintenanceWorkflowTarget>();
-    for (const workflow of previousWorkflows) {
-      workflowByKey.set(workflowKey(workflow), workflow);
-    }
-    for (const target of newlyDisabled) {
-      workflowByKey.set(workflowKey(target), target);
-    }
-
     const disabledRuleIds = [...new Set([...previousRuleIds, ...newlyDisabledRuleIds])];
 
     return {
-      disabledWorkflows: [...workflowByKey.values()],
+      disabledWorkflows: mergeWorkflowTargets(previousWorkflows, newlyDisabled),
       disabledRuleIds,
       workflowsDisabledThisSweep: newlyDisabled.length,
       rulesDisabledThisSweep: newlyDisabledRuleIds.length,
@@ -739,14 +740,23 @@ export const createSignificantEventsMaintenanceService = ({
     // Turn Settings off after the workflow sweep so a settings write failure
     // still leaves workflows stopped. Reuse the sweep's space enumeration.
     let pausedSettings: SignificantEventsMaintenanceStateAttributes['pausedSettings'];
+    let disabledWorkflows = sweep.disabledWorkflows;
     if (mode === 'pause') {
-      pausedSettings = await featureSettings.pauseFeatureSettings({
+      const pausedFeatures = await featureSettings.pauseFeatureSettings({
         request,
         access,
         spaceIds: sweep.spaceIds,
         previous: existing?.pausedSettings,
         failures: sweep.failures,
       });
+      pausedSettings = pausedFeatures.pausedSettings;
+      // The recorded continuous document is what Resume restores the space setting
+      // from, so a space whose setting was on stays recorded even when the sweep
+      // could not disable its document.
+      disabledWorkflows = mergeWorkflowTargets(
+        disabledWorkflows,
+        pausedFeatures.continuousOnboardingTargets
+      );
     } else {
       await featureSettings.reassertFeatureSettingsOff({
         request,
@@ -763,7 +773,7 @@ export const createSignificantEventsMaintenanceService = ({
     const summary: SignificantEventsMaintenanceSummary = {
       state: 'paused',
       executionsCancelled: 0,
-      workflowsDisabled: sweep.disabledWorkflows.length,
+      workflowsDisabled: disabledWorkflows.length,
       rulesDisabled: sweep.disabledRuleIds.length,
       partialFailures: sweep.failures,
     };
@@ -774,7 +784,7 @@ export const createSignificantEventsMaintenanceService = ({
         state: 'paused',
         updatedAt: new Date().toISOString(),
         updatedBy: actor,
-        disabledWorkflows: sweep.disabledWorkflows,
+        disabledWorkflows,
         disabledRuleIds: sweep.disabledRuleIds,
         pausedSettings,
         lastSummary: summary,
@@ -792,7 +802,7 @@ export const createSignificantEventsMaintenanceService = ({
         `Significant Events ${mode} snapshot persist failed after sweep (state remains paused): newly disabled ${
           sweep.workflowsDisabledThisSweep
         } workflow(s) / ${sweep.rulesDisabledThisSweep} rule(s), snapshot would have ${
-          sweep.disabledWorkflows.length
+          disabledWorkflows.length
         } workflow(s); write error: ${toMessage(writeError)}`,
         failuresWithSnapshot
       );

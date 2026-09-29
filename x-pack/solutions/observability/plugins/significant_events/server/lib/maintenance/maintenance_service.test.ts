@@ -1057,6 +1057,58 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
+    it('restores continuous onboarding when pause could not disable its document', async () => {
+      const { api } = makeManagementApi({ failUpdateFor: continuousDocumentId('default') });
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+
+      await service.pause({ request: REQUEST });
+
+      const pauseWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(pauseWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
+      spaceUiSettingsClient.set.mockClear();
+
+      await service.resume({ request: REQUEST });
+
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
+    });
+
+    it('restores continuous onboarding when its setting was on but its document was already off', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+      await api.updateWorkflow(continuousDocumentId('default'), { enabled: false }, 'default');
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+      spaceUiSettingsClient.set.mockClear();
+
+      await service.resume({ request: REQUEST });
+
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        continuousDocumentId('default'),
+        { enabled: true },
+        'default',
+        REQUEST
+      );
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
+    });
+
     it('is a no-op when not paused', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, v2RulesClient } = makeService({ management: api });

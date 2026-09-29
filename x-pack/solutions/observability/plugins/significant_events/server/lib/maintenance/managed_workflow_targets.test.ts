@@ -14,6 +14,7 @@ import {
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
+  buildCancelTargets,
   buildDisableTargets,
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
@@ -46,6 +47,16 @@ describe('managed_workflow_targets registry', () => {
         SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
       ])
     );
+  });
+
+  it('keeps the legacy default-space sync document in the pause and cancel sweeps', () => {
+    const legacySync = {
+      id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      spaceId: asSpaceId('default'),
+    };
+
+    expect(buildDisableTargets([asSpaceId('space-a')])).toContainEqual(legacySync);
+    expect(buildCancelTargets([asSpaceId('space-a')])).toContainEqual(legacySync);
   });
 
   it('tracks cleanup as a per-space scheduled workflow', () => {

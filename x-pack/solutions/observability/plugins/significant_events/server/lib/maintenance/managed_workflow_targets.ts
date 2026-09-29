@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
@@ -69,12 +69,11 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Pre-per-space workflows installed in the default space (continuous onboarding, KI sync,
- * legacy). Removed at startup and dropped from recorded maintenance state.
+ * Pre-per-space continuous onboarding workflows of the default space. Removed at startup and
+ * dropped from recorded maintenance state.
  */
 export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
 ];
 
@@ -94,12 +93,23 @@ export interface MaintenanceWorkflowTarget {
   spaceId: SpaceId;
 }
 
+/**
+ * The pre-per-space KI sync document of the default space. Startup keeps it until
+ * `${id}-default` is enabled, since it is the only thing reconciling the default space until
+ * then, so Pause and Resume still cover it. Missing documents are a no-op for both.
+ */
+export const LEGACY_DEFAULT_SPACE_SYNC_TARGET: MaintenanceWorkflowTarget = {
+  id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  spaceId: DEFAULT_SPACE_ID,
+};
+
 /** Targets whose `enabled` flag is toggled by pause/resume. */
 export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
   ...GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
     id,
     spaceId: BRANDED_GLOBAL_WORKFLOW_SPACE_ID,
   })),
+  LEGACY_DEFAULT_SPACE_SYNC_TARGET,
   ...spaceIds.flatMap((spaceId) =>
     SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
       id: `${baseId}-${spaceId}`,
@@ -115,6 +125,7 @@ export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTar
  */
 export const buildCancelTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
   ...spaceIds.flatMap((spaceId) => GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({ id, spaceId }))),
+  LEGACY_DEFAULT_SPACE_SYNC_TARGET,
   ...spaceIds.flatMap((spaceId) =>
     SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
       id: `${baseId}-${spaceId}`,

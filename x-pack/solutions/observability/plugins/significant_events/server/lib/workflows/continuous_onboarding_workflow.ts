@@ -148,11 +148,21 @@ export const createContinuousOnboardingWorkflowService = ({
         .cancelAllRunning({ request })
         .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
 
-      const managedWorkflowsClient = await getManagedWorkflowsClient();
-      await managedWorkflowsClient.uninstall(
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        managedWorkflowOptions
-      );
+      // The document is already disabled and drained, so a failed uninstall must not
+      // fail the request: the caller would roll the setting back to on while nothing
+      // runs. A leftover disabled document is reused by the next enable.
+      await getManagedWorkflowsClient()
+        .then((managedWorkflowsClient) =>
+          managedWorkflowsClient.uninstall(
+            SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+            managedWorkflowOptions
+          )
+        )
+        .catch((err) =>
+          log.warn(
+            `Failed to uninstall continuous onboarding workflow ${workflowId} in space ${spaceId}: ${err}`
+          )
+        );
 
       log.info(`Disabled continuous KI onboarding workflow in space ${spaceId}`);
     },

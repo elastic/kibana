@@ -177,8 +177,13 @@ const CONCURRENCY_KEY_PREFIX = 'nightshift-source-onboarding-';
 /**
  * Builds the concurrency group key used to correlate workflow executions with
  * a specific source. Must stay in sync with the `settings.concurrency.key`
- * template in the onboarding YAML definition. Slugs are immutable and unique
- * per space, and the engine scopes concurrency groups by space.
+ * template in the onboarding YAML definition.
+ *
+ * Keyed by slug rather than source id so execution lists stay readable. A slug
+ * is unique among the live sources of a space (the engine scopes concurrency
+ * groups by space), but deleting a source frees it: a new source created with
+ * the same title reuses the slug and shows the deleted source's last run until
+ * its own first run.
  */
 export const buildConcurrencyKey = (sourceSlug: string) => `${CONCURRENCY_KEY_PREFIX}${sourceSlug}`;
 
