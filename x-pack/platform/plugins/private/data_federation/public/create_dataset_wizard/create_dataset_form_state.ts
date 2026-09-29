@@ -40,12 +40,11 @@ const isValidEscapeCharacterSequence = (value: string): value is ValidEscapeChar
 
 const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<
   Record<string, Exclude<ValidEscapeCharacterSequence, '\\\\'> | '\\n' | '\\r'>
-> =
-  {
-    '\t': '\\t',
-    '\n': '\\n',
-    '\r': '\\r',
-  };
+> = {
+  '\t': '\\t',
+  '\n': '\\n',
+  '\r': '\\r',
+};
 
 /** Encodes non-printable characters into a two-character escape sequence for the form. */
 export const encodeEscapeCharacterToFormValue = (value: string): string => {
@@ -60,10 +59,6 @@ export interface CreateDatasetSettingsFormValues {
   partition_detection: DatasetPartitionDetectionFormValue;
   schema_resolution: DatasetSchemaResolutionFormValue;
   partition_path: string;
-  hive_partitioning: DatasetBooleanFormValue;
-  // Parquet advanced
-  optimized_reader: DatasetBooleanFormValue;
-  late_materialization: DatasetBooleanFormValue;
   // CSV/TSV core
   delimiter: string;
   mode: DatasetModeFormValue;
@@ -109,9 +104,6 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   partition_detection: '',
   schema_resolution: '',
   partition_path: '',
-  hive_partitioning: '',
-  optimized_reader: '',
-  late_materialization: '',
   delimiter: '',
   mode: '',
   header_row: '',
@@ -240,8 +232,6 @@ export const buildDatasetSettingsFromFormValues = (
   if (settings.partition_detection === 'template' && settings.partition_path) {
     applied.partition_path = settings.partition_path;
   }
-  const hivePartitioning = parseBooleanFormValue(settings.hive_partitioning);
-  if (hivePartitioning !== undefined) applied.hive_partitioning = hivePartitioning;
 
   if (settings.error_mode) applied.error_mode = settings.error_mode;
   const maxErrors = parsePositiveWholeNumber(settings.max_errors);
@@ -252,7 +242,6 @@ export const buildDatasetSettingsFromFormValues = (
   const { format } = settings;
   const isCsvTsv = format === 'csv' || format === 'tsv';
   const isNdjson = format === 'ndjson';
-  const isParquet = format === 'parquet';
 
   if (isCsvTsv) {
     if (settings.delimiter) applied.delimiter = settings.delimiter;
@@ -285,12 +274,7 @@ export const buildDatasetSettingsFromFormValues = (
     if (settings.trim_spaces) applied.trim_spaces = true;
   }
 
-  if (isParquet) {
-    const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
-    if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
-    const lateMaterialization = parseBooleanFormValue(settings.late_materialization);
-    if (lateMaterialization !== undefined) applied.late_materialization = lateMaterialization;
-  }
+  // Parquet has no wizard-managed advanced settings.
 
   if (isCsvTsv || isNdjson) {
     if (settings.datetime_format && settings.datetime_format !== DEFAULT_DATETIME_FORMAT) {

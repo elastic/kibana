@@ -6,6 +6,5 @@
  */
 
 export * from './datetime_format_select';
-export * from './late_materialization_select';
 export * from './partition_detection_select';
 export * from './schema_resolution_field';

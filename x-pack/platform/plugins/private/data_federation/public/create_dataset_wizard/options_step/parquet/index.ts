@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './optimized_reader_select';
 export * from './parquet_advanced_settings';
 export * from './parquet_common_settings';

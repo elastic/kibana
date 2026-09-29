@@ -31,7 +31,6 @@ describe('dataset_form_initial_values', () => {
     expect(values.settings.schema_resolution).toBe('');
     expect(values.settings.partition_path).toBe('');
     expect(values.settings.file_exclusions).toEqual([]);
-    expect(values.settings.hive_partitioning).toBe('');
     expect(values.settings.delimiter).toBe('');
     expect(values.settings.header_row).toBe('');
     expect(values.settings.skip_rows).toBe('');
@@ -70,13 +69,11 @@ describe('dataset_form_initial_values', () => {
       resource: 'r',
       settings: {
         header_row: false,
-        hive_partitioning: true,
       },
     };
 
     const result = dataSetToFormValues(data);
     expect(result.settings.header_row).toBe('false');
-    expect(result.settings.hive_partitioning).toBe('true');
   });
 
   it('maps numeric settings to strings', () => {
@@ -119,7 +116,6 @@ describe('dataset_form_initial_values', () => {
       settings: {
         schema_resolution: 'union_by_name',
         partition_path: '/year={year}/',
-        hive_partitioning: false,
         file_exclusions: ['**/tmp/**'],
       },
     };
@@ -127,7 +123,6 @@ describe('dataset_form_initial_values', () => {
     const result = dataSetToFormValues(data);
     expect(result.settings.schema_resolution).toBe('union_by_name');
     expect(result.settings.partition_path).toBe('/year={year}/');
-    expect(result.settings.hive_partitioning).toBe('false');
     expect(result.settings.file_exclusions).toEqual(['**/tmp/**']);
   });
 });

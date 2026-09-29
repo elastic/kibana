@@ -30,7 +30,6 @@ const settingLabels = [
   { key: 'schema_resolution', label: createDatasetWizardStrings.settingsSchemaResolutionLabel },
   { key: 'partition_detection', label: createDatasetWizardStrings.settingsPartitionDetectionLabel },
   { key: 'partition_path', label: createDatasetWizardStrings.settingsPartitionPathLabel },
-  { key: 'hive_partitioning', label: createDatasetWizardStrings.settingsHivePartitioningLabel },
   { key: 'file_exclusions', label: createDatasetWizardStrings.settingsFileExclusionsLabel },
   { key: 'error_mode', label: createDatasetWizardStrings.settingsErrorModeLabel },
   { key: 'max_errors', label: createDatasetWizardStrings.settingsMaxErrorsLabel },
@@ -50,11 +49,6 @@ const settingLabels = [
   { key: 'trim_spaces', label: createDatasetWizardStrings.settingsTrimSpacesLabel },
   { key: 'multi_value_syntax', label: createDatasetWizardStrings.settingsMultiValueSyntaxLabel },
   { key: 'max_field_size', label: createDatasetWizardStrings.settingsMaxFieldSizeLabel },
-  { key: 'optimized_reader', label: createDatasetWizardStrings.settingsOptimizedReaderLabel },
-  {
-    key: 'late_materialization',
-    label: createDatasetWizardStrings.settingsLateMaterializationLabel,
-  },
 ] satisfies ReadonlyArray<{ key: SettingKey; label: string }>;
 
 const enumLabels: Partial<Record<SettingKey, Record<string, string>>> = {
@@ -110,6 +104,7 @@ const formatBoolean = (key: SettingKey, value: boolean): string => {
 
 const formatEscapeCharacterForReview = (value: string): string => {
   if (value === '\t') return '\\t';
+  if (value === '\\') return '\\\\';
   return value;
 };
 

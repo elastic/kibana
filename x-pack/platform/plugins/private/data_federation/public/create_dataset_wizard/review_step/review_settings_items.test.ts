@@ -30,9 +30,6 @@ const allSettingsForFormat = (format: CreateDatasetSettingsFormValues['format'])
     partition_detection: 'hive',
     schema_resolution: 'union_by_name',
     partition_path: 'year=*/month=*',
-    hive_partitioning: 'true',
-    optimized_reader: 'false',
-    late_materialization: 'true',
     delimiter: ';',
     mode: 'quoted',
     header_row: 'false',
@@ -88,7 +85,6 @@ describe('getSettingsReviewItems', () => {
     expect(valueOf('format')).toBe('CSV');
     expect(valueOf('schema_resolution')).toBe('Union by name');
     expect(valueOf('header_row')).toBe('No');
-    expect(valueOf('hive_partitioning')).toBe('Enabled');
     expect(valueOf('file_exclusions')).toBe('**/skip/*');
     expect(valueOf('max_errors')).toBe('5');
   });

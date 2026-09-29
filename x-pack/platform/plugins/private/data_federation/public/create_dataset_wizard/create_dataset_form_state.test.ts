@@ -132,9 +132,6 @@ describe('create_dataset_form_state', () => {
         partition_detection: '',
         schema_resolution: '',
         partition_path: '',
-        hive_partitioning: '',
-        optimized_reader: '',
-        late_materialization: '',
         delimiter: '',
         mode: '',
         header_row: '',
@@ -195,18 +192,6 @@ describe('create_dataset_form_state', () => {
           file_exclusions: ['**/tmp/**'],
         })
       ).toEqual({ file_exclusions: ['**/tmp/**'] });
-    });
-
-    it('converts hive_partitioning boolean form values correctly', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'false' })
-      ).toEqual({ hive_partitioning: false });
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'true' })).toEqual(
-        { hive_partitioning: true }
-      );
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: '' })
-      ).toBeUndefined();
     });
 
     it('ignores format-specific fields when no format is selected', () => {

@@ -12,7 +12,7 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CreateDatasetAdditionalSettings, CreateDatasetSettings } from './create_dataset_settings';
+import { CreateDatasetAdditionalSettings } from './create_dataset_settings';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from '../create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
@@ -57,7 +57,7 @@ const renderSettings = () => {
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-            <CreateDatasetSettings control={control} />
+            <CreateDatasetAdditionalSettings control={control} />
             <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
           </KibanaContextProvider>
         </EuiProvider>
@@ -140,11 +140,10 @@ describe('CreateDatasetSettings', () => {
     expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
   });
 
-  it('shows schema_resolution and hive_partitioning', () => {
+  it('shows schema_resolution', () => {
     const { getByTestId } = renderSettings();
 
     expect(getByTestId('createDatasetSettingsSchemaResolution')).toBeVisible();
-    expect(getByTestId('createDatasetSettingsHivePartitioning')).toBeVisible();
   });
 
   it('shows no format-specific fields when no format is selected', () => {
