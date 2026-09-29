@@ -12,7 +12,10 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import { detectServiceVarsDrift, detectAuthDrift, detectAgentPoliciesDrift } from './detect_drift';
-import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
+import {
+  toSOAuthMethod,
+  type AgentCredentialMethod,
+} from './agent_based_section/credential_method_selector';
 
 interface UseOnboardingDriftDetectionParams {
   onboardingDeploymentId: string | undefined;
@@ -22,7 +25,7 @@ interface UseOnboardingDriftDetectionParams {
   authMethod: string | undefined;
   connectorId: string | undefined;
   agentBasedDeployment: {
-    agentCredentialMethod: string;
+    agentCredentialMethod: AgentCredentialMethod | undefined;
     agentHostsMode: string;
     agentPolicyId?: string;
     selectedAgentPolicyIds: string[];
