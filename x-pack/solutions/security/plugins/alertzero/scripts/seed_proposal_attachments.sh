@@ -201,10 +201,11 @@ index_proposal() {
 }
 
 # Creates an Agent Builder attachment that links to an existing proposal via
-# its `origin` field. Everything rendered is read live from the proposal, so the
-# attachment carries the id and nothing else. Only needed here because this
-# script writes proposals straight to Elasticsearch — a proposal created through
-# the service attaches itself.
+# its `origin` field. Everything rendered is read live from the proposal except
+# the card's label, which is drawn synchronously and so has to be stored here —
+# the same title the proposal carries. Only needed because this script writes
+# proposals straight to Elasticsearch; one created through the service attaches
+# itself.
 add_attachment() {
   local conversation_id="$1"
   local payload="$2"
@@ -236,6 +237,7 @@ index_proposal "$P1_ID" "$(jq -n \
     id: $id,
     spaceId: $space,
     conversationId: $cid,
+    title: "Block outbound \u2014 seed",
     comment: "Block outbound traffic from the compromised host to prevent data exfiltration. This change applies only to the host running qualys-scan on the DMZ scan pool.",
     actionWorkflowId: "system-alertzero-action-create-rule",
     actionInput: {
@@ -284,6 +286,7 @@ index_proposal "$P2_ID" "$(jq -n \
     id: $id,
     spaceId: $space,
     conversationId: $cid,
+    title: "Detect repeated SSH login failures",
     comment: "Create a detection rule for repeated SSH login failures from external IP ranges. The pattern observed correlates with credential-stuffing campaigns in our threat intel feed.",
     actionWorkflowId: "system-alertzero-action-create-rule",
     actionInput: {
@@ -332,6 +335,7 @@ index_proposal "$P3_ID" "$(jq -n \
     id: $id,
     spaceId: $space,
     conversationId: $cid,
+    title: "Proposed action",
     comment: "Create a detection rule for repeated failed logins from this IP range.",
     status: "no_action",
     decision: "dismissed",
@@ -355,7 +359,7 @@ ATTACH3=$(add_attachment "$CONV3" "$(jq -n \
     type: $type,
     origin: $origin,
     render_inline: true,
-    data: { proposalId: $origin }
+    data: { proposalId: $origin, title: "Proposed action" }
   }')")
 
 echo "  conversation: $CONV3, proposal: $P3_ID, attachment: $ATTACH3"
