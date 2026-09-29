@@ -97,7 +97,15 @@ run(
     description:
       'Seeds one FP/TP scenario twin into a local Elasticsearch + Kibana for Workflows UI validation.',
     flags: {
-      string: ['scenario', 'variant', 'kibanaUrl', 'elasticsearchUrl', 'apiKey', 'username', 'password'],
+      string: [
+        'scenario',
+        'variant',
+        'kibanaUrl',
+        'elasticsearchUrl',
+        'apiKey',
+        'username',
+        'password',
+      ],
       default: {
         scenario: 'encoded-powershell',
         variant: 'fp',
