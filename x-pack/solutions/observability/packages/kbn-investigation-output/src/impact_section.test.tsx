@@ -70,7 +70,9 @@ describe('ImpactSection', () => {
       screen.getByText('Checkout failed for ~30% of requests for 40 minutes.')
     ).toBeInTheDocument();
     expect(screen.getAllByTestId('investigationOutputImpactEntity')).toHaveLength(2);
-    expect(screen.getByText('service')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOutputImpactEntityType')).toHaveTextContent(
+      '· service'
+    );
 
     // Entity evidence starts collapsed and expands on click.
     const toggle = screen.getByRole('button', { name: /checkout-service/ });

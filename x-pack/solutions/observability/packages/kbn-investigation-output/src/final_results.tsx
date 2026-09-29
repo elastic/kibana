@@ -85,6 +85,17 @@ const RecommendationRow: React.FC<{
     text-align: left;
     width: 100%;
   `;
+  // A row is part of one shared panel, so hovering tints it rather than lifting it with the
+  // clickable panel's own shadow, which would draw a square frame inside the rounded panel.
+  const clickableRowCss = css`
+    ${rowCss}
+    &:hover,
+    &:focus {
+      box-shadow: none;
+      transform: none;
+      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+    }
+  `;
   const content = (
     <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem component="span">
@@ -118,7 +129,7 @@ const RecommendationRow: React.FC<{
       hasShadow={false}
       paddingSize="m"
       onClick={onClick}
-      css={rowCss}
+      css={clickableRowCss}
     >
       {content}
     </EuiPanel>
@@ -180,6 +191,9 @@ export const FinalResults: React.FC<{
             hasBorder
             hasShadow={false}
             paddingSize="none"
+            css={css`
+              overflow: hidden;
+            `}
             data-test-subj="investigationOutputRecommendations"
           >
             <EuiFlexGroup direction="column" gutterSize="none">

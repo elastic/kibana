@@ -8,13 +8,11 @@
 import React, { useState } from 'react';
 import {
   EuiAccordion,
-  EuiBadge,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -34,18 +32,14 @@ export interface ImpactSectionProps {
 }
 
 const EntityHeader: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s">
-        <strong>{entity.name}</strong>
-      </EuiText>
-    </EuiFlexItem>
+  <EuiText size="s">
+    <strong>{entity.name}</strong>
     {entity.type && (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{entity.type}</EuiBadge>
-      </EuiFlexItem>
+      <EuiTextColor color="subdued" data-test-subj="investigationOutputImpactEntityType">
+        {` · ${entity.type}`}
+      </EuiTextColor>
     )}
-  </EuiFlexGroup>
+  </EuiText>
 );
 
 /**
