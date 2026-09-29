@@ -69,6 +69,7 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
   - '@kbn/ui-callout'
+  - '@kbn/proposals-ui'
 tags:
   - plugin
   - prod
