@@ -92,6 +92,7 @@ export const useIlmLifecycleSummary = ({
   const { notifyAfterSave } = useLifecycleAfterSave();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const { signal } = useAbortController();
+  const ilmStatsDefinitionRef = useRef(definition);
 
   const isIlm = isIlmLifecycle(definition.effective_lifecycle);
   const policyName = isIlm
@@ -167,6 +168,7 @@ export const useIlmLifecycleSummary = ({
       if (!isIlm) {
         return undefined;
       }
+      ilmStatsDefinitionRef.current = definition;
       return streamsRepositoryClient
         .fetch('GET /internal/streams/{name}/lifecycle/_stats', {
           params: { path: { name: definition.stream.name } },
@@ -182,8 +184,11 @@ export const useIlmLifecycleSummary = ({
   // definition still reports "settled" while holding the previous definition's stats. Report that
   // window as loading too, otherwise the summary's readiness signal claims stale stats are current.
   // A failed fetch is settled: no stats are coming, and staying "loading" would strand the hold.
+  // Keep the requested definition separately because a previous error remains in the fetch state
+  // until the next successful request, including during the first render after a definition change.
   const ilmLoading =
     ilmStatsLoading ||
+    ilmStatsDefinitionRef.current !== definition ||
     (ilmStatsError === undefined &&
       ilmStatsResult !== undefined &&
       ilmStatsResult.definition !== definition);

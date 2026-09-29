@@ -106,17 +106,17 @@ const FlyoutRegistrant = ({ id, isOpen }: { id: StreamLifecycleFlyoutId; isOpen:
 };
 
 describe('LifecycleSummary', () => {
-  const renderWithSync = (ui: React.ReactElement) => {
-    return render(
-      <I18nProvider>
-        <LifecycleAfterSaveProvider>
-          <LifecyclePreviewProvider>
-            <LifecycleFlyoutCoordinationProvider>{ui}</LifecycleFlyoutCoordinationProvider>
-          </LifecyclePreviewProvider>
-        </LifecycleAfterSaveProvider>
-      </I18nProvider>
-    );
-  };
+  const wrapWithSync = (ui: React.ReactElement) => (
+    <I18nProvider>
+      <LifecycleAfterSaveProvider>
+        <LifecyclePreviewProvider>
+          <LifecycleFlyoutCoordinationProvider>{ui}</LifecycleFlyoutCoordinationProvider>
+        </LifecyclePreviewProvider>
+      </LifecycleAfterSaveProvider>
+    </I18nProvider>
+  );
+
+  const renderWithSync = (ui: React.ReactElement) => render(wrapWithSync(ui));
 
   // Renders `ui` alongside a sibling probe in the *same* LifecycleFlyoutCoordinationProvider, so
   // tests can observe the shared registry the way a real sibling (e.g. the failure store section)
@@ -791,6 +791,30 @@ describe('LifecycleSummary', () => {
       renderWithSync(<LifecycleSummary definition={createIlmDefinition()} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-stats-loaded')).toBeInTheDocument();
+    });
+
+    it('reports loading after the definition changes while a previous stats error is retained', () => {
+      const previousDefinition = createIlmDefinition();
+      const definition = createIlmDefinition();
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          definition: previousDefinition,
+          stats: {
+            phases: { hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} } },
+          },
+        },
+        loading: false,
+        error: new Error('previous stats fetch failed'),
+        refresh: jest.fn(),
+      });
+
+      const { rerender } = renderWithSync(
+        <LifecycleSummary definition={previousDefinition} isMetricsStream />
+      );
+      rerender(wrapWithSync(<LifecycleSummary definition={definition} isMetricsStream />));
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-stats-loaded')).not.toBeInTheDocument();
     });
 
     it('should open edit policy modal when removing an ILM phase with affected resources', async () => {
