@@ -177,6 +177,13 @@ const formatSortKeys = (keys: EsqlSortKey[]): string => {
   return clauses.join(', ');
 };
 
+/**
+ * Name of the column holding an outer dimension's ranking metric. It must differ from the
+ * metric's own output name, which the leaf `STATS` also produces.
+ */
+const getOuterRankAlias = (sourceField: string): string =>
+  `rank_${sourceField.replace(/[^A-Za-z0-9_]/g, '_')}`;
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -277,8 +284,9 @@ export function generateEsqlQuery(
   // Process metrics (excluding static_value which is handled above)
   // Maps metric column IDs to STATS output names (alias or bare expression) for terms orderBy.
   const metricOutputNamesByColId = new Map<string, string>();
-  // Same keys, but the whole STATS fragment, so outer top-N subqueries can re-aggregate it.
-  const metricFragmentsByColId = new Map<string, string>();
+  // Same keys, but the unaliased STATS expression, so an outer top-N rank can re-aggregate it
+  // under its own alias.
+  const metricExpressionsByColId = new Map<string, string>();
   const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
     // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
@@ -358,7 +366,7 @@ export function generateEsqlQuery(
     const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
 
     metricOutputNamesByColId.set(colId, esAggsIdMapKey);
-    metricFragmentsByColId.set(colId, statsMetricFragment);
+    metricExpressionsByColId.set(colId, fullStatsMetricExpression);
 
     esAggsIdMap[esAggsIdMapKey] = [
       ...(esAggsIdMap[esAggsIdMapKey] ?? []),
@@ -531,9 +539,9 @@ export function generateEsqlQuery(
     | undefined;
 
   if (validBuckets.length > 0) {
-    const statsClause =
+    const buildStatsClause = (leadingGroups: string[] = []): string | undefined =>
       validMetrics.length > 0
-        ? `STATS ${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`
+        ? `STATS ${validMetrics.join(', ')} BY ${[...leadingGroups, ...validBuckets].join(', ')}`
         : undefined;
 
     if (innerTermsBucket) {
@@ -570,6 +578,11 @@ export function generateEsqlQuery(
 
       const outerSortKeys: EsqlSortKey[] = [];
       const outerTopNFilters: string[] = [];
+      // The leaf STATS holds the ranking metric per (outer, inner) pair, but a metric-ranked
+      // outer dimension is ordered by that metric per outer value, so INLINE STATS computes it
+      // beforehand as a rank column.
+      const outerRankStats: string[] = [];
+      const outerRankAliases: string[] = [];
 
       for (const [index, bucketExpr] of outerBuckets) {
         const [, col] = bucketEsAggsEntries[index];
@@ -579,21 +592,32 @@ export function generateEsqlQuery(
           continue;
         }
 
-        const outerSortKey = resolveTermsSortKey(col, index);
-        if (!outerSortKey) {
+        const {
+          orderBy: outerOrderBy,
+          orderDirection: outerDirection,
+          size: outerSize,
+        } = col.params;
+        let outerSortKey: EsqlSortKey | undefined;
+        let scoreFragment: string | undefined;
+
+        if (outerOrderBy.type === 'column') {
+          const metricExpression = metricExpressionsByColId.get(outerOrderBy.columnId);
+          if (metricExpression) {
+            const rankAlias = getOuterRankAlias(col.sourceField);
+            scoreFragment = `${rankAlias} = ${metricExpression}`;
+            outerSortKey = { expr: rankAlias, direction: outerDirection.toUpperCase() };
+            outerRankStats.push(`INLINE STATS ${scoreFragment} BY ${bucketExpr}`);
+            outerRankAliases.push(rankAlias);
+          }
+        } else {
+          outerSortKey = resolveTermsSortKey(col, index);
+          scoreFragment = OUTER_TOP_N_GROUPING_ONLY_METRIC;
+        }
+
+        if (!outerSortKey || !scoreFragment) {
           return getEsqlQueryFailedResult('terms_order_by_not_supported');
         }
         outerSortKeys.push(outerSortKey);
-
-        const { orderBy: outerOrderBy, size: outerSize } = col.params;
-        const scoreFragment =
-          outerOrderBy.type === 'column'
-            ? metricFragmentsByColId.get(outerOrderBy.columnId)
-            : OUTER_TOP_N_GROUPING_ONLY_METRIC;
-
-        if (!scoreFragment) {
-          return getEsqlQueryFailedResult('terms_order_by_not_supported');
-        }
 
         outerTopNFilters.push(
           buildOuterTopNFilter({
@@ -608,7 +632,10 @@ export function generateEsqlQuery(
       }
 
       // Filters run before STATS so the aggregation only sees the kept outer values.
-      queryParts.push(...outerTopNFilters);
+      queryParts.push(...outerTopNFilters, ...outerRankStats);
+      // Rank columns are constant per outer value, so grouping by them keeps the same groups
+      // and only carries them through STATS.
+      const statsClause = buildStatsClause(outerRankAliases);
       if (statsClause) {
         queryParts.push(statsClause);
       }
@@ -623,8 +650,14 @@ export function generateEsqlQuery(
         // The ranking above is consumed by LIMIT BY, so outer dimensions are ordered
         // afterwards; the inner key trails it to keep each group internally ranked.
         queryParts.push(`SORT ${formatSortKeys([...outerSortKeys, innerSortKey])}`);
+
+        // No Lens column reads the rank columns, so the result keeps the chart's columns only.
+        if (outerRankAliases.length > 0) {
+          queryParts.push(`DROP ${outerRankAliases.join(', ')}`);
+        }
       }
     } else {
+      const statsClause = buildStatsClause();
       if (statsClause) {
         queryParts.push(statsClause);
       }

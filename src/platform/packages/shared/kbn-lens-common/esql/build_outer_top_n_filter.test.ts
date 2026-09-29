@@ -48,17 +48,17 @@ describe('buildOuterTopNFilter', () => {
     );
   });
 
-  it('keeps the metric alias so the subquery can sort by it', () => {
+  it('keeps the rank alias so the subquery can sort by it', () => {
     expect(
       buildOuterTopNFilter({
         source: 'kibana_sample_data_logs',
         groupExpr: 'agent.keyword',
-        scoreFragment: 'avg_bytes = AVG(bytes)',
-        sortClause: 'avg_bytes ASC',
+        scoreFragment: 'rank_agent_keyword = AVG(bytes)',
+        sortClause: 'rank_agent_keyword ASC',
         size: 4,
       })
     ).toBe(
-      'WHERE agent.keyword IN (FROM kibana_sample_data_logs | STATS avg_bytes = AVG(bytes) BY agent.keyword | SORT avg_bytes ASC | LIMIT 4 | KEEP agent.keyword)'
+      'WHERE agent.keyword IN (FROM kibana_sample_data_logs | STATS rank_agent_keyword = AVG(bytes) BY agent.keyword | SORT rank_agent_keyword ASC | LIMIT 4 | KEEP agent.keyword)'
     );
   });
 });

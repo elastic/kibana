@@ -16,10 +16,10 @@ export interface OuterTopNFilterInput {
   groupExpr: string;
   /**
    * `STATS` fragment ranking the outer values, evaluated per outer group rather than
-   * per leaf row, e.g. `AVG(bytes)` or `avg_bytes = AVG(bytes)`.
+   * per leaf row, e.g. `rank_geo_src = AVG(bytes)` or `COUNT(*)`.
    */
   scoreFragment: string;
-  /** `SORT` clause selecting the top values, e.g. '`AVG(bytes)` DESC'. */
+  /** `SORT` clause selecting the top values, e.g. 'rank_geo_src DESC'. */
   sortClause: string;
   /** Number of outer values to keep, from the dimension's `size`. */
   size: number;

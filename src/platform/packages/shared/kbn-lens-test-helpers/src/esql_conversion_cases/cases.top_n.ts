@@ -176,6 +176,8 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     // Multi-terms parity has three parts: the outer dimension keeps only its top values,
     // `LIMIT n BY` keeps the inner top values per outer value, and a second SORT applies the
     // outer ordering that the leading SORT cannot express because `LIMIT BY` consumes it.
+    // A metric-ranked outer dimension is ordered by its metric per outer value: INLINE STATS
+    // computes it as a `rank_<field>` column for the second SORT, and DROP removes it after.
     {
       group: 'top_n',
       dataset: logs,
@@ -198,13 +200,152 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
           field: 'geo.src',
-          score: 'AVG(bytes)',
-          sort: '`AVG(bytes)` DESC',
+          score: 'rank_geo_src = AVG(bytes)',
+          sort: 'rank_geo_src DESC',
           size: 5,
-        })} | STATS AVG(bytes) BY geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT \`AVG(bytes)\` DESC`,
+        })} | INLINE STATS rank_geo_src = AVG(bytes) BY geo.src | STATS AVG(bytes) BY rank_geo_src, geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT rank_geo_src DESC, \`AVG(bytes)\` DESC | DROP rank_geo_src`,
         columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'two terms both ranked by count DESC',
+      columns: {
+        col1: terms('agent.keyword', {
+          size: 9,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 9,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'agent.keyword',
+          score: 'rank_agent_keyword = COUNT(*)',
+          sort: 'rank_agent_keyword DESC',
+          size: 9,
+        })} | INLINE STATS rank_agent_keyword = COUNT(*) BY agent.keyword | STATS COUNT(*) BY rank_agent_keyword, agent.keyword, host.keyword | SORT \`COUNT(*)\` DESC | LIMIT 9 BY agent.keyword | SORT rank_agent_keyword DESC, \`COUNT(*)\` DESC | DROP rank_agent_keyword`,
+        columnNames: ['COUNT(*)', 'agent.keyword', 'host.keyword'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'agent.keyword': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'outer ranked by a different metric than the inner dimension',
+      columns: {
+        col1: terms('geo.src', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col4' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+        col4: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3', 'col4'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'rank_geo_src = COUNT(*)',
+          sort: 'rank_geo_src DESC',
+          size: 5,
+        })} | INLINE STATS rank_geo_src = COUNT(*) BY geo.src | STATS AVG(bytes), COUNT(*) BY rank_geo_src, geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT rank_geo_src DESC, \`AVG(bytes)\` DESC | DROP rank_geo_src`,
+        columnNames: ['AVG(bytes)', 'COUNT(*)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'COUNT(*)': ['col4'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'outer ranked by a KQL-filtered metric keeps the filter in the rank',
+      columns: {
+        col1: terms('geo.src', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: count({ filter: { language: 'kuery', query: 'bytes > 1000' } }),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'rank_geo_src = COUNT(*) WHERE KQL("bytes > 1000")',
+          sort: 'rank_geo_src DESC',
+          size: 5,
+        })} | INLINE STATS rank_geo_src = COUNT(*) WHERE KQL("bytes > 1000") BY geo.src | STATS COUNT(*) WHERE KQL("bytes > 1000") BY rank_geo_src, geo.src, host.keyword | SORT \`COUNT(*) WHERE KQL("bytes > 1000")\` DESC | LIMIT 3 BY geo.src | SORT rank_geo_src DESC, \`COUNT(*) WHERE KQL("bytes > 1000")\` DESC | DROP rank_geo_src`,
+        columnNames: ['COUNT(*) WHERE KQL("bytes > 1000")', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'COUNT(*) WHERE KQL("bytes > 1000")': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'outer rank uses its own alias when the metric has a column role',
+      columns: {
+        col1: terms('geo.src', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      columnRoles: { col3: 'avg_bytes' },
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'rank_geo_src = AVG(bytes)',
+          sort: 'rank_geo_src DESC',
+          size: 5,
+        })} | INLINE STATS rank_geo_src = AVG(bytes) BY geo.src | STATS avg_bytes = AVG(bytes) BY rank_geo_src, geo.src, host.keyword | SORT avg_bytes DESC | LIMIT 3 BY geo.src | SORT rank_geo_src DESC, avg_bytes DESC | DROP rank_geo_src`,
+        columnNames: ['avg_bytes', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          avg_bytes: ['col3'],
           'geo.src': ['col1'],
           'host.keyword': ['col2'],
         },
@@ -280,8 +421,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description:
-        'both dimensions ranked by the same metric in opposite directions — outer direction wins',
+      description: 'both dimensions ranked by the same metric in opposite directions',
       columns: {
         col1: terms('geo.src', {
           size: 5,
@@ -300,10 +440,10 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
           field: 'geo.src',
-          score: 'AVG(bytes)',
-          sort: '`AVG(bytes)` ASC',
+          score: 'rank_geo_src = AVG(bytes)',
+          sort: 'rank_geo_src ASC',
           size: 5,
-        })} | STATS AVG(bytes) BY geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT \`AVG(bytes)\` ASC`,
+        })} | INLINE STATS rank_geo_src = AVG(bytes) BY geo.src | STATS AVG(bytes) BY rank_geo_src, geo.src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src | SORT rank_geo_src ASC, \`AVG(bytes)\` DESC | DROP rank_geo_src`,
         columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
