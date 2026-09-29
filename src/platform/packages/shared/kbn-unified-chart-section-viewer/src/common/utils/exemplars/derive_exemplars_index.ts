@@ -56,6 +56,7 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
 export const resolveExemplarsIndex = (
   { indexName }: Pick<ParsedMetricItem, 'indexName'>,
   originalSource?: string
-): string | undefined =>
-  (isSingleSource(originalSource) ? deriveExemplarsIndex(originalSource) : undefined) ??
-  deriveExemplarsIndex(indexName);
+): string | undefined => {
+  if (!isSingleSource(originalSource)) return undefined;
+  return deriveExemplarsIndex(originalSource) ?? deriveExemplarsIndex(indexName);
+};
