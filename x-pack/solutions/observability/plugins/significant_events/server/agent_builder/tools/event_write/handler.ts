@@ -356,7 +356,8 @@ const fetchPriorDocsByEventId = async (
         try {
           const result = await eventSearchClient.findByEventId(c.eventId);
           hits = result.hits;
-        } catch {
+        } catch (err) {
+          if (eventSearchClient === eventClient) throw err;
           const result = await eventClient.findByEventId(c.eventId);
           hits = result.hits;
           readClientIsCanonical = true;
