@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { createTestSource, deleteTestSource } from './helpers/test_source';
 import {
   disableStreams,
   enableStreams,
@@ -19,6 +18,7 @@ import {
 import { STREAMS_SNAPSHOT_REPO_PATH } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/common_paths';
 import type { StreamsSupertestRepositoryClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
 import { createStreamsRepositoryAdminClient as createPlatformStreamsRepositoryAdminClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
+import { createTestSource, deleteTestSource } from './helpers/test_source';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
