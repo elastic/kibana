@@ -6,76 +6,27 @@
  */
 
 import type { TSVBMetricModelCreator, TSVBMetricModel } from '../../../../types';
+import { podModelRequires, podNetworkSeries } from './pod_series';
 
 export const podNetworkTraffic: TSVBMetricModelCreator = (
   timeField,
   indexPattern,
-  interval
+  interval,
+  options
 ): TSVBMetricModel => ({
   id: 'podNetworkTraffic',
-  requires: ['kubernetes.pod'],
+  requires: podModelRequires(options?.schema),
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
   type: 'timeseries',
   series: [
-    {
-      id: 'tx',
-      split_mode: 'everything',
-      metrics: [
-        {
-          field: 'kubernetes.pod.network.tx.bytes',
-          id: 'max-network-tx',
-          type: 'max',
-        },
-        {
-          field: 'max-network-tx',
-          id: 'deriv-max-network-tx',
-          type: 'derivative',
-          unit: '1s',
-        },
-        {
-          id: 'posonly-deriv-max-net-tx',
-          type: 'calculation',
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-tx' }],
-          script: 'params.rate > 0.0 ? params.rate : 0.0',
-        },
-      ],
-    },
-    {
-      id: 'rx',
-      split_mode: 'everything',
-      metrics: [
-        {
-          field: 'kubernetes.pod.network.rx.bytes',
-          id: 'max-network-rx',
-          type: 'max',
-        },
-        {
-          field: 'max-network-rx',
-          id: 'deriv-max-network-rx',
-          type: 'derivative',
-          unit: '1s',
-        },
-        {
-          id: 'posonly-deriv-max-net-rx',
-          type: 'calculation',
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-rx' }],
-          script: 'params.rate > 0.0 ? params.rate : 0.0',
-        },
-        {
-          id: 'invert-posonly-deriv-max-network-rx',
-          script: 'params.rate * -1',
-          type: 'calculation',
-          variables: [
-            {
-              field: 'posonly-deriv-max-net-rx',
-              id: 'var-rate',
-              name: 'rate',
-            },
-          ],
-        },
-      ],
-    },
+    podNetworkSeries(options?.schema, 'tx', 'posonly-deriv-max-net-tx'),
+    podNetworkSeries(
+      options?.schema,
+      'rx',
+      'posonly-deriv-max-net-rx',
+      'invert-posonly-deriv-max-network-rx'
+    ),
   ],
 });

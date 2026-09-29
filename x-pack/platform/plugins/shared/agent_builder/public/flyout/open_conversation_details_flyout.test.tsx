@@ -7,38 +7,99 @@
 
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import { ConversationTemplatesService } from '../services/conversation_templates';
 import { openConversationDetailsFlyout } from './open_conversation_details_flyout';
 
 describe('openConversationDetailsFlyout', () => {
-  const open = (menuActions?: EuiFlyoutMenuAction[]) => {
+  const setup = () => {
     const core = coreMock.createStart();
-    core.overlays.openFlyout.mockReturnValue({ close: jest.fn(), onClose: new Promise(() => {}) });
-
-    void openConversationDetailsFlyout({
-      core,
-      conversationsService: { get: jest.fn() } as unknown as ConversationsService,
-      conversationTemplatesService: new ConversationTemplatesService(),
-      conversationId: 'conversation',
-      menuActions,
+    const close = jest.fn();
+    let resolveClosed: () => void = () => {};
+    const onClosed = new Promise<void>((resolve) => {
+      resolveClosed = resolve;
     });
+    core.overlays.openSystemFlyout.mockReturnValue({ close, onClose: onClosed });
 
-    const [[, options]] = core.overlays.openFlyout.mock.calls;
-    return options;
+    const open = ({
+      onClose,
+      menuActions,
+    }: { onClose?: () => void; menuActions?: EuiFlyoutMenuAction[] } = {}) =>
+      openConversationDetailsFlyout({
+        core,
+        conversationsService: { get: jest.fn() } as unknown as ConversationsService,
+        conversationTemplatesService: new ConversationTemplatesService(),
+        conversationId: 'conversation',
+        onClose,
+        menuActions,
+      });
+
+    return { core, close, open, closeFlyout: () => resolveClosed() };
   };
 
-  it('renders the caller menu actions in the flyout menu bar', () => {
+  it('opens a managed flyout in the conversation details history group', async () => {
+    const { core, open } = setup();
+
+    await open();
+
+    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        session: 'start',
+        historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+        title: 'Chat info',
+        type: 'push',
+      })
+    );
+  });
+
+  it('renders the caller menu actions in the flyout menu bar', async () => {
+    const { core, open } = setup();
     const copyLink: EuiFlyoutMenuAction = {
       iconType: 'link',
       'aria-label': 'Copy link',
       onClick: jest.fn(),
     };
 
-    expect(open([copyLink])?.flyoutMenuProps).toEqual({ trailingActions: [copyLink] });
+    await open({ menuActions: [copyLink] });
+
+    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ flyoutMenuProps: { trailingActions: [copyLink] } })
+    );
   });
 
-  it('renders no menu actions by default', () => {
-    expect(open()?.flyoutMenuProps?.trailingActions).toBeUndefined();
+  it('renders no menu actions by default', async () => {
+    const { core, open } = setup();
+
+    await open();
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.flyoutMenuProps?.trailingActions).toBeUndefined();
+  });
+
+  it('notifies the caller once the flyout closes', async () => {
+    const { open, closeFlyout } = setup();
+    const onClose = jest.fn();
+
+    await open({ onClose });
+    await Promise.resolve();
+
+    expect(onClose).not.toHaveBeenCalled();
+
+    closeFlyout();
+    await Promise.resolve();
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns a handle that closes the flyout', async () => {
+    const { close, open } = setup();
+
+    const dismiss = await open();
+    dismiss();
+
+    expect(close).toHaveBeenCalledTimes(1);
   });
 });

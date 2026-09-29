@@ -10,10 +10,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
-import { ConversationDetailsFlyoutSnapshot } from './conversation_details_flyout';
+import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
 import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationDetailsFlyoutTitle');
@@ -38,19 +38,19 @@ export const openConversationDetailsFlyout = async ({
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
 
-  const flyoutRef = core.overlays.openFlyout(
-    toMountPoint(
-      <QueryClientProvider client={queryClient}>
-        <ConversationDetailsFlyoutSnapshot
-          conversationId={conversationId}
-          conversationsService={conversationsService}
-          conversationTemplatesService={conversationTemplatesService}
-          titleId={titleId}
-        />
-      </QueryClientProvider>,
-      core.rendering
-    ),
+  const flyoutRef = core.overlays.openSystemFlyout(
+    <QueryClientProvider client={queryClient}>
+      <ConversationDetailsFlyoutSnapshot
+        conversationId={conversationId}
+        conversationsService={conversationsService}
+        conversationTemplatesService={conversationTemplatesService}
+        titleId={titleId}
+      />
+    </QueryClientProvider>,
     {
+      session: 'start',
+      historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+      title: FLYOUT_TITLE,
       size: 's',
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions: menuActions },
@@ -60,7 +60,6 @@ export const openConversationDetailsFlyout = async ({
       role: 'region',
       'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',
       'aria-labelledby': titleId,
-      onClose: (ref) => ref.close(),
     }
   );
 
