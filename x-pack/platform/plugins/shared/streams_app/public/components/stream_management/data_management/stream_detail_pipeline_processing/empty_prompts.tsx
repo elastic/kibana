@@ -7,12 +7,11 @@
 
 import React from 'react';
 import {
+  EuiAvatar,
   EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -21,23 +20,11 @@ import { css } from '@emotion/react';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../../asset_image';
-import { ProcessingPanel } from './pipeline_suggestions/processing_panel';
-import {
-  useOptionalInteractiveModeSelector,
-  useStreamEnrichmentEvents,
-} from './state_management/stream_enrichment_state_machine';
+import { useAddStepActions } from './hooks/use_add_step_actions';
+import { useOptionalInteractiveModeSelector } from './state_management/stream_enrichment_state_machine';
 
-interface ProcessingButtonsManualProps {
-  center?: boolean;
-  color?: 'text' | 'primary';
-}
-
-export const ProcessingButtonsManual = ({
-  center = false,
-  color = 'text',
-}: ProcessingButtonsManualProps) => {
-  const { euiTheme } = useEuiTheme();
-  const { addProcessor } = useStreamEnrichmentEvents();
+const ManualStepButtons = () => {
+  const { onAddCondition, onAddProcessor } = useAddStepActions();
 
   const canAddStep = useOptionalInteractiveModeSelector(
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' }),
@@ -49,20 +36,25 @@ export const ProcessingButtonsManual = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent={center ? 'center' : 'flexStart'}>
+    <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
-          color={color}
-          fill={false}
-          css={css`
-            color: ${euiTheme.colors.textPrimary};
-          `}
-          data-test-subj="streamsAppStreamDetailEnrichmentCreateProcessorButton"
-          iconType="processor"
-          onClick={() => addProcessor(undefined, { parentId: null })}
+          color="text"
+          data-test-subj="streamsAppStreamDetailEnrichmentCreateConditionButton"
+          onClick={onAddCondition}
         >
-          {createProcessorText}
+          {addConditionText}
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          color="text"
+          data-test-subj="streamsAppStreamDetailEnrichmentCreateProcessorButton"
+          onClick={onAddProcessor}
+        >
+          {addProcessorText}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -129,58 +121,47 @@ export const NoStepsEmptyPrompt = ({
   canUsePipelineSuggestions,
   children,
 }: NoStepsEmptyPromptProps) => {
-  const message = canUsePipelineSuggestions ? cardDescriptionAiEnabled : cardDescriptionManual;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiEmptyPrompt
       aria-live="polite"
+      titleSize="xxs"
       css={css`
         margin: 0 auto;
-        width: 100%;
-        max-width: ${canUsePipelineSuggestions ? '640px' : '400px'};
-
-        .euiEmptyPrompt__main,
-        .euiEmptyPrompt__content {
-          width: 100%;
-          max-width: none;
-        }
+        max-width: 400px;
       `}
-      body={
-        <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="s">
-          <EuiFlexItem>
-            <ProcessingPanel message={message} showTechPreviewBadge={canUsePipelineSuggestions}>
-              {canUsePipelineSuggestions ? children : <ProcessingButtonsManual />}
-            </ProcessingPanel>
-          </EuiFlexItem>
+      icon={
+        <EuiAvatar
+          name=""
+          aria-hidden
+          type="space"
+          size="l"
+          iconSize="m"
+          iconType="processor"
+          color={euiTheme.colors.backgroundBaseSubdued}
+          css={css`
+            border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+          `}
+        />
+      }
+      title={<h2>{noStepsTitle}</h2>}
+      body={<p>{noStepsDescription}</p>}
+      actions={
+        <EuiFlexGroup direction="column" alignItems="center" gutterSize="m" responsive={false}>
           {canUsePipelineSuggestions && (
             <>
-              <EuiSpacer size="s" />
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="m">
-                  <EuiFlexItem>
-                    <EuiHorizontalRule margin="none" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      {i18n.translate(
-                        'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.or',
-                        {
-                          defaultMessage: 'or',
-                        }
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiHorizontalRule margin="none" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiSpacer size="s" />
-              <EuiFlexItem>
-                <ProcessingButtonsManual center={true} />
+              <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {orManuallyText}
+                </EuiText>
               </EuiFlexItem>
             </>
           )}
+          <EuiFlexItem grow={false}>
+            <ManualStepButtons />
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
     />
@@ -240,24 +221,38 @@ export const NoProcessingDataAvailableEmptyPrompt = () => {
   );
 };
 
-const cardDescriptionAiEnabled = i18n.translate(
-  'xpack.streams.streamDetailView.processingTab.noDataEmptyPrompt.cardDescription',
+const noStepsTitle = i18n.translate(
+  'xpack.streams.streamDetailView.processingTab.noStepsEmptyPrompt.title',
+  {
+    defaultMessage: 'Structure your data',
+  }
+);
+
+const noStepsDescription = i18n.translate(
+  'xpack.streams.streamDetailView.processingTab.noStepsEmptyPrompt.description',
   {
     defaultMessage:
-      'Transform your data before indexing with conditions and processors. Do it yourself, or let Elastic suggest an AI-generated proposal based on your data.',
+      'Add processors to parse and transform your data and extract fields you can use in Discover and dashboards.',
   }
 );
 
-const cardDescriptionManual = i18n.translate(
-  'xpack.streams.streamDetailView.processingTab.noDataEmptyPrompt.cardDescriptionManual',
+const orManuallyText = i18n.translate(
+  'xpack.streams.streamDetailView.processingTab.noStepsEmptyPrompt.orManually',
   {
-    defaultMessage: 'Transform your data before indexing with conditions and processors.',
+    defaultMessage: 'Or manually...',
   }
 );
 
-const createProcessorText = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createProcessorButtonText',
+const addConditionText = i18n.translate(
+  'xpack.streams.streamDetailView.processingTab.noStepsEmptyPrompt.addConditionButtonText',
   {
-    defaultMessage: 'Create processor',
+    defaultMessage: 'Add condition',
+  }
+);
+
+const addProcessorText = i18n.translate(
+  'xpack.streams.streamDetailView.processingTab.noStepsEmptyPrompt.addProcessorButtonText',
+  {
+    defaultMessage: 'Add processor',
   }
 );

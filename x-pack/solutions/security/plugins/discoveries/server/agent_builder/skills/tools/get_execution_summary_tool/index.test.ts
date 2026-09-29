@@ -199,10 +199,12 @@ describe('getExecutionSummaryTool', () => {
         );
 
         expect(mockGetWorkflowExecution).toHaveBeenCalledWith('ar-run-1', 'test-space', {
+          request: mockContext.request,
           includeInput: false,
           includeOutput: false,
         });
         expect(mockGetWorkflowExecution).toHaveBeenCalledWith('ar-run-2', 'test-space', {
+          request: mockContext.request,
           includeInput: false,
           includeOutput: false,
         });
@@ -224,6 +226,7 @@ describe('getExecutionSummaryTool', () => {
         );
 
         expect(mockGetWorkflowExecution).toHaveBeenCalledWith('gen-run-1', 'test-space', {
+          request: mockContext.request,
           includeInput: false,
           includeOutput: false,
         });
@@ -245,6 +248,7 @@ describe('getExecutionSummaryTool', () => {
         );
 
         expect(mockGetWorkflowExecution).toHaveBeenCalledWith('val-run-1', 'test-space', {
+          request: mockContext.request,
           includeInput: false,
           includeOutput: false,
         });

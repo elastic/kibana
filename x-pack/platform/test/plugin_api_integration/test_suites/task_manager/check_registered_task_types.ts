@@ -203,6 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:v2:entity_maintainer_task:risk-score',
         'entity_store:v2:entity_maintainer_task:supervises',
         'entity_store:v2:entity_maintainer_task:watchlist',
+        'entity_store:v2:extract_entity_non_priority_task:user',
         'entity_store:v2:extract_entity_task:generic',
         'entity_store:v2:extract_entity_task:host',
         'entity_store:v2:extract_entity_task:service',
