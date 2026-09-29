@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -33,6 +32,7 @@ import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
+import { ViewExecutionsLink } from './view_executions_link';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -235,19 +235,11 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
       {executionsHref ? (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="text"
-            iconType="external"
-            iconSide="right"
-            href={executionsHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={settingsI18n.viewExecutionsAriaLabel(name)}
-            data-test-subj={`alertZeroWorkerViewExecutions-${worker.id}`}
-          >
-            {settingsI18n.VIEW_EXECUTIONS}
-          </EuiButtonEmpty>
+          <ViewExecutionsLink
+            workerId={worker.id}
+            workerName={name}
+            executionsHref={executionsHref}
+          />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>{enabledSwitch}</EuiFlexItem>
