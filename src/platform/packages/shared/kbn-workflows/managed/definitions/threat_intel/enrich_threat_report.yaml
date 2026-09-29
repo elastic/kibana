@@ -186,6 +186,7 @@ steps:
             article_url: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}"
             report_id: "{{ foreach.item._id }}"
             iocs: "${{ steps.extract_iocs.output.iocs }}"
+            ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
             truncated: "${{ steps.extract_iocs.output.truncated | default: false }}"
         on-failure:
           continue: true

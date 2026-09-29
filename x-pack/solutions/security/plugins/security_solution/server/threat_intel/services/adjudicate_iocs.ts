@@ -170,11 +170,27 @@ const urlPathCandidates = (parsed: URL): string[] => {
  */
 const urlHostCandidates = (parsed: URL): string[] => {
   const hosts = [parsed.host];
+  // Source text often writes the default port explicitly; extract_iocs strips it
+  // via `new URL().toString()`, so match both spellings.
+  if (!parsed.port) {
+    if (parsed.protocol === 'https:') {
+      hosts.push(`${parsed.hostname}:443`);
+    } else if (parsed.protocol === 'http:') {
+      hosts.push(`${parsed.hostname}:80`);
+    }
+  }
   try {
     const unicodeHostname = domainToUnicode(parsed.hostname);
     if (unicodeHostname && unicodeHostname !== parsed.hostname) {
       const unicodeHost = parsed.port ? `${unicodeHostname}:${parsed.port}` : unicodeHostname;
       hosts.push(unicodeHost);
+      if (!parsed.port) {
+        if (parsed.protocol === 'https:') {
+          hosts.push(`${unicodeHostname}:443`);
+        } else if (parsed.protocol === 'http:') {
+          hosts.push(`${unicodeHostname}:80`);
+        }
+      }
     }
   } catch {
     // domainToUnicode throws on malformed labels; keep the canonical host only.

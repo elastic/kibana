@@ -81,6 +81,9 @@ export const ENRICH_REPORT_CORE_MAX_BODY_BYTES = 50 * 1024 * 1024;
 export const enrichReportCoreBodySchema = schema.object({
   text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
   iocs: schema.arrayOf(extractedIocSchema, { maxSize: EXTRACT_IOCS_MAX_RESPONSE_SIZE }),
+  // Pass-through of extract_iocs' fingerprint so truncated reports keep the same
+  // correlation key (extract hashes before the 5k cap; the capped array alone does not).
+  ioc_set_hash: schema.maybe(schema.nullable(schema.string({ maxLength: 128 }))),
   title: schema.maybe(schema.string({ maxLength: 1_024 })),
   article_url: schema.maybe(schema.string({ maxLength: MAX_URL_LENGTH })),
   report_id: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),

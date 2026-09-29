@@ -767,16 +767,28 @@ const loadPriorCitationIdsByReport = async ({
   const pageSize = 1000;
   let pitId: string | undefined;
   let searchAfter: estypes.SortResults | undefined;
+  let pitOpened = false;
 
   try {
-    const pit = await esClient.openPointInTime(
-      {
-        index: THREAT_INTEL_INDICATORS_INDEX,
-        keep_alive: PIT_KEEP_ALIVE,
-      },
-      { signal }
-    );
+    let pit;
+    try {
+      pit = await esClient.openPointInTime(
+        {
+          index: THREAT_INTEL_INDICATORS_INDEX,
+          keep_alive: PIT_KEEP_ALIVE,
+        },
+        { signal }
+      );
+    } catch (err) {
+      const status = (err as { statusCode?: number }).statusCode;
+      if (status === 404 || signal.aborted) {
+        // Indicators index not created yet, or the task timed out before open.
+        return prior;
+      }
+      throw new PriorCitationLookupError((err as Error).message ?? String(err));
+    }
     pitId = pit.id;
+    pitOpened = true;
 
     while (!signal.aborted && pitId) {
       const activePitId: string = pitId;
@@ -829,12 +841,19 @@ const loadPriorCitationIdsByReport = async ({
       searchAfter = nextSearchAfter;
     }
   } catch (err) {
-    const status = (err as { statusCode?: number }).statusCode;
-    if (status === 404 || signal.aborted) {
-      // Indicators index not created yet, or the task timed out mid-lookup.
+    if (signal.aborted) {
       return prior;
     }
-    throw new PriorCitationLookupError((err as Error).message ?? String(err));
+    // A 404 after the PIT opened means the PIT expired/was lost mid-page, not a
+    // missing index. Hold the checkpoint so orphans past the last page still retract.
+    if (err instanceof PriorCitationLookupError) {
+      throw err;
+    }
+    throw new PriorCitationLookupError(
+      pitOpened
+        ? `Prior-citation PIT search failed: ${(err as Error).message ?? String(err)}`
+        : ((err as Error).message ?? String(err))
+    );
   } finally {
     if (pitId) {
       await esClient.closePointInTime({ id: pitId }).catch(() => undefined);

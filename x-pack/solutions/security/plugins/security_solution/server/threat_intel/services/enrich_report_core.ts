@@ -117,6 +117,8 @@ export type ReportCoreModelOutput = z.infer<typeof reportCoreModelOutputSchema>;
 export interface EnrichReportCoreParams {
   text: string;
   iocs: ExtractedIoc[];
+  /** When set, preferred over recomputing from the (possibly capped) IOC array. */
+  ioc_set_hash?: string | null;
   title?: string;
   article_url?: string;
   report_id?: string;
@@ -327,8 +329,10 @@ export const enrichReportCore = async (
   logger: Logger,
   params: EnrichReportCoreParams
 ): Promise<EnrichReportCoreResult> => {
-  // Correlation fingerprint must match extract_iocs and ignore adjudication.
-  const correlationHash = hashIocSet(params.iocs);
+  // Prefer extract_iocs' fingerprint: it hashes before the response cap, so a
+  // truncated report keeps the same correlation key the workflow persists.
+  const correlationHash =
+    params.ioc_set_hash !== undefined ? params.ioc_set_hash : hashIocSet(params.iocs);
   const prepared = prepareIocAdjudication(params);
   const { batches } = chunkIocAdjudicationBatches(prepared.reviewable);
   const [firstBatch = [], ...queuedBatches] = batches;
