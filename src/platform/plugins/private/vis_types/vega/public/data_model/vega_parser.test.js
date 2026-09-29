@@ -188,8 +188,8 @@ describe(`VegaParser._setDefaultColors`, () => {
         range: { category: { scheme: 'elastic' } },
         arc: { fill: VegaThemeColors.borealis.light.default },
         area: {
-          fill: getDefaultAreaGradientFill(VegaThemeColors.borealis.light.default),
-          fillOpacity: 0.3,
+          fill: VegaThemeColors.borealis.light.default,
+          fillOpacity: 0.5,
           line: true,
         },
         line: { stroke: VegaThemeColors.borealis.light.default },

@@ -46,4 +46,13 @@ export interface EpisodeAction {
   renderInlineControl?: (ctx: EpisodeActionInlineControlContext) => ReactNode;
   showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
   disabledTooltip?: string;
+  /**
+   * Whether this action is supported in multi-selection bulk contexts.
+   * Defaults to `true` when omitted.
+   */
+  supportsBulk?: boolean;
+  /**
+   * Whether this action is a workflow action grouped with lifecycle operations.
+   */
+  isWorkflowAction?: boolean;
 }
