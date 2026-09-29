@@ -84,11 +84,11 @@ describe('create_dataset_form_state', () => {
       expect(validateDelimiter('\t')).toBe(true);
     });
 
-    it.each(['\\t', '\\n', '\\r', '\\\\'])('accepts the %s escape sequence', (value) => {
+    it.each(['\\t', '\\\\'])('accepts the %s escape sequence', (value) => {
       expect(validateDelimiter(value)).toBe(true);
     });
 
-    it.each(['ab', '\\a', '\\0', '::', '\\tt'])('rejects %s', (value) => {
+    it.each(['ab', '\\a', '\\0', '\\n', '\\r', '::', '\\tt'])('rejects %s', (value) => {
       expect(validateDelimiter(value)).toBe(createDatasetWizardStrings.settingsDelimiterInvalid);
     });
   });
