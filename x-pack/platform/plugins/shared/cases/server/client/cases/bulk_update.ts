@@ -717,9 +717,11 @@ export const bulkUpdate = async (
     await Promise.all(
       casesToUpdate.map(async ({ updateReq, originalCase }) => {
         const { template } = updateReq;
+        // Coerce undefined (template not found) to null so validators.ts can distinguish
+        // a cached miss from an absent prefetch and avoids a redundant getTemplate call.
         const prefetchedTemplate =
           template != null && template.id
-            ? await prefetchedTemplates.get(`${template.id}@${template.version}`)
+            ? (await prefetchedTemplates.get(`${template.id}@${template.version}`)) ?? null
             : undefined;
         return validateTemplateInRequest({
           updateReq,

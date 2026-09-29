@@ -475,8 +475,11 @@ export const validateTemplateInRequest = async ({
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
-  /** Pre-fetched template SO — when provided, the SO fetch is skipped (bulk deduplication). */
-  prefetchedTemplate?: Awaited<ReturnType<TemplatesService['getTemplate']>>;
+  /**
+   * Pre-fetched template SO — when provided, the SO fetch is skipped (bulk deduplication).
+   * `null` means the template was fetched and not found; `undefined` means no prefetch occurred.
+   */
+  prefetchedTemplate?: Awaited<ReturnType<TemplatesService['getTemplate']>> | null;
 }): Promise<void> => {
   // null = clear; undefined = no change — both are valid without further checks.
   if (updateReq.template == null) return;

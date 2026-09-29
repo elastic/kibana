@@ -972,6 +972,39 @@ describe('update', () => {
       expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
     });
 
+    it('issues one getTemplate search when multiple cases request the same nonexistent template', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+              {
+                id: secondCase.id,
+                version: secondCase.version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+
+      // Both cases share the same nonexistent template — the cached undefined result
+      // is preserved as a null sentinel, so getTemplate is called exactly once.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
+    });
+
     it('rejects when the fetched template id does not match the requested id', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue({
         attributes: {
