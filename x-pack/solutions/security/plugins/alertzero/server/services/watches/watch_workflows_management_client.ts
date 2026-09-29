@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
+import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import type {
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
@@ -15,8 +16,6 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { SCAN_FAILURE_EXCLUDED_DEFINITION_IDS } from '../scan_failures/scan_failure_classification';
-
 /** `managedBy` stamped on AlertZero managed workflow executions. */
 const ALERTZERO_MANAGED_BY = 'alertzero';
 
@@ -144,9 +143,7 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
         query: {
           bool: {
             filter: [{ term: { managedBy: ALERTZERO_MANAGED_BY } }],
-            must_not: [
-              { terms: { originManagedWorkflowId: SCAN_FAILURE_EXCLUDED_DEFINITION_IDS } },
-            ],
+            must_not: [{ terms: { originManagedWorkflowId: [...ALERTZERO_ACTION_WORKFLOW_IDS] } }],
           },
         },
         sortField: 'finishedAt',

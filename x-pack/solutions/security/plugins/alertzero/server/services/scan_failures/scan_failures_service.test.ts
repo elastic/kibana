@@ -96,9 +96,13 @@ const childStartedByWorker = (childDefinitionId: string, workerDefinitionId: str
 };
 
 describe('ScanFailuresService', () => {
-  it('drops action workflow failures', async () => {
-    const search = jest.fn(async () => page([ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID], 1));
-    const { service } = createService(search);
+  it('drops an action workflow even when a Worker started it', async () => {
+    const { failedPage, lookup } = childStartedByWorker(
+      ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+      ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID
+    );
+    const search = jest.fn(async () => failedPage);
+    const { service } = createService(search, lookup);
 
     await expect(service.list(request, 'default')).resolves.toEqual({
       workers: [],

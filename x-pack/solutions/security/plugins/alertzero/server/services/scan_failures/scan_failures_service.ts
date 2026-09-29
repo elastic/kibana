@@ -6,13 +6,14 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { SYSTEM_SECURITY_WORKER_CATALOG, type ScanFailuresResponse } from '@kbn/alertzero-common';
-import type { WorkflowExecutionDto, WorkflowExecutionListDto } from '@kbn/workflows';
-import pMap from 'p-map';
 import {
-  classifyScanFailureDefinition,
-  isCatalogWorkerDefinition,
-} from './scan_failure_classification';
+  SYSTEM_SECURITY_WORKER_CATALOG,
+  SYSTEM_SECURITY_WORKER_IDS,
+  type ScanFailuresResponse,
+} from '@kbn/alertzero-common';
+import type { WorkflowExecutionDto, WorkflowExecutionListDto } from '@kbn/workflows';
+import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
+import pMap from 'p-map';
 
 export const SCAN_FAILURE_PAGE_SIZE = 100;
 export const SCAN_FAILURE_MAX_PAGES = 5;
@@ -23,6 +24,15 @@ const SCAN_FAILURE_MAX_PARENT_HOPS = 8;
 const WORKFLOW_STEP_TRIGGER = 'workflow-step';
 
 const EMPTY_SCAN_FAILURES: ScanFailuresResponse = { workers: [], unknown: false };
+
+const CATALOG_WORKER_IDS = new Set<string>(SYSTEM_SECURITY_WORKER_IDS);
+const ACTION_WORKFLOW_IDS = new Set<string>(ALERTZERO_ACTION_WORKFLOW_IDS);
+
+const isCatalogWorkerId = (definitionId: string | undefined): boolean =>
+  definitionId != null && CATALOG_WORKER_IDS.has(definitionId);
+
+const isActionWorkflowId = (definitionId: string | undefined): boolean =>
+  definitionId != null && ACTION_WORKFLOW_IDS.has(definitionId);
 
 export type FailedExecutionPage = Pick<WorkflowExecutionListDto, 'results' | 'total'>;
 
@@ -63,18 +73,18 @@ const parentExecutionIdOf = (execution: AttributableExecution): string | undefin
 /**
  * The catalog Worker that owns this failure.
  * A failed catalog Worker counts on its own. A child counts only when walking
- * `parentWorkflowExecutionId` reaches a catalog Worker. Anything else is skipped:
- * a manual test of a shared workflow is not a Worker scan.
+ * `parentWorkflowExecutionId` reaches one. Action workflows are not scans, and
+ * a manual run that never reaches a catalog Worker is skipped.
  */
 export const attributeFailedExecution = async (
   execution: AttributableExecution,
   loadExecution: LoadExecution
 ): Promise<string | undefined> => {
   const definitionId = definitionIdOf(execution);
-  if (classifyScanFailureDefinition(definitionId).kind === 'exclude') {
+  if (isActionWorkflowId(definitionId)) {
     return undefined;
   }
-  if (isCatalogWorkerDefinition(definitionId)) {
+  if (isCatalogWorkerId(definitionId)) {
     return definitionId;
   }
   if (execution.triggeredBy !== WORKFLOW_STEP_TRIGGER) {
@@ -103,7 +113,7 @@ export const attributeFailedExecution = async (
       return undefined;
     }
     const parentDefinitionId = definitionIdOf(parent);
-    if (isCatalogWorkerDefinition(parentDefinitionId)) {
+    if (isCatalogWorkerId(parentDefinitionId)) {
       return parentDefinitionId;
     }
     if (parent.triggeredBy !== WORKFLOW_STEP_TRIGGER) {

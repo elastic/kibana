@@ -7,8 +7,8 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
+import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { SCAN_FAILURE_EXCLUDED_DEFINITION_IDS } from '../scan_failures/scan_failure_classification';
 import { WatchWorkflowsManagementClientImpl } from './watch_workflows_management_client';
 
 describe('WatchWorkflowsManagementClientImpl', () => {
@@ -30,9 +30,7 @@ describe('WatchWorkflowsManagementClientImpl', () => {
         query: {
           bool: {
             filter: [{ term: { managedBy: 'alertzero' } }],
-            must_not: [
-              { terms: { originManagedWorkflowId: SCAN_FAILURE_EXCLUDED_DEFINITION_IDS } },
-            ],
+            must_not: [{ terms: { originManagedWorkflowId: [...ALERTZERO_ACTION_WORKFLOW_IDS] } }],
           },
         },
         sortField: 'finishedAt',
