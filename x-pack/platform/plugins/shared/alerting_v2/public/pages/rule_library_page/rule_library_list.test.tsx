@@ -169,6 +169,7 @@ describe('RuleLibraryList', () => {
       'maxLength',
       String(MAX_TAG_LENGTH)
     );
+    expect(screen.getByRole('searchbox', { name: 'Search tags' })).toBeInTheDocument();
     fireEvent.click(within(options).getByText('nginx'));
 
     await waitFor(() => {

@@ -18,6 +18,9 @@ const TAG_SEARCH_DEBOUNCE_MS = 300;
 const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.tagsFilter.label', {
   defaultMessage: 'Tags',
 });
+const TAG_SEARCH_LABEL = i18n.translate('xpack.alertingV2.tagsFilter.searchPlaceholder', {
+  defaultMessage: 'Search tags',
+});
 
 /** Creates a content-list tag filter backed by the supplied tag query hook. */
 export const createTagsFilter = ({
@@ -70,9 +73,8 @@ export const createTagsFilter = ({
             value={tagSearch}
             maxLength={MAX_TAG_LENGTH}
             onChange={(event) => setTagSearch(event.target.value)}
-            placeholder={i18n.translate('xpack.alertingV2.tagsFilter.searchPlaceholder', {
-              defaultMessage: 'Search tags',
-            })}
+            placeholder={TAG_SEARCH_LABEL}
+            aria-label={TAG_SEARCH_LABEL}
             data-test-subj={`${testSubjectPrefix}Search`}
           />
         }
