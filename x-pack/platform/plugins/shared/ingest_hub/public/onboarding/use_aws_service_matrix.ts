@@ -38,8 +38,11 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     isError: awsIsError,
     refetch: awsRefetch,
   } = useGetPackageInfoByKeyQuery('aws', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const { data: bedrockData, isError: bedrockIsError, refetch: bedrockRefetch } =
-    useGetPackageInfoByKeyQuery('aws_bedrock', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: bedrockData,
+    isError: bedrockIsError,
+    refetch: bedrockRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_bedrock', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
   const {
     data: bedrockAgentcoreData,
     isError: bedrockAgentcoreIsError,
@@ -50,12 +53,21 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: fargateData, isError: fargateIsError, refetch: fargateRefetch } =
-    useGetPackageInfoByKeyQuery('awsfargate', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const { data: mqData, isError: mqIsError, refetch: mqRefetch } =
-    useGetPackageInfoByKeyQuery('aws_mq', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const { data: logsData, isError: logsIsError, refetch: logsRefetch } =
-    useGetPackageInfoByKeyQuery('aws_logs', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: fargateData,
+    isError: fargateIsError,
+    refetch: fargateRefetch,
+  } = useGetPackageInfoByKeyQuery('awsfargate', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: mqData,
+    isError: mqIsError,
+    refetch: mqRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_mq', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: logsData,
+    isError: logsIsError,
+    refetch: logsRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_logs', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
   const {
     data: cloudwatchOtelData,
     isError: cloudwatchOtelIsError,
@@ -71,10 +83,16 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     isError: securityHubIsError,
     refetch: securityHubRefetch,
   } = useGetPackageInfoByKeyQuery('aws_securityhub', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const { data: billingData, isError: billingIsError, refetch: billingRefetch } =
-    useGetPackageInfoByKeyQuery('aws_billing', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const { data: firehoseData, isError: firehoseIsError, refetch: firehoseRefetch } =
-    useGetPackageInfoByKeyQuery('awsfirehose', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: billingData,
+    isError: billingIsError,
+    refetch: billingRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_billing', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: firehoseData,
+    isError: firehoseIsError,
+    refetch: firehoseRefetch,
+  } = useGetPackageInfoByKeyQuery('awsfirehose', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
   const {
     data: securityLakeData,
     isError: securityLakeIsError,
@@ -85,8 +103,11 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: endaceData, isError: endaceIsError, refetch: endaceRefetch } =
-    useGetPackageInfoByKeyQuery('endace', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: endaceData,
+    isError: endaceIsError,
+    refetch: endaceRefetch,
+  } = useGetPackageInfoByKeyQuery('endace', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
 
   const matrix = useMemo(() => {
     if (!awsData?.item) {
