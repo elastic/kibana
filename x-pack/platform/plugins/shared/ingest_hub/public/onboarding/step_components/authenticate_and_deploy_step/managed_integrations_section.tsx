@@ -402,7 +402,15 @@ export function ManagedIntegrationsSection({
                   size="s"
                   color="danger"
                   onClick={onDeploy}
-                  isDisabled={!isDeployReady}
+                  isDisabled={
+                    !isDeployReady &&
+                    !(
+                      isDirty &&
+                      isStaticKeysEditMode &&
+                      !!authenticateAndDeployStep.staticKeys?.access_key_id &&
+                      !!authenticateAndDeployStep.staticKeys?.secret_access_key
+                    )
+                  }
                   data-test-subj="managedIntegrationsSection-retryButton"
                 >
                   <FormattedMessage
