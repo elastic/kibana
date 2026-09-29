@@ -11,7 +11,6 @@ import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools'
 import {
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
-  NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
@@ -110,13 +109,11 @@ export const getInvestigationAgentType = ({
           : [];
       return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
     })(),
+    // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
+    // workflow, so listing the reinforce workflow here as well would reinforce every round
+    // twice — two ai.agent runs, up to 900s each, writing the same trees.
     ...(cortexEnabled || memoryEnabled || decisionTreesEnabled
-      ? {
-          post_execution_workflow_ids: [
-            ...(cortexEnabled || memoryEnabled ? [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] : []),
-            ...(decisionTreesEnabled ? [NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID] : []),
-          ],
-        }
+      ? { post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] }
       : {}),
   },
 });

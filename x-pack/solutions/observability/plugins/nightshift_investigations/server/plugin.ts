@@ -378,15 +378,16 @@ export class NightshiftInvestigationsPlugin
             telemetry,
           })
         );
-        if (this.decisionTreesEnabled) {
-          const decisionTreeLogger = this.logger.get('decision_trees');
-          plugins.workflowsExtensions.registerStepDefinition(
-            decisionTreePrepareStepDefinition({
-              getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
-              logger: decisionTreeLogger,
-            })
-          );
-        }
+        // Registered unconditionally for the same reason as the tree hydrate above: the
+        // combined optimize workflow installs with Cortex or Memory and now runs the
+        // reinforcement phase too. The handler no-ops on the flag.
+        plugins.workflowsExtensions.registerStepDefinition(
+          decisionTreePrepareStepDefinition({
+            getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+            logger: this.logger.get('decision_trees'),
+            isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
       }
 
       registerRoutes({

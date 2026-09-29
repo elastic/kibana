@@ -50,7 +50,9 @@ export const decisionTreeHydrateStepDefinition = ({
     }),
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
-      conversation_id: z.string().describe('Unscoped conversation id derived from the sandbox key.'),
+      conversation_id: z
+        .string()
+        .describe('Unscoped conversation id derived from the sandbox key.'),
       tree_count: z.number().describe('Number of decision trees written into the sandbox.'),
       skipped: z.boolean().optional(),
     }),
@@ -63,7 +65,14 @@ export const decisionTreeHydrateStepDefinition = ({
       // registered even when the tree feature is off. Fail closed without touching the sandbox.
       if (isEnabled && !isEnabled()) {
         context.logger.info(`Skipped decision tree hydrate for sandbox ${sandboxId} (flag off)`);
-        return { output: { sandbox_id: sandboxId, conversation_id: conversationId, tree_count: 0, skipped: true } };
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            conversation_id: conversationId,
+            tree_count: 0,
+            skipped: true,
+          },
+        };
       }
 
       const sandboxStart = getSandboxStart();
@@ -95,6 +104,8 @@ export const decisionTreeHydrateStepDefinition = ({
         `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
 
-      return { output: { sandbox_id: sandboxId, conversation_id: conversationId, tree_count: treeCount } };
+      return {
+        output: { sandbox_id: sandboxId, conversation_id: conversationId, tree_count: treeCount },
+      };
     },
   });
