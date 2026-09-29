@@ -32,9 +32,14 @@ function ObservabilityCompleteLandingPage() {
   const { share, logsDataAccess } = useKibana().services;
 
   useEffect(() => {
+    let isMounted = true;
+
     async function redirectToLanding() {
       if (isAllRequestsComplete) {
         const hasLogsData = await getHasLogsData(logsDataAccess);
+        // The user may have navigated away while the probe was in flight; redirecting now would
+        // clobber wherever they went.
+        if (!isMounted) return;
         const hasApmData = hasDataMap.apm?.hasData;
         const locators = getLocators(share);
 
@@ -49,6 +54,10 @@ function ObservabilityCompleteLandingPage() {
     }
 
     redirectToLanding();
+
+    return () => {
+      isMounted = false;
+    };
   }, [hasDataMap, isAllRequestsComplete, logsDataAccess, share]);
 
   return <></>;
@@ -58,8 +67,11 @@ function ObservabilityLogsEssentialsLandingPage() {
   const { share, logsDataAccess } = useKibana().services;
 
   useEffect(() => {
+    let isMounted = true;
+
     async function redirectToLanding() {
       const hasLogsData = await getHasLogsData(logsDataAccess);
+      if (!isMounted) return;
       const locators = getLocators(share);
 
       if (hasLogsData && locators.logs) {
@@ -70,6 +82,10 @@ function ObservabilityLogsEssentialsLandingPage() {
     }
 
     redirectToLanding();
+
+    return () => {
+      isMounted = false;
+    };
   }, [logsDataAccess, share]);
 
   return <></>;
