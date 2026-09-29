@@ -2892,10 +2892,10 @@ describe('add_controls / remove_controls operations', () => {
     expect(after2.pinned_panels).toHaveLength(2);
   });
 
-  it('add_controls skips a field that is not aggregatable and records a failure', async () => {
+  it('add_controls skips a field that is not aggregatable and reports it as skipped', async () => {
     const esClient = createFieldCapsEsClient({ host: 'keyword', 'host.keyword': 'keyword' });
 
-    const { dashboardData, failures } = await executeDashboardOperations({
+    const { dashboardData, failures, skippedControls } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
       operations: [
         {
@@ -2919,12 +2919,15 @@ describe('add_controls / remove_controls operations', () => {
     expect((kept.config as Record<string, unknown>).esql_query).toBe(
       'FROM kibana_sample_data_logs | STATS BY host'
     );
-    expect(failures).toEqual([
+    expect(failures).toEqual([]);
+    expect(skippedControls).toEqual([
       {
-        type: 'add_controls',
         identifier: 'controls[1]',
-        error:
-          'Field "method" is not an aggregatable field in the mappings of index "kibana_sample_data_logs". Controls query the index directly, so fields created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot be used. Pick a mapped field or skip this control.',
+        fieldName: 'method',
+        index: 'kibana_sample_data_logs',
+        reason:
+          'Not an aggregatable field in the index mappings. Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.',
+        availableFields: ['host', 'host.keyword'],
       },
     ]);
   });

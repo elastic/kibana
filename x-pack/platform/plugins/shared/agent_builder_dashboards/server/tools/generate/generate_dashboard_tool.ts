@@ -136,24 +136,25 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
-          dashboardData: latestVersion?.data,
-          operations,
-          logger,
-          resolvePanelContent: createVisPanelResolver({
+        const { dashboardData, failures, skippedControls, panelAuthoringNotes } =
+          await executeDashboardOperations({
+            dashboardData: latestVersion?.data,
+            operations,
             logger,
-            modelProvider,
-            events,
-            esClient,
-          }),
-          resolveCustomContentTemplate: createCustomContentTemplateResolver({
-            logger,
-            modelProvider,
-            esClient,
-          }),
-          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
-          esClient: esClient.asCurrentUser,
-        });
+            resolvePanelContent: createVisPanelResolver({
+              logger,
+              modelProvider,
+              events,
+              esClient,
+            }),
+            resolveCustomContentTemplate: createCustomContentTemplateResolver({
+              logger,
+              modelProvider,
+              esClient,
+            }),
+            resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+            esClient: esClient.asCurrentUser,
+          });
 
         // Data-aware default time range computation
         const finalDashboardData = await applyDefaultDashboardTimeRange({
@@ -199,6 +200,18 @@ Use operations[] to:
                   )
                 ),
                 failures: failures.length > 0 ? failures : undefined,
+                skipped_controls:
+                  skippedControls.length > 0
+                    ? skippedControls.map(
+                        ({ identifier, fieldName, index, reason, availableFields }) => ({
+                          identifier,
+                          field_name: fieldName,
+                          index,
+                          reason,
+                          available_fields: availableFields,
+                        })
+                      )
+                    : undefined,
               },
             },
           ],

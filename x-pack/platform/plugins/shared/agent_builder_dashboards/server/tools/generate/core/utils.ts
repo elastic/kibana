@@ -18,6 +18,17 @@ export interface PanelFailure {
 }
 
 /**
+ * Control the server left out because its field cannot back a control.
+ */
+export interface SkippedControl {
+  identifier: string;
+  fieldName: string;
+  index: string;
+  reason: string;
+  availableFields: string[];
+}
+
+/**
  * Type-safe extraction of error message from unknown error.
  */
 export const getErrorMessage = (error: unknown): string => {

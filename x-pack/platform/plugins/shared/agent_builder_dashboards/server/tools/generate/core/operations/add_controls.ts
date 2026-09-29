@@ -21,7 +21,7 @@ import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { getErrorMessage, type PanelFailure } from '../utils';
+import { getErrorMessage, type PanelFailure, type SkippedControl } from '../utils';
 import { defineOperation } from './types';
 
 const controlWidthSchema = z
@@ -126,6 +126,8 @@ const getFieldCandidates = (control: Exclude<ControlInput, { type: typeof TIME_S
     ? [control.field_name]
     : [control.field_name, `${control.field_name}.keyword`];
 
+const MAX_AVAILABLE_FIELDS = 30;
+
 const fetchAggregatableFieldTypes = async ({
   esClient,
   index,
@@ -138,6 +140,7 @@ const fetchAggregatableFieldTypes = async ({
   const response = await esClient.fieldCaps({
     index,
     fields,
+    filters: '-metadata',
     ignore_unavailable: true,
     allow_no_indices: true,
   });
@@ -156,22 +159,38 @@ const fetchAggregatableFieldTypes = async ({
   );
 };
 
-const isNumericField = (types: string[]): boolean =>
-  types.every((type) => castEsToKbnFieldTypeName(type) === KBN_FIELD_TYPES.NUMBER);
+const hasKbnFieldType = (types: string[], kbnFieldType: KBN_FIELD_TYPES): boolean =>
+  types.every((type) => castEsToKbnFieldTypeName(type) === kbnFieldType);
+
+const getAvailableFields = (
+  fieldTypes: Map<string, string[]>,
+  controlType: typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL
+): string[] => {
+  const kbnFieldType =
+    controlType === RANGE_SLIDER_CONTROL ? KBN_FIELD_TYPES.NUMBER : KBN_FIELD_TYPES.STRING;
+  return [...fieldTypes]
+    .filter(([, types]) => hasKbnFieldType(types, kbnFieldType))
+    .map(([fieldName]) => fieldName)
+    .sort()
+    .slice(0, MAX_AVAILABLE_FIELDS);
+};
 
 /**
  * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
  * text fields to their `.keyword` sibling. Range sliders additionally require a
- * numeric field. Other data controls are skipped as failures.
+ * numeric field. Other data controls are reported as skipped, together with the
+ * mapped fields that could back them instead.
  */
 const resolveControlFields = async ({
   controls,
   esClient,
   failures,
+  skippedControls,
 }: {
   controls: IndexedControlInput[];
   esClient?: ElasticsearchClient;
   failures: PanelFailure[];
+  skippedControls: SkippedControl[];
 }): Promise<IndexedControlInput[]> => {
   if (!esClient) {
     return controls;
@@ -202,6 +221,19 @@ const resolveControlFields = async ({
     )
   );
 
+  const allFieldTypesByIndex = new Map<string, Promise<Map<string, string[]>>>();
+  const getAllFieldTypes = (index: string): Promise<Map<string, string[]>> => {
+    const cached = allFieldTypesByIndex.get(index);
+    if (cached) {
+      return cached;
+    }
+    const pending = fetchAggregatableFieldTypes({ esClient, index, fields: ['*'] }).catch(
+      () => new Map<string, string[]>()
+    );
+    allFieldTypesByIndex.set(index, pending);
+    return pending;
+  };
+
   const resolved: IndexedControlInput[] = [];
   for (const indexedControl of controls) {
     const { control, controlInputIndex } = indexedControl;
@@ -210,10 +242,19 @@ const resolveControlFields = async ({
       continue;
     }
 
-    const recordFailure = createFailureRecorder(failures, controlInputIndex);
     const { index, field_name: fieldName } = control;
+    const recordSkip = async (reason: string) =>
+      skippedControls.push({
+        identifier: `controls[${controlInputIndex}]`,
+        fieldName,
+        index,
+        reason,
+        availableFields: getAvailableFields(await getAllFieldTypes(index), control.type),
+      });
+
     const aggregatableFieldTypes = lookupByIndex.get(index);
     if (!(aggregatableFieldTypes instanceof Map)) {
+      const recordFailure = createFailureRecorder(failures, controlInputIndex);
       recordFailure(
         `Could not load fields for index "${index}": ${aggregatableFieldTypes?.message}`
       );
@@ -224,18 +265,21 @@ const resolveControlFields = async ({
       aggregatableFieldTypes.has(candidate)
     );
     if (resolvedFieldName === undefined) {
-      recordFailure(
-        `Field "${fieldName}" is not an aggregatable field in the mappings of index "${index}". Controls query the index directly, so fields created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot be used. Pick a mapped field or skip this control.`
+      await recordSkip(
+        'Not an aggregatable field in the index mappings. Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.'
       );
       continue;
     }
 
     const resolvedFieldTypes = aggregatableFieldTypes.get(resolvedFieldName) ?? [];
-    if (control.type === RANGE_SLIDER_CONTROL && !isNumericField(resolvedFieldTypes)) {
-      recordFailure(
-        `Field "${fieldName}" is not numeric (${resolvedFieldTypes.join(
+    if (
+      control.type === RANGE_SLIDER_CONTROL &&
+      !hasKbnFieldType(resolvedFieldTypes, KBN_FIELD_TYPES.NUMBER)
+    ) {
+      await recordSkip(
+        `range_slider_control needs a numeric field, but this field is ${resolvedFieldTypes.join(
           ', '
-        )}); range_slider_control requires a numeric field.`
+        )}.`
       );
       continue;
     }
@@ -318,6 +362,7 @@ export const addControlsOperation = defineOperation({
       })),
       esClient: context.esClient,
       failures: context.failures,
+      skippedControls: context.skippedControls,
     });
     const controlsToAdd = filterDuplicateTimeSliders({
       existingControls,
