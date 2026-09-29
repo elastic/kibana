@@ -51,6 +51,13 @@ describe('createSecurityDataSourceProfileProvider', () => {
   });
 
   it('matches an all-Security ES|QL query in Classic navigation', async () => {
+    const dataView = createStubIndexPattern({
+      spec: { title: '.alerts-security.alerts-default,logs-endpoint.events.process-*' },
+    });
+    dataView.matchedIndices = [
+      '.internal.alerts-security.alerts-default-000001',
+      '.ds-logs-endpoint.events.process-default-2024.01.01-000001',
+    ];
     await expect(
       provider.resolve({
         rootContext: rootContext(SolutionType.Default),
@@ -58,6 +65,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
         query: {
           esql: 'FROM .alerts-security.alerts-default,logs-endpoint.events.process-*',
         },
+        dataView,
       })
     ).resolves.toMatchObject({
       isMatch: true,
@@ -66,11 +74,62 @@ describe('createSecurityDataSourceProfileProvider', () => {
   });
 
   it('rejects a mixed Security and non-Security query in Classic navigation', async () => {
+    const dataView = createStubIndexPattern({
+      spec: { title: '.alerts-security.alerts-default,logs-nginx.access-*' },
+    });
+    dataView.matchedIndices = [
+      '.internal.alerts-security.alerts-default-000001',
+      '.ds-logs-nginx.access-default-2024.01.01-000001',
+    ];
     await expect(
       provider.resolve({
         rootContext: rootContext(SolutionType.Default),
         dataSource: createEsqlDataSource(),
         query: { esql: 'FROM .alerts-security.alerts-default,logs-nginx.access-*' },
+        dataView,
+      })
+    ).resolves.toEqual({ isMatch: false });
+  });
+
+  it('falls back to the ES|QL index pattern in Classic navigation when there is no resolved data view', async () => {
+    await expect(
+      provider.resolve({
+        rootContext: rootContext(SolutionType.Default),
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'FROM .alerts-security.alerts-default,logs-endpoint.events.process-*' },
+      })
+    ).resolves.toMatchObject({
+      isMatch: true,
+      context: { category: DataSourceCategory.Security },
+    });
+  });
+
+  it('matches a generic data view in Classic navigation when every resolved index is Security', async () => {
+    const dataView = createStubIndexPattern({ spec: { id: 'my-logs', title: 'logs-*' } });
+    dataView.matchedIndices = [
+      '.ds-logs-crowdstrike.alert-default-2024.01.01-000001',
+      '.ds-logs-endpoint.events.process-default-2024.01.01-000001',
+    ];
+    await expect(
+      provider.resolve({
+        rootContext: rootContext(SolutionType.Default),
+        dataSource: createDataViewDataSource({ dataViewId: 'my-logs' }),
+        dataView,
+      })
+    ).resolves.toMatchObject({
+      isMatch: true,
+      context: { category: DataSourceCategory.Security },
+    });
+  });
+
+  it('does not match in Classic navigation when the data view resolves to no indices', async () => {
+    const dataView = createStubIndexPattern({ spec: { id: 'my-logs', title: 'logs-*' } });
+    dataView.matchedIndices = [];
+    await expect(
+      provider.resolve({
+        rootContext: rootContext(SolutionType.Default),
+        dataSource: createDataViewDataSource({ dataViewId: 'my-logs' }),
+        dataView,
       })
     ).resolves.toEqual({ isMatch: false });
   });

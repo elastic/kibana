@@ -28,10 +28,21 @@ export const createResolve = (
       return { isMatch: false };
     }
 
-    const indexPattern = extractIndexPatternFrom(params);
+    const matchedIndices = params.dataView?.matchedIndices;
 
-    if (!indexPattern || !testIndexPattern(indexPattern)) {
-      return { isMatch: false };
+    if (matchedIndices && matchedIndices.length > 0) {
+      // Prefer the concrete resolved indices: every one must belong to this integration, so a data
+      // view spanning multiple integrations is never claimed.
+      if (!matchedIndices.every(testIndexPattern)) {
+        return { isMatch: false };
+      }
+    } else {
+      // Fall back to the raw index pattern when the data view has not resolved any indices.
+      const indexPattern = extractIndexPatternFrom(params);
+
+      if (!indexPattern || !testIndexPattern(indexPattern)) {
+        return { isMatch: false };
+      }
     }
 
     return {

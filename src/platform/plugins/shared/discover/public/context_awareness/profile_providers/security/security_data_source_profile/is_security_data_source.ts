@@ -32,30 +32,41 @@ const SECURITY_SOURCE_PATTERNS = [
   /^logs-m365_defender\./,
 ];
 
+/**
+ * True when the given dataVIew is a recognized Security data view.
+ */
 export const isSecurityDataViewId = (dataViewId?: string): boolean =>
   Boolean(
     dataViewId && SECURITY_DATA_VIEW_ID_PREFIXES.some((prefix) => dataViewId.startsWith(prefix))
   );
 
-export const isSecuritySourcePattern = (sourcePattern: string): boolean => {
-  const normalizedPattern = sourcePattern
-    .trim()
-    .replace(/^[^:]+:(?!:)/, '')
-    .replace(/::[^,]+$/, '')
-    .replace(/^\.ds-/, '');
+/**
+ * True only when every source is Security data, so a data view spanning Security and non-Security
+ * indices is never claimed. Prefers the data view's concrete resolved indices and falls back to the
+ * raw index pattern when it has not resolved any indices.
+ */
+export const containsOnlySecuritySourcePatterns = (
+  matchedIndices: string[] | undefined,
+  indexPattern: string | null
+): boolean => {
+  const isSecuritySource = (source: string): boolean => {
+    // Ignores remote cluster, selector (::data/::failures) and datastream (.ds-) decorations.
+    const normalizedSource = source
+      .trim()
+      .replace(/^[^:]+:(?!:)/, '')
+      .replace(/::[^,]+$/, '')
+      .replace(/^\.ds-/, '');
 
-  return SECURITY_SOURCE_PATTERNS.some((pattern) => pattern.test(normalizedPattern));
-};
+    return SECURITY_SOURCE_PATTERNS.some((pattern) => pattern.test(normalizedSource));
+  };
 
-export const containsOnlySecuritySourcePatterns = (indexPattern: string | null): boolean => {
-  if (!indexPattern) {
-    return false;
-  }
+  const sources =
+    matchedIndices && matchedIndices.length > 0
+      ? matchedIndices
+      : (indexPattern ?? '')
+          .split(',')
+          .map((source) => source.trim())
+          .filter((source) => source && !source.startsWith('-'));
 
-  const sourcePatterns = indexPattern
-    .split(',')
-    .map((sourcePattern) => sourcePattern.trim())
-    .filter((sourcePattern) => sourcePattern && !sourcePattern.startsWith('-'));
-
-  return sourcePatterns.length > 0 && sourcePatterns.every(isSecuritySourcePattern);
+  return sources.length > 0 && sources.every(isSecuritySource);
 };

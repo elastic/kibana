@@ -78,7 +78,10 @@ export const createSecurityDataSourceProfileProvider = (
       if (
         solutionType === SolutionType.Default &&
         !isSecurityDataViewId(params.dataView?.id) &&
-        !containsOnlySecuritySourcePatterns(extractIndexPatternFrom(params))
+        !containsOnlySecuritySourcePatterns(
+          params.dataView?.matchedIndices,
+          extractIndexPatternFrom(params)
+        )
       ) {
         return { isMatch: false };
       }

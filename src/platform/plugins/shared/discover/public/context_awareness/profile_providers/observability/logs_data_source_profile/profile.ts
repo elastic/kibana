@@ -8,7 +8,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import type { DataSourceContext, DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
@@ -25,11 +24,6 @@ import {
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
 export type LogOverViewAccordionExpandedValue = 'stacktrace' | 'quality_issues' | undefined;
-
-// Mirrors @kbn/logs-data-access-plugin DEFAULT_LOG_SOURCES (the observability:logSources defaults).
-// Duplicated because that value isn't exported from the plugin's `public` entry and @kbn/imports
-// forbids importing plugin `common` values across plugins.
-export const EXCLUDED_LOG_SOURCES_FOR_DEFAULT_DISCOVER = ['logs*', '-logstash*', 'filebeat-*'];
 
 export interface LogOverviewContext {
   recordId: string;
@@ -66,28 +60,11 @@ export const createLogsDataSourceProfileProvider = (
     getDeepAnalysisPlaybook,
   },
   resolve: (params) => {
-    if (
-      params.rootContext.solutionType !== SolutionType.Observability &&
-      params.rootContext.solutionType !== SolutionType.Default
-    ) {
+    if (params.rootContext.solutionType !== SolutionType.Observability) {
       return { isMatch: false };
     }
 
     const indexPattern = extractIndexPatternFrom(params);
-
-    // Only match in Default Discover if the index pattern is in the configured log sources, observability:logSources setting.
-    // But excludes the default values of the setting as they are too generic.
-    if (params.rootContext.solutionType === SolutionType.Default && indexPattern) {
-      const logsSourcesPatternsFromSetting =
-        services.logsContextService.getAllLogsIndexPattern() ?? '';
-      const logsSourcesPatterns = logsSourcesPatternsFromSetting
-        .split(',')
-        .filter((pattern) => !EXCLUDED_LOG_SOURCES_FOR_DEFAULT_DISCOVER.includes(pattern));
-      const isMatch = testPatternAgainstAllowedList(logsSourcesPatterns)(indexPattern);
-      if (!isMatch) {
-        return { isMatch: false };
-      }
-    }
 
     if (!services.logsContextService.isLogsIndexPattern(indexPattern)) {
       return { isMatch: false };
