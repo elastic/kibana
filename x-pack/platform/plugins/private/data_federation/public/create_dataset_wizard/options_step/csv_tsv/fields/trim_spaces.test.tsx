@@ -11,14 +11,15 @@ import { act, fireEvent, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
+import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
 import { TrimSpaces } from './trim_spaces';
 
 const renderComponent = ({
-  value = false,
+  value = '',
   onChange = () => {},
 }: {
-  value?: boolean;
-  onChange?: (next: boolean) => void;
+  value?: DatasetBooleanFormValue;
+  onChange?: (next: DatasetBooleanFormValue) => void;
 } = {}) =>
   render(
     <EuiProvider>
@@ -29,7 +30,10 @@ const renderComponent = ({
   );
 
 describe('TrimSpaces', () => {
-  it('calls onChange when the user selects an option', async () => {
+  it.each([
+    ['true', createDatasetWizardStrings.trueLabel],
+    ['false', createDatasetWizardStrings.falseLabel],
+  ] as const)('calls onChange with %s when the user selects it', async (expected, label) => {
     const onChange = jest.fn();
     const { getByTestId, getByRole } = renderComponent({ onChange });
 
@@ -39,21 +43,28 @@ describe('TrimSpaces', () => {
     });
 
     await act(async () => {
-      fireEvent.click(getByRole('option', { name: createDatasetWizardStrings.trueLabel }));
+      fireEvent.click(getByRole('option', { name: new RegExp(`^${label}`) }));
     });
 
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(expected);
   });
 
-  it('clearing the selection results in false', async () => {
-    const onChange = jest.fn();
-    const { getByTestId } = renderComponent({ value: true, onChange });
+  it('displays false when the value is false', () => {
+    const { getByTestId } = renderComponent({ value: 'false' });
 
-    // Click clear button.
+    expect(getByTestId('createDatasetSettingsTrimSpaces').querySelector('input')).toHaveValue(
+      createDatasetWizardStrings.falseLabel
+    );
+  });
+
+  it('clearing the selection results in empty form value', async () => {
+    const onChange = jest.fn();
+    const { getByTestId } = renderComponent({ value: 'true', onChange });
+
     await act(async () => {
       fireEvent.click(getByTestId('comboBoxClearButton'));
     });
 
-    expect(onChange).toHaveBeenCalledWith(false);
+    expect(onChange).toHaveBeenCalledWith('');
   });
 });

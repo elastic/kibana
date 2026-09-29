@@ -126,7 +126,7 @@ const settingsToFormValues = (
     column_prefix: s.column_prefix ?? defaults.column_prefix,
     quote: s.quote ?? '',
     escape: encodeEscapeCharacterToFormValue(s.escape ?? ''),
-    trim_spaces: s.trim_spaces ?? false,
+    trim_spaces: boolToFormValue(s.trim_spaces),
     // CSV/TSV error handling
     error_mode: s.error_mode ?? '',
     max_errors: s.max_errors !== undefined ? String(s.max_errors) : '',

@@ -40,7 +40,7 @@ const allSettingsForFormat = (format: CreateDatasetSettingsFormValues['format'])
     quote: "'",
     escape: '/',
     column_prefix: 'field',
-    trim_spaces: true,
+    trim_spaces: 'true',
     error_mode: 'skip_row',
     max_errors: '5',
     max_error_ratio: '0.5',

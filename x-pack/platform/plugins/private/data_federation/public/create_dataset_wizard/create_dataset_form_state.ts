@@ -70,7 +70,7 @@ export interface CreateDatasetSettingsFormValues {
   quote: string;
   escape: string;
   column_prefix: string;
-  trim_spaces: boolean;
+  trim_spaces: DatasetBooleanFormValue;
   // CSV/TSV error handling
   error_mode: DatasetErrorModeFormValue;
   max_errors: string;
@@ -113,7 +113,7 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   quote: '',
   escape: '',
   column_prefix: '',
-  trim_spaces: false,
+  trim_spaces: '',
   error_mode: '',
   max_errors: '',
   max_error_ratio: '',
@@ -270,7 +270,8 @@ export const buildDatasetSettingsFromFormValues = (
     if (settings.column_prefix && settings.column_prefix !== DEFAULT_COLUMN_PREFIX) {
       applied.column_prefix = settings.column_prefix;
     }
-    if (settings.trim_spaces) applied.trim_spaces = true;
+    const trimSpaces = parseBooleanFormValue(settings.trim_spaces);
+    if (trimSpaces !== undefined) applied.trim_spaces = trimSpaces;
   }
 
   // Parquet has no wizard-managed advanced settings.

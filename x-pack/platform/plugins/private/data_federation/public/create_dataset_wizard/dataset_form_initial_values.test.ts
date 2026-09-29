@@ -36,7 +36,7 @@ describe('dataset_form_initial_values', () => {
     expect(values.settings.skip_rows).toBe('');
     expect(values.settings.encoding).toBe('');
     expect(values.settings.column_prefix).toBe('');
-    expect(values.settings.trim_spaces).toBe(false);
+    expect(values.settings.trim_spaces).toBe('');
   });
 
   it('maps list-table item and defaults description to empty string', () => {

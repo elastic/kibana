@@ -145,7 +145,7 @@ describe('create_dataset_form_state', () => {
         quote: '',
         escape: '',
         column_prefix: '',
-        trim_spaces: false,
+        trim_spaces: '',
       });
     });
   });
@@ -313,19 +313,26 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'tsv', escape: '\\\\' });
     });
 
-    it('includes trim_spaces when enabled', () => {
+    it('includes trim_spaces when explicitly set and omits it when unset', () => {
       expect(
         buildDatasetSettingsFromFormValues({
           ...empty(),
           format: 'csv',
-          trim_spaces: true,
+          trim_spaces: 'true',
         })
       ).toEqual({ format: 'csv', trim_spaces: true });
       expect(
         buildDatasetSettingsFromFormValues({
           ...empty(),
           format: 'csv',
-          trim_spaces: false,
+          trim_spaces: 'false',
+        })
+      ).toEqual({ format: 'csv', trim_spaces: false });
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          trim_spaces: '',
         })
       ).toEqual({ format: 'csv' });
     });

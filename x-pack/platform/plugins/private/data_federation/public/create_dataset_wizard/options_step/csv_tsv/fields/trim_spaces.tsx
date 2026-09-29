@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
+import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
 
-type TrimSpacesOption = EuiComboBoxOptionOption<string> & { value: 'true' | 'false' };
+type TrimSpacesOption = EuiComboBoxOptionOption<string> & { value: DatasetBooleanFormValue };
 
 const OPTIONS: TrimSpacesOption[] = [
   {
@@ -26,18 +27,14 @@ export function TrimSpaces({
   onChange,
   onBlur,
 }: {
-  value: boolean;
-  onChange: (next: boolean) => void;
+  value: DatasetBooleanFormValue;
+  onChange: (next: DatasetBooleanFormValue) => void;
   onBlur: () => void;
 }) {
-  const selectedOptions = value
-    ? [
-        {
-          value: 'true',
-          label: createDatasetWizardStrings.trueLabel,
-        },
-      ]
-    : [];
+  const selectedOptions = useMemo(() => {
+    const option = OPTIONS.find((o) => o.value === value);
+    return option ? [{ value: option.value, label: option.label }] : [];
+  }, [value]);
 
   return (
     <EuiComboBox
@@ -51,7 +48,7 @@ export function TrimSpaces({
       selectedOptions={selectedOptions}
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as TrimSpacesOption | undefined;
-        onChange(next?.value === 'true');
+        onChange(next?.value ?? '');
       }}
       onBlur={onBlur}
     />
