@@ -61,6 +61,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(response.body.id);
       expect(persisted.id).toBe(response.body.id);
       expect(persisted.metadata.name).toBe('created-rule');
+      expect(persisted.version).toBe(1);
     }
   );
 

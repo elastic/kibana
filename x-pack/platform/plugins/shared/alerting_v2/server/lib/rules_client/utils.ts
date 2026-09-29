@@ -26,7 +26,7 @@ import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { toApiQuery, toApiStateTransition } from '../../saved_objects/legacy_rule_shape';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
-import type { BulkOperationError, InternalRule, RotationCandidate } from './types';
+import type { BulkOperationError, RotationCandidate } from './types';
 
 /**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
@@ -403,13 +403,11 @@ function isMergedRecoverySegmentComposable(attrs: RuleSavedObjectAttributes): bo
   return validateComposedEsqlQuery(attrs.query.base, attrs.recovery.segment) == null;
 }
 
-/**
- * Converts saved object attributes into the server-internal rule shape.
- */
-export function transformRuleSoAttributesToInternalRule(
+/** Converts saved object attributes into the public API rule shape. */
+export function transformRuleSoAttributesToRuleApiResponse(
   id: string,
   attrs: RuleSavedObjectAttributes
-): InternalRule {
+): RuleResponse {
   return {
     id,
     version: attrs.version ?? RULE_VERSION_FALLBACK,
@@ -444,9 +442,4 @@ export function transformRuleSoAttributesToInternalRule(
     updated_by: attrs.updatedBy,
     updated_at: attrs.updatedAt,
   };
-}
-
-/** Projects a server-internal rule onto the public API response shape. */
-export function toRuleApiResponse({ version, ...rule }: InternalRule): RuleResponse {
-  return rule;
 }

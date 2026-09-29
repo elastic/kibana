@@ -52,7 +52,9 @@ const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleRespo
   );
 
   // Cover the full payload shape so significant schema drift fails loudly.
-  expect(snapshot).toMatchObject(expectedRule);
+  // `version` is omitted from the snapshot (it lives in `object.sequence`).
+  const { version: _version, ...expectedRuleWithoutVersion } = expectedRule;
+  expect(snapshot).toMatchObject(expectedRuleWithoutVersion);
 };
 
 const expectSequences = (entries: ChangeHistoryDocument[], expected: number[]): void => {

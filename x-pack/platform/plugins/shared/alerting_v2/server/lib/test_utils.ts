@@ -20,7 +20,7 @@ import type {
   RulePipelineState,
   StepStreamResult,
 } from './rule_executor/types';
-import type { InternalRule, RuleResponse } from './rules_client';
+import type { RuleResponse } from './rules_client';
 import type { QueryPayload } from './rule_executor/get_query_payload';
 import type { AlertEvent } from '../resources/datastreams/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
@@ -61,6 +61,7 @@ export function createRuleResponse(
   return {
     id: 'rule-1',
     kind: 'alert',
+    version: 1,
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     query: { base: 'FROM logs-* | LIMIT 10' },
@@ -77,15 +78,8 @@ export function createRuleResponse(
   };
 }
 
-/**
- * Creates a standard InternalRule (API shape + version counter) for testing.
- */
-export function createInternalRule(
-  overrides: Parameters<typeof createRuleResponse>[0] & { version?: number } = {}
-): InternalRule {
-  const { version, ...rest } = overrides;
-  return { ...createRuleResponse(rest), version: version ?? 1 };
-}
+/** @deprecated Use `createRuleResponse` with a `version` override instead. */
+export const createInternalRule = createRuleResponse;
 
 /**
  * Creates standard RuleSavedObjectAttributes for testing.

@@ -56,6 +56,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.id).toBe(id);
       expect(persisted.metadata.name).toBe('created-via-upsert');
+      expect(persisted.version).toBe(1);
     }
   );
 
@@ -84,8 +85,9 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.created_at).toBe(created.created_at);
       expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.enabled).toBe(created.enabled);
-      // updatedAt is refreshed on every replace.
+      // updatedAt is refreshed and version advances on every replace.
       expect(response.body.updated_at).not.toBe(created.updated_at);
+      expect(response.body.version).toBe(created.version + 1);
     }
   );
 

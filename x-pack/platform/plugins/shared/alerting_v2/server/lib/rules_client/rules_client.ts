@@ -86,7 +86,6 @@ import type {
   FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
-  InternalRule,
   RotationCandidate,
   RuleResponse,
   UpdateRuleParams,
@@ -103,8 +102,7 @@ import {
   toBulkError,
   bulkErrorCodeForStatus,
   transformCreateRuleBodyToRuleSoAttributes,
-  transformRuleSoAttributesToInternalRule,
-  toRuleApiResponse,
+  transformRuleSoAttributesToRuleApiResponse,
 } from './utils';
 
 const withApm = withApmDecorator('RulesClient');
@@ -566,7 +564,7 @@ export class RulesClient {
    * `references` is required rather than optional: omitting it would silently
    * skip artifact reference resolution, so a caller that has none has to say so.
    */
-  private toInternalRule({
+  private toRuleApiResponse({
     id,
     attrs,
     references,
@@ -574,8 +572,8 @@ export class RulesClient {
     id: string;
     attrs: RuleSavedObjectAttributes;
     references: SavedObjectReference[] | undefined;
-  }): InternalRule {
-    return transformRuleSoAttributesToInternalRule(
+  }): RuleResponse {
+    return transformRuleSoAttributesToRuleApiResponse(
       id,
       this.withResolvedArtifacts(attrs, references)
     );
@@ -632,7 +630,7 @@ export class RulesClient {
     if (!persisted) {
       throw Boom.badImplementation('Rule was not created');
     }
-    const rule = this.toInternalRule({
+    const rule = this.toRuleApiResponse({
       id: persisted.id,
       attrs: persisted.attributes,
       references: persisted.references,
@@ -640,7 +638,7 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleCreated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
-    return toRuleApiResponse(rule);
+    return rule;
   }
 
   @withApm
@@ -691,12 +689,12 @@ export class RulesClient {
     const items: RuleResponse[] = [];
     const createdRules: EventRule[] = [];
     for (const doc of persisted.created) {
-      const rule = this.toInternalRule({
+      const rule = this.toRuleApiResponse({
         id: doc.id,
         attrs: doc.attributes,
         references: doc.references,
       });
-      items.push(toRuleApiResponse(rule));
+      items.push(rule);
       createdRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
@@ -776,7 +774,7 @@ export class RulesClient {
       references,
     });
 
-    const rule = this.toInternalRule({
+    const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
       references,
@@ -786,22 +784,13 @@ export class RulesClient {
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
 
-    return toRuleApiResponse(rule);
-  }
-
-  /**
-   * Reads a rule with its version counter attached, for the in-process callers
-   * (rule executor, change history) that order work on the counter.
-   */
-  @withApm
-  public async getInternalRule({ id }: { id: string }): Promise<InternalRule> {
-    const { attrs, references } = await this.getExistingRule(id);
-    return this.toInternalRule({ id, attrs, references });
+    return rule;
   }
 
   @withApm
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
-    return toRuleApiResponse(await this.getInternalRule({ id }));
+    const { attrs, references } = await this.getExistingRule(id);
+    return this.toRuleApiResponse({ id, attrs, references });
   }
 
   @withApm
@@ -816,13 +805,11 @@ export class RulesClient {
       }
       rulesById.set(
         doc.id,
-        toRuleApiResponse(
-          this.toInternalRule({
-            id: doc.id,
-            attrs: doc.attributes,
-            references: doc.references,
-          })
-        )
+        this.toRuleApiResponse({
+          id: doc.id,
+          attrs: doc.attributes,
+          references: doc.references,
+        })
       );
     }
 
@@ -858,7 +845,7 @@ export class RulesClient {
 
     // Nothing is persisted on delete, so stamp the bumped counter onto the
     // emitted rule so the deletion orders after the last change.
-    const rule = this.toInternalRule({
+    const rule = this.toRuleApiResponse({
       id,
       attrs: { ...existingAttrs, version: this.getNextVersion(existingAttrs.version) },
       references,
@@ -964,7 +951,7 @@ export class RulesClient {
       references,
     });
 
-    const rule = this.toInternalRule({
+    const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
       references,
@@ -972,7 +959,7 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleEnabled(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
-    return toRuleApiResponse(rule);
+    return rule;
   }
 
   @withApm
@@ -1009,7 +996,7 @@ export class RulesClient {
       references,
     });
 
-    const rule = this.toInternalRule({
+    const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
       references,
@@ -1017,7 +1004,7 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleDisabled(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
-    return toRuleApiResponse(rule);
+    return rule;
   }
 
   @withApm
@@ -1052,13 +1039,11 @@ export class RulesClient {
 
     return {
       items: res.saved_objects.map((so) =>
-        toRuleApiResponse(
-          this.toInternalRule({
-            id: so.id,
-            attrs: so.attributes,
-            references: so.references,
-          })
-        )
+        this.toRuleApiResponse({
+          id: so.id,
+          attrs: so.attributes,
+          references: so.references,
+        })
       ),
       total: res.total,
       page,
@@ -1187,7 +1172,7 @@ export class RulesClient {
           ? {
               ruleId: result.id,
               spaceId,
-              rule: this.toInternalRule({
+              rule: this.toRuleApiResponse({
                 id: result.id,
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
@@ -1309,7 +1294,7 @@ export class RulesClient {
         }
 
         affectedCount += 1;
-        const rule = this.toInternalRule({
+        const rule = this.toRuleApiResponse({
           id: item.id,
           attrs: item.attrs,
           references: item.references,
@@ -1389,7 +1374,7 @@ export class RulesClient {
           continue;
         }
 
-        const rule = this.toInternalRule({
+        const rule = this.toRuleApiResponse({
           id: item.id,
           attrs: item.attrs,
           references: item.references,
@@ -1514,7 +1499,7 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      const rule = this.toInternalRule({
+      const rule = this.toRuleApiResponse({
         id: item.id,
         attrs: item.attrs,
         references: item.references,
@@ -1829,7 +1814,7 @@ export class RulesClient {
       references,
     });
 
-    const rule = this.toInternalRule({
+    const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
       references,
@@ -1837,6 +1822,6 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleUpdated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
-    return { rule: toRuleApiResponse(rule), created: false };
+    return { rule, created: false };
   }
 }

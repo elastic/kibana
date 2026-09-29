@@ -805,6 +805,13 @@ export const ruleResponseSchema = createRuleDataBaseSchema
     // response never carries it.
     state_transition: stateTransitionSchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
+    version: z
+      .number()
+      .int()
+      .min(1)
+      .describe(
+        'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
+      ),
     enabled: z.boolean().describe('Whether the rule is enabled.'),
     created_by: actorSchema.nullable().describe('Actor who created the rule.'),
     created_at: z.iso.datetime().describe('ISO timestamp when the rule was created.'),

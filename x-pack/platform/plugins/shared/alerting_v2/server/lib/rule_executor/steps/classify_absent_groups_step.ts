@@ -27,7 +27,7 @@ import {
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { ActiveAlertGroupHash } from '../queries';
-import type { InternalRule } from '../../rules_client';
+import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 
 /**
@@ -194,7 +194,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     recoveryQuery,
     logger,
   }: {
-    rule: InternalRule;
+    rule: RuleResponse;
     input: RulePipelineState['input'];
     activeGroups: ActiveAlertGroupHash[];
     breachedGroupHashes: ReadonlySet<string>;
@@ -241,7 +241,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     dataPresentGroupHashes,
     recoveryQuery,
   }: {
-    rule: InternalRule;
+    rule: RuleResponse;
     input: RulePipelineState['input'];
     activeGroups: ActiveAlertGroupHash[];
     breachedGroupHashes: ReadonlySet<string>;

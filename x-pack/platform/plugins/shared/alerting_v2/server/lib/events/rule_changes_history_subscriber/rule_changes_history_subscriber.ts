@@ -8,6 +8,7 @@
 import { inject, injectable } from 'inversify';
 import { CoreStart } from '@kbn/core-di-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -18,7 +19,6 @@ import {
   type RuleChangesHistoryServiceContract,
   type RuleChangesHistorySnapshot,
 } from '../../rule_changes_history';
-import type { InternalRule } from '../../rules_client/types';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import {
   AlertingDomainEventBusToken,
@@ -32,7 +32,7 @@ import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
  * Strips the version counter: it is persisted as `object.sequence`, so keeping
  * it in the snapshot too would show up as a spurious change on every diff.
  */
-const toRuleChangesHistorySnapshot = (rule: InternalRule): RuleChangesHistorySnapshot => {
+const toRuleChangesHistorySnapshot = (rule: RuleResponse): RuleChangesHistorySnapshot => {
   const { version: _version, ...snapshot } = rule;
   return snapshot;
 };

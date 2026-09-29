@@ -1774,6 +1774,7 @@ describe('findRulesRequestSchema', () => {
 describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
+    version: 1,
     kind: 'alert' as const,
     metadata: { name: 'r' },
     time_field: '@timestamp',
@@ -1871,6 +1872,7 @@ describe('bulkCreateRulesRequestSchema', () => {
 describe('bulkCreateRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
+    version: 1,
     kind: 'alert' as const,
     metadata: { name: 'r' },
     time_field: '@timestamp',

@@ -14,7 +14,7 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
 /**
  * Data stored inside a rule attachment.
  *
- * Server-generated fields (id, enabled, created_at, updated_at) are optional so
+ * Server-generated fields (id, version, enabled, created_at, updated_at) are optional so
  * that the same schema covers both:
  *   - proposed rules (by-value, not yet saved — no id or audit fields)
  *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
@@ -38,6 +38,7 @@ export const ruleAttachmentDataSchema = ruleResponseSchema
   .omit({ created_by: true, updated_by: true })
   .extend({
     id: opt(shape.id),
+    version: opt(shape.version),
     enabled: opt(shape.enabled),
     created_at: opt(shape.created_at),
     updated_at: opt(shape.updated_at),

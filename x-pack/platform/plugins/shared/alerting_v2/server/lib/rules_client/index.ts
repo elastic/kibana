@@ -19,13 +19,11 @@ export type {
   DryRunResponse,
   FindRulesArgs,
   FindRulesResponse,
-  InternalRule,
   RuleResponse,
   UpdateRuleData,
 } from './types';
 export {
   transformCreateRuleBodyToRuleSoAttributes,
-  transformRuleSoAttributesToInternalRule,
-  toRuleApiResponse,
+  transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
 } from './utils';

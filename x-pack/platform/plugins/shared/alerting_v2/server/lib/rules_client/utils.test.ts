@@ -12,8 +12,7 @@ import { createRuleSoAttributes } from '../test_utils';
 import type { RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
-  transformRuleSoAttributesToInternalRule,
-  toRuleApiResponse,
+  transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
   assertImmutableUnchanged,
   validateMergedRuleAttributes,
@@ -624,17 +623,17 @@ describe('utils', () => {
     });
   });
 
-  describe('transformRuleSoAttributesToInternalRule', () => {
+  describe('transformRuleSoAttributesToRuleApiResponse', () => {
     it('returns artifacts that satisfy the strict response schema', () => {
       const attrs = createRuleSoAttributesWithArtifacts();
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
-      expect(() => ruleResponseSchema.parse(toRuleApiResponse(result))).not.toThrow();
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
     it('strips legacy artifact value left on disk after model-version migration', () => {
@@ -657,13 +656,13 @@ describe('utils', () => {
         ],
       });
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
-      expect(() => ruleResponseSchema.parse(toRuleApiResponse(result))).not.toThrow();
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
     it('includes description in the API response', () => {
@@ -671,7 +670,7 @@ describe('utils', () => {
         metadata: { name: 'rule-1', description: 'A test description' },
       });
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.metadata.description).toBe('A test description');
     });
@@ -679,7 +678,7 @@ describe('utils', () => {
     it('sets description to undefined when not present in SO attributes', () => {
       const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.metadata.description).toBeUndefined();
     });
@@ -691,7 +690,7 @@ describe('utils', () => {
       };
 
       const soAttrs = transformCreateRuleBodyToRuleSoAttributes(createData, serverFields);
-      const response = transformRuleSoAttributesToInternalRule('rule-rt-1', soAttrs);
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-1', soAttrs);
 
       expect(response.metadata.description).toBe('Round-trip desc');
     });
@@ -701,7 +700,7 @@ describe('utils', () => {
         query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
       });
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.query).toEqual({
         base: 'FROM metrics-*',
@@ -716,7 +715,7 @@ describe('utils', () => {
         no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
       });
 
-      const result = toRuleApiResponse(transformRuleSoAttributesToInternalRule('rule-id-1', attrs));
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
       expect(result.no_data).toEqual({ strategy: 'alert', query: 'FROM heartbeat-*' });
@@ -730,7 +729,7 @@ describe('utils', () => {
         no_data: undefined,
       });
 
-      const result = toRuleApiResponse(transformRuleSoAttributesToInternalRule('rule-id-1', attrs));
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.recovery).toBeUndefined();
       expect(result.no_data).toBeUndefined();
@@ -744,7 +743,7 @@ describe('utils', () => {
       };
 
       const soAttrs = transformCreateRuleBodyToRuleSoAttributes(createData, serverFields);
-      const response = transformRuleSoAttributesToInternalRule('rule-rt-2', soAttrs);
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-2', soAttrs);
 
       expect(soAttrs.query).toEqual({ base: 'FROM metrics-*' });
       expect(response.query).toEqual(createData.query);
@@ -755,7 +754,7 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.metadata.builder_type).toBe('threshold');
     });
@@ -763,7 +762,7 @@ describe('utils', () => {
     it('sets metadata.builder_type to undefined when absent from SO attributes', () => {
       const attrs = createRuleSoAttributes({});
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.metadata.builder_type).toBeUndefined();
     });
@@ -771,24 +770,25 @@ describe('utils', () => {
     it('exposes the persisted version counter on the internal rule', () => {
       const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule' }, version: 7 });
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
       expect(result.version).toBe(7);
     });
 
     it('falls back to the baseline version when the rule has no version yet', () => {
       const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule' }, version: undefined });
 
-      const result = transformRuleSoAttributesToInternalRule('rule-id-1', attrs);
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
       expect(result.version).toBe(1);
     });
   });
 
-  describe('toRuleApiResponse', () => {
-    it('drops the version counter so the response matches the strict API schema', () => {
+  describe('transformRuleSoAttributesToRuleApiResponse version counter', () => {
+    it('exposes the version counter and satisfies the strict API schema', () => {
       const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' }, version: 7 });
 
-      const result = toRuleApiResponse(transformRuleSoAttributesToInternalRule('rule-id-1', attrs));
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
+      expect(result.version).toBe(7);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
   });

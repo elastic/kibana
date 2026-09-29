@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import type { InternalRule } from '../../rules_client/types';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -27,13 +27,13 @@ import {
 
 /**
  * Rule carried in a rule-lifecycle event. `rule` is the domain model (the API
- * response plus the version counter); it is optional only for the bulk-delete
- * fallback where the pre-delete state could not be read.
+ * response); it is optional only for the bulk-delete fallback where the
+ * pre-delete state could not be read.
  */
 export interface EventRule {
   ruleId: string;
   spaceId: string;
-  rule?: InternalRule;
+  rule?: RuleResponse;
 }
 
 /**
