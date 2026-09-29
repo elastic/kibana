@@ -16,6 +16,7 @@ import { assertPrivilegesInSpaces } from './assert_privileges_in_spaces';
 const mockFns = {
   useRbacForRequest: jest.fn().mockReturnValue(true),
   atSpaces: jest.fn().mockResolvedValue({ hasAllRequested: true }),
+  globally: jest.fn().mockResolvedValue({ hasAllRequested: true }),
 };
 
 jest.mock('..', () => ({
@@ -37,6 +38,7 @@ function makeSecurityStub() {
       },
       checkPrivilegesWithRequest: jest.fn().mockReturnValue({
         atSpaces: (...args: unknown[]) => mockFns.atSpaces(...args),
+        globally: (...args: unknown[]) => mockFns.globally(...args),
       }),
     },
   };
@@ -48,6 +50,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockFns.useRbacForRequest.mockReturnValue(true);
   mockFns.atSpaces.mockResolvedValue({ hasAllRequested: true });
+  mockFns.globally.mockResolvedValue({ hasAllRequested: true });
   mockGetSecurity.mockReturnValue(makeSecurityStub());
 });
 
@@ -154,6 +157,47 @@ describe('assertPrivilegesInSpaces', () => {
     ).resolves.toBeUndefined();
 
     expect(mockFns.atSpaces).not.toHaveBeenCalled();
+  });
+
+  it('uses globally() check when spaceIds contains ALL_SPACES_ID (*)', async () => {
+    await expect(
+      assertPrivilegesInSpaces({
+        request: mockRequest,
+        spaceIds: ['*'],
+        apiPrivileges: ['fleet-agent-policies-all'],
+        errorMessage: 'No access',
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mockFns.globally).toHaveBeenCalled();
+    expect(mockFns.atSpaces).not.toHaveBeenCalled();
+  });
+
+  it('throws when globally() check fails for ALL_SPACES_ID', async () => {
+    mockFns.globally.mockResolvedValue({ hasAllRequested: false });
+
+    await expect(
+      assertPrivilegesInSpaces({
+        request: mockRequest,
+        spaceIds: ['*'],
+        apiPrivileges: ['fleet-agent-policies-all'],
+        errorMessage: 'No global access',
+      })
+    ).rejects.toThrow('No global access');
+
+    expect(mockFns.atSpaces).not.toHaveBeenCalled();
+  });
+
+  it('checks globally() for * and atSpaces() for concrete spaces when both are present', async () => {
+    await assertPrivilegesInSpaces({
+      request: mockRequest,
+      spaceIds: ['*', 'space-a'],
+      apiPrivileges: ['fleet-agent-policies-all'],
+      errorMessage: 'No access',
+    });
+
+    expect(mockFns.globally).toHaveBeenCalled();
+    expect(mockFns.atSpaces).toHaveBeenCalledWith(['space-a'], expect.any(Object));
   });
 
   it('maps each apiPrivilege through authz.actions.api.get before passing to atSpaces', async () => {

@@ -7,12 +7,17 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '..';
 
 /**
  * Checks that the caller represented by `request` holds all the given Kibana
  * API privileges in every space in `spaceIds`.
+ *
+ * When `spaceIds` contains `'*'` (ALL_SPACES_ID), a global privilege check is
+ * used instead of a per-space check, because only a globally-granted privilege
+ * covers all spaces. Per-space grants do not satisfy `atSpaces(['*'])`.
  *
  * Returns immediately (no-op) when:
  *  - There is no security plugin (e.g. in tests with security disabled)
@@ -48,11 +53,31 @@ export async function assertPrivilegesInSpaces({
   }
 
   const { authz } = security;
-  const result = await authz.checkPrivilegesWithRequest(request).atSpaces(spaceIdsArray, {
-    kibana: apiPrivileges.map((p) => authz.actions.api.get(p)),
-  });
+  const kibanaPrivileges = { kibana: apiPrivileges.map((p) => authz.actions.api.get(p)) };
+  const checker = authz.checkPrivilegesWithRequest(request);
 
-  if (!result.hasAllRequested) {
+  // When any policy is shared to all spaces ('*'), a global privilege check is
+  // required — per-space grants do not satisfy atSpaces(['*']).
+  const hasAllSpaces = spaceIdsArray.includes(ALL_SPACES_ID);
+  const concreteSpaceIds = spaceIdsArray.filter((id) => id !== ALL_SPACES_ID);
+
+  let hasAllRequested = true;
+
+  if (hasAllSpaces) {
+    const result = await checker.globally(kibanaPrivileges);
+    if (!result.hasAllRequested) {
+      hasAllRequested = false;
+    }
+  }
+
+  if (hasAllRequested && concreteSpaceIds.length > 0) {
+    const result = await checker.atSpaces(concreteSpaceIds, kibanaPrivileges);
+    if (!result.hasAllRequested) {
+      hasAllRequested = false;
+    }
+  }
+
+  if (!hasAllRequested) {
     throw new FleetUnauthorizedError(errorMessage);
   }
 }
