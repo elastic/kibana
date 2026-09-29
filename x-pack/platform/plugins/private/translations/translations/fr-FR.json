@@ -18453,7 +18453,6 @@
     "xpack.dataFederation.createDatasetForm.settingsHeaderRowTrue": "Oui",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioInvalid": "Doit être un nombre compris entre 0 et 1.",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioLabel": "Taux d'erreur maximal",
-    "xpack.dataFederation.createDatasetForm.settingsMaxErrorsInvalid": "Doit être un entier non négatif.",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorsLabel": "Nombre maximal d'erreurs",
     "xpack.dataFederation.createDatasetForm.settingsMaxFieldSizeLabel": "Taille maximale du champ",
     "xpack.dataFederation.createDatasetForm.settingsModeEscaped": "Échappé",

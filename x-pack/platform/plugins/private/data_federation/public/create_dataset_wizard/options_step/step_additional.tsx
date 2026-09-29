@@ -30,6 +30,7 @@ export function StepAdditional() {
           'settings.max_errors',
           'settings.max_error_ratio',
           'settings.skip_rows',
+          'settings.delimiter',
           'settings.quote',
           'settings.escape',
         ]);

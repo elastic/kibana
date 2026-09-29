@@ -18541,7 +18541,6 @@
     "xpack.dataFederation.createDatasetForm.settingsHeaderRowTrue": "はい",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioInvalid": "0から1の間の数値でなければなりません。",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioLabel": "最大エラー率",
-    "xpack.dataFederation.createDatasetForm.settingsMaxErrorsInvalid": "非負の整数でなければなりません。",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorsLabel": "最大エラー数",
     "xpack.dataFederation.createDatasetForm.settingsMaxFieldSizeLabel": "最大フィールドサイズ",
     "xpack.dataFederation.createDatasetForm.settingsModeEscaped": "エスケープ済み",

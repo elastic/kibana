@@ -54,7 +54,7 @@ export function MaxErrorsField({ control }: { control: Control<CreateDatasetForm
       <EuiFieldNumber
         data-test-subj="createDatasetSettingsMaxErrors"
         fullWidth
-        min={1}
+        min={0}
         step={1}
         placeholder={createDatasetWizardStrings.settingsMaxErrorsPlaceholder}
         isInvalid={isMaxErrorsInvalid}

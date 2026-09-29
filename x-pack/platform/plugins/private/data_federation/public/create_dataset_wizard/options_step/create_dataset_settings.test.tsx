@@ -531,7 +531,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByText(createDatasetWizardStrings.settingsSkipRowsInvalid)).toBeInTheDocument();
   });
 
-  it('shows an error message when max errors is not a positive whole number', () => {
+  it('shows an error message when max errors is not a whole number', () => {
     const { getByTestId, getByText } = renderAdditionalSettings();
 
     fireEvent.change(getByTestId('createDatasetSettingsMaxErrors'), {

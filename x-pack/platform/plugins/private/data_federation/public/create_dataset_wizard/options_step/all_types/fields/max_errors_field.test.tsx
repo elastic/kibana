@@ -42,7 +42,7 @@ const renderField = () => {
 };
 
 describe('MaxErrorsField', () => {
-  it('allows empty, rejects non-positive whole numbers, accepts positive whole numbers', () => {
+  it('allows empty and whole numbers from 0, rejects negative and fractional numbers', () => {
     const { getByTestId, queryByText, getByText } = renderField();
     const input = getByTestId('createDatasetSettingsMaxErrors');
 
@@ -51,6 +51,10 @@ describe('MaxErrorsField', () => {
 
     fireEvent.change(input, { target: { value: '0' } });
     expect(getByTestId('maxErrorsValue')).toHaveTextContent('0');
+    expect(queryByText(createDatasetWizardStrings.settingsMaxErrorsInvalid)).toBeNull();
+    expect(input).not.toHaveAttribute('aria-invalid', 'true');
+
+    fireEvent.change(input, { target: { value: '-1' } });
     expect(getByText(createDatasetWizardStrings.settingsMaxErrorsInvalid)).toBeInTheDocument();
     expect(input).toHaveAttribute('aria-invalid', 'true');
 

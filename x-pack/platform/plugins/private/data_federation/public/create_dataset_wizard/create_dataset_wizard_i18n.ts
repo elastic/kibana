@@ -423,9 +423,9 @@ export const createDatasetWizardStrings = {
   ),
 
   settingsMaxErrorsInvalid: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsMaxErrorsInvalid',
+    'xpack.dataFederation.createDatasetForm.settingsMaxErrorsInvalidNonNegative',
     {
-      defaultMessage: 'Must be a positive whole number or empty.',
+      defaultMessage: 'Must be a whole number of 0 or more, or empty.',
     }
   ),
 

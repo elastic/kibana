@@ -18549,7 +18549,6 @@
     "xpack.dataFederation.createDatasetForm.settingsHeaderRowTrue": "是",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioInvalid": "必须是介于0和1之间的数字。",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioLabel": "最大错误比率",
-    "xpack.dataFederation.createDatasetForm.settingsMaxErrorsInvalid": "必须为非负整数。",
     "xpack.dataFederation.createDatasetForm.settingsMaxErrorsLabel": "最大错误数",
     "xpack.dataFederation.createDatasetForm.settingsMaxFieldSizeLabel": "最大字段大小",
     "xpack.dataFederation.createDatasetForm.settingsModeEscaped": "Esc 键",
