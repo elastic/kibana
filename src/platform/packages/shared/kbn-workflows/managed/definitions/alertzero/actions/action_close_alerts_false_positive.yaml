@@ -17,7 +17,7 @@ consts:
   # under `consts`: unknown top-level keys are stripped by the schema.
   actionMetadata:
     name: Close alerts as false positive
-    category: respond
+    category: investigate
     description: Closes the specified alerts with workflow_status=closed and workflow_reason=false_positive.
     impact: high
     # A closed alert can be reopened by an analyst.

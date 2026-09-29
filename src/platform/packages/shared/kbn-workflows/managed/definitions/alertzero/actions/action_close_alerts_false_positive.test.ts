@@ -19,9 +19,16 @@ interface ParsedStep {
 }
 
 describe('Close alerts as false positive action', () => {
-  const workflow = parse(ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML) as { steps: ParsedStep[] };
+  const workflow = parse(ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML) as {
+    consts?: { actionMetadata?: { category?: string } };
+    steps: ParsedStep[];
+  };
   const failStep = workflow.steps.find((step) => step.name === 'fail_incomplete_close')!;
   const engine = createWorkflowLiquidEngine();
+
+  it('queues under Investigate so Respond stays reserved for containment actions', () => {
+    expect(workflow.consts?.actionMetadata?.category).toBe('investigate');
+  });
 
   // Mirrors WorkflowTemplatingEngine.evaluateExpression: strip the leading `$` and the
   // surrounding `{{ }}`, then evalValueSync the raw expression against a context — the
