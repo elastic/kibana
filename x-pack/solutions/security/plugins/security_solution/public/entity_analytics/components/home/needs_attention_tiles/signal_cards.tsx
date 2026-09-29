@@ -33,9 +33,52 @@ export interface SignalCardsProps {
   onAddCardToTimeline?: (cardId: SignalCardId) => void;
 }
 
-/** 6 tiles in a 1×6 compact horizontal strip. */
+/** Named container so the grid can step columns from its own width, not the viewport. */
+const SIGNAL_CARDS_CONTAINER = 'eaSignalCards';
+/** Compact: 6-across, then 3 / 2 / 1 so the last row stays even. */
+const COMPACT_CARD_MIN_WIDTH = '12rem';
+const COMPACT_COLUMN_STEPS = [6, 3, 2, 1] as const;
+/** Expanded: two rows of 3, then 2 / 1. */
+const EXPANDED_CARD_MIN_WIDTH = '16rem';
+const EXPANDED_COLUMN_STEPS = [3, 2, 1] as const;
 const METRIC_LINE_HEIGHT = 1.2;
 const DIMMED_OPACITY = 0.7;
+
+const spaceForColumns = (count: number, minItemWidth: string, gap: string): string =>
+  count === 1 ? minItemWidth : `calc(${count} * ${minItemWidth} + ${count - 1} * ${gap})`;
+
+/**
+ * Caps column count (compact 6, expanded 3) and steps down via container queries
+ * when tiles would otherwise shrink below `minItemWidth`.
+ */
+const layoutCappedGridCss = ({
+  minItemWidth,
+  columnSteps,
+  gap,
+}: {
+  minItemWidth: string;
+  columnSteps: readonly number[];
+  gap: string;
+}) => {
+  const [maxColumns, ...narrower] = columnSteps;
+  const steps = narrower
+    .map((columns, index) => {
+      const threshold = spaceForColumns(columnSteps[index], minItemWidth, gap);
+      return `
+        @container ${SIGNAL_CARDS_CONTAINER} (width < ${threshold}) {
+          grid-template-columns: repeat(${columns}, minmax(0, 1fr));
+        }
+      `;
+    })
+    .join('');
+
+  return css`
+    display: grid;
+    gap: ${gap};
+    grid-template-columns: repeat(${maxColumns}, minmax(0, 1fr));
+    ${steps}
+  `;
+};
 
 /** v.5 title overrides (tooltip uses the same string). */
 const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
@@ -87,12 +130,33 @@ const unfilterTableTooltip = (title: string) =>
     }
   );
 
+const compactLayoutTooltip = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCards.compactLayoutTooltip',
+  { defaultMessage: 'Compact layout' }
+);
+
+const expandedLayoutTooltip = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCards.expandedLayoutTooltip',
+  { defaultMessage: 'Expanded layout' }
+);
+
+const switchToCompactLayoutAriaLabel = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCards.switchToCompactLayoutAriaLabel',
+  { defaultMessage: 'Switch to compact layout' }
+);
+
+const switchToExpandedLayoutAriaLabel = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCards.switchToExpandedLayoutAriaLabel',
+  { defaultMessage: 'Switch to expanded layout' }
+);
+
 const CornerControl: React.FC<{
   selected: boolean;
   interactive: boolean;
   emphasized: boolean;
-  onClear?: () => void;
-}> = ({ selected, interactive, emphasized, onClear }) => {
+  title: string;
+  onToggle: () => void;
+}> = ({ selected, interactive, emphasized, title, onToggle }) => {
   const { euiTheme } = useEuiTheme();
 
   if (!interactive) {
@@ -135,40 +199,43 @@ const CornerControl: React.FC<{
     </span>
   );
 
-  if (selected && onClear) {
-    return (
-      <button
-        type="button"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.facelift.signalCards.clearFilter',
-          { defaultMessage: 'Clear table filter' }
-        )}
-        data-test-subj="eaFaceliftSignalCardClearFilter"
-        onMouseDown={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onClear();
-        }}
-        css={css`
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          border: 0;
-          background: transparent;
-          cursor: pointer;
-        `}
-      >
-        {icon}
-      </button>
-    );
-  }
-
-  return icon;
+  return (
+    <button
+      type="button"
+      // Stay in the tab order only while selected so we do not add a second
+      // stop per tile; keep the node mounted so keyboard clear does not lose focus.
+      tabIndex={selected ? 0 : -1}
+      aria-label={
+        selected
+          ? i18n.translate(
+              'xpack.securitySolution.entityAnalytics.facelift.signalCards.clearFilter',
+              { defaultMessage: 'Clear table filter' }
+            )
+          : filterTableTooltip(title)
+      }
+      data-test-subj="eaFaceliftSignalCardClearFilter"
+      onMouseDown={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onToggle();
+      }}
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      `}
+    >
+      {icon}
+    </button>
+  );
 };
 
 interface SignalMetricCardProps {
@@ -234,13 +301,20 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         isLoading
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelLoading',
-              { defaultMessage: '{title}: loading', values: { title: displayTitle } }
+              {
+                defaultMessage: '{title}: loading. {description}',
+                values: { title: displayTitle, description: displayDescription },
+              }
             )
           : i18n.translate(
               'xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelCount',
               {
-                defaultMessage: '{title}: {count}',
-                values: { title: displayTitle, count: isZero ? 0 : card.value },
+                defaultMessage: '{title}: {count}. {description}',
+                values: {
+                  title: displayTitle,
+                  count: isZero ? 0 : card.value,
+                  description: displayDescription,
+                },
               }
             )
       }
@@ -260,7 +334,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         display: flex;
         flex-direction: column;
         block-size: 100%;
-        min-block-size: ${isExpanded ? `calc(${euiTheme.base}px * 10)` : '0'};
+        min-block-size: ${isExpanded ? `calc(${euiTheme.base}px * 10)` : 'auto'};
         padding: ${euiTheme.size.s};
         border: 1px solid ${borderColor};
         border-radius: ${euiTheme.border.radius.medium};
@@ -268,7 +342,6 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         opacity: ${dimmed ? DIMMED_OPACITY : 1};
         cursor: ${interactive ? 'pointer' : 'default'};
         outline: none;
-        overflow: hidden;
         position: relative;
         /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local card stacking, no semantic token applies */
         z-index: ${selected || emphasized ? 2 : 1};
@@ -329,7 +402,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
               selected={selected}
               interactive={interactive}
               emphasized={emphasized}
-              onClear={selected ? onToggle : undefined}
+              title={displayTitle}
+              onToggle={onToggle}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -411,8 +485,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
 };
 
 /**
- * Needs-attention metrics in a compact 1×6 horizontal strip. Each card toggles
- * an in-page table filter; selection stays on the card itself.
+ * Needs-attention metrics in a capped wrapping grid (6 compact, 3 expanded).
+ * Each card toggles an in-page table filter; selection stays on the card itself.
  */
 export const SignalCards: React.FC<SignalCardsProps> = ({
   activeFilter,
@@ -422,7 +496,6 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
   const { euiTheme } = useEuiTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const anySelected = activeFilter?.type === 'card';
-  const columns = isExpanded ? 3 : 6;
 
   return (
     <>
@@ -433,11 +506,13 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
           margin-block-end: ${euiTheme.size.xs};
         `}
       >
-        <EuiToolTip content={isExpanded ? 'Compact layout' : 'Expanded layout'}>
+        <EuiToolTip content={isExpanded ? compactLayoutTooltip : expandedLayoutTooltip}>
           <EuiButtonIcon
             iconType={isExpanded ? 'tableOfContents' : 'apps'}
             onClick={() => setIsExpanded((prev) => !prev)}
-            aria-label={isExpanded ? 'Switch to compact layout' : 'Switch to expanded layout'}
+            aria-label={
+              isExpanded ? switchToCompactLayoutAriaLabel : switchToExpandedLayoutAriaLabel
+            }
             size="xs"
             color="text"
           />
@@ -449,16 +524,16 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
         paddingSize="none"
         data-test-subj="eaFaceliftSignalCards"
         css={css`
-          overflow-x: auto;
+          container-type: inline-size;
+          container-name: ${SIGNAL_CARDS_CONTAINER};
         `}
       >
         <div
-          css={css`
-            display: grid;
-            grid-template-columns: repeat(${columns}, minmax(140px, 1fr));
-            gap: ${euiTheme.size.s};
-            block-size: 100%;
-          `}
+          css={layoutCappedGridCss({
+            minItemWidth: isExpanded ? EXPANDED_CARD_MIN_WIDTH : COMPACT_CARD_MIN_WIDTH,
+            columnSteps: isExpanded ? EXPANDED_COLUMN_STEPS : COMPACT_COLUMN_STEPS,
+            gap: euiTheme.size.s,
+          })}
         >
           {cards.map((card) => {
             const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
@@ -469,8 +544,6 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
                 key={card.id}
                 css={css`
                   min-inline-size: 0;
-                  min-block-size: 0;
-                  block-size: 100%;
                   position: relative;
                   /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local grid cell stacking, no semantic token applies */
                   z-index: ${selected ? 2 : 1};
