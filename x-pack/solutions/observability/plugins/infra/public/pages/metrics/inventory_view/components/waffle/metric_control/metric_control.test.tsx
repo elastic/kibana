@@ -35,7 +35,7 @@ const createMockCustomMetric = (): SnapshotCustomMetricInput => ({
 
 describe('WaffleMetricControls', () => {
   it(`doesn't allow adding more metrics when there are already ${SNAPSHOT_API_MAX_METRICS} metrics`, async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     const options = Array.from(
       { length: Math.floor(SNAPSHOT_API_MAX_METRICS / 2) },
