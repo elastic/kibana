@@ -170,9 +170,7 @@ describe('SignificantEventFlyout actions menu', () => {
   });
 
   it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
-    // Provide a non-empty lifecycle so hasCanonicalLifecycle is true and
-    // close/dismiss actions are enabled. Use mockReturnValue (not Once) so
-    // re-renders triggered by fireEvent keep the same return value.
+    // Use mockReturnValue (not Once) so re-renders triggered by fireEvent keep the same value.
     lifecycleMock.mockReturnValue({
       data: { events: [event], detections: [] },
       isLoading: false,
@@ -192,9 +190,9 @@ describe('SignificantEventFlyout actions menu', () => {
     expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
-  it('disables Dismiss and Close when lifecycle has no events (hasCanonicalLifecycle=false)', () => {
-    // Default afterEach mock: data: undefined — hasCanonicalLifecycle is false.
-    // Actions button is still rendered but action items must be disabled.
+  it('keeps Dismiss and Close enabled even when lifecycle returns empty events (event_id is always known)', () => {
+    // The update route resolves via event_id (findLatestByEventId), not event_uuid —
+    // lifecycle data is not required for close/dismiss to work correctly.
     lifecycleMock.mockReturnValue({
       data: { events: [], detections: [] },
       isLoading: false,
@@ -209,12 +207,12 @@ describe('SignificantEventFlyout actions menu', () => {
     const dismissItem = screen.getByText('Dismiss significant event').closest('button');
     const closeItem = screen.getByTestId('sigEventCloseButton');
 
-    expect(dismissItem).toBeDisabled();
-    expect(closeItem).toBeDisabled();
+    expect(dismissItem).not.toBeDisabled();
+    expect(closeItem).not.toBeDisabled();
 
-    // Clicking the disabled dismiss item must not open the modal.
+    // Clicking dismiss must open the modal since the action is enabled.
     fireEvent.click(screen.getByText('Dismiss significant event'));
-    expect(screen.queryByTestId('sigEventDismissModal')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
   it('does not expose actions for an already dismissed event', () => {

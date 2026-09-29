@@ -39,7 +39,7 @@ export const attachInvestigationToEvent = async ({
   investigation: SignificantEventInvestigation;
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
-}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
+}): Promise<{ event_uuid?: string; updated: number; ignored: number }> => {
   const resolvedSearchClient = eventSearchClient ?? eventClient;
   let latestByEventId: SignificantEventResponse | undefined;
   let readStoreThrew = false;
@@ -65,7 +65,7 @@ export const attachInvestigationToEvent = async ({
     : latestByEventId;
 
   if (!latest) {
-    return { event_uuid: eventId, updated: 0, ignored: 1 };
+    return { updated: 0, ignored: 1 };
   }
 
   // RuleEventsClient uses `group_hash` as a synthetic event_uuid, so a legacy write must retain

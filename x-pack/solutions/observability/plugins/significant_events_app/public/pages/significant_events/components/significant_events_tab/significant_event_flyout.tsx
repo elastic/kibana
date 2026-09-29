@@ -198,14 +198,6 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   // versions that fall outside the time-filtered list query used by the parent table.
   const latestEvent = useMemo(() => lifecycleData?.events.at(-1) ?? event, [lifecycleData, event]);
 
-  // Guard close/dismiss actions until the lifecycle query has returned at least once.
-  // The list may supply a synthetic group_hash as event.event_uuid (read-flag path); using
-  // it on the update route returns { updated: 0, ignored: 1 } while the UI shows success.
-  // Once lifecycleData is populated the real UUID is available via latestEvent.event_uuid.
-  // On lifecycle error, keep disabled: lifecycleData is absent so latestEvent still holds the
-  // synthetic group_hash — enabling actions in that state silently no-ops the update.
-  const hasCanonicalLifecycle = Boolean(lifecycleData?.events.length);
-
   const isInvestigationRunning = hasRunningInvestigation(latestEvent);
 
   // Poll lifecycle while a pending investigation is in progress, or briefly after the
@@ -286,7 +278,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     key="dismiss-event"
                     icon="eyeSlash"
                     color="primary"
-                    disabled={isUpdating || !hasCanonicalLifecycle}
+                    disabled={isUpdating}
                     onClick={() => {
                       setIsActionsMenuOpen(false);
                       setIsDismissModalOpen(true);
@@ -298,9 +290,9 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     key="close-event"
                     icon="cross"
                     color="danger"
-                    disabled={isUpdating || !hasCanonicalLifecycle}
+                    disabled={isUpdating}
                     onClick={() => {
-                      if (!isUpdating && hasCanonicalLifecycle) {
+                      if (!isUpdating) {
                         setIsActionsMenuOpen(false);
                         updateEventStatus({
                           eventId: latestEvent.event_id,
