@@ -40,9 +40,9 @@ describe('connector spec contracts', () => {
     expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_TYPE_ID_LENGTH);
     expect(metadata.displayName.trim()).not.toHaveLength(0);
     expect(metadata.description.trim()).not.toHaveLength(0);
-    // The actions plugin rejects a third party action type below an enterprise license at
+    // The actions plugin rejects a third party action type below an gold license at
     // registration time, which makes Kibana exit on startup. Catch it here instead.
-    expect(LICENSE_TYPE[metadata.minimumLicense]).toBeGreaterThanOrEqual(LICENSE_TYPE.enterprise);
+    expect(LICENSE_TYPE[metadata.minimumLicense]).toBeGreaterThanOrEqual(LICENSE_TYPE.gold);
     // supportedFeatureIds may be [] for support-only connectors (not yet feature-enabled).
     // Non-empty entries must be valid feature ID strings.
     if (metadata.supportedFeatureIds.length > 0) {
