@@ -278,19 +278,22 @@ describe('ApprovalModal', () => {
     expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
-  it('disables approving a proposal whose deadline has passed', () => {
+  it('shows Expired rather than Needs review, hiding the actions, once the deadline has passed', () => {
     renderModal({ proposal: { ...mockProposal, expired: true } });
-    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
+    expect(screen.getByText('Expired')).toBeInTheDocument();
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
   });
 
-  it('disables approving a proposal the workflow settled as expired before its deadline', () => {
+  it('shows Expired for a proposal the workflow settled as expired before its deadline', () => {
     renderModal({ proposal: { ...mockProposal, expired: false, status: 'expired' } });
-    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
+    expect(screen.getByText('Expired')).toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
   });
 
-  it('disables declining an expired proposal too, not just approving it', () => {
+  it('hides declining an expired proposal too, not just approving it', () => {
     renderModal({ proposal: { ...mockProposal, expired: true } });
-    expect(screen.getByTestId('approvalModal-dismiss')).toBeDisabled();
+    expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
   it('routes Dismiss to onDismiss rather than silently closing', () => {
