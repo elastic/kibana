@@ -31,7 +31,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import type { RulesClient } from './lib/rules_client';
+import type { BulkResponse, RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
@@ -57,6 +57,13 @@ export interface AlertingServerStart {
     request: KibanaRequest,
     spaceId: SpaceId
   ): Promise<RulesClientApi>;
+
+  /**
+   * Disables rules in a space as the internal Kibana user, for system-initiated
+   * work that has no user request. Bypasses user authorization, so callers own
+   * the decision of which rules to disable.
+   */
+  disableRulesAsInternalUser(params: { spaceId: SpaceId; ids: string[] }): Promise<BulkResponse>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
   getActionPolicyClientWithRequestInSpace(

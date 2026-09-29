@@ -6,19 +6,25 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { Setup, Start } from '@kbn/core-di';
+import { PluginStart, Setup, Start } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { RulesClient } from '../lib/rules_client';
+import type { BulkResponse } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { RuleSavedObjectsClientToken } from '../lib/services/rules_saved_object_service/tokens';
+import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
   AlertingServerSetup,
   AlertingServerStart,
+  AlertingServerStartDependencies,
   RulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
@@ -49,6 +55,25 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       return scope;
     };
 
+    // A credential-less request plus an internal-user rules SO client bound to the
+    // space, so the regular rules client code path runs without a user.
+    const savedObjects = get(CoreStart('savedObjects'));
+    const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+    const buildInternalScope = (spaceId: SpaceId) => {
+      const fakeRawRequest: FakeRawRequest = { headers: {}, spaceId };
+      const scope = buildScope(kibanaRequestFactory(fakeRawRequest), spaceId);
+      const internalClient = savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      });
+      const namespace = spaceIdToNamespace(spaces, spaceId);
+      scope
+        .bind(RuleSavedObjectsClientToken)
+        .toConstantValue(
+          namespace ? internalClient.asScopedToNamespace(namespace) : internalClient
+        );
+      return scope;
+    };
+
     const contract: AlertingServerStart = {
       async getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi> {
         return buildScope(request).get(RulesClient);
@@ -58,6 +83,15 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         spaceId: SpaceId
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
+      },
+      async disableRulesAsInternalUser({
+        spaceId,
+        ids,
+      }: {
+        spaceId: SpaceId;
+        ids: string[];
+      }): Promise<BulkResponse> {
+        return buildInternalScope(spaceId).get(RulesClient).bulkDisableRules({ ids });
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest
