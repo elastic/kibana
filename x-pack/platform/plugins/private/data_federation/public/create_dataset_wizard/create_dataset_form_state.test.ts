@@ -133,7 +133,13 @@ describe('create_dataset_form_state', () => {
       expect(validateQuoteCharacter("'")).toBe(true);
     });
 
+    it.each(['none', 'NONE', 'None'])('accepts %s to turn off quoting', (value) => {
+      expect(validateQuoteCharacter(value)).toBe(true);
+    });
+
     it('rejects multi-character values', () => {
+      expect(validateQuoteCharacter('non')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+      expect(validateQuoteCharacter(' none')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('\\t')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('\\\\')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('ab')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
@@ -316,6 +322,12 @@ describe('create_dataset_form_state', () => {
           escape: '"',
         })
       ).toEqual({ format: 'csv', quote: "'", escape: '"' });
+    });
+
+    it('includes a quote of none to turn off quoting', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', quote: 'none' })
+      ).toEqual({ format: 'csv', quote: 'none' });
     });
 
     it('does not decode the \\t escape sequence in the payload (API receives the literal sequence)', () => {

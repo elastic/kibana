@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { QUOTE_CHARACTER_NONE, isValidQuoteCharacter } from '../../../common';
 
 const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 const optionalShortString = schema.maybe(schema.string({ maxLength: 256 }));
@@ -105,7 +106,16 @@ export const datasetSchema = schema.object({
       max_errors: schema.maybe(schema.number({ min: 0 })),
       max_error_ratio: schema.maybe(schema.number({ min: 0, max: 1 })),
       // CSV/TSV advanced
-      quote: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
+      quote: schema.maybe(
+        schema.string({
+          maxLength: QUOTE_CHARACTER_NONE.length,
+          minLength: 1,
+          validate: (value) => {
+            if (isValidQuoteCharacter(value)) return;
+            return `Must be a single character or ${QUOTE_CHARACTER_NONE}.`;
+          },
+        })
+      ),
       escape: schema.maybe(
         schema.string({
           maxLength: 2,
@@ -124,10 +134,7 @@ export const datasetSchema = schema.object({
       // API-only (not shown in the UI)
       file_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
       file_sort_by: schema.maybe(
-        schema.arrayOf(
-          schema.oneOf([schema.literal('list'), schema.literal('name'), schema.literal('mtime')]),
-          { maxSize: 3 }
-        )
+        schema.oneOf([schema.literal('list'), schema.literal('name'), schema.literal('mtime')])
       ),
       max_field_size: schema.maybe(
         schema.number({

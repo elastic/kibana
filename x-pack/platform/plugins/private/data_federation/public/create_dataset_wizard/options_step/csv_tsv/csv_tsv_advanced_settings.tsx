@@ -11,6 +11,7 @@ import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
+import { QUOTE_CHARACTER_NONE } from '../../../../common';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   DEFAULT_COLUMN_PREFIX,
@@ -45,9 +46,10 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
             label={createDatasetWizardStrings.settingsQuoteLabel}
             infoText={
               <FormattedMessage
-                id="xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.descriptionText"
-                defaultMessage="Character that surrounds field values. Overrides {quoteMode} in {commonSettings}."
+                id="xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.descriptionTextWithNone"
+                defaultMessage="Character that surrounds field values. Enter {none} to turn off quoting. Overrides {quoteMode} in {commonSettings}."
                 values={{
+                  none: <EuiCode>{QUOTE_CHARACTER_NONE}</EuiCode>,
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
                     <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
@@ -80,7 +82,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           data-test-subj="createDatasetSettingsQuote"
           fullWidth
           placeholder={createDatasetWizardStrings.settingsQuotePlaceholder}
-          maxLength={1}
+          maxLength={QUOTE_CHARACTER_NONE.length}
           isInvalid={Boolean(quoteState.error)}
           value={quoteField.value}
           onChange={(e) => quoteField.onChange(e.target.value)}

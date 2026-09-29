@@ -102,7 +102,7 @@ export interface DatasetSettingsFile {
   split_probe_window?: string;
   segment_size?: string;
   max_split_probes?: number;
-  file_sort_by?: Array<'list' | 'name' | 'mtime'>;
+  file_sort_by?: 'list' | 'name' | 'mtime';
   file_order?: 'asc' | 'desc';
   partition_sample_size?: string;
   region?: string;

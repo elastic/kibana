@@ -61,6 +61,13 @@ export function getDataSetByIdApiPath(id: string): string {
   return DATA_SET_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
 }
 
+/** Quote character value Elasticsearch reads (case-insensitively) as "quoting off". */
+export const QUOTE_CHARACTER_NONE = 'none';
+
+/** Whether `value` is a single character or `none` (any case). */
+export const isValidQuoteCharacter = (value: string): boolean =>
+  value.length === 1 || value.toLowerCase() === QUOTE_CHARACTER_NONE;
+
 export type { Dataset, DataSetWithName, DatasetSettings } from './dataset_types';
 export type {
   DatasetMappings,

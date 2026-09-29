@@ -11,6 +11,7 @@ import type {
   DatasetSettingsFile,
   DatasetFormat,
 } from '../../common/dataset_types';
+import { isValidQuoteCharacter } from '../../common';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from './mapping_step/mapping_editor';
@@ -198,14 +199,11 @@ export const validateSkipRows = (value: string): true | string => {
   return true;
 };
 
-const validateSingleCharacter = (value: string, errorMessage: string): true | string => {
+export const validateQuoteCharacter = (value: string): true | string => {
   if (!value) return true;
-  if (value.length !== 1) return errorMessage;
+  if (!isValidQuoteCharacter(value)) return createDatasetWizardStrings.settingsQuoteInvalid;
   return true;
 };
-
-export const validateQuoteCharacter = (value: string): true | string =>
-  validateSingleCharacter(value, createDatasetWizardStrings.settingsQuoteInvalid);
 
 export const validateEscapeCharacter = (value: string): true | string => {
   if (!value) return true;
