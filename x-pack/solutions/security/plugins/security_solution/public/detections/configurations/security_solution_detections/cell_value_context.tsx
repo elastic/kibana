@@ -8,7 +8,7 @@
 import React, { createContext, useMemo } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';

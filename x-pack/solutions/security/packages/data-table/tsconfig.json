@@ -8,7 +8,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/cell-actions",
-    "@kbn/timelines-plugin",
+    "@kbn/securitysolution-timeline-common",
     "@kbn/es-query",
     "@kbn/securitysolution-ecs",
     "@kbn/safer-lodash-set",

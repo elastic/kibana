@@ -25,8 +25,8 @@ import type {
   DeprecatedCellValueElementProps,
   DeprecatedRowRenderer,
   Direction,
-  EntityType,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-common';
+import type { EntityType } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
