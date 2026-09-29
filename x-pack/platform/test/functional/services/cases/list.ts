@@ -173,8 +173,8 @@ export function CasesTableServiceProvider(
     },
 
     async waitForCasesToBeListed() {
+      await this.refreshTable();
       await retry.waitFor('cases to appear on the all cases list', async () => {
-        await this.refreshTable();
         return (
           (await testSubjects.exists('case-details-link')) ||
           (await testSubjects.exists('cases-list-item-title'))
@@ -184,17 +184,13 @@ export function CasesTableServiceProvider(
     },
 
     async waitForNthToBeListed(numberOfCases: number) {
-      await retry.try(async () => {
-        await this.refreshTable();
-        await this.validateCasesTableHasNthRows(numberOfCases);
-      });
-
-      await header.waitUntilLoadingHasFinished();
+      await this.refreshTable();
+      await this.validateCasesTableHasNthRows(numberOfCases);
     },
 
     async waitForCasesToBeDeleted() {
+      await this.refreshTable();
       await retry.waitFor('the cases list to be empty', async () => {
-        await this.refreshTable();
         const rows = await find.allByCssSelector(CASE_ROWS_SELECTOR, 100);
         return rows.length === 0;
       });
