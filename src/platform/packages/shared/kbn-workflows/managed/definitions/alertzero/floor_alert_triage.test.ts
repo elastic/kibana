@@ -405,6 +405,42 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
   });
 });
 
+describe('floor_alert_triage — close_investigation_no_fp', () => {
+  it('nests an analyzed-batch guard rather than combining conditions with `and`', () => {
+    const outer = stepByName('close_investigation_no_fp');
+    const inner = stepByName('close_investigation_no_fp_when_analyzed');
+
+    expect(outer?.condition).toBe('${{ variables.fp_candidate_count == 0 }}');
+    expect(inner?.condition).toBe('${{ variables.verdict_count > 0 }}');
+    expect(outer?.steps?.some((s) => s.name === 'close_investigation_no_fp_when_analyzed')).toBe(
+      true
+    );
+    expect(inner?.steps?.some((s) => s.name === 'close_no_fp')).toBe(true);
+  });
+
+  it('does not close the Investigation or claim "Triage complete" for a zero-verdict batch', () => {
+    // fp_candidate_count is also 0 when nothing was classified (missing connector, skipped
+    // sub-workflow), which is exactly the case guard_classification_nonempty_inner already
+    // warned about above. The inner guard must fail for that case so close_no_fp /
+    // post_comment_outcome_no_fp never run.
+    expect(
+      evalExpr('${{ variables.fp_candidate_count == 0 }}', { variables: { fp_candidate_count: 0 } })
+    ).toBe(true);
+    expect(
+      evalExpr('${{ variables.verdict_count > 0 }}', { variables: { verdict_count: 0 } })
+    ).toBe(false);
+  });
+
+  it('still closes and reports "Triage complete" for a real zero-FP analyzed batch', () => {
+    expect(
+      evalExpr('${{ variables.fp_candidate_count == 0 }}', { variables: { fp_candidate_count: 0 } })
+    ).toBe(true);
+    expect(
+      evalExpr('${{ variables.verdict_count > 0 }}', { variables: { verdict_count: 5 } })
+    ).toBe(true);
+  });
+});
+
 describe('floor_alert_triage — if-conditions', () => {
   it('keeps every if-condition free of Liquid filters', () => {
     const ifSteps = allSteps.filter((step) => step.type === 'if');

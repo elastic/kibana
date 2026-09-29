@@ -790,47 +790,58 @@ steps:
   #     This branch MUST be explicit. A batch that classifies nothing as a
   #     false positive still needs a closed Investigation — it is the branch
   #     that gets forgotten in tests and in code review.
+  #
+  #     Nested rather than `and`-combined (see compute_classification_guard_counts):
+  #     fp_candidate_count is also 0 for a zero-verdict batch (missing connector,
+  #     skipped sub-workflow), and that case already posted a warning via
+  #     guard_classification_nonempty_inner above. Requiring verdict_count > 0 here
+  #     stops that batch from ALSO closing the Investigation and posting "Triage
+  #     complete" as if a real zero-FP analysis had run; it stays open instead.
   # ---------------------------------------------------------------------------
   - name: close_investigation_no_fp
     type: if
     condition: "${{ variables.fp_candidate_count == 0 }}"
     steps:
-      # This is the most common branch (no FP candidates), so an unhandled patch failure here
-      # would fail most triage runs. `ai.conversation.metadata.patch` errors when
-      # `agentBuilder:experimentalFeatures` is off; `continue: true` is required alongside
-      # `fallback` — fallback alone still re-throws the original error afterwards (see
-      # on_failure/README.md) and would skip post_comment_outcome_no_fp below.
-      - name: close_no_fp
-        type: ai.conversation.metadata.patch
-        on-failure:
-          continue: true
-          fallback:
-            - name: log_no_fp_close_failed
-              type: console
-              with:
-                message: >-
-                  Triage completed with no false-positive candidates, but the Investigation
-                  could not be marked closed: {{ error.message }}. Investigation
-                  {{ steps.create_investigation.output.conversation_id }} stays open.
-        with:
-          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-          updates:
-            status: closed
+      - name: close_investigation_no_fp_when_analyzed
+        type: if
+        condition: "${{ variables.verdict_count > 0 }}"
+        steps:
+          # This is the most common branch (no FP candidates), so an unhandled patch failure
+          # here would fail most triage runs. `ai.conversation.metadata.patch` errors when
+          # `agentBuilder:experimentalFeatures` is off; `continue: true` is required alongside
+          # `fallback` — fallback alone still re-throws the original error afterwards (see
+          # on_failure/README.md) and would skip post_comment_outcome_no_fp below.
+          - name: close_no_fp
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_no_fp_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      Triage completed with no false-positive candidates, but the Investigation
+                      could not be marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
 
-      - name: post_comment_outcome_no_fp
-        type: kibana.request
-        on-failure:
-          continue: true
-        with:
-          method: POST
-          path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-          headers:
-            kbn-xsrf: string
-            Content-Type: application/json
-            elastic-api-version: "2023-10-31"
-          body:
-            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-            trigger_mode: "never"
-            input: >-
-              Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
-              {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+          - name: post_comment_outcome_no_fp
+            type: kibana.request
+            on-failure:
+              continue: true
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+                elastic-api-version: "2023-10-31"
+              body:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                trigger_mode: "never"
+                input: >-
+                  Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
+                  {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
