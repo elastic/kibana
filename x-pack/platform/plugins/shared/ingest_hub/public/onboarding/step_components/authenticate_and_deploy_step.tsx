@@ -29,6 +29,7 @@ import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_ba
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
+import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
 import {
   ECF_UNIFIED_STACK_NAME,
   ECF_OTEL_STACK_NAME,
@@ -170,12 +171,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     return handleAgentDeploy();
   }, [handleAgentDeploy]);
 
+  const isAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled();
   const showIdentityFederation = useMemo(() => {
+    if (!isAwsIdentityFederationEnabled) return false;
     if (miServiceIds.length === 0) return true;
     return miServiceIds.every(
       (id) => awsServicesMap?.get(id)?.identityFederationSupported !== false
     );
-  }, [miServiceIds, awsServicesMap]);
+  }, [isAwsIdentityFederationEnabled, miServiceIds, awsServicesMap]);
 
   // The Federated Identity template must cover exactly the instances Deploy will create as
   // managed integrations, duplicates included.

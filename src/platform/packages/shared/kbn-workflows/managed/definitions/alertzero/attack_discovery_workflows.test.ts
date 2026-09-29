@@ -20,6 +20,7 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
@@ -1353,7 +1354,9 @@ describe('Attack Discovery worker chain', () => {
 
     it('creates exactly one proposal', () => {
       expect(
-        reviewSteps.filter((step) => step.with?.['workflow-id'] === 'system-create-proposal')
+        reviewSteps.filter(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
+        )
       ).toHaveLength(1);
     });
 
@@ -1364,6 +1367,18 @@ describe('Attack Discovery worker chain', () => {
       );
 
       expect(rendered.trim()).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+    });
+
+    // This workflow's trigger allows 1024 characters, while the proposal step
+    // caps titles at 256: forwarding one unbounded fails the escalation for an
+    // otherwise valid discovery.
+    it('bounds the proposal title it forwards', async () => {
+      const rendered = await createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'escalation_gate')).title,
+        { inputs: { title: 'A'.repeat(1024) } }
+      );
+
+      expect(rendered.length).toBeLessThanOrEqual(256);
     });
 
     it('installs the action it points at', () => {

@@ -12,7 +12,6 @@ import { ApprovalContent } from './approval_content';
 import {
   getProposalCaption,
   getProposalDecision,
-  getProposalTitle,
   getProposalTone,
   isProposalExpired,
 } from './proposal_helpers';
@@ -67,7 +66,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
 
-    const title = getProposalTitle(proposal);
+    const { title } = proposal;
     const isExpired = isProposalExpired(proposal);
 
     return (
@@ -80,7 +79,6 @@ export const ApprovalModal = memo<ApprovalModalProps>(
         <ApprovalContent
           title={title}
           tone={getProposalTone(proposal)}
-          iconType="lock"
           comment={proposal.comment}
           titleId={titleId}
           caption={getProposalCaption(proposal, { includeRiskDetails: true })}

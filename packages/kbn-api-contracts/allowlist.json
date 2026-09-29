@@ -561,20 +561,44 @@
       "prUrl": "https://github.com/elastic/kibana/pull/275716"
     },
     {
-      "path": "/api/agent_builder/agents",
+      "path": "/api/fleet/cloud_onboarding_deployments",
       "method": "post",
-      "reason": "AI index ID maxLength reduced from 256 to 244 so the `v-ai-index-<id>` view name fits an Elasticsearch index name. ai_indices is behind the Context Engine feature flag.",
-      "approvedBy": "@elastic/workchat-eng",
-      "oasdiffId": "request-property-max-length-decreased",
-      "prUrl": "https://github.com/elastic/kibana/pull/291134"
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
     },
     {
-      "path": "/api/agent_builder/agents/{id}",
+      "path": "/api/fleet/cloud_onboarding_deployments/connector/{connectorId}",
+      "method": "get",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments/{id}",
+      "method": "get",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments/{id}",
       "method": "put",
-      "reason": "AI index ID maxLength reduced from 256 to 244 so the `v-ai-index-<id>` view name fits an Elasticsearch index name. ai_indices is behind the Context Engine feature flag.",
-      "approvedBy": "@elastic/workchat-eng",
-      "oasdiffId": "request-property-max-length-decreased",
-      "prUrl": "https://github.com/elastic/kibana/pull/291134"
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments/{id}",
+      "method": "put",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
     }
   ]
 }

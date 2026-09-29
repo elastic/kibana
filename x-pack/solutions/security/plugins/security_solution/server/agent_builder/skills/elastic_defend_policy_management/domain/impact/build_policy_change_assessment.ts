@@ -93,6 +93,7 @@ export const buildPolicyChangeAssessment = (
   return {
     policy,
     proposed: normalize(prepared.proposedConfig),
+    proposedConfig: prepared.proposedConfig,
     fields: getFieldRegistry(),
     requestedOperations: operations,
     changes: prepared.explicitChanges.map((change) =>
@@ -102,6 +103,9 @@ export const buildPolicyChangeAssessment = (
     sideEffects: prepared.sideEffects,
     globalBlockers: [
       ...computeGlobalManifestBlockers(prepared.proposedConfig, eligibilityContext),
+      ...(policy.snapshot.source.is_managed === true
+        ? [{ reason: 'managed_policy_not_writable' }]
+        : []),
       ...(isEndpointPolicyValidForLicense(prepared.proposedConfig, capabilities.licenseInformation)
         ? []
         : [{ reason: 'license_invalid_policy' }]),

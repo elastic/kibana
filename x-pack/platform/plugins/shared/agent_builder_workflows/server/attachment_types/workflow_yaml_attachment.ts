@@ -15,6 +15,8 @@ import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import deepEqual from 'fast-deep-equal';
 import { workflowTools } from '../../common/constants';
@@ -57,7 +59,10 @@ const areWorkflowYamlsEquivalent = (left: string, right: string): boolean => {
   return left.trim() === right.trim();
 };
 
-const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
+const createWorkflowYamlAttachmentType = (
+  api: WorkflowsManagementApi,
+  getSecurity: () => SecurityPluginStart | undefined
+) => ({
   id: WORKFLOW_YAML_ATTACHMENT_TYPE,
   isReadonly: true,
   validate: (input: unknown) => {
@@ -76,21 +81,28 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   },
   resolve: async (
     origin: string,
-    context: AttachmentResolveContext
+    { request, spaceId }: AttachmentResolveContext
   ): Promise<WorkflowYamlData | undefined> => {
-    const workflow = await api.getWorkflow(origin, context.spaceId);
+    if (!(await hasWorkflowReadPrivilege({ security: getSecurity(), request, spaceId }))) {
+      return undefined;
+    }
+    const workflow = await api.getWorkflow(origin, spaceId, request);
     if (!workflow) return undefined;
     return { yaml: workflow.yaml, workflowId: workflow.id, name: workflow.name };
   },
   isStale: async (
     attachment: VersionedAttachment<typeof WORKFLOW_YAML_ATTACHMENT_TYPE, WorkflowYamlData>,
-    context: AttachmentResolveContext
+    { request, spaceId }: AttachmentResolveContext
   ): Promise<boolean> => {
     if (!attachment.origin || !attachment.origin_snapshot_at) {
       return false;
     }
 
-    const workflow = await api.getWorkflow(attachment.origin, context.spaceId);
+    if (!(await hasWorkflowReadPrivilege({ security: getSecurity(), request, spaceId }))) {
+      return false;
+    }
+
+    const workflow = await api.getWorkflow(attachment.origin, spaceId, request);
     if (
       !workflow ||
       Date.parse(workflow.lastUpdatedAt) <= Date.parse(attachment.origin_snapshot_at)
@@ -181,10 +193,11 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
 
 export function registerWorkflowYamlAttachment(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getSecurity: () => SecurityPluginStart | undefined
 ): void {
   agentBuilder.attachments.registerType(
-    createWorkflowYamlAttachmentType(api) as Parameters<
+    createWorkflowYamlAttachmentType(api, getSecurity) as Parameters<
       typeof agentBuilder.attachments.registerType
     >[0]
   );

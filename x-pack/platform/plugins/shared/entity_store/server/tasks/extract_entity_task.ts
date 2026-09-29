@@ -170,7 +170,7 @@ async function runTask({
   fakeRequest,
   signal,
   entityType,
-  logger,
+  logger: taskLogger,
   core,
   isServerless,
   extractionMode: registeredExtractionMode,
@@ -184,7 +184,7 @@ async function runTask({
    * `nonPriority`, which the flag never resolves to. */
   extractionMode: ExtractionMode;
 }): Promise<RunResult> {
-  logger.info(`Running extract entity task`);
+  taskLogger.info(`Running extract entity task`);
 
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
@@ -199,7 +199,7 @@ async function runTask({
     await shouldDeleteOrphanedEntityStoreTask({
       coreStart,
       namespace,
-      logger,
+      logger: taskLogger,
     })
   ) {
     return {
@@ -220,6 +220,8 @@ async function runTask({
       ? registeredExtractionMode
       : resolveExtractionMode(dualProcessEnabled, entityType);
 
+  const logger = taskLogger.get(extractionMode);
+
   if (!fakeRequest) {
     logger.error(`No fake request found, skipping extract entity task`);
     return {
@@ -239,7 +241,7 @@ async function runTask({
       entityType,
       namespace,
       dualProcessEnabled,
-      logger,
+      logger: taskLogger.get(EXTRACTION_MODE.nonPriority),
     });
   }
 
