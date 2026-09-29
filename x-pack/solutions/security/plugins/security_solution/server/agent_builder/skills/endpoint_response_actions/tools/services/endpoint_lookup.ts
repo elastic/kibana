@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { escapeKuery } from '@kbn/es-query';
+import { escapeQuotes } from '@kbn/es-query';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { HostStatus } from '../../../../../../common/endpoint/types';
@@ -252,7 +252,11 @@ export function createEndpointLookupService(
     const { items, truncated } = await collectPages<RawFleetAgent>(async (page) => {
       const response = await fleetServices.agent.listAgents({
         showInactive: true,
-        kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
+        // Exact match on the `.keyword` subfield: `local_metadata.host.name`
+        // is `text`, so a plain value compiles to an analyzed `match` and
+        // `web-01` also matches `web-02`/`db-01` (false ambiguity or the
+        // wrong agent). Quoting alone only gives `match_phrase` on text.
+        kuery: `local_metadata.host.name.keyword: "${escapeQuotes(hostName)}"`,
         page,
         perPage: LOOKUP_PAGE_SIZE,
       });
@@ -337,16 +341,25 @@ export function createEndpointLookupService(
   };
 
   /**
-   * Candidates visible only through the request-scoped metadata index — i.e.
-   * endpoints enrolled in a linked project, invisible to origin Fleet. Callers
-   * merge this with `listVisibleFleetCandidates` rather than treating it as an
-   * exclusive fallback.
+   * Candidates from the Defend united metadata index, matched exactly on
+   * `united.endpoint.host.hostname` — the hostname `list_endpoints` returns
+   * and the status read filters on. Read on origin as well as under CPS:
+   * Fleet's `local_metadata.host.name` holds the FQDN when the agent policy
+   * hostname format is FQDN, while Defend keeps writing the short OS
+   * hostname, so a Fleet-only origin read misses the short name that
+   * `list_endpoints` shows. Under CPS the request-scoped read also covers
+   * endpoints enrolled in a linked project, which origin Fleet cannot see.
+   * Space isolation holds on both paths: `getHostMetadataList` filters to the
+   * Defend policies visible in this space. Callers merge this with
+   * `listVisibleFleetCandidates` rather than treating it as an exclusive
+   * fallback.
    */
-  const listScopedMetadataCandidates = async (
+  const listMetadataCandidates = async (
     hostName: string,
-    scopedServices: ScopedEndpointServices
+    scopedServices?: ScopedEndpointServices
   ): Promise<CandidateCollection> => {
-    if (!scopedServices.isCpsRead()) {
+    // The metadata index only holds Elastic Defend hosts.
+    if (supportedAgentTypes && !supportedAgentTypes.includes('endpoint')) {
       return { candidates: [], truncated: false };
     }
 
@@ -358,7 +371,7 @@ export function createEndpointLookupService(
           // The metadata service pages from 0, unlike Fleet's 1-based pages.
           page: page - 1,
           pageSize: LOOKUP_PAGE_SIZE,
-          kuery: `united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
+          kuery: `united.endpoint.host.hostname: "${escapeQuotes(hostName)}"`,
         },
         scopedServices
       );
@@ -401,9 +414,7 @@ export function createEndpointLookupService(
     async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
       const [fleet, metadata] = await Promise.all([
         listVisibleFleetCandidates(hostName),
-        scoped
-          ? listScopedMetadataCandidates(hostName, scoped)
-          : Promise.resolve<CandidateCollection>({ candidates: [], truncated: false }),
+        listMetadataCandidates(hostName, scoped),
       ]);
 
       // Fleet is the authority when it has the record — prefer it (it carries

@@ -89,6 +89,27 @@ describe('getResponseActionStatusTool', () => {
     expect(mockGetActionDetailsById).not.toHaveBeenCalled();
   });
 
+  it('returns insufficient_privileges for an actions-log-only caller without canReadSecuritySolution', async () => {
+    // The details route requires the `securitySolution` feature privilege on
+    // top of the actions-log check; the actions-log sub-feature does not grant it.
+    service.getEndpointAuthz = jest.fn().mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canReadSecuritySolution: false,
+        canAccessEndpointActionsLogManagement: true,
+      })
+    );
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('insufficient_privileges');
+    expect(denialData.privilege).toBe('canReadSecuritySolution');
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
   it('returns found: false with reason action_not_found when the action id does not exist', async () => {
     mockGetActionDetailsById.mockRejectedValue(
       new NotFoundError(`Action with id '${ACTION_ID}' not found.`)

@@ -195,6 +195,38 @@ describe('listEndpointsTool', () => {
       }
     });
 
+    it.each([
+      ['whitespace', 'prod web'],
+      ['a tab', 'prod\tweb'],
+      ['an opening curly brace', 'prod{web'],
+      ['a closing curly brace', 'prod}web'],
+    ])(
+      'rejects a hostNameFilter containing %s with invalid_argument before querying',
+      async (_label, hostNameFilter) => {
+        // With no index pattern the wildcard compiles to `query_string`, which
+        // splits on whitespace (`*prod web*` -> `*prod OR web*`), and
+        // `escapeKuery` leaves `{`/`}` unescaped, so they throw parser errors.
+        const mockMetadataService = { getHostMetadataList: jest.fn() };
+        const originalGetEndpointMetadataService =
+          mockEndpointAppContextService.getEndpointMetadataService;
+        mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+          () => mockMetadataService
+        ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+        try {
+          const result = await tool.handler({ hostNameFilter }, mockContext);
+
+          const results = assertStandardReturn(result);
+          expect(results[0].type).toBe(ToolResultType.error);
+          expect((results[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+          expect(mockMetadataService.getHostMetadataList).not.toHaveBeenCalled();
+        } finally {
+          mockEndpointAppContextService.getEndpointMetadataService =
+            originalGetEndpointMetadataService;
+        }
+      }
+    );
+
     it('filters by hostname when hostNameFilter is provided', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({

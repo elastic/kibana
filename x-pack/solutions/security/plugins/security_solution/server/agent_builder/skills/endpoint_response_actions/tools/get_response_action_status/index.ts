@@ -52,11 +52,18 @@ export const getResponseActionStatusTool = (
       try {
         const actionId = params.actionId;
 
-        // The HTTP details route gates this behind
+        // The HTTP details route requires the `securitySolution` feature
+        // privilege (`requiredPrivileges: ['securitySolution']`) AND
         // `withEndpointAuthz({ all: ['canAccessEndpointActionsLogManagement'] })`.
-        // The internal lookup skips that check, so assert the caller's privilege
-        // here to keep chat access from bypassing endpoint RBAC.
+        // The actions-log sub-feature alone does not grant `securitySolution`,
+        // and Agent Builder chat only requires `readAgentBuilder`, so both
+        // layers are asserted here — otherwise a role with Response Actions
+        // History: Read gets a 403 from the route but full action details
+        // (outputs, runscript params) from chat.
         const authz = await endpointAppContextService.getEndpointAuthz(request);
+        if (!authz.canReadSecuritySolution) {
+          return insufficientPrivilegesResult('canReadSecuritySolution');
+        }
         if (!authz.canAccessEndpointActionsLogManagement) {
           return insufficientPrivilegesResult('canAccessEndpointActionsLogManagement');
         }

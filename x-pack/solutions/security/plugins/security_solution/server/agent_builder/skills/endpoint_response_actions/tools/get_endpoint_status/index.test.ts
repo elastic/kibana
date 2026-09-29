@@ -37,6 +37,11 @@ describe('getEndpointStatusTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEndpointAppContextService = createMockEndpointAppContext().service;
+    // Hostname resolution also reads the Defend metadata index on origin, so
+    // tests that only stub Fleet get an empty metadata index by default.
+    mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => ({
+      getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+    })) as unknown as EndpointAppContextService['getEndpointMetadataService'];
   });
 
   describe('tool definition', () => {
@@ -197,7 +202,7 @@ describe('getEndpointStatusTool', () => {
 
         expect(mockAgentService.listAgents).toHaveBeenCalledWith({
           showInactive: true,
-          kuery: 'local_metadata.host.name: my-host',
+          kuery: 'local_metadata.host.name.keyword: "my-host"',
           page: 1,
           perPage: LOOKUP_PAGE_SIZE,
         });
@@ -262,7 +267,7 @@ describe('getEndpointStatusTool', () => {
             // endpoint's own id (top-level `agent.id`), which diverge on
             // current agents.
             kuery:
-              '(united.agent.agent.id: agent-123 OR agent.id: agent-123) AND united.endpoint.host.hostname: my-host',
+              '(united.agent.agent.id: agent-123 OR agent.id: agent-123) AND united.endpoint.host.hostname: "my-host"',
           },
           // Scoped services are required for this read to fan out under CPS.
           expect.objectContaining({ isCpsRead: expect.any(Function) })
@@ -507,7 +512,7 @@ describe('getEndpointStatusTool', () => {
             page: 0,
             pageSize: 1,
             kuery:
-              '(united.agent.agent.id: live-b OR agent.id: live-b) AND united.endpoint.host.hostname: duplicated-host',
+              '(united.agent.agent.id: live-b OR agent.id: live-b) AND united.endpoint.host.hostname: "duplicated-host"',
           },
           expect.objectContaining({ isCpsRead: expect.any(Function) })
         );
@@ -573,6 +578,29 @@ describe('getEndpointStatusTool', () => {
         getEndpointAuthzInitialStateMock({
           canReadSecuritySolution: false,
           canAccessFleet: false,
+        })
+      );
+
+      const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const denialData = results[0].data as Record<string, unknown>;
+      expect(denialData.error).toBe('insufficient_privileges');
+      expect(denialData.privilege).toBe('canReadSecuritySolution');
+    });
+
+    it('returns insufficient_privileges for a Fleet-only caller without canReadSecuritySolution', async () => {
+      // The metadata detail route requires the `securitySolution` feature
+      // privilege before its `any: [canReadSecuritySolution, canAccessFleet]`
+      // check, so Fleet access alone never reaches it.
+      const { getEndpointAuthzInitialStateMock } = jest.requireActual(
+        '../../../../../../common/endpoint/service/authz/mocks'
+      );
+      mockEndpointAppContextService.getEndpointAuthz = jest.fn().mockResolvedValue(
+        getEndpointAuthzInitialStateMock({
+          canReadSecuritySolution: false,
+          canAccessFleet: true,
         })
       );
 

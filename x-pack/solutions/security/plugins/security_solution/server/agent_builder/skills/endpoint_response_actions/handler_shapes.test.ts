@@ -33,6 +33,11 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
   beforeEach(() => {
     mockEndpointAppContextService = createMockEndpointAppContext().service;
+    // Hostname resolution also reads the Defend metadata index on origin, so
+    // tests that only stub Fleet get an empty metadata index by default.
+    mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => ({
+      getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+    })) as unknown as EndpointAppContextService['getEndpointMetadataService'];
     mockAgentService = {
       listAgents: jest.fn().mockResolvedValue({ agents: [] }),
     };

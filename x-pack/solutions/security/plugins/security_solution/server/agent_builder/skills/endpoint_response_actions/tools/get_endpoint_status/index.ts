@@ -9,7 +9,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { escapeKuery } from '@kbn/es-query';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
@@ -83,13 +83,15 @@ export const getEndpointStatusTool = (
         let hostName = params.hostName;
         const requestedAgentId = params.agentId;
 
-        // The endpoint metadata detail route gates this behind
+        // The endpoint metadata detail route requires the `securitySolution`
+        // feature privilege (`requiredPrivileges: ['securitySolution']`) before
         // `withEndpointAuthz({ any: ['canReadSecuritySolution', 'canAccessFleet'] })`
-        // (`server/endpoint/routes/metadata/index.ts`). The internal fleet and
-        // metadata services skip that check, so assert the caller's privilege
-        // here before resolving or reporting on a host.
+        // (`server/endpoint/routes/metadata/index.ts`). Fleet access alone never
+        // reaches that route, so the effective gate is `canReadSecuritySolution`.
+        // The internal fleet and metadata services skip both checks, so assert
+        // it here before resolving or reporting on a host.
         const authz = await endpointAppContextService.getEndpointAuthz(request);
-        if (!authz.canReadSecuritySolution && !authz.canAccessFleet) {
+        if (!authz.canReadSecuritySolution) {
           return insufficientPrivilegesResult('canReadSecuritySolution');
         }
 
@@ -202,7 +204,7 @@ export const getEndpointStatusTool = (
             page: 0,
             pageSize: 1,
             kuery: hostName
-              ? `${idKuery} AND united.endpoint.host.hostname: ${escapeKuery(hostName)}`
+              ? `${idKuery} AND united.endpoint.host.hostname: "${escapeQuotes(hostName)}"`
               : idKuery,
           },
           scoped

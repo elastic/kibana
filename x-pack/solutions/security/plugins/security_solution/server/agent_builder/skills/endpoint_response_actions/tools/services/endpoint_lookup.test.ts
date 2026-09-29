@@ -28,7 +28,8 @@ describe('createEndpointLookupService', () => {
       });
     const ensureInCurrentSpace =
       overrides?.ensureInCurrentSpace ?? jest.fn().mockResolvedValue(undefined);
-    const getHostMetadataList = overrides?.getHostMetadataList ?? jest.fn();
+    const getHostMetadataList =
+      overrides?.getHostMetadataList ?? jest.fn().mockResolvedValue({ data: [], total: 0 });
 
     const endpointAppContextService = {
       getInternalFleetServices: jest.fn(() => ({
@@ -61,7 +62,7 @@ describe('createEndpointLookupService', () => {
     expect(result).toEqual({ kind: 'not_found' });
     expect(listAgents).toHaveBeenCalledWith(
       expect.objectContaining({
-        kuery: 'local_metadata.host.name: missing-host',
+        kuery: 'local_metadata.host.name.keyword: "missing-host"',
         page: 1,
         perPage: LOOKUP_PAGE_SIZE,
       })
@@ -75,7 +76,7 @@ describe('createEndpointLookupService', () => {
 
     expect(listAgents).toHaveBeenCalledWith(
       expect.objectContaining({
-        kuery: 'local_metadata.host.name: host\\"with\\:quotes',
+        kuery: 'local_metadata.host.name.keyword: "host\\"with:quotes"',
       })
     );
   });
@@ -521,7 +522,7 @@ describe('createEndpointLookupService', () => {
       expect(result.kind).toBe('found');
       expect(result).toHaveProperty('endpoint.agentId', 'linked-agent');
       expect(getHostMetadataList).toHaveBeenCalledWith(
-        expect.objectContaining({ kuery: 'united.endpoint.host.hostname: linked-host' }),
+        expect.objectContaining({ kuery: 'united.endpoint.host.hostname: "linked-host"' }),
         expect.objectContaining({ isCpsRead: expect.any(Function) })
       );
     });
@@ -615,24 +616,65 @@ describe('createEndpointLookupService', () => {
       expect(result).toHaveProperty('endpoint.agentId', 'linked-new');
     });
 
-    it('does not consult the metadata index when CPS is inactive', async () => {
+    it('reads the metadata index on origin when CPS is inactive', async () => {
+      // No scoped fan-out, but the origin metadata read still runs: it is the
+      // exact Defend hostname source (see the FQDN case below).
       const { lookup, getHostMetadataList } = buildService({
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
         scoped: { isCpsRead: () => false },
-        getHostMetadataList: jest.fn(),
       });
 
       expect(await lookup.resolveByHostName('missing-host')).toEqual({ kind: 'not_found' });
-      expect(getHostMetadataList).not.toHaveBeenCalled();
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'united.endpoint.host.hostname: "missing-host"' }),
+        expect.objectContaining({ isCpsRead: expect.any(Function) })
+      );
     });
 
-    it('does not consult the metadata index when no scoped services were supplied', async () => {
+    it('reads the metadata index on origin when no scoped services were supplied', async () => {
       const { lookup, getHostMetadataList } = buildService({
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
-        getHostMetadataList: jest.fn(),
       });
 
       expect(await lookup.resolveByHostName('missing-host')).toEqual({ kind: 'not_found' });
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'united.endpoint.host.hostname: "missing-host"' }),
+        undefined
+      );
+    });
+
+    it('resolves the short Defend hostname when Fleet stores the FQDN', async () => {
+      // FQDN hostname format: Elastic Agent writes the FQDN to Fleet's
+      // `local_metadata.host.name`, Defend keeps the short OS hostname in
+      // `host.hostname`. `list_endpoints` shows the short name, so it must
+      // resolve without CPS.
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'fleet-web01' } }, agent: { id: 'ep-web01' } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 1,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('web01');
+
+      expect(result.kind).toBe('found');
+      expect(result).toHaveProperty('endpoint.agentId', 'fleet-web01');
+      expect(result).toHaveProperty('endpoint.agentType', 'endpoint');
+    });
+
+    it('does not read the metadata index when the lookup excludes Elastic Defend', async () => {
+      const { lookup, getHostMetadataList } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        agentTypes: ['sentinel_one'],
+      });
+
+      expect(await lookup.resolveByHostName('s1-host')).toEqual({ kind: 'not_found' });
       expect(getHostMetadataList).not.toHaveBeenCalled();
     });
   });

@@ -68,10 +68,24 @@ export const listEndpointsTool = (
 
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
 
-        // `hostNameFilter` is user/LLM-controlled, so escape it before
-        // interpolating into the KQL wildcard expression.
-        const kuery = params.hostNameFilter
-          ? `united.endpoint.host.hostname: *${escapeKuery(params.hostNameFilter)}*`
+        // `hostNameFilter` is user/LLM-controlled, so validate and escape it
+        // before interpolating into the KQL wildcard expression. Whitespace is
+        // rejected rather than escaped: with no index pattern, the wildcard
+        // compiles to a `query_string` query, which splits on whitespace —
+        // `*prod web*` would silently become `*prod OR web*`. `{` and `}` are
+        // rejected because `escapeKuery` does not escape them and the KQL
+        // grammar treats them as special, so they throw parser errors. Real
+        // hostnames contain none of these characters.
+        const hostNameFilter = params.hostNameFilter;
+        if (hostNameFilter && /[\s{}]/.test(hostNameFilter)) {
+          return responseActionErrorResult(
+            'invalid_argument',
+            'hostNameFilter must not contain whitespace or curly braces. Use a contiguous hostname fragment instead.'
+          );
+        }
+
+        const kuery = hostNameFilter
+          ? `united.endpoint.host.hostname: *${escapeKuery(hostNameFilter)}*`
           : undefined;
 
         const page = params.page ?? 0;
