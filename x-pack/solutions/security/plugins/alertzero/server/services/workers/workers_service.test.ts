@@ -87,7 +87,11 @@ const makeAttachmentService = (
               attachedRuleIds: [],
               skippedRuleCount: opts.skippedRuleCount,
             }
-          : { ruleIds: [], attachedRuleIds: [...attached].slice(0, pageSize) }
+          : {
+              ruleIds: [],
+              attachedRuleIds: [...attached].slice(0, pageSize),
+              skippedRuleCount: opts.skippedRuleCount,
+            }
     ),
     updateRuleAttachments: jest.fn(
       async ({
@@ -1086,6 +1090,37 @@ describe('WorkersService', () => {
         attachRuleIds: [],
         detachRuleIds: ['r1'],
       });
+    });
+
+    it('disable: reports how many rules the caller could not detach from', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({
+        notAttachedIds: ['r1'],
+        attachedIds: ['r1'],
+        skippedRuleCount: 3,
+      });
+      const { service } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result).toEqual({
+        outcome: 'updated',
+        response: expect.objectContaining({ skippedRuleCount: 3 }),
+      });
+      if (result.outcome !== 'updated') throw new Error();
+      expect(result.response.worker.enabled).toBe(false);
+    });
+
+    it('disable: omits skippedRuleCount when every rule could be detached', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
+      const { service } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
     });
 
     it('idempotent enable: skips attachment when all rules are already attached', async () => {

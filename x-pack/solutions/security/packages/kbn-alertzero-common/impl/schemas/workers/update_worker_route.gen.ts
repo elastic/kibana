@@ -69,7 +69,7 @@ export const UpdateWorkerResponse = lazySchema(() =>
   z.object({
     worker: Worker,
     /**
-     * Present when enabling the Alert Triage Worker left rules without it because the caller cannot edit them (machine learning rules without machine learning permissions). Those rules are not triaged.
+     * Present when enabling or disabling the Alert Triage Worker left rules the caller cannot edit (machine learning rules without machine learning permissions). On enable those rules were not attached and are not triaged; on disable they still carry the Worker action.
      */
     skippedRuleCount: z
       .number()
@@ -77,7 +77,7 @@ export const UpdateWorkerResponse = lazySchema(() =>
       .min(1)
       .optional()
       .describe(
-        'Present when enabling the Alert Triage Worker left rules without it because the caller cannot edit them (machine learning rules without machine learning permissions). Those rules are not triaged.'
+        'Present when enabling or disabling the Alert Triage Worker left rules the caller cannot edit (machine learning rules without machine learning permissions). On enable those rules were not attached and are not triaged; on disable they still carry the Worker action.'
       ),
   })
 );

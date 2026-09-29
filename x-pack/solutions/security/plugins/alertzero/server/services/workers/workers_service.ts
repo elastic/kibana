@@ -233,8 +233,9 @@ export class WorkersService {
     });
 
     const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
-    // Rules left without the Worker because the caller cannot edit them (ML rules without ML
-    // authz). Reported to the caller: those rules are silently not triaged otherwise.
+    // Rules the caller cannot edit (ML rules without ML authz), so this call could not attach or
+    // detach them. Reported to the caller: on enable those rules are silently not triaged, and on
+    // disable they keep firing the Worker's action against a disabled workflow.
     let skippedRuleCount = 0;
     let alertTriageAttachmentService: AlertTriageAttachmentService | undefined;
 
@@ -377,7 +378,13 @@ export class WorkersService {
             status.workflowId
           );
           if (attachmentService) {
-            await detachAlertTriageWorkerFromAllRules(attachmentService);
+            const detachResult = await detachAlertTriageWorkerFromAllRules(attachmentService);
+            skippedRuleCount = detachResult.skippedRuleCount;
+            if (skippedRuleCount > 0) {
+              this.logger.warn(
+                `Alert Triage Worker: ${skippedRuleCount} rule(s) still carry the Worker action because the current user cannot edit them`
+              );
+            }
           } else {
             this.logger.warn(
               'Alert Triage Worker: disabled without detaching rules; the rule-attachment service is unavailable'

@@ -75,6 +75,19 @@ export const notifyWorkerRulesSkipped = (toasts: IToasts, skippedRuleCount: numb
   });
 };
 
+export const notifyWorkerRulesLeftAttached = (toasts: IToasts, skippedRuleCount: number): void => {
+  toasts.addWarning({
+    title: i18n.translate('xpack.alertzero.workerRulesLeftAttachedTitle', {
+      defaultMessage: 'Some rules still have the worker attached',
+    }),
+    text: i18n.translate('xpack.alertzero.workerRulesLeftAttachedText', {
+      defaultMessage:
+        '{count, plural, one {# machine learning rule still has} other {# machine learning rules still have}} the worker attached because you do not have the machine learning permissions needed to edit {count, plural, one {it} other {them}}. Someone with machine learning permissions must disable the worker to detach {count, plural, one {it} other {them}}.',
+      values: { count: skippedRuleCount },
+    }),
+  });
+};
+
 const replaceWorkerInList = (
   queryClient: QueryClient,
   queryKey: ReturnType<typeof queryKeys.workers.list>,
@@ -112,9 +125,14 @@ export const useUpdateWorker = () => {
         body: JSON.stringify(patch),
       }),
     // Only the confirmed Worker touches the cache; nothing is written before the server answers.
-    onSuccess: (data) => {
+    onSuccess: (data, { patch }) => {
       replaceWorkerInList(queryClient, queryKey, data.worker);
-      if (data.skippedRuleCount) {
+      if (!data.skippedRuleCount) {
+        return;
+      }
+      if (patch.enabled === false) {
+        notifyWorkerRulesLeftAttached(services.notifications!.toasts, data.skippedRuleCount);
+      } else {
         notifyWorkerRulesSkipped(services.notifications!.toasts, data.skippedRuleCount);
       }
     },
