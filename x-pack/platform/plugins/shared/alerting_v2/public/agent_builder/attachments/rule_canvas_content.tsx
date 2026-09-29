@@ -12,16 +12,19 @@ import {
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
+import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { RuleProvider } from '../../components/rule_details/rule_context';
 import {
   RuleHeaderDescription,
   RuleTagsList,
 } from '../../components/rule_details/rule_summary_header';
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
-import { paths } from '../../constants';
+import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
 import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
 
@@ -35,8 +38,7 @@ export const RuleCanvasContent = ({
   updateOrigin,
 }: RuleCanvasContentProps) => {
   const rulesApi = useService(RulesApi);
-  const application = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
+  const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
 
   const { data, origin: savedObjectId } = attachment;
@@ -102,9 +104,11 @@ export const RuleCanvasContent = ({
         }),
         icon: 'external',
         type: ActionButtonType.OVERFLOW,
-        // TODO: Migrate to rules locator once agent builder attachments render inside the LocatorProvider tree
         handler: () => {
-          application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
+          getAlertingV2Locators(share).rulesLocators.navigateSync({
+            ruleId,
+            host: OBSERVABILITY_ALERTING_HOST.rules,
+          });
         },
       },
     ]);
@@ -115,8 +119,7 @@ export const RuleCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     rulesApi,
-    application,
-    basePath,
+    share,
     notifications,
     data,
   ]);
