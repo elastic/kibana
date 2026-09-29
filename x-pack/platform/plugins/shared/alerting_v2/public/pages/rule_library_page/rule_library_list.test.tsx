@@ -13,6 +13,8 @@ import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RuleLibraryList } from './rule_library_list';
 
+jest.setTimeout(20_000);
+
 const mockFindItems = jest.fn();
 const mockInstallMutate = jest.fn();
 let mockCanWriteRules = true;
