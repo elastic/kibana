@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Global, css } from '@emotion/react';
 import { IGNORE_SELECTOR } from '../constants';
 import { isIgnored, promoteToCommentable } from '../lib/anchor';
+import { holdsPassThrough, isPassingThrough, passThrough } from '../lib/pass_through';
 import { useComments } from './comments_context';
 
 const POINTER_EVENTS = [
@@ -57,10 +58,26 @@ const COMMENT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
  * capture phase, so the UI state being commented on does not change. Releasing
  * the pointer on an element starts a comment (or moves the one being written);
  * so do Enter and Space on the focused element, which Tab still moves between.
+ * With Alt held, pointer input goes to the page instead, and the cursor is its own.
  */
 export const CommentModeOverlay = () => {
   const controller = useComments();
   const { ignoreSelectors } = controller;
+  const [altHeld, setAltHeld] = useState(false);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => setAltHeld(event.altKey);
+    // Released elsewhere (Alt+Tab): no keyup comes.
+    const release = () => setAltHeld(false);
+    window.addEventListener('keydown', onKey, true);
+    window.addEventListener('keyup', onKey, true);
+    window.addEventListener('blur', release);
+    return () => {
+      window.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('keyup', onKey, true);
+      window.removeEventListener('blur', release);
+    };
+  }, []);
 
   const cursorStyles = useMemo(() => {
     const roots = [IGNORE_SELECTOR, ...ignoreSelectors];
@@ -85,7 +102,16 @@ export const CommentModeOverlay = () => {
 
     const onPointer = (event: Event) => {
       const target = pageTarget(event);
-      if (!target) {
+      if (!target || isPassingThrough()) {
+        return;
+      }
+      if (event instanceof MouseEvent && holdsPassThrough(event)) {
+        // The page's; the click without its Alt (see `passThrough`).
+        if (event.type === 'click') {
+          event.preventDefault();
+          event.stopPropagation();
+          passThrough(event);
+        }
         return;
       }
       event.preventDefault();
@@ -142,5 +168,5 @@ export const CommentModeOverlay = () => {
     };
   }, [controller, ignoreSelectors]);
 
-  return <Global styles={cursorStyles} />;
+  return altHeld ? null : <Global styles={cursorStyles} />;
 };
