@@ -60,8 +60,38 @@ export class RuleDetailsPage {
   }
 
   async filterAlertsByKql(query: string) {
-    await this.alertsQueryInput.fill(query);
+    await this.alertsQueryInput.pressSequentially(query);
+    await expect(this.alertsQueryInput).toHaveValue(query);
     await this.alertsQuerySubmitButton.click();
+  }
+
+  public get alertFlyout() {
+    return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.ALERT_FLYOUT);
+  }
+
+  public get alertFlyoutFieldsTablePanel() {
+    return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.FLYOUT_TABLE_TAB_PANEL);
+  }
+
+  /**
+   * Opens the alert details flyout for the row at `rowIndex` and switches it to the
+   * fields table tab, which lists every raw alert field (unlike the grid, whose
+   * columns are virtualized out of the DOM past the viewport width).
+   */
+  async openAlertFieldsTable(rowIndex = 0) {
+    await this.page
+      .locator(
+        `[data-gridcell-row-index="${rowIndex}"] [data-test-subj="${RULE_DETAILS_TEST_SUBJECTS.ROW_EXPAND}"]`
+      )
+      .click();
+    await this.alertFlyout.waitFor({ state: 'visible' });
+    await this.page.testSubj.click(RULE_DETAILS_TEST_SUBJECTS.FLYOUT_TABLE_TAB);
+  }
+
+  async filterAlertFieldsTable(query: string) {
+    await this.alertFlyoutFieldsTablePanel
+      .getByPlaceholder('Filter by Field, Value, or Description...')
+      .fill(query);
   }
 
   /**

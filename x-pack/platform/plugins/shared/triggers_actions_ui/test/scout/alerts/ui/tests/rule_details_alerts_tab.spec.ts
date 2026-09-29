@@ -166,5 +166,17 @@ test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
       await expect(ruleNameCells).toHaveCount(1);
       await expect(ruleNameCells).toContainText(INDEX_THRESHOLD_RULE_NAME);
     });
+
+    await test.step('confirm the surviving row is the matching alert instance', async () => {
+      await pageObjects.ruleDetailsPage.openAlertFieldsTable();
+      await pageObjects.ruleDetailsPage.filterAlertFieldsTable(ALERT_INSTANCE_ID);
+
+      await expect(pageObjects.ruleDetailsPage.alertFlyoutFieldsTablePanel).toContainText(
+        MATCHING_ALERT_INSTANCE_ID
+      );
+      await expect(pageObjects.ruleDetailsPage.alertFlyoutFieldsTablePanel).not.toContainText(
+        OTHER_ALERT_INSTANCE_ID
+      );
+    });
   });
 });
