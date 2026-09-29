@@ -362,16 +362,69 @@ describe('PolicyAssignmentList', () => {
       expect(lastCall.policy_ids).toHaveLength(0);
     });
 
-    it('select all with active search selects ALL policies, not just filtered', () => {
+    it('select all with an active search selects only the matching policies', () => {
+      // Selecting hidden rows would silently assign the pack to policies the
+      // user filtered out, deploying queries to their agents.
       const handleChange = jest.fn();
       render(<FormWrapper onFormChange={handleChange} />);
-      // Search to filter down to one visible row
+
       const searchInput = screen.getByPlaceholderText('Search policies');
       fireEvent.change(searchInput, { target: { value: 'Alpha' } });
-      // Click select all — should select all 3, not just the 1 visible
+
       fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
       const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
-      expect(lastCall.policy_ids).toHaveLength(3);
+      expect(lastCall.policy_ids).toEqual(['policy-1']);
+    });
+
+    it('select all with an active search keeps selections outside the filter', () => {
+      const handleChange = jest.fn();
+      render(
+        <FormWrapper defaultValues={{ policy_ids: ['policy-3'] }} onFormChange={handleChange} />
+      );
+
+      const searchInput = screen.getByPlaceholderText('Search policies');
+      fireEvent.change(searchInput, { target: { value: 'Alpha' } });
+      fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
+
+      const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toContain('policy-1');
+      expect(lastCall.policy_ids).toContain('policy-3');
+      expect(lastCall.policy_ids).toHaveLength(2);
+    });
+
+    it('un-select all with an active search clears only the matching policies', () => {
+      const handleChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: ['policy-1', 'policy-3'] }}
+          onFormChange={handleChange}
+        />
+      );
+
+      const searchInput = screen.getByPlaceholderText('Search policies');
+      fireEvent.change(searchInput, { target: { value: 'Alpha' } });
+      fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+
+      const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
+      expect(lastCall.policy_ids).toEqual(['policy-3']);
+    });
+
+    it('labels the bulk actions as scoped while a search is active', () => {
+      render(<FormWrapper />);
+
+      expect(screen.getByTestId('policyAssignmentSelectAll')).toHaveTextContent('Select all');
+      expect(screen.getByTestId('policyAssignmentSelectAll')).not.toHaveTextContent('matching');
+
+      fireEvent.change(screen.getByPlaceholderText('Search policies'), {
+        target: { value: 'Alpha' },
+      });
+
+      expect(screen.getByTestId('policyAssignmentSelectAll')).toHaveTextContent(
+        'Select all matching'
+      );
+      expect(screen.getByTestId('policyAssignmentUnselectAll')).toHaveTextContent(
+        'Un-select all matching'
+      );
     });
 
     it('selection survives filtering then clearing filter', () => {
@@ -565,6 +618,28 @@ describe('PolicyAssignmentList', () => {
       const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
       expect(lastCall.policy_ids).toContain('policy-1');
       expect(lastCall.policy_ids).not.toContain('policy-2');
+    });
+
+    it('does not link an orphan row to a Fleet page that cannot exist', () => {
+      // The id is absent from Fleet, so a policy-details link is guaranteed to
+      // land on a not-found page.
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'orphan-policy'] }} />);
+
+      expect(screen.queryByTestId('viewPolicy-orphan-policy')).not.toBeInTheDocument();
+      expect(screen.getByTestId('viewPolicy-policy-1')).toBeInTheDocument();
+    });
+
+    it('explains that an orphan policy is unavailable', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['orphan-policy'] }} />);
+
+      expect(screen.getByText('Unavailable')).toBeInTheDocument();
+
+      const trigger = screen
+        .getByTestId('policyUnavailableTip-orphan-policy')
+        .querySelector('[tabindex="0"]');
+
+      expect(trigger).not.toBeNull();
+      expect(trigger).toHaveTextContent('Why orphan-policy is unavailable');
     });
 
     it('renders a row for an orphan policy_id absent from Fleet', () => {

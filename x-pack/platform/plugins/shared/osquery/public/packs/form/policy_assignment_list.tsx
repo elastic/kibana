@@ -6,7 +6,7 @@
  */
 
 import { reduce } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useWatch } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +25,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiSearchBar,
 } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAgentPolicies } from '../../agent_policies';
@@ -36,9 +38,16 @@ interface PolicyRow {
   name: string;
   description: string;
   agents: number;
+  // Synthesized from a saved policy_id that Fleet did not return, so there is
+  // no Fleet page to link to.
+  isOrphan: boolean;
 }
 
 const EMPTY_POLICY_ROWS: PolicyRow[] = [];
+
+// Shared by the table and by the bulk actions, so the rows a user sees and the
+// rows Select all acts on are always the same set.
+const EXECUTE_QUERY_OPTIONS = { defaultFields: ['name', 'description'] };
 
 const shardAssignedTooltip = i18n.translate('xpack.osquery.pack.policyList.shardAssignedTooltip', {
   defaultMessage:
@@ -104,6 +113,58 @@ const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
 );
 
 CheckboxCell.displayName = 'CheckboxCell';
+
+const unavailablePolicyTooltip = i18n.translate(
+  'xpack.osquery.pack.policyList.unavailablePolicyTooltip',
+  {
+    defaultMessage:
+      'This policy no longer exists in Fleet, or you do not have access to it. Un-check it to remove it from this pack.',
+  }
+);
+
+interface UnavailablePolicyCellProps {
+  policyId: string;
+  policyName: string;
+}
+
+const UnavailablePolicyCell: React.FC<UnavailablePolicyCellProps> = React.memo(
+  ({ policyId, policyName }) => {
+    const tipAnchorProps = useMemo(
+      () => ({ 'data-test-subj': `policyUnavailableTip-${policyId}` }),
+      [policyId]
+    );
+
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.osquery.pack.policyList.policyUnavailable"
+              defaultMessage="Unavailable"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="question"
+            position="left"
+            content={unavailablePolicyTooltip}
+            anchorProps={tipAnchorProps}
+            aria-label={i18n.translate(
+              'xpack.osquery.pack.policyList.unavailablePolicyIconAriaLabel',
+              {
+                defaultMessage: 'Why {name} is unavailable',
+                values: { name: policyName },
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
+UnavailablePolicyCell.displayName = 'UnavailablePolicyCell';
 
 interface DescriptionCellProps {
   description: string;
@@ -180,6 +241,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       name: policy.name ?? id,
       description: policy.description ?? '',
       agents: policy.agents ?? 0,
+      isOrphan: false,
     }));
   }, [agentPoliciesById]);
 
@@ -201,7 +263,9 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   const orphanPolicies = useMemo<PolicyRow[]>(
     () =>
       orphanIdsKey
-        ? orphanIdsKey.split('\u0000').map((id) => ({ id, name: id, description: '', agents: 0 }))
+        ? orphanIdsKey
+            .split('\u0000')
+            .map((id) => ({ id, name: id, description: '', agents: 0, isOrphan: true }))
         : EMPTY_POLICY_ROWS,
     [orphanIdsKey]
   );
@@ -213,13 +277,29 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
 
   const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
 
+  // `EuiInMemoryTable` owns the search box, so mirror its query here to keep the
+  // bulk actions scoped to the rows actually on screen.
+  const [query, setQuery] = useState<Query | null>(null);
+
+  const visiblePolicies = useMemo(
+    () =>
+      query ? EuiSearchBar.Query.execute(query, allPolicies, EXECUTE_QUERY_OPTIONS) : allPolicies,
+    [query, allPolicies]
+  );
+
+  const isFiltered = visiblePolicies.length !== allPolicies.length;
+
   // Shard-targeted policies cannot be assigned here, so they are not part of
   // the "N of M selected" denominator unless they are already selected.
-  const assignableTotal = useMemo(
+  const visibleAssignable = useMemo(
     () =>
-      allPolicies.filter((policy) => !shardKeySet.has(policy.id) || selectedSet.has(policy.id))
-        .length,
-    [allPolicies, shardKeySet, selectedSet]
+      visiblePolicies.filter((policy) => !shardKeySet.has(policy.id) || selectedSet.has(policy.id)),
+    [visiblePolicies, shardKeySet, selectedSet]
+  );
+
+  const visibleSelectedCount = useMemo(
+    () => visibleAssignable.filter((policy) => selectedSet.has(policy.id)).length,
+    [visibleAssignable, selectedSet]
   );
 
   const totalAgents = useMemo(
@@ -250,19 +330,23 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     [selectedIds, onChange, shardKeySet]
   );
 
+  // Both bulk actions operate on the rows currently matching the search, so a
+  // filtered "Select all" cannot silently assign policies the user cannot see.
+  // With no search active the visible set is every row, preserving the
+  // unfiltered behaviour (including orphan ids, which are never invented here).
   const handleSelectAll = useCallback(() => {
-    const knownSelectableIds = knownPolicies
-      .filter((policy) => !shardKeySet.has(policy.id))
+    const idsToAdd = visiblePolicies
+      .filter((policy) => !policy.isOrphan && !shardKeySet.has(policy.id))
       .map((policy) => policy.id);
-    // Preserve orphan ids the user has not cleared; never invent new ones.
-    const orphanIdsToKeep = (selectedIds ?? []).filter((id) => !agentPoliciesById?.[id]);
 
-    onChange(Array.from(new Set([...knownSelectableIds, ...orphanIdsToKeep])));
-  }, [knownPolicies, shardKeySet, selectedIds, agentPoliciesById, onChange]);
+    onChange(Array.from(new Set([...(selectedIds ?? []), ...idsToAdd])));
+  }, [visiblePolicies, shardKeySet, selectedIds, onChange]);
 
   const handleUnselectAll = useCallback(() => {
-    onChange([]);
-  }, [onChange]);
+    const visibleIds = new Set(visiblePolicies.map((policy) => policy.id));
+
+    onChange((selectedIds ?? []).filter((id) => !visibleIds.has(id)));
+  }, [visiblePolicies, selectedIds, onChange]);
 
   // `useAgentPolicies` uses `initialData: []`, so an empty map alone is not a
   // settled Fleet response — gate empty / error / loading on fetch status.
@@ -324,26 +408,39 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       },
       {
         name: '',
-        width: '120px',
+        width: '140px',
         align: 'right' as const,
-        render: (item: PolicyRow) => (
-          <EuiLink
-            href={getUrlForApp(PLUGIN_ID, {
-              path: pagePathGetters.policy_details({ policyId: item.id })[1],
-            })}
-            target="_blank"
-            data-test-subj={`viewPolicy-${item.id}`}
-          >
-            <FormattedMessage
-              id="xpack.osquery.pack.policyList.viewPolicyLink"
-              defaultMessage="View policy"
-            />
-          </EuiLink>
-        ),
+        // Orphan rows have no Fleet page behind them, so linking would send the
+        // user to a not-found screen.
+        render: (item: PolicyRow) =>
+          item.isOrphan ? (
+            <UnavailablePolicyCell policyId={item.id} policyName={item.name} />
+          ) : (
+            <EuiLink
+              href={getUrlForApp(PLUGIN_ID, {
+                path: pagePathGetters.policy_details({ policyId: item.id })[1],
+              })}
+              target="_blank"
+              data-test-subj={`viewPolicy-${item.id}`}
+            >
+              <FormattedMessage
+                id="xpack.osquery.pack.policyList.viewPolicyLink"
+                defaultMessage="View policy"
+              />
+            </EuiLink>
+          ),
       },
     ],
     [selectedSet, togglePolicy, isAssignmentDisabled, getUrlForApp, shardKeySet]
   );
+
+  // Must return true: `EuiInMemoryTable` skips its own in-memory filtering for
+  // any falsy return, so mirroring the query is not enough on its own.
+  const handleSearchChange = useCallback(({ query: nextQuery }: EuiSearchBarOnChangeArgs) => {
+    setQuery(nextQuery ?? null);
+
+    return true;
+  }, []);
 
   const search = useMemo(
     () => ({
@@ -354,11 +451,10 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         }),
         'data-test-subj': 'policyAssignmentSearch',
       },
+      onChange: handleSearchChange,
     }),
-    []
+    [handleSearchChange]
   );
-
-  const executeQueryOptions = useMemo(() => ({ defaultFields: ['name', 'description'] }), []);
 
   // `allPolicies` comes from `Object.entries` over the Fleet response, so
   // without an explicit default sort a server-side reorder silently reshuffles
@@ -487,40 +583,68 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
             <EuiButtonEmpty
               size="xs"
               onClick={handleSelectAll}
-              disabled={isAssignmentDisabled || knownPolicies.length === 0}
+              disabled={isAssignmentDisabled || visibleAssignable.length === 0}
               data-test-subj="policyAssignmentSelectAll"
             >
-              <FormattedMessage
-                id="xpack.osquery.pack.policyList.selectAll"
-                defaultMessage="Select all"
-              />
+              {isFiltered ? (
+                <FormattedMessage
+                  id="xpack.osquery.pack.policyList.selectAllMatching"
+                  defaultMessage="Select all matching"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.pack.policyList.selectAll"
+                  defaultMessage="Select all"
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
               onClick={handleUnselectAll}
-              disabled={isAssignmentDisabled || selectedSet.size === 0}
+              disabled={isAssignmentDisabled || visibleSelectedCount === 0}
               data-test-subj="policyAssignmentUnselectAll"
             >
-              <FormattedMessage
-                id="xpack.osquery.pack.policyList.unselectAll"
-                defaultMessage="Un-select all"
-              />
+              {isFiltered ? (
+                <FormattedMessage
+                  id="xpack.osquery.pack.policyList.unselectAllMatching"
+                  defaultMessage="Un-select all matching"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.pack.policyList.unselectAll"
+                  defaultMessage="Un-select all"
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s" color="subdued" data-test-subj="policyAssignmentCount">
-              <FormattedMessage
-                id="xpack.osquery.pack.policyList.selectionCount"
-                defaultMessage="{selected} of {total} selected | {agents, plural, one {# agent} other {# agents}} enrolled"
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                values={{
-                  selected: selectedSet.size,
-                  total: assignableTotal,
-                  agents: totalAgents,
-                }}
-              />
+              {isFiltered ? (
+                <FormattedMessage
+                  id="xpack.osquery.pack.policyList.selectionCountMatching"
+                  defaultMessage="{selected} of {total} matching | {overall} selected | {agents, plural, one {# agent} other {# agents}} enrolled"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    selected: visibleSelectedCount,
+                    total: visibleAssignable.length,
+                    overall: selectedSet.size,
+                    agents: totalAgents,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.pack.policyList.selectionCount"
+                  defaultMessage="{selected} of {total} selected | {agents, plural, one {# agent} other {# agents}} enrolled"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    selected: visibleSelectedCount,
+                    total: visibleAssignable.length,
+                    agents: totalAgents,
+                  }}
+                />
+              )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -534,7 +658,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
           sorting={sorting}
           loading={isInitialLoad}
           noItemsMessage={emptyMessage}
-          executeQueryOptions={executeQueryOptions}
+          executeQueryOptions={EXECUTE_QUERY_OPTIONS}
           data-test-subj="policyAssignmentTable"
         />
       </EuiPanel>
