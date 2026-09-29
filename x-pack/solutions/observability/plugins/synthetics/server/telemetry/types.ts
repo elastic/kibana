@@ -42,6 +42,11 @@ export interface MonitorErrorEvent {
   status?: number;
   url?: string;
   stackVersion: string;
+  /** Machine-readable cause for `invalidApiKey` events. */
+  failureReason?: 'missing' | 'invalid' | 'insufficient_privileges' | 'error';
+  apiKeyPresent?: boolean;
+  missingPrivileges?: string[];
+  isServerless?: boolean;
 }
 
 export interface MonitorUpdateTelemetryChannelEvents {

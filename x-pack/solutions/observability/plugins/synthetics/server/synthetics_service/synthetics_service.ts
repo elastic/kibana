@@ -30,7 +30,11 @@ import {
 } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
-import { getAPIKeyForSyntheticsService } from './get_api_key';
+import {
+  getAPIKeyForSyntheticsService,
+  getApiKeyInvalidTelemetryMessage,
+  type ApiKeyInvalidReason,
+} from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
 import type { ServiceConfig } from '../config';
 import type { ServiceData } from './service_api_client';
@@ -81,6 +85,12 @@ export class SyntheticsService {
   public syncErrors?: ServiceLocationErrors | null = [];
 
   public invalidApiKeyError?: boolean;
+
+  public apiKeyInvalidDetails?: {
+    reason: ApiKeyInvalidReason;
+    apiKeyPresent: boolean;
+    missingPrivileges?: string[];
+  };
 
   constructor(server: SyntheticsServerSetup) {
     this.logger = server.logger;
@@ -354,7 +364,7 @@ export class SyntheticsService {
   }
 
   async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+    const { apiKey, isValid, reason, missingPrivileges } = await getAPIKeyForSyntheticsService({
       server: this.server,
     });
     // do not check for api key validity if inspecting
@@ -363,8 +373,15 @@ export class SyntheticsService {
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;
+      this.apiKeyInvalidDetails = {
+        reason: reason ?? 'invalid',
+        apiKeyPresent: Boolean(apiKey),
+        missingPrivileges,
+      };
       return null;
     }
+
+    this.apiKeyInvalidDetails = undefined;
 
     return {
       hosts: this.esHosts,
@@ -498,10 +515,15 @@ export class SyntheticsService {
           if (!output) {
             output = await this.getOutput();
             if (!output) {
+              const failureReason = service.apiKeyInvalidDetails?.reason ?? 'invalid';
               sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                reason: 'API key is not valid.',
-                message: 'Failed to push configs. API key is not valid.',
+                reason: failureReason,
+                message: getApiKeyInvalidTelemetryMessage(failureReason),
                 type: 'invalidApiKey',
+                failureReason,
+                apiKeyPresent: service.apiKeyInvalidDetails?.apiKeyPresent ?? false,
+                missingPrivileges: service.apiKeyInvalidDetails?.missingPrivileges,
+                isServerless: service.server.isElasticsearchServerless,
                 stackVersion: service.server.stackVersion,
               });
               return;

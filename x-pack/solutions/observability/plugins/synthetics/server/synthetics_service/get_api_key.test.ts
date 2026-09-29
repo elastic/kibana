@@ -8,6 +8,7 @@
 import {
   generateAPIKey,
   getAPIKeyForSyntheticsService,
+  getApiKeyInvalidTelemetryMessage,
   getServiceApiKeyPrivileges,
   syntheticsIndex,
 } from './get_api_key';
@@ -49,6 +50,7 @@ describe('getAPIKeyTest', function () {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    security.authc.apiKeys.validate = jest.fn().mockResolvedValue(true);
     jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
       index: {
         [syntheticsIndex]: {
@@ -101,6 +103,36 @@ describe('getAPIKeyTest', function () {
     }
   );
 
+  it('returns missing reason when no api key is stored', async () => {
+    encryptedSavedObjects.getClient = jest.fn().mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(undefined),
+    });
+
+    const apiKey = await getAPIKeyForSyntheticsService({ server });
+
+    expect(apiKey).toEqual({ isValid: false, reason: 'missing' });
+  });
+
+  it('returns invalid reason when api key validation fails', async () => {
+    security.authc.apiKeys.validate = jest.fn().mockResolvedValue(false);
+
+    const getObject = jest
+      .fn()
+      .mockReturnValue({ attributes: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' } });
+
+    encryptedSavedObjects.getClient = jest.fn().mockReturnValue({
+      getDecryptedAsInternalUser: getObject,
+    });
+
+    const apiKey = await getAPIKeyForSyntheticsService({ server });
+
+    expect(apiKey).toEqual({
+      apiKey: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' },
+      isValid: false,
+      reason: 'invalid',
+    });
+  });
+
   it('invalidates api keys with missing read permissions', async () => {
     jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
       index: {
@@ -127,6 +159,8 @@ describe('getAPIKeyTest', function () {
     expect(apiKey).toEqual({
       apiKey: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' },
       isValid: false,
+      reason: 'insufficient_privileges',
+      missingPrivileges: ['read'],
     });
 
     expect(encryptedSavedObjects.getClient).toHaveBeenCalledTimes(1);
@@ -138,6 +172,15 @@ describe('getAPIKeyTest', function () {
       'uptime-synthetics-api-key',
       'ba997842-b0cf-4429-aa9d-578d9bf0d391'
     );
+  });
+
+  it('maps invalid api key reasons to telemetry messages', () => {
+    expect(getApiKeyInvalidTelemetryMessage('missing')).toContain('is missing');
+    expect(getApiKeyInvalidTelemetryMessage('invalid')).toContain('is not valid');
+    expect(getApiKeyInvalidTelemetryMessage('insufficient_privileges')).toContain(
+      'required index privileges'
+    );
+    expect(getApiKeyInvalidTelemetryMessage('error')).toContain('Failed to validate');
   });
 
   it('marks new service API keys as Kibana-managed', async () => {

@@ -19,6 +19,36 @@ import { checkHasPrivileges } from './authentication/check_has_privilege';
 
 export const syntheticsIndex = 'synthetics-*';
 
+const REQUIRED_INDEX_PRIVILEGES = [
+  'auto_configure',
+  'create_doc',
+  'view_index_metadata',
+  'read',
+] as const;
+
+export type ApiKeyInvalidReason = 'missing' | 'invalid' | 'insufficient_privileges' | 'error';
+
+export interface GetSyntheticsApiKeyResult {
+  apiKey?: SyntheticsServiceApiKey;
+  isValid: boolean;
+  reason?: ApiKeyInvalidReason;
+  missingPrivileges?: string[];
+}
+
+export const getApiKeyInvalidTelemetryMessage = (reason: ApiKeyInvalidReason): string => {
+  switch (reason) {
+    case 'missing':
+      return 'Failed to push configs. Synthetics service API key is missing.';
+    case 'insufficient_privileges':
+      return 'Failed to push configs. API key is missing required index privileges.';
+    case 'error':
+      return 'Failed to push configs. Failed to validate API key.';
+    case 'invalid':
+    default:
+      return 'Failed to push configs. API key is not valid.';
+  }
+};
+
 export const getServiceApiKeyPrivileges = (isServerlessEs: boolean) => {
   const cluster: SecurityClusterPrivilege[] = ['monitor', 'read_pipeline'];
   if (isServerlessEs === false) cluster.push('read_ilm');
@@ -43,40 +73,45 @@ export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
   server: SyntheticsServerSetup;
-}): Promise<{
-  apiKey?: SyntheticsServiceApiKey;
-  isValid: boolean;
-}> => {
+}): Promise<GetSyntheticsApiKeyResult> => {
   try {
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
 
-    if (apiKey) {
-      const [isValid, { index }] = await Promise.all([
-        server.security.authc.apiKeys.validate({
-          id: apiKey.id,
-          api_key: apiKey.apiKey,
-        }),
-        checkHasPrivileges(server, apiKey),
-      ]);
-
-      const indexPermissions = index[syntheticsIndex];
-
-      const hasPermissions =
-        indexPermissions.auto_configure &&
-        indexPermissions.create_doc &&
-        indexPermissions.view_index_metadata &&
-        indexPermissions.read;
-
-      if (!hasPermissions) {
-        return { isValid: false, apiKey };
-      }
-      return { apiKey, isValid };
+    if (!apiKey) {
+      return { isValid: false, reason: 'missing' };
     }
+
+    const [isValid, { index }] = await Promise.all([
+      server.security.authc.apiKeys.validate({
+        id: apiKey.id,
+        api_key: apiKey.apiKey,
+      }),
+      checkHasPrivileges(server, apiKey),
+    ]);
+
+    const indexPermissions = index[syntheticsIndex];
+    const missingPrivileges = REQUIRED_INDEX_PRIVILEGES.filter(
+      (privilege) => !indexPermissions?.[privilege]
+    );
+
+    if (!isValid) {
+      return { apiKey, isValid: false, reason: 'invalid' };
+    }
+
+    if (missingPrivileges.length > 0) {
+      return {
+        apiKey,
+        isValid: false,
+        reason: 'insufficient_privileges',
+        missingPrivileges: [...missingPrivileges],
+      };
+    }
+
+    return { apiKey, isValid: true };
   } catch (error) {
     server.logger.error(`API key is invalid, ${error.message}`, { error });
+    return { isValid: false, reason: 'error' };
   }
-
-  return { isValid: false };
 };
 
 export const generateAPIKey = async ({
