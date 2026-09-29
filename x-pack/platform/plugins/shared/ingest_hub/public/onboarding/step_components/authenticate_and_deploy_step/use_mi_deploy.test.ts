@@ -15,12 +15,12 @@ function makeInstance(instanceId: string, serviceId: string): ServiceInstance {
 
 function makeGroup(instanceId: string, serviceId: string): DeployGroup {
   return {
+    groupId: serviceId,
     instanceIds: [instanceId],
     members: [
       { instance: makeInstance(instanceId, serviceId), service: { id: serviceId } as never },
     ],
     isDuplicateGroup: false,
-    packageName: 'aws',
   };
 }
 
