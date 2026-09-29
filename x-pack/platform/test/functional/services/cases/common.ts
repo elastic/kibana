@@ -176,6 +176,14 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
     async selectClosureOption(value: 'close-by-user' | 'close-by-pushing') {
       if (await this.isRedesignEnabled()) {
+        // Disabled until the connectors request resolves; clicking earlier is a silent no-op.
+        await retry.waitFor('selectClosureOption: closure switch to be actionable', async () => {
+          return (
+            (await testSubjects.exists('automatic-closure-switch')) &&
+            (await testSubjects.isEnabled('automatic-closure-switch'))
+          );
+        });
+
         const checked = await testSubjects.getAttribute('automatic-closure-switch', 'aria-checked');
         const isPushing = checked === 'true';
         const shouldBePushing = value === 'close-by-pushing';
