@@ -15,5 +15,8 @@
   "exclude": [
     "**/__fixtures__/**/*",
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/test",
   ]
 }

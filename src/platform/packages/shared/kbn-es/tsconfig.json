@@ -19,5 +19,6 @@
     "@kbn/mock-idp-utils",
     "@kbn/jest-serializers",
     "@kbn/repo-info",
+    "@kbn/test",
   ]
 }

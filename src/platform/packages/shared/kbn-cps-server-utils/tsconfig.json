@@ -9,6 +9,7 @@
   ],
   "kbn_references": [
     "@kbn/core-spaces-common",
+    "@kbn/test",
   ],
   "exclude": [
     "target/**/*"
