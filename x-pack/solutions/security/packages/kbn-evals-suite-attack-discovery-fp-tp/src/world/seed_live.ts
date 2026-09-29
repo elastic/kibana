@@ -120,7 +120,7 @@ export const buildLiveSeedPlan = (world: FpTpWorld, now: Date = new Date()): FpT
     attackDocument: shifted.attack ? toAttackAlertDocument(shifted.attack) : undefined,
     alertIds: shifted.alerts.map((alert) => alert.id),
     alertOperations: shifted.alerts.flatMap((alert) => [
-      { index: { _index: AD2_ALERTS_INDEX, _id: alert.id } },
+      { create: { _index: AD2_ALERTS_INDEX, _id: alert.id } },
       alert.source,
     ]),
     events: shifted.events.map(({ index, id }) => ({ index, id })),
@@ -456,7 +456,7 @@ export const seedFixture = async ({
       );
     }
     if (plan.attackDocument) {
-      await esClient.index({
+      await esClient.create({
         index: plan.attackIndex,
         id: plan.attackId,
         document: plan.attackDocument,

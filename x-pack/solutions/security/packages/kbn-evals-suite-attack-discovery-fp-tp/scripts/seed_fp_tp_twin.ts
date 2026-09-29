@@ -13,14 +13,18 @@ import type { FpTpLiveKbnRequest } from '../src/world';
 
 const createKbnRequest = ({
   kibanaUrl,
+  apiKey,
   username,
   password,
 }: {
   kibanaUrl: string;
+  apiKey?: string;
   username: string;
   password: string;
 }): FpTpLiveKbnRequest => {
-  const authorization = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+  const authorization = apiKey
+    ? `ApiKey ${apiKey}`
+    : `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
 
   return async ({ method, path, body, version }) => {
     const headers: Record<string, string> = {
@@ -62,16 +66,17 @@ run(
 
     const kibanaUrl = flags.kibanaUrl as string;
     const elasticsearchUrl = flags.elasticsearchUrl as string;
+    const apiKey = flags.apiKey as string | undefined;
     const username = flags.username as string;
     const password = flags.password as string;
 
     const esClient = new Client({
       node: elasticsearchUrl,
-      auth: { username, password },
+      auth: apiKey ? { apiKey } : { username, password },
     });
 
     try {
-      const kbnRequest = createKbnRequest({ kibanaUrl, username, password });
+      const kbnRequest = createKbnRequest({ kibanaUrl, apiKey, username, password });
       const summary = await seedTwinLive({
         esClient,
         kbnRequest,
@@ -92,7 +97,7 @@ run(
     description:
       'Seeds one FP/TP scenario twin into a local Elasticsearch + Kibana for Workflows UI validation.',
     flags: {
-      string: ['scenario', 'variant', 'kibanaUrl', 'elasticsearchUrl', 'username', 'password'],
+      string: ['scenario', 'variant', 'kibanaUrl', 'elasticsearchUrl', 'apiKey', 'username', 'password'],
       default: {
         scenario: 'encoded-powershell',
         variant: 'fp',
@@ -106,6 +111,7 @@ run(
         --variant                       Twin of the scenario to load, e.g. tp or fp (Default: fp). Only one at a time.
         --kibanaUrl                     Kibana URL (Default: http://127.0.0.1:5601)
         --elasticsearchUrl              Elasticsearch URL (Default: http://127.0.0.1:9200)
+        --apiKey                        Base64 API key for ApiKey auth (serverless projects; overrides username/password)
         --username                      Username (Default: elastic)
         --password                      Password (Default: changeme)
       `,

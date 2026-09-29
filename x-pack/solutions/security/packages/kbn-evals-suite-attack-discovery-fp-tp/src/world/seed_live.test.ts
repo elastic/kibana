@@ -38,7 +38,7 @@ describe('buildLiveSeedPlan', () => {
 
   it('returns alert bulk operations targeting the detection alerts index', () => {
     expect(plan.alertOperations[0]).toEqual({
-      index: { _index: AD2_ALERTS_INDEX, _id: plan.alertIds[0] },
+      create: { _index: AD2_ALERTS_INDEX, _id: plan.alertIds[0] },
     });
   });
 
@@ -152,7 +152,7 @@ describe('seedFixture', () => {
   const world = twinToWorld(buildEncodedPowershellTwin('tp'));
   let esClient: {
     bulk: jest.Mock;
-    index: jest.Mock;
+    create: jest.Mock;
     deleteByQuery: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
@@ -162,7 +162,7 @@ describe('seedFixture', () => {
   beforeEach(() => {
     esClient = {
       bulk: jest.fn().mockResolvedValue({ errors: false }),
-      index: jest.fn().mockResolvedValue({}),
+      create: jest.fn().mockResolvedValue({}),
       deleteByQuery: jest.fn().mockResolvedValue({}),
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
       updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
@@ -255,7 +255,7 @@ describe('seedFixture', () => {
   });
 
   it('returns after deleting the partially seeded alerts when indexing fails', async () => {
-    esClient.index.mockRejectedValue(new Error('index failed'));
+    esClient.create.mockRejectedValue(new Error('index failed'));
 
     await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world }).catch(
       () => undefined
@@ -267,7 +267,7 @@ describe('seedFixture', () => {
   });
 
   it('returns the partial-seed cleanup to onCleanupFailure when that cleanup fails', async () => {
-    esClient.index.mockRejectedValue(new Error('index failed'));
+    esClient.create.mockRejectedValue(new Error('index failed'));
     esClient.deleteByQuery.mockRejectedValue(new Error('delete failed'));
     const onCleanupFailure = jest.fn();
 

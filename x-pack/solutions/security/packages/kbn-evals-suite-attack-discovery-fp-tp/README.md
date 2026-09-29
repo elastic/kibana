@@ -86,6 +86,26 @@ node scripts/evals start --suite security-attack-discovery-fp-tp --model <connec
 
 The suite's stack uses the `evals_attack_discovery_fp_tp` Scout config set, which enables AlertZero (and the `agenticInvestigations` and `proposals` plugins it requires) plus the Workflows UI and agent settings.
 
+## Manual seeding on a serverless project
+
+`scripts/seed_fp_tp_twin.ts` also runs against a serverless project. Serverless
+has no basic-auth users, so pass an API key (`--apiKey`, base64 form from
+Kibana's API keys UI) and the ES endpoint in addition to the Kibana URL:
+
+```bash
+node scripts/evals tsx scripts/seed_fp_tp_twin.ts \
+  --kibanaUrl https://<project>.kb.<region>.qa.elastic.cloud \
+  --elasticsearchUrl https://<project>.es.<region>.qa.elastic.cloud \
+  --apiKey <base64-api-key>
+```
+
+Serverless constraints handled by the seeder: the detection alerts index is a
+data stream (bulk writes use `create`), and Attack Discovery alerts go to the
+product-managed `.alerts-security.attack.discovery.alerts-default` data stream
+rather than an ad-hoc index. Deleting a seed and immediately reseeding the same
+ids can fail with 409 version conflicts because serverless ignores the delete
+refresh; wait a moment and rerun.
+
 ## Reproducibility
 
 Run with `--repetitions 5` or more. Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
