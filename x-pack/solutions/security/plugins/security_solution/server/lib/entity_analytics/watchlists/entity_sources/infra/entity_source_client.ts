@@ -269,7 +269,7 @@ export class WatchlistEntitySourceClient {
       : matched;
 
     const page = query?.page ?? 1;
-    const perPage = query?.per_page ?? Math.max(sorted.length, 1);
+    const perPage = query?.per_page ?? 10;
     const start = (page - 1) * perPage;
 
     return {

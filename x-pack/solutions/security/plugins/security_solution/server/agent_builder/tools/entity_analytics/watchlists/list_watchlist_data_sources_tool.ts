@@ -126,7 +126,7 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
 
         const sourceIds = await watchlistClient.getEntitySourceIds(params.watchlistId);
         const sources = sourceIds.length
-          ? (await entitySourceClient.list({}, sourceIds)).sources
+          ? (await entitySourceClient.list({ per_page: sourceIds.length }, sourceIds)).sources
           : [];
 
         const dataSources = sources.map(toDataSourceSummary);

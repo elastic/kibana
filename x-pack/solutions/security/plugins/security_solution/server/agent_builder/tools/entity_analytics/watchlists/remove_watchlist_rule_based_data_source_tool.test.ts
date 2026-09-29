@@ -321,7 +321,39 @@ describe('removeWatchlistRuleBasedDataSourceTool', () => {
         expect(askArgs.message).toContain('host.os.name: "Ubuntu*"');
       });
 
-      it('on accept: unlinks and deletes the source', async () => {
+      it('on unprompted: prompt for an index source names its index pattern, identifier field, and range', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(
+          buildWatchlist({ name: 'Ubuntu Hosts', entitySourceIds: ['src-2'] })
+        );
+        mockGetEntitySourceIdsFn.mockResolvedValueOnce(['src-2']);
+        mockListFn.mockResolvedValueOnce({
+          sources: [
+            {
+              id: 'src-2',
+              type: 'index',
+              name: 'wl-1-index',
+              managed: false,
+              queryRule: 'event.action: "user.session.start"',
+              indexPattern: 'logs-okta.system-*',
+              identifierField: 'user.email',
+              range: { start: 'now-10d', end: 'now' },
+            },
+          ],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks);
+
+        await tool.handler({ watchlistId: 'wl-1', type: 'index' }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        // Identifying params are shown (not the internal source name) so the user can spot a
+        // mismatch if more than one source of this type ended up linked to the watchlist.
+        expect(askArgs.message).toContain('logs-okta.system-*');
+        expect(askArgs.message).toContain('user.email');
+        expect(askArgs.message).toContain('now-10d to now');
+        expect(askArgs.message).toContain('event.action: "user.session.start"');
+      });
+
+      it('on accept: deletes the source before unlinking it', async () => {
         mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist({ entitySourceIds: ['src-1'] }));
         mockGetEntitySourceIdsFn.mockResolvedValueOnce(['src-1']);
         const source = { id: 'src-1', type: 'store' as const, name: 'wl-store', managed: false };
@@ -333,16 +365,49 @@ describe('removeWatchlistRuleBasedDataSourceTool', () => {
           .fn()
           .mockReturnValue({ existingSourceFingerprint: fingerprintDataSource(source) });
 
+        const callOrder: string[] = [];
+        mockDeleteFn.mockImplementationOnce(async () => {
+          callOrder.push('delete');
+        });
+        mockRemoveEntitySourceReferenceFn.mockImplementationOnce(async () => {
+          callOrder.push('unlink');
+        });
+
         const result = (await tool.handler(
           { watchlistId: 'wl-1', type: 'store' },
           ctx
         )) as ToolHandlerStandardReturn;
 
-        expect(mockRemoveEntitySourceReferenceFn).toHaveBeenCalledWith('wl-1', source);
+        expect(callOrder).toEqual(['delete', 'unlink']);
         expect(mockDeleteFn).toHaveBeenCalledWith('src-1');
+        expect(mockRemoveEntitySourceReferenceFn).toHaveBeenCalledWith('wl-1', source);
         const other = result.results[0] as OtherResult;
         expect(other.type).toBe(ToolResultType.other);
         expect(other.data).toMatchObject({ watchlistId: 'wl-1', removedSourceId: 'src-1' });
+      });
+
+      it('on accept: does not unlink the source if deleting it fails', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist({ entitySourceIds: ['src-1'] }));
+        mockGetEntitySourceIdsFn.mockResolvedValueOnce(['src-1']);
+        const source = { id: 'src-1', type: 'store' as const, name: 'wl-store', managed: false };
+        mockListFn.mockResolvedValueOnce({ sources: [source] });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+        ctx.stateManager.getState = jest
+          .fn()
+          .mockReturnValue({ existingSourceFingerprint: fingerprintDataSource(source) });
+        mockDeleteFn.mockRejectedValueOnce(new Error('ES unavailable'));
+
+        const result = (await tool.handler(
+          { watchlistId: 'wl-1', type: 'store' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(mockRemoveEntitySourceReferenceFn).not.toHaveBeenCalled();
+        const error = result.results[0] as ErrorResult;
+        expect(error.type).toBe(ToolResultType.error);
+        expect(error.data.message).toMatch(/ES unavailable/);
       });
 
       it('on reject: returns an error result without deleting', async () => {

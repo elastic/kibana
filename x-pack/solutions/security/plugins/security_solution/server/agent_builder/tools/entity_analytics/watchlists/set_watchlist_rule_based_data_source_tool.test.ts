@@ -310,7 +310,7 @@ describe('setWatchlistRuleBasedDataSourceTool', () => {
         const error = result.results[0] as ErrorResult;
         expect(error.type).toBe(ToolResultType.error);
         expect(error.data.message).toMatch(/managed/i);
-        expect(error.data.message).toContain('locked-index');
+        expect(error.data.message).toMatch(/index pattern/i);
       });
 
       it('on unprompted: warns that the existing other-type source will be removed on a non-managed watchlist', async () => {
@@ -328,10 +328,75 @@ describe('setWatchlistRuleBasedDataSourceTool', () => {
         await tool.handler({ type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' }, ctx);
 
         const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
-        expect(askArgs.message).toMatch(/remove its existing.*index pattern.*source.*wl-index/i);
+        expect(askArgs.message).toMatch(/remove its existing.*index pattern.*source/i);
       });
 
-      it('on accept: removes the other-type source before creating the new one', async () => {
+      it('on accept: removes the other-type source after the new one is created and linked', async () => {
+        const conflictingSource = { id: 'src-old-index', type: 'index' as const, name: 'wl-index' };
+        mockGetWatchlistFn.mockResolvedValueOnce(
+          buildWatchlist({ managed: false, entitySourceIds: ['src-old-index'] })
+        );
+        mockGetEntitySourceIdsFn.mockResolvedValueOnce(['src-old-index']);
+        mockListFn.mockResolvedValueOnce({ sources: [conflictingSource] });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+        ctx.stateManager.getState = jest.fn().mockReturnValue({
+          existingSourceFingerprint: fingerprintDataSource(undefined),
+          conflictingSourceId: conflictingSource.id,
+        });
+
+        const callOrder: string[] = [];
+        mockCreateFn.mockImplementationOnce(async () => {
+          callOrder.push('create');
+          return { id: 'src-new-store', type: 'store', name: 'wl-store', managed: false };
+        });
+        mockAddEntitySourceReferenceFn.mockImplementationOnce(async () => {
+          callOrder.push('link');
+        });
+        mockDeleteFn.mockImplementationOnce(async () => {
+          callOrder.push('delete-conflicting');
+        });
+
+        await tool.handler({ type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' }, ctx);
+
+        expect(mockRemoveEntitySourceReferenceFn).toHaveBeenCalledWith('wl-1', conflictingSource);
+        expect(mockDeleteFn).toHaveBeenCalledWith('src-old-index');
+        expect(mockCreateFn).toHaveBeenCalled();
+        // The conflicting source is only deleted once the replacement is safely created and
+        // linked — never before, since a failure at either step would otherwise leave the
+        // watchlist with no rule-based source at all.
+        expect(callOrder).toEqual(['create', 'link', 'delete-conflicting']);
+      });
+
+      it('on accept: does not touch the conflicting source if creating the replacement fails', async () => {
+        const conflictingSource = { id: 'src-old-index', type: 'index' as const, name: 'wl-index' };
+        mockGetWatchlistFn.mockResolvedValueOnce(
+          buildWatchlist({ managed: false, entitySourceIds: ['src-old-index'] })
+        );
+        mockGetEntitySourceIdsFn.mockResolvedValueOnce(['src-old-index']);
+        mockListFn.mockResolvedValueOnce({ sources: [conflictingSource] });
+        mockCreateFn.mockRejectedValueOnce(new Error('API key granting failed'));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+        ctx.stateManager.getState = jest.fn().mockReturnValue({
+          existingSourceFingerprint: fingerprintDataSource(undefined),
+          conflictingSourceId: conflictingSource.id,
+        });
+
+        const result = (await tool.handler(
+          { type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(mockRemoveEntitySourceReferenceFn).not.toHaveBeenCalled();
+        expect(mockDeleteFn).not.toHaveBeenCalled();
+        const error = result.results[0] as ErrorResult;
+        expect(error.type).toBe(ToolResultType.error);
+      });
+
+      it('on accept: does not touch the conflicting source if linking the replacement fails', async () => {
         const conflictingSource = { id: 'src-old-index', type: 'index' as const, name: 'wl-index' };
         mockGetWatchlistFn.mockResolvedValueOnce(
           buildWatchlist({ managed: false, entitySourceIds: ['src-old-index'] })
@@ -344,6 +409,7 @@ describe('setWatchlistRuleBasedDataSourceTool', () => {
           name: 'wl-store',
           managed: false,
         });
+        mockAddEntitySourceReferenceFn.mockRejectedValueOnce(new Error('link failed'));
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
         });
@@ -352,11 +418,18 @@ describe('setWatchlistRuleBasedDataSourceTool', () => {
           conflictingSourceId: conflictingSource.id,
         });
 
-        await tool.handler({ type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' }, ctx);
+        const result = (await tool.handler(
+          { type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' },
+          ctx
+        )) as ToolHandlerStandardReturn;
 
-        expect(mockRemoveEntitySourceReferenceFn).toHaveBeenCalledWith('wl-1', conflictingSource);
-        expect(mockDeleteFn).toHaveBeenCalledWith('src-old-index');
-        expect(mockCreateFn).toHaveBeenCalled();
+        // The rollback of the new (unlinked) source is expected — but the conflicting source
+        // must be left untouched, since it's still the only working rule-based source.
+        expect(mockRemoveEntitySourceReferenceFn).not.toHaveBeenCalled();
+        expect(mockDeleteFn).toHaveBeenCalledWith('src-new-store');
+        expect(mockDeleteFn).not.toHaveBeenCalledWith('src-old-index');
+        const error = result.results[0] as ErrorResult;
+        expect(error.type).toBe(ToolResultType.error);
       });
 
       it('does not touch the other-type source on a managed watchlist', async () => {
@@ -519,7 +592,11 @@ describe('setWatchlistRuleBasedDataSourceTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(mockCreateFn).toHaveBeenCalledWith(
-          expect.objectContaining({ type: 'store', queryRule: 'host.os.name: "Ubuntu*"' }),
+          expect.objectContaining({
+            type: 'store',
+            queryRule: 'host.os.name: "Ubuntu*"',
+            name: 'wl-1-store',
+          }),
           ctx.request
         );
         expect(mockAddEntitySourceReferenceFn).toHaveBeenCalledWith('wl-1', 'src-new');

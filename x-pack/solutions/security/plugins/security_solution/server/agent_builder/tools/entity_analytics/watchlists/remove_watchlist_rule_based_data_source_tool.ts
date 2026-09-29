@@ -26,6 +26,7 @@ import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import {
   fingerprintDataSource,
+  formatRuleBasedSourceParamLines,
   DATA_SOURCE_CHANGED_MESSAGE,
   type ConfirmedDataSourceState,
 } from './data_source_utils';
@@ -149,7 +150,12 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
         // 1. Get the existing data sources
         const existingSourceIds = await watchlistClient.getEntitySourceIds(params.watchlistId);
         const linkedSources = existingSourceIds.length
-          ? (await entitySourceClient.list({}, existingSourceIds)).sources
+          ? (
+              await entitySourceClient.list(
+                { per_page: existingSourceIds.length },
+                existingSourceIds
+              )
+            ).sources
           : [];
         const existingSource = linkedSources.find((source) => source.type === params.type);
 
@@ -193,13 +199,13 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
             title: 'Remove rule-based data source',
             message: [
               `Remove the **${ruleType}** rule-based data source from watchlist **"${watchlist.name}"**?`,
-              '\n',
-              existingSource.queryRule ? `**Filter query:** \`${existingSource.queryRule}\`` : '',
-              '\n',
+              ...formatRuleBasedSourceParamLines(params.type, {
+                ...existingSource,
+                queryRule: existingSource.queryRule ?? '',
+              }),
+              '',
               'Entities that were added by this query will be automatically removed from the watchlist on the next sync. This does not affect entities added manually or via other sources.',
-            ]
-              .filter(Boolean)
-              .join('\n'),
+            ].join('\n'),
             confirm_text: 'Remove',
             cancel_text: 'Cancel',
             color: 'warning',
@@ -231,8 +237,10 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
         }
 
         // 4. Actual action: remove the data source
-        await watchlistClient.removeEntitySourceReference(params.watchlistId, existingSource);
+        // Delete before unlinking — if unlinking fails, the leftover reference just points to an already-deleted source
+        // instead of leaving the source and its credential (for `index` type) orphaned but still live and no longer discoverable to retry or revoke.
         await entitySourceClient.delete(existingSource.id);
+        await watchlistClient.removeEntitySourceReference(params.watchlistId, existingSource);
 
         telemetryTracker.recordResultCount(1);
         return {

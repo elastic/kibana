@@ -736,5 +736,30 @@ describe('WatchlistEntitySourceClient', () => {
         'Alpha',
       ]);
     });
+
+    it('defaults to 10 per page', async () => {
+      const twelveSources = Array.from({ length: 12 }, (_, i) => ({
+        id: `src-${i}`,
+        type: watchlistEntitySourceTypeName,
+        references: [],
+        attributes: { type: 'store' as const, name: `Source ${i}` },
+      }));
+      soClient.bulkGet.mockResolvedValue({ saved_objects: twelveSources } as never);
+
+      const result = await client.list(
+        {},
+        twelveSources.map((s) => s.id)
+      );
+
+      expect(result.per_page).toBe(10);
+      expect(result.sources).toHaveLength(10);
+      expect(result.total).toBe(12);
+
+      const secondPage = await client.list(
+        { page: 2 },
+        twelveSources.map((s) => s.id)
+      );
+      expect(secondPage.sources).toHaveLength(2);
+    });
   });
 });

@@ -148,8 +148,8 @@ const parseParams = (input: SchemaInput): SourceInput | { error: string } => {
   };
 };
 
-const buildSourceName = (watchlistName: string, type: RuleBasedSourceType): string =>
-  `${watchlistName}-${type}`;
+const buildSourceName = (watchlistId: string, type: RuleBasedSourceType): string =>
+  `${watchlistId}-${type}`;
 
 export const setWatchlistRuleBasedDataSourceTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -266,7 +266,12 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
 
         const existingSourceIds = await watchlistClient.getEntitySourceIds(source.watchlistId);
         const linkedSources = existingSourceIds.length
-          ? (await entitySourceClient.list({}, existingSourceIds)).sources
+          ? (
+              await entitySourceClient.list(
+                { per_page: existingSourceIds.length },
+                existingSourceIds
+              )
+            ).sources
           : [];
         const existingSource = linkedSources.find((linked) => linked.type === source.type);
         const toUpdate = !!existingSource;
@@ -297,7 +302,7 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
               watchlist.name
             }" is non-managed and already has a managed **${getRuleTypeNames(
               conflictingType
-            )}** source ("${conflictingSource.name}"). Managed sources cannot be replaced.`
+            )}** source. Managed sources cannot be replaced.`
           );
         }
 
@@ -357,7 +362,7 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
                   '',
                   `This watchlist can only have one rule-based source — saving this will remove its existing **${getRuleTypeNames(
                     conflictingType
-                  )}** source ("${conflictingSource?.name}").`,
+                  )}** source.`,
                 ]
               : []),
             '',
@@ -409,7 +414,7 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
                 type: RuleBasedSourceType.store,
                 name:
                   existingSource?.name ??
-                  buildSourceName(watchlist.name, RuleBasedSourceType.store),
+                  buildSourceName(source.watchlistId, RuleBasedSourceType.store),
                 queryRule: source.queryRule,
                 enabled: true,
               }
@@ -417,19 +422,13 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
                 type: RuleBasedSourceType.index,
                 name:
                   existingSource?.name ??
-                  buildSourceName(watchlist.name, RuleBasedSourceType.index),
+                  buildSourceName(source.watchlistId, RuleBasedSourceType.index),
                 queryRule: source.queryRule,
                 indexPattern: source.indexPattern,
                 identifierField: source.identifierField,
                 range: source.range ?? DEFAULT_RANGE,
                 enabled: true,
               };
-
-        // Enforce the one-rule-based-source invariant for non-managed watchlists before creating the replacement
-        if (willReplaceConflictingSource && conflictingSource) {
-          await watchlistClient.removeEntitySourceReference(source.watchlistId, conflictingSource);
-          await entitySourceClient.delete(conflictingSource.id);
-        }
 
         const savedSource = toUpdate
           ? await entitySourceClient.update({ ...attributes, id: existingSource.id }, request)
@@ -451,6 +450,25 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
               );
             });
             throw linkError;
+          }
+        }
+
+        // Enforce the one-rule-based-source invariant for non-managed watchlists
+        if (willReplaceConflictingSource && conflictingSource) {
+          try {
+            await watchlistClient.removeEntitySourceReference(
+              source.watchlistId,
+              conflictingSource
+            );
+            await entitySourceClient.delete(conflictingSource.id);
+          } catch (cleanupError) {
+            logger.error(
+              `Failed to remove conflicting entity source "${
+                conflictingSource.id
+              }" after replacing it with "${savedSource.id}": ${
+                cleanupError instanceof Error ? cleanupError.message : 'Unknown error'
+              }`
+            );
           }
         }
 
