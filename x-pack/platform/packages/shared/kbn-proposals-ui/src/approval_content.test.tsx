@@ -17,7 +17,6 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const baseProps: ApprovalContentProps = {
   title: 'Block IP 10.0.0.4',
   tone: 'danger',
-  iconType: 'lock',
   comment: 'Isolate the compromised host.',
   primaryAction: {
     label: 'Approve',

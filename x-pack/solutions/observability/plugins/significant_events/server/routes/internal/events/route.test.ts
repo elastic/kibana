@@ -64,13 +64,13 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
 
 describe('POST /internal/significant_events/events/{id}/investigate', () => {
   it('rejects with 409 while paused before loading the event', async () => {
-    const findByEventUuid = jest.fn();
+    const findLatestByEventId = jest.fn();
     const handlerParams = {
       params: { path: { id: 'event-1' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({ findByEventUuid }),
+        getEventSearchClient: () => ({ findLatestByEventId }),
       }),
       server: { nightshiftInvestigations: {} },
       logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
@@ -80,7 +80,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
     await expect(investigateRoute.handler(handlerParams)).rejects.toMatchObject({
       output: { statusCode: 409 },
     });
-    expect(findByEventUuid).not.toHaveBeenCalled();
+    expect(findLatestByEventId).not.toHaveBeenCalled();
   });
 });
 
@@ -230,12 +230,11 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
     };
 
     const response = await lifecycleRoute.handler({
-      params: { path: { id: latestVersion.event_uuid } },
+      params: { path: { id: latestVersion.event_id } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({
-          findByEventUuid: jest.fn().mockResolvedValue({ hits: [latestVersion] }),
+        getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
         }),
         getDetectionClient: () => ({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
@@ -260,16 +259,15 @@ describe('GET /internal/significant_events/events/{id}', () => {
     confidence: 0.8,
   };
 
-  it('returns 404 when the event uuid is missing', async () => {
+  it('returns 404 when the event id is missing', async () => {
     await expect(
       eventsGetRoute.handler({
         params: { path: { id: 'missing' } },
         request: {},
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
-          getEventClient: () => ({
-            findByEventUuid: jest.fn().mockResolvedValue({ hits: [] }),
-            findByEventId: jest.fn(),
+          getEventSearchClient: () => ({
+            findLatestByEventId: jest.fn().mockResolvedValue(undefined),
           }),
         }),
         server: {},
@@ -287,13 +285,12 @@ describe('GET /internal/significant_events/events/{id}', () => {
     };
 
     const response = await eventsGetRoute.handler({
-      params: { path: { id: older.event_uuid } },
+      params: { path: { id: older.event_id } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({
-          findByEventUuid: jest.fn().mockResolvedValue({ hits: [older] }),
-          findByEventId: jest.fn().mockResolvedValue({ hits: [older, latest] }),
+        getEventSearchClient: () => ({
+          findLatestByEventId: jest.fn().mockResolvedValue(latest),
         }),
       }),
       server: {},
@@ -320,13 +317,12 @@ describe('GET /internal/significant_events/events/{id}', () => {
     const eventWithSignals = { ...baseEvent, signals };
 
     const response = await eventsGetRoute.handler({
-      params: { path: { id: baseEvent.event_uuid } },
+      params: { path: { id: baseEvent.event_id } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({
-          findByEventUuid: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
-          findByEventId: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
+        getEventSearchClient: () => ({
+          findLatestByEventId: jest.fn().mockResolvedValue(eventWithSignals),
         }),
       }),
       server: {},

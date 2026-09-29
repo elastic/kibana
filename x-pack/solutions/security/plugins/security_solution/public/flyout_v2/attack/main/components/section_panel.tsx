@@ -6,15 +6,14 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiText,
   EuiToolTip,
-  EuiLink,
   EuiIcon,
   useEuiTheme,
-  useEuiFontSize,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -55,7 +54,6 @@ export const SectionPanel = memo(
     'data-test-subj': dataTestSubj = 'sectionPanel',
   }: SectionPanelProps) => {
     const { euiTheme } = useEuiTheme();
-    const fontSize = useEuiFontSize('s').fontSize;
 
     const styles = useMemo(() => {
       return {
@@ -72,24 +70,25 @@ export const SectionPanel = memo(
           font-weight: ${euiTheme.font.weight.bold};
         `,
         titleLink: css`
-          font-size: ${fontSize};
           font-weight: ${euiTheme.font.weight.bold};
         `,
       };
-    }, [euiTheme, fontSize]);
+    }, [euiTheme]);
 
     const titleContent = useMemo(() => {
       if (link?.callback) {
         return (
           <EuiToolTip content={link.tooltip}>
-            <EuiLink
+            <EuiButtonEmpty
               css={styles.titleLink}
               data-test-subj={`${dataTestSubj}TitleLink`}
               onClick={link.callback}
               color={highlightTitle ? 'primary' : 'text'}
+              flush="both"
+              size="s"
             >
               {title}
-            </EuiLink>
+            </EuiButtonEmpty>
           </EuiToolTip>
         );
       }

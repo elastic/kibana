@@ -54,7 +54,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     /**
      * Report if a node is a string literal or template literal containing 'npx playwright'.
      */
