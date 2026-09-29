@@ -172,7 +172,7 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 
 | **Field** | **Description** |
 | --- | --- |
-| `kibana.<bucket>` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log; each producer provides its own bucket (for example, `kibana.dashboard`). For dashboard refresh metadata, refer to [Dashboard event fields](#dashboard-event-fields). |
+| `kibana.<bucket>` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. Each producer provides its own bucket (for example, `kibana.dashboard`). |
 
 ### Error fields
 
