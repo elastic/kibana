@@ -25,6 +25,7 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { getExecutionStatusIcon } from './shared/status_badge';
 import { TokenUsageBadge } from './shared/token_usage_badge';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { ServiceAccountName } from '../../../entities/service_accounts';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
@@ -121,7 +122,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                     title: i18n.translate('workflows.execution.runAsLabel', {
                       defaultMessage: 'Run as',
                     }),
-                    description: executionData.effectiveIdentity.id,
+                    description: <ServiceAccountName id={executionData.effectiveIdentity.id} />,
                   },
                 ]}
               />
