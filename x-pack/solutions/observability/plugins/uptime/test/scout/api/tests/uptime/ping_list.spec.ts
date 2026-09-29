@@ -12,21 +12,15 @@ import { apiTest, testData } from '../../fixtures';
 apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
 
-  const from = '2019-01-28T17:40:08.078Z';
-  const to = '2025-01-28T19:00:16.078Z';
+  // FULL_HEARTBEAT is entirely on 2019-09-11; keep the window tight so sibling
+  // archives (browser 2021, location 2019-06) and generated "now" docs cannot match.
+  const from = '2019-09-11T00:00:00.000Z';
+  const to = '2019-09-11T23:59:59.999Z';
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    // getPings uses heartbeat-*; sibling Scout can leave archive indices that add
-    // in-window summary docs. Do not wipe GENERATED_INDEX (parallel suites use it).
-    await esClient.indices.delete({
-      index: [
-        'heartbeat-8-full-test',
-        'heartbeat-8.1.0-2021.11.21-000001', // browser archive (+4)
-        'heartbeat-8.0.0', // location/pings archives
-      ],
-      ignore_unavailable: true,
-    });
+    // Reload only this suite's archive index; do not wipe GENERATED_INDEX.
+    await esClient.indices.delete({ index: 'heartbeat-8-full-test', ignore_unavailable: true });
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
