@@ -14,6 +14,7 @@ import {
   type CortexPage,
   type CortexPageSummary,
 } from '../../common/cortex';
+import type { CortexTelemetry } from '../telemetry';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import type { CortexPageStore } from './page_store';
 
@@ -82,10 +83,12 @@ const renderPage = (page: CortexPage): string => {
 export const materializeCortex = async ({
   session,
   store,
+  telemetry,
   logger,
 }: {
   session: SandboxSession;
   store: CortexPageStore;
+  telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
   await store.pruneDuplicates();
@@ -118,6 +121,7 @@ export const materializeCortex = async ({
     { path: `${CORTEX_WORKSPACE_ROOT}/INDEX.md`, content: Buffer.from(renderIndex(pages), 'utf8') },
   ]);
 
+  telemetry.reportHydrated(fullPages);
   logger.info(
     fullPages.length > 0
       ? `Materialized ${fullPages.length} Cortex page(s) into sandbox`

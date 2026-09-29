@@ -167,7 +167,8 @@ ${statsClause}
  * `IS NOT NULL` / `COALESCE` semantics are consistent across queries —
  * override authors cannot accidentally omit it.
  *
- * - `kind: 'override'` → delegates the body to `config.esqlQueryOverride(namespace)`.
+ * - `kind: 'override'` → delegates the body to
+ *   `config.esqlQueryOverride(namespace, pageActorValues)`.
  *   The override must emit columns `actorUserId` and `<relationshipKey>`
  *   (e.g. `communicates_with`); mismatched column names produce silent empty
  *   results (see `parseTargetsPerActorRows` for the warning safety net).
@@ -179,11 +180,12 @@ ${statsClause}
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
-  namespace: string
+  namespace: string,
+  pageActorValues?: readonly string[]
 ): string => {
   const body =
     config.kind === 'override'
-      ? config.esqlQueryOverride(namespace)
+      ? config.esqlQueryOverride(namespace, pageActorValues)
       : buildRelationshipEsql(config, namespace);
   return `${ESQL_ENGINE_PREAMBLE}\n${body}`;
 };

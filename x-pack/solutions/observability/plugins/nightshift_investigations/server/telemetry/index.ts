@@ -23,3 +23,15 @@ export const setupNightshiftTelemetry = ({
 
 export { NightshiftTelemetryClient };
 export type { SemanticMemoryMaterializedEvent, SemanticMemoryOptimizedEvent } from './events';
+export {
+  NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE,
+  NIGHTSHIFT_CORTEX_HYDRATED_EVENT_TYPE,
+  type CortexEditAppliedProps,
+  type CortexHydratedProps,
+} from './cortex_events';
+export {
+  createCortexTelemetry,
+  registerCortexTelemetryEvents,
+  type AppliedCortexEdit,
+  type CortexTelemetry,
+} from './cortex_telemetry';

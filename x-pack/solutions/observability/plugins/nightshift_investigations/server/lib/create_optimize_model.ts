@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, ScopedModel } from '@kbn/agent-builder-server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 
 /**
  * Same LLM path Agent Builder converse uses:
@@ -19,11 +20,13 @@ export const createOptimizeModel = async ({
   request,
   connectorId,
   agentBuilder,
+  telemetryMetadata,
   logger,
 }: {
   request: KibanaRequest;
   connectorId?: string;
   agentBuilder: AgentBuilderPluginStart | undefined;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
   logger: Logger;
 }): Promise<ScopedModel | undefined> => {
   if (!agentBuilder) {
@@ -35,6 +38,7 @@ export const createOptimizeModel = async ({
   const modelProvider = agentBuilder.runtime.createModelProvider({
     request,
     ...(defaultConnectorId ? { defaultConnectorId } : {}),
+    ...(telemetryMetadata ? { telemetryMetadata } : {}),
   });
 
   try {

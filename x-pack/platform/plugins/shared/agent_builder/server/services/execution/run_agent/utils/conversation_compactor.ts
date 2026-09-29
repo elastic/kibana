@@ -17,13 +17,19 @@ import {
   ChatEventType,
   TimelineEventType,
   isPreExecutionWorkflowStep,
+  isTimelineEvent,
   isToolCallStep,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { ProcessedConversation } from './prepare_conversation';
-import { dropTimelineRounds, groupTimelineRounds, type TimelineRound } from './context_timeline';
+import {
+  dropTimelineRounds,
+  groupTimelineRounds,
+  sliceTimelineRounds,
+  type TimelineRound,
+} from './context_timeline';
 import type { ProcessedTimelineEvent } from './context_timeline';
 import type { ContextBudget } from './context_budget';
 import { shouldTriggerCompaction } from './context_budget';
@@ -95,7 +101,9 @@ const withoutPreExecutionContextForSummary = (
 ): ProcessedTimelineEvent[] =>
   events.filter(
     (event) =>
-      event.type !== TimelineEventType.executionStep || !isPreExecutionWorkflowStep(event.data.step)
+      !isTimelineEvent(event) ||
+      event.type !== TimelineEventType.executionStep ||
+      !isPreExecutionWorkflowStep(event.data.step)
   );
 
 // ---------------------------------------------------------------------------
@@ -321,13 +329,34 @@ export const compactConversation = async ({
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Removes the covered rounds from a timeline and drops custom events whose timestamp falls
+ * before the first uncovered round's user message (i.e. they are "older than the cut").
+ */
+const applyTimelineCoverage = (
+  timeline: ProcessedTimelineEvent[],
+  covered: ReadonlySet<string>
+): ProcessedTimelineEvent[] => {
+  const trimmed = dropTimelineRounds(timeline, covered);
+  const firstRound = groupTimelineRounds(trimmed)[0];
+  if (!firstRound) {
+    // All rounds were covered: only keep custom events that post-date the last removed round.
+    const lastCoveredRound = groupTimelineRounds(timeline).at(-1);
+    if (!lastCoveredRound) return trimmed;
+    const lastTerminalAt = lastCoveredRound.terminal.created_at;
+    return trimmed.filter((event) => isTimelineEvent(event) || event.created_at > lastTerminalAt);
+  }
+  const cutoff = firstRound.userMessage.created_at;
+  return trimmed.filter((event) => isTimelineEvent(event) || event.created_at >= cutoff);
+};
+
 const applyExistingSummary = (
   conversation: ProcessedConversation,
   summary: CompactionSummary,
   covered: ReadonlySet<string>
 ): ProcessedConversation => ({
   ...conversation,
-  timeline: dropTimelineRounds(conversation.timeline, covered),
+  timeline: applyTimelineCoverage(conversation.timeline, covered),
   compactionSummary: summary,
 });
 
@@ -409,7 +438,7 @@ const summarizeOlderRounds = async ({
     return {
       processedConversation: {
         ...conversation,
-        timeline: dropTimelineRounds(conversation.timeline, newCovered),
+        timeline: applyTimelineCoverage(conversation.timeline, newCovered),
         compactionSummary: summary,
       },
       summary,
@@ -549,8 +578,14 @@ const applyHardTruncation = (
     dropped.add(candidates[index].id);
     tokens -= tokensByRoundId.get(candidates[index].id) ?? 0;
   }
+  if (dropped.size === 0) {
+    return { conversation, tokens };
+  }
   return {
-    conversation: { ...conversation, timeline: dropTimelineRounds(conversation.timeline, dropped) },
+    conversation: {
+      ...conversation,
+      timeline: sliceTimelineRounds(conversation.timeline, dropped.size),
+    },
     tokens,
   };
 };

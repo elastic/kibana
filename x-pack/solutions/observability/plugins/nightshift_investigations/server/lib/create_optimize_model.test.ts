@@ -45,6 +45,25 @@ describe('createOptimizeModel', () => {
     expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('anthropic-sonnet'));
   });
 
+  it('forwards explicit EIS attribution with the inherited connector', async () => {
+    const telemetryMetadata = {
+      pluginId: 'significant_events_investigation',
+      interactionId: 'workflow-execution-1',
+    };
+    await createOptimizeModel({
+      request,
+      connectorId: 'anthropic-sonnet',
+      agentBuilder,
+      telemetryMetadata,
+      logger,
+    });
+    expect(createModelProvider).toHaveBeenCalledWith({
+      request,
+      defaultConnectorId: 'anthropic-sonnet',
+      telemetryMetadata,
+    });
+  });
+
   it('does not invent a catalog connector when the round did not supply one', async () => {
     await run(undefined);
     expect(createModelProvider).toHaveBeenCalledWith({ request });

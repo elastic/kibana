@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
@@ -19,10 +19,12 @@ const HYDRATE_TIMEOUT_MS = 45_000;
 
 export const cortexHydrateStepDefinition = ({
   getSandboxStart,
+  analytics,
   logger,
   isEnabled,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
+  analytics: AnalyticsServiceSetup;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -110,6 +112,8 @@ export const cortexHydrateStepDefinition = ({
             esClient: context.contextManager.getScopedEsClient(),
             spaceId,
             signal,
+            analytics,
+            conversationId: resolvedConversationId,
             logger,
           }),
         HYDRATE_TIMEOUT_MS,

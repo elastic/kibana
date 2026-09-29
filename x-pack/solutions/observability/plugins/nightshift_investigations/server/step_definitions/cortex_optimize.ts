@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { runCortexOptimize } from '../cortex/register_cortex';
 import { withTimeout } from './with_timeout';
@@ -23,10 +23,12 @@ const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const cortexOptimizeStepDefinition = ({
   getAgentBuilder,
+  analytics,
   logger,
   isEnabled,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  analytics: AnalyticsServiceSetup;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -58,6 +60,16 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
+      conversation_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Conversation the round belongs to. Recorded on the edit telemetry events.'),
+      round_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Id of the completed round. Recorded on the edit telemetry events.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -72,7 +84,7 @@ export const cortexOptimizeStepDefinition = ({
       context.logger.info(
         `Running Cortex optimize for agent ${context.input.agent_id ?? 'unknown'}`
       );
-
+      const { workflow, execution } = context.contextManager.getContext();
       await withTimeout(
         (signal) =>
           runCortexOptimize({
@@ -81,8 +93,12 @@ export const cortexOptimizeStepDefinition = ({
             userMessage: context.input.prompt,
             assistantMessage: context.input.response,
             esClient: context.contextManager.getScopedEsClient(),
-            spaceId: context.contextManager.getContext().workflow.spaceId,
+            spaceId: workflow.spaceId,
+            interactionId: execution.id,
             signal,
+            analytics,
+            conversationId: context.input.conversation_id,
+            roundId: context.input.round_id,
             logger,
             getAgentBuilder,
             connectorId: context.input.connector_id,
