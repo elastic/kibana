@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -67,16 +67,11 @@ describe('DatasetsTable', () => {
         <Router history={history}>
           <KibanaContextProvider services={{ docLinks: docLinksMock }}>
             <DatasetsTable
-              filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+              items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
               selectedItems={[]}
-              dataSourceFilterOptions={[
-                { value: '', text: 'All' },
-                { value: 'ds1', text: 'ds1' },
-              ]}
-              dataSourceFilter=""
+              dataSourceNames={['ds1']}
               isCreateDisabled={false}
               onSelectionChange={jest.fn()}
-              onDataSourceFilterChange={jest.fn()}
               onDelete={jest.fn()}
               onDeleteSelected={jest.fn()}
               {...props}
@@ -105,19 +100,64 @@ describe('DatasetsTable', () => {
     expect(history.location.pathname).toBe(CREATE_DATASET_PATH);
   });
 
-  it('calls onDataSourceFilterChange when the filter changes', async () => {
-    const onDataSourceFilterChange = jest.fn();
-    const { getByTestId } = renderTable({ onDataSourceFilterChange });
+  it('filters rows by the selected data sources', async () => {
+    const { getByRole, findByRole, queryByText } = renderTable({
+      items: [
+        createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+        createDataSetRow({ name: 'set2', dataSource: 'ds10' }),
+        createDataSetRow({ name: 'set3', dataSource: 'ds2' }),
+      ],
+      dataSourceNames: ['ds1', 'ds10', 'ds2'],
+    });
 
-    fireEvent.change(getByTestId('dataSetsSetsDataSourceFilter'), { target: { value: 'ds1' } });
-    expect(onDataSourceFilterChange).toHaveBeenCalledTimes(1);
-    expect(onDataSourceFilterChange).toHaveBeenCalledWith('ds1');
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /Data sources/ }));
+    });
+    const ds1Option = await findByRole('option', { name: 'ds1' });
+    await act(async () => {
+      fireEvent.click(ds1Option);
+    });
+
+    expect(queryByText('set1')).toBeInTheDocument();
+    expect(queryByText('set2')).not.toBeInTheDocument();
+    expect(queryByText('set3')).not.toBeInTheDocument();
+
+    const ds2Option = await findByRole('option', { name: 'ds2' });
+    await act(async () => {
+      fireEvent.click(ds2Option);
+    });
+
+    expect(queryByText('set1')).toBeInTheDocument();
+    expect(queryByText('set2')).not.toBeInTheDocument();
+    expect(queryByText('set3')).toBeInTheDocument();
+  });
+
+  it('clears the selection when the data source filter changes', async () => {
+    const onSelectionChange = jest.fn();
+    const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
+
+    const { getByRole, findByRole } = renderTable({
+      items: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds2' })],
+      selectedItems,
+      dataSourceNames: ['ds1', 'ds2'],
+      onSelectionChange,
+    });
+
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /Data sources/ }));
+    });
+    const option = await findByRole('option', { name: 'ds2' });
+    await act(async () => {
+      fireEvent.click(option);
+    });
+
+    expect(onSelectionChange).toHaveBeenCalledWith([]);
   });
 
   it('navigates to the edit wizard and calls onDelete for row actions', async () => {
     const onDelete = jest.fn();
     const { getAllByTestId, history } = renderTable({
-      filteredItems: [
+      items: [
         createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
         createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
       ],
@@ -141,7 +181,7 @@ describe('DatasetsTable', () => {
     const onDeleteSelected = jest.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
     const { getByTestId } = renderTable({
-      filteredItems: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })],
+      items: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })],
       selectedItems,
       onDeleteSelected,
     });
