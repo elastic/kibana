@@ -244,8 +244,7 @@ export function FieldMappingForm({
                       defaultMessage: 'Date format',
                     })}
                     infoText={i18n.translate('xpack.dataFederation.mappingEditor.formatTooltip', {
-                      defaultMessage:
-                        'Date parsing pattern, for example yyyy-MM-dd HH:mm:ss.',
+                      defaultMessage: 'Date parsing pattern, for example yyyy-MM-dd HH:mm:ss.',
                     })}
                   />
                 }
