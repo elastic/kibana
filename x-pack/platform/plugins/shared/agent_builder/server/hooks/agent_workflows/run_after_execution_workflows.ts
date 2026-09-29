@@ -19,6 +19,7 @@ import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AfterExecutionWorkflowParams } from './types';
+import { withDeclaredInputs } from './with_declared_inputs';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
@@ -71,15 +72,28 @@ export const runAfterExecutionWorkflows = async ({
     round_id: round.id,
     ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
     ...(context.agentId ? { agent_id: context.agentId } : {}),
-    ...(roundConnectorId ? { round_connector_id: roundConnectorId } : {}),
-    ...(workflowContext !== undefined ? { workflow_context: workflowContext } : {}),
     tool_calls: toolCalls,
+  };
+  const optionalWorkflowParams: Pick<
+    AfterExecutionWorkflowParams,
+    'round_connector_id' | 'workflow_context'
+  > = {
+    round_connector_id: roundConnectorId || undefined,
+    workflow_context: workflowContext,
   };
 
   for (const workflowId of workflowIds) {
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: workflowParams as unknown as Record<string, unknown>,
+      workflowParams: await withDeclaredInputs({
+        workflowId,
+        inputs: workflowParams as unknown as Record<string, unknown>,
+        optionalInputs: optionalWorkflowParams,
+        workflowApi,
+        spaceId,
+        request: context.request,
+        logger,
+      }),
       request: context.request,
       spaceId,
       workflowApi,
