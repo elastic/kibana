@@ -89,9 +89,9 @@ function makeInScopeRuleResponse(overrides: Partial<RuleResponse> = {}): RuleRes
     version: 'abc123', // saved-object concurrency token
     enabled: false,
     created_at: '2024-01-01T00:00:00.000Z',
-    created_by: 'elastic',
+    created_by: { profile_uid: 'elastic' },
     updated_at: '2024-01-02T00:00:00.000Z',
-    updated_by: 'elastic',
+    updated_by: { profile_uid: 'elastic' },
     kind: 'alert',
     schedule: { every: '5m' },
     metadata: {

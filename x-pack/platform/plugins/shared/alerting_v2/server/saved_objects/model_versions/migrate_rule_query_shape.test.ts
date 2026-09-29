@@ -35,7 +35,9 @@ const legacyAttributes = (overrides: Partial<LegacyAttributes> = {}): LegacyAttr
   ...overrides,
 });
 
-const migrate = (overrides: Partial<LegacyAttributes> = {}): RuleSavedObjectAttributes =>
+const migrate = (
+  overrides: Partial<LegacyAttributes> = {}
+): RuleSavedObjectAttributes & { query: NonNullable<RuleSavedObjectAttributes['query']> } =>
   migrateRuleQueryShape(
     {
       id: 'rule-1',
@@ -44,7 +46,9 @@ const migrate = (overrides: Partial<LegacyAttributes> = {}): RuleSavedObjectAttr
       references: [],
     },
     {} as TransformArgs[1]
-  ).document.attributes;
+  ).document.attributes as RuleSavedObjectAttributes & {
+    query: NonNullable<RuleSavedObjectAttributes['query']>;
+  };
 
 describe('migrateRuleQueryShape', () => {
   describe('query', () => {

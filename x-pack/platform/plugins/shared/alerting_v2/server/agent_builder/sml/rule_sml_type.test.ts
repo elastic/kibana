@@ -208,7 +208,7 @@ describe('createRuleSmlType', () => {
           'CPU breach detection',
           'alert',
           'ops, cpu',
-          baseRuleAttrs.query.base,
+          baseRuleAttrs.query!.base,
         ].join('\n'),
       });
       expect(result).not.toHaveProperty('permissions');

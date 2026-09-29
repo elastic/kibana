@@ -11,11 +11,11 @@
  * Detection rules are configured as `kind: 'alert'` with both lifecycle
  * strategies off and zero pending count so that every detection opens an alert
  * immediately and no alert ever recovers automatically.  These tests pin that
- * configuration and the framework trap that prevents adding `recovering_count`.
+ * configuration and the framework trap that prevents adding a recovering phase.
  *
  * The stored fields are verified through the generic Alerting v2 GET route
  * (`GET /api/alerting/v2/rules/{id}`) because the public Detection API does
- * not surface framework-internal fields (`kind`, `recovery_strategy`, etc.).
+ * not surface framework-internal fields (`kind`, `recovery`, etc.).
  *
  * Ref: implementation-plan.md "Phase A: the persistent-mode workaround"
  *      alert-modes.md "The configuration on main"
@@ -78,7 +78,7 @@ apiTest.describe(
     // -------------------------------------------------------------------------
 
     apiTest(
-      'create: query rule persists kind=alert, both strategies none, pending_count=0, no grouping',
+      'create: query rule persists kind=alert, the lifecycle off, pending count 0, no grouping',
       async ({ apiClient }) => {
         const created = await apiClient.post(DETECTION_V2_RULES, {
           headers: writerHeaders,
@@ -94,10 +94,10 @@ apiTest.describe(
         const framework = frameworkResponse.body;
 
         expect(framework.kind).toBe('alert');
-        expect(framework.recovery_strategy).toBe('none');
-        expect(framework.no_data_strategy).toBe('none');
-        // pending_count: 0 so the first match opens an active alert immediately.
-        expect(framework.state_transition).toMatchObject({ pending_count: 0 });
+        expect(framework.recovery).toMatchObject({ strategy: 'manual' });
+        expect(framework.no_data).toMatchObject({ strategy: 'ignore' });
+        // pending.count: 0 so the first match opens an active alert immediately.
+        expect(framework.state_transition).toMatchObject({ pending: { count: 0 } });
         // No grouping: each result row is its own episode, so a later crossing of
         // the same bucket is a new alert instead of joining the first one. Not v1
         // parity — v1 alerts once per accumulation of threshold.value new events,
@@ -107,7 +107,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'create: threshold rule persists kind=alert, both strategies none, pending_count=0, no grouping',
+      'create: threshold rule persists kind=alert, the lifecycle off, pending count 0, no grouping',
       async ({ apiClient }) => {
         const created = await apiClient.post(DETECTION_V2_RULES, {
           headers: writerHeaders,
@@ -122,9 +122,9 @@ apiTest.describe(
         const framework = frameworkResponse.body;
 
         expect(framework.kind).toBe('alert');
-        expect(framework.recovery_strategy).toBe('none');
-        expect(framework.no_data_strategy).toBe('none');
-        expect(framework.state_transition).toMatchObject({ pending_count: 0 });
+        expect(framework.recovery).toMatchObject({ strategy: 'manual' });
+        expect(framework.no_data).toMatchObject({ strategy: 'ignore' });
+        expect(framework.state_transition).toMatchObject({ pending: { count: 0 } });
         // grouping must be absent: threshold's deriveRuleFields no longer derives it.
         expect(framework.grouping).toBeUndefined();
       }
@@ -158,9 +158,9 @@ apiTest.describe(
         const framework = frameworkResponse.body;
 
         expect(framework.kind).toBe('alert');
-        expect(framework.recovery_strategy).toBe('none');
-        expect(framework.no_data_strategy).toBe('none');
-        expect(framework.state_transition).toMatchObject({ pending_count: 0 });
+        expect(framework.recovery).toMatchObject({ strategy: 'manual' });
+        expect(framework.no_data).toMatchObject({ strategy: 'ignore' });
+        expect(framework.state_transition).toMatchObject({ pending: { count: 0 } });
         expect(framework.grouping).toBeUndefined();
       }
     );
@@ -179,7 +179,7 @@ apiTest.describe(
         expect(created).toHaveStatusCode(201);
 
         // Full replace via the Detection API — toFrameworkReplace explicitly restates
-        // all three workaround fields (recovery_strategy, no_data_strategy, state_transition)
+        // all three workaround fields (recovery, no_data, state_transition)
         // so none of them depend on the merge's omitted-means-keep behaviour.
         const replaced = await apiClient.put(getDetectionRuleUrl(created.body.id), {
           headers: writerHeaders,
@@ -202,25 +202,25 @@ apiTest.describe(
         const framework = frameworkResponse.body;
 
         expect(framework.kind).toBe('alert');
-        expect(framework.recovery_strategy).toBe('none');
-        expect(framework.no_data_strategy).toBe('none');
-        expect(framework.state_transition).toMatchObject({ pending_count: 0 });
+        expect(framework.recovery).toMatchObject({ strategy: 'manual' });
+        expect(framework.no_data).toMatchObject({ strategy: 'ignore' });
+        expect(framework.state_transition).toMatchObject({ pending: { count: 0 } });
         expect(framework.grouping).toBeUndefined();
       }
     );
 
     // -------------------------------------------------------------------------
-    // Trap: recovering_count is rejected when recovery is off
+    // Trap: a recovering phase is rejected when recovery is manual
     //
-    // Detection rules carry recovery_strategy: 'none'. This test pins the
+    // Detection rules carry recovery: { strategy: 'manual' }. This test pins the
     // framework refinement (isRecoveryTransitionConsistentWithStrategy) that
-    // rejects recovering_count while recovery is disabled.  Adding
-    // recovering_count: 0 to toFrameworkCreate would break every detection rule
+    // rejects state_transition.recovering while recovery never happens. Adding
+    // a recovering phase to toFrameworkCreate would break every detection rule
     // create with this error.
     // -------------------------------------------------------------------------
 
     apiTest(
-      'trap: creating a rule with recovering_count while recovery_strategy is none is rejected',
+      'trap: creating a rule with a recovering phase while recovery is manual is rejected',
       async ({ apiClient }) => {
         const response = await apiClient.post(ALERTING_V2_RULES, {
           headers: adminHeaders,
@@ -228,17 +228,14 @@ apiTest.describe(
             kind: 'alert',
             metadata: { name: 'trap-recovering-count' },
             schedule: { every: '5m' },
-            recovery_strategy: 'none',
-            no_data_strategy: 'none',
-            state_transition: { pending_count: 0, recovering_count: 0 },
-            query: {
-              format: 'standalone',
-              breach: { query: 'FROM logs-* | LIMIT 1' },
-            },
+            recovery: { strategy: 'manual' },
+            no_data: { strategy: 'ignore' },
+            state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
+            query: { base: 'FROM logs-* | LIMIT 1' },
           },
         });
-        // isRecoveryTransitionConsistentWithStrategy rejects recovering_count when
-        // recovery is disabled (recovery_strategy is 'none' or absent).
+        // isRecoveryTransitionConsistentWithStrategy rejects a recovering phase
+        // when recovery never happens (recovery.strategy is 'manual').
         expect(response).toHaveStatusCode(400);
       }
     );

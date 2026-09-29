@@ -45,7 +45,7 @@
  *   the cap.  Do not widen it; do not truncate silently.
  *
  *   Internal fields that never surface: kind, time_field, grouping,
- *   recovery_strategy, no_data_strategy, state_transition, artifacts,
+ *   recovery, no_data, state_transition, artifacts,
  *   metadata.owner, metadata.ownership, metadata.version (the mutation
  *   sequence), and the saved-object concurrency token.  All are constant
  *   across detection rules and not part of the domain model.
@@ -177,12 +177,11 @@ export interface DetectionRuleCreateInput {
  *
  * Detection rules always have:
  *   - `kind: 'alert'` — they produce alert episodes visible on the Episodes page.
- *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` — sent
- *     explicitly so stored detection rules are uniform even if the framework
- *     default ever changes.  An alert rule may carry either strategy at any
- *     value; sending `'none'` explicitly is this API's choice, not the schema's
- *     constraint.
- *   - `state_transition: { pending_count: 0 }` — zero consecutive breaches
+ *   - `recovery: { strategy: 'manual' }` and `no_data: { strategy: 'ignore' }` —
+ *     the lifecycle switched off, which is what makes an alert-kind rule behave
+ *     persistently. An alert rule may carry either object at any value; these
+ *     two are this API's choice, not the schema's constraint.
+ *   - `state_transition: { pending: { count: 0 } }` — zero consecutive breaches
  *     required, so the alert activates immediately on the first match.
  *   - No persisted `query` — the framework compiles the query at execution time
  *     from `metadata.builder_fields`.
@@ -207,13 +206,13 @@ export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleDa
 
   return {
     kind,
-    // Sent explicitly so stored detection rules are uniform regardless of the
-    // framework default.
-    recovery_strategy: 'none',
-    no_data_strategy: 'none',
+    // The lifecycle switched off, sent explicitly so stored detection rules are
+    // uniform regardless of the framework default.
+    recovery: { strategy: 'manual' },
+    no_data: { strategy: 'ignore' },
     // Zero consecutive breaches required: the alert activates immediately on
     // the first match, with no pending window.
-    state_transition: { pending_count: 0 },
+    state_transition: { pending: { count: 0 } },
     schedule: {
       every: props.schedule.interval,
       ...(props.schedule.lookback !== undefined ? { lookback: props.schedule.lookback } : {}),
@@ -247,8 +246,9 @@ export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleDa
  *     the stored tags instead of clearing them.
  *   - Sends `schedule.lookback: null` (not omit) when absent — omission would
  *     keep the stored lookback.
- *   - Restates `state_transition: { pending_count: 0 }`, `recovery_strategy:
- *     'none'` and `no_data_strategy: 'none'` explicitly.  The public PUT
+ *   - Restates `state_transition: { pending: { count: 0 } }`, `recovery:
+ *     { strategy: 'manual' }` and `no_data: { strategy: 'ignore' }` explicitly.
+ *     The public PUT
  *     routes through `updateRule`, whose merge reads an omitted field as "keep
  *     stored", so the values would survive a PUT today by accident.  Restating
  *     them makes every invariant explicit rather than load-bearing-and-implicit.
@@ -287,9 +287,9 @@ export function toFrameworkReplace(
     // All three lifecycle invariants are restated on every full write so they
     // are explicit rather than surviving by accident through the merge's
     // "omitted = keep stored" rule.
-    recovery_strategy: 'none',
-    no_data_strategy: 'none',
-    state_transition: { pending_count: 0 },
+    recovery: { strategy: 'manual' },
+    no_data: { strategy: 'ignore' },
+    state_transition: { pending: { count: 0 } },
     schedule: schedulePayload,
     metadata: {
       name: props.name,
@@ -404,7 +404,7 @@ export function toFrameworkPatch(merged: DetectionRulePatchedInput): UpdateRuleD
  * caller must handle the unknown-type case before calling here.
  *
  * Internal fields never surfaced:
- *   - `kind`, `time_field`, `grouping`, `recovery_strategy`, `no_data_strategy`,
+ *   - `kind`, `time_field`, `grouping`, `recovery`, `no_data`,
  *     `state_transition`, `artifacts` — constant across detection rules and not
  *     part of the domain model.
  *   - `metadata.owner`, `metadata.ownership` — internal machinery.
@@ -454,9 +454,11 @@ export function toPublicResponse(rule: RuleResponse): DetectionRuleResponse {
     source: publicSource,
     enabled: rule.enabled,
     created_at: rule.created_at,
-    created_by: rule.created_by,
+    // Alerting v2 reports actors as `{ profile_uid }` objects; the Detections API
+    // contract keeps the bare profile uid (rule-domain-model.md).
+    created_by: rule.created_by?.profile_uid ?? null,
     updated_at: rule.updated_at,
-    updated_by: rule.updated_by,
+    updated_by: rule.updated_by?.profile_uid ?? null,
 
     // Common detection fields — same key names as builder_fields keys.
     name: metadata.name,
