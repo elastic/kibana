@@ -685,4 +685,38 @@ describe('per-slot correlation anchors', () => {
       expect(scenario.historicArticles[0]?.body).toContain(namedActor);
     }
   });
+
+  it('seeds extracted.diamond on the anchored historic-01 doc, and nowhere else', () => {
+    const docs = buildAllHistoricDocsWithIds();
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'].filter((s) => s.historicAnchors);
+    expect(awsIamScenarios.length).toBeGreaterThan(0);
+
+    for (const scenario of awsIamScenarios) {
+      const anchoredDoc = docs.find(
+        (doc) => doc.lineage.source_doc_ref.id === `ti-report-${scenario.reportIdSlug}-historic-01`
+      );
+      const diamond = anchoredDoc?.extracted?.diamond;
+      expect(diamond).toBeDefined();
+      expect(diamond?.suitable).toBe(true);
+      expect(diamond?.model_id).toBe('seeded-fixture');
+      const vertices = [
+        diamond!.adversary,
+        diamond!.capability,
+        diamond!.infrastructure,
+        diamond!.victim,
+      ];
+      expect(diamond?.signal_count).toBe(vertices.filter((v) => v.signal !== 'NONE').length);
+      expect(diamond?.adversary.summary).toContain(scenario.historicAnchors!.threatActors[0]);
+    }
+
+    for (const doc of docs) {
+      const isAnchoredSlot = awsIamScenarios.some(
+        (scenario) =>
+          doc.lineage.source_doc_ref.id === `ti-report-${scenario.reportIdSlug}-historic-01`
+      );
+      if (!isAnchoredSlot) {
+        expect(doc.extracted?.diamond).toBeUndefined();
+      }
+    }
+  });
 });

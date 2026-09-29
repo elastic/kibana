@@ -53,6 +53,30 @@ export interface PackTiHistoricArticle {
   body: string;
 }
 
+export type PackTiDiamondSignal = 'HIGH' | 'PARTIAL' | 'NONE';
+
+export interface PackTiDiamondVertex {
+  signal: PackTiDiamondSignal;
+  summary: string;
+}
+
+/**
+ * Fixture-authored Diamond Model vertices applied to the anchored slot(s) only.
+ * Mirrors extract_diamond's real output shape (adversary/capability/infrastructure/
+ * victim + signal/summary) so seeded reports don't sit at extraction_method
+ * 'seeded' with no diamond data. `summary` is indexed as `semantic_text`
+ * (DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID), so writing a non-empty summary here
+ * requires the `.jina-embeddings-v5-text-small` inference endpoint to exist on
+ * the target cluster — already expected for this demo series (EIS wired via
+ * `start_es.sh`), same prerequisite ELSER-backed enrich_taxonomy relies on.
+ */
+export interface PackTiDiamondAnchor {
+  adversary: PackTiDiamondVertex;
+  capability: PackTiDiamondVertex;
+  infrastructure: PackTiDiamondVertex;
+  victim: PackTiDiamondVertex;
+}
+
 /** Report-only correlation anchors applied to specific historic slots of this scenario. */
 export interface PackTiHistoricAnchors {
   /** 1-based historic item indexes (the NN in historic-NN) that carry the anchors. */
@@ -61,6 +85,8 @@ export interface PackTiHistoricAnchors {
   threatActors: string[];
   /** Appended to extracted.iocs (type 'hash') on the anchored slots only; report-only, not a join IOC. */
   hashIoc: { value: string };
+  /** Written to extracted.diamond on the anchored slots only. */
+  diamond: PackTiDiamondAnchor;
 }
 
 export interface PackTiScenario {
@@ -432,6 +458,28 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         slots: [1],
         threatActors: ['TA-DEMO-SHADOW-ADMIN'],
         hashIoc: { value: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789' },
+        diamond: {
+          adversary: {
+            signal: 'HIGH',
+            summary:
+              'Activity is attributed to the TA-DEMO-SHADOW-ADMIN intrusion set, observed escalating IAM privileges and disabling audit logging inside a single AWS account. The intrusion set favors direct API abuse over custom tooling, chaining a role assumption into policy attachment and then into log-trail suppression within the same operational window.',
+          },
+          capability: {
+            signal: 'HIGH',
+            summary:
+              'Tradecraft centers on abusing native AWS IAM and CloudTrail APIs rather than deploying malware: role assumption to escalate into a higher-privileged role, administrator policy attachment, and log-trail suppression paired with trail deletion to blind audit logging.',
+          },
+          infrastructure: {
+            signal: 'PARTIAL',
+            summary:
+              'Only two source IP addresses have been observed issuing the AWS API calls, with no dedicated C2 channel, staging domain, or malware-delivery infrastructure identified; access is consistent with stolen credentials used directly against the AWS control plane rather than through actor-owned infrastructure.',
+          },
+          victim: {
+            signal: 'HIGH',
+            summary:
+              'The targeted environment is a single AWS account running production cloud workloads, with the intrusion reaching an object storage bucket holding production data and a secrets-manager path storing database credentials, indicating the actor pursued both data-staging and credential-harvesting objectives.',
+          },
+        },
       },
     },
     {
@@ -512,6 +560,28 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         slots: [1],
         threatActors: ['TA-DEMO-SHADOW-ADMIN'],
         hashIoc: { value: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789' },
+        diamond: {
+          adversary: {
+            signal: 'HIGH',
+            summary:
+              'Attributed to the TA-DEMO-SHADOW-ADMIN intrusion set; this report captures the role-assumption phase of the same privilege-escalation activity, with the actor repeatedly reusing one escalated role across multiple sessions.',
+          },
+          capability: {
+            signal: 'PARTIAL',
+            summary:
+              'Observed tradecraft is limited to repeated role-assumption calls escalating into a single higher-privileged role; no defense-evasion or data-access follow-through is captured in this report, only the escalation mechanism itself.',
+          },
+          infrastructure: {
+            signal: 'PARTIAL',
+            summary:
+              'The same two source IP addresses seen elsewhere in this campaign issue the role-assumption calls; no additional infrastructure, staging systems, or C2 channels are described.',
+          },
+          victim: {
+            signal: 'HIGH',
+            summary:
+              'The target is the same AWS account and escalated IAM role referenced across this campaign; the report is scoped to a single compromised account rather than a broader victim set.',
+          },
+        },
       },
     },
     {
@@ -983,6 +1053,14 @@ export interface HistoricThreatReportDoc {
     relevance: number;
     /** Report-only correlation anchor (Phase 3); only present on anchored historic slots. */
     threat_actors?: string[];
+    /** Fixture-authored Diamond Model extraction; only present on anchored historic slots. */
+    diamond?: PackTiDiamondAnchor & {
+      signal_count: number;
+      model_id: string;
+      extracted_at: string;
+      extraction_mode: 'single_call';
+      suitable: boolean;
+    };
   };
   geography?: { regions: string[] };
   lineage: {
@@ -1261,6 +1339,20 @@ export const buildHistoricThreatReportDoc = ({
       ],
       relevance: 0.72,
       ...(item.anchors ? { threat_actors: [...item.anchors.threatActors] } : {}),
+      ...(item.anchors
+        ? {
+            diamond: {
+              ...item.anchors.diamond,
+              signal_count: Object.values(item.anchors.diamond).filter(
+                (vertex) => vertex.signal !== 'NONE'
+              ).length,
+              model_id: 'seeded-fixture',
+              extracted_at: item.reportTimestamp,
+              extraction_mode: 'single_call' as const,
+              suitable: true,
+            },
+          }
+        : {}),
     };
     doc.geography = { regions: [region] };
     doc.lineage.extracted_at = item.reportTimestamp;
