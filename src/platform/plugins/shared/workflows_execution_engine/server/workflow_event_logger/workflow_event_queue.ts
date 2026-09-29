@@ -24,6 +24,7 @@ const BACKLOG_WARN_THRESHOLD = 10_000;
 /** Pending workflow events. Writers enqueue; the persistence loop flushes. */
 export class WorkflowEventQueue {
   private events: WorkflowLogEvent[] = [];
+  private inFlight: Promise<void> | undefined;
 
   constructor(private logsRepository: LogsRepository, private logger: Logger) {}
 
@@ -31,37 +32,53 @@ export class WorkflowEventQueue {
     this.events.push(event);
   }
 
-  public async flush(options: WorkflowEventFlushOptions = {}): Promise<void> {
+  /** Writes the events queued at the start of this call. A second call joins the current write. */
+  public flush(options: WorkflowEventFlushOptions = {}): Promise<void> {
+    if (this.inFlight) {
+      return this.inFlight;
+    }
+
+    this.inFlight = this.flushPending(options).finally(() => {
+      this.inFlight = undefined;
+    });
+    return this.inFlight;
+  }
+
+  private async flushPending(options: WorkflowEventFlushOptions): Promise<void> {
     if (this.events.length > BACKLOG_WARN_THRESHOLD) {
       this.logger.warn(
         `Workflow event log persistence is behind; ${this.events.length} events are still queued`
       );
     }
 
-    while (this.events.length > 0) {
-      const events = this.events.splice(0, FLUSH_BATCH_SIZE);
+    const pending = this.events;
+    this.events = [];
+
+    for (let i = 0; i < pending.length; i += FLUSH_BATCH_SIZE) {
+      const batch = pending.slice(i, i + FLUSH_BATCH_SIZE);
 
       try {
-        await this.logsRepository.createLogs(events);
+        await this.logsRepository.createLogs(batch);
 
-        this.logger.debug(`Successfully indexed ${events.length} workflow events`);
+        this.logger.debug(`Successfully indexed ${batch.length} workflow events`);
       } catch (error) {
         if (options.signal && isWorkflowTaskManagerAbortSignal(options.signal)) {
-          // Best-effort flushes are used after Task Manager aborts; do not re-queue
-          // because this process may not get another chance to flush them.
+          // Best-effort flushes are used after Task Manager aborts. Drop the batch
+          // that failed; batches not yet sent stay queued.
           this.logger.debug(`Failed to index workflow events during best-effort flush`, {
-            eventsCount: events.length,
+            eventsCount: batch.length,
             error: { message: error instanceof Error ? error.message : String(error) },
           });
+          this.events = pending.slice(i + batch.length).concat(this.events);
           return;
         }
 
         this.logger.error(`Failed to index workflow events: ${error.message}`, {
-          eventsCount: events.length,
+          eventsCount: batch.length,
           error: error.stack,
         });
 
-        this.events = events.concat(this.events);
+        this.events = pending.slice(i).concat(this.events);
         return;
       }
     }

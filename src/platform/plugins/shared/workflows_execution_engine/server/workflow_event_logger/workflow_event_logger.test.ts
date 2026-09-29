@@ -204,7 +204,7 @@ describe('WorkflowEventLogger', () => {
     expect(events[1].workflow?.step_id).toBe('step-2');
   });
 
-  it('writes events logged during a flush in the next batch of the same drain', async () => {
+  it('leaves events logged during a flush for the next flush', async () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
     let releaseFlush: (() => void) | undefined;
@@ -226,13 +226,109 @@ describe('WorkflowEventLogger', () => {
     releaseFlush?.();
     await flushPromise;
 
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     const firstBatch = (logsRepository.createLogs as jest.Mock).mock
       .calls[0][0] as WorkflowLogEvent[];
     expect(firstBatch.map((event) => event.message)).toEqual(['before flush']);
 
+    logsRepository.createLogs.mockResolvedValueOnce(undefined);
+    await eventQueue.flush();
+
     const secondBatch = (logsRepository.createLogs as jest.Mock).mock
       .calls[1][0] as WorkflowLogEvent[];
     expect(secondBatch.map((event) => event.message)).toEqual(['during flush']);
+  });
+
+  it('retries the unsent tail ahead of events enqueued during a failed write', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    let rejectFlush: (error: Error) => void = () => {};
+    logsRepository.createLogs.mockImplementationOnce(
+      () =>
+        new Promise<void>((_, reject) => {
+          rejectFlush = reject;
+        })
+    );
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
+
+    for (let i = 0; i < 501; i++) {
+      workflowLogger.logInfo(`event-${i}`);
+    }
+
+    const flushPromise = eventQueue.flush();
+    workflowLogger.logInfo('during failure');
+    rejectFlush(new Error('index-fail'));
+    await flushPromise;
+
+    logsRepository.createLogs.mockResolvedValue(undefined);
+    await eventQueue.flush();
+
+    const retriedFirstBatch = logsRepository.createLogs.mock.calls[1][0] as WorkflowLogEvent[];
+    const retriedSecondBatch = logsRepository.createLogs.mock.calls[2][0] as WorkflowLogEvent[];
+    expect(retriedFirstBatch).toHaveLength(500);
+    expect(retriedFirstBatch[0].message).toBe('event-0');
+    expect(retriedSecondBatch.map((event) => event.message)).toEqual([
+      'event-500',
+      'during failure',
+    ]);
+  });
+
+  it('drops the failed batch on Task Manager abort and keeps the unattempted tail', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    logsRepository.createLogs.mockRejectedValueOnce(new Error('task-aborted'));
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
+    const signal = AbortSignal.abort(new WorkflowTaskManagerAbortError());
+
+    for (let i = 0; i < 501; i++) {
+      workflowLogger.logInfo(`event-${i}`);
+    }
+
+    await eventQueue.flush({ signal });
+
+    logsRepository.createLogs.mockResolvedValueOnce(undefined);
+    await eventQueue.flush();
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+    const failedBatch = logsRepository.createLogs.mock.calls[0][0] as WorkflowLogEvent[];
+    const retriedBatch = logsRepository.createLogs.mock.calls[1][0] as WorkflowLogEvent[];
+    expect(failedBatch).toHaveLength(500);
+    expect(failedBatch[0].message).toBe('event-0');
+    expect(retriedBatch.map((event) => event.message)).toEqual(['event-500']);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('joins an in-flight flush instead of starting a second drain', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    let releaseFlush: () => void = () => {};
+    logsRepository.createLogs.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseFlush = resolve;
+        })
+    );
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
+
+    workflowLogger.logInfo('before flush');
+    const firstFlush = eventQueue.flush();
+    workflowLogger.logInfo('during flush');
+    const secondFlush = eventQueue.flush();
+
+    expect(secondFlush).toBe(firstFlush);
+    releaseFlush();
+    await firstFlush;
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
+    const firstBatch = logsRepository.createLogs.mock.calls[0][0] as WorkflowLogEvent[];
+    expect(firstBatch.map((event) => event.message)).toEqual(['before flush']);
+
+    logsRepository.createLogs.mockResolvedValueOnce(undefined);
+    await eventQueue.flush();
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+    const nextBatch = logsRepository.createLogs.mock.calls[1][0] as WorkflowLogEvent[];
+    expect(nextBatch.map((event) => event.message)).toEqual(['during flush']);
   });
 
   it('indexes a large backlog in bounded batches', async () => {
