@@ -660,7 +660,7 @@ export function getCustomRankLastValueSortFieldWarningMessages(
         shortMessage: i18n.translate(
           'xpack.lens.indexPattern.terms.customRankLastValueMissingSortField.shortMessage',
           {
-            defaultMessage: 'Set a date field for ranking by last value',
+            defaultMessage: 'Set a date field to rank by last value',
           }
         ),
         longMessage: (

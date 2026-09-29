@@ -365,7 +365,7 @@ export function getOrderAggErrorMessages(
             'xpack.lens.indexPattern.terms.customRankLastValueSortFieldInvalidType',
             {
               defaultMessage:
-                'Field {invalidField} is not a date field and cannot be used for sorting',
+                'Field {invalidField} cannot be used for sorting because it is not a date field',
               values: { invalidField: sortField },
             }
           ),
