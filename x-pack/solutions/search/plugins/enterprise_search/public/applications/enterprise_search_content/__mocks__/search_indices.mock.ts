@@ -60,6 +60,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
           name: '',
         },
       },
+      deleted: false,
       description: null,
       error: null,
       features: null,

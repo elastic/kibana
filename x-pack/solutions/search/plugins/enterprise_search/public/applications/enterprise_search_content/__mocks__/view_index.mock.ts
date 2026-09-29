@@ -66,6 +66,7 @@ export const connectorIndex: ConnectorViewIndex = {
         name: '',
       },
     },
+    deleted: false,
     description: null,
     error: null,
     features: null,

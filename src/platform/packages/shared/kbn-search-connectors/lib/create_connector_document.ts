@@ -42,6 +42,7 @@ export function createConnectorDocument({
     api_key_secret_id: null,
     configuration: configuration || {},
     custom_scheduling: {},
+    deleted: false,
     description: null,
     error: null,
     features: features || null,
