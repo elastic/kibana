@@ -350,18 +350,28 @@ export class WorkersService {
       );
 
       if (isAlertTriageWorker && !patch.enabled) {
-        // Detach after disabling; don't let a partial detach fail the disable.
-        const attachmentService = await this.getAlertTriageAttachmentService(
-          request,
-          status.workflowId
-        );
-        if (attachmentService) {
-          await detachAlertTriageWorkerFromAllRules(attachmentService).catch((err: Error) => {
-            this.logger.error(`Alert Triage Worker: rule detachment failed: ${err.message}`);
-          });
-        } else {
-          this.logger.warn(
-            'Alert Triage Worker: disabled without detaching rules; the rule-attachment service is unavailable'
+        // Detach after disabling; don't let a partial detach — or a failure resolving the
+        // attachment service itself — fail the disable, which has already been persisted above.
+        // Resolving the service can throw (it builds scoped rules/actions clients and
+        // calculates rule authorization), so it shares this try/catch rather than only the
+        // detach call.
+        try {
+          const attachmentService = await this.getAlertTriageAttachmentService(
+            request,
+            status.workflowId
+          );
+          if (attachmentService) {
+            await detachAlertTriageWorkerFromAllRules(attachmentService);
+          } else {
+            this.logger.warn(
+              'Alert Triage Worker: disabled without detaching rules; the rule-attachment service is unavailable'
+            );
+          }
+        } catch (err) {
+          this.logger.error(
+            `Alert Triage Worker: rule detachment failed: ${
+              err instanceof Error ? err.message : String(err)
+            }`
           );
         }
       }

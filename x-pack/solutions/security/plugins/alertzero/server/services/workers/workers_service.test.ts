@@ -1076,6 +1076,23 @@ describe('WorkersService', () => {
       if (result.outcome !== 'updated') throw new Error();
       expect(result.response.worker.enabled).toBe(false);
     });
+
+    it('disable: a rejecting getAttachmentService does not fail the disable operation', async () => {
+      // The provider builds scoped rules/actions clients and calculates rule authorization
+      // (see security_solution/server/plugin.ts), so resolving it can throw independently of
+      // the detach call itself; that failure must be as best-effort as detachment is.
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const { service, getAttachmentServiceMock } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      getAttachmentServiceMock.mockRejectedValueOnce(new Error('failed to build rules client'));
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error();
+      expect(result.response.worker.enabled).toBe(false);
+    });
   });
 
   describe('endpoint analysis skill gate', () => {
